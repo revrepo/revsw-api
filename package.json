@@ -1,0 +1,25 @@
+{
+  "name": "revsw-api",
+  "version": "0.0.0",
+  "description": "New Rev API service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com//revrepo/revsw-api"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "joi": "~6.6.0",
+    "hapi": "~8.8.0"
+  },
+  "devDependencies": {
+    "should-http": "0.0.4",
+    "should": "~7.0.2",
+    "superagent": "~1.2.0",
+    "mocha": "~2.2.5"
+  }
+}
