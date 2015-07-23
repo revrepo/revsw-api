@@ -1,25 +1,38 @@
 {
   "name": "revsw-api",
-  "version": "0.0.0",
-  "description": "New Rev API service",
-  "main": "index.js",
+  "author": "Rev Software, Inc",
+  "version": "1.0.0",
+  "description": "Rev API Service",
+  "keywords": [
+    "example",
+    "calulator",
+    "hapi",
+    "api"
+  ],
+  "main": "index",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com//revrepo/revsw-api"
-  },
-  "author": "",
-  "license": "BSD-2-Clause",
   "dependencies": {
-    "joi": "~6.6.0",
-    "hapi": "~8.8.0"
+    "blipp": "2.1.x",
+    "boom": "2.7.x",
+    "convert-base": "~0.1.0",
+    "handlebars": "1.3.x",
+    "hapi": "8.4.x",
+    "hapi-swagger": "https://api.github.com/repos/glennjones/hapi-swagger/tarball/",
+    "joi": "6.1.x",
+    "marked": "0.3.x",
+    "mongoose": "4.0.x",
+    "joi-objectid": "~1.1.0"
   },
   "devDependencies": {
-    "should-http": "0.0.4",
-    "should": "~7.0.2",
-    "superagent": "~1.2.0",
-    "mocha": "~2.2.5"
+    "grunt": "0.4.x",
+    "grunt-contrib-jshint": "0.8.x",
+    "grunt-mocha-test": "0.9.x",
+    "mocha": "1.17.x",
+    "chai": "1.9.x"
+  },
+  "engines": {
+    "node": ">= 0.12.x"
   }
 }
