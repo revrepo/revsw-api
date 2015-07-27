@@ -39,6 +39,17 @@
             },
                 docExpansion: "list"
             });
+
+    var updateAuth = function() {
+      var auth = "Basic " + btoa($('#input_user')[0].value + ":" + $('#input_pass')[0].value);
+      window.authorizations.add("key", new ApiKeyAuthorization("Authorization", auth, "header"));
+    //  swaggerUi.api.clientAuthorizations.add("basic", new SwaggerClient.ApiKeyAuthorization("Authorization", auth, "header"));
+    //  console.log('Changed auth parameters');
+    };
+
+    $('#input_user').change(updateAuth);
+    $('#input_pass').change(updateAuth);
+
             window.swaggerUi.load();
         });
     </script>
@@ -62,6 +73,20 @@
 
 
     <div class="wrapper">
+
+<div id='header'>
+  <div class="swagger-ui-wrap">
+
+    <form id='api_selector'>
+      <div class='input'><input placeholder="user" id="input_user" name="user" type="text" size="10"/></div>    
+      <div class='input'><input placeholder="pass" id="input_pass" name="pass" type="password" size="10"/></div>
+    </form>
+
+  </div>
+</div>
+
+
+
         <header>
             {{#if hapiSwagger.info.title}}
                 <h1 class="home-link"><a href="/">{{hapiSwagger.info.title}}</a></h1>
@@ -81,6 +106,8 @@
             <h1 class="entry-title api-title">API</h1>
             <div id="message-bar" class="swagger-ui-wrap"></div>
             <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+
+
         </section>
 
 

@@ -22,16 +22,16 @@
 var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
   Pack = require('../package'),
-  Routes = require('../lib/routes.js');
-
+  Config = require('../config/config'),
+  Routes = require('../lib/routes.js'),
+  UserAuth = require('../lib/handlers.js').UserAuth,
+  User = require('../lib/user.js').User;
 
 var server = new Hapi.Server();
 server.connection({
-  host: '0.0.0.0',
+  host: Config.service.url,
   port: 8000
 });
-
-server.route(Routes.routes);
 
 server.views({
   path: 'templates',
@@ -48,9 +48,9 @@ var swaggerOptions = {
   apiVersion: Pack.version,
   authorizations: {
     default: {
-      type: "apiKey",
-      passAs: "header",
-      keyname: "authentication"
+      type: 'apiKey',
+      passAs: 'header',
+      keyname: 'Rev-API-Key'
     }
   },
   info: {
@@ -58,8 +58,11 @@ var swaggerOptions = {
     description: 'This API provides full control on Rev\'s global acceleration platform.',
     contact: 'support@revsw.com'
   }
-
 };
+
+server.register(require('hapi-auth-basic'), function (err) {
+    server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
+});
 
 
 // adds swagger self documentation plugin
@@ -79,3 +82,5 @@ server.register([{
     });
   }
 });
+
+server.route(Routes.routes);
