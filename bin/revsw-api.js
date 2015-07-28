@@ -46,6 +46,15 @@ server.views({
 // setup swagger options
 var swaggerOptions = {
   apiVersion: Pack.version,
+  pathPrefixSize: 2,
+  tagging: {
+    mode: 'tags',
+    pathLevel: 2
+  },
+  tags: {
+    'purge': 'Purging of cached objects',
+    'users': 'Management of Rev portal users'
+  },
   authorizations: {
     default: {
       type: 'apiKey',

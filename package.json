@@ -22,6 +22,7 @@
     "handlebars": "1.3.x",
     "hapi": "8.4.x",
     "hapi-auth-basic": "~3.0.0",
+    "hapi-authorization": "^2.1.3",
     "hapi-swagger": "https://api.github.com/repos/glennjones/hapi-swagger/tarball/",
     "joi": "6.1.x",
     "joi-objectid": "~1.1.0",
@@ -31,11 +32,14 @@
     "mongoose-merge-plugin": "0.0.5"
   },
   "devDependencies": {
+    "chai": "1.9.x",
     "grunt": "0.4.x",
     "grunt-contrib-jshint": "0.8.x",
     "grunt-mocha-test": "0.9.x",
     "mocha": "1.17.x",
-    "chai": "1.9.x"
+    "sleep": "^2.0.0",
+    "supertest": "^1.0.1",
+    "supertest-as-promised": "^2.0.2"
   },
   "engines": {
     "node": ">= 0.12.x"
