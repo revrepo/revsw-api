@@ -29,7 +29,8 @@
     "marked": "0.3.x",
     "merge": "^1.2.0",
     "mongoose": "4.0.x",
-    "mongoose-merge-plugin": "0.0.5"
+    "mongoose-merge-plugin": "0.0.5",
+    "node-uuid": "^1.4.3"
   },
   "devDependencies": {
     "chai": "1.9.x",
