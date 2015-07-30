@@ -33,6 +33,7 @@
     "node-uuid": "^1.4.3"
   },
   "devDependencies": {
+    "async": "^1.4.0",
     "chai": "1.9.x",
     "grunt": "0.4.x",
     "grunt-contrib-jshint": "0.8.x",
