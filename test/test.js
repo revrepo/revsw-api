@@ -6,6 +6,7 @@ var express = require('express');
 var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
+var utils = require('../lib/utilities.js');
 
 var testAPIUrl = 'http://localhost:8000';
 
@@ -25,6 +26,24 @@ describe('Rev API', function() {
   var userToken = '';
   var userCompanyId = '';
   var domainConfigJson = {};
+
+
+  it('should receive 404 on wrong API path', function(done) {
+    request(testAPIUrl)
+      .get('/v1/users-wrong-path')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(404)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(404);
+        response_json.error.should.be.equal('Not Found');
+        done();
+      });
+  });
+
 
   it('should not authenticate user with wrong username', function(done) {
     request(testAPIUrl)
@@ -277,7 +296,17 @@ describe('Rev API Reseller User', function() {
 
 describe('Rev API Admin User', function() {
 
-  it('should be denied access to /accounts functions', function(done) {
+  var numberOfUsers = 0,
+    userId = '',
+    myCompanyId = [],
+    myDomains = [],
+    testUser = 'api-qa-user-' + Date().now + '@revsw.com',
+    testPassword = 'password1',
+    newTestPassword = 'password2',
+    testUserProfile = {};
+
+
+  it('should be denied access to /v1/accounts functions', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -289,10 +318,108 @@ describe('Rev API Admin User', function() {
         res.statusCode.should.be.equal(403);
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Only users with role "reseller" can access account-related functions');
+        response_json.message.should.startWith('Insufficient scope');
         done();
       });
   });
+
+  it('should get a list of users', function(done) {
+    request(testAPIUrl)
+      .get('/v1/users')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        // response_json.statusCode.should.be.equal(200);
+        response_json.length.should.be.above(0);
+        numberOfUsers = response_json.length;
+
+
+        // now let's find the ID of the API test user (variable qaUserWithAdminPerm)
+        var foundMyself = false;
+        for ( var i=0; i < numberOfUsers; i++ ) {
+          response_json[i].companyId.should.be.an.instanceOf(Array);
+          response_json[i].domain.should.be.an.instanceOf(Array);
+          response_json[i].email.should.be.type('string');
+          response_json[i].firstname.should.be.type('string');
+          response_json[i].user_id.should.be.type('string');
+          if ( response_json[i].email === qaUserWithAdminPerm ) {
+            foundMyself = true;
+            userId = response_json[i].user_id;
+            myCompanyId = response_json[i].companyId;
+            myDomains = response_json[i].domain;
+          }
+        }
+        foundMyself.should.be.equal(true);
+
+        // check that the returned users all belong to the same companyId as the test user
+        for ( i=0; i < numberOfUsers; i++ ) {
+          var companyIdOverlap = utils.areOverlappingArrays(myCompanyId, response_json[i].companyId);
+          companyIdOverlap.should.be.equal(true);
+        }
+
+        done();
+      });
+  });
+
+  it('should get the details of test user account ' + qaUserWithAdminPerm, function(done) {
+    request(testAPIUrl)
+      .get('/v1/users/' + userId )
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.role.should.be.equal('admin');
+        response_json.email.should.be.equal(qaUserWithAdminPerm);
+        response_json.user_id.should.be.equal(userId);
+        response_json.password.should.not.be.equal(qaUserWithAdminPermPassword);
+        done();
+      });
+  });
+
+  it('should fail to receive user details for RevAdmin user dev@revsw.com, ID 55888147fef4198e079c315e', function(done) {
+    request(testAPIUrl)
+      .get('/v1/users/55888147fef4198e079c315e' )
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('User not found');
+        done();
+      });
+  });
+
+  it('should create a new user account with Admin permissions' + testUser, function(done) {
+    request(testAPIUrl)
+      .post('/v1/users')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(newUserJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.role.should.be.equal('admin');
+        response_json.email.should.be.equal(qaUserWithAdminPerm);
+        response_json.user_id.should.be.equal(userId);
+        response_json.password.should.not.be.equal(qaUserWithAdminPermPassword);
+        testUserProfile = response_json;
+        done();
+      });
+  });
+
 
 });
 

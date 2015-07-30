@@ -58,7 +58,7 @@ describe('Rev Purge API', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Not enough privileges to purge cached objects');
+        response_json.message.should.startWith('Insufficient scope');
         done();
       });
   });
@@ -233,6 +233,41 @@ describe('Rev Purge API', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('success');
+        done();
+      });
+  });
+
+  it('should receive an error on short request ID', function(done) {
+    request(testAPIUrl)
+      .get('/v1/purge/24qwerasfasdfsdfsdf')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('child \"request_id\" fails because [\"request_id\" length must be 36 characters long]');
+        done();
+      });
+  });
+
+
+  it('should receive an error on not existing ID', function(done) {
+    request(testAPIUrl)
+      .get('/v1/purge/be5e3430-3670-11e5-a98b-25bd5958e027')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('Purge job ID not found');
         done();
       });
   });
