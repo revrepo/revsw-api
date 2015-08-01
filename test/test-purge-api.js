@@ -8,7 +8,7 @@ var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
 
-var testAPIUrl = 'http://localhost:8000';
+var testAPIUrl = 'https://localhost:8000';
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',

@@ -1,3 +1,4 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('supertest');
 var agent = require('supertest-as-promised');
@@ -8,7 +9,7 @@ var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
 
-var testAPIUrl = 'http://localhost:8000';
+var testAPIUrl = 'https://localhost:8000';
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
@@ -28,6 +29,25 @@ describe('Rev API', function() {
     testDomainId,
     testDomain = 'qa-api-test-domain.revsw.net',
     domainConfigJson = {};
+
+  it('should receive a list of first mile locations', function(done) {
+    request(testAPIUrl)
+      .get('/v1/locations/firstmile')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.length.should.be.above(0);
+        for (var i=0; i < response_json.length; i++) {
+          response_json[i].locationName.should.be.a.String();
+          response_json[i].id.should.be.a.String();
+        }
+        done();
+      });
+  });
 
 
   it('should receive 404 on wrong API path', function(done) {
@@ -357,29 +377,47 @@ describe('Rev API Admin User', function() {
     testUserProfile = {};
 
   var newUserJson = {
-  'firstname': 'API QA User',
-  'lastname': 'With Admin Perm',
-  'email': 'deleteme111@revsw.com',
-  'companyId': [
-    '55b6ff6a7957012304a49d04'
-  ],
-  'domain': [
-    'qa-api-test-domain.revsw.net'
-  ],
-
-  'theme': 'light',
-  'role': 'admin',
-'password': 'password1',
-  'access_control_list': {
-    'readOnly': false,
-    'test': true,
-    'configure': true,
-    'reports': true,
-    'dashBoard': true
-  }
+    'firstname': 'API QA User',
+    'lastname': 'With Admin Perm',
+    'email': 'deleteme111@revsw.com',
+    'companyId': [
+      '55b6ff6a7957012304a49d04'
+    ],
+    'domain': [
+      'qa-api-test-domain.revsw.net'
+    ],
+    'theme': 'light',
+    'role': 'admin',
+    'password': 'password1',
+    'access_control_list': {
+      'readOnly': false,
+      'test': true,
+      'configure': true,
+      'reports': true,
+      'dashBoard': true
+    }
   };
 
-
+  var updatedUserJson = {
+    'firstname': 'Updated API QA User',
+    'lastname': 'Updated With Admin Perm',
+    'companyId': [
+      '55b6ff6a7957012304a49d04'
+    ],
+    'domain': [
+      'qa-api-test-domain.revsw.net'
+    ],
+    'theme': 'dark',
+    'role': 'user',
+    'password': newTestPassword,
+    'access_control_list': {
+      'readOnly': true,
+      'test': false,
+      'configure': false,
+      'reports': false,
+      'dashBoard': false
+    }
+  };
 
   it('should be denied access to /v1/accounts functions', function(done) {
     request(testAPIUrl)
@@ -676,6 +714,85 @@ describe('Rev API Admin User', function() {
         done();
       });
   });
+
+  it('should fail to set new companyId 55ba46a67957012304a49d0f which does not belong to test user ' + testUser, function(done) {
+
+    request(testAPIUrl)
+      .put('/v1/users/' + testUserId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send( { companyId: [ '55b6ff6a7957012304a49d04', '55ba46a67957012304a49d0f' ] })
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('The new companyId is not found');
+        done();
+      });
+  }); 
+
+  it('should update test user ' + testUser + ' with new details in all fields', function(done) {
+
+    request(testAPIUrl)
+      .put('/v1/users/' + testUserId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(updatedUserJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully updated the user');
+        done();
+      });
+  });
+
+  it('should read back the updated configuration of test user ' + testUser, function(done) {
+    request(testAPIUrl)
+      .get('/v1/users/' + testUserId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.user_id.should.be.equal(testUserId);
+        response_json.updated_at.should.be.a.String();
+        response_json.created_at.should.be.a.String();
+
+        var verifyUserJson = response_json;
+        delete verifyUserJson.created_at;
+        delete verifyUserJson.updated_at;
+        delete verifyUserJson.user_id;
+        delete verifyUserJson.email;
+        delete updatedUserJson.password;
+        verifyUserJson.should.be.eql(updatedUserJson);
+        done();
+      });
+  });
+
+  it('should get a list of domains using updated user ' + testUser +' and new password', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domains')
+      .auth(testUser, newTestPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.length.should.be.above(0);
+        done();
+      });
+  });
+
+
 
   it('should delete test user account ' + testUser, function(done) {
     request(testAPIUrl)

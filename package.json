@@ -30,7 +30,8 @@
     "merge": "^1.2.0",
     "mongoose": "4.0.x",
     "mongoose-merge-plugin": "0.0.5",
-    "node-uuid": "^1.4.3"
+    "node-uuid": "^1.4.3",
+    "request": "^2.60.0"
   },
   "devDependencies": {
     "async": "^1.4.0",

@@ -22,6 +22,7 @@
 var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
   Pack = require('../package'),
+  Fs = require('fs'),
   Config = require('../config/config'),
   Routes = require('../lib/routes.js'),
   UserAuth = require('../lib/handlers.js').UserAuth,
@@ -30,7 +31,11 @@ var Hapi = require('hapi'),
 var server = new Hapi.Server();
 server.connection({
   host: Config.service.url,
-  port: 8000
+  port: 8000,
+  tls: {
+    key: Fs.readFileSync(Config.key_path),
+    cert: Fs.readFileSync(Config.cert_path)
+  }
 });
 
 server.views({
