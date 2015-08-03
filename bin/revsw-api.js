@@ -69,7 +69,7 @@ var swaggerOptions = {
   },
   info: {
     title: 'RevAPM API Guide',
-    description: 'This API provides full control on Rev\'s global acceleration platform.',
+    description: 'This API provides full control on Rev\'s global acceleration platform. For detailed information about the interface please see below.',
     contact: 'support@revsw.com'
   }
 };

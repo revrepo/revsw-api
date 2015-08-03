@@ -1,0 +1,37 @@
+
+# RevAPM API
+
+The first version of the RevAPM API makes it easier for developers to have
+open access to the RevAPM platform.  We created it to allow the developer
+to extenct the Application into the RevAPM platform.
+objects.
+
+Build something great!
+
+
+All requests are only accessible via https and the endpoint is located at
+`api.revsw.net`. Depending on the request type a GET, POST, PUT or DELETE
+is used. We do our best to have all our URLs be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer).
+Every endpoint (URL) may support one of four different http verbs. GET
+requests fetch information about an object, POST requests create objects,
+PUT requests update objects, and finally DELETE requests will delete
+
+## Authentication
+
+RevAPM's supports authentication using a user's email and password
+used to access. Rev system. Your API calls must include HTTP Basic
+Authentication header (RFC 2617) generated from a user's email and password.
+All modern browsers, as well as command line tools like curl and wget support
+basic authentication. This is secure, since all communication with the Rev
+service happens over SSL/HTTPS.
+
+## Limits
+Be nice. If you're sending too many requests too quickly, we'll send back a
+`503` error code (server unavailable).
+There is a limit of 5000 requests per hour.
+
+
+
+
+
+

@@ -388,7 +388,7 @@ describe('Rev API Reseller User', function() {
         }
         res.statusCode.should.be.equal(200);
         var response_json = JSON.parse(res.text);
-        response_json.companyName.should.be.equal(testCompanyName);
+        response_json.message.should.be.equal('Successfully updated the account');
         done();
       });
   });
