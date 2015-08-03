@@ -31,7 +31,7 @@ var Hapi = require('hapi'),
 var server = new Hapi.Server();
 server.connection({
   host: Config.service.url,
-  port: 8000,
+  port: Config.service.https_port,
   tls: {
     key: Fs.readFileSync(Config.key_path),
     cert: Fs.readFileSync(Config.cert_path)
