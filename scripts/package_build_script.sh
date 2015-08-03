@@ -76,6 +76,7 @@ cp -rf  $WORKSPACE/bin  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/lib  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/node_modules  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/config/config.js.def  $foldername/opt/$PackageName/config
+cp -rf  $WORKSPACE/package.json $foldername/opt/$PackageName/
 
 mkdir -p $foldername/opt/$PackageName/log
 
