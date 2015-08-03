@@ -9,7 +9,11 @@ var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
 
-var testAPIUrl = 'https://localhost:8000';
+if ( process.env.API_QA_URL ) {
+  var testAPIUrl = process.env.API_QA_URL;
+} else {
+  var testAPIUrl = 'https://localhost:8000';
+}
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
@@ -18,7 +22,69 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
-  wrongPassword = 'we5rsdfsdfs';
+  wrongPassword = 'we5rsdfsdfs',
+  testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
+
+    var updatedConfigJson = {
+
+    'rev_component_co': {
+    'enable_rum': false,
+    'enable_optimization': false,
+    'mode': 'moderate',
+    'img_choice': 'medium',
+    'js_choice': 'medium',
+    'css_choice': 'medium'
+    },
+    'rev_component_bp': {
+    'enable_cache': true,
+    'block_crawlers': true,
+    'cdn_overlay_urls': [],
+    'caching_rules': [
+      {
+      'cookies': {
+        'remove_ignored_from_response': false,
+        'remove_ignored_from_request': false,
+        'keep_or_ignore_list': [],
+        'list_is_keep': false,
+        'ignore_all': false,
+        'override': false
+      },
+      'browser_caching': {
+        'force_revalidate': false,
+        'new_ttl': 0,
+        'override_edge': false
+      },
+      'edge_caching': {
+        'override_no_cc': true,
+        'new_ttl': 1,
+        'override_origin': true
+      },
+      'url': {
+        'value': '/image/**',
+        'is_wildcard': true
+      },
+      'version': 1
+      }
+    ],
+    'enable_security': true,
+    'web_app_firewall': 'off',
+    'acl': {
+      'enabled': false,
+      'action': 'deny_except',
+      'acl_rules': [
+      {
+        'header_value': '',
+        'header_name': '',
+        'country_code': 'CH',
+        'subnet_mask': '',
+        'host_name': ''
+      }
+      ]
+    },
+    'cache_bypass_locations': []
+    }
+
+    };
 
 
 describe('Rev API', function() {
@@ -233,6 +299,26 @@ describe('Rev API Reseller User', function() {
       });
   });
 
+
+  it('should fail to create a new account with empty JSON request', function(done) {
+    request(testAPIUrl)
+      .post('/v1/accounts')
+      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .send({})
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        res.statusCode.should.be.equal(400);
+        var response_json = JSON.parse(res.text);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('child "companyName" fails because ["companyName" is required]');
+        done();
+      });
+  });
+
+
   it('should see the new account in the list of registered accounts', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts')
@@ -374,6 +460,8 @@ describe('Rev API Admin User', function() {
     testUserId,
     testPassword = 'password1',
     newTestPassword = 'password2',
+    newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
+    newDomainId,
     testUserProfile = {};
 
   var newUserJson = {
@@ -593,6 +681,9 @@ describe('Rev API Admin User', function() {
       });
   });
 
+
+
+
   it('should change the password for new user account ' + testUser, function(done) {
     request(testAPIUrl)
       .put('/v1/users/' + testUserId)
@@ -665,7 +756,6 @@ describe('Rev API Admin User', function() {
   });
 
   it('should read back the configuration of freshly created user ' + testUser + ' and verify companyId and domain attributes', function(done) {
-
 
   var newUserJson = {
   'firstname': 'API QA User',
@@ -809,6 +899,435 @@ describe('Rev API Admin User', function() {
         done();
       });
   });
+
+
+
+  it('should fail to create a new domain with existing domain name ' + newDomainName, function(done) {
+    this.timeout(60000);
+    newDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      name: testDomain,
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/domains')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(newDomainJson)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('The domain name is already registered in the system');
+        done();
+      });
+  });
+
+
+  it('should fail to create a new domain with unexisting CO group name', function(done) {
+    this.timeout(60000);
+    newDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      name: newDomainName,
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab which does not exist',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/domains')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(newDomainJson)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('Specified Rev first mile location cannot be found');
+        done();
+      });
+  });
+
+  it('should fail to create a new domain with companyId 55ba46a67957012304a49d0f which does not belong to the user', function(done) {
+    this.timeout(60000);
+    newDomainJson = {
+      companyId: '55ba46a67957012304a49d0f',
+      name: newDomainName,
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/domains')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(newDomainJson)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('Your user does not manage the specified company ID');
+        done();
+      });
+  });
+
+  it('should fail to create a new domain with empty Json', function(done) {
+    this.timeout(60000);
+    request(testAPIUrl)
+      .post('/v1/domains')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send( {} )
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('child "name" fails because ["name" is required]');
+        done();
+      });
+  });
+
+
+  it('should create a new domain configuration for name ' + newDomainName, function(done) {
+    this.timeout(60000);
+    newDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      name: newDomainName,
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/domains')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(newDomainJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully created the domain');
+        response_json.object_id.should.be.a.String();
+        newDomainId = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should read the basic confguration of freshly created domain ' + newDomainName, function(done) {
+    this.timeout(60000);
+    newDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      id: newDomainId,
+      name: newDomainName,
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .get('/v1/domains/' + newDomainId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.sync_status.should.be.equal('Success');
+        delete response_json.sync_status;
+        response_json.updated_at.should.be.a.String();
+        delete response_json.updated_at;
+        response_json.created_at.should.be.a.String();
+        delete response_json.created_at;
+        response_json.cname.should.be.equal(newDomainName + '.revdn.net');
+        delete response_json.cname;
+        response_json.should.be.eql(newDomainJson);
+        done();
+      });
+  });
+
+  it('should fail to update the new domain with unexisting CO group name', function(done) {
+    this.timeout(60000);
+    updateDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab which does not exist',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .put('/v1/domains/' + newDomainId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(updateDomainJson)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('Specified Rev first mile location cannot be found');
+        done();
+      });
+  });
+
+  it('should fail to update the new domain with companyId 55ba46a67957012304a49d0f belonging to another user', function(done) {
+    this.timeout(60000);
+    updateDomainJson = {
+      companyId: '55ba46a67957012304a49d0f',
+      origin_server: 'origin_server.com',
+      tolerance: '3000',
+      origin_server_location: 'HQ Test Lab',
+      origin_host_header: 'origin_host_header.com'
+    };
+
+    request(testAPIUrl)
+      .put('/v1/domains/' + newDomainId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(updateDomainJson)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('Your user does not manage the specified company ID');
+        done();
+      });
+  });
+
+  it('should update all fields for test domain ' + newDomainName, function(done) {
+    this.timeout(60000);
+    updateDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      origin_server: 'origin_server2.com',
+      tolerance: '4000',
+      origin_server_location: 'HQ Office Test Lab',
+      origin_host_header: 'origin_host_header2.com'
+    };
+
+    request(testAPIUrl)
+      .put('/v1/domains/' + newDomainId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(updateDomainJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully updated the domain');
+        done();
+      });
+  });
+
+  it('should read the updated configuration back and check all fields', function(done) {
+    this.timeout(60000);
+    newDomainJson = {
+      companyId: '55b6ff6a7957012304a49d04',
+      id: newDomainId,
+      name: newDomainName,
+      origin_server: 'origin_server2.com',
+      tolerance: '4000',
+      origin_server_location: 'HQ Office Test Lab',
+      origin_host_header: 'origin_host_header2.com'
+    };
+
+    request(testAPIUrl)
+      .get('/v1/domains/' + newDomainId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.sync_status.should.be.equal('Success');
+        delete response_json.sync_status;
+        response_json.updated_at.should.be.a.String();
+        delete response_json.updated_at;
+        response_json.created_at.should.be.a.String();
+        delete response_json.created_at;
+        response_json.cname.should.be.equal(newDomainName + '.revdn.net');
+        delete response_json.cname;
+        response_json.should.be.eql(newDomainJson);
+        done();
+      });
+  });
+
+
+
+  it('should read detailed domain configuration', function(done) {
+    this.timeout(60000);
+    var detailedConfigJson = {
+
+    'rev_component_co': {
+    'enable_rum': true,
+    'enable_optimization': false,
+    'mode': 'moderate',
+    'img_choice': 'medium',
+    'js_choice': 'medium',
+    'css_choice': 'medium'
+    },
+    'rev_component_bp': {
+    'enable_cache': true,
+    'block_crawlers': false,
+    'cdn_overlay_urls': [],
+    'caching_rules': [
+      {
+      'cookies': {
+        'remove_ignored_from_response': false,
+        'remove_ignored_from_request': false,
+        'keep_or_ignore_list': [],
+        'list_is_keep': false,
+        'ignore_all': false,
+        'override': false
+      },
+      'browser_caching': {
+        'force_revalidate': false,
+        'new_ttl': 0,
+        'override_edge': false
+      },
+      'edge_caching': {
+        'override_no_cc': false,
+        'new_ttl': 0,
+        'override_origin': false
+      },
+      'url': {
+        'value': '**',
+        'is_wildcard': true
+      },
+      'version': 1
+      }
+    ],
+    'enable_security': true,
+    'web_app_firewall': 'off',
+    'acl': {
+      'enabled': false,
+      'action': 'deny_except',
+      'acl_rules': [
+      {
+        'header_value': '',
+        'header_name': '',
+        'country_code': '',
+        'subnet_mask': '',
+        'host_name': ''
+      }
+      ]
+    },
+    'cache_bypass_locations': []
+    }
+
+    };
+
+    request(testAPIUrl)
+      .get('/v1/domains/' + newDomainId + '/details')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.should.be.eql(detailedConfigJson);
+        done();
+      });
+  });
+
+  it('should fail to update detailed domain configuration with empty Json', function(done) {
+    this.timeout(60000);
+
+    request(testAPIUrl)
+      .put('/v1/domains/' + newDomainId + '/details')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send( {} )
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('child \"rev_component_co\" fails because [\"rev_component_co\" is required]');
+        done();
+      });
+  });
+
+  it('should update detailed domain configuration', function(done) {
+    this.timeout(60000);
+
+    request(testAPIUrl)
+      .put('/v1/domains/' + newDomainId + '/details')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .send(updatedConfigJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.message.should.be.equal('Successfully updated the domain');
+        done();
+      });
+  });
+
+  it('should read back the updated detailed domain configuration and verify all fields', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domains/' + newDomainId + '/details')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.should.be.eql(updatedConfigJson);
+        done();
+      });
+  });
+
+
+  it('should delete test domain ' + newDomainName, function(done) {
+    this.timeout(60000);
+    request(testAPIUrl)
+      .delete('/v1/domains/' + newDomainId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully deleted the domain');
+        done();
+      });
+  });
+
 
 });
 

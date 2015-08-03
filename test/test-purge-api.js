@@ -1,3 +1,4 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('supertest');
 var agent = require('supertest-as-promised');
@@ -8,7 +9,11 @@ var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
 
-var testAPIUrl = 'https://localhost:8000';
+if ( process.env.API_QA_URL ) {
+  var testAPIUrl = process.env.API_QA_URL;
+} else {
+  var testAPIUrl = 'https://localhost:8000';
+}
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',
@@ -24,7 +29,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   testObjectPath = '/test-cache.js';
 
   var  purgeJson = {
-    domain: testObjectDomain,
+    domainName: testObjectDomain,
     purges: [{
       url: {
        is_wildcard: true,
@@ -65,7 +70,7 @@ describe('Rev Purge API', function() {
 
   it('should fail to submit a purge request with non-existing domain', function(done) {
     var  purgeJson = {
-      domain: 'domain-which-should-not-exist-in-the-system.revsw.net',
+      domainName: 'domain-which-should-not-exist-in-the-system.revsw.net',
       purges: [{
         url: {
           is_wildcard: true,
@@ -91,7 +96,7 @@ describe('Rev Purge API', function() {
 
   it('should fail to submit a purge request using malformed JSON purge object', function(done) {
     var  purgeJson = {
-      domain: 'test-proxy-cache-config.revsw.net',
+      domainName: 'test-proxy-cache-config.revsw.net',
       purges: [{
         url: {
           is_wildcard: true,
@@ -153,7 +158,7 @@ describe('Rev Purge API', function() {
 
   it('should submit a purge request', function(done) {
     var  purgeJson = {
-      domain: 'qa-api-test-domain.revsw.net',
+      domainName: 'qa-api-test-domain.revsw.net',
       purges: [{
         url: {
           is_wildcard: true,
