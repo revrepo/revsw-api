@@ -9,11 +9,7 @@ var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
 
-if ( process.env.API_QA_URL ) {
-  var testAPIUrl = process.env.API_QA_URL;
-} else {
-  var testAPIUrl = 'https://localhost:8000';
-}
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:8000';
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',

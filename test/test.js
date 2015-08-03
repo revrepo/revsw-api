@@ -9,11 +9,7 @@ var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
 
-if ( process.env.API_QA_URL ) {
-  var testAPIUrl = process.env.API_QA_URL;
-} else {
-  var testAPIUrl = 'https://localhost:8000';
-}
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:8000';
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
@@ -95,6 +91,24 @@ describe('Rev API', function() {
     testDomainId,
     testDomain = 'qa-api-test-domain.revsw.net',
     domainConfigJson = {};
+
+
+  it('should return OK on healthcheck call', function(done) {
+    request(testAPIUrl)
+      .get('/healthcheck')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Everything is OK');
+        done();
+      });
+  });
+
 
   it('should receive a list of first mile locations', function(done) {
     request(testAPIUrl)

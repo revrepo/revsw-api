@@ -4,8 +4,7 @@ module.exports = {
 
   service: {
     url: '0.0.0.0',
-    https_port: 443,
-    http_port: 80,
+    https_port: 8000,
   },
   is_https: true,
   key_path: './config/ssl_certs/server.key',
