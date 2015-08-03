@@ -79,5 +79,7 @@ cp -rf  $WORKSPACE/config/config.js.def  $foldername/opt/$PackageName/config
 
 mkdir -p $foldername/opt/$PackageName/log
 
+sudo chown -R root:root $foldername
+
 dpkg -b $foldername $WORKSPACE/$PACKAGEDIR/$foldername.deb
  
