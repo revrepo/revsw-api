@@ -7,6 +7,7 @@ module.exports = {
     http_port: 7000,
     https_port: 8000,
   },
+  master_password: '8cdea34a9c582e10940da5beb29b4597',
   is_https: true,
   key_path: './config/ssl_certs/server.key',
   cert_path: './config/ssl_certs/server.crt',

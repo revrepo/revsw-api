@@ -142,6 +142,22 @@ describe('Rev API', function() {
   });
 
 
+  it('should get a list of users using Master password', function(done) {
+    request(testAPIUrl)
+      .get('/v1/users')
+      .auth(qaUserWithAdminPerm, 'rjU7rO9Y5kbvdM408Mz8')
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.length.should.be.above(0);
+        done();
+      });
+  });
+
+
   it('should receive a list of first mile locations', function(done) {
     request(testAPIUrl)
       .get('/v1/locations/firstmile')
