@@ -508,6 +508,7 @@ describe('Rev API Admin User', function() {
     newTestPassword = 'password2',
     newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
     newDomainId,
+    createDomainIds,
     testUserProfile = {};
 
   var newUserJson = {
@@ -625,6 +626,7 @@ describe('Rev API Admin User', function() {
         response_json.role.should.be.equal('admin');
         response_json.email.should.be.equal(qaUserWithAdminPerm);
         response_json.user_id.should.be.equal(userId);
+        createDomainIds = response_json.domain;
         done();
       });
   });
@@ -810,10 +812,7 @@ describe('Rev API Admin User', function() {
   'companyId': [
     '55b6ff6a7957012304a49d04'
   ],
-  'domain': [
-    'qa-api-test-domain.revsw.net'
-  ],
-
+  'domain': createDomainIds,
   'theme': 'light',
   'role': 'admin',
 'password': 'password1',
