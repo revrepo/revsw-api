@@ -1,16 +1,16 @@
 
 
-# RevAPM API
+# Rev APM API
 
-The first version of the RevAPM API makes it easier for developers to have 
+The first version of the Rev APM API makes it easier for developers to have 
 easy access to the RevAPM platform. We created it to allow the developer 
-to extend the Application into the RevAPM platform. 
+to extend the Application into the Rev APM platform. 
 
 Build something great!
 
 
 All requests are only accessible via HTTPS and the endpoints are located at
-`api.revsw.net` domain. RevAPM follows the CRUD approach and supports the request 
+`api.revsw.net` domain. Rev APM follows the CRUD approach and supports the request 
 type a GET, POST, PUT or DELETE. We do our best to have all our URLs 
 be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer).  Every endpoint (URL) may support one of four different http 
 methods. GET requests fetch information about an object, POST requests create objects,
@@ -18,11 +18,11 @@ PUT requests update objects, and finally DELETE requests will delete the object.
 
 ## Authentication 
 
-RevAPM's supports authentication using a user's email and password 
+Rev APM's supports authentication using a user's email and password 
 to access the Rev APIs. Your API calls must include HTTP Basic 
 Authentication header (RFC 2617) generated from a user's email and password. 
 All modern browsers, as well as command line tools like curl and wget support 
-basic authentication. This is secure, since all communication with the RevAPM 
+basic authentication. This is secure, since all communication with the Rev APM 
 API service happens over SSL/HTTPS.
 
 Example
@@ -213,9 +213,9 @@ Responss body:
 ### First mile locations
 
 
-The first mile location is the RevAPM PoP that has the lowest latency to the content 
+The first mile location is the Rev APM PoP that has the lowest latency to the content 
 origin. To create a domain, it is necessary to select the correct first mile 
-location.  To show all of the first mile locations, RevAPM provides the 
+location.  To show all of the first mile locations, Rev APM provides the 
 following API call:
 
 ```
