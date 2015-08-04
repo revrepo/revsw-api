@@ -8,8 +8,9 @@ var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
+var Config = require('../config/config.js');
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:8000';
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + Config.service.https_port;
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',

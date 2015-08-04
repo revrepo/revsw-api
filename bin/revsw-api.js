@@ -29,6 +29,8 @@ var Hapi = require('hapi'),
   User = require('../lib/user.js').User;
 
 var server = new Hapi.Server();
+
+// Configure SSL connection
 server.connection({
   host: Config.service.url,
   port: Config.service.https_port,
@@ -36,6 +38,12 @@ server.connection({
     key: Fs.readFileSync(Config.key_path),
     cert: Fs.readFileSync(Config.cert_path)
   }
+});
+
+// Configure HTTP connection - all HTTP requests will be redirected to HTTPS
+server.connection({
+  host: Config.service.url,
+  port: Config.service.http_port
 });
 
 server.views({
@@ -98,3 +106,12 @@ server.register([{
 });
 
 server.route(Routes.routes);
+
+// Redirect all non-HTTPS requests to HTTPS
+server.ext('onRequest', function (request, reply) {
+     if ( request.connection.info.port !==  Config.service.https_port ) {
+            return reply.redirect('https://' + request.headers.host +
+                            request.url.path).code(301);
+      }
+      reply.continue();
+});

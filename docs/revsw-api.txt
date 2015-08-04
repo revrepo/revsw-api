@@ -1,47 +1,48 @@
 
 # RevAPM API
 
-The first version of the RevAPM API makes it easier for developers to have
-open access to the RevAPM platform.  We created it to allow the developer
-to extenct the Application into the RevAPM platform.
+The first version of the RevAPM API makes it easier for developers to have 
+open access to the RevAPM platform.  We created it to allow the developer 
+to extenct the Application into the RevAPM platform. 
 objects.
 
 Build something great!
 
 
 All requests are only accessible via https and the endpoint is located at
-`api.revsw.net`. Depending on the request type a GET, POST, PUT or DELETE
+`api.revsw.net`. Depending on the request type a GET, POST, PUT or DELETE 
 is used. We do our best to have all our URLs be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer).
 Every endpoint (URL) may support one of four different http verbs. GET
 requests fetch information about an object, POST requests create objects,
 PUT requests update objects, and finally DELETE requests will delete
 
-## Authentication
+## Authentication 
 
-RevAPM's supports authentication using a user's email and password
-used to access. Rev system. Your API calls must include HTTP Basic
-Authentication header (RFC 2617) generated from a user's email and password.
-All modern browsers, as well as command line tools like curl and wget support
-basic authentication. This is secure, since all communication with the Rev
+RevAPM’s supports authentication using a user’s email and password 
+used to access. Rev system. Your API calls must include HTTP Basic 
+Authentication header (RFC 2617) generated from a user’s email and password. 
+All modern browsers, as well as command line tools like curl and wget support 
+basic authentication. This is secure, since all communication with the Rev 
 service happens over SSL/HTTPS.
 
 Example
 
 ```
-curl -u "user@example.com:password"
+curl -u ‘user@example.com:password’
 ```
 
 
 ## Limits
 Be nice. If you're sending too many requests too quickly, we'll send back a
 `503` error code (server unavailable).
-There is a limit of 5000 requests per hour.
+There is a limit of 5000 requests per hour. 
 
 
 # Examples
 
 ## Account Control Example
 
+### Create User
 This following section we are going to show some examples of how to create, 
 modify and check status of a user.  
 
@@ -55,35 +56,34 @@ https://api.revsw.net/v1/users
 Create user JSON (User.json):
 ```json
 {
- "email": "stan.lee@example.com",
- "firstname": "Stan",
- "lastname": "Lee",
- "password": "Spider-Man",
- "companyId": [
+  "email": "stan.lee@example.com",
+  "firstname": "Stan",
+  "lastname": "Lee",
+  "password": "Spider-Man",
+  "companyId": [
     "5588869fbde7a0d00338ce8f"
-],
-"theme": "light",
-"role": "admin",
-"domain": [
-  "www.example.com",
-  "api.example.com"
-],
+  ],
+  "theme": "light",
+  "role": "admin",
+  "domain": [
+    "www.example.com",
+    "api.example.com"
+  ],
   "access_control_list": {
-    "readOnly": false,
-    "test": true,
-    "configure": true,
-    "reports": true,
-    "dashBoard": true
+  "readOnly": false,
+  "test": true,
+  "configure": true,
+  "reports": true,
+  "dashBoard": true
   }
 }
  
 ```
   
-Example in CURL
+cURL example:
 ```
-￼curl -u 'user@example.com:password' -X POST -H 'Content-Type: application/json" -T User.json http://api.revsw.net/v1/users
+curl -u 'user@example.com:password' -X POST -H 'Content-Type: application/json" -T User.json http://api.revsw.net/v1/users
 ```
-
 
 Response Body should looks something like this following:
 
@@ -95,21 +95,28 @@ Response Body should looks something like this following:
  }
 ```
 
-This means that the user was created.   To check the stat of the user, use the object_id
-and use the same endpoint with a GET request.
+This means that the user was created.   
+
+### Check User Status
+
+To check the stat of the user, use the object_id and use the same endpoint with a 
+GET request.
+
 
 ```
 https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
 ```
+
+cURL example:
 
 ```
 curl -u 'user@example.com:password' -H 'Content-Type: application/json" http://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 Response body to the get User request
 
-```
+```json
 {
-    "email": "stan.lee2@example.com",
+    "email": "stan.lee@example.com",
     "firstname": "Stan",
     "lastname": "Lee",
     "companyId": [
@@ -133,12 +140,78 @@ Response body to the get User request
   "user_id": "55bff4b8c01a42a2348170f7"
 }
 ```
+### Change User
+
+To change a user, a PUT command is used to the same endpoint. In the following example,
+we will be removing access to the "api.example.com" domain and changing the Portal 
+theme to "dark".
+
+```
+https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+```
 
 
 
+cURL example:
+
+```
+￼curl -u 'user@example.com:password' -X PUT -H 'Content-Type: application/json" -T Change.json https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+```
+
+The Change.json file would look like the following example.  Please note, the email field
+is removed.  This field is not changeable. 
+
+```json
+{
+  "firstname": "Stan",
+  "lastname": "Lee",
+  "password": "Spider-Man",
+  "companyId": [
+    "5588869fbde7a0d00338ce8f"
+  ],
+  "theme": "dark",
+  "role": "admin",
+  "domain": [
+    "www.example.com"
+  ],
+  "access_control_list": {
+    "readOnly": false,
+    "test": true,
+    "configure": true,
+    "reports": true,
+    "dashBoard": true
+  }
+}
+```
+
+### Delete User
+
+To delete that user, send a DELETE. 
+
+
+```
+https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+```
+
+cURL example:
+
+```
+curl  -u 'user@example.com:password' -X PUT -H 'Content-Type: application/json https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+```
+
+Body respons:
+```
+{
+  "statusCode": 200,
+  "message": "Successfully deleted the user"
+}
+```
+
+## Domain (site) create, modify and delete
 
 
 
-
-
+    
+    
+    
 

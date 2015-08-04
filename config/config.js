@@ -4,6 +4,7 @@ module.exports = {
 
   service: {
     url: '0.0.0.0',
+    http_port: 7000,
     https_port: 8000,
   },
   is_https: true,
