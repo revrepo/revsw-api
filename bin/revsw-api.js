@@ -77,7 +77,7 @@ var swaggerOptions = {
   },
   info: {
     title: 'RevAPM API Guide',
-    description: 'This API provides full control on Rev\'s global acceleration platform. For detailed information about the interface please see below.',
+    // description: 'This API provides full control on Rev\'s global acceleration platform. For detailed information about the interface please see below.',
     contact: 'support@revsw.com'
   }
 };
@@ -109,26 +109,27 @@ server.route(Routes.routes);
 
 // Redirect all non-HTTPS requests to HTTPS
 server.ext('onRequest', function (request, reply) {
-     if ( request.connection.info.port !==  Config.service.https_port ) {
-            return reply.redirect('https://' + request.headers.host +
-                            request.url.path).code(301);
-      }
-      reply.continue();
+  if ( request.connection.info.port !==  Config.service.https_port ) {
+    return reply.redirect('https://' + request.headers.host +
+      request.url.path).code(301);
+  }
+  reply.continue();
 });
 
 var goodOptions = {
-    opsInterval: 60000,
-    reporters: [{
-        reporter: require('good-console'),
-        events: { log: '*', response: '*', ops: '*', error: '*', request: '*' }
-    }]
+  opsInterval: 60000,
+  reporters: [{
+    reporter: require('good-console'),
+      events: { log: '*', response: '*', ops: '*', error: '*', request: '*' }
+  }]
 };
 
 server.register({
-    register: require('good'),
-    options: goodOptions
+  register: require('good'),
+  options: goodOptions
 }, function (err) {
-    if (err) {
-        console.error(err);
-    }
+  if (err) {
+    console.error(err);
+  }
 });
+
