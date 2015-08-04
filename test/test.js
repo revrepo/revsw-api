@@ -83,6 +83,37 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
     };
 
 
+describe('Rev API Swagger UI', function() {
+
+  it('should return a page when requested from "/" path', function(done) {
+    request(testAPIUrl)
+      .get('/')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
+  it('should return an object when requested from "/docs/swaggerui/css/highlight.default.css" path', function(done) {
+    request(testAPIUrl)
+      .get('/docs/swaggerui/css/highlight.default.css')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
+});
+
+
 describe('Rev API', function() {
 
   var adminToken = '',
