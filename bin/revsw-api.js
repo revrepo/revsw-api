@@ -115,3 +115,20 @@ server.ext('onRequest', function (request, reply) {
       }
       reply.continue();
 });
+
+var goodOptions = {
+    opsInterval: 60000,
+    reporters: [{
+        reporter: require('good-console'),
+        events: { log: '*', response: '*', ops: '*', error: '*', request: '*' }
+    }]
+};
+
+server.register({
+    register: require('good'),
+    options: goodOptions
+}, function (err) {
+    if (err) {
+        console.error(err);
+    }
+});
