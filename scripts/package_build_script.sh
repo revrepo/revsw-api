@@ -71,6 +71,7 @@ cp -rp $WORKSPACE/scripts/init.d_revsw-api  $foldername/etc/init.d/revsw-api
 cp -rp $WORKSPACE/scripts/logrotate_revsw-api $foldername/etc/logrotate.d/revsw-api
 
 mkdir -p $foldername/opt/$PackageName/config
+mkdir -p $foldername/opt/$PackageName/docs
 
 cp -rf  $WORKSPACE/bin  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/lib  $foldername/opt/$PackageName/
@@ -79,6 +80,7 @@ cp -rf  $WORKSPACE/config/config.js.def  $foldername/opt/$PackageName/config
 cp -rf  $WORKSPACE/package.json $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/templates $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/public $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/docs/revsw-api.txt $foldername/opt/$PackageName/docs/
 
 mkdir -p $foldername/opt/$PackageName/log
 
