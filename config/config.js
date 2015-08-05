@@ -9,6 +9,7 @@ module.exports = {
   },
   master_password: '8cdea34a9c582e10940da5beb29b4597',
   is_https: true,
+//  version_file: './config/version.txt',
   key_path: './config/ssl_certs/server.key',
   cert_path: './config/ssl_certs/server.crt',
   portal_url: 'https://testsjc20-portal01.revsw.net:3000',
