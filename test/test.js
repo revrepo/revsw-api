@@ -126,6 +126,7 @@ describe('Rev API', function() {
 
 
   it('should return OK on healthcheck call', function(done) {
+    var version = fs.readFileSync(Config.version_file || './config/version.txt', {encoding: 'utf8'});
     request(testAPIUrl)
       .get('/healthcheck')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -137,6 +138,7 @@ describe('Rev API', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Everything is OK');
+        response_json.version.should.be.equal(version.trim());
         done();
       });
   });
