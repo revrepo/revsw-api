@@ -118,6 +118,10 @@ server.ext('onRequest', function (request, reply) {
 
 var goodOptions = {
   opsInterval: 60000,
+  requestHeaders: true,
+  requestPayload: true,
+  responsePayload: true,
+  responseEvent: 'response',
   reporters: [{
     reporter: require('good-console'),
       events: { log: '*', response: '*', ops: '*', error: '*', request: '*' }
@@ -127,7 +131,7 @@ var goodOptions = {
     events: { log: '*', response: '*', ops: '*', error: '*', request: '*' },
     config: {
       path: Config.logging.debug_log_file_path,
-      rotate: 'daily'
+      rotate: 'weekly'
     }
   }]
 };
