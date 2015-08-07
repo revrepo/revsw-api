@@ -22,6 +22,7 @@
     "express": "^4.13.3",
     "good": "^6.3.0",
     "good-console": "^5.0.2",
+    "good-file": "^5.0.1",
     "handlebars": "1.3.x",
     "hapi": "8.4.x",
     "hapi-auth-basic": "~3.0.0",

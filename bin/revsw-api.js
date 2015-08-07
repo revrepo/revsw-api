@@ -121,6 +121,14 @@ var goodOptions = {
   reporters: [{
     reporter: require('good-console'),
       events: { log: '*', response: '*', ops: '*', error: '*', request: '*' }
+  },
+  {
+    reporter: require('good-file'),
+    events: { log: '*', response: '*', ops: '*', error: '*', request: '*' },
+    config: {
+      path: Config.logging.debug_log_file_path,
+      rotate: 'daily'
+    }
   }]
 };
 

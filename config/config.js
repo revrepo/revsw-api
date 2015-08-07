@@ -23,7 +23,6 @@ module.exports = {
   },
   logging: {
     syslog_level: 'debug', // allowed levels debug, info, notice, warning, error, crit, alert, emerg
-    debug_log_file_path: './log/api.log'
+    debug_log_file_path: './log'
   }
-
 };
