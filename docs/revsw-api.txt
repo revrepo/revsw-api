@@ -2,10 +2,6 @@
 
 # Rev APM API
 
-The first version of the Rev APM API makes it easier for developers to work 
-with the Rev APM platform. We created it to allow developers 
-to extend App functionality to control the Rev APM platform. 
-
 Build something great!
 
 
