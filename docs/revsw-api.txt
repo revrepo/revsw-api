@@ -19,7 +19,7 @@ The system supports authentication using the user’s email and password.  The
 same credentials used with the portal. The API calls must include HTTP Basic 
 Authentication header (RFC 2617) generated from a user's email and password. 
 All modern browsers, as well as command line tools like curl and wget support 
-basic authentication. This is secure, since all communication with the Rev APM 
+basic authentication. This is secure, since all communication with the RevAPM 
 API service happens over SSL/HTTPS.
 
 
@@ -207,13 +207,13 @@ Response body:
   
 ### First mile locations
 
-The first mile location is the Rev APM PoP that has the lowest
+The first mile location is the RevAPM PoP that has the lowest
 latency to the content origin. To create a domain, it is necessary
 to select the correct first mile location.  This is typically the
 same city as the origin data center.  If the city of the origin data
 center is not listed, select the next nearest city.  
 
-To show all of the first mile locations, Rev APM provides the
+To show all of the first mile locations, RevAPM provides the
 following API call:
 
 ```
