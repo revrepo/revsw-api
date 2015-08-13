@@ -1,12 +1,12 @@
 
 
-# Rev APM API
+# RevAPM API
 
 Build something great!
 
 
 All requests are only accessible via HTTPS and the endpoint is
-located at `api.revsw.net`. Rev APM follows the CRUD approach and supports 
+located at `api.revsw.net`. RevAPM follows the CRUD approach and supports 
 the request types GET, POST, PUT or DELETE. The GET requests will fetch 
 information about an object, the POST requests will create an object, the 
 PUT request will update an object, and finally the DELETE requests will delete the object.
