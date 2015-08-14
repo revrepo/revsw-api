@@ -1,29 +1,27 @@
 
 
-# Rev APM API
-
-The first version of the Rev APM API makes it easier for developers to have 
-an access to the Rev APM platform. We created it to allow the developer 
-to extend the Application into the Rev APM platform. 
+# RevAPM API
 
 Build something great!
 
 
-All requests are only accessible via HTTPS and the endpoints are located at
-`api.revsw.net` domain. Rev APM follows the CRUD approach and supports the request 
-type a GET, POST, PUT or DELETE. We do our best to have all our URLs 
-be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer).  Every endpoint (URL) may support one of four different http 
-methods. GET requests fetch information about an object, POST requests create objects,
-PUT requests update objects, and finally DELETE requests will delete the object.
+All requests are only accessible via HTTPS and the endpoint is
+located at `api.revapm.net`. RevAPM follows the CRUD approach and supports 
+the request types GET, POST, PUT or DELETE. The GET requests will fetch 
+information about an object, the POST requests will create an object, the 
+PUT request will update an object, and finally the DELETE requests will delete the object.
+We do our best to have all our URLs be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer).  
+
 
 ## Authentication 
 
-Rev APM's supports authentication using a user's email and password 
-to access the Rev APIs. Your API calls must include HTTP Basic 
+The system supports authentication using the user’s email and password.  The 
+same credentials used with the portal. The API calls must include HTTP Basic 
 Authentication header (RFC 2617) generated from a user's email and password. 
 All modern browsers, as well as command line tools like curl and wget support 
-basic authentication. This is secure, since all communication with the Rev APM 
+basic authentication. This is secure, since all communication with the RevAPM 
 API service happens over SSL/HTTPS.
+
 
 Example
 
@@ -43,14 +41,13 @@ There is a limit of 5000 requests per hour.
 ## Account Control Example
 
 ### Create User
-In the following section we are going to show some examples of how to create, 
-modify and check status of a user.  
+In the following section is an example of how to create, modify and check the status of a user. 
 
   
 Create User Request URL:
 
 ```
-https://api.revsw.net/v1/users
+https://api.revapm.net/v1/users
 ```
 
 Create user JSON (User.json):
@@ -82,7 +79,7 @@ Create user JSON (User.json):
   
 cURL example:
 ```
-curl -u 'user@example.com:password' -X POST -H 'Content-Type: application/json' -T User.json http://api.revsw.net/v1/users
+curl -u 'user@example.com:password' -X POST -H 'Content-Type: application/json' -T User.json http://api.revapm.net/v1/users
 ```
 
 Response body:
@@ -95,22 +92,20 @@ Response body:
  }
 ```
 
-This means that the user was created.   
+This means that the user was successfully created.   
 
 ### Get User Profile
 
-To get the profile of a user, use the object_id and use the same endpoint with a 
-GET request.
-
+To get the profile of a user, use the object_id and the same endpoint with a GET request.
 
 ```
-https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+https://api.revapm.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 
 cURL example:
 
 ```
-curl -u 'user@example.com:password' -H 'Content-Type: application/json' http://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+curl -u 'user@example.com:password' -H 'Content-Type: application/json' http://api.revapm.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 Response body to the get User request
 
@@ -142,12 +137,13 @@ Response body to the get User request
 ```
 ### Change User
 
-To change a user, a PUT command is used to the same endpoint. In the following example,
-we will be removing access to the "api.example.com" domain and changing the Portal 
-theme to "dark".
+To change a user, use a PUT to the same endpoint. In the 
+following example, we will be removing access to the "api.example.com" 
+domain and changing the Portal theme to "dark".
+
 
 ```
-https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+https://api.revapm.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 
 
@@ -155,11 +151,11 @@ https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
 cURL example:
 
 ```
-￼curl -u 'user@example.com:password' -X PUT -H 'Content-Type: application/json' -T Change.json https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+￼curl -u 'user@example.com:password' -X PUT -H 'Content-Type: application/json' -T Change.json https://api.revapm.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 
 The Change.json file would look like the following example.  Please note, the email field
-is removed.  This field is not changeable. 
+is removed.  The email field is not changeable. 
 
 ```json
 {
@@ -188,18 +184,17 @@ is removed.  This field is not changeable.
 
 To delete that user, send a DELETE method.
 
-
 ```
-https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+https://api.revapm.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 
 cURL example:
 
 ```
-curl  -u 'user@example.com:password' -X DELETE -H 'Content-Type: application/json' https://api.revsw.net/v1/users/55bff4b8c01a42a2348170f7
+curl  -u 'user@example.com:password' -X DELETE -H 'Content-Type: application/json' https://api.revapm.net/v1/users/55bff4b8c01a42a2348170f7
 ```
 
-Responss body:
+Response body:
 
 ```
 {
@@ -212,20 +207,23 @@ Responss body:
   
 ### First mile locations
 
+The first mile location is the RevAPM PoP that has the lowest
+latency to the content origin. To create a domain, it is necessary
+to select the correct first mile location.  This is typically the
+same city as the origin data center.  If the city of the origin data
+center is not listed, select the next nearest city.  
 
-The first mile location is the Rev APM PoP that has the lowest latency to the content 
-origin. To create a domain, it is necessary to select the correct first mile 
-location.  To show all of the first mile locations, Rev APM provides the 
+To show all of the first mile locations, RevAPM provides the
 following API call:
 
 ```
-https://api.revsw.net/v1/locations/firstmile
+https://api.revapm.net/v1/locations/firstmile
 ```
 
 cURL example:
 
 ```
-curl  -u 'user@example.com:password' https://api.revsw.net/v1/locations/firstmile
+curl  -u 'user@example.com:password' https://api.revapm.net/v1/locations/firstmile
 ```
 
 
@@ -243,24 +241,21 @@ Response body:
 ]
 ```
 
-
-
 ### Create a domain  
   
-To create a domain, use the following POST to the api.revsw.net endpoint.
-
+To create a domain, use the following POST to the api.revapm.net endpoint.
 
 ```
-  https://api.revsw.net/v1/domains/
+  https://api.revapm.net/v1/domains/
 ```
 
 cURL example:
 
 ```
-curl  -u 'user@example.com:password' -X POST -H 'Content-Type: application/json'  -T Domain.json https://api.revsw.net/v1/domains
+curl  -u 'user@example.com:password' -X POST -H 'Content-Type: application/json'  -T Domain.json https://api.revapm.net/v1/domains
 ```
 
-Using the response from the first mile response, select the nearest 
+Using the response from the first mile request, select the nearest 
 firstmile location to the origin. The example JSON (Domain.json) would be the following:
   
 ```json
@@ -286,18 +281,16 @@ Body response:
 
 ### Show the domain
 
-Take the object_id from body response of the domain create POST and use to 
-get the current configuration of the domain.
-
-
+Take the object_id from body response of the domain create POST 
+and use it to get the current configuration of the domain.
 
 ```
-https://api.revsw.net/v1/domains/55c0222fe9032a2d741b9f38
+https://api.revapm.net/v1/domains/55c0222fe9032a2d741b9f38
 ```
 
 cURL Example:
 ```
-curl -u 'user@example.com:password' -H 'Content-Type: application/json' http://api.revsw.net/v1/domains/55c0222fe9032a2d741b9f38
+curl -u 'user@example.com:password' -H 'Content-Type: application/json' http://api.revapm.net/v1/domains/55c0222fe9032a2d741b9f38
 ```
 
 Body response:
@@ -319,16 +312,17 @@ Body response:
 
 ### Modify the domain
 
-Use the following PUT to modify the domain. Again, using the object_id from 
-the response header from when the domain was created.
+Use the following PUT to modify the domain. Again, using 
+the object_id from the response header from when the 
+domain was created.
 
 ```
-https://api.revsw.net/v1/domains/55888c861ef09d211562a439
+https://api.revapm.net/v1/domains/55888c861ef09d211562a439
 ```
 
 cURL example:
 ```
-curl  -u 'user@example.com:password' -X PUT -H 'Content-Type: application/json'  " -T Domain.json https://api.revsw.net/v1/domains/55888c861ef09d211562a439
+curl  -u 'user@example.com:password' -X PUT -H 'Content-Type: application/json'  " -T Domain.json https://api.revapm.net/v1/domains/55888c861ef09d211562a439
 ```
 
 Domain.json example, changing the origin server to origin-new.example.com
