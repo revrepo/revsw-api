@@ -37,7 +37,8 @@ server.connection({
   tls: {
     key: Fs.readFileSync(Config.key_path),
     cert: Fs.readFileSync(Config.cert_path)
-  }
+  },
+  routes: { cors: true }
 });
 
 // Configure HTTP connection - all HTTP requests will be redirected to HTTPS
