@@ -11,7 +11,8 @@ var utils = require('../lib/utilities.js');
 var Config = require('../config/config.js');
 
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + Config.service.https_port;
-var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + Config.service.https_port;
+var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + Config.service.http_port;
+var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + Config.service.http_port;
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
@@ -91,7 +92,7 @@ describe('Rev API Swagger UI', function() {
     request(testAPIUrlHTTP)
       .get('/')
       .expect(301)
-      .expect('Location', testAPIUrl + '/')
+      .expect('Location', testAPIUrlExpected + '/')
       .end(function(err, res) {
         if (err) {
           throw err;

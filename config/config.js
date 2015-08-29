@@ -12,7 +12,7 @@ module.exports = {
 //  version_file: './config/version.txt',
   key_path: './config/ssl_certs/server.key',
   cert_path: './config/ssl_certs/server.crt',
-  portal_url: 'https://testsjc20-portal01.revsw.net:3000',
+  portal_url: 'https://testsjc20-portal01.revsw.net',
   use_x_forwarded_for: true,
   default_cname_domain: 'revdn.net',
   portal_mongo: {
