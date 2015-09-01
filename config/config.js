@@ -13,6 +13,7 @@ module.exports = {
   key_path: './config/ssl_certs/server.key',
   cert_path: './config/ssl_certs/server.crt',
   portal_url: 'https://testsjc20-portal01.revsw.net',
+  elasticsearch_url: 'testsjc20-es01.revsw.net:9200',
   use_x_forwarded_for: true,
   default_cname_domain: 'revdn.net',
   portal_mongo: {

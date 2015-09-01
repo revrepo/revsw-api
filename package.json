@@ -19,6 +19,7 @@
     "boom": "2.7.x",
     "convert-base": "~0.1.0",
     "crypto": "0.0.3",
+    "elasticsearch": "^8.0.1",
     "express": "^4.13.3",
     "good": "^6.3.0",
     "good-console": "^5.0.2",
