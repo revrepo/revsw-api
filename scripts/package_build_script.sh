@@ -32,9 +32,9 @@ if [ ! -d $PACKAGEDIR ]; then
 	fi
 fi
 
-dat=`date +%Y_%m_%d_%H_%M_%S`
+WORKDIR="package_build_dir"
 
-WORKDIR=$PACKAGENAME'_'$VERSION'_'$dat 
+sudo rm -rf $WORKDIR
 mkdir $WORKDIR
 cd $WORKDIR
 
@@ -76,7 +76,8 @@ mkdir -p $foldername/opt/$PackageName/docs
 cp -rf  $WORKSPACE/bin  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/lib  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/node_modules  $foldername/opt/$PackageName/
-cp -rf  $WORKSPACE/config/config.js.def  $foldername/opt/$PackageName/config
+cp -rf  $WORKSPACE/config/*.json  $foldername/opt/$PackageName/config/
+cp -rf  $WORKSPACE/config/dev_ssl_certs  $foldername/opt/$PackageName/config/
 cp -rf  $WORKSPACE/config/version.txt  $foldername/opt/$PackageName/config
 cp -rf  $WORKSPACE/package.json $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/templates $foldername/opt/$PackageName/

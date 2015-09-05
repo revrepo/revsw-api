@@ -23,7 +23,7 @@ var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
   Pack = require('../package'),
   Fs = require('fs'),
-  Config = require('../config/config'),
+  config = require('config'),
   Routes = require('../lib/routes.js'),
   UserAuth = require('../lib/handlers.js').UserAuth,
   User = require('../lib/user.js').User;
@@ -32,19 +32,19 @@ var server = new Hapi.Server();
 
 // Configure SSL connection
 server.connection({
-  host: Config.service.url,
-  port: Config.service.https_port,
+  host: config.get('service.host'),
+  port: config.get('service.https_port'),
   tls: {
-    key: Fs.readFileSync(Config.key_path),
-    cert: Fs.readFileSync(Config.cert_path)
+    key: Fs.readFileSync(config.get('key_path')),
+    cert: Fs.readFileSync(config.get('cert_path'))
   },
   routes: { cors: true }
 });
 
 // Configure HTTP connection - all HTTP requests will be redirected to HTTPS
 server.connection({
-  host: Config.service.url,
-  port: Config.service.http_port
+  host: config.get('service.host'),
+  port: config.get('service.http_port')
 });
 
 server.views({
@@ -110,7 +110,7 @@ server.route(Routes.routes);
 
 // Redirect all non-HTTPS requests to HTTPS
 server.ext('onRequest', function (request, reply) {
-  if ( request.connection.info.port !==  Config.service.https_port ) {
+  if ( request.connection.info.port !==  config.get('service.https_port') ) {
     return reply.redirect('https://' + request.headers.host +
       request.url.path).code(301);
   }
@@ -131,7 +131,7 @@ var goodOptions = {
     reporter: require('good-file'),
     events: { log: '*', response: '*', ops: '*', error: '*', request: '*' },
     config: {
-      path: Config.logging.debug_log_file_path,
+      path: config.get('log_dir'),
       rotate: 'weekly'
     }
   }]

@@ -17,6 +17,7 @@
     "bcrypt": "~0.8.3",
     "blipp": "2.1.x",
     "boom": "2.7.x",
+    "config": "^1.16.0",
     "convert-base": "~0.1.0",
     "crypto": "0.0.3",
     "elasticsearch": "^8.0.1",

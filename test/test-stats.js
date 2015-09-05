@@ -8,7 +8,7 @@ var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
-var Config = require('../config/config.js');
+var config = require('config');
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',
@@ -22,9 +22,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   testDomainId = '55df7177bab6f4da0306f58e',
   testDomain = 'portal-qa-domain.revsw.net';  // this domain should exist in the QA environment
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + Config.service.https_port;
-var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + Config.service.http_port;
-var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + Config.service.http_port;
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
+var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
+var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
 
 describe('Rev stats top API', function() {
 
