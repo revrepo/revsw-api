@@ -20,6 +20,7 @@
     "config": "^1.16.0",
     "convert-base": "~0.1.0",
     "crypto": "0.0.3",
+    "datejs": "0.0.2",
     "elasticsearch": "^8.0.1",
     "express": "^4.13.3",
     "good": "^6.3.0",
