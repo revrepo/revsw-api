@@ -28,7 +28,41 @@ var Hapi = require('hapi'),
   UserAuth = require('../lib/handlers.js').UserAuth,
   User = require('../lib/user.js').User;
 
+//  Logger = require('audit');
+
 var server = new Hapi.Server();
+
+/*Logger.init(
+    {
+      mongodb : {
+        db         : 'rev_test',
+        collection : 'logger',
+        host       : 'localhost',
+        port       : '27017'
+      },
+      file    : {
+        filename  : 'audit.txt',
+        stream    : true,
+        timestamp : true
+      }
+    }
+);
+
+
+Logger.store({
+  datetime: '12313131',
+  usertype: 'user',
+  username: 'admin',
+  user_id: 'dqd3d2d2dd0ad9sa0da',
+  account: 'ddqwdqd',
+  account_id: 'dk09qd10d910d01d01d81jd910d091ddsdacs',
+  activity_type: 'add',
+  activity_target: 'user',
+  target_name: 'target_name',
+  target_id: 'target_id',
+  operation_status: 'success',
+  target_object: {test : 'test'}
+});*/
 
 // Configure SSL connection
 server.connection({
