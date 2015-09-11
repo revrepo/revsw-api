@@ -26,43 +26,41 @@ var Hapi = require('hapi'),
   config = require('config'),
   Routes = require('../lib/routes.js'),
   UserAuth = require('../lib/handlers.js').UserAuth,
-  User = require('../lib/user.js').User;
-
-//  Logger = require('audit');
+  User = require('../lib/user.js').User,
+  AuditLogger = require('revsw-audit');
 
 var server = new Hapi.Server();
 
-/*Logger.init(
+AuditLogger.init(
     {
       mongodb : {
-        db         : 'rev_test',
-        collection : 'logger',
-        host       : 'localhost',
-        port       : '27017'
+        db         : 'mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0',
+        collection : 'audit_events'
       },
       file    : {
-        filename  : 'audit.txt',
-        stream    : true,
+        filename  : 'log/revsw-audit.log',
         timestamp : true
       }
     }
 );
 
 
-Logger.store({
+AuditLogger.store({
+  domain_id : 'dqwdqw312d12',
+  company_id : 'dqwd11231231',
   datetime: '12313131',
   usertype: 'user',
   username: 'admin',
-  user_id: 'dqd3d2d2dd0ad9sa0da',
+  user_id: '55b7018a7957012304a49d09',
   account: 'ddqwdqd',
   account_id: 'dk09qd10d910d01d01d81jd910d091ddsdacs',
-  activity_type: 'add',
+  activity_type: 'modify',
   activity_target: 'user',
   target_name: 'target_name',
   target_id: 'target_id',
-  operation_status: 'success',
+  operation_status: 'failure',
   target_object: {test : 'test'}
-});*/
+});
 
 // Configure SSL connection
 server.connection({
