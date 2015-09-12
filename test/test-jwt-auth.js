@@ -14,6 +14,8 @@ var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://
 var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
 var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
 
+describe('Rev API JWT Token', function() {
+
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
   qaUserWithAdminPermPassword = 'password1',
@@ -24,20 +26,23 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   wrongPassword = 'we5rsdfsdfs',
   testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
 
-describe('Rev API JWT Token', function() {
 
   var adminToken = '',
-    userToken = ''.
+    jwtToken = ''.
     userCompanyId = '',
     testDomainId,
-    testDomain = 'qa-api-test-domain.revsw.net',
     domainConfigJson = {};
 
-    testUser = 'api-qa-user-' + Date.now() + '@revsw.com';
-    testPass = 'password1';
-    newTestPass = 'password2';
+    var testUserJWT = 'api-qa-user-' + Date.now() + '@revsw.com';
+    var testPass = 'password1';
+    var newTestPass = 'password2';
 
-  var changePasswordJson = {
+  var userAuth = {
+    email: testUserJWT,
+    password: testPass
+  };
+
+  var changePasswordJson2 = {
     current_password: testPass,
     new_password: newTestPass
   };
@@ -45,7 +50,7 @@ describe('Rev API JWT Token', function() {
   var newUserJson = {
     'firstname': 'API QA User',
     'lastname': 'With User Perm',
-    'email': testUser,
+    'email': testUserJWT,
     'theme': 'light',
     'role': 'user',
     'password': testPass,
@@ -58,7 +63,7 @@ describe('Rev API JWT Token', function() {
     }
   };
 
-  it('should create a new user account ' + testUser, function(done) {
+  it('should create a new user account ' + testUserJWT, function(done) {
     request(testAPIUrl)
       .post('/v1/users')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -93,11 +98,10 @@ describe('Rev API JWT Token', function() {
       });
   });
 
-
   it('should fail to authenticate using wrong password', function(done) {
     request(testAPIUrl)
       .post('/v1/authenticate')
-      .send( { email: testUser, password: 'edtq3tedfgsdfg' } )
+      .send( { email: testUserJWT, password: 'edtq3tedfgsdfg' } )
       .expect(401)
       .end(function(err, res) {
         if (err) {
@@ -110,11 +114,10 @@ describe('Rev API JWT Token', function() {
       });
   });
 
-
   it('should authenticate and receive a token', function(done) {
     request(testAPIUrl)
       .post('/v1/authenticate')
-      .send( { email: testUser, password: testPass } )
+      .send( userAuth )
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -124,7 +127,7 @@ describe('Rev API JWT Token', function() {
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Enjoy your token');
         response_json.token.should.be.a.String();
-        userToken = response_json.token;
+        jwtToken = response_json.token;
         done();
       });
   });
@@ -156,12 +159,10 @@ describe('Rev API JWT Token', function() {
       });
   });
 
-
-
   it('should get a list of countries using the new token', function(done) {
     request(testAPIUrl)
       .get('/v1/countries/list')
-      .set('Authorization', 'Bearer ' + userToken)
+      .set('Authorization', 'Bearer ' + jwtToken)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -173,14 +174,13 @@ describe('Rev API JWT Token', function() {
   });
 
   it('should successfully change the user password', function(done) {
-    var changePasswordJson = {
-      current_password: testPass,
-      new_password: newTestPass
-    };
+
+    console.log(testUserJWT, testPass);
+    console.log(changePasswordJson2);
     request(testAPIUrl)
       .put('/v1/users/password/' + testUserId)
-      .auth(testUser, testPass)
-      .send( changePasswordJson )
+      .auth(testUserJWT, testPass)
+      .send( changePasswordJson2 )
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -196,7 +196,7 @@ describe('Rev API JWT Token', function() {
   it('should fail to get a list of countries using the same token after password change', function(done) {
     request(testAPIUrl)
       .get('/v1/countries/list')
-      .set('Authorization', 'Bearer ' + userToken)
+      .set('Authorization', 'Bearer ' + jwtToken)
       .expect(401)
       .end(function(err, res) {
         if (err) {
@@ -207,8 +207,7 @@ describe('Rev API JWT Token', function() {
       });
   });
 
-
-  it('should delete test user account ' + testUser, function(done) {
+  it('should delete test user account ' + testUserJWT, function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
