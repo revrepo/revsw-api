@@ -38,6 +38,7 @@
     "mongoose": "4.0.x",
     "mongoose-merge-plugin": "0.0.5",
     "node-uuid": "^1.4.3",
+    "nodemailer": "^1.4.0",
     "request": "^2.60.0",
     "should": "^7.0.2",
     "should-http": "0.0.4"
