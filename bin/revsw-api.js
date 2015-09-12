@@ -67,7 +67,8 @@ var swaggerOptions = {
   },
   tags: {
     'purge': 'Purging of cached objects',
-    'users': 'Management of Rev portal users'
+    'users': 'Management of Rev portal users',
+    'portal': 'Internal portal calls'
   },
   authorizations: {
     default: {
