@@ -26,9 +26,14 @@ var Hapi = require('hapi'),
   config = require('config'),
   Routes = require('../lib/routes.js'),
   UserAuth = require('../lib/handlers.js').UserAuth,
+  validateJWTToken = require('../lib/handlers.js').validateJWTToken,
+  jwt = require('jsonwebtoken'),
   User = require('../lib/user.js').User;
 
 var server = new Hapi.Server();
+
+var jwtPrivateKey = config.get('jwt_private_key');
+
 
 // Configure SSL connection
 server.connection({
@@ -85,8 +90,17 @@ var swaggerOptions = {
 };
 
 server.register(require('hapi-auth-basic'), function (err) {
-    server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
+  server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
 });
+
+server.register(require('hapi-auth-jwt'), function (err) {
+  server.auth.strategy('token', 'jwt', {
+    key: jwtPrivateKey,
+    validateFunc: validateJWTToken
+  });
+});
+
+
 
 
 // adds swagger self documentation plugin

@@ -14,5 +14,6 @@
   "purge_mongo": {
     "connect_string": "mongodb://IAD02-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
   },
-  "password_reset_portal_domain": "testsjc20-portal01.revsw.net"
+  "password_reset_portal_domain": "portal.revsw.net",
+  "jwt_private_key" : "2c83899336891b6cfa571449f098c3fca7d4e2ef96e7"
 }
