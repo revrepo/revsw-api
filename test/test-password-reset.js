@@ -117,9 +117,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
             var ytre = /(\b(https?|ftp|file):\/\/[\-A-Z0-9+&@#\/%?=~_|!:,.;]*[\-A-Z0-9+&@#\/%=~_|])/ig;
             var resultArray = text.match(ytre);
-            var i = 0;
+            var forgotlink;
             if (resultArray !== null) {
-              for (i = 0; i < resultArray.length; i++) {
+              for (var i = 0; i < resultArray.length; i++) {
                 if (resultArray[i].indexOf('reset') + 1) {
                   forgotlink = resultArray[i];
                 }
