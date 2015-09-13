@@ -29,42 +29,10 @@ var Hapi = require('hapi'),
   validateJWTToken = require('../lib/handlers.js').validateJWTToken,
   jwt = require('jsonwebtoken'),
   User = require('../lib/user.js').User;
-  AuditLogger = require('revsw-audit');
 
 var server = new Hapi.Server();
 
 var jwtPrivateKey = config.get('jwt_private_key');
-
-
-AuditLogger.init(
-    {
-      mongodb : {
-        db         : 'mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0',
-        collection : 'audit_events'
-      },
-      file    : {
-        filename  : 'log/revsw-audit.log',
-        timestamp : true
-      }
-    }
-);
-
-/*AuditLogger.store({
-  domain_id : 'dqwdqw312d122',
-  company_id : 'dqwd11231231',
-  datetime: 1442005200000,
-  usertype: 'user',
-  username: 'admin',
-  user_id: '55b7018a7957012304a49d09',
-  account: 'ddqwdqd',
-  account_id: 'dk09qd10d910d01d01d81jd910d091ddsdacs',
-  activity_type: 'add',
-  activity_target: 'user',
-  target_name: 'target_name',
-  target_id: 'target_id',
-  operation_status: 'failure',
-  target_object: {test : 'test'}
-});*/
 
 // Configure SSL connection
 server.connection({
@@ -119,6 +87,12 @@ var swaggerOptions = {
     contact: 'support@revsw.com'
   }
 };
+
+server.register(require('hapi-forward'), function (err) {
+  if (err) {
+    console.error('Failed to load a plugin:', err);
+  }
+});
 
 server.register(require('hapi-auth-basic'), function (err) {
   server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
