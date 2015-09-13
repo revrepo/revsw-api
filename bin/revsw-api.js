@@ -152,6 +152,10 @@ server.register([{
   }
 });
 
+server.auth.default({
+  strategies: [ 'simple', 'token' ]
+});
+
 server.route(Routes.routes);
 
 // Redirect all non-HTTPS requests to HTTPS
