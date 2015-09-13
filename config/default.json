@@ -20,5 +20,16 @@
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
   },
   "version_file": "./config/version.txt",
-  "log_dir": "./log/"
+  "log_dir": "./log/",
+
+  "password_reset_token_lifespan": 3600000,     // 1 hour
+  "password_reset_from_email" : "support@revapm.com",
+  "password_reset_email_subject": "RevAPM Customer Portal Password Reset",
+  "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
+  "password_reset_confirmation_email_subject": "Your RevAPM Customer Portal password has been changed",
+  "support_email" : "support@revapm.com",
+
+  "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
+  "jwt_token_lifetime_minutes": 1440   // 24 hours
+  
 }

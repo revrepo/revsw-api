@@ -27,7 +27,7 @@
     <script type="text/javascript">
         $(function () {
             window.swaggerUi = new SwaggerUi({
-                url: window.location.protocol + '//' + window.location.host + '{{hapiSwagger.endpoint}}',
+                url: window.location.protocol + '//' + window.location.host + '{{hapiSwagger.endpoint}}?tags=api',
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
                 onComplete: function(swaggerApi, swaggerUi){

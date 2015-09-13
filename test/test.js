@@ -742,6 +742,19 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should fail to delete the new user account using the same account for API access', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/users/' + testUserId)
+      .auth(testUser, 'password1')
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
 
   it('should read back the configuration of freshly created user ' + testUser, function(done) {
     request(testAPIUrl)
