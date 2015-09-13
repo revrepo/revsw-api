@@ -34,7 +34,6 @@ var server = new Hapi.Server();
 
 var jwtPrivateKey = config.get('jwt_private_key');
 
-
 // Configure SSL connection
 server.connection({
   host: config.get('service.host'),
@@ -88,6 +87,12 @@ var swaggerOptions = {
     contact: 'support@revsw.com'
   }
 };
+
+server.register(require('hapi-forward'), function (err) {
+  if (err) {
+    console.error('Failed to load a plugin:', err);
+  }
+});
 
 server.register(require('hapi-auth-basic'), function (err) {
   server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
