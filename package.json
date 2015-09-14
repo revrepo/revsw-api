@@ -40,6 +40,7 @@
     "marked": "0.3.x",
     "merge": "^1.2.0",
     "mongoose": "4.0.x",
+    "mongoose-auto-increment": "^4.0.0",
     "mongoose-merge-plugin": "0.0.5",
     "node-uuid": "^1.4.3",
     "nodemailer": "^1.4.0",
