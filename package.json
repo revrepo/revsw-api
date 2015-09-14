@@ -31,6 +31,7 @@
     "hapi-auth-basic": "~3.0.0",
     "hapi-auth-jwt": "^3.0.0",
     "hapi-authorization": "^2.1.3",
+    "hapi-forward": "^1.0.0",
     "hapi-swagger": "https://api.github.com/repos/glennjones/hapi-swagger/tarball/",
     "inbox": "^1.1.59",
     "joi": "6.1.x",
@@ -43,6 +44,7 @@
     "node-uuid": "^1.4.3",
     "nodemailer": "^1.4.0",
     "request": "^2.60.0",
+    "revsw-audit": "0.0.x",
     "should": "^7.0.2",
     "should-http": "0.0.4"
   },
