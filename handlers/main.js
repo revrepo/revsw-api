@@ -17,7 +17,7 @@
  */
 
 /*jslint node: true */
-"use strict";
+'use strict';
 
 var utils = require('../lib/utilities.js');
 var pack  = require('../package');

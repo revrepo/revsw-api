@@ -18,7 +18,7 @@
 
 /*jslint node: true */
 
-"use strict";
+'use strict';
 
 var mongoose        = require('mongoose');
 var boom            = require('boom');
