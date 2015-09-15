@@ -19,10 +19,9 @@
 /*jslint node: true */
 
 'use strict';
-//	data access layer 
+//	data access layer
 
 var utils = require('../lib/utilities.js');
-
 
 function Domain(mongoose, connection, options) {
   this.options = options;
@@ -31,29 +30,29 @@ function Domain(mongoose, connection, options) {
 
   this.DomainSchema = new this.Schema({
 
-    'BPGroup': { type: String },
-    'COGroupx': { type: String },
-    'bp_apache_custom_config': { type: String },
-    'bp_apache_fe_custom_config': { type: String },
-    'co_apache_custom_config': { type: String },
-    'co_cnames': { type: String },
-    'companyId': { type: String },
-    'config_command_options': { type: String },
-    'config_url': { type: String },
-    'cube_url': { type: String },
-    'id': { type: String },
-    'name': { type: String },
-    'nt_status': { type: Boolean },
-    'origin_domain': { type: String },
-    'origin_server': { type: String },
-    'rum_beacon_url': { type: String },
-    'stats_url': { type: String },
-    'status': { type: Boolean },
-    'sync_status': { type: String },
-    'tolerance': { type: String },
-    'webpagetest_url': { type: String },
-    'created_at': { type: Date, default: Date() },
-    'updated_at': { type: Date, default: Date() }
+    'BPGroup'                    : {type : String},
+    'COGroupx'                   : {type : String},
+    'bp_apache_custom_config'    : {type : String},
+    'bp_apache_fe_custom_config' : {type : String},
+    'co_apache_custom_config'    : {type : String},
+    'co_cnames'                  : {type : String},
+    'companyId'                  : {type : String},
+    'config_command_options'     : {type : String},
+    'config_url'                 : {type : String},
+    'cube_url'                   : {type : String},
+    'id'                         : {type : String},
+    'name'                       : {type : String},
+    'nt_status'                  : {type : Boolean},
+    'origin_domain'              : {type : String},
+    'origin_server'              : {type : String},
+    'rum_beacon_url'             : {type : String},
+    'stats_url'                  : {type : String},
+    'status'                     : {type : Boolean},
+    'sync_status'                : {type : String},
+    'tolerance'                  : {type : String},
+    'webpagetest_url'            : {type : String},
+    'created_at'                 : {type : Date, default : Date()},
+    'updated_at'                 : {type : Date, default : Date()}
   });
 
   this.model = connection.model('Domain', this.DomainSchema, 'Domain');
@@ -61,56 +60,56 @@ function Domain(mongoose, connection, options) {
 
 Domain.prototype = {
 
-  get: function(item, callback) {
+  get : function (item, callback) {
 
 //    console.log('Inside get. item = ', item);
 
-    this.model.findOne( item, function(err, doc) {
+    this.model.findOne(item, function (err, doc) {
 //      console.log('Inside get. Received err = ', err);
 //      console.log('Inside get. Received doc = ', doc);
-      if(doc) {   
+      if (doc) {
         doc = utils.clone(doc);
         doc.id = doc._id;
         delete doc.__v;
         delete doc._id;
-        if ( doc.sync_status === null ) {
+        if (doc.sync_status === null) {
           doc.sync_status = 'Unknown';
         }
       }
       callback(err, doc);
     });
-  }, 
+  },
 
-  list: function(request, callback) {
-    this.model.find( {}, function (err, domains) {
+  list : function (request, callback) {
+    this.model.find({}, function (err, domains) {
       if (err) {
         callback(err, null);
       }
 
-//      console.log('inside domains.list - domains = ', domains); 
+//      console.log('inside domains.list - domains = ', domains);
 
       if (domains) {
         domains = utils.clone(domains);
-        for (var i = 0; i < domains.length; i++ ) {
+        for (var i = 0; i < domains.length; i++) {
 
-          // ignore domains without companyId set or with companyId not belonging 
+          // ignore domains without companyId set or with companyId not belonging
           // to the user or domain name not managed by the user
-          if (!domains[i].companyId || request.auth.credentials.companyId.indexOf(domains[i].companyId) === -1 || 
+          if (!domains[i].companyId || request.auth.credentials.companyId.indexOf(domains[i].companyId) === -1 ||
             request.auth.credentials.domain.indexOf(domains[i].name) === -1) {
             domains.splice(i, 1);
             i--;
             continue;
           } else {
             domains[i].id = domains[i]._id;
-            delete domains[i]._id; 
-            delete domains[i].__v; 
-            if ( domains[i].sync_status === null ) {
+            delete domains[i]._id;
+            delete domains[i].__v;
+            if (domains[i].sync_status === null) {
               domains[i].sync_status = 'Unknown';
             }
           }
         }
       }
-//      console.log('inside domains.list, right before callback - domains = ', domains); 
+//      console.log('inside domains.list, right before callback - domains = ', domains);
       callback(err, domains);
     });
   }

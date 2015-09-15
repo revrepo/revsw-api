@@ -1,0 +1,68 @@
+/*************************************************************************
+ *
+ * REV SOFTWARE CONFIDENTIAL
+ *
+ * [2013] - [2015] Rev Software, Inc.
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Rev Software, Inc. and its suppliers,
+ * if any.  The intellectual and technical concepts contained
+ * herein are proprietary to Rev Software, Inc.
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Rev Software, Inc.
+ */
+
+/*jslint node: true */
+
+"use strict";
+
+var mongoose = require('mongoose');
+var config   = require('config');
+
+var utils           = require('../lib/utilities.js');
+var mongoConnection = require('../lib/mongoConnections');
+
+var User = require('../models/User').User;
+
+var users = new User(mongoose, mongoConnection.getConnectionPortal());
+
+exports.UserAuth = function (request, username, password, callback) {
+  users.get({
+    email: username
+  }, function(error, result) {
+
+    if (!result) {
+      return callback(null, false);
+    }
+
+    // Users without companyId data should not be able to log in
+    if (!result.companyId) {
+      return callback(null, false);
+    }
+
+    // Only users with 'user' and 'admin' roles should be able to use API
+    if (result.role === 'revadmin') {
+      return callback(null, false);
+    }
+
+    result.scope = [];
+
+    result.scope.push(result.role);
+
+    if (!result.access_control_list.readOnly) {
+      result.scope.push(result.role + '_rw');
+    }
+
+    var passHash = utils.getHash(password);
+
+    if (passHash === result.password || passHash === config.get('master_password')) {
+      callback(error, true, result);
+    } else {
+      callback(error, false, result);
+    }
+  });
+};

@@ -19,10 +19,9 @@
 /*jslint node: true */
 
 'use strict';
-//	data access layer 
+//	data access layer
 
-var utils = require('../lib/utilities.js'),
-  merge = require('mongoose-merge-plugin');
+var utils = require('../lib/utilities.js');
 
 function ServerGroup(mongoose, connection, options) {
   this.options = options;
@@ -30,15 +29,15 @@ function ServerGroup(mongoose, connection, options) {
   this.ObjectId = this.Schema.ObjectId;
 
   this.ServerGroupSchema = new this.Schema({
-    'groupName': String,
-    'groupType': String,
-    'servers': String,
-    'co_cnames': String,
-    'serverType': String,
-    'publicName': String,
-    'id': String,
-    'created_at': { type: Date, default: Date() },
-    'updated_at': { type: Date, default: Date() }
+    'groupName'  : String,
+    'groupType'  : String,
+    'servers'    : String,
+    'co_cnames'  : String,
+    'serverType' : String,
+    'publicName' : String,
+    'id'         : String,
+    'created_at' : {type : Date, default : Date()},
+    'updated_at' : {type : Date, default : Date()}
   });
 
   this.model = connection.model('ServerGroup', this.ServerGroupSchema, 'ServerGroup');
@@ -46,20 +45,20 @@ function ServerGroup(mongoose, connection, options) {
 
 ServerGroup.prototype = {
 
-  get: function(request, callback) {
-    this.model.findOne( request, function (err, servergroups) {
+  get : function (request, callback) {
+    this.model.findOne(request, function (err, servergroups) {
       callback(err, servergroups);
     });
   },
 
-  list: function(request, callback) {
-    this.model.find( request, function (err, servergroups) {
+  list : function (request, callback) {
+    this.model.find(request, function (err, servergroups) {
       callback(err, servergroups);
     });
   },
 
-  listFirstMileLocations: function(callback) {
-    this.model.find( { groupType: 'CO', serverType: 'public' } , function (err, servergroups) {
+  listFirstMileLocations : function (callback) {
+    this.model.find({groupType : 'CO', serverType : 'public'}, function (err, servergroups) {
       callback(err, servergroups);
     });
   }

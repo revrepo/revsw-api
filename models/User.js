@@ -19,11 +19,9 @@
 /*jslint node: true */
 
 'use strict';
-//	data access layer 
+//	data access layer
 
-var utils = require('../lib/utilities.js'),
-  crypto = require('crypto'),
-  merge = require('mongoose-merge-plugin');
+var utils = require('../lib/utilities.js');
 
 function User(mongoose, connection, options) {
   this.options = options;
@@ -31,27 +29,27 @@ function User(mongoose, connection, options) {
   this.ObjectId = this.Schema.ObjectId;
 
   this.UserSchema = new this.Schema({
-    'access_control_list': {
-      dashBoard: { type: Boolean, default: true },
-      reports: { type: Boolean, default: true },
-      configure:  { type: Boolean, default: true },
-      test:  { type: Boolean, default: true },
-      readOnly:  { type: Boolean, default: false },
+    'access_control_list'  : {
+      dashBoard : {type : Boolean, default : true},
+      reports   : {type : Boolean, default : true},
+      configure : {type : Boolean, default : true},
+      test      : {type : Boolean, default : true},
+      readOnly  : {type : Boolean, default : false},
     },
-    'companyId': String,
-    'domain': String,
-    'email': String,
-    'firstname': String,
-    'lastname': String,
-    'password': String,
-    'role':  { type: String, default: 'user' },
-    'status': { type: Boolean, default: true },
-    'theme': { type: String, default: 'light' },
-    'token': String,
-    'created_at': { type: Date, default: Date() },
-    'updated_at': { type: Date, default: Date() },
-    'resetPasswordToken': String,
-    'resetPasswordExpires': Number
+    'companyId'            : String,
+    'domain'               : String,
+    'email'                : String,
+    'firstname'            : String,
+    'lastname'             : String,
+    'password'             : String,
+    'role'                 : {type : String, default : 'user'},
+    'status'               : {type : Boolean, default : true},
+    'theme'                : {type : String, default : 'light'},
+    'token'                : String,
+    'created_at'           : {type : Date, default : Date()},
+    'updated_at'           : {type : Date, default : Date()},
+    'resetPasswordToken'   : String,
+    'resetPasswordExpires' : Number
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
@@ -60,7 +58,7 @@ function User(mongoose, connection, options) {
 User.prototype = {
 
   // adds a new item
-  add: function(item, callback) {
+  add : function (item, callback) {
 
     var hash = utils.getHash(item.password);
     item.password = hash;
@@ -73,7 +71,7 @@ User.prototype = {
       item.companyId = item.companyId.join(',');
     }
 
-    new this.model(item).save(function(err, item) {
+    new this.model(item).save(function (err, item) {
 //      console.log('Error = ', err);
       if (callback) {
         callback(err, item);
@@ -81,15 +79,14 @@ User.prototype = {
     });
   },
 
+  get : function (item, callback) {
 
-  get: function(item, callback) {
+    //   console.log('Inside get. item = ', item);
 
- //   console.log('Inside get. item = ', item);
-
-    this.model.findOne( item, function(err, doc) {
- //     console.log('Inside get. Received err = ', err);
- //     console.log('Inside get. Received doc = ', doc);
-      if(doc) {   
+    this.model.findOne(item, function (err, doc) {
+      //     console.log('Inside get. Received err = ', err);
+      //     console.log('Inside get. Received doc = ', doc);
+      if (doc) {
         doc = utils.clone(doc);
         doc.user_id = doc._id;
         delete doc.__v;
@@ -97,38 +94,41 @@ User.prototype = {
         delete doc.token;
         delete doc.status;
         delete doc.id;
-        if (doc.companyId) { doc.companyId = doc.companyId.split(','); }
-        if (doc.domain) { doc.domain = doc.domain.split(',');
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
         } else {
           doc.domain = [];
         }
-          
+
       }
       callback(err, doc);
     });
-  }, 
+  },
 
-  list: function(request, callback) {
+  list : function (request, callback) {
 
 //    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
 
-    this.model.find( function (err, users) {
+    this.model.find(function (err, users) {
       if (users) {
 
         users = utils.clone(users);
-        for (var i = 0; i < users.length; i++ ) {
+        for (var i = 0; i < users.length; i++) {
 
           // remove from the resulting array users without companyId property (most likely RevAdmin/system users)
-          if (!users[i].companyId) { 
+          if (!users[i].companyId) {
             users.splice(i, 1);
             i--;
-            continue; 
+            continue;
           }
 
-          if (request.auth.credentials.role !== 'reseller' && users[i].role === 'reseller') { 
+          if (request.auth.credentials.role !== 'reseller' && users[i].role === 'reseller') {
             users.splice(i, 1);
             i--;
-            continue; 
+            continue;
           }
 
           users[i].companyId = users[i].companyId.split(',');
@@ -136,8 +136,8 @@ User.prototype = {
           // skip users which do not belong to the company
           if (utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
             users[i].user_id = users[i]._id;
-            delete users[i]._id; 
-            delete users[i].__v; 
+            delete users[i]._id;
+            delete users[i].__v;
             if (users[i].domain && users[i].domain !== '') {
               users[i].domain = users[i].domain.split(',');
             } else {
@@ -149,15 +149,15 @@ User.prototype = {
           }
         }
       }
-  //    console.log('Inside list, users = ', users);
+      //    console.log('Inside list, users = ', users);
       callback(err, users);
     });
   },
 
-  update: function(item, callback) {
+  update : function (item, callback) {
     var context = this;
-    this.model.findOne( { _id: item.user_id }, function (err, doc) {
- //     console.log('Inside update: doc = ', doc);
+    this.model.findOne({_id : item.user_id}, function (err, doc) {
+      //     console.log('Inside update: doc = ', doc);
       if (doc) {
 
         if (utils.isArray(item.domain)) {
@@ -173,25 +173,27 @@ User.prototype = {
           item.password = hash;
         }
 
-        for (var attrname in item) { doc[attrname] = item[attrname]; }
+        for (var attrname in item) {
+          doc[attrname] = item[attrname];
+        }
         doc.updated_at = new Date();
 
- //       console.log('Inside update: updated doc = ', doc);
-        doc.save(function(err, item) {
+        //       console.log('Inside update: updated doc = ', doc);
+        doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
             delete item._id;
             delete item.__v;
           }
           callback(err, item);
-        });    
+        });
       } else {
         callback(err, doc);
       }
     });
   },
 
-  remove: function(item, callback) {
+  remove : function (item, callback) {
     var context = this;
     if (item) {
       this.get(item, function (err, data) {
@@ -204,11 +206,10 @@ User.prototype = {
         }
       });
     } else {
-      callback( utils.buildError('400','No user ID passed to remove function'), null );
+      callback(utils.buildError('400', 'No user ID passed to remove function'), null);
     }
   }
 
 };
-
 
 exports.User = User;
