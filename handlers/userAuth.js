@@ -30,7 +30,7 @@ var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-exports.UserAuth = function (request, username, password, callback) {
+function UserAuth (request, username, password, callback) {
   users.get({
     email: username
   }, function(error, result) {
@@ -66,3 +66,5 @@ exports.UserAuth = function (request, username, password, callback) {
     }
   });
 };
+
+module.exports = UserAuth;

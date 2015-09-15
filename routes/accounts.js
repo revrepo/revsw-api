@@ -22,7 +22,7 @@
 
 var Joi = require('joi');
 
-var account     = require('../handlers/accounts');
+var account = require('../handlers/accounts');
 
 var routeModels = require('../lib/routeModels');
 

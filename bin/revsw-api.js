@@ -28,7 +28,7 @@ var Hapi = require('hapi'),
   Pack = require('../package'),
   UserAuth = require('../handlers/UserAuth'),
   validateJWTToken = require('../handlers/validateJWTToken'),
-  User = require('../models/User').User;
+  User = require('../models/User');
 
 var server = new Hapi.Server();
 
@@ -110,7 +110,7 @@ server.register(require('hapi-forward'), function (err) {
 });
 
 server.register(require('hapi-auth-basic'), function (err) {
-  server.auth.strategy('simple', 'basic', { validateFunc: UserAuth.UserAuth });
+  server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
 });
 
 server.register(require('hapi-auth-jwt'), function (err) {
