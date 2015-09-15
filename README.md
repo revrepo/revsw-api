@@ -1,5 +1,5 @@
 # revsw-api
-New Rev API service
+Rev API service
 
-Hello for Konstantin!
+Please see https://revwiki.atlassian.net/wiki/display/OP/Rev+API+Service for details.
 
