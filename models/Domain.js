@@ -116,4 +116,4 @@ Domain.prototype = {
 
 };
 
-exports.Domain = Domain;
+module.exports = Domain;

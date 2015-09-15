@@ -143,4 +143,4 @@ Account.prototype = {
 
 };
 
-exports.Account = Account;
+module.exports = Account;

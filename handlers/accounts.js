@@ -26,8 +26,8 @@ var boom            = require('boom');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
 
-var Account         = require('../models/Account').Account;
-var User            = require('../models/User').User;
+var Account         = require('../models/Account');
+var User            = require('../models/User');
 
 var accounts        = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users           = new User(mongoose, mongoConnection.getConnectionPortal());

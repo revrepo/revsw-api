@@ -22,21 +22,19 @@
 
 var Joi = require('joi');
 
-var getCountriesList = require('../handlers/getCountriesList');
+var healthCheck = require('../handlers/healthCheck');
 
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
   {
     method: 'GET',
-    path: '/v1/countries/list',
+    path: '/healthcheck',
     config: {
-      auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
-      },
-      handler: getCountriesList.getCountriesList,
-      description: 'Get a list of country two-character codes',
-      tags: ['api'],
+      auth: false,
+      handler: healthCheck.healthCheck,
+      description: 'Run a quick system health check ',
+      tags: [],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

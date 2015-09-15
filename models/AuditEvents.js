@@ -84,4 +84,4 @@ AuditEvents.prototype = {
   }
 };
 
-exports.AuditEvents = AuditEvents;
+module.exports = AuditEvents;

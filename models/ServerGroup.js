@@ -65,4 +65,4 @@ ServerGroup.prototype = {
 
 };
 
-exports.ServerGroup = ServerGroup;
+module.exports = ServerGroup;

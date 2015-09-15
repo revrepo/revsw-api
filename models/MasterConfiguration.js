@@ -62,4 +62,4 @@ MasterConfiguration.prototype = {
 
 };
 
-exports.MasterConfiguration = MasterConfiguration;
+module.exports = MasterConfiguration;

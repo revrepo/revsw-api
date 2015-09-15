@@ -26,7 +26,7 @@ var config   = require('config');
 var utils           = require('../lib/utilities.js');
 var mongoConnection = require('../lib/mongoConnections');
 
-var User = require('../models/User').User;
+var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 

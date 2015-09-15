@@ -81,4 +81,4 @@ PurgeJob.prototype = {
 
 };
 
-exports.PurgeJob = PurgeJob;
+module.exports = PurgeJob;
