@@ -17,7 +17,7 @@
  */
 
 /*jslint node: true */
-"use strict";
+'use strict';
 
 var mongoose = require('mongoose');
 var fs       = require('fs');

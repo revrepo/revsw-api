@@ -17,7 +17,7 @@
  */
 
 /*jslint node: true */
-"use strict";
+'use strict';
 
 var boom           = require('boom');
 var config         = require('config');

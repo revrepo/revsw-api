@@ -26,7 +26,7 @@ var Hapi = require('hapi'),
   config = require('config'),
   AuditLogger = require('revsw-audit'),
   Pack = require('../package'),
-  UserAuth = require('../handlers/UserAuth'),
+  UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken'),
   User = require('../models/User');
 
@@ -189,5 +189,7 @@ server.register({
     routes: 'routes/*.js' // uses glob to include files
   }
 }, function (err) {
-  if (err) throw err;
+  if (err) {
+    throw err;
+  }
 });

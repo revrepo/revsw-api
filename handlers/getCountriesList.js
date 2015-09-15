@@ -18,7 +18,7 @@
 
 /*jslint node: true */
 
-"use strict";
+'use strict';
 
 var renderJSON = require('../lib/renderJSON');
 var utils      = require('../lib/utilities.js');
