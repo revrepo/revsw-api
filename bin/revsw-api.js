@@ -21,16 +21,30 @@
 'use strict';
 var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
-  Pack = require('../package'),
+  jwt = require('jsonwebtoken'),
   Fs = require('fs'),
   config = require('config'),
-  Routes = require('../lib/routes.js'),
-  UserAuth = require('../lib/handlers.js').UserAuth,
-  validateJWTToken = require('../lib/handlers.js').validateJWTToken,
-  jwt = require('jsonwebtoken'),
-  User = require('../lib/user.js').User;
+  AuditLogger = require('revsw-audit'),
+  Pack = require('../package'),
+  UserAuth = require('../handlers/UserAuth'),
+  validateJWTToken = require('../handlers/validateJWTToken'),
+  User = require('../models/User');
 
 var server = new Hapi.Server();
+
+
+AuditLogger.init(
+  {
+    mongodb : {
+      db         : 'mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0',
+      collection : 'audit_events'
+    },
+    file    : {
+      filename  : 'log/revsw-audit.log',
+      timestamp : true
+    }
+  }
+);
 
 var jwtPrivateKey = config.get('jwt_private_key');
 
@@ -88,6 +102,7 @@ var swaggerOptions = {
   }
 };
 
+
 server.register(require('hapi-forward'), function (err) {
   if (err) {
     console.error('Failed to load a plugin:', err);
@@ -104,8 +119,6 @@ server.register(require('hapi-auth-jwt'), function (err) {
     validateFunc: validateJWTToken
   });
 });
-
-
 
 
 // adds swagger self documentation plugin
@@ -130,7 +143,7 @@ server.auth.default({
   strategies: [ 'simple', 'token' ]
 });
 
-server.route(Routes.routes);
+//server.route(Routes.routes);
 
 // Redirect all non-HTTPS requests to HTTPS
 server.ext('onRequest', function (request, reply) {
@@ -170,3 +183,11 @@ server.register({
   }
 });
 
+server.register({
+  register: require('hapi-router'),
+  options: {
+    routes: 'routes/*.js' // uses glob to include files
+  }
+}, function (err) {
+  if (err) throw err;
+});
