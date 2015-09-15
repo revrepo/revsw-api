@@ -21,6 +21,7 @@
 
 var mongoose = require('mongoose');
 var boom = require('boom');
+var uuid = require('node-uuid');
 
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');

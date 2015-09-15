@@ -27,7 +27,7 @@ var Hapi = require('hapi'),
   AuditLogger = require('revsw-audit'),
   Pack = require('../package'),
   UserAuth = require('../handlers/userAuth'),
-  validateJWTToken = require('../handlers/validateJWTToken'),
+  validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
   User = require('../models/User');
 
 var server = new Hapi.Server();

@@ -65,6 +65,6 @@ function UserAuth (request, username, password, callback) {
       callback(error, false, result);
     }
   });
-};
+}
 
 module.exports = UserAuth;
