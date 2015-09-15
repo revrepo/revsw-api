@@ -75,6 +75,9 @@ mkdir -p $foldername/opt/$PackageName/docs
 
 cp -rf  $WORKSPACE/bin  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/lib  $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/handlers  $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/models  $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/routes  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/node_modules  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/config/*.json  $foldername/opt/$PackageName/config/
 cp -rf  $WORKSPACE/config/dev_ssl_certs  $foldername/opt/$PackageName/config/
