@@ -21,7 +21,8 @@
 'use strict';
 //	data access layer
 
-var utils = require('../lib/utilities.js');
+var utils = require('../lib/utilities.js'),
+  autoIncrement = require('mongoose-auto-increment');
 
 function PurgeJob(mongoose, connection, options) {
   this.options  = options;
@@ -56,6 +57,8 @@ function PurgeJob(mongoose, connection, options) {
     'retry_proxy_list'     : {type : String, default : ''},
   });
 
+  autoIncrement.initialize(connection);
+  this.PurgeJobSchema.plugin(autoIncrement.plugin, { model: 'purge_jobs', field: 'serial_id' });
   this.model = connection.model('purge_jobs', this.PurgeJobSchema, 'purge_jobs');
 }
 
