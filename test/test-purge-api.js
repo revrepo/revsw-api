@@ -221,7 +221,7 @@ describe('Rev Purge API', function() {
 
   });
 
-  it('should read the status of purge job and make sure it is "success"', function(done) {
+  it('should read the status of purge job and make sure it is "Success"', function(done) {
     request(testAPIUrl)
       .get('/v1/purge/' + purgeRequestID)
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -232,7 +232,7 @@ describe('Rev Purge API', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
-        response_json.message.should.be.equal('success');
+        response_json.message.should.be.equal('Success');
         done();
       });
   });
@@ -276,7 +276,7 @@ describe('Rev Purge API', function() {
 });
 
 
-describe('Rev Purge old API', function() {
+xdescribe('Rev Purge old API', function() {
 
   var adminToken = '';
   var userToken = '';

@@ -21,7 +21,9 @@
 
 var mongoose = require('mongoose');
 var boom = require('boom');
-var uuid = require('node-uuid');
+var uuid = require('node-uuid'),
+  config = require('config'),
+  cds_request = require('request');
 
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -93,6 +95,8 @@ exports.purgeObject = function(request, reply) {
   });
 };
 
+
+/*
 // Old version of purge API
 exports.purgeObject_v0 = function (request, reply) {
   var domain = request.payload.domainName;
@@ -157,33 +161,47 @@ exports.purgeObject_v0 = function (request, reply) {
   });
 };
 
+*/
+
 exports.getPurgeJobStatus = function(request, reply) {
 
   var request_id = request.params.request_id;
-
-  //  console.log('get request = ', request_id);
-
-  purgeJobs.get(request_id, function (error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to get purge job status'));
+  cds_request( { url: config.get('cds_url') + '/v1/purge/' + request_id,
+    headers: {
+      Authorization: 'Bearer ' + config.get('cds_api_token')
     }
-    //    console.log('retrieved purge job = ', result);
-    if (result) {
-      var statusResponse;
-      statusResponse = {
-        statusCode : 200,
-        message    : result.req_status
-      };
-      renderJSON(request, reply, error, statusResponse);
+  }, function (err, res, body) {
+    if (err) {
+      return reply(boom.badImplementation('Failed to get purge job details from the CDS'));
+    }
+    var response_json = JSON.parse(body);
+    if ( res.statusCode === 400 ) {
+      return reply(boom.badRequest(response_json.message));
     } else {
-      reply(boom.badRequest('Purge job ID not found'));
+      renderJSON(request, reply, err, response_json);
     }
   });
 };
 
+/*
+
 exports.getPurgeJobStatus_v0 = function (request, reply) {
 
   var request_id = request.payload.req_id;
+
+  var request_id = request.params.request_id;
+  cds_request( { url: config.get('cds_url') + '/v1/purge/' + request_id,
+    headers: {
+      Authorization: 'Bearer ' + config.get('cds_api_token')
+    }
+  }, function (err, res, body) {
+    if (err) {
+      return reply(boom.badImplementation('Failed to get purge job details from the CDS'));
+    }
+    var response_json = JSON.parse(body);
+    renderJSON(request, reply, err, response_json);
+  });
+
 
   purgeJobs.get(request_id, function (error, result) {
     if (error) {
@@ -212,4 +230,6 @@ exports.getPurgeJobStatus_v0 = function (request, reply) {
     }
   });
 };
+
+*/
 
