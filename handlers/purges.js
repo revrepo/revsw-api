@@ -19,19 +19,20 @@
 /*jslint node: true */
 'use strict';
 
-var mongoose = require('mongoose');
-var boom = require('boom');
-var uuid = require('node-uuid'),
-  config = require('config'),
-  cds_request = require('request');
+var mongoose    = require('mongoose');
+var boom        = require('boom');
+var uuid        = require('node-uuid');
+var AuditLogger = require('revsw-audit');
+var config      = require('config');
+var cds_request = require('request');
 
-var renderJSON = require('../lib/renderJSON');
+var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 
-var Domain = require('../models/Domain');
+var Domain   = require('../models/Domain');
 var PurgeJob = require('../models/PurgeJob');
 
-var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domains   = new Domain(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 
 //
@@ -90,6 +91,23 @@ exports.purgeObject = function(request, reply) {
         message    : 'The purge request has been successfully queued',
         request_id : result.req_id
       };
+
+      AuditLogger.store({
+        ip_adress        : request.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId,
+        domain_id        : request.auth.credentials.domain,
+        activity_type    : 'add',
+        activity_target  : 'purge',
+        target_id        : result.id,
+        target_name      : result.req_email,
+        target_object    : newPurgeJob,
+        operation_status : 'success'
+      });
+
       renderJSON(request, reply, error, purgeStatusResponse);
     });
   });
@@ -156,6 +174,23 @@ exports.purgeObject_v0 = function (request, reply) {
         message    : 'The purge request has been successfully queued',
         request_id : result.req_id
       };
+
+      AuditLogger.store({
+        ip_adress        : request.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId,
+        domain_id        : request.auth.credentials.domain,
+        activity_type    : 'add',
+        activity_target  : 'purge',
+        target_id        : result.id,
+        target_name      : result.req_email,
+        target_object    : newPurgeJob,
+        operation_status : 'success'
+      });
+
       reply(purgeStatusResponse).code(202);
     });
   });

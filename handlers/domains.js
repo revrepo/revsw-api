@@ -22,6 +22,7 @@
 var boom           = require('boom');
 var config         = require('config');
 var mongoose       = require('mongoose');
+var AuditLogger    = require('revsw-audit');
 var portal_request = require('supertest');
 
 var utils           = require('../lib/utilities.js');
@@ -261,6 +262,23 @@ exports.createDomain = function (request, reply) {
                     message    : 'Successfully created the domain',
                     object_id  : result.id
                   };
+
+                  AuditLogger.store({
+                    ip_adress        : request.info.remoteAddress,
+                    datetime         : Date.now(),
+                    user_id          : request.auth.credentials.user_id,
+                    user_name        : request.auth.credentials.email,
+                    user_type        : 'user',
+                    account_id       : request.auth.credentials.companyId,
+                    domain_id        : request.auth.credentials.domain,
+                    activity_type    : 'add',
+                    activity_target  : 'domain',
+                    target_id        : result.id,
+                    target_name      : result.name,
+                    target_object    : createDomainJson,
+                    operation_status : 'success'
+                  });
+
                   renderJSON(request, reply, error, statusResponse);
                 });
               } else {
@@ -347,6 +365,23 @@ exports.updateDomain = function (request, reply) {
                   statusCode : 200,
                   message    : 'Successfully updated the domain'
                 };
+
+                AuditLogger.store({
+                  ip_adress        : request.info.remoteAddress,
+                  datetime         : Date.now(),
+                  user_id          : request.auth.credentials.user_id,
+                  user_name        : request.auth.credentials.email,
+                  user_type        : 'user',
+                  account_id       : request.auth.credentials.companyId,
+                  domain_id        : request.auth.credentials.domain,
+                  activity_type    : 'modify',
+                  activity_target  : 'domain',
+                  target_id        : result.id,
+                  target_name      : result.name,
+                  target_object    : updateDomainJson,
+                  operation_status : 'success'
+                });
+
                 renderJSON(request, reply, error, statusResponse);
               } else {
                 return reply(boom.badImplementation('Failed to update the domain configuration'));
@@ -418,6 +453,23 @@ exports.updateDomainDetails = function (request, reply) {
                     statusCode : 200,
                     message    : 'Successfully updated the domain'
                   };
+
+                  AuditLogger.store({
+                    ip_adress        : request.info.remoteAddress,
+                    datetime         : Date.now(),
+                    user_id          : request.auth.credentials.user_id,
+                    user_name        : request.auth.credentials.email,
+                    user_type        : 'user',
+                    account_id       : request.auth.credentials.companyId,
+                    domain_id        : request.auth.credentials.domain,
+                    activity_type    : 'modify',
+                    activity_target  : 'domain',
+                    target_id        : res.id,
+                    target_name      : res.name,
+                    target_object    : updateDomainJson,
+                    operation_status : 'success'
+                  });
+
                   renderJSON(request, reply, error, statusResponse);
                 } else {
                   return reply(boom.badImplementation('Failed to update the domain configuration'));
@@ -480,8 +532,24 @@ exports.deleteDomain = function (request, reply) {
               statusCode : 200,
               message    : 'Successfully deleted the domain'
             };
-            renderJSON(request, reply, error, statusResponse);
 
+            AuditLogger.store({
+              ip_adress        : request.info.remoteAddress,
+              datetime         : Date.now(),
+              user_id          : request.auth.credentials.user_id,
+              user_name        : request.auth.credentials.email,
+              user_type        : 'user',
+              account_id       : request.auth.credentials.companyId,
+              domain_id        : request.auth.credentials.domain,
+              activity_type    : 'delete',
+              activity_target  : 'domain',
+              target_id        : res.id,
+              target_name      : res.name,
+              target_object    : deleteDomainJson,
+              operation_status : 'success'
+            });
+
+            renderJSON(request, reply, error, statusResponse);
           });
       });
   });
