@@ -102,13 +102,6 @@ var swaggerOptions = {
   }
 };
 
-
-server.register(require('hapi-forward'), function (err) {
-  if (err) {
-    console.error('Failed to load a plugin:', err);
-  }
-});
-
 server.register(require('hapi-auth-basic'), function (err) {
   server.auth.strategy('simple', 'basic', { validateFunc: UserAuth });
 });
@@ -180,6 +173,12 @@ server.register({
 }, function (err) {
   if (err) {
     console.error(err);
+  }
+});
+
+server.register(require('hapi-forward'), function (err) {
+  if (err) {
+    console.error('Failed to load a plugin:', err);
   }
 });
 
