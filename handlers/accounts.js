@@ -215,6 +215,8 @@ exports.deleteAccount = function(request, reply) {
       message: 'Successfully deleted the account'
     };
 
+/*
+
     AuditLogger.store({
       ip_adress        : request.info.remoteAddress,
       datetime         : Date.now(),
@@ -230,6 +232,7 @@ exports.deleteAccount = function(request, reply) {
       target_object    : result,
       operation_status : 'success'
     });
+*/
 
     // now let's remove the account ID from the user's companyId array
     var updatedUser = {
