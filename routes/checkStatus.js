@@ -27,6 +27,7 @@ var purges = require('../handlers/purges');
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
+/*
   {
     method: 'POST',
     path: '/checkStatus',
@@ -53,4 +54,5 @@ module.exports = [
       }
     }
   }
+*/
 ];
