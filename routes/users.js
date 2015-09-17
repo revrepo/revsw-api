@@ -140,6 +140,11 @@ module.exports = [
     method: 'GET',
     path: '/v1/users/myself',
     config: {
+      validate: {
+        options: {
+          stripUnknown: true
+        }
+      },
       auth: {
         scope: [ 'user', 'admin', 'reseller' ]
       },

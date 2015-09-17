@@ -32,6 +32,12 @@ var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+var privateUserProfileFields = [
+  'password',
+  'resetPasswordToken',
+  'resetPasswordExpires'
+  ];
+
 exports.getUsers = function getUsers(request, reply) {
   users.list(request, function(error, listOfUsers) {
     if (error || !listOfUsers) {
@@ -139,7 +145,12 @@ exports.getUser = function(request, reply) {
       }
 
       if (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId)) {
-        delete result.password;
+        
+        for (var i in privateUserProfileFields) {
+          if ( result[privateUserProfileFields[i]] ) {
+            delete result[privateUserProfileFields[i]];
+          }
+        }
         renderJSON(request, reply, error, result);
       } else {
         return reply(boom.badRequest('User not found'));
@@ -160,7 +171,11 @@ exports.getMyUser = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve user details'));
     }
     if (result) {
-      delete result.password;
+      for (var i in privateUserProfileFields) {
+        if ( result[privateUserProfileFields[i]] ) {
+          delete result[privateUserProfileFields[i]];
+        }
+      }
       renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('User not found'));
@@ -297,19 +312,9 @@ exports.deleteUser = function(request, reply) {
         return reply(boom.badRequest('User not found'));
       }
 
-      users.remove({
-        _id: user_id
-      }, function(error, result) {
-        if (!error) {
-          var statusResponse;
-          statusResponse = {
-            statusCode: 200,
-            message: 'Successfully deleted the user'
-          };
+      delete result.password;
 
-          delete result.password;
-
-          AuditLogger.store({
+      var auditRecord = {
             ip_adress        : request.info.remoteAddress,
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
@@ -323,7 +328,19 @@ exports.deleteUser = function(request, reply) {
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
-          });
+          };
+
+      users.remove({
+        _id: user_id
+      }, function(error, result) {
+        if (!error) {
+          var statusResponse;
+          statusResponse = {
+            statusCode: 200,
+            message: 'Successfully deleted the user'
+          };
+
+          AuditLogger.store(auditRecord);
 
           renderJSON(request, reply, error, statusResponse);
         } else {
