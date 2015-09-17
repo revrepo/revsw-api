@@ -195,6 +195,25 @@ exports.updateUser = function(request, reply) {
             statusCode: 200,
             message: 'Successfully updated the user'
           };
+
+          delete newUser.password;
+
+          AuditLogger.store({
+            ip_adress        : request.info.remoteAddress,
+            datetime         : Date.now(),
+            user_id          : request.auth.credentials.user_id,
+            user_name        : request.auth.credentials.email,
+            user_type        : 'user',
+            account_id       : request.auth.credentials.companyId,
+            domain_id        : request.auth.credentials.domain,
+            activity_type    : 'modify',
+            activity_target  : 'user',
+            target_id        : result.id,
+            target_name      : result.email,
+            target_object    : newUser,
+            operation_status : 'success'
+          });
+
           renderJSON(request, reply, error, statusResponse);
         } else {
           return reply(boom.badRequest('User not found'));
@@ -232,6 +251,25 @@ exports.updateUserPassword = function(request, reply) {
             statusCode: 200,
             message: 'Successfully updated the password'
           };
+
+          delete result.password;
+
+          AuditLogger.store({
+            ip_adress        : request.info.remoteAddress,
+            datetime         : Date.now(),
+            user_id          : request.auth.credentials.user_id,
+            user_name        : request.auth.credentials.email,
+            user_type        : 'user',
+            account_id       : request.auth.credentials.companyId,
+            domain_id        : request.auth.credentials.domain,
+            activity_type    : 'modify',
+            activity_target  : 'user',
+            target_id        : result.id,
+            target_name      : result.email,
+            target_object    : result,
+            operation_status : 'success'
+          });
+
           renderJSON(request, reply, error, statusResponse);
         } else {
           return reply(boom.badImplementation('Failed to update user details'));
@@ -268,6 +306,25 @@ exports.deleteUser = function(request, reply) {
             statusCode: 200,
             message: 'Successfully deleted the user'
           };
+
+          delete result.password;
+
+          AuditLogger.store({
+            ip_adress        : request.info.remoteAddress,
+            datetime         : Date.now(),
+            user_id          : request.auth.credentials.user_id,
+            user_name        : request.auth.credentials.email,
+            user_type        : 'user',
+            account_id       : request.auth.credentials.companyId,
+            domain_id        : request.auth.credentials.domain,
+            activity_type    : 'delete',
+            activity_target  : 'user',
+            target_id        : result.id,
+            target_name      : result.email,
+            target_object    : result,
+            operation_status : 'success'
+          });
+
           renderJSON(request, reply, error, statusResponse);
         } else {
           return reply(boom.badRequest('User not found'));

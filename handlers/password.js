@@ -20,12 +20,13 @@
 
 'use strict';
 
-var boom       = require('boom');
-var mongoose   = require('mongoose');
-var async      = require('async');
-var nodemailer = require('nodemailer');
-var config     = require('config');
-var crypto     = require('crypto');
+var boom        = require('boom');
+var mongoose    = require('mongoose');
+var async       = require('async');
+var nodemailer  = require('nodemailer');
+var config      = require('config');
+var crypto      = require('crypto');
+var AuditLogger = require('revsw-audit');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -67,6 +68,25 @@ exports.forgotPassword = function(request, reply) {
             if (error) {
               return reply(boom.badImplementation('Failed to retrieve user details'));
             }
+
+            delete result.password;
+
+            AuditLogger.store({
+              ip_adress        : request.info.remoteAddress,
+              datetime         : Date.now(),
+              user_id          : result.id,
+              user_name        : result.email,
+              user_type        : 'user',
+              account_id       : result.companyId,
+              domain_id        : result.domain,
+              activity_type    : 'modify',
+              activity_target  : 'user',
+              target_id        : result.id,
+              target_name      : result.email,
+              target_object    : result,
+              operation_status : 'success'
+            });
+
             done(error, token, user);
           });
         },
@@ -145,6 +165,25 @@ exports.resetPassword = function(request, reply) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user details with new password'));
           }
+
+          delete result.password;
+
+          AuditLogger.store({
+            ip_adress        : request.info.remoteAddress,
+            datetime         : Date.now(),
+            user_id          : result.id,
+            user_name        : result.email,
+            user_type        : 'user',
+            account_id       : result.companyId,
+            domain_id        : result.domain,
+            activity_type    : 'modify',
+            activity_target  : 'user',
+            target_id        : result.id,
+            target_name      : result.email,
+            target_object    : result,
+            operation_status : 'success'
+          });
+
           done(error, user);
         });
       });

@@ -23,7 +23,7 @@ var utils = require('../lib/utilities.js');
 var pack  = require('../package');
 
 exports.index = function (request, reply) {
-  utils.getMarkDownHTML(__dirname.replace('/lib', '') + '/docs/revsw-api.txt', function (err, data) {
+  utils.getMarkDownHTML(__dirname.replace('/handlers', '') + '/docs/revsw-api.txt', function (err, data) {
     reply.view('swagger.html', {
       title    : pack.name + ' &#151; Calculator',
       markdown : data
@@ -32,7 +32,7 @@ exports.index = function (request, reply) {
 };
 
 exports.reduced = function (request, reply) {
-  utils.getMarkDownHTML(__dirname.replace('/lib', '') + '/docs/revsw-api.txt', function (err, data) {
+  utils.getMarkDownHTML(__dirname.replace('/handlers', '') + '/docs/revsw-api.txt', function (err, data) {
     reply.view('reduced.html', {
       title    : pack.name + ' &#151; Calculator',
       markdown : data

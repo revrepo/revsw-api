@@ -42,14 +42,11 @@ exports.getDetailedAuditInfo = function (request, reply) {
   }
   requestBody['meta.user_id'] = request.auth.credentials.user_id;
 
-  start_time = request.query.from_timestamp || Date.now() - (124*3600*1000); // 1 day back
+  start_time = request.query.from_timestamp || Date.now() - (30*24*3600*1000); // 1 month back
   end_time   = request.query.to_timestamp || Date.now();
 
   if ( start_time >= end_time ) {
     return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-  }
-  if ( (end_time - start_time ) > 124*3600*1000 ) {
-    return reply(boom.badRequest('Requested report period exceeds 24 hours'));
   }
 
   requestBody['meta.datetime'] = {
@@ -73,14 +70,11 @@ exports.getSummaryAuditInfo = function (request, reply) {
   }
   requestBody['meta.user_id'] = request.auth.credentials.user_id;
 
-  start_time = request.query.from_timestamp || Date.now() - (124*3600*1000); // 1 day back
+  start_time = request.query.from_timestamp || Date.now() - (30*24*3600*1000); // 1 month back
   end_time   = request.query.to_timestamp || Date.now();
 
   if ( start_time >= end_time ) {
     return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-  }
-  if ( (end_time - start_time ) > 124*3600*1000 ) {
-    return reply(boom.badRequest('Requested report period exceeds 24 hours'));
   }
 
   requestBody['meta.datetime'] = {
