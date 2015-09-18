@@ -108,6 +108,31 @@ User.prototype = {
     });
   },
 
+  getById : function (id, callback) {
+
+    this.model.findById(id, function (err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.user_id = doc._id;
+        delete doc.__v;
+        delete doc._id;
+        delete doc.token;
+        delete doc.status;
+        delete doc.id;
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
+        } else {
+          doc.domain = [];
+        }
+
+      }
+      callback(err, doc);
+    });
+  },
+
   list : function (request, callback) {
 
 //    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);

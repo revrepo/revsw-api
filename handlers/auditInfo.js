@@ -20,42 +20,110 @@
 
 'use strict';
 
-var mongoose        = require('mongoose');
-var boom            = require('boom');
+var mongoose = require('mongoose');
+var boom     = require('boom');
+var async    = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
+var utils           = require('../lib/utilities');
 
 var AuditEvents = require('../models/AuditEvents');
+var Users       = require('../models/User');
 
 var auditevents = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
+var users       = new Users(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getDetailedAuditInfo = function (request, reply) {
+
   var requestBody = {};
   var start_time;
   var end_time;
 
-  for (var key in request.query) {
-    if(key !== 'to_timestamp' && key !== 'from_timestamp') {
-      requestBody['meta.'+key] = request.query[key];
+  var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
+
+  async.waterfall([
+
+    function (cb) {
+      users.getById(user_id, function (err, result) {
+        if (err || !result) {
+          return reply(boom.notFound('User not found'));
+        }
+        cb(null, result);
+      });
+    },
+
+    function (user) {
+
+      switch (user.role) {
+
+        case 'user' :
+          if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
+            return reply(boom.notFound('User not found'));
+          }
+          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          requestBody['meta.user_id']    = user_id;
+          requestBody['meta.account_id'] = user.companyId;
+
+          break;
+
+        case 'admin' :
+          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          requestBody['meta.user_id']    = user_id;
+          requestBody['meta.account_id'] = user.companyId;
+
+          break;
+
+        case 'reseller' :
+          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          if (request.query.user_id) {
+            requestBody['meta.user_id']    = user_id;
+          }
+          requestBody['meta.account_id'] = user.companyId;
+
+          break;
+      }
+
+      delete request.query.user_id;
+
+      for (var key in request.query) {
+        if (key !== 'to_timestamp' && key !== 'from_timestamp') {
+          requestBody['meta.' + key] = request.query[key];
+        }
+      }
+
+      start_time = request.query.from_timestamp || Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
+      end_time = request.query.to_timestamp || Date.now();
+
+      if (start_time >= end_time) {
+        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
+      }
+
+      requestBody['meta.datetime'] = {
+        '$gte' : start_time,
+        '$lte' : end_time
+      };
+
+      auditevents.detailed(requestBody, function (error, result) {
+        renderJSON(request, reply, error, result);
+      });
     }
-  }
-  requestBody['meta.user_id'] = request.auth.credentials.user_id;
-
-  start_time = request.query.from_timestamp || Date.now() - (30*24*3600*1000); // 1 month back
-  end_time   = request.query.to_timestamp || Date.now();
-
-  if ( start_time >= end_time ) {
-    return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-  }
-
-  requestBody['meta.datetime'] = {
-    '$gte': start_time,
-    '$lte': end_time
-  };
-
-  auditevents.detailed(requestBody, function (error, result) {
-    renderJSON(request, reply, error, result);
+  ], function (err) {
+    if (err) {
+      return reply(boom.badImplementation('Failed to execute password reset procedure'));
+    }
   });
 };
 
@@ -63,27 +131,89 @@ exports.getSummaryAuditInfo = function (request, reply) {
   var requestBody = {};
   var start_time;
   var end_time;
-  for (var key in request.query) {
-    if(key !== 'to_timestamp' && key !== 'from_timestamp') {
-      requestBody['meta.'+key] = request.query[key];
+
+  var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
+
+  async.waterfall([
+
+    function (cb) {
+      users.getById(user_id, function (err, result) {
+        if (err || !result) {
+          return reply(boom.notFound('User not found'));
+        }
+        cb(null, result);
+      });
+    },
+
+    function (user) {
+
+      switch (user.role) {
+
+        case 'user' :
+          if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
+            return reply(boom.notFound('User not found'));
+          }
+          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          requestBody['meta.user_id'] = user_id;
+          requestBody['meta.account_id'] = user.companyId;
+          break;
+
+        case 'admin' :
+          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          requestBody['meta.user_id'] = user_id;
+          requestBody['meta.account_id'] = user.companyId;
+          break;
+        case 'reseller' :
+
+          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
+            return reply(boom.notFound('Company not found'));
+          }
+          if (request.query.user_id) {
+            requestBody['meta.user_id'] = user_id;
+          }
+          requestBody['meta.account_id'] = user.companyId;
+          break;
+      }
+
+      delete request.query.user_id;
+
+      for (var key in request.query) {
+        if (key !== 'to_timestamp' && key !== 'from_timestamp') {
+          requestBody['meta.' + key] = request.query[key];
+        }
+      }
+      requestBody['meta.user_id'] = request.auth.credentials.user_id;
+
+      start_time = request.query.from_timestamp || Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
+      end_time = request.query.to_timestamp || Date.now();
+
+      if (start_time >= end_time) {
+        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
+      }
+
+      requestBody['meta.datetime'] = {
+        '$gte' : start_time,
+        '$lte' : end_time
+      };
+
+      auditevents.summary(requestBody, function (error, result) {
+        renderJSON(request, reply, error, result);
+      });
     }
-  }
-  requestBody['meta.user_id'] = request.auth.credentials.user_id;
-
-  start_time = request.query.from_timestamp || Date.now() - (30*24*3600*1000); // 1 month back
-  end_time   = request.query.to_timestamp || Date.now();
-
-  if ( start_time >= end_time ) {
-    return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-  }
-
-  requestBody['meta.datetime'] = {
-    '$gte': start_time,
-    '$lte': end_time
-  };
-
-  auditevents.summary(requestBody, function (error, result) {
-    renderJSON(request, reply, error, result);
+    ], function (err) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to execute password reset procedure'));
+      }
   });
 };
 
