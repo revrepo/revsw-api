@@ -12,7 +12,7 @@
   "portal_url": "https://testsjc20-portal01.revsw.net",
   // by default use QA instance of ES service
   "elasticsearch_url": "testsjc20-es01.revsw.net:9200",
-  "cds_url": "http://testsjc20-cds01.revsw.net:9000",
+  "cds_url": "https://testsjc20-cds01.revsw.net:9000",
   "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
   "default_cname_domain": "revdn.net",
   "portal_mongo": {
