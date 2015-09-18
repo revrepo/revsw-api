@@ -162,7 +162,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
 
         case 'admin' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.notFound('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
             return reply(boom.notFound('Company not found'));
@@ -170,8 +170,8 @@ exports.getSummaryAuditInfo = function (request, reply) {
           requestBody['meta.user_id'] = user_id;
           requestBody['meta.account_id'] = user.companyId;
           break;
-        case 'reseller' :
 
+        case 'reseller' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
             return reply(boom.notFound('Company not found'));
           }
