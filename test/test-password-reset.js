@@ -125,7 +125,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
                 }
               }
               // forgotlink.should.be.not.be.empty();
-              resetToken = forgotlink.split('/')[4];
+              resetToken = forgotlink.split('/')[7];
               // resetToken.should.be.a.String();
               done();
             }

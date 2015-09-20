@@ -53,7 +53,6 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         'new_ttl': 0,
         'override_edge': false
       },
-      'cookies_cache_bypass': [],
       'edge_caching': {
         'override_no_cc': true,
         'new_ttl': 1,
@@ -1322,7 +1321,6 @@ describe('Rev API Admin User', function() {
         'new_ttl': 0,
         'override_edge': false
       },
-      'cookies_cache_bypass': [],
       'edge_caching': {
         'override_no_cc': false,
         'new_ttl': 0,

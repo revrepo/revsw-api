@@ -36,11 +36,11 @@ var server = new Hapi.Server();
 AuditLogger.init(
   {
     mongodb : {
-      db         : 'mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0',
+      db         : config.get('portal_mongo.connect_string'),
       collection : 'audit_events'
     },
     file    : {
-      filename  : 'log/revsw-audit.log',
+      filename  : config.get('log_dir') + config.get('audit_log'),
       timestamp : true
     }
   }
