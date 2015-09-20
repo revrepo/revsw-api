@@ -30,8 +30,8 @@ function AuditEvents(mongoose, connection, options) {
       domain_id        : {type : String},
       company_id       : {type : String},
       datetime         : {type : Number},
-      usertype         : {type : String},
-      username         : {type : String},
+      user_type        : {type : String},
+      user_name        : {type : String},
       user_id          : {type : String},
       account          : {type : String},
       account_id       : {type : String},
@@ -50,9 +50,24 @@ function AuditEvents(mongoose, connection, options) {
 AuditEvents.prototype = {
   detailed : function (request, callback) {
     this.model.find(request, function (err, auditevents) {
-      var data = [];
+      var data      = [];
+      var innerData = {};
       for (var key in auditevents) {
-        data.push(auditevents[key].meta);
+        innerData.user_id = auditevents[key].meta.user_id;
+        innerData.user_name = auditevents[key].meta.user_name;
+        innerData.user_type =  auditevents[key].meta.user_type;
+        innerData.domain_id = auditevents[key].meta.domain_id;
+        innerData.company_id = auditevents[key].meta.company_id;
+        innerData.datetime = auditevents[key].meta.datetime;
+        innerData.account = auditevents[key].meta.account;
+        innerData.account_id = auditevents[key].meta.account_id;
+        innerData.activity_type = auditevents[key].meta.activity_type;
+        innerData.activity_target = auditevents[key].meta.activity_target;
+        innerData.target_name = auditevents[key].meta.target_name;
+        innerData.target_id = auditevents[key].meta.target_id;
+        innerData.operation_status = auditevents[key].meta.operation_status;
+        innerData.target_object = auditevents[key].meta.target_object;
+        data.push(innerData);
       }
       callback(err, data);
     });
