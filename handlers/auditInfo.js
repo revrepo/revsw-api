@@ -157,8 +157,8 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
             return reply(boom.notFound('Company not found'));
           }
-          requestBody['meta.user_id'] = user_id;
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.user_id']    = user_id;
+          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'admin' :
@@ -168,8 +168,8 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
             return reply(boom.notFound('Company not found'));
           }
-          requestBody['meta.user_id'] = user_id;
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.user_id']    = user_id;
+          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'reseller' :
@@ -182,7 +182,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.account_id'] = request.query.company_id;
           break;
       }
 
