@@ -35,12 +35,12 @@ var auditevents = new AuditEvents(mongoose, mongoConnection.getConnectionPortal(
 var users       = new Users(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getDetailedAuditInfo = function (request, reply) {
-
   var requestBody = {};
   var start_time;
   var end_time;
 
   var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
+
 
   async.waterfall([
 
@@ -55,7 +55,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
 
     function (user) {
 
-      switch (user.role) {
+      switch (request.auth.credentials.role) {
 
         case 'user' :
           if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
@@ -65,7 +65,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
             return reply(boom.notFound('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.account_id'] = request.query.company_id;
 
           break;
 
@@ -77,7 +77,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
             return reply(boom.notFound('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.account_id'] = request.query.company_id;
 
           break;
 
@@ -89,14 +89,15 @@ exports.getDetailedAuditInfo = function (request, reply) {
             return reply(boom.notFound('Company not found'));
           }
           if (request.query.user_id) {
-            requestBody['meta.user_id']    = user_id;
+            requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.account_id'] = request.query.company_id;
 
           break;
       }
 
       delete request.query.user_id;
+      delete request.query.company_id;
 
       for (var key in request.query) {
         if (key !== 'to_timestamp' && key !== 'from_timestamp') {
@@ -105,7 +106,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
       }
 
       start_time = request.query.from_timestamp || Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
-      end_time = request.query.to_timestamp || Date.now();
+      end_time   = request.query.to_timestamp || Date.now();
 
       if (start_time >= end_time) {
         return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
@@ -147,7 +148,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
 
     function (user) {
 
-      switch (user.role) {
+      switch (request.auth.credentials.role) {
 
         case 'user' :
           if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
@@ -156,8 +157,8 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
             return reply(boom.notFound('Company not found'));
           }
-          requestBody['meta.user_id'] = user_id;
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.user_id']    = user_id;
+          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'admin' :
@@ -167,8 +168,8 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
             return reply(boom.notFound('Company not found'));
           }
-          requestBody['meta.user_id'] = user_id;
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.user_id']    = user_id;
+          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'reseller' :
@@ -181,11 +182,12 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = user.companyId;
+          requestBody['meta.account_id'] = request.query.company_id;
           break;
       }
 
       delete request.query.user_id;
+      delete request.query.company_id;
 
       for (var key in request.query) {
         if (key !== 'to_timestamp' && key !== 'from_timestamp') {
