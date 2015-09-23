@@ -27,14 +27,14 @@ function AuditEvents(mongoose, connection, options) {
 
   this.AuditEventsSchema = new this.Schema({
     meta : {
-      domain_id        : {type : String},
+      domain_id        : {type : Array},
       company_id       : {type : String},
       datetime         : {type : Number},
       user_type        : {type : String},
       user_name        : {type : String},
       user_id          : {type : String},
       account          : {type : String},
-      account_id       : {type : String},
+      account_id       : {type : Array},
       activity_type    : {type : String},
       activity_target  : {type : String},
       target_name      : {type : String},

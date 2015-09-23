@@ -20,33 +20,34 @@
 
 'use strict';
 
-var mongoose    = require('mongoose');
-var boom        = require('boom');
+var mongoose = require('mongoose');
+var boom = require('boom');
 var AuditLogger = require('revsw-audit');
+var async = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');
-var renderJSON      = require('../lib/renderJSON');
+var renderJSON = require('../lib/renderJSON');
 
 var Account = require('../models/Account');
-var User    = require('../models/User');
+var User = require('../models/User');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
-var users    = new User(mongoose, mongoConnection.getConnectionPortal());
+var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getAccounts = function getAccounts(request, reply) {
-  accounts.list(request, function(error, listOfAccounts) {
+  accounts.list(request, function (error, listOfAccounts) {
     renderJSON(request, reply, error, listOfAccounts);
   });
 };
 
-exports.createAccount = function(request, reply) {
+exports.createAccount = function (request, reply) {
 
   var newAccount = request.payload;
   newAccount.createdBy = request.auth.credentials.email;
 
   accounts.get({
-    companyName: newAccount.companyName
-  }, function(error, result) {
+    companyName : newAccount.companyName
+  }, function (error, result) {
 
     if (error) {
       return reply(boom.badImplementation('Failed to verify the new account name'));
@@ -56,7 +57,7 @@ exports.createAccount = function(request, reply) {
       return reply(boom.badRequest('The company name is already registered in the system'));
     }
 
-    accounts.add(newAccount, function(error, result) {
+    accounts.add(newAccount, function (error, result) {
 
       if (error || !result) {
         return reply(boom.badImplementation('Failed to add new account'));
@@ -65,9 +66,9 @@ exports.createAccount = function(request, reply) {
       var statusResponse;
       if (result) {
         statusResponse = {
-          statusCode: 200,
-          message: 'Successfully created new account',
-          object_id: result._id.toString()
+          statusCode : 200,
+          message    : 'Successfully created new account',
+          object_id  : result._id.toString()
         };
 
         AuditLogger.store({
@@ -87,12 +88,12 @@ exports.createAccount = function(request, reply) {
         });
 
         var updatedUser = {
-          user_id: request.auth.credentials.user_id,
-          companyId: request.auth.credentials.companyId
+          user_id   : request.auth.credentials.user_id,
+          companyId : request.auth.credentials.companyId
         };
         updatedUser.companyId.push(result._id.toString());
 
-        users.update(updatedUser, function(error, result) {
+        users.update(updatedUser, function (error, result) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user details with new account ID'));
           } else {
@@ -123,7 +124,7 @@ exports.createAccount = function(request, reply) {
   });
 };
 
-exports.getAccount = function(request, reply) {
+exports.getAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
@@ -132,8 +133,8 @@ exports.getAccount = function(request, reply) {
   }
 
   accounts.get({
-    _id: account_id
-  }, function(error, result) {
+    _id : account_id
+  }, function (error, result) {
     if (result) {
       renderJSON(request, reply, error, result);
     } else {
@@ -142,7 +143,7 @@ exports.getAccount = function(request, reply) {
   });
 };
 
-exports.updateAccount = function(request, reply) {
+exports.updateAccount = function (request, reply) {
 
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
@@ -153,8 +154,8 @@ exports.updateAccount = function(request, reply) {
 
   // check that the company name is not used by another customer
   accounts.get({
-    companyName: updatedAccount.companyName, _id: { $ne: request.params.account_id }
-  }, function(error, result) {
+    companyName : updatedAccount.companyName, _id : {$ne : request.params.account_id}
+  }, function (error, result) {
 
     if (error) {
       return reply(boom.badImplementation('Failed to verify the new account name'));
@@ -164,14 +165,14 @@ exports.updateAccount = function(request, reply) {
       return reply(boom.badRequest('The company name is already registered in the system'));
     }
 
-    accounts.update(updatedAccount, function(error, result) {
+    accounts.update(updatedAccount, function (error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update the account'));
       }
 
       var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully updated the account',
+        statusCode : 200,
+        message    : 'Successfully updated the account',
       };
 
       AuditLogger.store({
@@ -195,59 +196,36 @@ exports.updateAccount = function(request, reply) {
   });
 };
 
-exports.deleteAccount = function(request, reply) {
+exports.deleteAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
   if (request.auth.credentials.companyId.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
-
-  accounts.remove({
-    _id: account_id
-  }, function(error, result) {
-    if (error) {
-      return reply(boom.badRequest('Account not found'));
-    }
-    var statusResponse;
-    statusResponse = {
-      statusCode: 200,
-      message: 'Successfully deleted the account'
-    };
-
-/*
-
-    AuditLogger.store({
-      ip_adress        : request.info.remoteAddress,
-      datetime         : Date.now(),
-      user_id          : request.auth.credentials.user_id,
-      user_name        : request.auth.credentials.email,
-      user_type        : 'user',
-      account_id       : request.auth.credentials.companyId,
-      domain_id        : request.auth.credentials.domain,
-      activity_type    : 'delete',
-      activity_target  : 'account',
-      target_id        : result.id,
-      target_name      : result.companyName,
-      target_object    : result,
-      operation_status : 'success'
-    });
-*/
-
-    // now let's remove the account ID from the user's companyId array
-    var updatedUser = {
-      user_id: request.auth.credentials.user_id,
-      companyId: request.auth.credentials.companyId
-    };
-
-    updatedUser.companyId.splice(updatedUser.companyId.indexOf(account_id), 1);
-
-    users.update(updatedUser, function(error, result) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to update user details with removed account ID'));
-      } else {
-
-        delete updatedUser.password;
+  async.waterfall([
+    function (cb) {
+      accounts.get({
+        _id : account_id
+      }, function (error, account) {
+        if (error || !account) {
+          return reply(boom.badRequest('Account not found'));
+        }
+        cb(error, account);
+      });
+    },
+    function (account) {
+      accounts.remove({
+        _id : account_id
+      }, function (error) {
+        if (error) {
+          return reply(boom.badRequest('Account not found'));
+        }
+        var statusResponse;
+        statusResponse = {
+          statusCode : 200,
+          message    : 'Successfully deleted the account'
+        };
 
         AuditLogger.store({
           ip_adress        : request.info.remoteAddress,
@@ -257,16 +235,52 @@ exports.deleteAccount = function(request, reply) {
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
           domain_id        : request.auth.credentials.domain,
-          activity_type    : 'modify',
-          activity_target  : 'user',
-          target_id        : result.id,
-          target_name      : result.email,
-          target_object    : updatedUser,
+          activity_type    : 'delete',
+          activity_target  : 'account',
+          target_id        : account.id,
+          target_name      : account.companyName,
+          target_object    : account,
           operation_status : 'success'
         });
 
-        renderJSON(request, reply, error, statusResponse);
-      }
-    });
+        // now let's remove the account ID from the user's companyId array
+        var updatedUser = {
+          user_id   : request.auth.credentials.user_id,
+          companyId : request.auth.credentials.companyId
+        };
+
+        updatedUser.companyId.splice(updatedUser.companyId.indexOf(account_id), 1);
+
+        users.update(updatedUser, function (error, result) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to update user details with removed account ID'));
+          } else {
+
+            delete updatedUser.password;
+
+            AuditLogger.store({
+              ip_adress        : request.info.remoteAddress,
+              datetime         : Date.now(),
+              user_id          : request.auth.credentials.user_id,
+              user_name        : request.auth.credentials.email,
+              user_type        : 'user',
+              account_id       : request.auth.credentials.companyId,
+              domain_id        : request.auth.credentials.domain,
+              activity_type    : 'modify',
+              activity_target  : 'user',
+              target_id        : result.id,
+              target_name      : result.email,
+              target_object    : updatedUser,
+              operation_status : 'success'
+            });
+            renderJSON(request, reply, error, statusResponse);
+          }
+        });
+      });
+    }
+  ], function (err) {
+    if (err) {
+      return reply(boom.badImplementation('Failed to delete account'));
+    }
   });
 };
