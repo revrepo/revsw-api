@@ -43,7 +43,7 @@ describe('Rev API /v1/activity call', function() {
   var userNotFound    = 'User not found';
   var companyNotFound = 'Company not found';
 
-  it('should return 401 fail', function(done) {
+  it('Should return 401 fail', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(wrongUser, wrongUserPassword)
@@ -56,13 +56,13 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return error 404 (User not found)', function(done) {
+  it('Should return error 400 (User not found)', function(done) {
     var getParams  = '?user_id='+wrongUserId;
 
     request(testAPIUrl)
       .get('/v1/activity'+getParams)
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .expect(404)
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -102,13 +102,13 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return error 404 (Other exist user_id with user permissions - User not found)', function(done) {
-    var getParams  = '?user_id='+otherId;
+  it('Should return error 400 (Other exist user_id with user permissions - User not found)', function(done) {
 
     request(testAPIUrl)
-      .get('/v1/activity'+getParams)
+      .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .expect(404)
+      .query({ user_id : otherId })
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -119,11 +119,11 @@ describe('Rev API /v1/activity call', function() {
   });
 
   it('Should return user detailed activity log (Other exist user_id with admin/resseler permissions)', function(done) {
-    var getParams  = '?user_id='+otherId;
 
     request(testAPIUrl)
-      .get('/v1/activity'+getParams)
+      .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .query({ user_id : otherId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -150,11 +150,11 @@ describe('Rev API /v1/activity call', function() {
   });
 
   it('Should return user detailed activity log (with user_id)', function(done) {
-    var getParams = '?user_id='+userId;
 
     request(testAPIUrl)
-      .get('/v1/activity'+getParams)
+      .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .query({ user_id : userId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -181,11 +181,11 @@ describe('Rev API /v1/activity call', function() {
   });
 
   it('Should return user detailed activity log (with company_id)', function(done) {
-    var getParams = '?company_id='+companyId;
 
     request(testAPIUrl)
-      .get('/v1/activity'+getParams)
+      .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .query({ company_id : companyId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -211,14 +211,13 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return error 404 (With user_id and wrong company_id - Company not found)', function(done) {
-    var badCompanyId = '5588869fbde7a0d00338ce6f';
-    var getParams    = '?user_id='+userId+'&company_id='+badCompanyId;
+  it('Should return error 400 (With user_id and wrong company_id - Company not found)', function(done) {
 
     request(testAPIUrl)
-      .get('/v1/activity'+getParams)
+      .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .expect(404)
+      .expect(400)
+      .query({ user_id : userId, company_id : '5588869fbde7a0d00338ce6f' })
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -229,12 +228,12 @@ describe('Rev API /v1/activity call', function() {
   });
 
   it('Should return user detailed activity log (with user_id and company_id)', function(done) {
-    var getParams = '?user_id='+userId+'&company_id='+companyId;
 
     request(testAPIUrl)
-      .get('/v1/activity'+getParams)
+      .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .expect(200)
+      .query({ user_id : userId, company_id : companyId })
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -271,7 +270,7 @@ describe('Rev API /v1/activity/summary call', function() {
   var userNotFound    = 'User not found';
   var companyNotFound = 'Company not found';
 
-  it('should return 401 fail', function(done) {
+  it('Should return 401 fail', function(done) {
     request(testAPIUrl)
       .get('/v1/activity/summary')
       .auth(wrongUser, wrongUserPassword)
@@ -284,13 +283,13 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return error 404 (User not found)', function(done) {
-    var getParams  = '?user_id='+wrongUserId;
+  it('Should return error 400 (User not found)', function(done) {
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .expect(404)
+      .query({ user_id : wrongUserId })
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -320,13 +319,13 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return error 404 (Other exist user_id with user permissions - User not found)', function(done) {
-    var getParams  = '?user_id='+otherId;
+  it('Should return error 400 (Other exist user_id with user permissions - User not found)', function(done) {
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .expect(404)
+      .query({ user_id : otherId })
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -337,11 +336,11 @@ describe('Rev API /v1/activity/summary call', function() {
   });
 
   it('Should return user summary activity log (Other exist user_id with admin/resseler permissions)', function(done) {
-    var getParams  = '?user_id='+otherId;
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .query({ user_id : otherId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -358,11 +357,11 @@ describe('Rev API /v1/activity/summary call', function() {
   });
 
   it('Should return user activity log (with user_id)', function(done) {
-    var getParams = '?user_id='+userId;
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .query({ user_id : userId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -378,11 +377,11 @@ describe('Rev API /v1/activity/summary call', function() {
   });
 
   it('Should return user summary activity log (with company_id)', function(done) {
-    var getParams = '?company_id='+companyId;
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .query({ company_id : companyId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -398,14 +397,13 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return error 404 (With user_id and wrong company_id - Company not found)', function(done) {
-    var badCompanyId = '5588869fbde7a0d00338ce6f';
-    var getParams    = '?user_id='+userId+'&company_id='+badCompanyId;
+  it('Should return error 400 (With user_id and wrong company_id - Company not found)', function(done) {
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .expect(404)
+      .query({ user_id : userId, company_id : '5588869fbde7a0d00338ce6f' })
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -416,11 +414,11 @@ describe('Rev API /v1/activity/summary call', function() {
   });
 
   it('Should return user summary activity log (with user_id and company_id)', function(done) {
-    var getParams = '?user_id='+userId+'&company_id='+companyId;
 
     request(testAPIUrl)
-      .get('/v1/activity/summary'+getParams)
+      .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .query({ user_id : userId, company_id : companyId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
