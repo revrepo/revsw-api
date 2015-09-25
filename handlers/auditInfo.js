@@ -41,7 +41,6 @@ exports.getDetailedAuditInfo = function (request, reply) {
 
   var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
 
-
   async.waterfall([
 
     function (cb) {
@@ -65,7 +64,6 @@ exports.getDetailedAuditInfo = function (request, reply) {
             return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
           break;
 
@@ -77,7 +75,6 @@ exports.getDetailedAuditInfo = function (request, reply) {
             return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
           break;
 
@@ -91,10 +88,11 @@ exports.getDetailedAuditInfo = function (request, reply) {
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
           break;
       }
+
+      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
       delete request.query.user_id;
       delete request.query.company_id;
@@ -158,7 +156,6 @@ exports.getSummaryAuditInfo = function (request, reply) {
             return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'admin' :
@@ -169,7 +166,6 @@ exports.getSummaryAuditInfo = function (request, reply) {
             return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'reseller' :
@@ -182,9 +178,10 @@ exports.getSummaryAuditInfo = function (request, reply) {
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = request.query.company_id;
           break;
       }
+
+      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
       delete request.query.user_id;
       delete request.query.company_id;
