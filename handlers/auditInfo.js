@@ -41,13 +41,12 @@ exports.getDetailedAuditInfo = function (request, reply) {
 
   var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
 
-
   async.waterfall([
 
     function (cb) {
       users.getById(user_id, function (err, result) {
         if (err || !result) {
-          return reply(boom.notFound('User not found'));
+          return reply(boom.badRequest('User not found'));
         }
         cb(null, result);
       });
@@ -59,42 +58,41 @@ exports.getDetailedAuditInfo = function (request, reply) {
 
         case 'user' :
           if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
-            return reply(boom.notFound('User not found'));
+            return reply(boom.badRequest('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id;
 
           break;
 
         case 'admin' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.notFound('User not found'));
+            return reply(boom.badRequest('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id;
 
           break;
 
         case 'reseller' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.notFound('User not found'));
+            return reply(boom.badRequest('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.badRequest('Company not found'));
           }
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = request.query.company_id;
 
           break;
       }
+
+      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
       delete request.query.user_id;
       delete request.query.company_id;
@@ -123,7 +121,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
     }
   ], function (err) {
     if (err) {
-      return reply(boom.badImplementation('Failed to execute password reset procedure'));
+      return reply(boom.badImplementation('Failed to execute activity log'));
     }
   });
 };
@@ -140,7 +138,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
     function (cb) {
       users.getById(user_id, function (err, result) {
         if (err || !result) {
-          return reply(boom.notFound('User not found'));
+          return reply(boom.badRequest('User not found'));
         }
         cb(null, result);
       });
@@ -152,39 +150,38 @@ exports.getSummaryAuditInfo = function (request, reply) {
 
         case 'user' :
           if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
-            return reply(boom.notFound('User not found'));
+            return reply(boom.badRequest('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'admin' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.notFound('User not found'));
+            return reply(boom.badRequest('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.badRequest('Company not found'));
           }
           requestBody['meta.user_id']    = user_id;
-          requestBody['meta.account_id'] = request.query.company_id;
           break;
 
         case 'reseller' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.notFound('User not found'));
+            return reply(boom.badRequest('User not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.notFound('Company not found'));
+            return reply(boom.badRequest('Company not found'));
           }
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
-          requestBody['meta.account_id'] = request.query.company_id;
           break;
       }
+
+      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
 
       delete request.query.user_id;
       delete request.query.company_id;
@@ -214,7 +211,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
     }
     ], function (err) {
       if (err) {
-        return reply(boom.badImplementation('Failed to execute password reset procedure'));
+        return reply(boom.badImplementation('Failed to execute activity log'));
       }
   });
 };
