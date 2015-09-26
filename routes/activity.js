@@ -47,8 +47,8 @@ module.exports = [
           user_id: Joi.string().description('User ID'),
           domain_id: Joi.string().description('Domain ID'),
           company_id: Joi.string().description('Company ID'),
-          from_timestamp: Joi.number().integer().min(1).description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.number().integer().min(2).description('Report period end timestamp (defaults to now)')
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
           //operation_status: Joi.string().valid ('success','failure').description('Type of operation')
         }
       }
@@ -74,8 +74,8 @@ module.exports = [
           user_id: Joi.string().description('User ID'),
           domain_id: Joi.string().description('Domain ID'),
           company_id: Joi.string().description('Company ID'),
-          from_timestamp: Joi.number().integer().min(1).description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.number().integer().min(2).description('Report period end timestamp (defaults to now)')
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
         }
       }
     }
