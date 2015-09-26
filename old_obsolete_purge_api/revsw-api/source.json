@@ -1,0 +1,12 @@
+{
+    "domainName":"www.mycompany.com",
+    "purges": [
+        {
+            "url": {
+                "is_wildcard": true,
+                "expression": "/images/**/*.png"
+            }
+        }
+    ]
+}
+
