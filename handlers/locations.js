@@ -27,8 +27,10 @@ var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
 
 var ServerGroup = require('../models/ServerGroup');
+var Location = require('../models/Location');
 
 var servergroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
+var locations = new Location(mongoose, mongoConnection.getConnectionPortal());
 
 
 exports.getFirstMileLocations = function(request, reply) {
@@ -51,3 +53,54 @@ exports.getFirstMileLocations = function(request, reply) {
     }
   });
 };
+
+exports.getLastMileLocations = function(request, reply) {
+
+  locations.listLastMileLocations(function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the database a list of last mile locations'));
+    }
+    if (result) {
+      var listOfSites = [];
+      for (var i = 0; i < result.length; i++) {
+        listOfSites.push({
+          id: result[i]._id.toString(),
+          site_code_name: result[i].site_code_name,
+          city: result[i].city,
+          state: result[i].state,
+          country: result[i].country,
+          billing_zone: result[i].billing_zone
+        });
+      }
+      renderJSON(request, reply, error, listOfSites);
+    } else {
+      return reply(boom.badRequest('No last mile locations are registered in the system'));
+    }
+  });
+};
+
+/*
+
+exports.getBillingZones = function(request, reply) {
+
+  locations.listLastMileLocations(function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the database a list of last mile locations for billing zones report'));
+    }
+    if (result) {
+      var listOfBillingZones = [];
+      for (var i = 0; i < result.length; i++) {
+        if 
+        listOfSites.push({
+          locationName: result[i].publicName,
+          id: result[i]._id.toString()
+        });
+      }
+      renderJSON(request, reply, error, listOfSites);
+    } else {
+      return reply(boom.badRequest('No last mile locations are registered in the system'));
+    }
+  });
+};
+
+*/

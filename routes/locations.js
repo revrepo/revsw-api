@@ -22,7 +22,7 @@
 
 var Joi = require('joi');
 
-var getFirstMileLocations = require('../handlers/getFirstMileLocations');
+var locations = require('../handlers/locations');
 
 var routeModels = require('../lib/routeModels');
 
@@ -32,9 +32,9 @@ module.exports = [
     path: '/v1/locations/firstmile',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller' ]
       },
-      handler: getFirstMileLocations.getFirstMileLocations,
+      handler: locations.getFirstMileLocations,
       description: 'Get a list of Rev first mile locations',
       tags: ['api', 'locations'],
       plugins: {
@@ -46,5 +46,52 @@ module.exports = [
         schema: routeModels.listOfFirstMileLocationsModel
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/locations/lastmile',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller' ]
+      },
+      handler: locations.getLastMileLocations,
+      description: 'Get a list of Rev last mile locations',
+      tags: ['api', 'locations'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.listOfLastMileLocationsModel
+      }
+    }
+  },
+
+/*
+
+  {
+    method: 'GET',
+    path: '/v1/locations/billing_zones',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller' ]
+      },
+      handler: locations.getBillingZones,
+      description: 'Get a list of Rev billing zones',
+      tags: ['api', 'locations'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.listOfBillingZonesModel
+      }
+    }
   }
+
+*/
+
 ];
