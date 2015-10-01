@@ -49,7 +49,6 @@ module.exports = [
           company_id: Joi.string().description('Company ID'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
-          //operation_status: Joi.string().valid ('success','failure').description('Type of operation')
         }
       }
     }

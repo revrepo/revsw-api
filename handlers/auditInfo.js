@@ -115,7 +115,17 @@ exports.getDetailedAuditInfo = function (request, reply) {
         '$lte' : end_time
       };
 
-      auditevents.detailed(requestBody, function (error, result) {
+      auditevents.detailed(requestBody, function (error, data) {
+        var result = {
+          metadata : {
+            user_id    : user_id,
+            domain_id  : request.query.domain_id,
+            company_id : request.query.company_id ? request.query.company_id : user.companyId,
+            start_time : start_time,
+            end_time   : end_time
+          },
+          data : data
+        };
         renderJSON(request, reply, error, result);
       });
     }
@@ -205,7 +215,17 @@ exports.getSummaryAuditInfo = function (request, reply) {
         '$lte' : end_time
       };
 
-      auditevents.summary(requestBody, function (error, result) {
+      auditevents.summary(requestBody, function (error, data) {
+        var result = {
+          metadata : {
+            user_id    : user_id,
+            domain_id  : request.query.domain_id,
+            company_id : request.query.company_id ? request.query.company_id : user.companyId,
+            start_time : start_time,
+            end_time   : end_time
+          },
+          data : data
+        };
         renderJSON(request, reply, error, result);
       });
     }
