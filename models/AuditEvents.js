@@ -51,22 +51,25 @@ AuditEvents.prototype = {
   detailed : function (request, callback) {
     this.model.find(request, function (err, auditevents) {
       var data      = [];
-      var innerData = {};
       for (var key in auditevents) {
-        innerData.user_id = auditevents[key].meta.user_id;
-        innerData.user_name = auditevents[key].meta.user_name;
-        innerData.user_type =  auditevents[key].meta.user_type;
-        innerData.domain_id = auditevents[key].meta.domain_id;
-        innerData.company_id = auditevents[key].meta.company_id;
-        innerData.datetime = auditevents[key].meta.datetime;
-        innerData.account = auditevents[key].meta.account;
-        innerData.account_id = auditevents[key].meta.account_id;
-        innerData.activity_type = auditevents[key].meta.activity_type;
-        innerData.activity_target = auditevents[key].meta.activity_target;
-        innerData.target_name = auditevents[key].meta.target_name;
-        innerData.target_id = auditevents[key].meta.target_id;
-        innerData.operation_status = auditevents[key].meta.operation_status;
-        innerData.target_object = auditevents[key].meta.target_object;
+        var innerData = {
+          ip_adress        : auditevents[key].meta.ip_adress,
+          user_id          : auditevents[key].meta.user_id,
+          user_name        : auditevents[key].meta.user_name,
+          user_type        : auditevents[key].meta.user_type,
+          domain_id        : auditevents[key].meta.domain_id,
+          company_id       : auditevents[key].meta.company_id,
+          datetime         : auditevents[key].meta.datetime,
+          account          : auditevents[key].meta.account,
+          account_id       : auditevents[key].meta.account_id,
+          activity_type    : auditevents[key].meta.activity_type,
+          activity_target  : auditevents[key].meta.activity_target,
+          target_name      : auditevents[key].meta.target_name,
+          target_id        : auditevents[key].meta.target_id,
+          operation_status : auditevents[key].meta.operation_status,
+          target_object    : auditevents[key].meta.target_object
+
+        };
         data.push(innerData);
       }
       callback(err, data);
@@ -74,7 +77,6 @@ AuditEvents.prototype = {
   },
 
   summary : function (request, callback) {
-    var response    = [];
     var requestBody = [
       {
         $match : request
@@ -99,24 +101,20 @@ AuditEvents.prototype = {
     ];
 
     this.model.aggregate(requestBody, function (err, auditevents) {
+      var data = [];
       for (var key in auditevents) {
-        response[key] = {
-          metadata     : {
-            user_id   : auditevents[key]._id.user_id,
-            ip_adress : auditevents[key]._id.ip_adress
-          },
-          data : {
-            activity_type    : auditevents[key]._id.activity_type,
-            activity_target  : auditevents[key]._id.activity_target,
-            email            : auditevents[key]._id.email,
-            firstname        : auditevents[key]._id.firstname,
-            lastname         : auditevents[key]._id.lastname,
-            operation_status : auditevents[key]._id.operation_status,
-            amount           : auditevents[key].amount
-          }
+        var innerData = {
+          activity_target  : auditevents[key]._id.activity_target,
+          activity_type    : auditevents[key]._id.activity_type,
+          email            : auditevents[key]._id.email,
+          firstname        : auditevents[key]._id.firstname,
+          lastname         : auditevents[key]._id.lastname,
+          operation_status : auditevents[key]._id.operation_status,
+          amount           : auditevents[key].amount
         };
+        data.push(innerData);
       }
-      callback(err, response);
+      callback(err, data);
     });
   }
 };
