@@ -89,7 +89,7 @@ exports.getStats = function(request, reply) {
       } else if ( time_period <= 2*24*3600*1000 ) {
         interval = 30*60*1000; // 30 minutes
       } else {
-        interval = 4*3600*1000; // 4 hours
+        interval = 12*3600*1000; // 12 hours
       }
 
       filter = elasticSearch.buildESFilterString(request);
