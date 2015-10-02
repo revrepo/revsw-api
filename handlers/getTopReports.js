@@ -52,22 +52,26 @@ exports.getTopReports = function(request, reply) {
       domain_name = result.name;
 
       if ( request.query.from_timestamp ) {
-        if ( ! isNaN(request.query.from_timestamp) ) {
-          start_time = parseInt(request.query.from_timestamp);
-
-        } else {
-          var parsed_time = Date.parse(request.query.from_timestamp);
-          if ( ! parsed_time ) {
-            return reply(boom.badRequest('Cannot parse the from_timestamp value'));
-          } else {
-            start_time = parsed_time.getTime();
-          }
+        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
+        if ( ! start_time ) {
+          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
         }
       } else {
         start_time = Date.now() - 3600000; // 1 hour back
       }
-//      start_time = request.query.from_timestamp || Date.now() - 3600000; // 1 hour back
-      end_time = request.query.to_timestamp || Date.now();
+
+      if ( request.query.to_timestamp ) {
+        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
+        if ( ! end_time ) {
+          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
+        }
+      } else {
+        end_time = request.query.to_timestamp || Date.now();
+      }
+
+      start_time = Math.floor(start_time/1000/300)*1000*300;
+      end_time = Math.floor(end_time/1000/300)*1000*300;
+
       if ( start_time >= end_time ) {
         return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
       }
@@ -183,7 +187,9 @@ exports.getTopReports = function(request, reply) {
             domain_name: domain_name,
             domain_id: domain_id,
             start_timestamp: start_time,
+            start_datetime: new Date(start_time),
             end_timestamp: end_time,
+            end_datetime: new Date(end_time),
             total_hits: body.hits.total,
             data_points_count: body.aggregations.results.buckets.length
           },

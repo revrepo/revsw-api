@@ -54,8 +54,23 @@ exports.getStats = function(request, reply) {
     if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
       domain_name = result.name;
 
-      start_time = request.query.from_timestamp || Date.now() - 3600*1000; // 1 hour back
-      end_time = request.query.to_timestamp || Date.now();
+      if ( request.query.from_timestamp ) {
+        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
+        if ( ! start_time ) {
+          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
+        }
+      } else {
+        start_time = Date.now() - 3600000*24; // 24 hours back
+      }
+
+      if ( request.query.to_timestamp ) {
+        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
+        if ( ! end_time ) {
+          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
+        }
+      } else {
+        end_time = request.query.to_timestamp || Date.now();
+      }
 
       if ( start_time >= end_time ) {
         return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
@@ -64,14 +79,17 @@ exports.getStats = function(request, reply) {
         return reply(boom.badRequest('Period start timestamp cannot be more than a month back from the current time'));
       }
 
+      start_time = Math.floor(start_time/1000/300)*1000*300;
+      end_time = Math.floor(end_time/1000/300)*1000*300;
+
       time_period = end_time - start_time;
 
       if ( time_period <= 3*3600*1000 ) {
         interval = 5*60*1000; // 5 minutes
-      } else if ( time_period <= 24*3600*1000 ) {
+      } else if ( time_period <= 2*24*3600*1000 ) {
         interval = 30*60*1000; // 30 minutes
       } else {
-        interval = 4*3600*1000; // 4 hours
+        interval = 12*3600*1000; // 12 hours
       }
 
       filter = elasticSearch.buildESFilterString(request);
@@ -149,7 +167,9 @@ exports.getStats = function(request, reply) {
             domain_name: domain_name,
             domain_id: domain_id,
             start_timestamp: start_time,
+            start_datetime: new Date(start_time),
             end_timestamp: end_time,
+            end_datetime: new Date(end_time),
             total_hits: body.hits.total,
             interval_sec: interval/1000,
             data_points_count: body.aggregations.results.buckets.length
