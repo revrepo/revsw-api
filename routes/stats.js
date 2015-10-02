@@ -49,8 +49,8 @@ module.exports = [
           domain_id: Joi.objectId().required().description('Domain ID')
         },
         query: {
-          from_timestamp: Joi.number().integer().min(1).description('Report period start timestamp'),
-          to_timestamp: Joi.number().integer().min(1).description('Report period end timestamp'),
+          from_timestamp: Joi.string().description('Report period start timestamp'),
+          to_timestamp: Joi.string().description('Report period end timestamp'),
           status_code: Joi.number().integer().min(100).max(600).description('HTTP status code to filter'),
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
           request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
@@ -86,8 +86,8 @@ module.exports = [
           domain_id: Joi.objectId().required().description('Domain ID')
         },
         query: {
-          from_timestamp: Joi.number().integer().min(1).description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.number().integer().min(1).description('Report period end timestamp (defaults to now)'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of top objects to report (default to 30)'),
           status_code: Joi.number().integer().min(100).max(600).description('HTTP status code to filter'),
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
@@ -125,7 +125,7 @@ module.exports = [
         },
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.number().integer().min(1).description('Report period end timestamp (defaults to now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
           report_type: Joi.string().required().valid ( 'referer', 'status_code', 'cache_status', 'content_type', 'protocol', 'request_status',
             'http_protocol', 'http_method', 'content_encoding', 'os', 'device', 'country' ).description('Type of requested report (defaults to "referer")'),
