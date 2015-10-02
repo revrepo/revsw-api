@@ -77,7 +77,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -96,7 +96,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
-          //response_json.data[key].should.have.property('target_id').be.a.String(); @TODO: I fix it later
+          response_json.data[key].should.have.property('target_id').be.a.String();
           response_json.data[key].should.have.property('operation_status').be.a.String();
           response_json.data[key].should.have.property('target_object').be.a.Object();
         }
