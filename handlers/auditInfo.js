@@ -103,8 +103,23 @@ exports.getDetailedAuditInfo = function (request, reply) {
         }
       }
 
-      start_time = utils.convertDateToTimestamp(request.query.from_timestamp) || Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
-      end_time   = utils.convertDateToTimestamp(request.query.to_timestamp) || Date.now();
+      if ( request.query.from_timestamp ) {
+        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
+        if ( ! start_time ) {
+          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
+        }
+      } else {
+        start_time = Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
+      }
+
+      if ( request.query.to_timestamp ) {
+        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
+        if ( ! end_time ) {
+          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
+        }
+      } else {
+        end_time = request.query.to_timestamp || Date.now();
+      }
 
       if (start_time >= end_time) {
         return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
@@ -203,8 +218,23 @@ exports.getSummaryAuditInfo = function (request, reply) {
       }
       requestBody['meta.user_id'] = request.auth.credentials.user_id;
 
-      start_time = utils.convertDateToTimestamp(request.query.from_timestamp) || Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
-      end_time   = utils.convertDateToTimestamp(request.query.to_timestamp) || Date.now();
+      if ( request.query.from_timestamp ) {
+        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
+        if ( ! start_time ) {
+          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
+        }
+      } else {
+        start_time = Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
+      }
+
+      if ( request.query.to_timestamp ) {
+        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
+        if ( ! end_time ) {
+          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
+        }
+      } else {
+        end_time = request.query.to_timestamp || Date.now();
+      }
 
       if (start_time >= end_time) {
         return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
