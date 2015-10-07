@@ -97,25 +97,6 @@ exports.createAccount = function (request, reply) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user details with new account ID'));
           } else {
-
-            delete result.password;
-
-            AuditLogger.store({
-              ip_adress        : request.info.remoteAddress,
-              datetime         : Date.now(),
-              user_id          : request.auth.credentials.user_id,
-              user_name        : request.auth.credentials.email,
-              user_type        : 'user',
-              account_id       : request.auth.credentials.companyId,
-              domain_id        : request.auth.credentials.domain,
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : result.id,
-              target_name      : result.email,
-              target_object    : updatedUser,
-              operation_status : 'success'
-            });
-
             renderJSON(request, reply, error, statusResponse);
           }
         });
@@ -255,24 +236,6 @@ exports.deleteAccount = function (request, reply) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user details with removed account ID'));
           } else {
-
-            delete updatedUser.password;
-
-            AuditLogger.store({
-              ip_adress        : request.info.remoteAddress,
-              datetime         : Date.now(),
-              user_id          : request.auth.credentials.user_id,
-              user_name        : request.auth.credentials.email,
-              user_type        : 'user',
-              account_id       : request.auth.credentials.companyId,
-              domain_id        : request.auth.credentials.domain,
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : result.id,
-              target_name      : result.email,
-              target_object    : updatedUser,
-              operation_status : 'success'
-            });
             renderJSON(request, reply, error, statusResponse);
           }
         });
