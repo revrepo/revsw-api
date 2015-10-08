@@ -150,6 +150,7 @@ exports.getStats = function(request, reply) {
       elasticSearch.getClient().search({
         index: utils.buildIndexList(start_time, end_time),
         ignoreUnavailable: true,
+        search_type: 'count',
         timeout: 60,
         body: requestBody
       }).then(function(body) {
