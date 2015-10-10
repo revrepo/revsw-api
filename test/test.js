@@ -89,7 +89,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 describe('Rev API', function() {
 
   var adminToken = '',
-    userToken = ''.
+    userToken = '',
     userCompanyId = '',
     testDomainId,
     testDomain = 'qa-api-test-domain.revsw.net',
@@ -484,6 +484,24 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should add a new record about adding a new user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('user');
+        done();
+      });
+  });
+
   it('should fail to delete the new user account using the same account for API access', function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)
@@ -538,9 +556,6 @@ describe('Rev API Admin User', function() {
       });
   });
 
-
-
-
   it('should change the password for new user account ' + testUser, function(done) {
     request(testAPIUrl)
       .put('/v1/users/' + testUserId)
@@ -554,6 +569,24 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully updated the user');
+        done();
+      });
+  });
+
+  it('should add a new record about updating user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });
@@ -589,6 +622,24 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should add a new record about deleting user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('user');
+        done();
+      });
+  });
+
   it('should create new user account ' + testUser + ' without specifying companyId and domain', function(done) {
     newUserJson.email = testUser;
     delete newUserJson.companyId;
@@ -608,6 +659,24 @@ describe('Rev API Admin User', function() {
         response_json.message.should.be.equal('Successfully created new user');
         response_json.object_id.should.be.a.String();
         testUserId = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should add a new record about adding a new user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });
@@ -676,7 +745,7 @@ describe('Rev API Admin User', function() {
         response_json.message.should.be.equal('The new companyId is not found');
         done();
       });
-  }); 
+  });
 
   it('should update test user ' + testUser + ' with new details in all fields', function(done) {
 
@@ -692,6 +761,24 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully updated the user');
+        done();
+      });
+  });
+
+  it('should add a new record about updating user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });
@@ -754,6 +841,23 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should add a new record about updating user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('user');
+        done();
+      });
+  });
 
 
   it('should fail to create a new domain with existing domain name ' + newDomainName, function(done) {
@@ -886,6 +990,24 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should add a new record about the addition of new domain in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(newDomainId);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('domain');
+        done();
+      });
+  });
+
   it('should read the basic confguration of freshly created domain ' + newDomainName, function(done) {
     this.timeout(60000);
     newDomainJson = {
@@ -994,6 +1116,24 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully updated the domain');
+        done();
+      });
+  });
+
+  it('should add a new record about updating domain in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(newDomainId);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('domain');
         done();
       });
   });
@@ -1149,6 +1289,24 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should add a new record about updating domain details in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(newDomainId);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('domain');
+        done();
+      });
+  });
+
   it('should read back the updated detailed domain configuration and verify all fields', function(done) {
     request(testAPIUrl)
       .get('/v1/domains/' + newDomainId + '/details')
@@ -1163,7 +1321,6 @@ describe('Rev API Admin User', function() {
         done();
       });
   });
-
 
   it('should delete test domain ' + newDomainName, function(done) {
     this.timeout(60000);
@@ -1182,6 +1339,23 @@ describe('Rev API Admin User', function() {
       });
   });
 
+  it('should add a new record about deleting domain details in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(newDomainId);
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('domain');
+        done();
+      });
+  });
 
 });
 

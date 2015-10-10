@@ -464,8 +464,8 @@ exports.updateDomainDetails = function (request, reply) {
                     domain_id        : request.auth.credentials.domain,
                     activity_type    : 'modify',
                     activity_target  : 'domain',
-                    target_id        : res.id,
-                    target_name      : res.name,
+                    target_id        : domain_id,
+                    target_name      : result.name,
                     target_object    : updateDomainJson,
                     operation_status : 'success'
                   });
@@ -543,8 +543,8 @@ exports.deleteDomain = function (request, reply) {
               domain_id        : request.auth.credentials.domain,
               activity_type    : 'delete',
               activity_target  : 'domain',
-              target_id        : res.id,
-              target_name      : res.name,
+              target_id        : domain_id,
+              target_name      : domain_name,
               target_object    : deleteDomainJson,
               operation_status : 'success'
             });

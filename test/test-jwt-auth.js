@@ -28,9 +28,10 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 
   var adminToken = '',
-    jwtToken = ''.
+    jwtToken = '',
     userCompanyId = '',
     testDomainId,
+    testUserId = '',
     domainConfigJson = {};
 
     var testUserJWT = 'api-qa-user-' + Date.now() + '@revsw.com';
@@ -78,6 +79,24 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         response_json.message.should.be.equal('Successfully created new user');
         response_json.object_id.should.be.a.String();
         testUserId = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should add in logger new record about the addition of new user', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });
@@ -140,7 +159,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         if (err) {
           throw err;
         }
-        var response_json = JSON.parse(res.text);
+        var response_json = JSON.parse(res.text); //@TODO why?
         done();
       });
   });
@@ -154,7 +173,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         if (err) {
           throw err;
         }
-        var response_json = JSON.parse(res.text);
+        var response_json = JSON.parse(res.text); //@TODO why?
         done();
       });
   });
@@ -168,15 +187,12 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         if (err) {
           throw err;
         }
-        var response_json = JSON.parse(res.text);
+        var response_json = JSON.parse(res.text); //@TODO why?
         done();
       });
   });
 
   it('should successfully change the user password', function(done) {
-
-    console.log(testUserJWT, testPass);
-    console.log(changePasswordJson2);
     request(testAPIUrl)
       .put('/v1/users/password/' + testUserId)
       .auth(testUserJWT, testPass)
@@ -189,6 +205,24 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully updated the password');
+        done();
+      });
+  });
+
+  it('should add in logger new record about modify password the user', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUserJWT, newTestPass)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });
@@ -219,6 +253,26 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully deleted the user');
+        done();
+      });
+  });
+
+
+
+  it('should add in logger new record about delete the user', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });

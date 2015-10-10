@@ -81,7 +81,7 @@ exports.createAccount = function (request, reply) {
           domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'account',
-          target_id        : result.id,
+          target_id        : result._id+'',
           target_name      : result.companyName,
           target_object    : newAccount,
           operation_status : 'success'
@@ -166,7 +166,7 @@ exports.updateAccount = function (request, reply) {
         domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'account',
-        target_id        : result.id,
+        target_id        : request.params.account_id,
         target_name      : result.companyName,
         target_object    : updatedAccount,
         operation_status : 'success'
