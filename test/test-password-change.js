@@ -78,7 +78,7 @@ describe('Rev user password change API', function() {
       });
   });
 
-  it('should add in logger new record about the addition of new user', function(done) {
+  it('should find a new record about the addition of new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -197,7 +197,7 @@ describe('Rev user password change API', function() {
       });
   });
 
-  it('should add new record about updating password the user in logger', function(done) {
+  it('should find a new record about updating password the user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(testUser, newTestPass)
@@ -247,7 +247,7 @@ describe('Rev user password change API', function() {
       });
   });
 
-  it('should add in logger new record about delete the user', function(done) {
+  it('should find a new record about deleting the user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)

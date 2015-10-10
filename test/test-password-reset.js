@@ -29,7 +29,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 
   var adminToken = '',
-    jwtToken = ''.
+    jwtToken = '',
     userCompanyId = '',
     testDomainId,
     domainConfigJson = {},
