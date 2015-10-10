@@ -147,19 +147,20 @@ exports.getStats = function(request, reply) {
         }
       };
 
-      elasticSearch.getClient().search({
+      elasticSearch.getClient().msearch( { body: [ {
         index: utils.buildIndexList(start_time, end_time),
         ignoreUnavailable: true,
-        timeout: 60,
-        body: requestBody
+        search_type: 'count',
+        timeout: 60 },
+        requestBody ]
       }).then(function(body) {
         var dataArray = [];
-        for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
+        for ( var i = 0; i < body.responses[0].aggregations.results.buckets.length; i++ ) {
           dataArray[i] = {
-            time: body.aggregations.results.buckets[i].key,
-            requests: body.aggregations.results.buckets[i].doc_count,
-            sent_bytes: body.aggregations.results.buckets[i].sent_bytes.value,
-            received_bytes: body.aggregations.results.buckets[i].received_bytes.value
+            time: body.responses[0].aggregations.results.buckets[i].key,
+            requests: body.responses[0].aggregations.results.buckets[i].doc_count,
+            sent_bytes: body.responses[0].aggregations.results.buckets[i].sent_bytes.value,
+            received_bytes: body.responses[0].aggregations.results.buckets[i].received_bytes.value
           };
         }
         var response = {
@@ -170,9 +171,9 @@ exports.getStats = function(request, reply) {
             start_datetime: new Date(start_time),
             end_timestamp: end_time,
             end_datetime: new Date(end_time),
-            total_hits: body.hits.total,
+            total_hits: body.responses[0].hits.total,
             interval_sec: interval/1000,
-            data_points_count: body.aggregations.results.buckets.length
+            data_points_count: body.responses[0].aggregations.results.buckets.length
           },
           data: dataArray
         };
