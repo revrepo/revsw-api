@@ -484,7 +484,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about adding a new user in logger', function(done) {
+  it('should find a new record about adding a new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -573,7 +573,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about updating user in logger', function(done) {
+  it('should find a new record about updating user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -622,7 +622,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about deleting user in logger', function(done) {
+  it('should find a new record about deleting user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -663,7 +663,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about adding a new user in logger', function(done) {
+  it('should find a new record about adding a new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -765,7 +765,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about updating user in logger', function(done) {
+  it('should find a new record about updating user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -841,7 +841,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about updating user in logger', function(done) {
+  it('should find a new record about updating user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -990,7 +990,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about the addition of new domain in logger', function(done) {
+  it('should find a new record about the addition of new domain in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -1120,7 +1120,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about updating domain in logger', function(done) {
+  it('should find a new record about updating domain in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -1289,7 +1289,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about updating domain details in logger', function(done) {
+  it('should find a new record about updating domain details in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -1339,7 +1339,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should add a new record about deleting domain details in logger', function(done) {
+  it('should find a new record about deleting domain details in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)

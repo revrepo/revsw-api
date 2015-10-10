@@ -83,7 +83,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should add in logger new record about the addition of new user', function(done) {
+  it('should find a new record about the addition of new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -209,7 +209,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should add in logger new record about modify password the user', function(done) {
+  it('should find a new record about modify password the user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(testUserJWT, newTestPass)
@@ -259,7 +259,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 
 
-  it('should add in logger new record about delete the user', function(done) {
+  it('should find a new record about deleting the user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)

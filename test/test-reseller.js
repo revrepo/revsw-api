@@ -65,7 +65,7 @@ describe('Rev API Reseller User', function() {
       });
   });
 
-  it('should add a new record about adding a new account in logger', function(done) {
+  it('should find a new record about adding a new account in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
@@ -180,7 +180,7 @@ describe('Rev API Reseller User', function() {
       });
   });
 
-  it('should add a new record about updating account in logger', function(done) {
+  it('should find a new record about updating account in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
@@ -234,7 +234,7 @@ describe('Rev API Reseller User', function() {
       });
   });
 
-  it('should add a new record about deleting account in logger', function(done) {
+  it('should find a new record about deleting account in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
