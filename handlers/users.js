@@ -145,7 +145,7 @@ exports.getUser = function(request, reply) {
       }
 
       if (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId)) {
-        
+
         for (var i in privateUserProfileFields) {
           if ( result[privateUserProfileFields[i]] ) {
             delete result[privateUserProfileFields[i]];
@@ -223,7 +223,7 @@ exports.updateUser = function(request, reply) {
             domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
-            target_id        : result.id,
+            target_id        : user_id,
             target_name      : result.email,
             target_object    : newUser,
             operation_status : 'success'
@@ -279,7 +279,7 @@ exports.updateUserPassword = function(request, reply) {
             domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
-            target_id        : result.id,
+            target_id        : user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
@@ -324,7 +324,7 @@ exports.deleteUser = function(request, reply) {
             domain_id        : request.auth.credentials.domain,
             activity_type    : 'delete',
             activity_target  : 'user',
-            target_id        : result.id,
+            target_id        : result.user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'

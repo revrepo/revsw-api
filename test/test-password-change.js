@@ -27,15 +27,16 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 describe('Rev user password change API', function() {
 
   var adminToken = '',
-    userToken = ''.
-    userCompanyId = '',
-    testDomainId,
-    testDomain = 'qa-api-test-domain.revsw.net',
-    domainConfigJson = {};
+      userToken = '',
+      userCompanyId = '',
+      testDomainId,
+      testDomain = 'qa-api-test-domain.revsw.net',
+      domainConfigJson = {};
 
-    testUser = 'api-qa-user-' + Date.now() + '@revsw.com';
-    testPass = 'password1';
-    newTestPass = 'password2';
+  var testUser = 'api-qa-user-' + Date.now() + '@revsw.com',
+      testUserId = '',
+      testPass = 'password1',
+      newTestPass = 'password2';
 
   var changePasswordJson = {
     current_password: testPass,
@@ -77,6 +78,24 @@ describe('Rev user password change API', function() {
       });
   });
 
+  it('should add in logger new record about the addition of new user', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('user');
+        done();
+      });
+  });
+
 
   it('should fail to change the password for another user', function(done) {
     request(testAPIUrl)
@@ -113,12 +132,12 @@ describe('Rev user password change API', function() {
   });
 
   it('should fail to change the password with wrong current password', function(done) {
-  
+
     var changePassJsonLocal = {
     current_password: testPass,
     new_password: newTestPass
   };
-    changePassJsonLocal.current_password = '234afsdfswsdf'; 
+    changePassJsonLocal.current_password = '234afsdfswsdf';
     request(testAPIUrl)
       .put('/v1/users/password/' + testUserId)
       .auth(testUser, testPass)
@@ -137,9 +156,9 @@ describe('Rev user password change API', function() {
 
   it('should fail to change the password with short new password', function(done) {
     var changePassJsonLocal = {
-    current_password: testPass,
-    new_password: newTestPass
-  };
+      current_password: testPass,
+      new_password: newTestPass
+    };
     changePassJsonLocal.new_password = '234af';
     request(testAPIUrl)
       .put('/v1/users/password/' + testUserId)
@@ -178,6 +197,23 @@ describe('Rev user password change API', function() {
       });
   });
 
+  it('should add new record about updating password the user in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUser, newTestPass)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('user');
+        done();
+      });
+  });
 
   it('should get user details using the new password', function(done) {
     request(testAPIUrl)
@@ -207,6 +243,24 @@ describe('Rev user password change API', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully deleted the user');
+        done();
+      });
+  });
+
+  it('should add in logger new record about delete the user', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testUserId);
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('user');
         done();
       });
   });
