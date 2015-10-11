@@ -25,7 +25,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
 
 describe('Rev API Reseller User', function() {
-  var testCompanyName = 'API QA Test Company ' + Date.now(); 
+  var testCompanyName = 'API QA Test Company ' + Date.now();
   var newAccountJson = { companyName: testCompanyName };
   var testCompanyID = '';
 
@@ -47,7 +47,6 @@ describe('Rev API Reseller User', function() {
 
 
   it('should create a new account', function(done) {
-//    console.log('New company name: ' + testCompanyName);
     request(testAPIUrl)
       .post('/v1/accounts')
       .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
@@ -62,7 +61,24 @@ describe('Rev API Reseller User', function() {
         response_json.message.should.be.equal('Successfully created new account');
         response_json.object_id.should.be.a.String();
         testCompanyID = response_json.object_id;
-//        console.log('New companyId: ', testCompanyID);
+        done();
+      });
+  });
+
+  it('should find a new record about adding a new account in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testCompanyID);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('account');
         done();
       });
   });
@@ -118,7 +134,6 @@ describe('Rev API Reseller User', function() {
         res.statusCode.should.be.equal(200);
         var response_json = JSON.parse(res.text);
         response_json.length.should.be.above(0);
-//        console.log(' response_json = ',  response_json);
         for ( var i = 0; i < response_json.length; i++ ) {
           if ( response_json[i].companyName === testCompanyName ) {
             done();
@@ -165,6 +180,25 @@ describe('Rev API Reseller User', function() {
       });
   });
 
+  it('should find a new record about updating account in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testCompanyID);
+        last_obj.target_name.should.be.equal(testCompanyName);
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('account');
+        done();
+      });
+  });
+
   it('should fail to update an account with existing company name "API QA Reseller Company"', function(done) {
     testCompanyName = 'API QA Reseller Company';
     newAccountJson = { companyName: testCompanyName };
@@ -200,6 +234,23 @@ describe('Rev API Reseller User', function() {
       });
   });
 
+  it('should find a new record about deleting account in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.target_id.should.be.equal(testCompanyID);
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('account');
+        done();
+      });
+  });
 
   it('should fail to delete a non-existing account', function(done) {
     request(testAPIUrl)

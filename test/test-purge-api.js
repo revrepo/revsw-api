@@ -12,17 +12,17 @@ var sleep = require('sleep');
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:8000';
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
-  qaUserWithUserPermPassword = 'password1',
-  qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
-  qaUserWithAdminPermPassword = 'password1',
-  qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
-  qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
-  qaUserWithResellerPermPassword = 'password1',
-  wrongUsername = 'wrong_username@revsw.com',
-  wrongPassword = 'we5rsdfsdfs';
+    qaUserWithUserPermPassword = 'password1',
+    qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
+    qaUserWithAdminPermPassword = 'password1',
+    qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
+    qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
+    qaUserWithResellerPermPassword = 'password1',
+    wrongUsername = 'wrong_username@revsw.com',
+    wrongPassword = 'we5rsdfsdfs';
 
-  testObjectDomain = 'qa-api-test-domain.revsw.net';
-  testObjectPath = '/test-cache.js';
+  var testObjectDomain = 'qa-api-test-domain.revsw.net',
+      testObjectPath   = '/test-cache.js';
 
   var  purgeJson = {
     domainName: testObjectDomain,
@@ -31,7 +31,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
        is_wildcard: true,
        expression: testObjectPath
       }
-    }]  
+    }]
   };
 
   var proxyServers = [ 'testsjc20-bp01.revsw.net', 'testsjc20-bp02.revsw.net' ];
