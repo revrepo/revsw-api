@@ -61,6 +61,7 @@ exports.forgotPassword = function(request, reply) {
         },
 
         function(token, done) {
+          delete user.password;
           user.resetPasswordToken   = token;
           user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan'); // 1 hour
 

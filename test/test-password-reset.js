@@ -125,7 +125,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
                 }
               }
               // forgotlink.should.be.not.be.empty();
-              resetToken = forgotlink.split('/')[7];
+              resetToken = forgotlink.split('/')[6];
               // resetToken.should.be.a.String();
               done();
             }
@@ -230,6 +230,35 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         });
       });
     });
+  });
+
+  it('should trigger one more time the password reset process for user ' + testUser, function(done) {
+    request(testAPIUrl)
+      .post('/v1/forgot')
+      .send( { email: testUser } )
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.message.should.be.equal('An e-mail has been sent to ' + testUser + ' with further instructions');
+        done();
+      });
+  });
+
+  it('should verify that the new password is still active for the test user', function(done) {
+
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send( { email: testUser, password: testPass } )
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
   });
 
 
