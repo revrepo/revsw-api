@@ -40,6 +40,15 @@ var privateUserProfileFields = [
   'two_factor_auth_secret_base32'
 ];
 
+function removePrivateFields(obj) {
+  for (var i in privateUserProfileFields) {
+    if (obj[privateUserProfileFields[i]]) {
+      delete obj[privateUserProfileFields[i]];
+    }
+  }
+  return obj;
+};
+
 exports.getUsers = function getUsers(request, reply) {
   users.list(request, function(error, listOfUsers) {
     if (error || !listOfUsers) {
@@ -108,7 +117,7 @@ exports.createUser = function(request, reply) {
           };
         }
 
-        delete newUser.password;
+        newUser = removePrivateFields(newUser);
 
         AuditLogger.store({
           ip_adress        : request.info.remoteAddress,
@@ -148,11 +157,7 @@ exports.getUser = function(request, reply) {
 
       if (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId)) {
 
-        for (var i in privateUserProfileFields) {
-          if ( result[privateUserProfileFields[i]] ) {
-            delete result[privateUserProfileFields[i]];
-          }
-        }
+        result = removePrivateFields(result);
         renderJSON(request, reply, error, result);
       } else {
         return reply(boom.badRequest('User not found'));
@@ -173,11 +178,7 @@ exports.getMyUser = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve user details'));
     }
     if (result) {
-      for (var i in privateUserProfileFields) {
-        if ( result[privateUserProfileFields[i]] ) {
-          delete result[privateUserProfileFields[i]];
-        }
-      }
+      result = removePrivateFields(result);
       renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('User not found'));
@@ -213,7 +214,7 @@ exports.updateUser = function(request, reply) {
             message: 'Successfully updated the user'
           };
 
-          delete newUser.password;
+          newUser = removePrivateFields(newUser);
 
           AuditLogger.store({
             ip_adress        : request.info.remoteAddress,
@@ -269,7 +270,7 @@ exports.updateUserPassword = function(request, reply) {
             message: 'Successfully updated the password'
           };
 
-          delete result.password;
+          result = removePrivateFields(result);
 
           AuditLogger.store({
             ip_adress        : request.info.remoteAddress,
@@ -314,7 +315,7 @@ exports.deleteUser = function(request, reply) {
         return reply(boom.badRequest('User not found'));
       }
 
-      delete result.password;
+      result = removePrivateFields(result);
 
       var auditRecord = {
             ip_adress        : request.info.remoteAddress,
@@ -366,7 +367,7 @@ exports.init2fa = function (request, reply) {
       users.update(user, function(error, result) {
         if (!error) {
 
-          delete result.password;
+          result = removePrivateFields(result);
 
           AuditLogger.store({
             ip_adress        : request.info.remoteAddress,
@@ -401,7 +402,7 @@ exports.enable2fa = function (request, reply) {
   users.get({
     _id: user_id
   }, function(error, user) {
-    if (user) {
+    if (user && user.two_factor_auth_secret_base32) {
       var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
       if (generatedOneTimePassword === oneTimePassword) {
         user.two_factor_auth_enabled = true;
@@ -412,7 +413,7 @@ exports.enable2fa = function (request, reply) {
               message: 'Successfully enabled two factor authentication'
             };
 
-            delete result.password;
+            result = removePrivateFields(result);
 
             AuditLogger.store({
               ip_adress        : request.info.remoteAddress,
@@ -436,7 +437,7 @@ exports.enable2fa = function (request, reply) {
           }
         });
       } else {
-        return reply(boom.badImplementation('Supplied one time password is wrong'));
+        return reply(boom.badImplementation('The supplied one time password is incorrect'));
       }
     } else {
       return reply(boom.badImplementation('Failed to retrieve user details'));
@@ -446,9 +447,13 @@ exports.enable2fa = function (request, reply) {
 
 exports.disable2fa = function (request, reply) {
   var password = request.payload.password;
-  var user_id = request.params.user_id;
-  if ((user_id !== request.auth.credentials.user_id) && (request.auth.credentials.role !== 'admin')) {
-    return reply(boom.badRequest('Cannot disable two factor authentication of another user'));
+  if (request.params.user_id) {
+    var user_id = request.params.user_id;
+    if ((user_id !== request.auth.credentials.user_id) && (request.auth.credentials.role !== 'admin')) {
+      return reply(boom.badRequest('User not found'));
+    }
+  } else {
+    user_id = request.auth.credentials.user_id;
   }
   users.get({
     _id: user_id
@@ -463,7 +468,7 @@ exports.disable2fa = function (request, reply) {
               message: 'Successfully disabled two factor authentication'
             };
 
-            delete result.password;
+            result = removePrivateFields(result);
 
             AuditLogger.store({
               ip_adress        : request.info.remoteAddress,

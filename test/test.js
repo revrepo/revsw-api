@@ -9,6 +9,7 @@ var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
 var config = require('config');
+var speakeasy = require('speakeasy');
 
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
 var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
@@ -22,7 +23,8 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
   wrongPassword = 'we5rsdfsdfs',
-  testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
+  testDomain = 'qa-api-test-domain.revsw.net',  // this domain should exist in the QA environment
+  secretKey = ''
 
     var updatedConfigJson = {
 
@@ -602,6 +604,59 @@ describe('Rev API Admin User', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.length.should.be.above(0);
+        done();
+      });
+  });
+
+  it('should initialize 2fa for freshly created user ' + testUser, function(done) {
+    request(testAPIUrl)
+      .get('/v1/users/2fa/init/' + testUserId)
+      .auth(testUser, 'password1')
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.ascii.should.be.a.String();
+        response_json.base32.should.be.a.String();
+        response_json.google_auth_qr.should.be.a.String();
+        done();
+      });
+  });
+
+  it('should enable 2fa for user ' + testUser, function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/users/2fa/enable')
+      .auth(testUser, 'password1')
+      .send({oneTimePassword: oneTimePassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully enabled two factor authentication');
+        done();
+      });
+  });
+
+  it('should disable 2fa for user ' + testUser, function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/users/2fa/disable')
+      .auth(testUser, 'password1')
+      .send({oneTimePassword: oneTimePassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully disabled two factor authentication');
         done();
       });
   });

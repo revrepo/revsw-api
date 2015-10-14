@@ -253,11 +253,6 @@ module.exports = [
     method: 'GET',
     path: '/v1/users/2fa/init',
     config: {
-      validate: {
-        options: {
-          stripUnknown: true
-        }
-      },
       auth: {
         scope: [ 'user' ]
       },
@@ -321,7 +316,7 @@ module.exports = [
       },
       validate: {
         params: {
-          user_id: Joi.objectId().required().description('Disable two factor authentication for this user ID')
+          user_id: Joi.objectId().description('Disable two factor authentication for this user ID')
         },
         payload: {
           oneTimePassword: Joi.string().required().description('One time password supplied by user')
