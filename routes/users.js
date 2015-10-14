@@ -136,6 +136,7 @@ module.exports = [
       }
     }
   },
+
   {
     method: 'GET',
     path: '/v1/users/myself',
@@ -162,7 +163,6 @@ module.exports = [
       }
     }
   },
-
 
   {
     method: 'PUT',
@@ -194,8 +194,6 @@ module.exports = [
       }
     }
   },
-
-
 
   {
     method: 'GET',
@@ -243,6 +241,90 @@ module.exports = [
       validate: {
         params: {
           user_id: Joi.objectId().required().description('User ID to delete')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/users/2fa/init',
+    config: {
+      validate: {
+        options: {
+          stripUnknown: true
+        }
+      },
+      auth: {
+        scope: [ 'user' ]
+      },
+      handler: users.init2fa,
+      description: 'Initialize two factor authentication',
+      notes: 'Use the call to get the QR code for Google Authenticator. This call assigns a new secret key to the user. If the secret key already exists, it will be overwritten.',
+      tags: ['api', 'users'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.generateKeyModel
+      }
+    }
+  },
+
+  {
+    method: 'POST',
+    path: '/v1/users/2fa/enable',
+    config: {
+      auth: {
+        scope: [ 'user' ]
+      },
+      handler: users.enable2fa,
+      description: 'Enable two factor authentication for the user',
+      notes: 'Use this call to enable two factor authentication for specific user',
+      tags: ['api', 'users'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        payload: {
+          oneTimePassword: Joi.string().required().description('One time password supplied by user')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+
+  {
+    method: 'POST',
+    path: '/v1/users/2fa/disable/{user_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin_rw' ]
+      },
+      handler: users.disable2fa,
+      description: 'Disable two factor authentication for the user',
+      notes: 'Use this call to disable two factor authentication for specific user',
+      tags: ['api', 'users'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          user_id: Joi.objectId().required().description('Disable two factor authentication for this user ID')
+        },
+        payload: {
+          oneTimePassword: Joi.string().required().description('One time password supplied by user')
         }
       },
       response: {

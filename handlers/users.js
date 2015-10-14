@@ -23,6 +23,7 @@
 var boom        = require('boom');
 var mongoose    = require('mongoose');
 var AuditLogger = require('revsw-audit');
+var speakeasy   = require('speakeasy');
 
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
@@ -35,8 +36,9 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var privateUserProfileFields = [
   'password',
   'resetPasswordToken',
-  'resetPasswordExpires'
-  ];
+  'resetPasswordExpires',
+  'two_factor_auth_secret_base32'
+];
 
 exports.getUsers = function getUsers(request, reply) {
   users.list(request, function(error, listOfUsers) {
@@ -349,6 +351,146 @@ exports.deleteUser = function(request, reply) {
       });
     } else {
       return reply(boom.badRequest('User not found'));
+    }
+  });
+};
+
+exports.init2fa = function (request, reply) {
+  var user_id = request.auth.credentials.user_id;
+  users.get({
+    _id: user_id
+  }, function(error, user) {
+    if (user) {
+      var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true});
+      user.two_factor_auth_secret_base32 = secretKey.base32;
+      users.update(user, function(error, result) {
+        if (!error) {
+
+          delete result.password;
+
+          AuditLogger.store({
+            ip_adress        : request.info.remoteAddress,
+            datetime         : Date.now(),
+            user_id          : request.auth.credentials.user_id,
+            user_name        : request.auth.credentials.email,
+            user_type        : 'user',
+            account_id       : request.auth.credentials.companyId,
+            domain_id        : request.auth.credentials.domain,
+            activity_type    : 'modify',
+            activity_target  : 'user',
+            target_id        : user_id,
+            target_name      : result.email,
+            target_object    : result,
+            operation_status : 'success'
+          });
+
+          renderJSON(request, reply, error, secretKey);
+        } else {
+          return reply(boom.badImplementation('Failed to update user details'));
+        }
+      });
+    } else {
+      return reply(boom.badImplementation('Failed to retrieve user details'));
+    }
+  });
+};
+
+exports.enable2fa = function (request, reply) {
+  var oneTimePassword = request.payload.oneTimePassword;
+  var user_id = request.auth.credentials.user_id;
+  users.get({
+    _id: user_id
+  }, function(error, user) {
+    if (user) {
+      var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
+      if (generatedOneTimePassword === oneTimePassword) {
+        user.two_factor_auth_enabled = true;
+        users.update(user, function(error, result) {
+          if (!error) {
+            var statusResponse = {
+              statusCode: 200,
+              message: 'Successfully enabled two factor authentication'
+            };
+
+            delete result.password;
+
+            AuditLogger.store({
+              ip_adress        : request.info.remoteAddress,
+              datetime         : Date.now(),
+              user_id          : request.auth.credentials.user_id,
+              user_name        : request.auth.credentials.email,
+              user_type        : 'user',
+              account_id       : request.auth.credentials.companyId,
+              domain_id        : request.auth.credentials.domain,
+              activity_type    : 'modify',
+              activity_target  : 'user',
+              target_id        : user_id,
+              target_name      : result.email,
+              target_object    : result,
+              operation_status : 'success'
+            });
+
+            renderJSON(request, reply, error, statusResponse);
+          } else {
+            return reply(boom.badImplementation('Failed to update user details'));
+          }
+        });
+      } else {
+        return reply(boom.badImplementation('Supplied one time password is wrong'));
+      }
+    } else {
+      return reply(boom.badImplementation('Failed to retrieve user details'));
+    }
+  });
+};
+
+exports.disable2fa = function (request, reply) {
+  var password = request.payload.password;
+  var user_id = request.params.user_id;
+  if ((user_id !== request.auth.credentials.user_id) && (request.auth.credentials.role !== 'admin')) {
+    return reply(boom.badRequest('Cannot disable two factor authentication of another user'));
+  }
+  users.get({
+    _id: user_id
+  }, function(error, user) {
+    if (user) {
+      if (user.companyId && utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId)) {
+        user.two_factor_auth_enabled = false;
+        users.update(user, function(error, result) {
+          if (!error) {
+            var statusResponse = {
+              statusCode: 200,
+              message: 'Successfully disabled two factor authentication'
+            };
+
+            delete result.password;
+
+            AuditLogger.store({
+              ip_adress        : request.info.remoteAddress,
+              datetime         : Date.now(),
+              user_id          : request.auth.credentials.user_id,
+              user_name        : request.auth.credentials.email,
+              user_type        : request.auth.credentials.role,
+              account_id       : request.auth.credentials.companyId,
+              domain_id        : request.auth.credentials.domain,
+              activity_type    : 'modify',
+              activity_target  : 'user',
+              target_id        : user_id,
+              target_name      : result.email,
+              target_object    : result,
+              operation_status : 'success'
+            });
+
+            renderJSON(request, reply, error, statusResponse);
+          } else {
+            return reply(boom.badImplementation('Failed to update user details'));
+          }
+        });
+      } else {
+        return reply(boom.badImplementation('User not found'));
+      }
+    } else {
+      return reply(boom.badImplementation('Failed to retrieve user details'));
     }
   });
 };
