@@ -139,6 +139,7 @@ describe('Rev API Reseller User', function() {
             done();
           }
         }
+        console.log(JSON.stringify(response_json));
         throw new Error('Cannot find freshly created account ' + testCompanyName + ' in the list of existing accounts');
       });
   });
@@ -191,6 +192,7 @@ describe('Rev API Reseller User', function() {
         }
         var response_json = JSON.parse(res.text);
         var last_obj      = response_json.data[response_json.data.length - 1];
+        console.log(JSON.stringify(last_obj));
         last_obj.target_id.should.be.equal(testCompanyID);
         last_obj.target_name.should.be.equal(testCompanyName);
         last_obj.activity_type.should.be.equal('modify');
@@ -200,7 +202,7 @@ describe('Rev API Reseller User', function() {
   });
 
   it('should fail to update an account with existing company name "API QA Reseller Company"', function(done) {
-    testCompanyName = 'API QA Reseller Company';
+    var testCompanyName = 'API QA Reseller Company';
     newAccountJson = { companyName: testCompanyName };
     request(testAPIUrl)
       .put('/v1/accounts/' + testCompanyID)
