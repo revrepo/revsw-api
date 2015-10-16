@@ -9,6 +9,7 @@ var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
 var config = require('config');
+var speakeasy = require('speakeasy');
 
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
 var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
@@ -22,7 +23,8 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
   wrongPassword = 'we5rsdfsdfs',
-  testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
+  testDomain = 'qa-api-test-domain.revsw.net',  // this domain should exist in the QA environment
+  secretKey = ''
 
     var updatedConfigJson = {
 

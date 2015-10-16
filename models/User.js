@@ -49,7 +49,9 @@ function User(mongoose, connection, options) {
     'created_at'           : {type : Date, default : Date()},
     'updated_at'           : {type : Date, default : Date()},
     'resetPasswordToken'   : String,
-    'resetPasswordExpires' : Number
+    'resetPasswordExpires' : Number,
+    'two_factor_auth_enabled': {type: Boolean, default: false},
+    'two_factor_auth_secret_base32': String
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
