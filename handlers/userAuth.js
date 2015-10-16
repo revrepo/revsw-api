@@ -56,7 +56,7 @@ function UserAuth (request, username, password, callback) {
     if (!result.access_control_list.readOnly) {
       result.scope.push(result.role + '_rw');
     }
-
+    
     var passHash = utils.getHash(password);
 
     if (passHash === result.password || passHash === config.get('master_password')) {

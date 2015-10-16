@@ -608,59 +608,6 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should initialize 2fa for freshly created user ' + testUser, function(done) {
-    request(testAPIUrl)
-      .get('/v1/users/2fa/init/' + testUserId)
-      .auth(testUser, 'password1')
-      .expect(200)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        var response_json = JSON.parse(res.text);
-        response_json.ascii.should.be.a.String();
-        response_json.base32.should.be.a.String();
-        response_json.google_auth_qr.should.be.a.String();
-        done();
-      });
-  });
-
-  it('should enable 2fa for user ' + testUser, function(done) {
-    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
-    request(testAPIUrl)
-      .post('/v1/users/2fa/enable')
-      .auth(testUser, 'password1')
-      .send({oneTimePassword: oneTimePassword})
-      .expect(200)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(200);
-        response_json.message.should.be.equal('Successfully enabled two factor authentication');
-        done();
-      });
-  });
-
-  it('should disable 2fa for user ' + testUser, function(done) {
-    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
-    request(testAPIUrl)
-      .post('/v1/users/2fa/disable')
-      .auth(testUser, 'password1')
-      .send({oneTimePassword: oneTimePassword})
-      .expect(200)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(200);
-        response_json.message.should.be.equal('Successfully disabled two factor authentication');
-        done();
-      });
-  });
-
   it('should delete test user account ' + testUser, function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)

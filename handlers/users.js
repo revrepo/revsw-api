@@ -364,6 +364,7 @@ exports.init2fa = function (request, reply) {
     if (user) {
       var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true});
       user.two_factor_auth_secret_base32 = secretKey.base32;
+      delete user.password;
       users.update(user, function(error, result) {
         if (!error) {
 
@@ -402,42 +403,47 @@ exports.enable2fa = function (request, reply) {
   users.get({
     _id: user_id
   }, function(error, user) {
-    if (user && user.two_factor_auth_secret_base32) {
-      var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
-      if (generatedOneTimePassword === oneTimePassword) {
-        user.two_factor_auth_enabled = true;
-        users.update(user, function(error, result) {
-          if (!error) {
-            var statusResponse = {
-              statusCode: 200,
-              message: 'Successfully enabled two factor authentication'
-            };
+    if (user) {
+      if (user.two_factor_auth_secret_base32) {
+        var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
+        if (generatedOneTimePassword === oneTimePassword) {
+          user.two_factor_auth_enabled = true;
+          delete user.password;
+          users.update(user, function(error, result) {
+            if (!error) {
+              var statusResponse = {
+                statusCode: 200,
+                message: 'Successfully enabled two factor authentication'
+              };
 
-            result = removePrivateFields(result);
+              result = removePrivateFields(result);
 
-            AuditLogger.store({
-              ip_adress        : request.info.remoteAddress,
-              datetime         : Date.now(),
-              user_id          : request.auth.credentials.user_id,
-              user_name        : request.auth.credentials.email,
-              user_type        : 'user',
-              account_id       : request.auth.credentials.companyId,
-              domain_id        : request.auth.credentials.domain,
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : user_id,
-              target_name      : result.email,
-              target_object    : result,
-              operation_status : 'success'
-            });
+              AuditLogger.store({
+                ip_adress        : request.info.remoteAddress,
+                datetime         : Date.now(),
+                user_id          : request.auth.credentials.user_id,
+                user_name        : request.auth.credentials.email,
+                user_type        : 'user',
+                account_id       : request.auth.credentials.companyId,
+                domain_id        : request.auth.credentials.domain,
+                activity_type    : 'modify',
+                activity_target  : 'user',
+                target_id        : user_id,
+                target_name      : result.email,
+                target_object    : result,
+                operation_status : 'success'
+              });
 
-            renderJSON(request, reply, error, statusResponse);
-          } else {
-            return reply(boom.badImplementation('Failed to update user details'));
-          }
-        });
+              renderJSON(request, reply, error, statusResponse);
+            } else {
+              return reply(boom.badImplementation('Failed to update user details'));
+            }
+          });
+        } else {
+          return reply(boom.badImplementation('The supplied one time password is incorrect'));
+        }
       } else {
-        return reply(boom.badImplementation('The supplied one time password is incorrect'));
+        return reply(boom.badImplementation('Must call init first'));
       }
     } else {
       return reply(boom.badImplementation('Failed to retrieve user details'));

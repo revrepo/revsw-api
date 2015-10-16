@@ -251,10 +251,10 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/users/2fa/init',
+    path: '/v1/2fa/init',
     config: {
       auth: {
-        scope: [ 'user' ]
+        scope: [ 'user', 'admin_rw' ]
       },
       handler: users.init2fa,
       description: 'Initialize two factor authentication',
@@ -273,10 +273,10 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/users/2fa/enable',
+    path: '/v1/2fa/enable',
     config: {
       auth: {
-        scope: [ 'user' ]
+        scope: [ 'user', 'admin_rw' ]
       },
       handler: users.enable2fa,
       description: 'Enable two factor authentication for the user',
@@ -300,7 +300,7 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/users/2fa/disable/{user_id}',
+    path: '/v1/2fa/disable/{user_id}',
     config: {
       auth: {
         scope: [ 'user', 'admin_rw' ]
