@@ -74,6 +74,7 @@ module.exports = [
           password: Joi.string().min(8).max(15).required().description('Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
+          two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
           access_control_list: Joi.object( {
             dashBoard: Joi.boolean().required().default(true).description('Access to the portal Dashboard section'),
             reports: Joi.boolean().required().default(true).description('Access to the portal REPORTS section'),
@@ -120,6 +121,7 @@ module.exports = [
           password: Joi.string().min(8).max(15).description('New Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
+          two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
           access_control_list: Joi.object( {
             dashBoard: Joi.boolean().default(true).description('Access to the portal Dashboard section'),
             reports: Joi.boolean().default(true).description('Access to the portal REPORTS section'),
@@ -258,7 +260,8 @@ module.exports = [
       },
       handler: users.init2fa,
       description: 'Initialize two factor authentication',
-      notes: 'Use the call to get the QR code for Google Authenticator. This call assigns a new secret key to the user. If the secret key already exists, it will be overwritten.',
+      notes: 'Use the call to get the QR code for Google Authenticator. This call assigns a new secret key to the user. ' +
+        'If the secret key already exists, it will be overwritten.',
       tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {

@@ -24,7 +24,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   wrongUsername = 'wrong_username@revsw.com',
   wrongPassword = 'we5rsdfsdfs',
   testDomain = 'qa-api-test-domain.revsw.net',  // this domain should exist in the QA environment
-  secretKey = ''
+  secretKey = '';
 
     var updatedConfigJson = {
 
@@ -322,6 +322,7 @@ describe('Rev API Admin User', function() {
     'theme': 'light',
     'role': 'admin',
     'password': 'password1',
+    'two_factor_auth_enabled' : false,
     'access_control_list': {
       'readOnly': false,
       'test': true,
@@ -343,6 +344,7 @@ describe('Rev API Admin User', function() {
     'theme': 'dark',
     'role': 'user',
     'password': newTestPassword,
+    'two_factor_auth_enabled' : false,
     'access_control_list': {
       'readOnly': true,
       'test': false,
@@ -693,6 +695,7 @@ describe('Rev API Admin User', function() {
     '55b6ff6a7957012304a49d04'
   ],
   'domain': createDomainIds,
+  'two_factor_auth_enabled' : false,
   'theme': 'light',
   'role': 'admin',
 'password': 'password1',

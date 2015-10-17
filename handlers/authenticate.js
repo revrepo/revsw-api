@@ -24,6 +24,7 @@ var mongoose = require('mongoose');
 var boom     = require('boom');
 var config   = require('config');
 var jwt      = require('jsonwebtoken');
+var speakeasy      = require('speakeasy');
 
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');

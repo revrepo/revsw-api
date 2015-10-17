@@ -47,7 +47,7 @@ function removePrivateFields(obj) {
     }
   }
   return obj;
-};
+}
 
 exports.getUsers = function getUsers(request, reply) {
   users.list(request, function(error, listOfUsers) {
