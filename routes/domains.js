@@ -194,9 +194,6 @@ module.exports = [
         }
       },
       validate    : {
-        options : {
-          stripUnknown : true
-        },
         params  : {
           domain_id : Joi.objectId().required().description('Domain ID')
         },

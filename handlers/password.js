@@ -61,6 +61,7 @@ exports.forgotPassword = function(request, reply) {
         },
 
         function(token, done) {
+          delete user.password;
           user.resetPasswordToken   = token;
           user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan'); // 1 hour
 
@@ -99,7 +100,7 @@ exports.forgotPassword = function(request, reply) {
             subject: config.get('password_reset_email_subject'),
             text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'https://' + config.get('password_reset_portal_domain') + '/portal/#/password/reset/' + token + '\n\n' +
+            'https://' + config.get('password_reset_portal_domain') + '/#/password/reset/' + token + '\n\n' +
             'If you did not request this, please ignore this email and your password will remain unchanged.\n\n' +
             'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
             'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
