@@ -176,7 +176,23 @@ describe('Rev Purge API', function() {
         response_json.message.should.be.equal('The purge request has been successfully queued');
         response_json.request_id.should.be.a.String();
         purgeRequestID = response_json.request_id;
-        console.log('Request ID = ', purgeRequestID);
+        done();
+      });
+  });
+
+  it('should find a new record about purge data in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj      = response_json.data[response_json.data.length - 1];
+        last_obj.activity_type.should.be.equal('purge');
+        last_obj.activity_target.should.be.equal('purge');
         done();
       });
   });

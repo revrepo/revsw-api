@@ -100,7 +100,7 @@ exports.purgeObject = function(request, reply) {
         user_type        : 'user',
         account_id       : request.auth.credentials.companyId,
         domain_id        : request.auth.credentials.domain,
-        activity_type    : 'add',
+        activity_type    : 'purge',
         activity_target  : 'purge',
         target_id        : result.id,
         target_name      : result.req_email,
