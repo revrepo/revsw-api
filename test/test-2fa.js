@@ -256,8 +256,21 @@ describe('Rev API 2FA', function() {
       });
   });
 
-//  it('should authenticate user ' + testUser + ' without oneTimePassword' , function(done) {
-//  });
+  it('should authenticate user ' + testUser + ' without oneTimePassword' , function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({email: testUser, password: testPassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Enjoy your token');
+        done();
+      });
+  });
 
   it('should delete test user account ' + testUser, function(done) {
     request(testAPIUrl)

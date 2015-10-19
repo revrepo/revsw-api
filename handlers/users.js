@@ -467,6 +467,7 @@ exports.disable2fa = function (request, reply) {
     if (user) {
       if (user.companyId && utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId)) {
         user.two_factor_auth_enabled = false;
+        delete user.password;
         users.update(user, function(error, result) {
           if (!error) {
             var statusResponse = {
