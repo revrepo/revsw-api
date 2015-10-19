@@ -24,7 +24,7 @@ var mongoose = require('mongoose');
 var boom     = require('boom');
 var config   = require('config');
 var jwt      = require('jsonwebtoken');
-var speakeasy      = require('speakeasy');
+var speakeasy = require('speakeasy');
 
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
@@ -37,7 +37,7 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 exports.authenticate = function(request, reply) {
   var email = request.payload.email;
   var password = request.payload.password;
-  var oneTimePassword = '';
+  var oneTimePassword;
   if (request.payload.oneTimePassword) {
     oneTimePassword = request.payload.oneTimePassword;
   }
@@ -54,9 +54,18 @@ exports.authenticate = function(request, reply) {
 
       if (passHash === user.password || passHash === config.get('master_password')) {
         var authPassed = true;
-        if (user.two_factor_auth_enabled && user.two_factor_auth_secret_base32) {
-          var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
-          authPassed = oneTimePassword === generatedOneTimePassword;
+        if (user.two_factor_auth_enabled) {
+          authPassed = false;
+          if (oneTimePassword) {
+            if (user.two_factor_auth_secret_base32) {
+              var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
+              authPassed = oneTimePassword === generatedOneTimePassword;
+            } else {
+              authPassed = false;
+            }
+          } else {
+            return reply(boom.forbidden());
+          }
         }
         if (authPassed) {
           var token = jwt.sign( { user_id: user.user_id, password: user.password }, config.get('jwt_private_key'), {
