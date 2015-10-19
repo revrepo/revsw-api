@@ -83,6 +83,24 @@ describe('Rev API 2FA', function() {
       });
   });
 
+  it('should fail to enable 2fa for user ' + testUser + ' before calling init', function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/2fa/enable')
+      .auth(testUser, testPassword)
+      .send({oneTimePassword: oneTimePassword})
+      .expect(500)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(500);
+        response_json.message.should.be.equal('An internal server error occurred');
+        done();
+      });
+  });
+
   it('should initialize 2fa for freshly created user ' + testUser, function(done) {
     request(testAPIUrl)
       .get('/v1/2fa/init')
@@ -98,6 +116,22 @@ describe('Rev API 2FA', function() {
         response_json.base32.should.be.a.String();
         response_json.google_auth_qr.should.be.a.String().and.match(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+.[A-Za-z0-9-_:%&;\?#/.=]+/g);
         secretKey = response_json.base32;
+        done();
+      });
+  });
+
+  it('should authenticate user ' + testUser + ' without oneTimePassword' , function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({email: testUser, password: testPassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Enjoy your token');
         done();
       });
   });
@@ -155,6 +189,55 @@ describe('Rev API 2FA', function() {
       });
   });
 
+  it('should fail to authenticate user ' + testUser + ' without oneTimePassword' , function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({email: testUser, password: testPassword})
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        done();
+      });
+  });
+
+  it('should fail to authenticate user ' + testUser + ' with wrong oneTimePassword' , function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({email: testUser, password: testPassword, oneTimePassword: 'wrong pass'})
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        done();
+      });
+  });
+
+  it('should authenticate user ' + testUser + ' with oneTimePassword' , function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({email: testUser, password: testPassword, oneTimePassword: oneTimePassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Enjoy your token');
+        done();
+      });
+  });
+
   it('should disable 2fa for user ' + testUser, function(done) {
     var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
     request(testAPIUrl)
@@ -169,6 +252,22 @@ describe('Rev API 2FA', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully disabled two factor authentication');
+        done();
+      });
+  });
+
+  it('should authenticate user ' + testUser + ' without oneTimePassword' , function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({email: testUser, password: testPassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Enjoy your token');
         done();
       });
   });
