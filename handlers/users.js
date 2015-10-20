@@ -440,7 +440,7 @@ exports.enable2fa = function (request, reply) {
             }
           });
         } else {
-          return reply(boom.badImplementation('The supplied one time password is incorrect'));
+          return reply(boom.unauthorized('The supplied one time password is incorrect'));
         }
       } else {
         return reply(boom.badImplementation('Must call init first'));
