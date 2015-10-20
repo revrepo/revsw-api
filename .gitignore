@@ -1,3 +1,6 @@
+mode_modules/
+test/rest_api/results/
+test/rest_api/coverage/
 .DS_Store
 .idea
 log

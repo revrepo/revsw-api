@@ -8,8 +8,25 @@
   "quotmark": "single",
   "maxdepth": 5,
   "maxstatements": 33,
-  "maxlen": 170,
+  "maxlen": 80,
   "eqnull": true,
   "funcscope": true,
-  "node": true
+  "node": true,
+
+  "undef": true,
+  "globals": {
+    "jQuery": true,
+    "module": true,
+    "require": true,
+    "window": true,
+    "console": true,
+    "document": true,
+    "describe": true,
+    "it": true,
+    "xit": true,
+    "before": true,
+    "after": true,
+    "beforeEach": true,
+    "afterEach": true
+  }
 }
