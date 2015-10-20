@@ -16,9 +16,11 @@ var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HT
 var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
+  qaUserWithUserPermPassword = 'password1',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
   qaUserWithAdminPermPassword = 'password1',
   qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
+  qaUserWithRevAdminPermPassword = 'password1',
   qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
@@ -159,14 +161,14 @@ describe('Rev API 2FA', function() {
       .post('/v1/2fa/enable')
       .auth(testUser, testPassword)
       .send({oneTimePassword: oneTimePassword})
-      .expect(500)
+      .expect(401)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(500);
-        response_json.message.should.be.equal('An internal server error occurred');
+        response_json.statusCode.should.be.equal(401);
+        response_json.message.should.be.equal('The supplied one time password is incorrect');
         done();
       });
   });
@@ -238,11 +240,67 @@ describe('Rev API 2FA', function() {
       });
   });
 
+  it('should fail to disable 2FA for another user', function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/2fa/disable/' + testUserId)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .send({oneTimePassword: oneTimePassword})
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('User not found');
+        done();
+      });
+  });
+
+  it('should fail to disable 2FA for an existing user from another account', function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/2fa/disable/' + testUserId)
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .send({oneTimePassword: oneTimePassword})
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Bad username or password');
+        done();
+      });
+  });
+
   it('should disable 2fa for user ' + testUser, function(done) {
     var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
     request(testAPIUrl)
       .post('/v1/2fa/disable/' + testUserId)
       .auth(testUser, testPassword)
+      .send({oneTimePassword: oneTimePassword})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully disabled two factor authentication');
+        done();
+      });
+  });
+
+  it('should be allowed to disable 2FA for another user in the same company account', function(done) {
+    var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
+    request(testAPIUrl)
+      .post('/v1/2fa/disable/' + testUserId)
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .send({oneTimePassword: oneTimePassword})
       .expect(200)
       .end(function(err, res) {
