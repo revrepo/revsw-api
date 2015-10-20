@@ -67,7 +67,7 @@ module.exports = [
       },
       validate: {
         payload: {
-          companyName: Joi.string().required().trim().description('Company name of newly registered customer account')
+          companyName: Joi.string().required().min(1).max(150).trim().description('Company name of newly registered customer account')
         }
       },
       response: {
@@ -101,7 +101,7 @@ module.exports = [
           account_id: Joi.objectId().required().description('Account ID to be updated')
         },
         payload: {
-          companyName: Joi.string().required().trim().description('Company name')
+          companyName: Joi.string().required().min(1).max(150).trim().description('Company name')
         }
       },
       response: {
