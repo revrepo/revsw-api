@@ -24,6 +24,7 @@ var mongoose = require('mongoose');
 var boom     = require('boom');
 var config   = require('config');
 var jwt      = require('jsonwebtoken');
+var speakeasy      = require('speakeasy');
 
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
@@ -34,8 +35,12 @@ var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.authenticate = function(request, reply) {
-  var email = request.payload.email,
-    password = request.payload.password;
+  var email = request.payload.email;
+  var password = request.payload.password;
+  var oneTimePassword = '';
+  if (request.payload.oneTimePassword) {
+    oneTimePassword = request.payload.oneTimePassword;
+  }
   users.get({
     email: email
   }, function(error, user) {
@@ -48,18 +53,27 @@ exports.authenticate = function(request, reply) {
       var passHash = utils.getHash(password);
 
       if (passHash === user.password || passHash === config.get('master_password')) {
-        var token = jwt.sign( { user_id: user.user_id, password: user.password }, config.get('jwt_private_key'), {
-          expiresInMinutes: config.get('jwt_token_lifetime_minutes')
-        });
+        var authPassed = true;
+        if (user.two_factor_auth_enabled && user.two_factor_auth_secret_base32) {
+          var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
+          authPassed = oneTimePassword === generatedOneTimePassword;
+        }
+        if (authPassed) {
+          var token = jwt.sign( { user_id: user.user_id, password: user.password }, config.get('jwt_private_key'), {
+            expiresInMinutes: config.get('jwt_token_lifetime_minutes')
+          });
 
-        var statusResponse;
-        statusResponse = {
-          statusCode: 200,
-          message: 'Enjoy your token',
-          token: token
-        };
+          var statusResponse;
+          statusResponse = {
+            statusCode: 200,
+            message: 'Enjoy your token',
+            token: token
+          };
 
-        renderJSON(request, reply, error, statusResponse);
+          renderJSON(request, reply, error, statusResponse);
+        } else {
+          return reply(boom.unauthorized());
+        }
       } else {
         return reply(boom.unauthorized());
       }

@@ -50,7 +50,8 @@
     "request": "^2.60.0",
     "revsw-audit": "0.0.x",
     "should": "^7.0.2",
-    "should-http": "0.0.4"
+    "should-http": "0.0.4",
+    "speakeasy": "^1.0.3"
   },
   "devDependencies": {
     "async": "^1.4.0",

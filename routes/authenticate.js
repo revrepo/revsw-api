@@ -43,7 +43,8 @@ module.exports = [
       validate    : {
         payload : {
           email    : Joi.string().email().required().description('Login name (email address) to authenticate'),
-          password : Joi.string().required().description('Password')
+          password : Joi.string().required().description('Password'),
+          oneTimePassword: Joi.string().description('One Time Password - delivered by Google Authenticator'),
         }
       }
     }
