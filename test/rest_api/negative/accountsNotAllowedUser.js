@@ -1,14 +1,32 @@
+/*************************************************************************
+ *
+ * REV SOFTWARE CONFIDENTIAL
+ *
+ * [2013] - [2015] Rev Software, Inc.
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Rev Software, Inc. and its suppliers,
+ * if any.  The intellectual and technical concepts contained
+ * herein are proprietary to Rev Software, Inc.
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Rev Software, Inc.
+ */
+
 var config = require('./../config/default');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataFactory = require('./../common/dataFactory');
+var DataProvider = require('./../common/providers/data');
 
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataFactory.generateAccount();
+  var accountSample = DataProvider.generateAccount();
   var revAdminUser = config.api.users.admin.revAdmin;
   var resellerUser = config.api.users.reseller;
   var adminUser = config.api.users.admin;
@@ -65,7 +83,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when creating specific account ' +
         'with `user-role` user.',
         function (done) {
-          var newAccount = DataFactory.generateAccount();
+          var newAccount = DataProvider.generateAccount();
           API.session.setCurrentUser(normalUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -76,7 +94,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when updating specific account ' +
         'with `user-role` user.',
         function (done) {
-          var updatedAccount = DataFactory.generateAccount('UPDATED');
+          var updatedAccount = DataProvider.generateAccount('UPDATED');
           API.session.setCurrentUser(normalUser);
           API.resources.accounts
             .update(accountSample.id, updatedAccount)
@@ -118,7 +136,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when creating specific account ' +
         'with `admin-role` user.',
         function (done) {
-          var newAccount = DataFactory.generateAccount();
+          var newAccount = DataProvider.generateAccount();
           API.session.setCurrentUser(adminUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -129,7 +147,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when updating specific account ' +
         'with `admin-role` user.',
         function (done) {
-          var updatedAccount = DataFactory.generateAccount('UPDATED');
+          var updatedAccount = DataProvider.generateAccount('UPDATED');
           API.session.setCurrentUser(adminUser);
           API.resources.accounts
             .update(accountSample.id, updatedAccount)
@@ -171,7 +189,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when creating specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
-          var newAccount = DataFactory.generateAccount();
+          var newAccount = DataProvider.generateAccount();
           API.session.setCurrentUser(revAdminUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -182,7 +200,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when updating specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
-          var updatedAccount = DataFactory.generateAccount('UPDATED');
+          var updatedAccount = DataProvider.generateAccount('UPDATED');
           API.session.setCurrentUser(revAdminUser);
           API.resources.accounts
             .update(accountSample.id, updatedAccount)
