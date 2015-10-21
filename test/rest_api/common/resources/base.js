@@ -47,9 +47,9 @@ var Session = require('./../session');
  *         createOne: Function,
  *         createOneAsPrerequisite: Function,
  *         update: Function,
- *         remove: Function,
- *         removeMany: Function,
- *         removeAllPrerequisites: Function,
+ *         deleteOne: Function,
+ *         deleteMany: Function,
+ *         deleteAllPrerequisites: Function,
  *         rememberAsPrerequisite: Function,
  *         forgetPrerequisite: Function
  *     }
@@ -192,7 +192,7 @@ var BaseResource = function(config) {
     },
 
     /**
-     * ### BaseResource.remove()
+     * ### BaseResource.deleteOne()
      *
      * Sends the DELETE request to the API in order to delete specified object
      * with given ID.
@@ -201,7 +201,7 @@ var BaseResource = function(config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    remove: function(id){
+    deleteOne: function(id){
       var location = _getLocation(id);
       var request = _getRequest()
         .del(location);
@@ -209,7 +209,7 @@ var BaseResource = function(config) {
     },
 
     /**
-     * ### BaseResource.removeMany()
+     * ### BaseResource.deleteMany()
      *
      * Sends the DELETE request to the API in order to delete specified objects
      * with given IDs. All request are run in parallel using promises.
@@ -218,12 +218,12 @@ var BaseResource = function(config) {
      *
      * @returns {object} a promise instance
      */
-    removeMany: function(ids){
+    deleteMany: function(ids){
       var me = this;
       var deletions = [];
       ids.forEach(function(id){
         deletions.push(me
-          .remove(id)
+          .deleteOne(id)
           .then());
       });
       return Promise
@@ -237,12 +237,12 @@ var BaseResource = function(config) {
     },
 
     /**
-     * ### BaseResource.removeAllPrerequisites()
+     * ### BaseResource.deleteAllPrerequisites()
      *
      * @returns {object} the supertest-as-promised instance
      */
-    removeAllPrerequisites: function () {
-      return this.removeMany(_cache);
+    deleteAllPrerequisites: function () {
+      return this.deleteMany(_cache);
     },
 
     /**

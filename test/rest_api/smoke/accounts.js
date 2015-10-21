@@ -42,7 +42,7 @@
 // We need to load some configuration values for our spec/test to execute. This
 // config module has some defined shared properties like username, passwords
 // host information and others
-var config = require('./../config/default');
+var config = require('config');
 
 // ### Requiring common components to use in our spec/test.
 
@@ -114,7 +114,7 @@ describe('Smoke check', function () {
     // of this is done to make sure we don;t leave garbage data in our
     // application being tested.
     API.resources.accounts
-      .removeAllPrerequisites()
+      .deleteAllPrerequisites()
       .finally(done);
   });
 
@@ -181,7 +181,7 @@ describe('Smoke check', function () {
           .then(function (response) {
             // Since we got a success response, we need to clean account created
             API.resources.accounts
-              .remove(response.body.object_id)
+              .deleteOne(response.body.object_id)
               .end(done);
           });
       });
@@ -218,7 +218,7 @@ describe('Smoke check', function () {
           // Since account was created, we can `delete` it
           var objectId = response.body.object_id;
           API.resources.accounts
-            .remove(objectId)
+            .deleteOne(objectId)
             // Validate `delete` was a success
             .expect(200)
             .end(done);

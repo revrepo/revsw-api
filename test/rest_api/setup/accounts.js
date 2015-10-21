@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -70,7 +70,7 @@ describe('Clean up', function () {
               }
             }
             API.resources.accounts
-              .removeMany(ids)
+              .deleteMany(ids)
               .finally(done);
           });
       });

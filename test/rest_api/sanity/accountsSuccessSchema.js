@@ -19,7 +19,7 @@
 require('should-http');
 var Joi = require('joi');
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -49,7 +49,7 @@ describe('Sanity check', function () {
   after(function (done) {
     API.session.setCurrentUser(resellerUser);
     API.resources.accounts
-      .removeAllPrerequisites()
+      .deleteAllPrerequisites()
       .finally(done);
   });
 
@@ -114,7 +114,7 @@ describe('Sanity check', function () {
                 }
                 // TODO: register prerequisite
                 API.resources.accounts
-                  .remove(data.object_id)
+                  .deleteOne(data.object_id)
                   .end(done);
               });
             });
@@ -148,7 +148,7 @@ describe('Sanity check', function () {
             .createOneAsPrerequisite(newProject)
             .then(function (response) {
               API.resources.accounts
-                .remove(response.body.object_id)
+                .deleteOne(response.body.object_id)
                 .expect(200)
                 .then(function (response) {
                   var data = response.body;

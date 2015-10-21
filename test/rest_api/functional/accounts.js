@@ -18,7 +18,7 @@
 
 require('should-http');
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -91,7 +91,7 @@ describe('Functional check', function () {
           .then(function (response) {
             API.session.setCurrentUser(anotherResellerUser);
             API.resources.accounts
-              .remove(response.body.object_id)
+              .deleteOne(response.body.object_id)
               .expect(400)
               .end(done);
           });
@@ -107,7 +107,7 @@ describe('Functional check', function () {
           .then(function (response) {
             var id = response.body.object_id;
             API.resources.accounts
-              .remove(id)
+              .deleteOne(id)
               .then(function () {
                 API.resources.accounts
                   .getOne(id)
@@ -131,7 +131,7 @@ describe('Functional check', function () {
           .then(function (response) {
             var id = response.body.object_id;
             API.resources.accounts
-              .remove(id)
+              .deleteOne(id)
               .then(function () {
                 API.resources.accounts
                   .update(id, updatedAccount)
@@ -154,10 +154,10 @@ describe('Functional check', function () {
           .then(function (response) {
             var id = response.body.object_id;
             API.resources.accounts
-              .remove(id)
+              .deleteOne(id)
               .then(function () {
                 API.resources.accounts
-                  .remove(id)
+                  .deleteOne(id)
                   .expect(400)
                   .end(function (err, res) {
                     res.body.message.should.equal('Account not found');

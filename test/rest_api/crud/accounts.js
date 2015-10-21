@@ -18,7 +18,7 @@
 
 require('should-http');
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -44,7 +44,7 @@ describe('CRUD check', function () {
   after(function (done) {
     API.session.setCurrentUser(resellerUser);
     API.resources.accounts
-      .removeAllPrerequisites()
+      .deleteAllPrerequisites()
       .finally(done);
   });
 
@@ -103,7 +103,7 @@ describe('CRUD check', function () {
             newAccount.object_id.should.not.be.empty();
             // TODO: register prerequisite
             API.resources.accounts
-              .remove(newAccount.object_id)
+              .deleteOne(newAccount.object_id)
               .end(done);
           });
       });
@@ -136,7 +136,7 @@ describe('CRUD check', function () {
         .createOneAsPrerequisite(newProject)
         .then(function (response) {
           API.resources.accounts
-            .remove(response.body.object_id)
+            .deleteOne(response.body.object_id)
             .expect(200)
             .then(function (response) {
               var account = response.body;

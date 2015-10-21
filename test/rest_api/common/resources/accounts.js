@@ -19,7 +19,7 @@
 // # Accounts Resource object
 
 // Requiring config and `BaseResource`
-var config = require('./../../config/default');
+var config = require('config');
 var BaseResource = require('./base');
 
 // Creating new instance of BaseResource which is going to represent the API

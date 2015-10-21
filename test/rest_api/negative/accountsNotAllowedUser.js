@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -45,7 +45,7 @@ describe('Negative check', function () {
   after(function (done) {
     API.session.setCurrentUser(resellerUser);
     API.resources.accounts
-      .removeAllPrerequisites()
+      .deleteAllPrerequisites()
       .finally(done);
   });
 
@@ -107,7 +107,7 @@ describe('Negative check', function () {
         function (done) {
         API.session.setCurrentUser(normalUser);
         API.resources.accounts
-          .remove(accountSample.id)
+          .deleteOne(accountSample.id)
           .expect(403)
           .end(done);
 
@@ -160,7 +160,7 @@ describe('Negative check', function () {
         function (done) {
           API.session.setCurrentUser(adminUser);
           API.resources.accounts
-            .remove(accountSample.id)
+            .deleteOne(accountSample.id)
             .expect(403)
             .end(done);
 
@@ -213,7 +213,7 @@ describe('Negative check', function () {
         function (done) {
           API.session.setCurrentUser(revAdminUser);
           API.resources.accounts
-            .remove(accountSample.id)
+            .deleteOne(accountSample.id)
             .expect(401)
             .end(done);
         });

@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 
@@ -70,7 +70,7 @@ describe('Negative check', function () {
               //is fixed:
               //[BUG] Account could be created with a bogus Company name.
               API.resources.accounts
-                .remove(response.body.object_id)
+                .deleteOne(response.body.object_id)
                 .end(function () {
                   done(new Error('BUG FOUND: Account could be created with a ' +
                     'bogus company name. ==> ' + error.message));
@@ -96,7 +96,7 @@ describe('Negative check', function () {
           var bogusId = '+_)(*&^%$#@+_)(*&^%$#@';
           API.session.setCurrentUser(resellerUser);
           API.resources.accounts
-            .remove(bogusId)
+            .deleteOne(bogusId)
             .expect(400)
             .end(done);
         });
