@@ -91,14 +91,14 @@ describe('Rev API 2FA', function() {
       .post('/v1/2fa/enable')
       .auth(testUser, testPassword)
       .send({oneTimePassword: oneTimePassword})
-      .expect(500)
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(500);
-        response_json.message.should.be.equal('An internal server error occurred');
+        response_json.statusCode.should.be.equal(400);
+        response_json.message.should.be.equal('Must call init first');
         done();
       });
   });
@@ -161,13 +161,13 @@ describe('Rev API 2FA', function() {
       .post('/v1/2fa/enable')
       .auth(testUser, testPassword)
       .send({oneTimePassword: oneTimePassword})
-      .expect(401)
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(401);
+        response_json.statusCode.should.be.equal(400);
         response_json.message.should.be.equal('The supplied one time password is incorrect');
         done();
       });

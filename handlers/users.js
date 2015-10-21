@@ -71,6 +71,7 @@ exports.getUsers = function getUsers(request, reply) {
       shortList[i].companyId = listOfUsers[i].companyId;
       shortList[i].domain = listOfUsers[i].domain;
       shortList[i].role = listOfUsers[i].role;
+      shortList[i].two_factor_auth_enabled = listOfUsers[i].two_factor_auth_enabled ? listOfUsers[i].two_factor_auth_enabled : false ;
     }
 
     renderJSON(request, reply, error, shortList);
@@ -440,10 +441,10 @@ exports.enable2fa = function (request, reply) {
             }
           });
         } else {
-          return reply(boom.unauthorized('The supplied one time password is incorrect'));
+          return reply(boom.badRequest('The supplied one time password is incorrect'));
         }
       } else {
-        return reply(boom.badImplementation('Must call init first'));
+        return reply(boom.badRequest('Must call init first'));
       }
     } else {
       return reply(boom.badImplementation('Failed to retrieve user details'));

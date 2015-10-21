@@ -322,7 +322,7 @@ module.exports = [
           user_id: Joi.objectId().description('Disable two factor authentication for this user ID')
         },
         payload: {
-          oneTimePassword: Joi.string().required().description('One time password supplied by user')
+          oneTimePassword: Joi.string().description('One time password supplied by user')
         }
       },
       response: {
