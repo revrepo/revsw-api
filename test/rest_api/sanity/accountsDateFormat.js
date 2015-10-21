@@ -18,7 +18,7 @@
 
 require('should-http');
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -45,7 +45,7 @@ describe('Sanity check', function () {
   after(function (done) {
     API.session.setCurrentUser(resellerUser);
     API.resources.accounts
-      .removeAllPrerequisites()
+      .deleteAllPrerequisites()
       .finally(done);
   });
 

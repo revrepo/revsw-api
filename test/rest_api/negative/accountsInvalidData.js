@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 
@@ -86,7 +86,7 @@ describe('Negative check', function () {
           var invalidId = 'invalid-account-id';
           API.session.setCurrentUser(resellerUser);
           API.resources.accounts
-            .remove(invalidId)
+            .deleteOne(invalidId)
             .expect(400)
             .end(done);
         });

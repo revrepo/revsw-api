@@ -18,7 +18,7 @@
 
 require('should-http');
 
-var config = require('./../config/default');
+var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
@@ -83,7 +83,7 @@ describe('Boundary check', function () {
             // TODO: remove following line/remove-action when this BUG is fixed
             // BUG: It is possible to create account with very long company name
             API.resources.accounts
-              .remove(response.body.object_id)
+              .deleteOne(response.body.object_id)
               .then();
             //response.body.message.should.equal('child "companyName" fails ' +
             //  'because ["companyName" is not allowed to be too long]');
