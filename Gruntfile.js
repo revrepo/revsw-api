@@ -4,7 +4,12 @@ module.exports = function (grunt) {
 
     pkg: grunt.file.readJSON('package.json'),
 
-    clean: ['dist', 'test/rest_api/results', 'test/rest_api/coverage'],
+    clean: [
+      'dist',
+      'test/rest_api/coverage',
+      'test/rest_api/docs',
+      'test/rest_api/results'
+    ],
 
     //concat: {
     //  options: {
@@ -93,7 +98,7 @@ module.exports = function (grunt) {
          document: true
          }*/
       }
-    }//,
+    },
 
     //watch: {
     //  files: ['<%= jshint.files %>'],
@@ -117,6 +122,20 @@ module.exports = function (grunt) {
     //    'out': 'doc/'
     //  }
     //}
+
+    docker: {
+      options: {
+        // These options are applied to all tasks
+      },
+      test: {
+        // Specify `src` and `dest` directly on the task object
+        src: ['test/rest_api/**/*.js'],
+        dest: 'test/rest_api/docs',
+        options: {
+          // ...
+        }
+      }
+    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -128,6 +147,7 @@ module.exports = function (grunt) {
   //grunt.loadNpmTasks('grunt-contrib-watch');
   //grunt.loadNpmTasks('grunt-docco');
   //grunt.loadNpmTasks('grunt-groc');
+  grunt.loadNpmTasks('grunt-docker');
 
 
   grunt.registerTask('test', ['clean', 'jshint', 'mochaTest']);

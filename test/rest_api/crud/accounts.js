@@ -1,16 +1,34 @@
+/*************************************************************************
+ *
+ * REV SOFTWARE CONFIDENTIAL
+ *
+ * [2013] - [2015] Rev Software, Inc.
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains
+ * the property of Rev Software, Inc. and its suppliers,
+ * if any.  The intellectual and technical concepts contained
+ * herein are proprietary to Rev Software, Inc.
+ * and its suppliers and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from Rev Software, Inc.
+ */
+
 require('should-http');
 
 var config = require('./../config/default');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataFactory = require('./../common/dataFactory');
+var DataProvider = require('./../common/providers/data');
 
 describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataFactory.generateAccount();
+  var accountSample = DataProvider.generateAccount();
   var resellerUser = config.api.users.reseller;
 
   before(function (done) {
@@ -73,7 +91,7 @@ describe('CRUD check', function () {
 
     it('should allow to create an account.',
       function (done) {
-        var newAccount = DataFactory.generateAccount();
+        var newAccount = DataProvider.generateAccount();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOne(newAccount)
@@ -92,8 +110,8 @@ describe('CRUD check', function () {
 
     it('should allow to update an account.',
       function (done) {
-        var newAccount = DataFactory.generateAccount();
-        var updatedAccount = DataFactory.generateAccount('UPDATED');
+        var newAccount = DataProvider.generateAccount();
+        var updatedAccount = DataProvider.generateAccount('UPDATED');
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -112,7 +130,7 @@ describe('CRUD check', function () {
       });
 
     it('should allow to delete an account.', function (done) {
-      var newProject = DataFactory.generateAccount();
+      var newProject = DataProvider.generateAccount();
       API.session.setCurrentUser(resellerUser);
       API.resources.accounts
         .createOneAsPrerequisite(newProject)
