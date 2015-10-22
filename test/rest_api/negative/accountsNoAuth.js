@@ -41,9 +41,7 @@ describe('Negative check', function () {
 
   after(function (done) {
     API.session.setCurrentUser(resellerUser);
-    API.resources.accounts
-      .deleteAllPrerequisites()
-      .finally(done);
+    API.resources.accounts.deleteAllPrerequisites(done);
   });
 
   describe('Accounts resource', function () {

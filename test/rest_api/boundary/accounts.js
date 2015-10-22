@@ -68,7 +68,7 @@ describe('Boundary check', function () {
       '`long` company name.',
       function (done) {
         // Generating very long string (around 6318 chars)
-        var str = "abcdefghijklmnopqrstuvwxyz";
+        var str = 'abcdefghijklmnopqrstuvwxyz';
         var iterations = 5;
         for (var i = 0; i < iterations; i++) {
           str += str + str;

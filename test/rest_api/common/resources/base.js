@@ -226,14 +226,7 @@ var BaseResource = function(config) {
           .deleteOne(id)
           .then());
       });
-      return Promise
-        .all(deletions)
-        .then(function (res) {
-          // What to do in case a pre-requisite is deleted successfully?
-        })
-        .catch(function (err) {
-          // What to do in case a pre-requisite is NOT deleted successfully?
-        });
+      return Promise.all(deletions);
     },
 
     /**
@@ -241,8 +234,17 @@ var BaseResource = function(config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    deleteAllPrerequisites: function () {
-      return this.deleteMany(_cache);
+    deleteAllPrerequisites: function (done) {
+      //return done();/*
+      this.deleteMany(_cache)
+        .then(function () {
+          // What to do in case a pre-requisite is deleted successfully?
+          done();
+        })
+        .catch(function () {
+          // What to do in case a pre-requisite is NOT deleted successfully?
+          done();
+        });
     },
 
     /**
