@@ -113,9 +113,7 @@ describe('Smoke check', function () {
     // `remove` or `delete` all pre-requisites that were created before. All
     // of this is done to make sure we don;t leave garbage data in our
     // application being tested.
-    API.resources.accounts
-      .deleteAllPrerequisites()
-      .finally(done);
+    API.resources.accounts.deleteAllPrerequisites(done);
   });
 
   describe('Accounts resource', function () {

@@ -48,9 +48,7 @@ describe('Sanity check', function () {
 
   after(function (done) {
     API.session.setCurrentUser(resellerUser);
-    API.resources.accounts
-      .deleteAllPrerequisites()
-      .finally(done);
+    API.resources.accounts.deleteAllPrerequisites(done);
   });
 
   describe('Accounts resource', function () {
@@ -139,8 +137,8 @@ describe('Sanity check', function () {
             });
         });
 
-      it('should return data applying `success response` schema when deleting ' +
-        'an account.',
+      it('should return data applying `success response` schema when ' +
+        'deleting an account.',
         function (done) {
           var newProject = DataProvider.generateAccount();
           API.session.setCurrentUser(resellerUser);
