@@ -30,7 +30,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 describe('Rev API 2FA', function() {
 
-  var myCompanyId = [],
+  var myCompanyId,
     myDomains = [],
     testUser = 'api-qa-user-' + Date.now() + '@revsw.com',
     testUserId,
