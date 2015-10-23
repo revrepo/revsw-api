@@ -124,7 +124,7 @@ describe('Rev API keys', function() {
   it('should fail to create an API key without admin permissions' + testUser, function(done) {
     request(testAPIUrl)
       .post('/v1/api_keys')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .send({companyId: myCompanyId})
       .expect(403)
       .end(function(err, res) {
@@ -134,7 +134,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
         done();
       });
   });

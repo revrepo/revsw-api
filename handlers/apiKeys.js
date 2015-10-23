@@ -129,7 +129,7 @@ exports.updateApiKey = function (request, reply) {
         domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'account',
-        target_id        : result._id + '',
+        target_id        : result.id + '',
         target_name      : result.key,
         target_object    : result,
         operation_status : 'success'
@@ -166,7 +166,7 @@ exports.activateApiKey = function (request, reply) {
         domain_id        : request.auth.credentials.domain,
         activity_type    : 'activate',
         activity_target  : 'account',
-        target_id        : result._id + '',
+        target_id        : result.id + '',
         target_name      : result.key,
         target_object    : result,
         operation_status : 'success'
