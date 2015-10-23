@@ -4,4 +4,5 @@ test/rest_api/docs/
 test/rest_api/results/
 .DS_Store
 .idea
+log
 lognpm-debug.log
