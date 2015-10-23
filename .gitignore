@@ -1,4 +1,7 @@
+node_modules/
+test/rest_api/coverage/
+test/rest_api/docs/
+test/rest_api/results/
 .DS_Store
 .idea
-log
-npm-debug.log
+lognpm-debug.log

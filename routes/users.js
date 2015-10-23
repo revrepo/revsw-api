@@ -256,7 +256,7 @@ module.exports = [
     path: '/v1/2fa/init',
     config: {
       auth: {
-        scope: [ 'user', 'admin_rw' ]
+        scope: [ 'user', 'admin', 'reseller' ]
       },
       handler: users.init2fa,
       description: 'Initialize two factor authentication',
@@ -279,7 +279,7 @@ module.exports = [
     path: '/v1/2fa/enable',
     config: {
       auth: {
-        scope: [ 'user', 'admin_rw' ]
+        scope: [ 'user', 'admin', 'reseller' ]
       },
       handler: users.enable2fa,
       description: 'Enable two factor authentication for the user',
@@ -306,7 +306,7 @@ module.exports = [
     path: '/v1/2fa/disable/{user_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin_rw' ]
+        scope: [ 'user', 'admin', 'reseller' ]
       },
       handler: users.disable2fa,
       description: 'Disable two factor authentication for the user',
@@ -320,9 +320,6 @@ module.exports = [
       validate: {
         params: {
           user_id: Joi.objectId().description('Disable two factor authentication for this user ID')
-        },
-        payload: {
-          oneTimePassword: Joi.string().required().description('One time password supplied by user')
         }
       },
       response: {

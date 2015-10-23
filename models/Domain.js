@@ -31,7 +31,7 @@ function Domain(mongoose, connection, options) {
   this.DomainSchema = new this.Schema({
 
     'BPGroup'                    : {type : String},
-    'COGroupx'                   : {type : String},
+    'COGroup'                    : {type : String},
     'bp_apache_custom_config'    : {type : String},
     'bp_apache_fe_custom_config' : {type : String},
     'co_apache_custom_config'    : {type : String},
