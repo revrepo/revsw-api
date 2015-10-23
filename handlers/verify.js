@@ -164,7 +164,7 @@ exports.referenced = function (request, reply) {
       };
     }
 
-    renderJSON(request, reply, null, result);
+    renderJSON(request, reply, err, result);
   });
 };
 
@@ -247,6 +247,6 @@ exports.indexes = function (request, reply) {
         result[name][key][data[0][0]] = data[0][1];
       })
     });
-    renderJSON(request, reply, null, result);
+    renderJSON(request, reply, err, result);
   });
 };
