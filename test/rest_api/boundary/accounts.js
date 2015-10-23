@@ -79,17 +79,13 @@ describe('Boundary check', function () {
         API.resources.accounts
           .createOne(newAccount)
           .expect(400)
-          .end(function (err, response) {
-            // TODO: remove following line/remove-action when this BUG is fixed
-            // BUG: It is possible to create account with very long company name
-            API.resources.accounts
-              .deleteOne(response.body.object_id)
-              .then();
-            //response.body.message.should.equal('child "companyName" fails ' +
-            //  'because ["companyName" is not allowed to be too long]');
-            done(new Error('[BUG] It is possible to create account with very ' +
-              'long company name'));
-          });
+          .then(function (response) {
+            response.body.message.should.equal('child "companyName" fails ' +
+              'because ["companyName" length must be less than or equal to ' +
+              '150 characters long]');
+            done();
+          })
+          .catch(done);
       });
   });
 });

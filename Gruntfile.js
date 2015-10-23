@@ -28,11 +28,13 @@ module.exports = function (grunt) {
     },
 
     jshint: {
-      files: ['Gruntfile.js', 'src/**/*.js', 'test/rest_api/**/*.js'],
-      options: {
-        reporter: require('jshint-html-reporter'),
-        reporterOutput: 'test/rest_api/results/jshint.html',
-        jshintrc: true
+      test: {
+        src: ['Gruntfile.js', 'test/rest_api/**/*.js'],
+        options: {
+          reporter: require('jshint-html-reporter'),
+          reporterOutput: 'test/rest_api/results/jshint.html',
+          jshintrc: 'test/.jshintrc'
+        }
       }
     },
 
@@ -56,7 +58,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-docker');
 
-  grunt.registerTask('default', ['clean', 'jshint', 'mochaTest', 'docker']);
-  grunt.registerTask('test', ['clean', 'jshint', 'mochaTest']);
+  grunt.registerTask('default', ['clean', 'jshint:test', 'mochaTest',
+    'docker']);
+  grunt.registerTask('test', ['clean', 'jshint:test', 'mochaTest']);
   grunt.registerTask('doc', ['clean', 'docker']);
 };

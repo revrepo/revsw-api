@@ -2,8 +2,8 @@
   "api": {
     "host": {
       "protocol": "https",
-      "name": "testsjc20-api01.revsw.net",
-      "port": 443
+      "name": "0.0.0.0",
+      "port": 8000
     },
     "version": "v1",
     "resources": {

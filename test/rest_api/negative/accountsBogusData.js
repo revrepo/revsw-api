@@ -65,17 +65,11 @@ describe('Negative check', function () {
           API.resources.accounts
             .createOne(invalidAccount)
             .expect(400)
-            .end(function (error, response) {
-              //TODO: Change this callback by `done` callback when following bug
-              //is fixed:
-              //[BUG] Account could be created with a bogus Company name.
-              API.resources.accounts
-                .deleteOne(response.body.object_id)
-                .end(function () {
-                  done(new Error('BUG FOUND: Account could be created with a ' +
-                    'bogus company name. ==> ' + error.message));
-                });
-            });
+            .then(function (response) {
+              response.body.error.should.equal('Bad Request');
+              done();
+            })
+            .catch(done);
         });
 
       it('should return `Bad Request` response when updating specific account',
