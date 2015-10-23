@@ -21,21 +21,36 @@
 'use strict';
 
 var Joi = require('joi');
-
-var verifyData = require('../handlers/verifyData');
-
+var verify = require('../handlers/verify');
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
   {
     method: 'GET',
-    path: '/v1/verifyData',
+    path: '/v1/verify/referenced',
     config: {
       auth: {
         scope: [ 'admin' ]
       },
-      handler: verifyData.verify,
-      description: 'Verify record data (that all exist and referenced records exist) and verify required indexes',
+      handler: verify.referenced,
+      description: 'Verify record data (that all exist and referenced records exist)',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/v1/verify/indexes',
+    config: {
+      auth: {
+        scope: [ 'admin' ]
+      },
+      handler: verify.indexes,
+      description: 'Verify required indexes',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {

@@ -112,6 +112,29 @@ Domain.prototype = {
 //      console.log('inside domains.list, right before callback - domains = ', domains);
       callback(err, domains);
     });
+  },
+
+  listAll : function (request, callback) {
+    this.model.find({}, function (err, domains) {
+      if (err) {
+        callback(err, null);
+      }
+      if (domains) {
+        domains = utils.clone(domains);
+
+        for (var i = 0; i < domains.length; i++) {
+          domains[i].id = domains[i]._id;
+
+          delete domains[i]._id;
+          delete domains[i].__v;
+
+          if (domains[i].sync_status === null) {
+            domains[i].sync_status = 'Unknown';
+          }
+        }
+      }
+      callback(err, domains);
+    });
   }
 
 };
