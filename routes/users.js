@@ -320,9 +320,6 @@ module.exports = [
       validate: {
         params: {
           user_id: Joi.objectId().description('Disable two factor authentication for this user ID')
-        },
-        payload: {
-          oneTimePassword: Joi.string().description('One time password supplied by user')
         }
       },
       response: {
