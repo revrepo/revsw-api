@@ -28,6 +28,7 @@ var Hapi = require('hapi'),
   Pack = require('../package'),
   UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
+  validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
   User = require('../models/User');
 
 var server = new Hapi.Server();
@@ -103,7 +104,7 @@ var swaggerOptions = {
 };
 
 server.register(require('hapi-auth-basic'), function (err) {
-  server.auth.strategy('basic', 'basic', { validateFunc: UserAuth });
+  server.auth.strategy('basic', 'basic', {validateFunc: UserAuth});
 });
 
 server.register(require('hapi-auth-jwt'), function (err) {
@@ -113,6 +114,9 @@ server.register(require('hapi-auth-jwt'), function (err) {
   });
 });
 
+server.register(require('hapi-auth-apikey'), function (err) {
+  server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
+});
 
 // adds swagger self documentation plugin
 server.register([{
