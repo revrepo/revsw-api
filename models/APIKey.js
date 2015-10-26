@@ -30,6 +30,7 @@ function APIKey(mongoose, connection, options) {
 
   this.APIKeySchema = new this.Schema({
     'key'             : String,
+    'key_name'        : String,
     'companyId'       : String,
     'domains'         : [{domain: String}],
     'createdBy'       : String,
