@@ -35,6 +35,10 @@ exports.validateAPIKey = function (request, key, callback) {
     key: key
   }, function(error, result) {
 
+    if (error) {
+      return callback(error, false, result);
+    }
+
     if (!result) {
       return callback(error, false, result);
     }
@@ -44,13 +48,6 @@ exports.validateAPIKey = function (request, key, callback) {
       return callback(error, false, result);
     }
 
-    accounts.get({
-      id: result.companyId
-    }, function(error, result) {
-      if (!result) {
-        return callback(error, false, result);
-      }
-      return callback(error, true, result);
-    });
+    return callback(error, true, result);
   });
 };
