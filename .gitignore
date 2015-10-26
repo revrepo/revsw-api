@@ -1,4 +1,3 @@
-node_modules/
 test/rest_api/coverage/
 test/rest_api/docs/
 test/rest_api/results/

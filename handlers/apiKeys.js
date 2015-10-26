@@ -219,13 +219,13 @@ exports.deleteApiKey = function (request, reply) {
     key: key
   }, function (error, result) {
     if (error || !key) {
-      return reply(boom.badRequest('API key not found'));
+      return reply(boom.badRequest('API key not found 1'));
     }
     apiKeys.remove({
       key: key
     }, function (error) {
       if (error) {
-        return reply(boom.badRequest('API key not found'));
+        return reply(boom.badRequest('API key not found 2'));
       }
       var statusResponse;
       statusResponse = {
