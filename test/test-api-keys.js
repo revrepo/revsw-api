@@ -157,6 +157,56 @@ describe('Rev API keys', function() {
       });
   });
 
+  it('should fail to return a list of API keys for the company without admin permissions', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys')
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller');
+        done();
+      });
+  });
+
+  it('should fail to return a list of API keys for the company with wrong password', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys')
+      .auth(qaUserWithUserPerm, 'du3jwuu823urj')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Bad username or password');
+        done();
+      });
+  });
+
+  it('should fail to return a list of API keys for the company without authentication', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Missing authentication');
+        done();
+      });
+  });
+
   it('should return a list of API keys for the company', function(done) {
     request(testAPIUrl)
       .get('/v1/api_keys')
@@ -168,6 +218,58 @@ describe('Rev API keys', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.should.be.an.Array;
+        done();
+      });
+  });
+
+  it('should fail to update an API key for the company without supplying the key', function(done) {
+    request(testAPIUrl)
+      .put('/v1/api_keys/')
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(404)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(404);
+        response_json.error.should.be.equal('Not Found');
+        done();
+      });
+  });
+
+  it('should fail to update an API key for the company without admin permissions', function(done) {
+    request(testAPIUrl)
+      .put('/v1/api_keys/' + createdAPIKey)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .send({read_only_status: true})
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        done();
+      });
+  });
+
+  it('should fail to update an API key for the company without authentication', function(done) {
+    request(testAPIUrl)
+      .put('/v1/api_keys/' + createdAPIKey)
+      .send({read_only_status: true})
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Missing authentication');
         done();
       });
   });
@@ -185,6 +287,213 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully updated the API key');
+        done();
+      });
+  });
+
+  it('should fail to activate the API key for the company without supplying the key', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/activate/')
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(404)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(404);
+        response_json.error.should.be.equal('Not Found');
+        done();
+      });
+  });
+
+  it('should fail to activate the API key for the company without admin permissions', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/activate/' + createdAPIKey)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .send({read_only_status: true})
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        done();
+      });
+  });
+
+  it('should fail to activate the API key for the company without authentication', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/activate/' + createdAPIKey)
+      .send({read_only_status: true})
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Missing authentication');
+        done();
+      });
+  });
+
+  it('should activate the API key for the company', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/activate/' + createdAPIKey)
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully activated the API key');
+        done();
+      });
+  });
+
+  it('should fail to deactivate the API key for the company without supplying the key', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/deactivate/')
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(404)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(404);
+        response_json.error.should.be.equal('Not Found');
+        done();
+      });
+  });
+
+  it('should fail to deactivate the API key for the company without admin permissions', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/deactivate/' + createdAPIKey)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .send({read_only_status: true})
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        done();
+      });
+  });
+
+  it('should fail to deactivate the API key for the company without authentication', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/deactivate/' + createdAPIKey)
+      .send({read_only_status: true})
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Missing authentication');
+        done();
+      });
+  });
+
+  it('should deactivate the API key for the company', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/deactivate/' + createdAPIKey)
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully deactivated the API key');
+        done();
+      });
+  });
+
+  it('should fail to delete the API key for the company without supplying the key', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/')
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(404)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(404);
+        response_json.error.should.be.equal('Not Found');
+        done();
+      });
+  });
+
+  it('should fail to delete the API key for the company without admin permissions', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/' + createdAPIKey)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .send({read_only_status: true})
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        done();
+      });
+  });
+
+  it('should fail to delete the API key for the company without authentication', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/' + createdAPIKey)
+      .send({read_only_status: true})
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Missing authentication');
+        done();
+      });
+  });
+
+  it('should fail to delete the API key for the company', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/' + createdAPIKey)
+      .auth(testUser, testPassword)
+      .send({read_only_status: true})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(200);
+        response_json.message.should.be.equal('Successfully deleted the API key');
         done();
       });
   });
