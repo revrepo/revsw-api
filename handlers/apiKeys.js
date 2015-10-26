@@ -46,6 +46,9 @@ exports.createApiKey = function(request, reply) {
   var newApiKey = request.payload;
   newApiKey.createdBy = request.auth.credentials.email;
   newApiKey.key = uuid();
+  if (!newApiKey.key_name) {
+    newApiKey.key_name = newApiKey.companyId;
+  }
 
   accounts.get({
     _id: newApiKey.companyId
@@ -80,15 +83,14 @@ exports.createApiKey = function(request, reply) {
           AuditLogger.store({
             ip_adress       : request.info.remoteAddress,
             datetime        : Date.now(),
-            user_id         : request.auth.credentials.user_id,
-            user_name       : request.auth.credentials.email,
+            user_id         : newApiKey.key,
+            user_name       : newApiKey.key_name,
             user_type       : 'user',
-            account_id      : request.auth.credentials.companyId,
-            domain_id       : request.auth.credentials.domain,
+            account_id      : newApiKey.companyId,
             activity_type   : 'add',
-            activity_target : 'account',
+            activity_target : 'apikey',
             target_id       : result._id + '',
-            target_name     : result.key,
+            target_name     : result.key_name,
             target_object   : result,
             operation_status: 'success'
           });
@@ -122,15 +124,14 @@ exports.updateApiKey = function (request, reply) {
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
+        user_id          : updatedApiKey.key,
+        user_name        : updatedApiKey.key_name,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        domain_id        : request.auth.credentials.domain,
+        account_id       : updatedApiKey.companyId,
         activity_type    : 'modify',
-        activity_target  : 'account',
+        activity_target  : 'apikey',
         target_id        : result.id + '',
-        target_name      : result.key,
+        target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
       });
@@ -159,15 +160,14 @@ exports.activateApiKey = function (request, reply) {
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
+        user_id          : result.key,
+        user_name        : result.key_name,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        domain_id        : request.auth.credentials.domain,
-        activity_type    : 'activate',
-        activity_target  : 'account',
+        account_id       : result.companyId,
+        activity_type    : 'modify',
+        activity_target  : 'apikey',
         target_id        : result.id + '',
-        target_name      : result.key,
+        target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
       });
@@ -196,15 +196,14 @@ exports.deactivateApiKey = function (request, reply) {
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
+        user_id          : result.key,
+        user_name        : result.key_name,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        domain_id        : request.auth.credentials.domain,
-        activity_type    : 'deactivate',
-        activity_target  : 'account',
-        target_id        : result._id + '',
-        target_name      : result.key,
+        account_id       : result.companyId,
+        activity_type    : 'modify',
+        activity_target  : 'apikey',
+        target_id        : result.id + '',
+        target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
       });
@@ -239,15 +238,14 @@ exports.deleteApiKey = function (request, reply) {
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
+        user_id          : result.key,
+        user_name        : result.key_name,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        domain_id        : request.auth.credentials.domain,
+        account_id       : result.companyId,
         activity_type    : 'delete',
-        activity_target  : 'account',
+        activity_target  : 'apikey',
         target_id        : result._id + '',
-        target_name      : result.key,
+        target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
       });
