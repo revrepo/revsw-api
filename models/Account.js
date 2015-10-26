@@ -27,6 +27,7 @@ function Account(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
   this.ObjectId = this.Schema.ObjectId;
+  this.mongoose = mongoose;
 
   this.AccountSchema = new this.Schema({
     'companyName' : String,
@@ -73,6 +74,22 @@ Account.prototype = {
             accounts.splice(i, 1);
             i--;
           }
+        }
+      }
+
+      callback(err, accounts);
+    });
+  },
+
+  listAll : function (request, callback) {
+    this.model.find(function (err, accounts) {
+      if (accounts) {
+        accounts = utils.clone(accounts);
+        for (var i = 0; i < accounts.length; i++) {
+          accounts[i].id = accounts[i]._id;
+          delete accounts[i]._id;
+          delete accounts[i].__v;
+          delete accounts[i].status;
         }
       }
 
@@ -140,7 +157,6 @@ Account.prototype = {
       callback(utils.buildError('400', 'No account ID passed to remove function'), null);
     }
   }
-
 };
 
 module.exports = Account;
