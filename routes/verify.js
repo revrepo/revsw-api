@@ -30,7 +30,7 @@ module.exports = [
     path: '/v1/verify/referenced',
     config: {
       auth: {
-        scope: [ 'admin' ]
+        scope: [ 'admin', 'reseller' ]
       },
       handler: verify.referenced,
       description: 'Verify record data (that all exist and referenced records exist)',
@@ -47,7 +47,7 @@ module.exports = [
     path: '/v1/verify/indexes',
     config: {
       auth: {
-        scope: [ 'admin' ]
+        scope: [ 'admin', 'reseller' ]
       },
       handler: verify.indexes,
       description: 'Verify required indexes',
