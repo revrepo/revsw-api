@@ -181,6 +181,30 @@ User.prototype = {
     });
   },
 
+  listAll : function (request, callback) {
+
+    this.model.find(function (err, users) {
+      if (users) {
+        users = utils.clone(users);
+
+        for (var i = 0; i < users.length; i++) {
+          users[i].companyId = users[i].companyId ? users[i].companyId.split(',') : '';
+          users[i].user_id   = users[i]._id;
+
+          delete users[i]._id;
+          delete users[i].__v;
+
+          if (users[i].domain && users[i].domain !== '') {
+            users[i].domain = users[i].domain.split(',');
+          } else {
+            users[i].domain = [];
+          }
+        }
+      }
+      callback(err, users);
+    });
+  },
+
   update : function (item, callback) {
     var context = this;
     this.model.findOne({_id : item.user_id}, function (err, doc) {

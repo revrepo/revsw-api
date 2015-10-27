@@ -61,6 +61,12 @@ ServerGroup.prototype = {
     this.model.find({groupType : 'CO', serverType : 'public'}, function (err, servergroups) {
       callback(err, servergroups);
     });
+  },
+
+  listAll : function (callback) {
+    this.model.find(function (err, servergroups) {
+      callback(err, servergroups);
+    })
   }
 
 };
