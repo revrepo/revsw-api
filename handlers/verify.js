@@ -92,7 +92,7 @@ exports.referenced = function (request, reply) {
           cb(err);
         }
         cb(null, configs);
-      })
+      });
     },
 
     serverGroup : function (cb) {
@@ -101,7 +101,7 @@ exports.referenced = function (request, reply) {
           cb(err);
         }
         cb(null, serverGroup);
-      })
+      });
     }
   }, function (err, res) {
     if(err) {
@@ -230,15 +230,15 @@ exports.referenced = function (request, reply) {
 
 
     if (!_.isEmpty(user_result)) {
-      result.user_data = user_result
+      result.user_data = user_result;
     }
 
     if (!_.isEmpty(domain_result)) {
-      result.domain_data = domain_result
+      result.domain_data = domain_result;
     }
 
     if (!_.isEmpty(config_result)) {
-      result.master_configuration = config_result
+      result.master_configuration = config_result;
     }
 
     renderJSON(request, reply, err, result);
@@ -261,7 +261,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -270,7 +270,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -279,7 +279,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -288,7 +288,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -297,7 +297,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -306,7 +306,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -315,7 +315,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     },
 
@@ -324,7 +324,7 @@ exports.indexes = function (request, reply) {
         if (err) {
           cb(err);
         }
-        cb(null, data)
+        cb(null, data);
       });
     }
   }, function (err, res) {
@@ -337,7 +337,7 @@ exports.indexes = function (request, reply) {
       _.forEach(obj, function (data, key) {
         result[name][key] = {};
         result[name][key][data[0][0]] = data[0][1];
-      })
+      });
     });
     renderJSON(request, reply, err, result);
   });
