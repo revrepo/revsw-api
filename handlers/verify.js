@@ -28,21 +28,23 @@ var _        = require('lodash');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
 
-var Account  = require('../models/Account');
-var Domain   = require('../models/Domain');
-var Location = require('../models/Location');
-var PurgeJob = require('../models/PurgeJob');
-var User     = require('../models/User');
+var Account     = require('../models/Account');
+var AuditEvents = require('../models/AuditEvents');
+var Domain      = require('../models/Domain');
+var Location    = require('../models/Location');
+var PurgeJob    = require('../models/PurgeJob');
+var User        = require('../models/User');
 var ServerGroup = require('../models/ServerGroup');
 var MasterConfiguration = require('../models/MasterConfiguration');
 
-var accounts     = new Account(mongoose, mongoConnection.getConnectionPortal());
-var domains      = new Domain(mongoose, mongoConnection.getConnectionPortal());
-var locations    = new Location(mongoose, mongoConnection.getConnectionPortal());
-var users        = new User(mongoose, mongoConnection.getConnectionPortal());
-var purgeJobs    = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
-var masterConf   = new MasterConfiguration(mongoose, mongoConnection.getConnectionPortal());
-var serverGroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
+var accounts      = new Account(mongoose, mongoConnection.getConnectionPortal());
+var audit_events  = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
+var domains       = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var locations     = new Location(mongoose, mongoConnection.getConnectionPortal());
+var users         = new User(mongoose, mongoConnection.getConnectionPortal());
+var purge_jobs    = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
+var master_conf   = new MasterConfiguration(mongoose, mongoConnection.getConnectionPortal());
+var server_groups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 
 /**
  *
@@ -50,33 +52,56 @@ var serverGroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal
  * @param reply
  */
 exports.referenced = function (request, reply) {
+
   if (request.auth.credentials.email !== 'fedotov.evgenii@gmail.com' && request.auth.credentials.email !== 'victor@revsw.com') {
     return reply(boom.forbidden('Access denied'));
   }
+
   async.parallel({
+
     accounts : function (cb) {
       accounts.listAll(request, function (err, accounts) {
         if (err) {
           cb(err);
         }
-        cb(null, accounts)
+        cb(null, accounts);
       });
     },
+
     domains : function (cb) {
       domains.listAll(request, function (err, domains) {
         if (err) {
           cb(err);
         }
-        cb(null, domains)
+        cb(null, domains);
       });
     },
+
     users : function (cb) {
       users.listAll(request, function (err, users) {
         if (err) {
           cb(err);
         }
-        cb(null, users)
+        cb(null, users);
       });
+    },
+
+    masterConfiguration : function (cb) {
+      master_conf.listAll(function (err, configs) {
+        if (err) {
+          cb(err);
+        }
+        cb(null, configs);
+      })
+    },
+
+    serverGroup : function (cb) {
+      server_groups.listAll(function (err, serverGroup) {
+        if (err) {
+          cb(err);
+        }
+        cb(null, serverGroup);
+      })
     }
   }, function (err, res) {
     if(err) {
@@ -85,11 +110,16 @@ exports.referenced = function (request, reply) {
 
     var broken_company_ids  = [];
     var broken_domain_names = [];
-    var user_result = [];
+    var broken_bpgroup      = [];
+    var broken_cogroup      = [];
+
+    var user_result   = [];
     var domain_result = [];
+    var config_result = [];
+
     var result = {};
 
-    // check broken referenced company id in users
+    // check broken referenced company id/domain name in users
     _.forEach(res.users, function (user) {
 
       _.forEach(user.companyId, function (company_id) {
@@ -122,27 +152,35 @@ exports.referenced = function (request, reply) {
         user_result.push(broken_user_data);
       }
 
+      broken_company_ids  = [];
+      broken_domain_names = [];
+
       /*if (!_.isEmpty(broken_company_ids)) {
         _.remove(user.companyId, function (companyId) {
           return _.indexOf(broken_company_ids, companyId) !== -1
         });
       }*/
+
     });
 
-    broken_company_ids = [];
-
-    // check broken referenced company id in domains
+    // check broken referenced company id/BPGroup/COGroup in domains
     _.forEach(res.domains, function (domain) {
 
-      _.forEach(domain.companyId, function (company_id) {
-        if (!_.findWhere(res.accounts, {'id' : company_id})) {
-          broken_company_ids.push(company_id);
-        }
-      });
+      if (!_.findWhere(res.accounts, {'id' : domain.companyId})) {
+        broken_company_ids.push(domain.companyId);
+      }
 
-      if (!_.isEmpty(broken_company_ids) || !_.isEmpty(broken_domain_names)) {
+      if (!_.findWhere(res.serverGroup, {'groupName' : domain.BPGroup, 'groupType' : 'BP'})) {
+        broken_bpgroup.push(domain.BPGroup);
+      }
+
+      if (!_.findWhere(res.serverGroup, {'groupName' : domain.COGroup, 'groupType' : 'CO'})) {
+        broken_cogroup.push(domain.COGroup);
+      }
+
+      if (!_.isEmpty(broken_company_ids) || !_.isEmpty(broken_bpgroup) || !_.isEmpty(broken_cogroup)){
         var broken_domain_data = {
-          domain_name : domain.name
+          domain_id : domain.id
         };
       }
 
@@ -150,18 +188,57 @@ exports.referenced = function (request, reply) {
         broken_domain_data.broken_company_ids = broken_company_ids;
       }
 
+      if (!_.isEmpty(broken_bpgroup)) {
+        broken_domain_data.broken_bpgroup = broken_bpgroup;
+      }
+
+      if (!_.isEmpty(broken_cogroup)) {
+        broken_domain_data.broken_cogroup = broken_cogroup;
+      }
+
+      if (!_.isEmpty(broken_domain_data)) {
+        domain_result.push(broken_domain_data);
+      }
+
+      broken_company_ids = [];
+      broken_bpgroup     = [];
+      broken_cogroup     = [];
+
     });
 
+    // check broken referenced domain name in master configuration
+    _.forEach(res.masterConfiguration, function (config) {
+
+      if (!_.findWhere(res.domains, {'name' : config.domainName})) {
+        broken_domain_names.push(config.domainName);
+      }
+
+      if (!_.isEmpty(broken_domain_names)) {
+        var broken_domain_data = {
+          config_id : config.id,
+          broken_domain_names : broken_domain_names
+        };
+      }
+
+      if (!_.isEmpty(broken_domain_data)) {
+        config_result.push(broken_domain_data);
+      }
+
+      broken_domain_names = [];
+
+    });
+
+
     if (!_.isEmpty(user_result)) {
-      result = {
-        user_data: user_result
-      };
+      result.user_data = user_result
     }
 
     if (!_.isEmpty(domain_result)) {
-      result = {
-        domain_data: domain_result
-      };
+      result.domain_data = domain_result
+    }
+
+    if (!_.isEmpty(config_result)) {
+      result.master_configuration = config_result
     }
 
     renderJSON(request, reply, err, result);
@@ -174,11 +251,20 @@ exports.referenced = function (request, reply) {
  * @param reply
  */
 exports.indexes = function (request, reply) {
-  console.log(request.auth.credentials.email);
   if (request.auth.credentials.email !== 'fedotov.evgenii@gmail.com' && request.auth.credentials.email !== 'victor@revsw.com') {
     return reply(boom.forbidden('Access denied'));
   }
   async.parallel({
+
+    AuditEvents : function (cb) {
+      audit_events.model.collection.getIndexes(function (err, data) {
+        if (err) {
+          cb(err);
+        }
+        cb(null, data)
+      });
+    },
+
     Company : function (cb) {
       accounts.model.collection.getIndexes(function (err, data) {
         if (err) {
@@ -187,6 +273,7 @@ exports.indexes = function (request, reply) {
         cb(null, data)
       });
     },
+
     Domain : function (cb) {
       domains.model.collection.getIndexes(function (err, data) {
         if (err) {
@@ -195,6 +282,7 @@ exports.indexes = function (request, reply) {
         cb(null, data)
       });
     },
+
     Location : function (cb) {
       locations.model.collection.getIndexes(function (err, data) {
         if (err) {
@@ -203,6 +291,7 @@ exports.indexes = function (request, reply) {
         cb(null, data)
       });
     },
+
     User : function (cb) {
       users.model.collection.getIndexes(function (err, data) {
         if (err) {
@@ -211,24 +300,27 @@ exports.indexes = function (request, reply) {
         cb(null, data)
       });
     },
+
     PurgeJob : function (cb) {
-      purgeJobs.model.collection.getIndexes(function (err, data) {
+      purge_jobs.model.collection.getIndexes(function (err, data) {
         if (err) {
           cb(err);
         }
         cb(null, data)
       });
     },
+
     MasterConfiguration : function (cb) {
-      masterConf.model.collection.getIndexes(function (err, data) {
+      master_conf.model.collection.getIndexes(function (err, data) {
         if (err) {
           cb(err);
         }
         cb(null, data)
       });
     },
+
     ServerGroup : function (cb) {
-      serverGroups.model.collection.getIndexes(function (err, data) {
+      server_groups.model.collection.getIndexes(function (err, data) {
         if (err) {
           cb(err);
         }
