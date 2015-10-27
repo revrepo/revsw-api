@@ -66,7 +66,7 @@ ServerGroup.prototype = {
   listAll : function (callback) {
     this.model.find(function (err, servergroups) {
       callback(err, servergroups);
-    })
+    });
   }
 
 };

@@ -73,7 +73,7 @@ MasterConfiguration.prototype = {
         }
       }
       callback(err, items);
-    })
+    });
   }
 
 };
