@@ -201,6 +201,7 @@ module.exports = [
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
+            enable_decompression : Joi.boolean(),
             mode                : Joi.string().valid('least', 'moderate', 'aggressive', 'custom', 'adaptive').required(),
             img_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             js_choice           : Joi.string().valid('off', 'low', 'medium', 'high').required(),
