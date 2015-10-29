@@ -58,6 +58,22 @@ MasterConfiguration.prototype = {
       }
       callback(err, doc);
     });
+  },
+
+  listAll : function (callback) {
+    this.model.find(function (err, items) {
+      if (items) {
+        items = utils.clone(items);
+
+        for (var i = 0; i < items.length; i++) {
+          items[i].id = items[i]._id;
+
+          delete items[i].__v;
+          delete items[i]._id;
+        }
+      }
+      callback(err, items);
+    });
   }
 
 };
