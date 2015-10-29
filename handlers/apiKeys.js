@@ -42,6 +42,17 @@ exports.getApiKeys = function(request, reply) {
   });
 };
 
+exports.getApiKey = function (request, reply) {
+  var id = request.params.key_id;
+  apiKeys.get(id, function (error, result) {
+    if (result) {
+      renderJSON(request, reply, error, result);
+    } else {
+      return reply(boom.badRequest('API key not found'));
+    }
+  });
+};
+
 exports.createApiKey = function(request, reply) {
   var newApiKey = request.payload;
   newApiKey.createdBy = request.auth.credentials.email;
@@ -77,7 +88,8 @@ exports.createApiKey = function(request, reply) {
           statusResponse = {
             statusCode: 200,
             message   : 'Successfully created new API key',
-            key       : result.key
+            key       : result.key,
+            object_id : result._id.toString()
           };
 
           AuditLogger.store({
@@ -103,14 +115,13 @@ exports.createApiKey = function(request, reply) {
 
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
-  updatedApiKey.key = request.params.key;
+  var id = request.params.key_id;
 
-  apiKeys.get({
-    key: updatedApiKey.key
-  }, function (error, result) {
+  apiKeys.get(id, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify the API key'));
     }
+    updatedApiKey.key = result.key;
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update the API key'));
@@ -130,7 +141,7 @@ exports.updateApiKey = function (request, reply) {
         account_id       : updatedApiKey.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result._id + '',
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -141,9 +152,8 @@ exports.updateApiKey = function (request, reply) {
 };
 
 exports.activateApiKey = function (request, reply) {
-  apiKeys.get({
-    key: request.params.key
-  }, function (error, result) {
+  var id = request.params.key_id;
+  apiKeys.get(id, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify the API key'));
     }
@@ -177,9 +187,8 @@ exports.activateApiKey = function (request, reply) {
 };
 
 exports.deactivateApiKey = function (request, reply) {
-  apiKeys.get({
-    key: request.params.key
-  }, function (error, result) {
+  var id = request.params.key_id;
+  apiKeys.get(id, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify the API key'));
     }
@@ -213,19 +222,15 @@ exports.deactivateApiKey = function (request, reply) {
 };
 
 exports.deleteApiKey = function (request, reply) {
-  var key = request.params.key;
-  apiKeys.get({
-    key: key
-  }, function (error, result) {
+  var id = request.params.key_id;
+  apiKeys.get(id, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Error retrieving the key'));
     }
-    if (!key) {
+    if (!result) {
       return reply(boom.badRequest('API key not found'));
     }
-    apiKeys.remove({
-      key: key
-    }, function (error) {
+    apiKeys.remove(id, function (error) {
       if (error) {
         return reply(boom.badImplementation('Error removing the key'));
       }
