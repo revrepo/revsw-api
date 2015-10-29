@@ -40,7 +40,7 @@ describe('Rev API keys', function() {
     newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
     newDomainId,
     createDomainIds,
-    createdAPIKey,
+    createdAPIKeyId,
     testUserProfile = {};
 
   var newUserJson = {
@@ -152,7 +152,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully created new API key');
-        createdAPIKey = response_json.key;
+        createdAPIKeyId = response_json._id;
         done();
       });
   });
@@ -241,7 +241,7 @@ describe('Rev API keys', function() {
 
   it('should fail to update an API key for the company without admin permissions', function(done) {
     request(testAPIUrl)
-      .put('/v1/api_keys/' + createdAPIKey)
+      .put('/v1/api_keys/' + createdAPIKeyId)
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .send({read_only_status: true})
       .expect(403)
@@ -259,7 +259,7 @@ describe('Rev API keys', function() {
 
   it('should fail to update an API key for the company without authentication', function(done) {
     request(testAPIUrl)
-      .put('/v1/api_keys/' + createdAPIKey)
+      .put('/v1/api_keys/' + createdAPIKeyId)
       .send({read_only_status: true})
       .expect(401)
       .end(function(err, res) {
@@ -276,7 +276,7 @@ describe('Rev API keys', function() {
 
   it('should update an API key for the company', function(done) {
     request(testAPIUrl)
-      .put('/v1/api_keys/' + createdAPIKey)
+      .put('/v1/api_keys/' + createdAPIKeyId)
       .auth(testUser, testPassword)
       .send({read_only_status: true})
       .expect(200)
@@ -310,7 +310,7 @@ describe('Rev API keys', function() {
 
   it('should fail to activate the API key for the company without admin permissions', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/activate/' + createdAPIKey)
+      .post('/v1/api_keys/activate/' + createdAPIKeyId)
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .send({read_only_status: true})
       .expect(403)
@@ -328,7 +328,7 @@ describe('Rev API keys', function() {
 
   it('should fail to activate the API key for the company without authentication', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/activate/' + createdAPIKey)
+      .post('/v1/api_keys/activate/' + createdAPIKeyId)
       .send({read_only_status: true})
       .expect(401)
       .end(function(err, res) {
@@ -345,7 +345,7 @@ describe('Rev API keys', function() {
 
   it('should activate the API key for the company', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/activate/' + createdAPIKey)
+      .post('/v1/api_keys/activate/' + createdAPIKeyId)
       .auth(testUser, testPassword)
       .send({read_only_status: true})
       .expect(200)
@@ -379,7 +379,7 @@ describe('Rev API keys', function() {
 
   it('should fail to deactivate the API key for the company without admin permissions', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/deactivate/' + createdAPIKey)
+      .post('/v1/api_keys/deactivate/' + createdAPIKeyId)
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .send({read_only_status: true})
       .expect(403)
@@ -397,7 +397,7 @@ describe('Rev API keys', function() {
 
   it('should fail to deactivate the API key for the company without authentication', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/deactivate/' + createdAPIKey)
+      .post('/v1/api_keys/deactivate/' + createdAPIKeyId)
       .send({read_only_status: true})
       .expect(401)
       .end(function(err, res) {
@@ -414,7 +414,7 @@ describe('Rev API keys', function() {
 
   it('should deactivate the API key for the company', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/deactivate/' + createdAPIKey)
+      .post('/v1/api_keys/deactivate/' + createdAPIKeyId)
       .auth(testUser, testPassword)
       .send({read_only_status: true})
       .expect(200)
@@ -448,7 +448,7 @@ describe('Rev API keys', function() {
 
   it('should fail to delete the API key for the company without admin permissions', function(done) {
     request(testAPIUrl)
-      .delete('/v1/api_keys/' + createdAPIKey)
+      .delete('/v1/api_keys/' + createdAPIKeyId)
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .send({read_only_status: true})
       .expect(403)
@@ -466,7 +466,7 @@ describe('Rev API keys', function() {
 
   it('should fail to delete the API key for the company without authentication', function(done) {
     request(testAPIUrl)
-      .delete('/v1/api_keys/' + createdAPIKey)
+      .delete('/v1/api_keys/' + createdAPIKeyId)
       .send({read_only_status: true})
       .expect(401)
       .end(function(err, res) {
@@ -483,7 +483,7 @@ describe('Rev API keys', function() {
 
   it('should fail to delete the API key for the company', function(done) {
     request(testAPIUrl)
-      .delete('/v1/api_keys/' + createdAPIKey)
+      .delete('/v1/api_keys/' + createdAPIKeyId)
       .auth(testUser, testPassword)
       .send({read_only_status: true})
       .expect(200)
