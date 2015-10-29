@@ -50,6 +50,33 @@ module.exports = [
   },
 
   {
+    method: 'GET',
+    path: '/v1/api_keys/{key_id}',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller']
+      },
+      handler: apiKey.getApiKey,
+      description: 'Get API key details',
+      notes: 'Use this function to get details of and API key',
+      tags: ['api', 'accounts'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          key_id: Joi.string().required().description('ID of the API key')
+        }
+      },
+      response: {
+        schema: routeModels.APIKeyModel
+      }
+    }
+  },
+
+  {
     method: 'POST',
     path: '/v1/api_keys',
     config: {
@@ -78,7 +105,7 @@ module.exports = [
 
   {
     method: 'PUT',
-    path: '/v1/api_keys/{key}',
+    path: '/v1/api_keys/{key_id}',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -94,7 +121,22 @@ module.exports = [
       },
       validate: {
         params: {
-          key: Joi.string().required().description('API key to be updated')
+          key_id: Joi.string().required().description('ID of the API key to be updated')
+        },
+        payload: {
+          key_name        : Joi.string().description('Name of the API key'),
+          companyId       : Joi.string().description('ID of a company that the API key belongs to'),
+          domains         : [{domainId: Joi.string().description('IDs of domains API key has access to')}],
+          allowed_ops     : Joi.object({
+            read_config     : Joi.boolean(),
+            modify_config   : Joi.boolean(),
+            delete_config   : Joi.boolean(),
+            purge           : Joi.boolean(),
+            reports         : Joi.boolean(),
+            admin           : Joi.boolean(),
+          }),
+          read_only_status: Joi.boolean().description('Tells if API key can read only or read/write'),
+          active          : Joi.boolean().description('Tells if API key active or not')
         }
       },
       response: {
@@ -105,7 +147,7 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/api_keys/activate/{key}',
+    path: '/v1/api_keys/activate/{key_id}',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -119,6 +161,11 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
+      validate: {
+        params: {
+          key_id: Joi.string().required().description('ID of the API key to be activated')
+        }
+      },
       response: {
         schema: routeModels.statusModel
       }
@@ -127,7 +174,7 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/api_keys/deactivate/{key}',
+    path: '/v1/api_keys/deactivate/{key_id}',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -141,6 +188,11 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
+      validate: {
+        params: {
+          key_id: Joi.string().required().description('ID of the API key to be deactivated')
+        }
+      },
       response: {
         schema: routeModels.statusModel
       }
@@ -149,7 +201,7 @@ module.exports = [
 
   {
     method: 'DELETE',
-    path: '/v1/api_keys/{key}',
+    path: '/v1/api_keys/{key_id}',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -165,7 +217,7 @@ module.exports = [
       },
       validate: {
         params: {
-          key: Joi.string().required().description('API key to be deleted')
+          key_id: Joi.string().required().description('ID of the API key to be deleted')
         }
       },
       response: {
