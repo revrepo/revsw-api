@@ -65,6 +65,11 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
+      validate: {
+        params: {
+          key_id: Joi.string().required().description('ID of the API key')
+        }
+      },
       response: {
         schema: routeModels.APIKeyModel
       }
@@ -156,6 +161,11 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
+      validate: {
+        params: {
+          key_id: Joi.string().required().description('ID of the API key to be activated')
+        }
+      },
       response: {
         schema: routeModels.statusModel
       }
@@ -176,6 +186,11 @@ module.exports = [
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          key_id: Joi.string().required().description('ID of the API key to be deactivated')
         }
       },
       response: {
