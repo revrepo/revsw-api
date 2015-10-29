@@ -157,6 +157,109 @@ describe('Rev API keys', function() {
       });
   });
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    it('should fail to return the API key without admin permissions', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys/' + createdAPIKeyId)
+      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(403);
+        response_json.error.should.be.equal('Forbidden');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller');
+        done();
+      });
+  });
+
+  it('should fail to return the API key with wrong password', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys/' + createdAPIKeyId)
+      .auth(qaUserWithUserPerm, 'du3jwuu823urj')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Bad username or password');
+        done();
+      });
+  });
+
+  it('should fail to return the API key without authentication', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys/' + createdAPIKeyId)
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(401);
+        response_json.error.should.be.equal('Unauthorized');
+        response_json.message.should.be.equal('Missing authentication');
+        done();
+      });
+  });
+
+  it('should return the API key', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys/' + createdAPIKeyId)
+      .auth(testUser, testPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.should.be.an.Array;
+        done();
+      });
+  });
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   it('should fail to return a list of API keys for the company without admin permissions', function(done) {
     request(testAPIUrl)
       .get('/v1/api_keys')
