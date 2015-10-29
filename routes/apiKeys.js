@@ -127,7 +127,7 @@ module.exports = [
           key_name        : Joi.string().description('Name of the API key'),
           companyId       : Joi.string().description('ID of a company that the API key belongs to'),
           domains         : [{domainId: Joi.string().description('IDs of domains API key has access to')}],
-          allowed_ops     : Joi.array().items({
+          allowed_ops     : Joi.object({
             read_config     : Joi.boolean(),
             modify_config   : Joi.boolean(),
             delete_config   : Joi.boolean(),
