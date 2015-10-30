@@ -106,6 +106,7 @@ Account.prototype = {
       if (doc) {
         doc = utils.clone(doc);
         doc.id = doc._id + '';
+
         delete doc.__v;
         delete doc._id;
         delete doc.status;

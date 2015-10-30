@@ -113,7 +113,7 @@ exports.createApiKey = function(request, reply) {
             account_id      : request.auth.credentials.companyId,
             activity_type   : 'add',
             activity_target : 'apikey',
-            target_id       : result._id + '',
+            target_id       : result.id,
             target_name     : result.key_name,
             target_object   : result,
             operation_status: 'success'
@@ -165,7 +165,7 @@ exports.updateApiKey = function (request, reply) {
         account_id       : request.auth.credentials.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -198,7 +198,7 @@ exports.activateApiKey = function (request, reply) {
 
       var statusResponse = {
         statusCode: 200,
-        message   : 'Successfully activated the API key',
+        message   : 'Successfully activated the API key'
       };
 
       result = publicRecordFields.handle(result, 'apiKeys');
@@ -212,7 +212,7 @@ exports.activateApiKey = function (request, reply) {
         account_id       : request.auth.credentials.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -258,7 +258,7 @@ exports.deactivateApiKey = function (request, reply) {
         account_id       : request.auth.credentials.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -304,7 +304,7 @@ exports.deleteApiKey = function (request, reply) {
         account_id       : request.auth.credentials.companyId,
         activity_type    : 'delete',
         activity_target  : 'apikey',
-        target_id        : result._id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
