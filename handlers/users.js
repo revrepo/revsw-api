@@ -121,13 +121,13 @@ exports.createUser = function(request, reply) {
         newUser = removePrivateFields(newUser);
 
         AuditLogger.store({
-          ip_adress        : request.info.remoteAddress,
+          ip_address        : request.info.remoteAddress,
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
-          domain_id        : request.auth.credentials.domain,
+//          domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'user',
           target_id        : result.id,
@@ -218,13 +218,13 @@ exports.updateUser = function(request, reply) {
           newUser = removePrivateFields(newUser);
 
           AuditLogger.store({
-            ip_adress        : request.info.remoteAddress,
+            ip_address        : request.info.remoteAddress,
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-            domain_id        : request.auth.credentials.domain,
+//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : user_id,
@@ -274,13 +274,13 @@ exports.updateUserPassword = function(request, reply) {
           result = removePrivateFields(result);
 
           AuditLogger.store({
-            ip_adress        : request.info.remoteAddress,
+            ip_address        : request.info.remoteAddress,
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-            domain_id        : request.auth.credentials.domain,
+//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : user_id,
@@ -319,13 +319,13 @@ exports.deleteUser = function(request, reply) {
       result = removePrivateFields(result);
 
       var auditRecord = {
-            ip_adress        : request.info.remoteAddress,
+            ip_address        : request.info.remoteAddress,
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-            domain_id        : request.auth.credentials.domain,
+//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'delete',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -372,13 +372,13 @@ exports.init2fa = function (request, reply) {
           result = removePrivateFields(result);
 
           AuditLogger.store({
-            ip_adress        : request.info.remoteAddress,
+            ip_address        : request.info.remoteAddress,
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-            domain_id        : request.auth.credentials.domain,
+//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : user_id,
@@ -420,13 +420,13 @@ exports.enable2fa = function (request, reply) {
               result = removePrivateFields(result);
 
               AuditLogger.store({
-                ip_adress        : request.info.remoteAddress,
+                ip_address        : request.info.remoteAddress,
                 datetime         : Date.now(),
                 user_id          : request.auth.credentials.user_id,
                 user_name        : request.auth.credentials.email,
                 user_type        : 'user',
                 account_id       : request.auth.credentials.companyId,
-                domain_id        : request.auth.credentials.domain,
+//                domain_id        : request.auth.credentials.domain,
                 activity_type    : 'modify',
                 activity_target  : 'user',
                 target_id        : user_id,
@@ -479,13 +479,13 @@ exports.disable2fa = function (request, reply) {
             result = removePrivateFields(result);
 
             AuditLogger.store({
-              ip_adress        : request.info.remoteAddress,
+              ip_address        : request.info.remoteAddress,
               datetime         : Date.now(),
               user_id          : request.auth.credentials.user_id,
               user_name        : request.auth.credentials.email,
-              user_type        : request.auth.credentials.role,
+              user_type        : 'user',
               account_id       : request.auth.credentials.companyId,
-              domain_id        : request.auth.credentials.domain,
+//              domain_id        : request.auth.credentials.domain,
               activity_type    : 'modify',
               activity_target  : 'user',
               target_id        : user_id,

@@ -35,9 +35,9 @@ module.exports = [
         scope: ['admin', 'reseller']
       },
       handler: apiKey.getApiKeys,
-      description: 'Get a list of customer API keys registered for a company',
+      description: 'Get a list of API keys registered for a company',
       notes: 'Use this function to get a list of API keys registered on your company account',
-      tags: ['api', 'accounts'],
+      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -58,8 +58,8 @@ module.exports = [
       },
       handler: apiKey.getApiKey,
       description: 'Get API key details',
-      notes: 'Use this function to get details of and API key',
-      tags: ['api', 'accounts'],
+      notes: 'Use this function to get details of an API key',
+      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -67,7 +67,7 @@ module.exports = [
       },
       validate: {
         params: {
-          key_id: Joi.string().required().description('ID of the API key')
+          key_id: Joi.objectId().required().description('ID of the API key')
         }
       },
       response: {
@@ -85,8 +85,9 @@ module.exports = [
       },
       handler: apiKey.createApiKey,
       description: 'Create a new API key in the system',
-      notes: 'As a customer use the call to create a new API key for your company in the system',
-      tags: ['api', 'accounts'],
+      notes: 'Use the call to create a new API key for your company. ' +
+        'After creating a new API key you can use a PUT call to /v1/api_keys/{key_id} to configure the key.',
+      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -94,7 +95,7 @@ module.exports = [
       },
       validate: {
         payload: {
-          companyId: Joi.string().required().trim().description('ID of a company that the API key is to be created for')
+          account_id: Joi.objectId().required().trim().description('ID of a company the new API key should be created for')
         }
       },
       response: {
@@ -112,21 +113,24 @@ module.exports = [
       },
       handler: apiKey.updateApiKey,
       description: 'Update a customer API key',
-      notes: 'Use this function to update details of an API key',
-      tags: ['api', 'accounts'],
+      notes: 'Use this function to update API key details',
+      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
         }
       },
       validate: {
+        options: {
+          stripUnknown: true
+        },
         params: {
           key_id: Joi.string().required().description('ID of the API key to be updated')
         },
         payload: {
-          key_name        : Joi.string().description('Name of the API key'),
-          companyId       : Joi.string().description('ID of a company that the API key belongs to'),
-          domains         : [{domainId: Joi.string().description('IDs of domains API key has access to')}],
+          key_name        : Joi.string().min(1).max(30).description('Name of the API key'),
+          account_id      : Joi.objectId().description('ID of a company that the API key belongs to'),
+          domains         : Joi.array().items( Joi.objectId().description('IDs of web domains the API key is allowed to manage' ) ),
           allowed_ops     : Joi.object({
             read_config     : Joi.boolean(),
             modify_config   : Joi.boolean(),
@@ -135,8 +139,8 @@ module.exports = [
             reports         : Joi.boolean(),
             admin           : Joi.boolean(),
           }),
-          read_only_status: Joi.boolean().description('Tells if API key can read only or read/write'),
-          active          : Joi.boolean().description('Tells if API key active or not')
+          read_only_status: Joi.boolean().description('Tells if the API key is read-only or read/write'),
+          active          : Joi.boolean().description('Tells if the API key is active or not')
         }
       },
       response: {
@@ -147,14 +151,14 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/api_keys/activate/{key_id}',
+    path: '/v1/api_keys/{key_id}/activate',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
       },
       handler: apiKey.activateApiKey,
       description: 'Make the API key active',
-      notes: 'As a customer use the call to activate an API key for your company in the system',
+      notes: 'Use the call to activate an API key for your company in the system',
       tags: ['api', 'accounts'],
       plugins: {
         'hapi-swagger': {
@@ -163,7 +167,7 @@ module.exports = [
       },
       validate: {
         params: {
-          key_id: Joi.string().required().description('ID of the API key to be activated')
+          key_id: Joi.objectId().required().description('ID of the API key to be activated')
         }
       },
       response: {
@@ -174,15 +178,16 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/api_keys/deactivate/{key_id}',
+    path: '/v1/api_keys/{key_id}/deactivate',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
       },
       handler: apiKey.deactivateApiKey,
       description: 'Make the API key inactive',
-      notes: 'As a customer use the call to deactivate an API key for your company in the system',
-      tags: ['api', 'accounts'],
+      notes: 'Use the call to deactivate an API key. The key\' configuration will be stored in the system but it will be not ' +
+        'possible to use the key to access the customer API service',
+      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -190,7 +195,7 @@ module.exports = [
       },
       validate: {
         params: {
-          key_id: Joi.string().required().description('ID of the API key to be deactivated')
+          key_id: Joi.objectId().required().description('ID of the API key to be deactivated')
         }
       },
       response: {
@@ -217,7 +222,7 @@ module.exports = [
       },
       validate: {
         params: {
-          key_id: Joi.string().required().description('ID of the API key to be deleted')
+          key_id: Joi.objectId().required().description('ID of the API key to be deleted')
         }
       },
       response: {
