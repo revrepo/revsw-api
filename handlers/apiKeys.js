@@ -27,6 +27,7 @@ var uuid = require('node-uuid');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
@@ -38,6 +39,7 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getApiKeys = function(request, reply) {
   apiKeys.list(request, function (error, listOfApiKeys) {
+    listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
     renderJSON(request, reply, error, listOfApiKeys);
   });
 };
@@ -73,6 +75,9 @@ exports.createApiKey = function(request, reply) {
         }
 
         var statusResponse;
+
+        result = publicRecordFields.handle(result, 'apiKeys');
+
         if (result) {
           statusResponse = {
             statusCode: 200,
@@ -83,10 +88,11 @@ exports.createApiKey = function(request, reply) {
           AuditLogger.store({
             ip_adress       : request.info.remoteAddress,
             datetime        : Date.now(),
-            user_id         : newApiKey.key,
-            user_name       : newApiKey.key_name,
+            user_id         : result.key,
+            user_name       : result.key_name,
             user_type       : 'user',
-            account_id      : newApiKey.companyId,
+            account_id      : result.companyId,
+            domain_id       : request.auth.credentials.domain,
             activity_type   : 'add',
             activity_target : 'apikey',
             target_id       : result._id + '',
@@ -94,6 +100,7 @@ exports.createApiKey = function(request, reply) {
             target_object   : result,
             operation_status: 'success'
           });
+
           renderJSON(request, reply, error, statusResponse);
         }
       });
@@ -118,23 +125,27 @@ exports.updateApiKey = function (request, reply) {
 
       var statusResponse = {
         statusCode: 200,
-        message   : 'Successfully updated the API key',
+        message   : 'Successfully updated the API key'
       };
+
+      result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : updatedApiKey.key,
-        user_name        : updatedApiKey.key_name,
+        user_id          : result.key,
+        user_name        : result.key_name,
         user_type        : 'user',
-        account_id       : updatedApiKey.companyId,
+        account_id       : result.companyId,
+        domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
       });
+
       renderJSON(request, reply, error, statusResponse);
     });
   });
@@ -157,6 +168,8 @@ exports.activateApiKey = function (request, reply) {
         message   : 'Successfully activated the API key',
       };
 
+      result = publicRecordFields.handle(result, 'apiKeys');
+
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
@@ -164,9 +177,10 @@ exports.activateApiKey = function (request, reply) {
         user_name        : result.key_name,
         user_type        : 'user',
         account_id       : result.companyId,
+        domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -190,8 +204,10 @@ exports.deactivateApiKey = function (request, reply) {
 
       var statusResponse = {
         statusCode: 200,
-        message   : 'Successfully deactivated the API key',
+        message   : 'Successfully deactivated the API key'
       };
+
+      result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
@@ -200,9 +216,10 @@ exports.deactivateApiKey = function (request, reply) {
         user_name        : result.key_name,
         user_type        : 'user',
         account_id       : result.companyId,
+        domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -235,6 +252,8 @@ exports.deleteApiKey = function (request, reply) {
         message    : 'Successfully deleted the API key'
       };
 
+      result = publicRecordFields.handle(result, 'apiKeys');
+
       AuditLogger.store({
         ip_adress        : request.info.remoteAddress,
         datetime         : Date.now(),
@@ -242,13 +261,15 @@ exports.deleteApiKey = function (request, reply) {
         user_name        : result.key_name,
         user_type        : 'user',
         account_id       : result.companyId,
+        domain_id        : request.auth.credentials.domain,
         activity_type    : 'delete',
         activity_target  : 'apikey',
-        target_id        : result._id + '',
+        target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
       });
+
       renderJSON(request, reply, error, statusResponse);
     });
   });

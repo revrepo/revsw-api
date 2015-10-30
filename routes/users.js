@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/users',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller' ],
+        scope: [ 'admin', 'reseller' ]
       },
       handler: users.getUsers,
       description: 'Get a list of registered users',

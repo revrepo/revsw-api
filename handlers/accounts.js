@@ -27,6 +27,7 @@ var async = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var Account = require('../models/Account');
 var User = require('../models/User');
@@ -36,7 +37,8 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getAccounts = function getAccounts(request, reply) {
   accounts.list(request, function (error, listOfAccounts) {
-    renderJSON(request, reply, error, listOfAccounts);
+    var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
+    renderJSON(request, reply, error, accounts_list);
   });
 };
 
@@ -63,12 +65,14 @@ exports.createAccount = function (request, reply) {
         return reply(boom.badImplementation('Failed to add new account'));
       }
 
+      result = publicRecordFields.handle(result, 'accounts');
+
       var statusResponse;
       if (result) {
         statusResponse = {
           statusCode : 200,
           message    : 'Successfully created new account',
-          object_id  : result._id.toString()
+          object_id  : result.id
         };
 
         AuditLogger.store({
@@ -81,9 +85,9 @@ exports.createAccount = function (request, reply) {
           domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'account',
-          target_id        : result._id+'',
+          target_id        : result.id,
           target_name      : result.companyName,
-          target_object    : newAccount,
+          target_object    : result,
           operation_status : 'success'
         });
 
@@ -91,7 +95,9 @@ exports.createAccount = function (request, reply) {
           user_id   : request.auth.credentials.user_id,
           companyId : request.auth.credentials.companyId
         };
-        updatedUser.companyId.push(result._id.toString());
+        updatedUser.companyId.push(result.id);
+
+        console.log(updatedUser, result);
 
         users.update(updatedUser, function (error, result) {
           if (error) {
@@ -117,6 +123,7 @@ exports.getAccount = function (request, reply) {
     _id : account_id
   }, function (error, result) {
     if (result) {
+      result = publicRecordFields.handle(result, 'accounts');
       renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('Account not found'));
@@ -151,9 +158,11 @@ exports.updateAccount = function (request, reply) {
         return reply(boom.badImplementation('Failed to update the account'));
       }
 
+      result = publicRecordFields.handle(result, 'accounts');
+
       var statusResponse = {
         statusCode : 200,
-        message    : 'Successfully updated the account',
+        message    : 'Successfully updated the account'
       };
 
       AuditLogger.store({
@@ -168,7 +177,7 @@ exports.updateAccount = function (request, reply) {
         activity_target  : 'account',
         target_id        : request.params.account_id,
         target_name      : result.companyName,
-        target_object    : updatedAccount,
+        target_object    : result,
         operation_status : 'success'
       });
 
@@ -207,6 +216,8 @@ exports.deleteAccount = function (request, reply) {
           statusCode : 200,
           message    : 'Successfully deleted the account'
         };
+
+        account = publicRecordFields.handle(account, 'accounts');
 
         AuditLogger.store({
           ip_adress        : request.info.remoteAddress,

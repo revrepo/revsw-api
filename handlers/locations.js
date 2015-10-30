@@ -25,6 +25,7 @@ var boom     = require('boom');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var ServerGroup = require('../models/ServerGroup');
 var Location = require('../models/Location');
@@ -36,6 +37,9 @@ var locations = new Location(mongoose, mongoConnection.getConnectionPortal());
 exports.getFirstMileLocations = function(request, reply) {
 
   servergroups.listFirstMileLocations(function(error, result) {
+
+    console.log(result);
+
     if (error) {
       return reply(boom.badImplementation('Failed to retrive from the database a list of first mile locations'));
     }
@@ -47,6 +51,7 @@ exports.getFirstMileLocations = function(request, reply) {
           id: result[i]._id.toString()
         });
       }
+
       renderJSON(request, reply, error, listOfSites);
     } else {
       return reply(boom.badRequest('No first mile locations are registered in the system'));
@@ -90,7 +95,7 @@ exports.getBillingZones = function(request, reply) {
     if (result) {
       var listOfBillingZones = [];
       for (var i = 0; i < result.length; i++) {
-        if 
+        if
         listOfSites.push({
           locationName: result[i].publicName,
           id: result[i]._id.toString()

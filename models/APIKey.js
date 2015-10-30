@@ -56,8 +56,10 @@ APIKey.prototype = {
   get: function (item, callback) {
     this.model.findOne(item, function (err, doc) {
       if (doc) {
+
         doc = utils.clone(doc);
-        doc.id = doc._id;
+        doc.id = doc._id + '';
+
         delete doc.__v;
         delete doc._id;
       }
@@ -68,6 +70,11 @@ APIKey.prototype = {
   add: function (item, callback) {
     new this.model(item).save(function (err, item) {
       if (callback) {
+        item    = utils.clone(item);
+        item.id = item._id + '';
+
+        delete item._id;
+
         callback(err, item);
       }
     });
@@ -79,7 +86,7 @@ APIKey.prototype = {
         var keys = utils.clone(api_keys);
         for (var i = 0; i < keys.length; i++) {
           if (request.auth.credentials.companyId.indexOf(keys[i].companyId) !== -1) {
-            keys[i].id = keys[i]._id;
+            keys[i].id = keys[i]._id + '';
             delete keys[i]._id;
             delete keys[i].__v;
           } else {
@@ -104,6 +111,8 @@ APIKey.prototype = {
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
+            item.id =  item._id + '';
+
             delete item._id;
             delete item.__v;
           }
@@ -114,7 +123,7 @@ APIKey.prototype = {
       }
     });
   },
-  
+
   activate: function(item, callback) {
     this.model.findOne({
       key: item.key
@@ -124,7 +133,9 @@ APIKey.prototype = {
         doc.updated_at = new Date();
         doc.save(function (err, item) {
           if (item) {
-            item = utils.clone(item);
+            item    = utils.clone(item);
+            item.id = item._id + '';
+
             delete item._id;
             delete item.__v;
           }
@@ -145,7 +156,9 @@ APIKey.prototype = {
         doc.updated_at = new Date();
         doc.save(function (err, item) {
           if (item) {
-            item = utils.clone(item);
+            item    = utils.clone(item);
+            item.id = item._id + '';
+
             delete item._id;
             delete item.__v;
           }

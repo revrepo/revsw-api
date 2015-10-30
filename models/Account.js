@@ -46,10 +46,15 @@ Account.prototype = {
   // adds a new item
   add : function (item, callback) {
 
-    new this.model(item).save(function (err, item) {
-//      console.log('Error = ', err);
+    new this.model(item).save(function (err, account) {
       if (callback) {
-        callback(err, item);
+
+        account    = utils.clone(account);
+        account.id = account._id + '';
+
+        delete account._id;
+
+        callback(err, account);
       }
     });
   },
@@ -59,12 +64,11 @@ Account.prototype = {
 //    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
 
     this.model.find(function (err, accounts) {
-//    console.log('Inside line. Object results = ', accounts);
       if (accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
           if (request.auth.credentials.companyId.indexOf(accounts[i]._id) !== -1) {
-            accounts[i].id = accounts[i]._id;
+            accounts[i].id = accounts[i]._id + '';
             delete accounts[i]._id;
             delete accounts[i].__v;
             delete accounts[i].status;
@@ -86,7 +90,7 @@ Account.prototype = {
       if (accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
-          accounts[i].id = accounts[i]._id;
+          accounts[i].id = accounts[i]._id + '';
           delete accounts[i]._id;
           delete accounts[i].__v;
           delete accounts[i].status;
@@ -98,15 +102,10 @@ Account.prototype = {
   },
 
   get : function (item, callback) {
-
-//    console.log('Inside get. item = ', item);
-
     this.model.findOne(item, function (err, doc) {
-//      console.log('Inside get. Received err = ', err);
-//      console.log('Inside get. Received doc = ', doc);
       if (doc) {
         doc = utils.clone(doc);
-        doc.id = doc._id;
+        doc.id = doc._id + '';
         delete doc.__v;
         delete doc._id;
         delete doc.status;
@@ -116,9 +115,7 @@ Account.prototype = {
   },
 
   update : function (item, callback) {
-    var context = this;
     this.model.findOne({_id : item.account_id}, function (err, doc) {
-//      console.log('Inside update: doc = ', doc);
       if (doc) {
 
         for (var attrname in item) {
@@ -130,6 +127,7 @@ Account.prototype = {
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
+            item.id = item._id + '';
             delete item._id;
             delete item.__v;
           }

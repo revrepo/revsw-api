@@ -28,6 +28,7 @@ var speakeasy   = require('speakeasy');
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var User = require('../models/User');
 
@@ -55,26 +56,13 @@ exports.getUsers = function getUsers(request, reply) {
       return reply(boom.badImplementation('Failed to get a list of users'));
     }
 
-    //   console.log('List of users = ', listOfUsers);
-
     if (listOfUsers.length === 0) {
       return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
     }
 
-    var shortList = [];
-    for (var i = 0; i < listOfUsers.length; i++) {
-      shortList.push({});
-      shortList[i].user_id = listOfUsers[i].user_id;
-      shortList[i].email = listOfUsers[i].email;
-      shortList[i].firstname = listOfUsers[i].firstname;
-      shortList[i].lastname = listOfUsers[i].lastname;
-      shortList[i].companyId = listOfUsers[i].companyId;
-      shortList[i].domain = listOfUsers[i].domain;
-      shortList[i].role = listOfUsers[i].role;
-      shortList[i].two_factor_auth_enabled = listOfUsers[i].two_factor_auth_enabled ? listOfUsers[i].two_factor_auth_enabled : false ;
-    }
+    listOfUsers = publicRecordFields.handle(listOfUsers, 'users');
 
-    renderJSON(request, reply, error, shortList);
+    renderJSON(request, reply, error, listOfUsers);
   });
 };
 
@@ -105,20 +93,18 @@ exports.createUser = function(request, reply) {
 
     } else {
 
-      //      console.log('Adding new user ', newUser);
       users.add(newUser, function(error, result) {
-        //        console.log('Added user, error = ', error, 'result = ', result);
 
         var statusResponse;
         if (result) {
           statusResponse = {
             statusCode: 200,
             message: 'Successfully created new user',
-            object_id: result._id.toString()
+            object_id: result.user_id
           };
         }
 
-        newUser = removePrivateFields(newUser);
+        result = publicRecordFields.handle(result, 'users');
 
         AuditLogger.store({
           ip_adress        : request.info.remoteAddress,
@@ -130,9 +116,9 @@ exports.createUser = function(request, reply) {
           domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'user',
-          target_id        : result.id,
+          target_id        : result.user_id,
           target_name      : result.email,
-          target_object    : newUser,
+          target_object    : result,
           operation_status : 'success'
         });
 
@@ -158,7 +144,8 @@ exports.getUser = function(request, reply) {
 
       if (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId)) {
 
-        result = removePrivateFields(result);
+        result = publicRecordFields.handle(result, 'user');
+
         renderJSON(request, reply, error, result);
       } else {
         return reply(boom.badRequest('User not found'));
@@ -179,7 +166,8 @@ exports.getMyUser = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve user details'));
     }
     if (result) {
-      result = removePrivateFields(result);
+      result = publicRecordFields.handle(result, 'user');
+
       renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('User not found'));
@@ -215,7 +203,7 @@ exports.updateUser = function(request, reply) {
             message: 'Successfully updated the user'
           };
 
-          newUser = removePrivateFields(newUser);
+          result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
             ip_adress        : request.info.remoteAddress,
@@ -227,9 +215,9 @@ exports.updateUser = function(request, reply) {
             domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
-            target_id        : user_id,
+            target_id        : result.user_id,
             target_name      : result.email,
-            target_object    : newUser,
+            target_object    : result,
             operation_status : 'success'
           });
 
@@ -271,7 +259,7 @@ exports.updateUserPassword = function(request, reply) {
             message: 'Successfully updated the password'
           };
 
-          result = removePrivateFields(result);
+          result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
             ip_adress        : request.info.remoteAddress,
@@ -283,7 +271,7 @@ exports.updateUserPassword = function(request, reply) {
             domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
-            target_id        : user_id,
+            target_id        : result.user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
@@ -316,7 +304,7 @@ exports.deleteUser = function(request, reply) {
         return reply(boom.badRequest('User not found'));
       }
 
-      result = removePrivateFields(result);
+      result = publicRecordFields.handle(result, 'users');
 
       var auditRecord = {
             ip_adress        : request.info.remoteAddress,
@@ -369,7 +357,7 @@ exports.init2fa = function (request, reply) {
       users.update(user, function(error, result) {
         if (!error) {
 
-          result = removePrivateFields(result);
+          result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
             ip_adress        : request.info.remoteAddress,
@@ -381,7 +369,7 @@ exports.init2fa = function (request, reply) {
             domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
-            target_id        : user_id,
+            target_id        : result.user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
@@ -417,7 +405,7 @@ exports.enable2fa = function (request, reply) {
                 message: 'Successfully enabled two factor authentication'
               };
 
-              result = removePrivateFields(result);
+              result = publicRecordFields.handle(result, 'users');
 
               AuditLogger.store({
                 ip_adress        : request.info.remoteAddress,
@@ -429,7 +417,7 @@ exports.enable2fa = function (request, reply) {
                 domain_id        : request.auth.credentials.domain,
                 activity_type    : 'modify',
                 activity_target  : 'user',
-                target_id        : user_id,
+                target_id        : user.user_id,
                 target_name      : result.email,
                 target_object    : result,
                 operation_status : 'success'
@@ -476,7 +464,7 @@ exports.disable2fa = function (request, reply) {
               message: 'Successfully disabled two factor authentication'
             };
 
-            result = removePrivateFields(result);
+            result = publicRecordFields.handle(result, 'users');
 
             AuditLogger.store({
               ip_adress        : request.info.remoteAddress,
@@ -488,7 +476,7 @@ exports.disable2fa = function (request, reply) {
               domain_id        : request.auth.credentials.domain,
               activity_type    : 'modify',
               activity_target  : 'user',
-              target_id        : user_id,
+              target_id        : user.user_id,
               target_name      : result.email,
               target_object    : result,
               operation_status : 'success'
