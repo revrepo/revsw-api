@@ -31,9 +31,9 @@ function APIKey(mongoose, connection, options) {
   this.APIKeySchema = new this.Schema({
     'key'             : String,
     'key_name'        : String,
-    'companyId'       : String,
+    'account_id'       : String,
     'domains'         : [{domain: String}],
-    'createdBy'       : String,
+    'created_by'       : String,
     'allowed_ops'     : {
       read_config     : {type: Boolean, default: false},
       modify_config   : {type: Boolean, default: false},
@@ -69,12 +69,14 @@ APIKey.prototype = {
 
   add: function (item, callback) {
     new this.model(item).save(function (err, item) {
-      if (callback) {
-        item    = utils.clone(item);
+      if (item) {
+        item = utils.clone(item);
         item.id = item._id + '';
 
+        delete item.__v;
         delete item._id;
-
+      }
+      if (callback) {
         callback(err, item);
       }
     });

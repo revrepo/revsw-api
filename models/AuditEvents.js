@@ -27,7 +27,7 @@ function AuditEvents(mongoose, connection, options) {
 
   this.AuditEventsSchema = new this.Schema({
     meta : {
-      domain_id        : {type : Array},
+//      domain_id        : {type : Array},
       company_id       : {type : String},
       datetime         : {type : Number},
       user_type        : {type : String},
@@ -53,11 +53,11 @@ AuditEvents.prototype = {
       var data      = [];
       for (var key in auditevents) {
         var innerData = {
-          ip_adress        : auditevents[key].meta.ip_adress,
+          ip_address        : auditevents[key].meta.ip_address,
           user_id          : auditevents[key].meta.user_id,
           user_name        : auditevents[key].meta.user_name,
           user_type        : auditevents[key].meta.user_type,
-          domain_id        : auditevents[key].meta.domain_id,
+//           domain_id        : auditevents[key].meta.domain_id,
           company_id       : auditevents[key].meta.company_id,
           datetime         : auditevents[key].meta.datetime,
           account          : auditevents[key].meta.account,
@@ -84,7 +84,7 @@ AuditEvents.prototype = {
       {
         $group : {
           _id    : {
-            ip_adress        : '$meta.ip_adress',
+            ip_address        : '$meta.ip_address',
             user_id          : '$meta.user_id',
             email            : '$meta.target_object.email',
             firstname        : '$meta.target_object.firstname',

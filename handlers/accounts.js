@@ -76,13 +76,13 @@ exports.createAccount = function (request, reply) {
         };
 
         AuditLogger.store({
-          ip_adress        : request.info.remoteAddress,
+          ip_address        : request.info.remoteAddress,
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
-          domain_id        : request.auth.credentials.domain,
+//          domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'account',
           target_id        : result.id,
@@ -166,13 +166,13 @@ exports.updateAccount = function (request, reply) {
       };
 
       AuditLogger.store({
-        ip_adress        : request.info.remoteAddress,
+        ip_address        : request.info.remoteAddress,
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
         account_id       : request.auth.credentials.companyId,
-        domain_id        : request.auth.credentials.domain,
+//        domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'account',
         target_id        : request.params.account_id,
@@ -220,13 +220,13 @@ exports.deleteAccount = function (request, reply) {
         account = publicRecordFields.handle(account, 'accounts');
 
         AuditLogger.store({
-          ip_adress        : request.info.remoteAddress,
+          ip_address        : request.info.remoteAddress,
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
-          domain_id        : request.auth.credentials.domain,
+//          domain_id        : request.auth.credentials.domain,
           activity_type    : 'delete',
           activity_target  : 'account',
           target_id        : account.id,

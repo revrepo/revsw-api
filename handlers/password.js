@@ -74,13 +74,13 @@ exports.forgotPassword = function(request, reply) {
             result = publicRecordFields.handle(result, 'users');
 
             AuditLogger.store({
-              ip_adress        : request.info.remoteAddress,
+              ip_address        : request.info.remoteAddress,
               datetime         : Date.now(),
-              user_id          : user.user_id,
-              user_name        : user.email,
+              user_id          : result.id,
+              user_name        : result.email,
               user_type        : 'user',
-              account_id       : user.companyId,
-              domain_id        : user.domain,
+              account_id       : result.companyId,
+//              domain_id        : result.domain,
               activity_type    : 'modify',
               activity_target  : 'user',
               target_id        : result.user_id,
@@ -171,13 +171,13 @@ exports.resetPassword = function(request, reply) {
           result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
-            ip_adress        : request.info.remoteAddress,
+            ip_address        : request.info.remoteAddress,
             datetime         : Date.now(),
             user_id          : user.user_id,
             user_name        : user.email,
             user_type        : 'user',
-            account_id       : user.companyId,
-            domain_id        : user.domain,
+            account_id       : result.companyId,
+//            domain_id        : result.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,

@@ -44,16 +44,33 @@ exports.getApiKeys = function(request, reply) {
   });
 };
 
+exports.getApiKey = function (request, reply) {
+  var id = request.params.key_id;
+  apiKeys.get( { _id: id }, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to get API key ' + id));
+    }
+
+    if (result) {
+      renderJSON(request, reply, error, result);
+    } else {
+      return reply(boom.badRequest('API key not found'));
+    }
+  });
+};
+
 exports.createApiKey = function(request, reply) {
   var newApiKey = request.payload;
-  newApiKey.createdBy = request.auth.credentials.email;
+  newApiKey.created_by = request.auth.credentials.email;
   newApiKey.key = uuid();
-  if (!newApiKey.key_name) {
-    newApiKey.key_name = newApiKey.companyId;
+  newApiKey.key_name = 'New API Key';
+
+  if ( request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1 ) {
+      return reply(boom.badRequest('Company ID not found'));
   }
 
   accounts.get({
-    _id: newApiKey.companyId
+    _id: newApiKey.account_id
   }, function (error, result) {
     if (error || !result) {
       return reply(boom.badRequest('Wrong company ID'));
@@ -63,7 +80,7 @@ exports.createApiKey = function(request, reply) {
       key: newApiKey.key
     }, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to verify the new API key'));
+        return reply(boom.badImplementation('Failed to verify new API key ' + newApiKey.key));
       }
       if (result) {
         return reply(boom.badRequest('The API key is already registered in the system'));
@@ -71,10 +88,11 @@ exports.createApiKey = function(request, reply) {
 
       apiKeys.add(newApiKey, function (error, result) {
         if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new API key'));
+          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key ));
         }
 
         var statusResponse;
+
 
         result = publicRecordFields.handle(result, 'apiKeys');
 
@@ -82,17 +100,17 @@ exports.createApiKey = function(request, reply) {
           statusResponse = {
             statusCode: 200,
             message   : 'Successfully created new API key',
-            key       : result.key
+            key       : result.key,
+            object_id : result._id.toString()
           };
 
           AuditLogger.store({
-            ip_adress       : request.info.remoteAddress,
+            ip_address      : request.info.remoteAddress,
             datetime        : Date.now(),
-            user_id         : result.key,
-            user_name       : result.key_name,
+            user_id         : request.auth.credentials.user_id,
+            user_name       : request.auth.credentials.email,
             user_type       : 'user',
-            account_id      : result.companyId,
-            domain_id       : request.auth.credentials.domain,
+            account_id      : request.auth.credentials.companyId,
             activity_type   : 'add',
             activity_target : 'apikey',
             target_id       : result._id + '',
@@ -110,37 +128,44 @@ exports.createApiKey = function(request, reply) {
 
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
-  updatedApiKey.key = request.params.key;
+  var id = request.params.key_id;
 
-  apiKeys.get({
-    key: updatedApiKey.key
-  }, function (error, result) {
+  if ( updatedApiKey.account_id && request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1 ) {
+      return reply(boom.badRequest('Company ID not found'));
+  }
+
+  apiKeys.get( { _id: id }, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to verify the API key'));
+      return reply(boom.badImplementation('Failed to verify API key ' + id));
     }
+
+    if (!result) {
+      return reply(boom.badRequest('API key not found'));
+    }
+
+    updatedApiKey.key = result.key;
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update the API key'));
+        return reply(boom.badImplementation('Failed to update API key ' + id));
       }
 
       var statusResponse = {
         statusCode: 200,
-        message   : 'Successfully updated the API key'
+        message   : 'Successfully updated the API key',
       };
 
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_adress        : request.info.remoteAddress,
+        ip_address       : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : result.key,
-        user_name        : result.key_name,
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : result.companyId,
-        domain_id        : request.auth.credentials.domain,
+        account_id       : request.auth.credentials.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id,
+        target_id        : result.id + '',
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -152,15 +177,23 @@ exports.updateApiKey = function (request, reply) {
 };
 
 exports.activateApiKey = function (request, reply) {
-  apiKeys.get({
-    key: request.params.key
-  }, function (error, result) {
+  var id = request.params.key_id;
+  apiKeys.get( { _id: id }, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to verify the API key'));
+      return reply(boom.badImplementation('Failed to verify API key ' + id));
     }
+
+    if (!result) {
+      return reply(boom.badRequest('API key not found'));
+    }
+
+    if ( request.auth.credentials.companyId.indexOf(result.account_id) === -1 ) {
+      return reply(boom.badRequest('API key not found'));
+    }
+
     apiKeys.activate({key: result.key}, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to activate the API key'));
+        return reply(boom.badImplementation('Failed to activate API key ' + id));
       }
 
       var statusResponse = {
@@ -171,16 +204,15 @@ exports.activateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_adress        : request.info.remoteAddress,
+        ip_address        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : result.key,
-        user_name        : result.key_name,
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : result.companyId,
-        domain_id        : request.auth.credentials.domain,
+        account_id       : request.auth.credentials.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id,
+        target_id        : result.id + '',
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -191,15 +223,23 @@ exports.activateApiKey = function (request, reply) {
 };
 
 exports.deactivateApiKey = function (request, reply) {
-  apiKeys.get({
-    key: request.params.key
-  }, function (error, result) {
+  var id = request.params.key_id;
+  apiKeys.get( { _id: id }, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify the API key'));
     }
+
+    if (!result) {
+      return reply(boom.badRequest('API key not found'));
+    }
+
+    if ( request.auth.credentials.companyId.indexOf(result.account_id) === -1 ) {
+      return reply(boom.badRequest('API key not found'));
+    }
+
     apiKeys.deactivate({key: result.key}, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to deactivate the API key'));
+        return reply(boom.badImplementation('Failed to deactivate API key ' + id));
       }
 
       var statusResponse = {
@@ -210,16 +250,15 @@ exports.deactivateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_adress        : request.info.remoteAddress,
+        ip_address        : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : result.key,
-        user_name        : result.key_name,
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : result.companyId,
-        domain_id        : request.auth.credentials.domain,
+        account_id       : request.auth.credentials.companyId,
         activity_type    : 'modify',
         activity_target  : 'apikey',
-        target_id        : result.id,
+        target_id        : result.id + '',
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
@@ -230,22 +269,24 @@ exports.deactivateApiKey = function (request, reply) {
 };
 
 exports.deleteApiKey = function (request, reply) {
-  var key = request.params.key;
-  apiKeys.get({
-    key: key
-  }, function (error, result) {
+  var id = request.params.key_id;
+  apiKeys.get( { _id: id }, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Error retrieving the key'));
+      return reply(boom.badImplementation('Error retrieving API key ' + id));
     }
-    if (!key) {
+    if (!result) {
       return reply(boom.badRequest('API key not found'));
     }
-    apiKeys.remove({
-      key: key
-    }, function (error) {
+
+    if ( request.auth.credentials.companyId.indexOf(result.account_id) === -1 ) {
+      return reply(boom.badRequest('API key not found'));
+    }
+
+    apiKeys.remove( { _id: id }, function (error) {
       if (error) {
         return reply(boom.badImplementation('Error removing the key'));
       }
+
       var statusResponse;
       statusResponse = {
         statusCode : 200,
@@ -255,16 +296,15 @@ exports.deleteApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_adress        : request.info.remoteAddress,
+        ip_address       : request.info.remoteAddress,
         datetime         : Date.now(),
-        user_id          : result.key,
-        user_name        : result.key_name,
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : result.companyId,
-        domain_id        : request.auth.credentials.domain,
+        account_id       : request.auth.credentials.companyId,
         activity_type    : 'delete',
         activity_target  : 'apikey',
-        target_id        : result.id,
+        target_id        : result._id + '',
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
