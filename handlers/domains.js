@@ -134,9 +134,6 @@ exports.getDomain = function (request, reply) {
 
         result.origin_server_location = servergroup.publicName;
 
-        result.origin_host_header = result.origin_server;
-        result.origin_server = result.origin_domain;
-
         result = publicRecordFields.handle(result, 'domain');
 
         renderJSON(request, reply, error, result);
