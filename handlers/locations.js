@@ -25,7 +25,6 @@ var boom     = require('boom');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
-var publicRecordFields = require('../lib/publicRecordFields');
 
 var ServerGroup = require('../models/ServerGroup');
 var Location = require('../models/Location');
@@ -37,8 +36,6 @@ var locations = new Location(mongoose, mongoConnection.getConnectionPortal());
 exports.getFirstMileLocations = function(request, reply) {
 
   servergroups.listFirstMileLocations(function(error, result) {
-
-    console.log(result);
 
     if (error) {
       return reply(boom.badImplementation('Failed to retrive from the database a list of first mile locations'));
