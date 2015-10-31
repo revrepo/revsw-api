@@ -198,6 +198,7 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID')
         },
         payload : {
+          proxy_timeout: Joi.boolean(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -220,7 +221,9 @@ module.exports = [
               edge_caching         : Joi.object({
                 override_origin : Joi.boolean().required(),
                 new_ttl         : Joi.number().integer().required(),
-                override_no_cc  : Joi.boolean().required()
+                override_no_cc  : Joi.boolean().required(),
+                query_string_list_is_keep: Joi.boolean(),
+                query_string_keep_or_remove_list: Joi.array().items(Joi.string()),
               }).required(),
               browser_caching      : Joi.object({
                 override_edge    : Joi.boolean().required(),
