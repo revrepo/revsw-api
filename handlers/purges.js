@@ -28,6 +28,7 @@ var cds_request = require('request');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var Domain   = require('../models/Domain');
 var PurgeJob = require('../models/PurgeJob');
@@ -92,6 +93,8 @@ exports.purgeObject = function(request, reply) {
         request_id : result.req_id
       };
 
+      result = publicRecordFields.handle(result, 'purge');
+
       AuditLogger.store({
         ip_address        : request.info.remoteAddress,
         datetime         : Date.now(),
@@ -102,9 +105,9 @@ exports.purgeObject = function(request, reply) {
 //        domain_id        : request.auth.credentials.domain,
         activity_type    : 'purge',
         activity_target  : 'purge',
-        target_id        : result.id,
+        target_id        : result.req_id,
         target_name      : result.req_email,
-        target_object    : newPurgeJob,
+        target_object    : result,
         operation_status : 'success'
       });
 

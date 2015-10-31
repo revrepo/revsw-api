@@ -74,8 +74,14 @@ User.prototype = {
     }
 
     new this.model(item).save(function (err, item) {
-//      console.log('Error = ', err);
       if (callback) {
+        item = utils.clone(item);
+        item.user_id = item._id;
+
+        delete item.__v;
+        delete item._id;
+        delete item.id;
+
         callback(err, item);
       }
     });
@@ -83,19 +89,18 @@ User.prototype = {
 
   get : function (item, callback) {
 
-    //   console.log('Inside get. item = ', item);
-
     this.model.findOne(item, function (err, doc) {
-      //     console.log('Inside get. Received err = ', err);
-      //     console.log('Inside get. Received doc = ', doc);
       if (doc) {
+
         doc = utils.clone(doc);
         doc.user_id = doc._id;
+
         delete doc.__v;
         delete doc._id;
+        delete doc.id;
         delete doc.token;
         delete doc.status;
-        delete doc.id;
+
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
         }
@@ -163,6 +168,7 @@ User.prototype = {
           // skip users which do not belong to the company
           if (utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
             users[i].user_id = users[i]._id;
+            users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;
             delete users[i].__v;
             if (users[i].domain && users[i].domain !== '') {
@@ -233,6 +239,8 @@ User.prototype = {
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
+            item.user_id = item._id;
+
             delete item._id;
             delete item.__v;
           }

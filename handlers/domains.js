@@ -28,6 +28,7 @@ var portal_request = require('supertest');
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var Domain              = require('../models/Domain');
 var ServerGroup         = require('../models/ServerGroup');
@@ -128,16 +129,15 @@ exports.getDomain = function (request, reply) {
         if (error || !servergroup) {
           return reply(boom.badImplementation('Failed to retrieve domain details'));
         }
+
+        result.cname = result.name + '.' + config.get('default_cname_domain');
+
         result.origin_server_location = servergroup.publicName;
 
         result.origin_host_header = result.origin_server;
         result.origin_server = result.origin_domain;
 
-        for (var i in domainAttributesToHide) {
-          delete result[domainAttributesToHide[i]];
-        }
-
-        result.cname = result.name + '.' + config.get('default_cname_domain');
+        result = publicRecordFields.handle(result, 'domain');
 
         renderJSON(request, reply, error, result);
       });
@@ -263,6 +263,8 @@ exports.createDomain = function (request, reply) {
                     object_id  : result.id
                   };
 
+                  result = publicRecordFields.handle(result, 'domain');
+
                   AuditLogger.store({
                     ip_address        : request.info.remoteAddress,
                     datetime         : Date.now(),
@@ -275,7 +277,7 @@ exports.createDomain = function (request, reply) {
                     activity_target  : 'domain',
                     target_id        : result.id,
                     target_name      : result.name,
-                    target_object    : createDomainJson,
+                    target_object    : result,
                     operation_status : 'success'
                   });
 
@@ -366,6 +368,8 @@ exports.updateDomain = function (request, reply) {
                   message    : 'Successfully updated the domain'
                 };
 
+                result = publicRecordFields.handle(result, 'domain');
+
                 AuditLogger.store({
                   ip_address        : request.info.remoteAddress,
                   datetime         : Date.now(),
@@ -378,7 +382,7 @@ exports.updateDomain = function (request, reply) {
                   activity_target  : 'domain',
                   target_id        : result.id,
                   target_name      : result.name,
-                  target_object    : updateDomainJson,
+                  target_object    : result,
                   operation_status : 'success'
                 });
 
@@ -454,6 +458,8 @@ exports.updateDomainDetails = function (request, reply) {
                     message    : 'Successfully updated the domain'
                   };
 
+                  result = publicRecordFields.handle(result, 'domain');
+
                   AuditLogger.store({
                     ip_address        : request.info.remoteAddress,
                     datetime         : Date.now(),
@@ -464,9 +470,9 @@ exports.updateDomainDetails = function (request, reply) {
 //                    domain_id        : request.auth.credentials.domain,
                     activity_type    : 'modify',
                     activity_target  : 'domain',
-                    target_id        : domain_id,
+                    target_id        : result.id,
                     target_name      : result.name,
-                    target_object    : updateDomainJson,
+                    target_object    : result,
                     operation_status : 'success'
                   });
 
@@ -533,6 +539,8 @@ exports.deleteDomain = function (request, reply) {
               message    : 'Successfully deleted the domain'
             };
 
+            result = publicRecordFields.handle(result, 'domain');
+
             AuditLogger.store({
               ip_address        : request.info.remoteAddress,
               datetime         : Date.now(),
@@ -543,9 +551,9 @@ exports.deleteDomain = function (request, reply) {
 //              domain_id        : request.auth.credentials.domain,
               activity_type    : 'delete',
               activity_target  : 'domain',
-              target_id        : domain_id,
-              target_name      : domain_name,
-              target_object    : deleteDomainJson,
+              target_id        : result.id,
+              target_name      : result.name,
+              target_object    : result,
               operation_status : 'success'
             });
 
