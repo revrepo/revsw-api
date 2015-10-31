@@ -365,25 +365,33 @@ exports.updateDomain = function (request, reply) {
                   message    : 'Successfully updated the domain'
                 };
 
-                result = publicRecordFields.handle(result, 'domain');
+                domains.get({
+                  _id : request.params.domain_id
+                }, function (error, result) {
+                  if (error) {
+                    return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + request.params.domain_id));
+                  }
+  
+                  result = publicRecordFields.handle(result, 'domain');
 
-                AuditLogger.store({
-                  ip_address        : request.info.remoteAddress,
-                  datetime         : Date.now(),
-                  user_id          : request.auth.credentials.user_id,
-                  user_name        : request.auth.credentials.email,
-                  user_type        : 'user',
-                  account_id       : request.auth.credentials.companyId,
+                  AuditLogger.store({
+                    ip_address        : request.info.remoteAddress,
+                    datetime         : Date.now(),
+                    user_id          : request.auth.credentials.user_id,
+                    user_name        : request.auth.credentials.email,
+                    user_type        : 'user',
+                    account_id       : request.auth.credentials.companyId,
 //                  domain_id        : request.auth.credentials.domain,
-                  activity_type    : 'modify',
-                  activity_target  : 'domain',
-                  target_id        : result.id,
-                  target_name      : result.name,
-                  target_object    : result,
-                  operation_status : 'success'
-                });
+                    activity_type    : 'modify',
+                    activity_target  : 'domain',
+                    target_id        : result.id,
+                    target_name      : result.name,
+                    target_object    : result,
+                    operation_status : 'success'
+                  });
 
-                renderJSON(request, reply, error, statusResponse);
+                  renderJSON(request, reply, error, statusResponse);
+                });
               } else {
                 return reply(boom.badImplementation('Failed to update the domain configuration'));
               }
