@@ -136,7 +136,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
         var result = {
           metadata : {
             user_id    : user_id,
-            domain_id  : request.query.domain_id,
+            //domain_id  : request.query.domain_id,
             company_id : request.query.company_id ? request.query.company_id : user.companyId,
             start_time : start_time,
             end_time   : end_time
@@ -251,7 +251,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
         var result = {
           metadata : {
             user_id    : user_id,
-            domain_id  : request.query.domain_id,
+            //domain_id  : request.query.domain_id,
             company_id : request.query.company_id ? request.query.company_id : user.companyId,
             start_time : start_time,
             end_time   : end_time

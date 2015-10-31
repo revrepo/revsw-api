@@ -62,14 +62,14 @@ Domain.prototype = {
 
   get : function (item, callback) {
 
-//    console.log('Inside get. item = ', item);
 
     this.model.findOne(item, function (err, doc) {
-//      console.log('Inside get. Received err = ', err);
-//      console.log('Inside get. Received doc = ', doc);
       if (doc) {
-        doc = utils.clone(doc);
-        doc.id = doc._id;
+        doc                    = utils.clone(doc);
+        doc.id                 = doc._id + '';
+        doc.origin_server      = doc.origin_domain;
+        doc.origin_host_header = doc.origin_server;
+
         delete doc.__v;
         delete doc._id;
         if (doc.sync_status === null) {
