@@ -101,7 +101,7 @@ exports.createApiKey = function(request, reply) {
             statusCode: 200,
             message   : 'Successfully created new API key',
             key       : result.key,
-            object_id : result._id.toString()
+            object_id : result.id
           };
 
           AuditLogger.store({
@@ -151,7 +151,7 @@ exports.updateApiKey = function (request, reply) {
 
       var statusResponse = {
         statusCode: 200,
-        message   : 'Successfully updated the API key',
+        message   : 'Successfully updated the API key'
       };
 
       result = publicRecordFields.handle(result, 'apiKeys');
@@ -263,6 +263,7 @@ exports.deactivateApiKey = function (request, reply) {
         target_object    : result,
         operation_status : 'success'
       });
+
       renderJSON(request, reply, error, statusResponse);
     });
   });
