@@ -93,7 +93,7 @@ exports.purgeObject = function(request, reply) {
         request_id : result.req_id
       };
 
-      result = publicRecordFields.handle(result, 'purge');
+      newPurgeJob = publicRecordFields.handle(newPurgeJob, 'purge');
 
       AuditLogger.store({
         ip_address        : request.info.remoteAddress,
@@ -105,9 +105,9 @@ exports.purgeObject = function(request, reply) {
 //        domain_id        : request.auth.credentials.domain,
         activity_type    : 'purge',
         activity_target  : 'purge',
-        target_id        : result.req_id,
-        target_name      : result.req_email,
-        target_object    : result,
+        target_id        : newPurgeJob.req_id,
+        target_name      : newPurgeJob.req_email,
+        target_object    : newPurgeJob,
         operation_status : 'success'
       });
 
