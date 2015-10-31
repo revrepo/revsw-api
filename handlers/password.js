@@ -30,6 +30,7 @@ var AuditLogger = require('revsw-audit');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var User = require('../models/User');
 
@@ -70,7 +71,7 @@ exports.forgotPassword = function(request, reply) {
               return reply(boom.badImplementation('Failed to retrieve user details'));
             }
 
-            delete result.password;
+            result = publicRecordFields.handle(result, 'users');
 
             AuditLogger.store({
               ip_address        : request.info.remoteAddress,
@@ -82,7 +83,7 @@ exports.forgotPassword = function(request, reply) {
 //              domain_id        : result.domain,
               activity_type    : 'modify',
               activity_target  : 'user',
-              target_id        : result.id,
+              target_id        : result.user_id,
               target_name      : result.email,
               target_object    : result,
               operation_status : 'success'
@@ -167,19 +168,19 @@ exports.resetPassword = function(request, reply) {
             return reply(boom.badImplementation('Failed to update user details with new password'));
           }
 
-          delete result.password;
+          result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
             ip_address        : request.info.remoteAddress,
             datetime         : Date.now(),
-            user_id          : result.id,
-            user_name        : result.email,
+            user_id          : user.user_id,
+            user_name        : user.email,
             user_type        : 'user',
             account_id       : result.companyId,
 //            domain_id        : result.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
-            target_id        : result.id,
+            target_id        : result.user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'

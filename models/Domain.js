@@ -62,14 +62,14 @@ Domain.prototype = {
 
   get : function (item, callback) {
 
-//    console.log('Inside get. item = ', item);
 
     this.model.findOne(item, function (err, doc) {
-//      console.log('Inside get. Received err = ', err);
-//      console.log('Inside get. Received doc = ', doc);
       if (doc) {
-        doc = utils.clone(doc);
-        doc.id = doc._id;
+        doc                    = utils.clone(doc);
+        doc.id                 = doc._id + '';
+        doc.origin_host_header = doc.origin_server;
+        doc.origin_server      = doc.origin_domain;
+
         delete doc.__v;
         delete doc._id;
         if (doc.sync_status === null) {
@@ -100,7 +100,7 @@ Domain.prototype = {
             i--;
             continue;
           } else {
-            domains[i].id = domains[i]._id;
+            domains[i].id = domains[i]._id + '';
             delete domains[i]._id;
             delete domains[i].__v;
             if (domains[i].sync_status === null) {
@@ -123,7 +123,7 @@ Domain.prototype = {
         domains = utils.clone(domains);
 
         for (var i = 0; i < domains.length; i++) {
-          domains[i].id = domains[i]._id;
+          domains[i].id = domains[i]._id + '';
 
           delete domains[i]._id;
           delete domains[i].__v;
