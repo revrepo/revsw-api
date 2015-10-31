@@ -65,7 +65,7 @@ exports.createAccount = function (request, reply) {
         return reply(boom.badImplementation('Failed to add new account'));
       }
 
-      result = publicRecordFields.handle(result, 'accounts');
+      result = publicRecordFields.handle(result, 'account');
 
       var statusResponse;
       if (result) {
@@ -123,7 +123,7 @@ exports.getAccount = function (request, reply) {
     _id : account_id
   }, function (error, result) {
     if (result) {
-      result = publicRecordFields.handle(result, 'accounts');
+      result = publicRecordFields.handle(result, 'account');
       renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('Account not found'));
@@ -158,7 +158,7 @@ exports.updateAccount = function (request, reply) {
         return reply(boom.badImplementation('Failed to update the account'));
       }
 
-      result = publicRecordFields.handle(result, 'accounts');
+      result = publicRecordFields.handle(result, 'account');
 
       var statusResponse = {
         statusCode : 200,
@@ -217,7 +217,7 @@ exports.deleteAccount = function (request, reply) {
           message    : 'Successfully deleted the account'
         };
 
-        account = publicRecordFields.handle(account, 'accounts');
+        account = publicRecordFields.handle(account, 'account');
 
         AuditLogger.store({
           ip_address        : request.info.remoteAddress,

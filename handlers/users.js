@@ -104,7 +104,7 @@ exports.createUser = function(request, reply) {
           };
         }
 
-        result = publicRecordFields.handle(result, 'users');
+        result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
           ip_address        : request.info.remoteAddress,
@@ -203,7 +203,7 @@ exports.updateUser = function(request, reply) {
             message: 'Successfully updated the user'
           };
 
-          result = publicRecordFields.handle(result, 'users');
+          result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
             ip_address        : request.info.remoteAddress,
@@ -259,7 +259,7 @@ exports.updateUserPassword = function(request, reply) {
             message: 'Successfully updated the password'
           };
 
-          result = publicRecordFields.handle(result, 'users');
+          result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
             ip_address        : request.info.remoteAddress,
@@ -304,7 +304,7 @@ exports.deleteUser = function(request, reply) {
         return reply(boom.badRequest('User not found'));
       }
 
-      result = publicRecordFields.handle(result, 'users');
+      result = publicRecordFields.handle(result, 'user');
 
       var auditRecord = {
             ip_address        : request.info.remoteAddress,
@@ -357,7 +357,7 @@ exports.init2fa = function (request, reply) {
       users.update(user, function(error, result) {
         if (!error) {
 
-          result = publicRecordFields.handle(result, 'users');
+          result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
             ip_address        : request.info.remoteAddress,
@@ -405,7 +405,7 @@ exports.enable2fa = function (request, reply) {
                 message: 'Successfully enabled two factor authentication'
               };
 
-              result = publicRecordFields.handle(result, 'users');
+              result = publicRecordFields.handle(result, 'user');
 
               AuditLogger.store({
                 ip_address        : request.info.remoteAddress,
@@ -464,7 +464,7 @@ exports.disable2fa = function (request, reply) {
               message: 'Successfully disabled two factor authentication'
             };
 
-            result = publicRecordFields.handle(result, 'users');
+            result = publicRecordFields.handle(result, 'user');
 
             AuditLogger.store({
               ip_address        : request.info.remoteAddress,
