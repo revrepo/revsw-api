@@ -190,7 +190,7 @@ describe('Rev Purge API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.activity_type.should.be.equal('purge');
         last_obj.activity_target.should.be.equal('purge');
         done();

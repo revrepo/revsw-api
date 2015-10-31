@@ -498,7 +498,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('add');
         last_obj.activity_target.should.be.equal('user');
@@ -587,7 +587,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('modify');
         last_obj.activity_target.should.be.equal('user');
@@ -636,7 +636,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('delete');
         last_obj.activity_target.should.be.equal('user');
@@ -677,7 +677,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('add');
         last_obj.activity_target.should.be.equal('user');
@@ -780,7 +780,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('modify');
         last_obj.activity_target.should.be.equal('user');
@@ -856,7 +856,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('delete');
         last_obj.activity_target.should.be.equal('user');
@@ -1005,7 +1005,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(newDomainId);
         last_obj.activity_type.should.be.equal('add');
         last_obj.activity_target.should.be.equal('domain');
@@ -1135,7 +1135,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(newDomainId);
         last_obj.activity_type.should.be.equal('modify');
         last_obj.activity_target.should.be.equal('domain');
@@ -1304,7 +1304,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(newDomainId);
         last_obj.activity_type.should.be.equal('modify');
         last_obj.activity_target.should.be.equal('domain');
@@ -1354,7 +1354,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(newDomainId);
         last_obj.activity_type.should.be.equal('delete');
         last_obj.activity_target.should.be.equal('domain');
