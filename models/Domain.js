@@ -100,7 +100,7 @@ Domain.prototype = {
             i--;
             continue;
           } else {
-            domains[i].id = domains[i]._id;
+            domains[i].id = domains[i]._id + '';
             delete domains[i]._id;
             delete domains[i].__v;
             if (domains[i].sync_status === null) {
@@ -123,7 +123,7 @@ Domain.prototype = {
         domains = utils.clone(domains);
 
         for (var i = 0; i < domains.length; i++) {
-          domains[i].id = domains[i]._id;
+          domains[i].id = domains[i]._id + '';
 
           delete domains[i]._id;
           delete domains[i].__v;
