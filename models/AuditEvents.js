@@ -20,6 +20,8 @@
 
 'use strict';
 
+var config = require('config');
+
 function AuditEvents(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -49,7 +51,7 @@ function AuditEvents(mongoose, connection, options) {
 
 AuditEvents.prototype = {
   detailed : function (request, callback) {
-    this.model.find(request, function (err, auditevents) {
+    this.model.find(request).sort({timestamp: 'descending'}).limit(config.get('number_of_reported_audit_log_records')).exec( function (err, auditevents) {
       var data      = [];
       for (var key in auditevents) {
         var innerData = {
