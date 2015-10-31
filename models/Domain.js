@@ -67,8 +67,8 @@ Domain.prototype = {
       if (doc) {
         doc                    = utils.clone(doc);
         doc.id                 = doc._id + '';
-        doc.origin_server      = doc.origin_domain;
         doc.origin_host_header = doc.origin_server;
+        doc.origin_server      = doc.origin_domain;
 
         delete doc.__v;
         delete doc._id;
