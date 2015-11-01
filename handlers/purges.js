@@ -106,7 +106,7 @@ exports.purgeObject = function(request, reply) {
         activity_type    : 'purge',
         activity_target  : 'purge',
         target_id        : newPurgeJob.req_id,
-        target_name      : newPurgeJob.req_email,
+        target_name      : newPurgeJob.req_domain,
         target_object    : newPurgeJob,
         operation_status : 'success'
       });
