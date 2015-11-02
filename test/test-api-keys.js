@@ -1,58 +1,43 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('supertest');
-var agent = require('supertest-as-promised');
 
-var express = require('express');
-var fs = require('fs');
-var https = require('https');
-var sleep = require('sleep');
-var utils = require('../lib/utilities.js');
 var config = require('config');
-var speakeasy = require('speakeasy');
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
-var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
-var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
-
-var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
-  qaUserWithUserPermPassword = 'password1',
-  qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
-  qaUserWithAdminPermPassword = 'password1',
-  qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
-  qaUserWithRevAdminPermPassword = 'password1',
-  qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
-  qaUserWithResellerPermPassword = 'password1',
-  wrongUsername = 'wrong_username@revsw.com',
-  wrongPassword = 'we5rsdfsdfs',
-  testDomain = 'qa-api-test-domain.revsw.net',  // this domain should exist in the QA environment
-  secretKey = '';
+var testAPIUrl = (process.env.API_QA_URL) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
+var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com';
+var qaUserWithUserPermPassword = 'password1';
+var qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com';
+var qaUserWithAdminPermPassword = 'password1';
 
 describe('Rev API keys', function() {
 
-  var myCompanyId = '55b6ff6a7957012304a49d04',
-    myDomains = [],
-    testUser = 'api-qa-user-' + Date.now() + '@revsw.com',
-    testUserId,
-//    testUser = 'api-qa-user-1444983698019@revsw.com',
-//    testUserId = '5620b39268a3f1483b990e1c',
-    testPassword = 'password1',
-    newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
-    newDomainId,
-    createDomainIds,
-    createdAPIKeyId,
-    testUserProfile = {};
+  var myCompanyId = '55b6ff6a7957012304a49d04';
+  var myDomains = [];
+  var okDomains = [
+    '55f9f0da5ca524340d761b70', '55f9f0fa5ca524340d761b76', '55f9f6825ca524340d761b7c',
+    '55b701197957012304a49d05', '56188c7e144de0433c4e68f8'
+  ];
+  var lessDomains = [
+    '55f9f6825ca524340d761b7c', '55b701197957012304a49d05', '56188c7e144de0433c4e68f8'
+  ];
+  var wrongDomains = [
+    '55f9f0da5ca524340d761b70', '55f9f0fa5ca524340f761b76', '55f9f6825ca524340d761b7c',
+    '55b7011979570123aaa49d05', '56188c7e144de0433c4e68f8', '56188c7e144de0433c4e68a9'
+  ];
+  var testUser = 'api-qa-user-' + Date.now() + '@revsw.com';
+  var testUserId;
+  var testPassword = 'password1';
+  var createdAPIKeyId;
+  var testDomain = 'qa-api-test-domain.revsw.net';
+  var testDomainId;
 
   var newUserJson = {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
-    'companyId': [
-      myCompanyId
-    ],
-    'domain': [
-      'qa-api-test-domain.revsw.net'
-    ],
+    'companyId': [myCompanyId],
+    'domain': ['qa-api-test-domain.revsw.net'],
     'theme': 'light',
     'role': 'admin',
     'password': 'password1',
@@ -82,6 +67,31 @@ describe('Rev API keys', function() {
         response_json.message.should.be.equal('Successfully created new user');
         response_json.object_id.should.be.a.String();
         testUserId = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should get a domains list as user with admin permissions', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domains')
+      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.length.should.be.above(0);
+        for (var i = 0; i < response_json.length; i++) {
+          response_json[i].companyId.should.be.a.String();
+          response_json[i].name.should.be.a.String();
+          response_json[i].id.should.be.a.String();
+          response_json[i].sync_status.should.be.a.String();
+          if (response_json[i].name === testDomain) {
+            testDomainId = response_json[i].id;
+          }
+        }
+        testDomainId.should.be.a.String();
         done();
       });
   });
@@ -139,11 +149,30 @@ describe('Rev API keys', function() {
       });
   });
 
+  it('should fail to create an API key with wrong domains' + testUser, function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys')
+      .auth(testUser, testPassword)
+      .send({account_id: myCompanyId, domains: wrongDomains})
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('Wrong domains: 55f9f0fa5ca524340f761b76,55b7011979570123aaa49d05,56188c7e144de0433c4e68a9');
+        createdAPIKeyId = response_json.object_id;
+        done();
+      });
+  });
+
   it('should create an API key for the company' + testUser, function(done) {
     request(testAPIUrl)
       .post('/v1/api_keys')
       .auth(testUser, testPassword)
-      .send({account_id: myCompanyId})
+      .send({account_id: myCompanyId, domains: okDomains})
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -157,7 +186,6 @@ describe('Rev API keys', function() {
       });
   });
 
-  
     it('should fail to return the API key without admin permissions', function(done) {
     request(testAPIUrl)
       .get('/v1/api_keys/' + createdAPIKeyId)
@@ -345,7 +373,21 @@ describe('Rev API keys', function() {
     request(testAPIUrl)
       .put('/v1/api_keys/' + createdAPIKeyId)
       .auth(testUser, testPassword)
-      .send({read_only_status: true})
+      .send({
+        key_name        : 'New Key Name',
+        account_id      : myCompanyId,
+        domains         : lessDomains,
+        allowed_ops     : {
+          read_config     : true,
+          modify_config   : true,
+          delete_config   : true,
+          purge           : true,
+          reports         : true,
+          admin           : true,
+        },
+        active          : true,
+        read_only_status: true
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -360,7 +402,7 @@ describe('Rev API keys', function() {
 
   it('should fail to activate the API key for the company without admin permissions', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/' + createdAPIKeyId + '/activate' )
+      .post('/v1/api_keys/' + createdAPIKeyId + '/activate')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .expect(403)
       .end(function(err, res) {
@@ -521,6 +563,35 @@ describe('Rev API keys', function() {
       });
   });
 
+  it('Should return user detailed activity log (without params)', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUser, testPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.data.should.be.a.Array();
+
+        for(var key in response_json.data) {
+          response_json.data[key].should.have.property('user_id').be.a.String();
+          response_json.data[key].should.have.property('user_name').be.a.String();
+          response_json.data[key].should.have.property('user_type').be.a.String();
+          response_json.data[key].should.have.property('datetime').be.a.Number();
+          response_json.data[key].should.have.property('account_id').be.a.Array();
+          response_json.data[key].should.have.property('activity_type').be.a.String();
+          response_json.data[key].should.have.property('activity_target').be.a.String();
+          response_json.data[key].should.have.property('target_name').be.a.String();
+          response_json.data[key].should.have.property('target_id').be.a.String();
+          response_json.data[key].should.have.property('operation_status').be.a.String();
+          response_json.data[key].should.have.property('target_object').be.a.Object();
+        }
+        done();
+      });
+  });
+
   it('should delete test user account ' + testUser, function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)
@@ -537,4 +608,3 @@ describe('Rev API keys', function() {
       });
   });
 });
-

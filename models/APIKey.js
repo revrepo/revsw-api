@@ -32,7 +32,7 @@ function APIKey(mongoose, connection, options) {
     'key'             : String,
     'key_name'        : String,
     'account_id'       : String,
-    'domains'         : [{domain: String}],
+    'domains'         : [String],
     'created_by'       : String,
     'allowed_ops'     : {
       read_config     : {type: Boolean, default: false},
