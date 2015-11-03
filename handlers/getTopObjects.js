@@ -122,7 +122,7 @@ exports.getTopObjects = function(request, reply) {
         }
       };
 
-      elasticSearch.getClient().search({
+      elasticSearch.getClientURL().search({
         index: utils.buildIndexList(start_time, end_time),
         ignoreUnavailable: true,
         timeout: 60,
