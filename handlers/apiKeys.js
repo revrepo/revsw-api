@@ -40,35 +40,38 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
 
 function verifyDomainOwnership(companyId, domainList, callback) {
+  
   var verified = true;
   var okDomains = [];
   var wrongDomains = [];
   var j = 0;
 
+  function checkDomain(_i, l) {
+    domains.get({_id: domainList[_i]}, function(error, result) {
+      j++;
+      if (!error && result) {
+        if (!result.companyId || result.companyId !== companyId) {
+          wrongDomains.push(domainList[_i]);
+        } else {
+          okDomains.push(domainList[_i]);
+        }
+      } else {
+        wrongDomains.push(domainList[_i]);
+      }
+      if (j === l) {
+        callback(error, okDomains, wrongDomains);
+      }
+    });
+  }
+
   if (!domainList || !domainList.length) {
     callback(null, okDomains, wrongDomains);
   } else {
     for (var i = 0, l = domainList.length; i < l; i++) {
-      (function(_i) {
-        domains.get({_id: domainList[_i]}, function(error, result) {
-          j++;
-          if (!error && result) {
-            if (!result.companyId || result.companyId !== companyId) {
-              wrongDomains.push(domainList[_i]);
-            } else {
-              okDomains.push(domainList[_i]);
-            }
-          } else {
-            wrongDomains.push(domainList[_i]);
-          }
-          if (j === l) {
-            callback(error, okDomains, wrongDomains);
-          }
-        });
-      })(i);
+      checkDomain(i, l);
     }
   }
-};
+}
 
 exports.getApiKeys = function(request, reply) {
   apiKeys.list(request, function (error, listOfApiKeys) {
@@ -180,11 +183,11 @@ exports.updateApiKey = function (request, reply) {
     }
     verifyDomainOwnership(updatedApiKey.account_id, updatedApiKey.domains, function(error, okDomains, wrongDomains) {
       if (error) {
-        return reply(boom.badImplementation('Error retrieving domain information'))
+        return reply(boom.badImplementation('Error retrieving domain information'));
       }
 
       if (wrongDomains.length) {
-        return reply(boom.badRequest('Wrong domains: ' + wrongDomains))
+        return reply(boom.badRequest('Wrong domains: ' + wrongDomains));
       }
 
       updatedApiKey.key = result.key;
