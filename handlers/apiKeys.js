@@ -32,10 +32,43 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
 var Account = require('../models/Account');
+var Domain = require('../models/Domain');
 
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+
+function verifyDomainOwnership(companyId, domainList, callback) {
+  var verified = true;
+  var okDomains = [];
+  var wrongDomains = [];
+  var j = 0;
+
+  if (!domainList || !domainList.length) {
+    callback(null, okDomains, wrongDomains);
+  } else {
+    for (var i = 0, l = domainList.length; i < l; i++) {
+      (function(_i) {
+        domains.get({_id: domainList[_i]}, function(error, result) {
+          j++;
+          if (!error && result) {
+            if (!result.companyId || result.companyId !== companyId) {
+              wrongDomains.push(domainList[_i]);
+            } else {
+              okDomains.push(domainList[_i]);
+            }
+          } else {
+            wrongDomains.push(domainList[_i]);
+          }
+          if (j === l) {
+            callback(error, okDomains, wrongDomains);
+          }
+        });
+      })(i);
+    }
+  }
+};
 
 exports.getApiKeys = function(request, reply) {
   apiKeys.list(request, function (error, listOfApiKeys) {
@@ -46,7 +79,7 @@ exports.getApiKeys = function(request, reply) {
 
 exports.getApiKey = function (request, reply) {
   var id = request.params.key_id;
-  apiKeys.get( { _id: id }, function (error, result) {
+  apiKeys.get({_id: id}, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to get API key ' + id));
     }
@@ -65,7 +98,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = uuid();
   newApiKey.key_name = 'New API Key';
 
-  if ( request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1 ) {
+  if (request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -88,11 +121,10 @@ exports.createApiKey = function(request, reply) {
 
       apiKeys.add(newApiKey, function (error, result) {
         if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key ));
+          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key));
         }
 
         var statusResponse;
-
 
         result = publicRecordFields.handle(result, 'apiKeys');
 
@@ -130,11 +162,11 @@ exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
   var id = request.params.key_id;
 
-  if ( updatedApiKey.account_id && request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1 ) {
+  if (updatedApiKey.account_id && request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
-  apiKeys.get( { _id: id }, function (error, result) {
+  apiKeys.get({_id: id}, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify API key ' + id));
     }
@@ -143,42 +175,55 @@ exports.updateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    updatedApiKey.key = result.key;
-    apiKeys.update(updatedApiKey, function (error, result) {
+    if (!updatedApiKey.domains) {
+      updatedApiKey.domains = [];
+    }
+    verifyDomainOwnership(updatedApiKey.account_id, updatedApiKey.domains, function(error, okDomains, wrongDomains) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update API key ' + id));
+        return reply(boom.badImplementation('Error retrieving domain information'))
       }
 
-      var statusResponse = {
-        statusCode: 200,
-        message   : 'Successfully updated the API key'
-      };
+      if (wrongDomains.length) {
+        return reply(boom.badRequest('Wrong domains: ' + wrongDomains))
+      }
 
-      result = publicRecordFields.handle(result, 'apiKeys');
+      updatedApiKey.key = result.key;
+      apiKeys.update(updatedApiKey, function (error, result) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to update API key ' + id));
+        }
 
-      AuditLogger.store({
-        ip_address       : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        activity_type    : 'modify',
-        activity_target  : 'apikey',
-        target_id        : result.id,
-        target_name      : result.key_name,
-        target_object    : result,
-        operation_status : 'success'
+        var statusResponse = {
+          statusCode: 200,
+          message   : 'Successfully updated the API key'
+        };
+
+        result = publicRecordFields.handle(result, 'apiKeys');
+
+        AuditLogger.store({
+          ip_address       : request.info.remoteAddress,
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId,
+          activity_type    : 'modify',
+          activity_target  : 'apikey',
+          target_id        : result.id,
+          target_name      : result.key_name,
+          target_object    : result,
+          operation_status : 'success'
+        });
+
+        renderJSON(request, reply, error, statusResponse);
       });
-
-      renderJSON(request, reply, error, statusResponse);
     });
   });
 };
 
 exports.activateApiKey = function (request, reply) {
   var id = request.params.key_id;
-  apiKeys.get( { _id: id }, function (error, result) {
+  apiKeys.get({_id: id}, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify API key ' + id));
     }
@@ -187,7 +232,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if ( request.auth.credentials.companyId.indexOf(result.account_id) === -1 ) {
+    if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -224,7 +269,7 @@ exports.activateApiKey = function (request, reply) {
 
 exports.deactivateApiKey = function (request, reply) {
   var id = request.params.key_id;
-  apiKeys.get( { _id: id }, function (error, result) {
+  apiKeys.get({_id: id}, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to verify the API key'));
     }
@@ -233,7 +278,7 @@ exports.deactivateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if ( request.auth.credentials.companyId.indexOf(result.account_id) === -1 ) {
+    if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -271,7 +316,7 @@ exports.deactivateApiKey = function (request, reply) {
 
 exports.deleteApiKey = function (request, reply) {
   var id = request.params.key_id;
-  apiKeys.get( { _id: id }, function (error, result) {
+  apiKeys.get({_id: id}, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Error retrieving API key ' + id));
     }
@@ -279,11 +324,11 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if ( request.auth.credentials.companyId.indexOf(result.account_id) === -1 ) {
+    if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    apiKeys.remove( { _id: id }, function (error) {
+    apiKeys.remove({_id: id}, function (error) {
       if (error) {
         return reply(boom.badImplementation('Error removing the key'));
       }
