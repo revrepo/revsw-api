@@ -41,6 +41,7 @@ exports.getStats = function(request, reply) {
     domain_name,
     start_time,
     filter = '',
+    metadataFilterField,
     interval,
     time_period,
     end_time;
@@ -95,6 +96,7 @@ exports.getStats = function(request, reply) {
       }
 
       filter = elasticSearch.buildESFilterString(request);
+      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
         'size': 0,
@@ -175,6 +177,7 @@ exports.getStats = function(request, reply) {
             end_datetime: new Date(end_time),
             total_hits: body.responses[0].hits.total,
             interval_sec: interval/1000,
+            filter: metadataFilterField,
             data_points_count: body.responses[0].aggregations.results.buckets.length
           },
           data: dataArray
