@@ -46,7 +46,7 @@ function verifyDomainOwnership(companyId, domainList, callback) {
   var wrongDomains = [];
   var j = 0;
 
-  function checkDomain(_i) {
+  function checkDomain(_i, l) {
     domains.get({_id: domainList[_i]}, function(error, result) {
       j++;
       if (!error && result) {
@@ -68,7 +68,7 @@ function verifyDomainOwnership(companyId, domainList, callback) {
     callback(null, okDomains, wrongDomains);
   } else {
     for (var i = 0, l = domainList.length; i < l; i++) {
-      checkDomain(i);
+      checkDomain(i, l);
     }
   }
 }
