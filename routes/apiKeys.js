@@ -95,7 +95,7 @@ module.exports = [
       },
       validate: {
         payload: {
-          account_id: Joi.objectId().required().trim().description('ID of a company the new API key should be created for')
+          account_id      : Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
         }
       },
       response: {
@@ -129,8 +129,8 @@ module.exports = [
         },
         payload: {
           key_name        : Joi.string().min(1).max(30).description('Name of the API key'),
-          account_id      : Joi.objectId().description('ID of a company that the API key belongs to'),
-          domains         : Joi.array().items( Joi.objectId().description('IDs of web domains the API key is allowed to manage' ) ),
+          account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
+          domains         : Joi.array().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
           allowed_ops     : Joi.object({
             read_config     : Joi.boolean(),
             modify_config   : Joi.boolean(),
