@@ -88,6 +88,7 @@ exports.getApiKey = function (request, reply) {
     }
 
     if (result) {
+      result = publicRecordFields.handle(result, 'apiKeys');
       renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('API key not found'));
@@ -164,6 +165,38 @@ exports.createApiKey = function(request, reply) {
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
   var id = request.params.key_id;
+  
+  function doUpdate() {
+    apiKeys.update(updatedApiKey, function (error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to update API key ' + id));
+      }
+
+      var statusResponse = {
+        statusCode: 200,
+        message   : 'Successfully updated the API key'
+      };
+
+      result = publicRecordFields.handle(result, 'apiKeys');
+
+      AuditLogger.store({
+        ip_address       : request.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId,
+        activity_type    : 'modify',
+        activity_target  : 'apikey',
+        target_id        : result.id,
+        target_name      : result.key_name,
+        target_object    : result,
+        operation_status : 'success'
+      });
+
+      renderJSON(request, reply, error, statusResponse);
+    });
+  }
 
   if (updatedApiKey.account_id && request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1) {
       return reply(boom.badRequest('Company ID not found'));
@@ -178,49 +211,24 @@ exports.updateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!updatedApiKey.domains) {
-      updatedApiKey.domains = [];
-    }
-    verifyDomainOwnership(updatedApiKey.account_id, updatedApiKey.domains, function(error, okDomains, wrongDomains) {
-      if (error) {
-        return reply(boom.badImplementation('Error retrieving domain information'));
-      }
+    updatedApiKey.key = result.key;
 
-      if (wrongDomains.length) {
-        return reply(boom.badRequest('Wrong domains: ' + wrongDomains));
-      }
-
-      updatedApiKey.key = result.key;
-      apiKeys.update(updatedApiKey, function (error, result) {
+    if (updatedApiKey.domains) {
+      verifyDomainOwnership(updatedApiKey.account_id, updatedApiKey.domains, function(error, okDomains, wrongDomains) {
         if (error) {
-          return reply(boom.badImplementation('Failed to update API key ' + id));
+          return reply(boom.badImplementation('Error retrieving domain information'));
         }
 
-        var statusResponse = {
-          statusCode: 200,
-          message   : 'Successfully updated the API key'
-        };
+        if (wrongDomains.length) {
+          return reply(boom.badRequest('Wrong domains: ' + wrongDomains));
+        }
 
-        result = publicRecordFields.handle(result, 'apiKeys');
+        doUpdate();
 
-        AuditLogger.store({
-          ip_address       : request.info.remoteAddress,
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
-          activity_type    : 'modify',
-          activity_target  : 'apikey',
-          target_id        : result.id,
-          target_name      : result.key_name,
-          target_object    : result,
-          operation_status : 'success'
-        });
-
-        renderJSON(request, reply, error, statusResponse);
       });
-    });
+    } else {
+      doUpdate();
+    }
   });
 };
 
