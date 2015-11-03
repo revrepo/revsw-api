@@ -40,6 +40,7 @@ exports.getTopObjects = function(request, reply) {
   var domain_id = request.params.domain_id;
   var domain_name,
       filter = '',
+      metadataFilterField,
       start_time,
       end_time;
 
@@ -81,6 +82,7 @@ exports.getTopObjects = function(request, reply) {
       }
 
       filter = elasticSearch.buildESFilterString(request);
+      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
         'query': {
@@ -142,6 +144,7 @@ exports.getTopObjects = function(request, reply) {
             end_timestamp: end_time,
             end_datetime: new Date(end_time),
             total_hits: body.hits.total,
+            filter: metadataFilterField,
             data_points_count: body.aggregations.results.buckets.length
           },
           data: dataArray
