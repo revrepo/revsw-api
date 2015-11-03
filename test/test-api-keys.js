@@ -312,6 +312,10 @@ describe('Rev API keys', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.should.be.an.Array;
+        response_json.length.should.be.equal(1);
+        response_json[0].id.should.be.equal(createdAPIKeyId);
+        response_json[0].key_name.should.be.equal('New API Key');
+        response_json[0].account_id.should.be.equal(myCompanyId);
         done();
       });
   });

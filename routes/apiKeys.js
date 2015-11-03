@@ -128,19 +128,19 @@ module.exports = [
           key_id: Joi.string().required().description('ID of the API key to be updated')
         },
         payload: {
-          key_name        : Joi.string().min(1).max(30).description('Name of the API key'),
+          key_name        : Joi.string().required().min(1).max(30).description('Name of the API key'),
           account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
-          domains         : Joi.array().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
+          domains         : Joi.array().required().items(Joi.objectId().required().description('IDs of web domains the API key is allowed to manage')),
           allowed_ops     : Joi.object({
-            read_config     : Joi.boolean(),
-            modify_config   : Joi.boolean(),
-            delete_config   : Joi.boolean(),
-            purge           : Joi.boolean(),
-            reports         : Joi.boolean(),
-            admin           : Joi.boolean(),
+            read_config     : Joi.boolean().required(),
+            modify_config   : Joi.boolean().required(),
+            delete_config   : Joi.boolean().required(),
+            purge           : Joi.boolean().required(),
+            reports         : Joi.boolean().required(),
+            admin           : Joi.boolean().required(),
           }),
-          read_only_status: Joi.boolean().description('Tells if the API key is read-only or read/write'),
-          active          : Joi.boolean().description('Tells if the API key is active or not')
+          read_only_status: Joi.boolean().required().description('Tells if the API key is read-only or read/write'),
+          active          : Joi.boolean().required().description('Tells if the API key is active or not')
         }
       },
       response: {
