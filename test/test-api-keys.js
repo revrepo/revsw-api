@@ -149,30 +149,11 @@ describe('Rev API keys', function() {
       });
   });
 
-  it('should fail to create an API key with wrong domains' + testUser, function(done) {
-    request(testAPIUrl)
-      .post('/v1/api_keys')
-      .auth(testUser, testPassword)
-      .send({account_id: myCompanyId, domains: wrongDomains})
-      .expect(400)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(400);
-        response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('Wrong domains: 55f9f0fa5ca524340f761b76,55b7011979570123aaa49d05,56188c7e144de0433c4e68a9');
-        createdAPIKeyId = response_json.object_id;
-        done();
-      });
-  });
-
   it('should create an API key for the company' + testUser, function(done) {
     request(testAPIUrl)
       .post('/v1/api_keys')
       .auth(testUser, testPassword)
-      .send({account_id: myCompanyId, domains: okDomains})
+      .send({account_id: myCompanyId})
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -186,7 +167,25 @@ describe('Rev API keys', function() {
       });
   });
 
-    it('should fail to return the API key without admin permissions', function(done) {
+  it('should find a new record about adding a new API key in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUser, testPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj = response_json.data[0];
+        last_obj.target_id.should.be.equal(createdAPIKeyId);
+        last_obj.activity_type.should.be.equal('add');
+        last_obj.activity_target.should.be.equal('apikey');
+        done();
+      });
+  });
+
+  it('should fail to return the API key without admin permissions', function(done) {
     request(testAPIUrl)
       .get('/v1/api_keys/' + createdAPIKeyId)
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
@@ -369,6 +368,38 @@ describe('Rev API keys', function() {
       });
   });
 
+  it('should fail to update an API key with wrong domains', function(done) {
+    request(testAPIUrl)
+      .put('/v1/api_keys/' + createdAPIKeyId)
+      .auth(testUser, testPassword)
+      .send({
+        key_name        : 'New Key Name',
+        account_id      : myCompanyId,
+        domains         : wrongDomains,
+        allowed_ops     : {
+          read_config     : true,
+          modify_config   : true,
+          delete_config   : true,
+          purge           : true,
+          reports         : true,
+          admin           : true,
+        },
+        active          : true,
+        read_only_status: true
+      })
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.startWith('Wrong domains: ');
+        done();
+      });
+  });
+
   it('should update an API key for the company', function(done) {
     request(testAPIUrl)
       .put('/v1/api_keys/' + createdAPIKeyId)
@@ -396,6 +427,25 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully updated the API key');
+        done();
+      });
+  });
+
+  it('should find a new record about updating API key in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUser, testPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj = response_json.data[0];
+        last_obj.target_id.should.be.equal(createdAPIKeyId);
+        last_obj.target_name.should.be.equal('New Key Name');
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('apikey');
         done();
       });
   });
@@ -449,6 +499,25 @@ describe('Rev API keys', function() {
       });
   });
 
+  it('should find a new record about activating API key in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUser, testPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj = response_json.data[0];
+        last_obj.target_id.should.be.equal(createdAPIKeyId);
+        last_obj.target_name.should.be.equal('New Key Name');
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('apikey');
+        done();
+      });
+  });
+
   it('should fail to deactivate the API key for the company without admin permissions', function(done) {
     request(testAPIUrl)
       .post('/v1/api_keys/' + createdAPIKeyId + '/deactivate')
@@ -494,6 +563,25 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Successfully deactivated the API key');
+        done();
+      });
+  });
+
+  it('should find a new record about deactivating API key in logger', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .auth(testUser, testPassword)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        var last_obj = response_json.data[0];
+        last_obj.target_id.should.be.equal(createdAPIKeyId);
+        last_obj.target_name.should.be.equal('New Key Name');
+        last_obj.activity_type.should.be.equal('modify');
+        last_obj.activity_target.should.be.equal('apikey');
         done();
       });
   });
@@ -563,7 +651,7 @@ describe('Rev API keys', function() {
       });
   });
 
-  it('Should return user detailed activity log (without params)', function(done) {
+  it('should find a new record about deleting API key in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(testUser, testPassword)
@@ -573,21 +661,11 @@ describe('Rev API keys', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.data.should.be.a.Array();
-
-        for(var key in response_json.data) {
-          response_json.data[key].should.have.property('user_id').be.a.String();
-          response_json.data[key].should.have.property('user_name').be.a.String();
-          response_json.data[key].should.have.property('user_type').be.a.String();
-          response_json.data[key].should.have.property('datetime').be.a.Number();
-          response_json.data[key].should.have.property('account_id').be.a.Array();
-          response_json.data[key].should.have.property('activity_type').be.a.String();
-          response_json.data[key].should.have.property('activity_target').be.a.String();
-          response_json.data[key].should.have.property('target_name').be.a.String();
-          response_json.data[key].should.have.property('target_id').be.a.String();
-          response_json.data[key].should.have.property('operation_status').be.a.String();
-          response_json.data[key].should.have.property('target_object').be.a.Object();
-        }
+        var last_obj = response_json.data[0];
+        last_obj.target_id.should.be.equal(createdAPIKeyId);
+        last_obj.target_name.should.be.equal('New Key Name');
+        last_obj.activity_type.should.be.equal('delete');
+        last_obj.activity_target.should.be.equal('apikey');
         done();
       });
   });

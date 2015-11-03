@@ -109,64 +109,50 @@ exports.createApiKey = function(request, reply) {
       return reply(boom.badRequest('Wrong company ID'));
     }
 
-    if (!newApiKey.domains) {
-      newApiKey.domains = [];
-    }
-    verifyDomainOwnership(newApiKey.account_id, newApiKey.domains, function(error, okDomains, wrongDomains) {
+    apiKeys.get({
+      key: newApiKey.key
+    }, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Error retrieving domain information'))
+        return reply(boom.badImplementation('Failed to verify new API key ' + newApiKey.key));
+      }
+      if (result) {
+        return reply(boom.badRequest('The API key is already registered in the system'));
       }
 
-      if (wrongDomains.length) {
-        return reply(boom.badRequest('Wrong domains: ' + wrongDomains))
-      }
-
-      apiKeys.get({
-        key: newApiKey.key
-      }, function (error, result) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to verify new API key ' + newApiKey.key));
+      apiKeys.add(newApiKey, function (error, result) {
+        if (error || !result) {
+          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key));
         }
+
+        var statusResponse;
+
+        result = publicRecordFields.handle(result, 'apiKeys');
+
         if (result) {
-          return reply(boom.badRequest('The API key is already registered in the system'));
+          statusResponse = {
+            statusCode: 200,
+            message   : 'Successfully created new API key',
+            key       : result.key,
+            object_id : result.id
+          };
+
+          AuditLogger.store({
+            ip_address      : request.info.remoteAddress,
+            datetime        : Date.now(),
+            user_id         : request.auth.credentials.user_id,
+            user_name       : request.auth.credentials.email,
+            user_type       : 'user',
+            account_id      : request.auth.credentials.companyId,
+            activity_type   : 'add',
+            activity_target : 'apikey',
+            target_id       : result.id,
+            target_name     : result.key_name,
+            target_object   : result,
+            operation_status: 'success'
+          });
+
+          renderJSON(request, reply, error, statusResponse);
         }
-
-        apiKeys.add(newApiKey, function (error, result) {
-          if (error || !result) {
-            return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key));
-          }
-
-          var statusResponse;
-
-
-          result = publicRecordFields.handle(result, 'apiKeys');
-
-          if (result) {
-            statusResponse = {
-              statusCode: 200,
-              message   : 'Successfully created new API key',
-              key       : result.key,
-              object_id : result.id
-            };
-
-            AuditLogger.store({
-              ip_address      : request.info.remoteAddress,
-              datetime        : Date.now(),
-              user_id         : request.auth.credentials.user_id,
-              user_name       : request.auth.credentials.email,
-              user_type       : 'user',
-              account_id      : request.auth.credentials.companyId,
-              activity_type   : 'add',
-              activity_target : 'apikey',
-              target_id       : result.id,
-              target_name     : result.key_name,
-              target_object   : result,
-              operation_status: 'success'
-            });
-
-            renderJSON(request, reply, error, statusResponse);
-          }
-        });
       });
     });
   });

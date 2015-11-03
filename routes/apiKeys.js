@@ -96,19 +96,6 @@ module.exports = [
       validate: {
         payload: {
           account_id      : Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
-          key_name        : Joi.string(),
-          domains         : Joi.array().items(Joi.objectId()),
-          created_by      : Joi.string(),
-          allowed_ops     : {
-            read_config     : Joi.boolean(),
-            modify_config   : Joi.boolean(),
-            delete_config   : Joi.boolean(),
-            purge           : Joi.boolean(),
-            reports         : Joi.boolean(),
-            admin           : Joi.boolean(),
-          },
-          read_only_status: Joi.boolean(),
-          active          : Joi.boolean(),
         }
       },
       response: {
