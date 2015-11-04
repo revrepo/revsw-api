@@ -104,7 +104,7 @@ exports.getStats = function(request, reply) {
           'filtered': {
             'query': {
               'query_string': {
-                'query': 'domain: \'' + domain_name + '\'' + filter,
+                'query': 'domain: \"' + domain_name + '\"' + filter,
                 'analyze_wildcard': true
               }
             },
