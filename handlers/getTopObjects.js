@@ -122,15 +122,15 @@ exports.getTopObjects = function(request, reply) {
         }
       };
 
-      console.log( 'full requestBody:' );
-      console.dir( requestBody , { colors: true, depth: null } );
-
       elasticSearch.getClientURL().search({
         index: utils.buildIndexList(start_time, end_time),
         ignoreUnavailable: true,
         timeout: 60,
         body: requestBody
       }).then(function(body) {
+        if ( !body.aggregations ) {
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence' ) );
+        }
         var dataArray = [];
         for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
           dataArray[i] = {
