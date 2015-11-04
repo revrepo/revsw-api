@@ -45,6 +45,7 @@ describe('Rev Purge API', function() {
   var domainConfigJson = {};
   var purgeRequestID = '';
 
+  this.timeout(10000);
 
   it('should fail to submit a purge request as user with "user" role', function(done) {
     request(testAPIUrl)
@@ -199,7 +200,7 @@ describe('Rev Purge API', function() {
 
 
   it('should sleep for 3 seconds and see that the test object is purged on the test proxy servers', function(done) {
-    this.timeout(10000);
+    this.timeout(20000);
 
     setTimeout(function () {
 

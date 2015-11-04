@@ -28,6 +28,8 @@ var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : '
 
 describe('Rev stats top API', function() {
 
+  this.timeout(10000);
+
   it('should allow a request for user with User role', function(done) {
     request(testAPIUrl)
       .get('/v1/stats/top/' + testDomainId)

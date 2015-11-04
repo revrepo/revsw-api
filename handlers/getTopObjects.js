@@ -112,7 +112,7 @@ exports.getTopObjects = function(request, reply) {
         'aggs': {
           'results': {
             'terms': {
-              'field': 'request.raw',
+              'field': 'request',
               'size': request.query.count || 30,
               'order': {
                 '_count': 'desc'

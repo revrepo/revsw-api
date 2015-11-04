@@ -5,3 +5,5 @@ test/rest_api/results/
 .idea
 log
 lognpm-debug.log
+*sublime*
+sftp-config.json

@@ -26,6 +26,8 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 describe('Rev user password change API', function() {
 
+  this.timeout(10000);
+
   var adminToken = '',
       userToken = '',
       userCompanyId = '',

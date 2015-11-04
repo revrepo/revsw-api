@@ -25,6 +25,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
 
 describe('Rev API Reseller User', function() {
+
+  this.timeout(10000);
+
   var testCompanyName = 'API QA Test Company ' + Date.now();
   var newAccountJson = { companyName: testCompanyName };
   var testCompanyID = '';
