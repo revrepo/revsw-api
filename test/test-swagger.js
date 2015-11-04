@@ -27,6 +27,8 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 describe('Rev API Swagger UI', function() {
 
+  this.timeout(10000);
+
   it('should redirect to HTTPS with 301 when sending HTTP request to /', function(done) {
     request(testAPIUrlHTTP)
       .get('/')

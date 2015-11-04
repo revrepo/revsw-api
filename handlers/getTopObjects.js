@@ -89,7 +89,7 @@ exports.getTopObjects = function(request, reply) {
           'filtered': {
             'query': {
               'query_string': {
-                'query': 'domain: \'' + domain_name + '\'' + filter,
+                'query': 'domain: \"' + domain_name + '\"' + filter,
                 'analyze_wildcard': true
               }
             },
@@ -112,7 +112,7 @@ exports.getTopObjects = function(request, reply) {
         'aggs': {
           'results': {
             'terms': {
-              'field': 'request.raw',
+              'field': 'request',
               'size': request.query.count || 30,
               'order': {
                 '_count': 'desc'
@@ -121,6 +121,9 @@ exports.getTopObjects = function(request, reply) {
           }
         }
       };
+
+      console.log( 'full requestBody:' );
+      console.dir( requestBody , { colors: true, depth: null } );
 
       elasticSearch.getClientURL().search({
         index: utils.buildIndexList(start_time, end_time),

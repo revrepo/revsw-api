@@ -80,38 +80,38 @@ exports.getTopReports = function(request, reply) {
       }
 
       if (request.query.country) {
-        filter = ' AND country_code2: \'' + request.query.country + '\'';
+        filter = ' AND country_code2: \"' + request.query.country + '\"';
       }
 
       request.query.report_type = (request.query.report_type) ? request.query.report_type : 'referer';
 
       switch (request.query.report_type) {
         case 'referer':
-          field = 'referer.raw';
+          field = 'referer';
           break;
         case 'status_code':
           field = 'response';
           break;
         case 'content_type':
-          field = 'cont_type.raw';
+          field = 'cont_type';
           break;
         case 'protocol':
           field = 'ipport';
           break;
         case 'http_protocol':
-          field = 'protocol.raw';
+          field = 'protocol';
           break;
         case 'http_method':
-          field = 'method.raw';
+          field = 'method';
           break;
         case 'content_encoding':
-          field = 'cont_enc.raw';
+          field = 'cont_enc';
           break;
         case 'os':
-          field = 'os.raw';
+          field = 'os';
           break;
         case 'device':
-          field = 'device.raw';
+          field = 'device';
           break;
         case 'country':
           field = 'geoip.country_code2';
@@ -131,7 +131,7 @@ exports.getTopReports = function(request, reply) {
           'filtered': {
             'query': {
               'query_string': {
-                'query': 'domain: \'' + domain_name + '\'' + filter,
+                'query': 'domain: \"' + domain_name + '\"' + filter,
                 'analyze_wildcard': true
               }
             },
@@ -168,6 +168,10 @@ exports.getTopReports = function(request, reply) {
           }
         }
       };
+
+      console.log( 'full requestBody:' );
+      console.dir( requestBody , { colors: true, depth: null } );
+
 
       elasticSearch.getClientURL().search({
         index: utils.buildIndexList(start_time, end_time),

@@ -16,6 +16,8 @@ var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : '
 
 describe('Rev API JWT Token', function() {
 
+  this.timeout(10000);
+
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
   qaUserWithAdminPermPassword = 'password1',

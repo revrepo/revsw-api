@@ -12,6 +12,8 @@ var qaUserWithAdminPermPassword = 'password1';
 
 describe('Rev API keys', function() {
 
+  this.timeout(10000);
+
   var myCompanyId = '55b6ff6a7957012304a49d04';
   var myDomains = [];
   var okDomains = [
@@ -49,7 +51,7 @@ describe('Rev API keys', function() {
       'dashBoard': true
     }
   };
-  
+
   it('should create a new user account ' + testUser, function(done) {
     newUserJson.email = testUser;
     newUserJson.domain = myDomains;
@@ -250,7 +252,7 @@ describe('Rev API keys', function() {
       });
   });
 
-  
+
   it('should fail to return a list of API keys for the company without admin permissions', function(done) {
     request(testAPIUrl)
       .get('/v1/api_keys')
@@ -473,7 +475,7 @@ describe('Rev API keys', function() {
 
   it('should fail to activate the API key for the company without authentication', function(done) {
     request(testAPIUrl)
-      .post('/v1/api_keys/' + createdAPIKeyId + '/activate') 
+      .post('/v1/api_keys/' + createdAPIKeyId + '/activate')
       .expect(401)
       .end(function(err, res) {
         if (err) {

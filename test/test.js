@@ -90,6 +90,8 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
 describe('Rev API', function() {
 
+  this.timeout(10000);
+
   var adminToken = '',
     userToken = '',
     userCompanyId = '',
@@ -295,6 +297,8 @@ describe('Rev API', function() {
 
 
 describe('Rev API Admin User', function() {
+
+  this.timeout(10000);
 
   var numberOfUsers = 0,
     userId = '',
@@ -698,7 +702,7 @@ describe('Rev API Admin User', function() {
   'two_factor_auth_enabled' : false,
   'theme': 'light',
   'role': 'admin',
-'password': 'password1',
+  'password': 'password1',
   'access_control_list': {
     'readOnly': false,
     'test': true,

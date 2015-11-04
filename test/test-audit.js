@@ -37,6 +37,8 @@ var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://
 
 describe('Rev API /v1/activity call', function() {
 
+  this.timeout(10000);
+
   var userId          = '55a45491bf0020ec6da33298';
   var otherId         = '5601fda1f68c387c76544120';
   var companyId       = '5588869fbde7a0d00338ce8f';
@@ -268,6 +270,8 @@ describe('Rev API /v1/activity call', function() {
 
 
 describe('Rev API /v1/activity/summary call', function() {
+
+  this.timeout(10000);
 
   var userId          = '55a45491bf0020ec6da33298';
   var otherId         = '5601fda1f68c387c76544120';

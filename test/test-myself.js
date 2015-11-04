@@ -27,6 +27,8 @@ var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : '
 
 describe('Rev API /v1/users/myself call', function() {
 
+  this.timeout(10000);
+
   it('should return back user details for user with User role', function(done) {
     request(testAPIUrl)
       .get('/v1/users/myself')

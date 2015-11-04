@@ -42,6 +42,8 @@ describe('Rev API 2FA', function() {
     createDomainIds,
     testUserProfile = {};
 
+  this.timeout(10000);
+
   var newUserJson = {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
@@ -63,7 +65,7 @@ describe('Rev API 2FA', function() {
       'dashBoard': true
     }
   };
-  
+
   it('should create a new user account ' + testUser, function(done) {
     newUserJson.email = testUser;
     newUserJson.domain = myDomains;
