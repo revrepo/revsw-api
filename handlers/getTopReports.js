@@ -80,7 +80,7 @@ exports.getTopReports = function(request, reply) {
       }
 
       if (request.query.country) {
-        filter = ' AND country_code2: \'' + request.query.country + '\'';
+        filter = ' AND country_code2: \"' + request.query.country + '\"';
       }
 
       request.query.report_type = (request.query.report_type) ? request.query.report_type : 'referer';
@@ -131,7 +131,7 @@ exports.getTopReports = function(request, reply) {
           'filtered': {
             'query': {
               'query_string': {
-                'query': 'domain: \'' + domain_name + '\'' + filter,
+                'query': 'domain: \"' + domain_name + '\"' + filter,
                 'analyze_wildcard': true
               }
             },
@@ -168,6 +168,10 @@ exports.getTopReports = function(request, reply) {
           }
         }
       };
+
+      console.log( 'full requestBody:' );
+      console.dir( requestBody , { colors: true, depth: null } );
+
 
       elasticSearch.getClientURL().search({
         index: utils.buildIndexList(start_time, end_time),
