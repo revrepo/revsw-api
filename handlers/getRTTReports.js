@@ -32,17 +32,14 @@ var Domain = require('../models/Domain');
 
 var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
 
-//
-// Handler for Top Objects report
-//
-exports.getTopObjects = function(request, reply) {
+
+exports.getRTTReports = function(request, reply) {
 
   var domain_id = request.params.domain_id;
   var domain_name,
-      filter = '',
-      metadataFilterField,
-      start_time,
-      end_time;
+    field,
+    start_time,
+    end_time;
 
   domains.get({
     _id: domain_id
@@ -51,6 +48,7 @@ exports.getTopObjects = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve domain details'));
     }
     if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
+
       domain_name = result.name;
 
       if ( request.query.from_timestamp ) {
@@ -77,45 +75,67 @@ exports.getTopObjects = function(request, reply) {
       if ( start_time >= end_time ) {
         return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
       }
-      if ( (end_time - start_time ) > 24*3600*1000 ) {
+      if ( (end_time - start_time ) > (24*3600*1000 + 10*1000) ) {
         return reply(boom.badRequest('Requested report period exceeds 24 hours'));
       }
 
-      filter = elasticSearch.buildESFilterString(request);
-      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
+      request.query.report_type = request.query.report_type || 'country';
+
+      switch (request.query.report_type) {
+        case 'country':
+          field = 'geoip.country_code2';
+          break;
+        case 'os':
+          field = 'os';
+          break;
+        case 'device':
+          field = 'device';
+          break;
+        default:
+          return reply(boom.badImplementation('Received bad report_type value ' + request.query.report_type));
+      }
 
       var requestBody = {
         'query': {
-          'filtered': {
-            'query': {
+          'bool': {
+            'must': [{
               'query_string': {
-                'query': 'domain: \"' + domain_name + '\"' + filter,
-                'analyze_wildcard': true
+                'query': 'domain: \"' + domain_name + '\"',
               }
-            },
-            'filter': {
-              'bool': {
-                'must': [{
-                  'range': {
-                    '@timestamp': {
-                      'gte': start_time,
-                      'lte': end_time
-                    }
-                  }
-                }],
-                'must_not': []
+            }, {
+              'range': {
+                '@timestamp': {
+                  'gte': start_time,
+                  'lte': end_time
+                }
               }
-            }
+            }]
           }
         },
         'size': 0,
         'aggs': {
           'results': {
             'terms': {
-              'field': 'request',
-              'size': request.query.count || 30,
-              'order': {
-                '_count': 'desc'
+              'field': field,
+              'size': request.query.count || 30
+            },
+            'aggs': {
+              'rtt': {
+                'avg': {
+                  'field': 'lm_rtt'
+                }
+              }
+            }
+          },
+          'missing_field': {
+            'missing': {
+              'field': field
+            },
+            'aggs': {
+              'rtt': {
+                'avg': {
+                  'field': 'lm_rtt'
+                }
               }
             }
           }
@@ -134,12 +154,23 @@ exports.getTopObjects = function(request, reply) {
             ', timestamps: ' + start_time + ' ' + end_time + ', domain: ' + domain_name ) );
         }
         var dataArray = [];
-        for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
-          dataArray[i] = {
-            path: body.aggregations.results.buckets[i].key,
-            count: body.aggregations.results.buckets[i].doc_count
-          };
+        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
+          var doc = body.aggregations.results.buckets[i];
+          dataArray.push({
+            key: doc.key,
+            count: doc.doc_count,
+            lm_rtt_ms: Math.round( doc.rtt.value / 1000 )
+          });
         }
+        if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
+          doc = body.aggregations.missing_field;
+          dataArray.push({
+            key: '--',
+            count: doc.doc_count,
+            lm_rtt_ms: Math.round( doc.rtt.value / 1000 )
+          });
+        }
+
         var response = {
           metadata: {
             domain_name: domain_name,
@@ -149,7 +180,7 @@ exports.getTopObjects = function(request, reply) {
             end_timestamp: end_time,
             end_datetime: new Date(end_time),
             total_hits: body.hits.total,
-            filter: metadataFilterField,
+            filter: elasticSearch.buildMetadataFilterString(request),
             data_points_count: body.aggregations.results.buckets.length
           },
           data: dataArray
@@ -159,7 +190,6 @@ exports.getTopObjects = function(request, reply) {
         console.trace(error.message);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
-
     } else {
       return reply(boom.badRequest('Domain not found'));
     }
