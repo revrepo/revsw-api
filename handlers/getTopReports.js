@@ -122,6 +122,9 @@ exports.getTopReports = function(request, reply) {
         case 'request_status':
           field = 'conn_status';
           break;
+        case 'QUIC':
+          field = 'quic';
+          break;
         default:
           return reply(boom.badImplementation('Received bad report_type value ' + request.query.report_type));
       }
