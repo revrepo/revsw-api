@@ -79,7 +79,7 @@ exports.getRTTReports = function(request, reply) {
         return reply(boom.badRequest('Requested report period exceeds 24 hours'));
       }
 
-      request.query.report_type = (request.query.report_type) ? request.query.report_type : 'referer';
+      request.query.report_type = request.query.report_type || 'country';
 
       switch (request.query.report_type) {
         case 'country':
@@ -142,14 +142,16 @@ exports.getRTTReports = function(request, reply) {
         }
       };
 
+      var indicesList = utils.buildIndexList(start_time, end_time);
       elasticSearch.getClientURL().search({
-        index: utils.buildIndexList(start_time, end_time),
+        index: indicesList,
         ignoreUnavailable: true,
         timeout: 60,
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
-          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence' ) );
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + start_time + ' ' + end_time + ', domain: ' + domain_name ) );
         }
         var dataArray = [];
         for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
@@ -157,7 +159,7 @@ exports.getRTTReports = function(request, reply) {
           dataArray.push({
             key: doc.key,
             count: doc.doc_count,
-            lm_rtt: Math.round( doc.rtt.value / 1000 )
+            lm_rtt_ms: Math.round( doc.rtt.value / 1000 )
           });
         }
         if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
@@ -165,9 +167,10 @@ exports.getRTTReports = function(request, reply) {
           dataArray.push({
             key: '--',
             count: doc.doc_count,
-            lm_rtt: Math.round( doc.rtt.value / 1000 )
+            lm_rtt_ms: Math.round( doc.rtt.value / 1000 )
           });
         }
+
         var response = {
           metadata: {
             domain_name: domain_name,
@@ -177,6 +180,7 @@ exports.getRTTReports = function(request, reply) {
             end_timestamp: end_time,
             end_datetime: new Date(end_time),
             total_hits: body.hits.total,
+            filter: elasticSearch.buildMetadataFilterString(request),
             data_points_count: body.aggregations.results.buckets.length
           },
           data: dataArray

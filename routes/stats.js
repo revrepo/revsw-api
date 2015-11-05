@@ -140,7 +140,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/rtt/{domain_id}',
+    path: '/v1/stats/lastmile_rtt/{domain_id}',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller' ]
@@ -161,7 +161,7 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
-          report_type: Joi.string().required().valid ( 'country', 'device', 'os' ).description('Type of requested report (defaults to "country")'),
+          report_type: Joi.string().valid ( 'country', 'device', 'os' ).description('Type of requested report (defaults to "country")'),
         }
       }
     }
