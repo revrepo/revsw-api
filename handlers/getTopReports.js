@@ -122,6 +122,9 @@ exports.getTopReports = function(request, reply) {
         case 'request_status':
           field = 'conn_status';
           break;
+        case 'QUIC':
+          field = 'quic';
+          break;
         default:
           return reply(boom.badImplementation('Received bad report_type value ' + request.query.report_type));
       }
@@ -169,14 +172,16 @@ exports.getTopReports = function(request, reply) {
         }
       };
 
+      var indicesList = utils.buildIndexList(start_time, end_time);
       elasticSearch.getClientURL().search({
-        index: utils.buildIndexList(start_time, end_time),
+        index: indicesList,
         ignoreUnavailable: true,
         timeout: 60,
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
-          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence' ) );
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + start_time + ' ' + end_time + ', domain: ' + domain_name ) );
         }
         var dataArray = [];
         for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
