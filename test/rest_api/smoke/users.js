@@ -113,6 +113,16 @@ describe('Smoke check', function () {
             .end(done);
         });
     });
+
+    it('should return a response when getting my user profile.',
+      function (done) {
+        API.session.setCurrentUser(userSample);
+
+        API.resources.users.myself
+          .getAll()
+          .expect(200)
+          .end(done);
+      });
   });
 });
 
