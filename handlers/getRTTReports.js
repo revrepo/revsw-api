@@ -100,7 +100,7 @@ exports.getRTTReports = function(request, reply) {
           'bool': {
             'must': [{
               'term': {
-                'domain': '\"' + domain_name + '\"'
+                'domain': domain_name
               }
             }, {
               'range': {
