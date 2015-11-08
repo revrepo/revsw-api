@@ -123,6 +123,20 @@ describe('Smoke check', function () {
           .expect(200)
           .end(done);
       });
+
+    // ### Spec/test to update a user's password
+    it('should return a response when updating specific user\'s password.',
+      function (done) {
+        API.session.setCurrentUser(userSample);
+
+        API.resources.users.userPassword
+          .update(userSample.id, {
+            current_password: userSample.password,
+            new_password: 'secret321'
+          })
+          .expect(200)
+          .end(done);
+      });
   });
 });
 
