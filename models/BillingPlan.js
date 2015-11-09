@@ -25,6 +25,7 @@ var utils = require('../lib/utilities.js');
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var mongoConnection = require('../lib/mongoConnections');
 
 var BillingPlanSchema = new Schema({
 
@@ -69,14 +70,12 @@ var BillingPlanSchema = new Schema({
   }
 });
 
-var BillingPlan = mongoose.model('BillingPlan', BillingPlanSchema, 'BillingPlan');
-
 /**
  * Overwrite / addd methods to fetched record
  *
  * @type {*}
  */
-BillingPlan.methods = {
+BillingPlanSchema.methods = {
 
   toJSON: function() {
     var obj = this.toObject();
@@ -93,7 +92,7 @@ BillingPlan.methods = {
  *
  * @type {*}
  */
-BillingPlan.statics = {
+BillingPlanSchema.statics = {
 
   get: function (item, callback) {
     callback = callback || _.noop;
@@ -102,12 +101,12 @@ BillingPlan.statics = {
 
   add: function (item, callback) {
     callback = callback || _.noop;
-    new this.create(item, callback);
+    this.create(item, callback);
   },
 
   list: function (request, callback) {
     callback = callback || _.noop;
-    this.find(callback);
+    return this.find().lean().exec(callback);
   },
 
   update: function (item, callback) {
@@ -155,4 +154,4 @@ BillingPlan.statics = {
   }
 };
 
-module.exports = BillingPlan;
+module.exports = mongoConnection.getConnectionPortal().model('BillingPlan', BillingPlanSchema, 'BillingPlan');

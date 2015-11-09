@@ -22,7 +22,7 @@
 var Joi = require('joi');
 Joi.objectId = require('joi-objectid');
 
-exports.listOfBillingPlanModels = Joi.object({
+exports.listOfBillingPlanModels = Joi.array().items({
   id                    : Joi.objectId().description('Billing plan ID'),
   name                  : Joi.string().description('Billing plan name'),
   description           : Joi.string().description('Billing plan description'),
