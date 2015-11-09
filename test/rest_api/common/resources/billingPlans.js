@@ -16,24 +16,18 @@
  * from Rev Software, Inc.
  */
 
-// # API object
+// # Accounts Resource object
 
-// Required resources to apply/attach to `API` object.
-var accounts = require('./resources/accounts');
-var billingPlans = require('./resources/billingPlans');
-var Session = require('./session');
+// Requiring config and `BaseResource`
+var config = require('config');
+var BaseResource = require('./base');
 
-// This allows to overpass SSL certificate check
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-// `API` object that abstracts all functionality from the REST API being tested.
-// Defines all resources and other components needed for testing.
-module.exports = {
-  // Session, will help us to _remember_ which user is currently being used.
-  session: Session,
-  // A set of all resources that the REST API service provides.
-  resources: {
-    accounts: accounts,
-    billingPlans: billingPlans
-  }
-};
+// Creating new instance of BaseResource which is going to represent the API
+// `accounts resource`
+// TODO: In the future we need to improve this way of instantiation by providing
+// allowed method for the resource being created.
+module.exports = new BaseResource({
+  host: config.api.host,
+  apiVersion: config.api.version,
+  apiResource: config.api.resources.billingPlans
+});

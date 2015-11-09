@@ -7,7 +7,8 @@
     },
     "version": "v1",
     "resources": {
-      "accounts": "accounts"
+      "accounts": "accounts",
+      "billingPlans": "billing-plans"
     },
     "request": {
       "maxTimeout": 10000
