@@ -36,7 +36,7 @@ module.exports = [
       handler: billingPlanHandler.list,
       description: 'Get a list of Billing Plans registered in system',
       notes: 'Use this function to get a list of Billing Plans registered in system',
-      tags: ['api'],
+      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
