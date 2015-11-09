@@ -78,6 +78,58 @@ exports.list = function(request, reply) {
   });
 };
 
+exports.create = function(request, reply) {
+  var requestPayload = request.payload;
+
+  BillingPlan.get({
+    name: requestPayload.name
+  }, function(err, plan) {
+
+    if (err) {
+      return reply(boom.badImplementation('Failed to verify the new billing plan name'));
+    }
+
+    if (plan) {
+      return reply(boom.badRequest('The billing plan name is already registered in the system'));
+    }
+
+    BillingPlan.add(requestPayload, function(error, result) {
+
+      if (error || !result) {
+        return reply(boom.badImplementation('Failed to add new billing plan'));
+      }
+
+      result = publicRecordFields.handle(result, 'billingPlan');
+      var statusResponse;
+      if (result) {
+        statusResponse = {
+          statusCode : 200,
+          message    : 'Successfully created new billing plan',
+          object_id  : result.id
+        };
+
+        AuditLogger.store({
+          ip_address       : request.info.remoteAddress,
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId,
+//          domain_id        : request.auth.credentials.domain,
+          activity_type    : 'add',
+          activity_target  : 'billing_plan',
+          target_id        : result.id,
+          target_name      : result.name,
+          target_object    : result,
+          operation_status : 'success'
+        });
+
+        renderJSON(request, reply, error, statusResponse);
+      }
+
+    });
+  });
+};
 /*
 exports.getApiKey = function (request, reply) {
   var id = request.params.key_id;
@@ -95,71 +147,7 @@ exports.getApiKey = function (request, reply) {
   });
 };
 
-exports.createApiKey = function(request, reply) {
-  var newApiKey = request.payload;
-  newApiKey.created_by = request.auth.credentials.email;
-  newApiKey.key = uuid();
-  newApiKey.key_name = 'New API Key';
 
-  if (request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
-    return reply(boom.badRequest('Company ID not found'));
-  }
-
-  accounts.get({
-    _id: newApiKey.account_id
-  }, function (error, result) {
-    if (error || !result) {
-      return reply(boom.badRequest('Wrong company ID'));
-    }
-
-    apiKeys.get({
-      key: newApiKey.key
-    }, function (error, result) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to verify new API key ' + newApiKey.key));
-      }
-      if (result) {
-        return reply(boom.badRequest('The API key is already registered in the system'));
-      }
-
-      apiKeys.add(newApiKey, function (error, result) {
-        if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key));
-        }
-
-        var statusResponse;
-
-        result = publicRecordFields.handle(result, 'apiKeys');
-
-        if (result) {
-          statusResponse = {
-            statusCode: 200,
-            message   : 'Successfully created new API key',
-            key       : result.key,
-            object_id : result.id
-          };
-
-          AuditLogger.store({
-            ip_address      : request.info.remoteAddress,
-            datetime        : Date.now(),
-            user_id         : request.auth.credentials.user_id,
-            user_name       : request.auth.credentials.email,
-            user_type       : 'user',
-            account_id      : request.auth.credentials.companyId,
-            activity_type   : 'add',
-            activity_target : 'apikey',
-            target_id       : result.id,
-            target_name     : result.key_name,
-            target_object   : result,
-            operation_status: 'success'
-          });
-
-          renderJSON(request, reply, error, statusResponse);
-        }
-      });
-    });
-  });
-};
 
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;

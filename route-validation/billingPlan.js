@@ -55,6 +55,33 @@ exports.listOfBillingPlanModels = Joi.array().items({
   className: 'List of Billing plans'
 });
 
+exports.BillingPlanRequestPayload = {
+  name                  : Joi.string().required().description('Billing plan name'),
+  description           : Joi.string().required().description('Billing plan description'),
+  type                  : Joi.string().valid('public', 'private').description('Type of the billing plan'),
+  monthly_fee           : Joi.number().required().description('Monthly fee of the billing plan'),
+
+  services              : Joi.array().items({
+    code_name             : Joi.string().description('Name of the service'),
+    description           : Joi.string().description('Description of the service'),
+    measure_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
+    cost                  : Joi.number().description('Cost of the service'),
+    included              : Joi.number().description('Amount included in the service')
+  }).description('List of the services of the billing plan'),
+
+  prepay_discounts      : Joi.array().items({
+    period                : Joi.number().description('The number of months after which this discount will be activated'),
+    discount              : Joi.number().description('The actual discount (e.g. 20)')
+  }).description('List of the prepay discounts of the billing plan'),
+
+  commitment_discounts  : Joi.array().items({
+    period                : Joi.number().description('The number of months after which this discount will be activated'),
+    discount              : Joi.number().description('The actual discount (e.g. 20)')
+  }).description('List of the long commitment discounts of the billing plan'),
+
+  order                 : Joi.number().description('Order of Billing plan'),
+};
+
 exports.BillingPlanModel = Joi.object({
   id                    : Joi.objectId().description('Billing plan ID'),
   name                  : Joi.string().description('Billing plan name'),

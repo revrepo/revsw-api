@@ -118,10 +118,7 @@ describe('Smoke check', function () {
       done();
     });
 
-    // ### Test to get all accounts
-    // This is a test, note that it requires to params, the first one is the
-    // statement and the second one a callback that receives a `done` param
-    it('should return a response when getting all accounts.',
+    it('should return a response when getting all billing plans.',
       function (done) {
         // Setting user for all upcoming REST API calls
         //API.session.setCurrentUser(adminUser);
@@ -149,16 +146,15 @@ describe('Smoke check', function () {
           // And done, test complete
           .end(done);
       });
-
-    // ### Spec/test to create account
-    it('should return a response when creating specific account.',
+*/
+    it('should return a response when creating specific billing plan.',
       function (done) {
-        // Generating data for a new `account`
-        var newAccount = DataProvider.generateAccount();
+        var newBillingPlan = DataProvider.generateBillingPlan();
+        console.log(newBillingPlan);
         API.session.setCurrentUser(adminUser);
-        API.resources.accounts
+        API.resources.billingPlans
           //Creating new account by using data generated
-          .createOne(newAccount)
+          .createOne(newBillingPlan)
           // Validate it has a success reponse
           .expect(200)
           // Calling `then()` function instead of `done()`. This is a feature of
@@ -166,12 +162,13 @@ describe('Smoke check', function () {
           // response.
           .then(function (response) {
             // Since we got a success response, we need to clean account created
+            done();
             API.resources.accounts
               .deleteOne(response.body.object_id)
               .end(done);
           });
       });
-
+/*
     // ### Test to update account
     it('should return a response when updating specific account.',
       function (done) {

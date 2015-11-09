@@ -30,7 +30,7 @@ var routeValidation = require('../route-validation/billingPlan');
 module.exports = [
   {
     method: 'GET',
-    path: '/v1/billing-plans',
+    path: '/v1/billing_plans',
     config: {
       auth: false,
       handler: billingPlanHandler.list,
@@ -50,7 +50,7 @@ module.exports = [
 
   /*{
     method: 'GET',
-    path: '/v1/api_keys/{key_id}',
+    path: '/v1/billing_plans/{key_id}',
     config: {
       auth: {
         scope: ['admin', 'reseller']
@@ -73,19 +73,18 @@ module.exports = [
         schema: routeModels.APIKeyModel
       }
     }
-  },
+  },*/
 
   {
     method: 'POST',
-    path: '/v1/api_keys',
+    path: '/v1/billing_plans',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw']
+        scope: ['admin_rw']
       },
-      handler: apiKey.createApiKey,
-      description: 'Create a new API key in the system',
-      notes: 'Use the call to create a new API key for your company. ' +
-      'After creating a new API key you can use a PUT call to /v1/api_keys/{key_id} to configure the key.',
+      handler: billingPlanHandler.create,
+      description: 'Create a new Billing plan in the system',
+      notes: 'Use the call to create a new Billing plan in system.',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -93,19 +92,17 @@ module.exports = [
         }
       },
       validate: {
-        payload: {
-          account_id      : Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
-        }
+        payload: routeValidation.BillingPlanRequestPayload
       },
       response: {
-        schema: routeModels.APIKeyStatusModel
+        schema: routeModels.statusModel
       }
     }
   },
-
+/*
   {
     method: 'PUT',
-    path: '/v1/api_keys/{key_id}',
+    path: '/v1/billing_plans/{key_id}',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -150,7 +147,7 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/api_keys/{key_id}/activate',
+    path: '/v1/billing_plans/{key_id}/activate',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -177,7 +174,7 @@ module.exports = [
 
   {
     method: 'POST',
-    path: '/v1/api_keys/{key_id}/deactivate',
+    path: '/v1/billing_plans/{key_id}/deactivate',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']
@@ -205,7 +202,7 @@ module.exports = [
 
   {
     method: 'DELETE',
-    path: '/v1/api_keys/{key_id}',
+    path: '/v1/billing_plans/{key_id}',
     config: {
       auth: {
         scope: ['admin_rw', 'reseller_rw']

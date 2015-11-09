@@ -31,11 +31,16 @@ var BillingPlanSchema = new Schema({
 
   name: String,
   description: String,
+
   type: {
     type: String,
-    enum: ['public', 'private']
+    enum: ['public', 'private'],
+    default: 'public'
   },
-  monthly_fee: Number,
+  monthly_fee: {
+    type: Number,
+    default: 0
+  },
   services: [{
     code_name: String,
     description: String,
@@ -60,7 +65,8 @@ var BillingPlanSchema = new Schema({
   history: [{}],
 
   overage_credit_linit: {
-    type: Number
+    type: Number,
+    default: 0
   }
 
 }, {

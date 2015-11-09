@@ -16,6 +16,11 @@
  * from Rev Software, Inc.
  */
 
+'use strict';
+
+var faker = require('faker');
+var _ = require('lodash');
+
 // # Data Provider object
 //
 // Defines some methods to generate valid and common test data. With common we
@@ -42,6 +47,45 @@ module.exports = {
     return {
       companyName: (prefix ? prefix + '_' : '' ) + 'API_TEST_COMPANY_' +
       (new Date()).getTime()
+    };
+  },
+
+  /**
+   * ### DataProvider.generateBillingPlan()
+   *
+   * Generates valida data that represents an Billing Plan and the billing_plan REST API
+   * end points accept.
+   *
+   * @returns {Object} Billing plan info with following schema
+   *
+   *    {
+   *        name: string,
+   *        description: string,
+   *        type: string,
+   *        monthly_fee: number,
+   *        services: Array,
+   *        prepay_discounts: Array
+   *    }
+   */
+  generateBillingPlan: function() {
+    return {
+      name: faker.commerce.product(),
+      description: faker.lorem.sentence(),
+      type: _.random() ? 'public' : 'private',
+      monthly_fee: faker.commerce.price(),
+
+      services: [{
+        code_name: faker.commerce.product(),
+        description: faker.lorem.sentence(),
+        measure_unit: faker.finance.currencyCode(),
+        cost: faker.finance.amount(),
+        included: 0
+      }],
+
+      prepay_discounts: [{
+        period: 12,
+        discount: 333
+      }]
     };
   }
 };
