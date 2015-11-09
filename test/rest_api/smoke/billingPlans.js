@@ -86,20 +86,8 @@ describe('Smoke check', function () {
     // REVSW REST API services
 
     // Setting a user for all upcoming API requests
-    //API.session.setCurrentUser(adminUser);
+    API.session.setCurrentUser(adminUser);
 
-    // For the `API` object, we get `accounts resource` and ask to create one
-    // account as pre-requisite by giving the `account sample` create before.
-    // It is important to highlight here that all pre-requisites are important
-    // for the test to run to completion, but not relevant to the validation.
-    // Meaning this that we should not apply any validation to its data result.
-
-    //API.resources.accounts
-    //  .createOneAsPrerequisite(accountSample)
-    //  .then(function (response) {
-    //    accountSample.id = response.body.object_id;
-    //    done();
-    //  });
     done();
   });
 
@@ -111,14 +99,8 @@ describe('Smoke check', function () {
     // Again, we set the user for the following API calls. This is to make sure
     // that we are using the right user account (in case any other test run
     // changed it to a different value)
-    //API.session.setCurrentUser(adminUser);
+    API.session.setCurrentUser(adminUser);
 
-    // Note also here that we use `account resource` but in this time to
-    // `remove` or `delete` all pre-requisites that were created before. All
-    // of this is done to make sure we don;t leave garbage data in our
-    // application being tested.
-
-    //API.resources.accounts.deleteAllPrerequisites(done);
     done();
   });
 

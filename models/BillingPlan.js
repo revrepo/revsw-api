@@ -106,7 +106,7 @@ BillingPlanSchema.statics = {
 
   list: function (request, callback) {
     callback = callback || _.noop;
-    return this.find().lean().exec(callback);
+    return this.find().exec(callback);
   },
 
   update: function (item, callback) {
