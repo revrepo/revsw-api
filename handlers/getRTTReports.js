@@ -99,8 +99,14 @@ exports.getRTTReports = function(request, reply) {
         'query': {
           'bool': {
             'must': [{
-              'query_string': {
-                'query': 'domain: \"' + domain_name + '\"',
+              'term': {
+                'domain': domain_name
+              }
+            }, {
+              'range': {
+                'lm_rtt': {
+                  'gt': 1000
+                }
               }
             }, {
               'range': {
@@ -120,8 +126,18 @@ exports.getRTTReports = function(request, reply) {
               'size': request.query.count || 30
             },
             'aggs': {
-              'rtt': {
+              'rtt_avg': {
                 'avg': {
+                  'field': 'lm_rtt'
+                }
+              },
+              'rtt_min': {
+                'min': {
+                  'field': 'lm_rtt'
+                }
+              },
+              'rtt_max': {
+                'max': {
                   'field': 'lm_rtt'
                 }
               }
@@ -132,8 +148,18 @@ exports.getRTTReports = function(request, reply) {
               'field': field
             },
             'aggs': {
-              'rtt': {
+              'rtt_avg': {
                 'avg': {
+                  'field': 'lm_rtt'
+                }
+              },
+              'rtt_min': {
+                'min': {
+                  'field': 'lm_rtt'
+                }
+              },
+              'rtt_max': {
+                'max': {
                   'field': 'lm_rtt'
                 }
               }
@@ -159,7 +185,9 @@ exports.getRTTReports = function(request, reply) {
           dataArray.push({
             key: doc.key,
             count: doc.doc_count,
-            lm_rtt_ms: Math.round( doc.rtt.value / 1000 )
+            lm_rtt_avg_ms: Math.round( doc.rtt_avg.value / 1000 ),
+            lm_rtt_min_ms: Math.round( doc.rtt_min.value / 1000 ),
+            lm_rtt_max_ms: Math.round( doc.rtt_max.value / 1000 )
           });
         }
         if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
@@ -167,7 +195,9 @@ exports.getRTTReports = function(request, reply) {
           dataArray.push({
             key: '--',
             count: doc.doc_count,
-            lm_rtt_ms: Math.round( doc.rtt.value / 1000 )
+            lm_rtt_avg_ms: Math.round( doc.rtt_avg.value / 1000 ),
+            lm_rtt_min_ms: Math.round( doc.rtt_min.value / 1000 ),
+            lm_rtt_max_ms: Math.round( doc.rtt_max.value / 1000 )
           });
         }
 
