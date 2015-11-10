@@ -176,7 +176,7 @@ exports.getTopReports = function(request, reply) {
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 60,
+        timeout: 120000,
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
