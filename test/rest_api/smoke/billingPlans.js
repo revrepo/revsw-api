@@ -101,6 +101,8 @@ describe('Smoke check', function () {
     // changed it to a different value)
     API.session.setCurrentUser(adminUser);
 
+    API.resources.billingPlans.deleteAllPrerequisites(done);
+
     done();
   });
 
@@ -150,7 +152,6 @@ describe('Smoke check', function () {
     it('should return a response when creating specific billing plan.',
       function (done) {
         var newBillingPlan = DataProvider.generateBillingPlan();
-        console.log(newBillingPlan);
         API.session.setCurrentUser(adminUser);
         API.resources.billingPlans
           //Creating new account by using data generated
@@ -161,12 +162,16 @@ describe('Smoke check', function () {
           // `supertest-as-promised` package. It receives as param the sucess
           // response.
           .then(function (response) {
+            console.log(response.body);
             // Since we got a success response, we need to clean account created
-            done();
             API.resources.accounts
               .deleteOne(response.body.object_id)
               .end(done);
-          });
+          })
+          .catch(function (data) {
+            console.log(data);
+          })
+          .finally(done);
       });
 /*
     // ### Test to update account

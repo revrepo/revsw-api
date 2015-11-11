@@ -89,6 +89,16 @@ BillingPlanSchema.methods = {
 
     delete obj.__v;
     delete obj._id;
+    if (obj.services && _.isArray(obj.services)) {
+      for(var i = 0; i < obj.services.length; i++) {
+        delete obj.services[i]._id;
+      }
+    }
+    if (obj.prepay_discounts && _.isArray(obj.prepay_discounts)) {
+      for(var j = 0; j < obj.prepay_discounts.length; j++) {
+        delete obj.prepay_discounts[j]._id;
+      }
+    }
     return obj;
   }
 };
@@ -112,7 +122,20 @@ BillingPlanSchema.statics = {
 
   list: function (request, callback) {
     callback = callback || _.noop;
-    return this.find().exec(callback);
+    return this.find().exec(function(err, billingPlans) {
+      if (err) {
+        return callback(err);
+      }
+      if (!_.isArray(billingPlans)) {
+        return callback(new Error('Wrong data loaded from Mongo'));
+      }
+      var result = [];
+      var length = billingPlans.length;
+      for(var i = 0; i < length; i++) {
+        result.push(billingPlans[i].toJSON());
+      }
+      return callback(null, result);
+    });
   },
 
   update: function (item, callback) {
@@ -157,6 +180,11 @@ BillingPlanSchema.statics = {
     } else {
       callback(utils.buildError('400', 'No API key passed to remove function'), null);
     }
+  },
+
+  clear: function(callback) {
+    callback = callback || _.noop;
+    this.remove({}, callback);
   }
 };
 
