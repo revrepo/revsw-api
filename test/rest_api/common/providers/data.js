@@ -67,7 +67,7 @@ module.exports = {
    *        prepay_discounts: Array
    *    }
    */
-  generateBillingPlan: function() {
+  generateBillingPlan: function () {
     return {
       name: faker.commerce.product(),
       description: faker.lorem.sentence(),
@@ -86,6 +86,41 @@ module.exports = {
         period: 12,
         discount: 333
       }]
+    };
+  },
+
+  /**
+   * ### DataProvider.generateUser()
+   *
+   * Generates valid data that represents a user and the user REST API
+   * end points accept.
+   *
+   * @param {String} prefix, a prefix value to put in the name
+   * @returns {Object} account info with the following schema
+   *
+   *     {
+   *         email: string
+   *     }
+   */
+  generateUser: function (role, prefix) {
+    var timestamp = (new Date()).getTime();
+
+    prefix = prefix ? prefix + '_' : '';
+
+    return {
+      email: prefix + 'API_TEST_USER_' + timestamp + '@revsw.com',
+      firstname: 'Jean',
+      lastname: 'Valjean',
+      password: 'secret123',
+      access_control_list: {
+        dashBoard: true,
+        reports: true,
+        configure: true,
+        test: true,
+        readOnly: true
+      },
+      role: role || 'user',
+      theme: 'light'
     };
   }
 };

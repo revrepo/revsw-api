@@ -155,7 +155,7 @@ exports.getStats = function(request, reply) {
         index: utils.buildIndexList(start_time, end_time),
         ignoreUnavailable: true,
         search_type: 'count',
-        timeout: 60 },
+        timeout: 120000 },
         requestBody ]
       }).then(function(body) {
         var dataArray = [];

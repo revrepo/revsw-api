@@ -21,6 +21,7 @@
 // Required resources to apply/attach to `API` object.
 var accounts = require('./resources/accounts');
 var billingPlans = require('./resources/billingPlans');
+var users = require('./resources/users');
 var Session = require('./session');
 
 // This allows to overpass SSL certificate check
@@ -34,6 +35,7 @@ module.exports = {
   // A set of all resources that the REST API service provides.
   resources: {
     accounts: accounts,
-    billingPlans: billingPlans
+    billingPlans: billingPlans,
+    users: users
   }
 };
