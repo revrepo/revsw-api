@@ -17,30 +17,24 @@
  */
 
 // ### Requiring common components to use in our spec/test.
-// var API = require('./../common/api');
-// var DataProvider = require('./../common/providers/data');
-
-
+var API = require('./../common/api');
 
 var should = require('should-http');
-var request = require('supertest');
-var agent = require('supertest-as-promised');
+var request = require('supertest-as-promised');
 var config = require('config');
 
-var apiURL = config.api.host.protocol + '://' + config.api.host.name;
-var apiRequest = '/' + config.api.version + '/' + config.api.stats.request + '/';
-var apiRequestTop = apiRequest + 'top/';
-var users = config.api.stats.users;
 var domains = config.api.stats.domains;
+var justtaUser = config.api.users.user;
 
 //  suite
 describe('Stats API check:', function () {
 
   this.timeout(config.api.request.maxTimeout);
 
-  // before(function (done) {
-  //   done();
-  // });
+  before(function (done) {
+    API.session.setCurrentUser(justtaUser);
+    done();
+  });
   // after(function (done) {
   //   done();
   // });
@@ -58,209 +52,208 @@ describe('Stats API check:', function () {
       // });
 
       it('should return data for report_type = referer', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'referer' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = status_code', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'status_code' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = cache_status', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'cache_status' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = content_type', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'content_type' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = protocol', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'protocol' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = http_protocol', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'http_protocol' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = http_method', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'http_method' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = content_encoding', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'content_encoding' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = os', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'os' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = device', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'device' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = country', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'country' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
 
       it('should return data for report_type = QUIC', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'QUIC' })
           .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then(function(res) {
             var response_json = JSON.parse(res.text);
             response_json.metadata.domain_name.should.be.equal(domains.test.name);
             response_json.metadata.domain_id.should.be.equal(domains.test.id);
             done();
+          })
+          .catch( function( err ) {
+              done( err );
           });
       });
-
 
     });
   });

@@ -17,30 +17,24 @@
  */
 
 // ### Requiring common components to use in our spec/test.
-// var API = require('./../common/api');
-// var DataProvider = require('./../common/providers/data');
-
-
+var API = require('./../common/api');
 
 var should = require('should-http');
-var request = require('supertest');
-var agent = require('supertest-as-promised');
+var request = require('supertest-as-promised');
 var config = require('config');
 
-var apiURL = config.api.host.protocol + '://' + config.api.host.name;
-var apiRequest = '/' + config.api.version + '/' + config.api.stats.request + '/';
-var apiRequestTop = apiRequest + 'top/';
-var users = config.api.stats.users;
 var domains = config.api.stats.domains;
+var justtaUser = config.api.users.user;
 
 //  suite
 describe('Stats API check:', function () {
 
   this.timeout(config.api.request.maxTimeout);
 
-  // before(function (done) {
-  //   done();
-  // });
+  before(function (done) {
+    API.session.setCurrentUser(justtaUser);
+    done();
+  });
   // after(function (done) {
   //   done();
   // });
@@ -58,46 +52,27 @@ describe('Stats API check:', function () {
       // });
 
       it('should fail if report_type is not set', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
-          .expect(400)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            done();
-          });
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
+          .expect(400, done);
       });
 
       it('should fail if report_type is set to some junk value', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
+
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
           .query({ report_type: 'motherfucking-referer' })
-          .expect(400)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            done();
-          });
+          .expect(400, done)
       });
 
       it('should fail if report period exceeds 24h', function(done) {
-        request(apiURL)
-          .get(apiRequestTop + domains.test.id)
-          .auth(users.user.name, users.user.password)
-          .query({ 'from_timestamp': '-72h', 'to_timestamp': '-2h' })
-          .expect(400)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            done();
-          });
-      });
 
+        API.resources.stats.stats_top
+          .getOne(domains.test.id)
+          .query({ 'from_timestamp': '-72h', 'to_timestamp': '-2h' })
+          .expect(400, done)
+      });
 
     });
   });
