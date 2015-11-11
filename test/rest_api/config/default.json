@@ -2,15 +2,15 @@
   "api": {
     "host": {
       "protocol": "https",
-      "name": "0.0.0.0",
-      "port": 8000
+      "name": "testsjc20-api01.revsw.net",
+      "port": 443
     },
     "version": "v1",
     "resources": {
       "accounts": "accounts"
     },
     "request": {
-      "maxTimeout": 10000
+      "maxTimeout": 20000
     },
     "users": {
       "revAdmin": {
@@ -32,6 +32,37 @@
       "user": {
         "name": "qa_user_with_user_perm@revsw.com",
         "password": "password1"
+      }
+    },
+    "stats": {
+      "request": "stats",
+      "users": {
+        "user": {
+          "name": "qa_user_with_user_perm@revsw.com",
+          "password": "password1"
+        },
+        "admin": {
+          "name": "qa_user_with_admin_perm@revsw.com",
+          "password": "password1"
+        },
+        "rev-admin": {
+          "name": "qa_user_with_rev-admin_perm@revs.wcom",
+          "password": "password1"
+        },
+        "reseller": {
+          "name": "qa_user_with_reseller_perm@revsw.com",
+          "password": "password1"
+        },
+        "nobody": {
+          "name": "wrong_username@revsw.com",
+          "password": "we5rsdfsdfs"
+        }
+      },
+      "domains": {
+        "test": {
+          "id": "55df7177bab6f4da0306f58e",
+          "name": "portal-qa-domain.revsw.net"
+        }
       }
     }
   }

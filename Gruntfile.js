@@ -28,14 +28,23 @@ module.exports = function (grunt) {
         },
         src: ['test/rest_api/**/*.js']
       },
-      smoke: {
+      'account-smoke': {
         options: { reporter: 'spec' },
-        src: ['test/rest_api/smoke/*.js']
+        src: ['test/rest_api/smoke/account.js']
       },
-      boundary: {
+      'account-boundary': {
         options: { reporter: 'spec' },
-        src: ['test/rest_api/boundary/*.js']
-      }
+        src: ['test/rest_api/boundary/account.js']
+      },
+      // …………
+      'stats-top-smoke': {
+        options: { reporter: 'spec' },
+        src: ['test/rest_api/stats/top-smoke.js']
+      },
+      'stats-top-negative': {
+        options: { reporter: 'spec' },
+        src: ['test/rest_api/stats/top-negative.js']
+      },
     },
 
     jshint: {
@@ -70,8 +79,12 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-docker');
 
-  grunt.registerTask('default', ['clean', 'jshint:test', 'mochaTest']);
+  grunt.registerTask('default', ['clean', 'jshint:test', 'env', 'mochaTest']);
   grunt.registerTask('test', ['clean', 'jshint:test', 'env', 'mochaTest']);
-  grunt.registerTask('smoke', ['env', 'mochaTest:smoke']);
+
+  grunt.registerTask('stats-top-negative', ['env', 'mochaTest:stats-top-negative']);
+  grunt.registerTask('stats-top-smoke', ['env', 'mochaTest:stats-top-smoke']);
+  grunt.registerTask('stats', ['env', 'mochaTest:stats-top-smoke', 'mochaTest:stats-top-negative']);
+
   grunt.registerTask('doc', ['clean', 'docker']);
 };
