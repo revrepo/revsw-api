@@ -3,11 +3,11 @@ var should = require('should-http');
 var request = require('supertest');
 var agent = require('supertest-as-promised');
 
-var express = require('express');
-var fs = require('fs');
-var https = require('https');
-var sleep = require('sleep');
-var utils = require('../lib/utilities.js');
+// var express = require('express');
+// var fs = require('fs');
+// var https = require('https');
+// var sleep = require('sleep');
+// var utils = require('../lib/utilities.js');
 var config = require('config');
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',

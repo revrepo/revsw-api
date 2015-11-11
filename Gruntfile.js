@@ -11,20 +11,40 @@ module.exports = function (grunt) {
       'test/rest_api/results'
     ],
 
+    env: {
+      test: {
+        NODE_ENV: 'qa',
+        NODE_CONFIG_DIR: './test/rest_api/config/'
+      }
+    },
+
     mochaTest: {
       test: {
         options: {
           reporter: 'spec',
-          // Optionally capture the reporter output to a file
-          captureFile: 'test/rest_api/results/mocha.txt',
-          // Optionally suppress output to standard out (defaults to false)
-          quiet: false,
-          // Optionally clear the require cache before running tests
-          // (defaults to false)
-          clearRequireCache: false
+          // captureFile: 'test/rest_api/results/mocha.txt',
+          // quiet: false,
+          // clearRequireCache: false
         },
         src: ['test/rest_api/**/*.js']
-      }
+      },
+      'account-smoke': {
+        options: { reporter: 'spec' },
+        src: ['test/rest_api/smoke/account.js']
+      },
+      'account-boundary': {
+        options: { reporter: 'spec' },
+        src: ['test/rest_api/boundary/account.js']
+      },
+      // …………
+      'stats-top-smoke': {
+        options: { reporter: 'spec' },
+        src: ['test/rest_api/stats/top-smoke.js']
+      },
+      'stats-top-negative': {
+        options: { reporter: 'spec' },
+        src: ['test/rest_api/stats/top-negative.js']
+      },
     },
 
     jshint: {
@@ -54,12 +74,17 @@ module.exports = function (grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-env');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-docker');
 
-  grunt.registerTask('default', ['clean', 'jshint:test', 'mochaTest',
-    'docker']);
-  grunt.registerTask('test', ['clean', 'jshint:test', 'mochaTest']);
+  grunt.registerTask('default', ['clean', 'jshint:test', 'env', 'mochaTest']);
+  grunt.registerTask('test', ['clean', 'jshint:test', 'env', 'mochaTest']);
+
+  grunt.registerTask('stats-top-negative', ['env', 'mochaTest:stats-top-negative']);
+  grunt.registerTask('stats-top-smoke', ['env', 'mochaTest:stats-top-smoke']);
+  grunt.registerTask('stats', ['env', 'mochaTest:stats-top-smoke', 'mochaTest:stats-top-negative']);
+
   grunt.registerTask('doc', ['clean', 'docker']);
 };
