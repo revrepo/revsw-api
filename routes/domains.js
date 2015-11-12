@@ -253,7 +253,28 @@ module.exports = [
                 header_value : Joi.string().allow('').required()
               }).required()
             }).required(),
-            cache_bypass_locations : Joi.array().items(Joi.string()).required()
+            cache_bypass_locations : Joi.array().items(Joi.string()).required(),
+            enable_vcl_geoip_headers: Joi.boolean(),
+            custom_vcl: Joi.object({
+              enabled: Joi.boolean(),
+              backends: Joi.array().items({
+                vcl: Joi.string(),
+                dynamic: Joi.boolean(),
+                port: Joi.number().integer(),
+                host: Joi.string(),
+                name: Joi.string()
+              }),
+              recv: Joi.string(),
+              backend_response: Joi.string(),
+              backend_error: Joi.string(),
+              hit: Joi.string(),
+              miss: Joi.string(),
+              deliver: Joi.string(),
+              pass: Joi.string(),
+              pipe: Joi.string(),
+              hash: Joi.string(),
+              synth: Joi.string()
+            })
           }).required()
         }
       },
