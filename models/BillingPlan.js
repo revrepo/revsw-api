@@ -122,7 +122,7 @@ BillingPlanSchema.statics = {
 
   list: function (request, callback) {
     callback = callback || _.noop;
-    return this.find().exec(function(err, billingPlans) {
+    return this.find({deleted: false}).exec(function(err, billingPlans) {
       if (err) {
         return callback(err);
       }
@@ -138,24 +138,18 @@ BillingPlanSchema.statics = {
     });
   },
 
-  update: function (item, callback) {
+  updateBillingPlan: function (item, callback) {
     callback = callback || _.noop;
-    this.model.findOne({
-      key: item.key
+    this.findOne({
+      _id: item.id
     }, function (err, doc) {
       if (doc) {
+        delete item.id;
         for (var attrname in item) {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
         doc.save(function (err, item) {
-          if (item) {
-            item = utils.clone(item);
-            item.id = item._id + '';
-
-            delete item._id;
-            delete item.__v;
-          }
           callback(err, item);
         });
       } else {
@@ -164,13 +158,13 @@ BillingPlanSchema.statics = {
     });
   },
 
-  remove: function (item, callback) {
+  removeBillingPlan: function (item, callback) {
     callback = callback || _.noop;
     var context = this;
     if (item) {
       this.get(item, function (err, data) {
         if (data) {
-          context.model.remove(item, function (err) {
+          data.update({deleted: true}, function (err) {
             callback(err, null);
           });
         } else {
@@ -178,7 +172,7 @@ BillingPlanSchema.statics = {
         }
       });
     } else {
-      callback(utils.buildError('400', 'No API key passed to remove function'), null);
+      callback(utils.buildError('400', 'No Billing plan passed to remove function'), null);
     }
   },
 

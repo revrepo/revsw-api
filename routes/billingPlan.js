@@ -48,16 +48,16 @@ module.exports = [
     }
   },
 
-  /*{
+  {
     method: 'GET',
-    path: '/v1/billing_plans/{key_id}',
+    path: '/v1/billing_plans/{id}',
     config: {
       auth: {
-        scope: ['admin', 'reseller']
+        scope: ['admin_rw']
       },
-      handler: apiKey.getApiKey,
-      description: 'Get API key details',
-      notes: 'Use this function to get details of an API key',
+      handler: billingPlanHandler.get,
+      description: 'Get Billing Plan details',
+      notes: 'Use this function to get details of an Billing plan',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -66,14 +66,14 @@ module.exports = [
       },
       validate: {
         params: {
-          key_id: Joi.objectId().required().description('ID of the API key')
+          id: Joi.objectId().required().description('ID of the Billing plan')
         }
       },
       response: {
-        schema: routeModels.APIKeyModel
+        schema: routeValidation.BillingPlanModel
       }
     }
-  },*/
+  },
 
   {
     method: 'POST',
@@ -99,17 +99,17 @@ module.exports = [
       }
     }
   },
-/*
+
   {
     method: 'PUT',
-    path: '/v1/billing_plans/{key_id}',
+    path: '/v1/billing_plans/{id}',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw']
+        scope: ['admin_rw']
       },
-      handler: apiKey.updateApiKey,
-      description: 'Update a customer API key',
-      notes: 'Use this function to update API key details',
+      handler: billingPlanHandler.update,
+      description: 'Update a Billing plan',
+      notes: 'Use this function to update Billing plan details',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -121,78 +121,9 @@ module.exports = [
           stripUnknown: true
         },
         params: {
-          key_id: Joi.string().required().description('ID of the API key to be updated')
+          id: Joi.string().required().description('ID of the Billing plan to be updated')
         },
-        payload: {
-          key_name        : Joi.string().required().min(1).max(30).description('Name of the API key'),
-          account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
-          domains         : Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
-          allowed_ops     : Joi.object({
-            read_config     : Joi.boolean().required(),
-            modify_config   : Joi.boolean().required(),
-            delete_config   : Joi.boolean().required(),
-            purge           : Joi.boolean().required(),
-            reports         : Joi.boolean().required(),
-            admin           : Joi.boolean().required(),
-          }),
-          read_only_status: Joi.boolean().required().description('Tells if the API key is read-only or read/write'),
-          active          : Joi.boolean().required().description('Tells if the API key is active or not')
-        }
-      },
-      response: {
-        schema: routeModels.statusModel
-      }
-    }
-  },
-
-  {
-    method: 'POST',
-    path: '/v1/billing_plans/{key_id}/activate',
-    config: {
-      auth: {
-        scope: ['admin_rw', 'reseller_rw']
-      },
-      handler: apiKey.activateApiKey,
-      description: 'Make the API key active',
-      notes: 'Use the call to activate an API key for your company in the system',
-      tags: ['api', 'accounts'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-      validate: {
-        params: {
-          key_id: Joi.objectId().required().description('ID of the API key to be activated')
-        }
-      },
-      response: {
-        schema: routeModels.statusModel
-      }
-    }
-  },
-
-  {
-    method: 'POST',
-    path: '/v1/billing_plans/{key_id}/deactivate',
-    config: {
-      auth: {
-        scope: ['admin_rw', 'reseller_rw']
-      },
-      handler: apiKey.deactivateApiKey,
-      description: 'Make the API key inactive',
-      notes: 'Use the call to deactivate an API key. The key\' configuration will be stored in the system but it will be not ' +
-      'possible to use the key to access the customer API service',
-      tags: ['api'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-      validate: {
-        params: {
-          key_id: Joi.objectId().required().description('ID of the API key to be deactivated')
-        }
+        payload: routeValidation.BillingPlanRequestPayload
       },
       response: {
         schema: routeModels.statusModel
@@ -202,14 +133,14 @@ module.exports = [
 
   {
     method: 'DELETE',
-    path: '/v1/billing_plans/{key_id}',
+    path: '/v1/billing_plans/{id}',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw']
+        scope: ['admin_rw']
       },
-      handler: apiKey.deleteApiKey,
-      description: 'Remove a customer API key',
-      notes: 'This function should be used by a company admin to delete an API key',
+      handler: billingPlanHandler.delete,
+      description: 'Remove a billing plan',
+      notes: 'This function should be used by a admin to delete an Billing plan',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -218,12 +149,12 @@ module.exports = [
       },
       validate: {
         params: {
-          key_id: Joi.objectId().required().description('ID of the API key to be deleted')
+          id: Joi.objectId().required().description('ID of the Billing plan to be deleted')
         }
       },
       response: {
         schema: routeModels.statusModel
       }
     }
-  }*/
+  }
 ];

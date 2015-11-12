@@ -29,7 +29,6 @@ var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
 
-var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
 var Account = require('../models/Account');
 var Domain = require('../models/Domain');
@@ -79,7 +78,7 @@ exports.create = function (request, reply) {
           user_id: request.auth.credentials.user_id,
           user_name: request.auth.credentials.email,
           user_type: 'user',
-          account_id: request.auth.credentials.companyId,
+          account_id: request.auth.credentials.user_id,
 //          domain_id        : request.auth.credentials.domain,
           activity_type: 'add',
           activity_target: 'billing_plan',
@@ -96,232 +95,111 @@ exports.create = function (request, reply) {
   });
 };
 
+exports.get = function (request, reply) {
+  var id = request.params.id;
+  BillingPlan.get({_id: id}, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to get Billing plan ' + id));
+    }
 
-/*
- exports.getApiKey = function (request, reply) {
- var id = request.params.key_id;
- apiKeys.get({_id: id}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to get API key ' + id));
- }
-
- if (result) {
- result = publicRecordFields.handle(result, 'apiKeys');
- renderJSON(request, reply, error, result);
- } else {
- return reply(boom.badRequest('API key not found'));
- }
- });
- };
+    if (result) {
+      result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
+      renderJSON(request, reply, error, result);
+    } else {
+      return reply(boom.badRequest('Billing plan not found'));
+    }
+  });
+};
 
 
+exports.update = function (request, reply) {
+  var updatedData = request.payload;
+  var id = request.params.id;
 
- exports.updateApiKey = function (request, reply) {
- var updatedApiKey = request.payload;
- var id = request.params.key_id;
 
- function doUpdate() {
- apiKeys.update(updatedApiKey, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to update API key ' + id));
- }
+  BillingPlan.get({_id: id}, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to verify Billing plan ' + id));
+    }
 
- var statusResponse = {
- statusCode: 200,
- message   : 'Successfully updated the API key'
- };
+    if (!result) {
+      return reply(boom.badRequest('Billing plan not found'));
+    }
 
- result = publicRecordFields.handle(result, 'apiKeys');
+    updatedData.id = id;
+    BillingPlan.updateBillingPlan(updatedData, function (error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to update Billing plan ' + id));
+      }
 
- AuditLogger.store({
- ip_address       : request.info.remoteAddress,
- datetime         : Date.now(),
- user_id          : request.auth.credentials.user_id,
- user_name        : request.auth.credentials.email,
- user_type        : 'user',
- account_id       : request.auth.credentials.companyId,
- activity_type    : 'modify',
- activity_target  : 'apikey',
- target_id        : result.id,
- target_name      : result.key_name,
- target_object    : result,
- operation_status : 'success'
- });
+      var statusResponse = {
+        statusCode: 200,
+        message: 'Successfully updated the Billing plan'
+      };
 
- renderJSON(request, reply, error, statusResponse);
- });
- }
+      result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
- if (updatedApiKey.account_id && request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1) {
- return reply(boom.badRequest('Company ID not found'));
- }
+      AuditLogger.store({
+        ip_address: request.info.remoteAddress,
+        datetime: Date.now(),
+        user_id: request.auth.credentials.user_id,
+        user_name: request.auth.credentials.email,
+        user_type: 'user',
+        account_id: request.auth.credentials.user_id,
+        activity_type: 'modify',
+        activity_target: 'billing_plan',
+        target_id: result.id,
+        target_name: result.name,
+        target_object: result,
+        operation_status: 'success'
+      });
 
- apiKeys.get({_id: id}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to verify API key ' + id));
- }
+      renderJSON(request, reply, error, statusResponse);
+    });
 
- if (!result) {
- return reply(boom.badRequest('API key not found'));
- }
+  });
+};
 
- updatedApiKey.key = result.key;
 
- if (updatedApiKey.domains) {
- verifyDomainOwnership(updatedApiKey.account_id, updatedApiKey.domains, function(error, okDomains, wrongDomains) {
- if (error) {
- return reply(boom.badImplementation('Error retrieving domain information'));
- }
+exports.delete = function (request, reply) {
+  var id = request.params.id;
+  BillingPlan.get({_id: id}, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id));
+    }
+    if (!result) {
+      return reply(boom.badRequest('Billing Plan not found'));
+    }
 
- if (wrongDomains.length) {
- return reply(boom.badRequest('Wrong domains: ' + wrongDomains));
- }
+    BillingPlan.removeBillingPlan({_id: id}, function (error) {
+      if (error) {
+        return reply(boom.badImplementation('Error removing billing plan'));
+      }
 
- doUpdate();
+      var statusResponse;
+      statusResponse = {
+        statusCode: 200,
+        message: 'Successfully deleted the Billing plan'
+      };
 
- });
- } else {
- doUpdate();
- }
- });
- };
+      result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
- exports.activateApiKey = function (request, reply) {
- var id = request.params.key_id;
- apiKeys.get({_id: id}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to verify API key ' + id));
- }
+      AuditLogger.store({
+        ip_address: request.info.remoteAddress,
+        datetime: Date.now(),
+        user_id: request.auth.credentials.user_id,
+        user_name: request.auth.credentials.email,
+        user_type: 'user',
+        account_id: request.auth.credentials.user_id || '',
+        activity_type: 'delete',
+        activity_target: 'billing_plan',
+        target_id: result.id,
+        target_name: result.name,
+        target_object: result,
+        operation_status: 'success'
+      });
 
- if (!result) {
- return reply(boom.badRequest('API key not found'));
- }
-
- if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
- return reply(boom.badRequest('API key not found'));
- }
-
- apiKeys.activate({key: result.key}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to activate API key ' + id));
- }
-
- var statusResponse = {
- statusCode: 200,
- message   : 'Successfully activated the API key'
- };
-
- result = publicRecordFields.handle(result, 'apiKeys');
-
- AuditLogger.store({
- ip_address        : request.info.remoteAddress,
- datetime         : Date.now(),
- user_id          : request.auth.credentials.user_id,
- user_name        : request.auth.credentials.email,
- user_type        : 'user',
- account_id       : request.auth.credentials.companyId,
- activity_type    : 'modify',
- activity_target  : 'apikey',
- target_id        : result.id,
- target_name      : result.key_name,
- target_object    : result,
- operation_status : 'success'
- });
- renderJSON(request, reply, error, statusResponse);
- });
- });
- };
-
- exports.deactivateApiKey = function (request, reply) {
- var id = request.params.key_id;
- apiKeys.get({_id: id}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to verify the API key'));
- }
-
- if (!result) {
- return reply(boom.badRequest('API key not found'));
- }
-
- if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
- return reply(boom.badRequest('API key not found'));
- }
-
- apiKeys.deactivate({key: result.key}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Failed to deactivate API key ' + id));
- }
-
- var statusResponse = {
- statusCode: 200,
- message   : 'Successfully deactivated the API key'
- };
-
- result = publicRecordFields.handle(result, 'apiKeys');
-
- AuditLogger.store({
- ip_address        : request.info.remoteAddress,
- datetime         : Date.now(),
- user_id          : request.auth.credentials.user_id,
- user_name        : request.auth.credentials.email,
- user_type        : 'user',
- account_id       : request.auth.credentials.companyId,
- activity_type    : 'modify',
- activity_target  : 'apikey',
- target_id        : result.id,
- target_name      : result.key_name,
- target_object    : result,
- operation_status : 'success'
- });
-
- renderJSON(request, reply, error, statusResponse);
- });
- });
- };
-
- exports.deleteApiKey = function (request, reply) {
- var id = request.params.key_id;
- apiKeys.get({_id: id}, function (error, result) {
- if (error) {
- return reply(boom.badImplementation('Error retrieving API key ' + id));
- }
- if (!result) {
- return reply(boom.badRequest('API key not found'));
- }
-
- if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
- return reply(boom.badRequest('API key not found'));
- }
-
- apiKeys.remove({_id: id}, function (error) {
- if (error) {
- return reply(boom.badImplementation('Error removing the key'));
- }
-
- var statusResponse;
- statusResponse = {
- statusCode : 200,
- message    : 'Successfully deleted the API key'
- };
-
- result = publicRecordFields.handle(result, 'apiKeys');
-
- AuditLogger.store({
- ip_address       : request.info.remoteAddress,
- datetime         : Date.now(),
- user_id          : request.auth.credentials.user_id,
- user_name        : request.auth.credentials.email,
- user_type        : 'user',
- account_id       : request.auth.credentials.companyId,
- activity_type    : 'delete',
- activity_target  : 'apikey',
- target_id        : result.id,
- target_name      : result.key_name,
- target_object    : result,
- operation_status : 'success'
- });
-
- renderJSON(request, reply, error, statusResponse);
- });
- });
- };*/
+      renderJSON(request, reply, error, statusResponse);
+    });
+  });
+};
