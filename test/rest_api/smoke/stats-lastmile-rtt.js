@@ -25,7 +25,6 @@ var config = require('config');
 
 var domains = config.api.stats.domains;
 var justtaUser = config.api.users.user;
-var someone = config.api.users.nobody;
 
 //  suite
 describe('Stats API check:', function () {
@@ -42,7 +41,7 @@ describe('Stats API check:', function () {
 
   describe('Top requests: ', function () {
 
-    describe('Negative: ', function () {
+    describe('Smoke: ', function () {
 
       // beforeEach(function (done) {
       //   done();
@@ -51,50 +50,28 @@ describe('Stats API check:', function () {
       // afterEach(function (done) {
       //   done();
       // });
+      var run_ = function( type, domain_name, domain_id ) {
 
-      it('should fail if creds are wrong or absent', function(done) {
+        return function( done ) {
+          API.resources.stats.stats_top
+            .getOne(domain_id)
+            .query({ report_type: type })
+            .expect(200)
+            .then(function(res) {
+              var response_json = JSON.parse(res.text);
+              response_json.metadata.domain_name.should.be.equal(domain_name);
+              response_json.metadata.domain_id.should.be.equal(domain_id);
+              done();
+            })
+            .catch( function( err ) {
+                done( err );
+            });
+        }
+      }
 
-        API.session.setCurrentUser(someone);
-        API.resources.stats.stats_top
-          .getOne(domains.test.id)
-          .expect(401)
-          .then( function( res ) {
-            API.session.setCurrentUser(false);
-            return API.resources.stats.stats_top
-              .getOne(domains.test.id)
-              .expect(401)
-              .then( function( res ) {
-                done();
-              });
-          }).catch( function( err ) {
-            done( err );
-          }).finally( function( res ) {
-            API.session.setCurrentUser(justtaUser);
-          });
-      });
-
-      it('should fail if report_type is not set', function(done) {
-
-        API.resources.stats.stats_top
-          .getOne(domains.test.id)
-          .expect(400, done);
-      });
-
-      it('should fail if report_type is set to some junk value', function(done) {
-
-        API.resources.stats.stats_top
-          .getOne(domains.test.id)
-          .query({ report_type: 'motherfucking-referer' })
-          .expect(400, done)
-      });
-
-      it('should fail if report period exceeds 24h', function(done) {
-
-        API.resources.stats.stats_top
-          .getOne(domains.test.id)
-          .query({ 'from_timestamp': '-72h', 'to_timestamp': '-2h' })
-          .expect(400, done)
-      });
+      it('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = device', run_( 'device', domains.test.name, domains.test.id ) );
 
     });
   });

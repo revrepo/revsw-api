@@ -51,176 +51,35 @@ describe('Stats API check:', function () {
       //   done();
       // });
 
-      it('should return data without query', function(done) {
+      var run_ = function( q ) {
 
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          // .query({ report_type: 'referer' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
+        return function( done ) {
+          API.resources.stats.stats_top_objects
+            .getOne(domains.test.id)
+            .query( q )
+            .expect(200)
+            .then(function(res) {
+              var response_json = JSON.parse(res.text);
+              response_json.metadata.domain_name.should.be.equal(domains.test.name);
+              response_json.metadata.domain_id.should.be.equal(domains.test.id);
+              done();
+            })
+            .catch( function( err ) {
+                done( err );
+            });
+        }
+      }
 
-      it('should return data for status_code', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ status_code: 200 })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for cache_code', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ cache_code: 'HIT' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for request_status', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ request_status: 'OK' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for protocol', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ protocol: 'HTTPS' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for http_method', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ http_method: 'GET' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for quic', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ quic: 'QUIC' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for country', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ country: 'ZU' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for os', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ os: 'Windows' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
-      it('should return data for device', function(done) {
-
-        API.resources.stats.stats_top_objects
-          .getOne(domains.test.id)
-          .query({ device: 'Motorola' })
-          .expect(200)
-          .then(function(res) {
-            var response_json = JSON.parse(res.text);
-            response_json.metadata.domain_name.should.be.equal(domains.test.name);
-            response_json.metadata.domain_id.should.be.equal(domains.test.id);
-            done();
-          })
-          .catch( function( err ) {
-              done( err );
-          });
-      });
-
+      it('should return data without query', run_({}) );
+      it('should return data for status_code', run_({ status_code: 200 }) );
+      it('should return data for cache_code', run_({ cache_code: 'HIT' }) );
+      it('should return data for request_status', run_({ request_status: 'OK' }) );
+      it('should return data for protocol', run_({ protocol: 'HTTPS' }) );
+      it('should return data for http_method', run_({ http_method: 'GET' }) );
+      it('should return data for quic', run_({ quic: 'QUIC' }) );
+      it('should return data for country', run_({ country: 'ZU' }) );
+      it('should return data for os', run_({ os: 'Windows' }) );
+      it('should return data for device', run_({ device: 'Motorola' }) );
 
     });
   });
