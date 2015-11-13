@@ -18,12 +18,13 @@
 
 //  stats endpoint data management
 
-//  The stats endpoint inherently has no CRUD functionality except maybe (R)etrieve to some extent in terms of aggregations
-//  thus it has no methods to create/delete data even for a testing
-//  So here are methods to generate/read, upload and finally remove testing data working directly with the elasticsearch interfaces
+//  The stats endpoint inherently has no CRUD functionality except maybe (R)etrieve
+//  to some extent in terms of aggregations. Thus it has no methods to create/delete data even
+//  for a testing. So here are methods to generate/read, upload and finally remove testing data
+//  working directly with the elasticsearch interfaces
 
 'use strict';
-var _ = require('underscore'),
+var _ = require('lodash'),
   elastic = require('elasticsearch'),
   config = require( 'config' ),
   promise = require('bluebird'),
@@ -37,7 +38,7 @@ var client_ = false,
   type_ = 'apache_json_testing',
   client_i_ = false,
   type_i_ = 'apache_json',
-  file_ = './statsData.json';
+  file_ = __dirname + '/statsData.json';
 
 var opts = {
   index: false,
@@ -47,7 +48,7 @@ var opts = {
   dataCount: 0,
   aggs: {},
   _ids: []
-}
+};
 
 //  init parameters
 var init_ = function(  ) {
@@ -178,8 +179,8 @@ module.exports = {
         var hits = resp.responses[i].hits.hits;
         for ( var i2 = 0, len2 = hits.length; i2 < len2; ++i2 ) {
           opts.data.push( hits[i2] );
-        };
-      };
+        }
+      }
       opts.dataCount = opts.data.length;
 
       // save to a json file before further processing
@@ -221,7 +222,7 @@ module.exports = {
           lm_rtt_avg_ms: 0,
           lm_rtt_min_ms: 1000000,
           lm_rtt_max_ms: 0
-        }
+        };
       }
       aggs[name][key].count++;
       aggs[name][key].lm_rtt_avg_ms += item.lm_rtt;
@@ -238,6 +239,7 @@ module.exports = {
 
       body.push({ index: {} });
       item['@timestamp'] = (new Date(t)).toISOString().slice(0,-5);
+      item.domain = config.api.stats.domains.google.name;
       body.push( item );
       t += step;
 
@@ -248,7 +250,7 @@ module.exports = {
 
     }
 
-    //  round data
+    //  round aggregations
     for ( var key0 in aggs ) {
       for ( var key1 in aggs[key0] ) {
         var item = aggs[key0][key1];

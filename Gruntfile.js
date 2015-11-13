@@ -63,6 +63,12 @@ module.exports = function (grunt) {
         },
         src: ['test/rest_api/negative/stats-top.js']
       },
+      stats_lastmile_rtt_func: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/functional/stats-lastmile-rtt.js']
+      },
     },
 
     jshint: {
@@ -107,5 +113,6 @@ module.exports = function (grunt) {
   grunt.registerTask('stats_top_objects_smoke', ['env', 'mochaTest:stats_top_objects_smoke']);
   grunt.registerTask('stats_lastmile_rtt_smoke', ['env', 'mochaTest:stats_lastmile_rtt_smoke']);
   grunt.registerTask('stats_top_negative', ['env', 'mochaTest:stats_top_negative']);
+  grunt.registerTask('stats_lastmile_rtt_func', ['env', 'mochaTest:stats_lastmile_rtt_func']);
 
 };
