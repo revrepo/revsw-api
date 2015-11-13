@@ -51,7 +51,27 @@ function User(mongoose, connection, options) {
     'resetPasswordToken'   : String,
     'resetPasswordExpires' : Number,
     'two_factor_auth_enabled': {type: Boolean, default: false},
-    'two_factor_auth_secret_base32': String
+    'two_factor_auth_secret_base32': String,
+
+    // Self register section
+    self_registered: {
+      type: Boolean,
+      default: false
+    },
+    company_name: {
+      type: String
+    },
+    old_passwords: [String],
+
+    validation: {
+      created: Date,
+      token: String
+    },
+
+    billing_plan: this.ObjectId,
+
+    deleted: { type: Boolean, default: false }
+
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
