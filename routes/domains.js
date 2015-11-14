@@ -198,6 +198,13 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID')
         },
         payload : {
+          enable_origin_health_probe: Joi.boolean(),
+          origin_health_probe: Joi.object({
+            HTTP_REQUEST: Joi.string().required(),
+            PROBE_TIMEOUT: Joi.number().integer().required(),
+            PROBE_INTERVAL: Joi.number().integer().required(),
+            HTTP_STATUS: Joi.number().integer().required()
+          }),
           proxy_timeout: Joi.boolean(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
@@ -238,6 +245,21 @@ module.exports = [
                 remove_ignored_from_request  : Joi.boolean().required(),
                 remove_ignored_from_response : Joi.boolean().required()
               }).required(),
+              serve_stale: Joi.object({
+                origin_sick_ttl: Joi.number().integer(),
+                while_fetching_ttl: Joi.number().integer(),
+                enable: Joi.boolean()
+              }),
+              end_user_response_headers: Joi.object({
+                header_value: Joi.string(),
+                header_name: Joi.string(),
+                operation: Joi.string().allow('add', 'remove', 'replace')
+              }),
+              origin_request_headers: Joi.object({
+                header_value: Joi.string(),
+                header_name: Joi.string(),
+                operation: Joi.string().allow('add', 'remove', 'replace')
+              }),
               cookies_cache_bypass : Joi.array().items(Joi.string())
             }).required(),
             enable_security        : Joi.boolean().required(),
