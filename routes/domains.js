@@ -250,12 +250,12 @@ module.exports = [
                 while_fetching_ttl: Joi.number().integer(),
                 enable: Joi.boolean()
               }),
-              end_user_response_headers: Joi.object({
+              end_user_response_headers: Joi.array().items({
                 header_value: Joi.string(),
                 header_name: Joi.string(),
                 operation: Joi.string().allow('add', 'remove', 'replace')
               }),
-              origin_request_headers: Joi.object({
+              origin_request_headers: Joi.array().items({
                 header_value: Joi.string(),
                 header_name: Joi.string(),
                 operation: Joi.string().allow('add', 'remove', 'replace')
