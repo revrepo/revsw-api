@@ -38,6 +38,14 @@ describe('Smoke check', function () {
       .then(function (response) {
         userSample.id = response.body.object_id;
         userSample.name = userSample.email;
+
+        return API.resources.authenticate.createOne({
+          email: userSample.email,
+          password: userSample.password
+        });
+      })
+      .then(function(response) {
+        userSample.token = response.body.token;
         done();
       });
   });

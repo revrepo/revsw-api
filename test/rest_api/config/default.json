@@ -8,6 +8,7 @@
     "version": "v1",
     "resources": {
       "accounts": "accounts",
+      "authenticate": "authenticate",
       "users": "users",
       "stats": "stats"
     },

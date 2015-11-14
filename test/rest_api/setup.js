@@ -16,10 +16,42 @@
  * from Rev Software, Inc.
  */
 
+var config = require('config');
+var Promise = require('bluebird');
+
+var API = require('./common/api');
+
+var join = Promise.join;
+
+var users = [
+  config.api.users.revAdmin,
+  config.api.users.reseller,
+  config.api.users.secondReseller,
+  config.api.users.admin,
+  config.api.users.user
+];
+
+var authenticateUser = function(user) {
+  return API.resources.authenticate
+    .createOne({ email: user.name, password: user.password })
+    .then(function(response) {
+      user.token = response.body.token;
+
+      return user.token;
+    });
+};
+
 // Global `before` hook
 // Invoked before all test suites runned
 before(function (done) {
-  done();
+  var usersPromises = users.map(function(user) {
+    return authenticateUser(user);
+  });
+
+  join.apply(Promise, usersPromises)
+    .then(function() {
+      done();
+    });
 });
 
 // Global `after` hook
