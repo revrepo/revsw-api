@@ -120,12 +120,12 @@ exports.getGBTReports = function(request, reply) {
               'size': request.query.count || 30
             },
             'aggs': {
-              'gbt_sent': {
+              'sent_bytes': {
                 'sum': {
                   'field': 's_bytes'
                 }
               },
-              'gbt_received': {
+              'received_bytes': {
                 'sum': {
                   'field': 'r_bytes'
                 }
@@ -137,12 +137,12 @@ exports.getGBTReports = function(request, reply) {
               'field': field
             },
             'aggs': {
-              'gbt_sent': {
+              'sent_bytes': {
                 'sum': {
                   'field': 's_bytes'
                 }
               },
-              'gbt_received': {
+              'received_bytes': {
                 'sum': {
                   'field': 'r_bytes'
                 }
@@ -169,8 +169,8 @@ exports.getGBTReports = function(request, reply) {
           dataArray.push({
             key: doc.key,
             count: doc.doc_count,
-            gbt_sent: doc.gbt_sent.value,
-            gbt_received: doc.gbt_received.value
+            sent_bytes: doc.sent_bytes.value,
+            received_bytes: doc.received_bytes.value
           });
         }
         if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
@@ -178,8 +178,8 @@ exports.getGBTReports = function(request, reply) {
           dataArray.push({
             key: '--',
             count: doc.doc_count,
-            gbt_sent: doc.gbt_sent.value,
-            gbt_received: doc.gbt_received.value
+            sent_bytes: doc.sent_bytes.value,
+            received_bytes: doc.received_bytes.value
           });
         }
 
