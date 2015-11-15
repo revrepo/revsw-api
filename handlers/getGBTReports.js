@@ -33,7 +33,7 @@ var Domain = require('../models/Domain');
 var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
 
 
-exports.getRTTReports = function(request, reply) {
+exports.getGBTReports = function(request, reply) {
 
   var domain_id = request.params.domain_id;
   var domain_name,
@@ -104,12 +104,6 @@ exports.getRTTReports = function(request, reply) {
               }
             }, {
               'range': {
-                'lm_rtt': {
-                  'gt': 1000
-                }
-              }
-            }, {
-              'range': {
                 '@timestamp': {
                   'gte': start_time,
                   'lte': end_time
@@ -126,19 +120,14 @@ exports.getRTTReports = function(request, reply) {
               'size': request.query.count || 30
             },
             'aggs': {
-              'rtt_avg': {
-                'avg': {
-                  'field': 'lm_rtt'
+              'gbt_sent': {
+                'sum': {
+                  'field': 's_bytes'
                 }
               },
-              'rtt_min': {
-                'min': {
-                  'field': 'lm_rtt'
-                }
-              },
-              'rtt_max': {
-                'max': {
-                  'field': 'lm_rtt'
+              'gbt_received': {
+                'sum': {
+                  'field': 'r_bytes'
                 }
               }
             }
@@ -148,19 +137,14 @@ exports.getRTTReports = function(request, reply) {
               'field': field
             },
             'aggs': {
-              'rtt_avg': {
-                'avg': {
-                  'field': 'lm_rtt'
+              'gbt_sent': {
+                'sum': {
+                  'field': 's_bytes'
                 }
               },
-              'rtt_min': {
-                'min': {
-                  'field': 'lm_rtt'
-                }
-              },
-              'rtt_max': {
-                'max': {
-                  'field': 'lm_rtt'
+              'gbt_received': {
+                'sum': {
+                  'field': 'r_bytes'
                 }
               }
             }
@@ -185,9 +169,8 @@ exports.getRTTReports = function(request, reply) {
           dataArray.push({
             key: doc.key,
             count: doc.doc_count,
-            lm_rtt_avg_ms: Math.round( doc.rtt_avg.value / 1000 ),
-            lm_rtt_min_ms: Math.round( doc.rtt_min.value / 1000 ),
-            lm_rtt_max_ms: Math.round( doc.rtt_max.value / 1000 )
+            gbt_sent: doc.gbt_sent.value,
+            gbt_received: doc.gbt_received.value
           });
         }
         if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
@@ -195,9 +178,8 @@ exports.getRTTReports = function(request, reply) {
           dataArray.push({
             key: '--',
             count: doc.doc_count,
-            lm_rtt_avg_ms: Math.round( doc.rtt_avg.value / 1000 ),
-            lm_rtt_min_ms: Math.round( doc.rtt_min.value / 1000 ),
-            lm_rtt_max_ms: Math.round( doc.rtt_max.value / 1000 )
+            gbt_sent: doc.gbt_sent.value,
+            gbt_received: doc.gbt_received.value
           });
         }
 
