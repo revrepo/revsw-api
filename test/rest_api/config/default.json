@@ -9,6 +9,7 @@
     "resources": {
       "accounts": "accounts",
       "billingPlans": "billing_plans",
+      "authenticate": "authenticate",
       "users": "users",
       "stats": "stats"
     },

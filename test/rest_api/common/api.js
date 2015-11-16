@@ -21,6 +21,7 @@
 // Required resources to apply/attach to `API` object.
 var accounts = require('./resources/accounts');
 var billingPlans = require('./resources/billingPlans');
+var authenticate = require('./resources/authenticate');
 var users = require('./resources/users');
 var stats = require('./resources/stats');
 var Session = require('./session');
@@ -37,6 +38,7 @@ module.exports = {
   resources: {
     accounts: accounts,
     billingPlans: billingPlans,
+    authenticate: authenticate,
     users: users,
     stats: stats
   }
