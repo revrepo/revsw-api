@@ -90,7 +90,7 @@ exports.getStats = function(request, reply) {
       } else if ( time_period <= 2*24*3600*1000 ) {
         interval = 30*60*1000; // 30 minutes
       } else if ( time_period <= 8*24*3600*1000 ) {
-        interval = 6*3600*1000; // 6 hours
+        interval = 3*3600*1000; // 3 hours
       } else {
         interval = 12*3600*1000; // 12 hours
       }
