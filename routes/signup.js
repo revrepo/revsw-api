@@ -46,5 +46,29 @@ module.exports = [
         schema: routeModels.statusModel
       }
     }
+  },
+
+  {
+    method : 'POST',
+    path   : '/v1/signup/verify/{token}',
+    config : {
+      handler     : handler.verify,
+      auth        : false,
+      description : 'An internal portal call for user verification',
+      tags        : ['api', 'web'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        params: {
+          token: Joi.string().trim().length(40).required().description('Verification token')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
   }
 ];

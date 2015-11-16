@@ -29,6 +29,7 @@ var config = require('config');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
+var publicRecordFields = require('../lib/publicRecordFields');
 
 var User = require('../models/User');
 var Location = require('../models/Location');
@@ -93,7 +94,7 @@ exports.signup = function(req, reply) {
             //user_id: req.auth.credentials.user_id,
             //user_name: req.auth.credentials.email,
             user_type: 'user',
-            account_id: user.id,
+            account_id: user.user_id,
 //          domain_id        : request.auth.credentials.domain,
             activity_type: 'add',
             activity_target: 'billing_plan',
@@ -123,4 +124,54 @@ exports.signup = function(req, reply) {
     });
   });
 
+};
+
+exports.verify = function(req, reply) {
+  var token = req.params.token;
+  users.get({
+    'validation.token': token
+  }, function(error, user) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve validation token/user details'));
+    }
+    if (!user) {
+      return reply(boom.badRequest('The validation token is invalid or has expired'));
+    }
+    user.validation = {
+      created: undefined,
+      token: ''
+    };
+    //@todo UPDATE ANYTHING ELSE ?
+
+    users.update( user, function(error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to update user details'));
+      }
+
+      result = publicRecordFields.handle(result, 'users');
+
+      AuditLogger.store({
+        ip_address        : req.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : user.user_id,
+        user_name        : user.email,
+        user_type        : 'user',
+        account_id       : result.companyId,
+//            domain_id        : result.domain,
+        activity_type    : 'modify',
+        activity_target  : 'user',
+        target_id        : result.user_id,
+        target_name      : result.email,
+        target_object    : result,
+        operation_status : 'success'
+      });
+
+      var statusResponse = {
+        statusCode: 200,
+        message: 'Successfully verified your account',
+        object_id: result.id
+      };
+      renderJSON(req, reply, error, statusResponse );
+    });
+  });
 };
