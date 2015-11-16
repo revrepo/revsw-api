@@ -100,7 +100,7 @@ User.prototype = {
 
         delete item.__v;
         delete item._id;
-        delete item.id;
+        //delete item.id;
 
         callback(err, item);
       }
