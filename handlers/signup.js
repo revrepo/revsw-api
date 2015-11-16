@@ -21,8 +21,10 @@
 
 var mongoose = require('mongoose');
 var boom     = require('boom');
+var async    = require('async');
 var AuditLogger = require('revsw-audit');
-var uuid     = require('node-uuid');
+var utils = require('../lib/utilities');
+var mail = require('../lib/mail');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
@@ -32,7 +34,6 @@ var Location = require('../models/Location');
 var BillingPlan = require('../models/BillingPlan');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-var locations = new Location(mongoose, mongoConnection.getConnectionPortal());
 
 exports.signup = function(req, reply) {
 
@@ -64,10 +65,11 @@ exports.signup = function(req, reply) {
       if (!data.company_name) {
         data.company_name = data.first_name + ' ' + data.last_name + '\'s Company';
       }
+      var token = utils.generateToken();
       data.self_registered = true;
       data.validation = {
         created: Date.new(),
-        token: uuid()
+        token: token
       };
 
       // All ok
@@ -101,8 +103,20 @@ exports.signup = function(req, reply) {
           });
 
           //@todo SEND REQUEST TO EBS
+          var mailOptions = {
+            to: user.email,
+            subject: config.get('user_verify_subject'),
+            text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of account.\n\n' +
+            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+            'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
+            'If you did not request this, please ignore this email and your password will remain unchanged.\n\n' +
+            'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
+            'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+          };
 
-          renderJSON(req, reply, err, statusResponse);
+          mail.sendMail(mailOptions, function (err, result) {
+            renderJSON(req, reply, err, statusResponse);
+          });
         }
       });
     });

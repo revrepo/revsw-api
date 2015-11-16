@@ -139,6 +139,8 @@ exports.update = function (request, reply) {
 
       result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
+      // TODO: Update all current subscribed users
+
       AuditLogger.store({
         ip_address: request.info.remoteAddress,
         datetime: Date.now(),
