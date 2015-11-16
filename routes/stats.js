@@ -26,6 +26,7 @@ var getStats = require('../handlers/getStats');
 var getTopObjects = require('../handlers/getTopObjects');
 var getTopReports = require('../handlers/getTopReports');
 var RTTReports = require('../handlers/getRTTReports');
+var GBTReports = require('../handlers/getGBTReports');
 
 var routeModels = require('../lib/routeModels');
 
@@ -147,6 +148,35 @@ module.exports = [
       },
       handler: RTTReports.getRTTReports,
       description: 'Get RTT stats for a domain',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
+          report_type: Joi.string().valid ( 'country', 'device', 'os' ).description('Type of requested report (defaults to "country")'),
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/gbt/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller' ]
+      },
+      handler: GBTReports.getGBTReports,
+      description: 'Get GBT stats for a domain',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {

@@ -22,6 +22,7 @@
 var accounts = require('./resources/accounts');
 var billingPlans = require('./resources/billingPlans');
 var users = require('./resources/users');
+var stats = require('./resources/stats');
 var Session = require('./session');
 
 // This allows to overpass SSL certificate check
@@ -36,6 +37,7 @@ module.exports = {
   resources: {
     accounts: accounts,
     billingPlans: billingPlans,
-    users: users
+    users: users,
+    stats: stats
   }
 };
