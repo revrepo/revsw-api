@@ -7,3 +7,5 @@ log
 npm-debug.log
 *sublime*
 sftp-config.json
+config/local.json
+config/local-*.json

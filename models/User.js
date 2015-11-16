@@ -120,6 +120,8 @@ User.prototype = {
         delete doc.id;
         delete doc.token;
         delete doc.status;
+        delete doc.validation;
+        delete doc.old_passwords;
 
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
@@ -146,6 +148,9 @@ User.prototype = {
         delete doc.token;
         delete doc.status;
         delete doc.id;
+        delete doc.validation;
+        delete doc.old_passwords;
+
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
         }
@@ -191,6 +196,9 @@ User.prototype = {
             users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;
             delete users[i].__v;
+            delete users[i].validation;
+            delete users[i].old_passwords;
+
             if (users[i].domain && users[i].domain !== '') {
               users[i].domain = users[i].domain.split(',');
             } else {
@@ -219,6 +227,8 @@ User.prototype = {
 
           delete users[i]._id;
           delete users[i].__v;
+          delete users[i].validation;
+          delete users[i].old_passwords;
 
           if (users[i].domain && users[i].domain !== '') {
             users[i].domain = users[i].domain.split(',');
@@ -263,6 +273,8 @@ User.prototype = {
 
             delete item._id;
             delete item.__v;
+            delete item.validation;
+            delete item.old_passwords;
           }
           callback(err, item);
         });

@@ -25,6 +25,7 @@ var async    = require('async');
 var AuditLogger = require('revsw-audit');
 var utils = require('../lib/utilities');
 var mail = require('../lib/mail');
+var config = require('config');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
@@ -68,7 +69,7 @@ exports.signup = function(req, reply) {
       var token = utils.generateToken();
       data.self_registered = true;
       data.validation = {
-        created: Date.new(),
+        created: Date.now(),
         token: token
       };
 
