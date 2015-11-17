@@ -70,7 +70,7 @@ exports.signup = function(req, reply) {
       var token = utils.generateToken();
       data.self_registered = true;
       data.validation = {
-        created: Date.now(),
+        expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
         token: token
       };
 
@@ -97,7 +97,7 @@ exports.signup = function(req, reply) {
             account_id: user.user_id,
 //          domain_id        : request.auth.credentials.domain,
             activity_type: 'add',
-            activity_target: 'billing_plan',
+            activity_target: 'user',
             target_id: user.id,
             target_name: user.name,
             target_object: user,
@@ -126,10 +126,31 @@ exports.signup = function(req, reply) {
 
 };
 
+exports.resetToken = function(req, reply) {
+  var email = req.params.email;
+
+  users.get({
+    email: email
+  }, function(err, user) {
+    if (err) {
+      return reply(boom.badImplementation('Failed to retrieve user details by given email'));
+    }
+    if (!user) {
+      return reply(boom.badImplementation('No user exist with such email address'));
+    }
+    var token = utils.generateToken();
+    user.validation = {
+      expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+      token: token
+    };
+  });
+};
+
 exports.verify = function(req, reply) {
   var token = req.params.token;
   users.get({
-    'validation.token': token
+    'validation.token': token,
+    'validation.expiredAt': { $gt: Date.now() }
   }, function(error, user) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve validation token/user details'));
@@ -138,7 +159,7 @@ exports.verify = function(req, reply) {
       return reply(boom.badRequest('The validation token is invalid or has expired'));
     }
     user.validation = {
-      created: undefined,
+      expiredAt: undefined,
       token: ''
     };
     //@todo UPDATE ANYTHING ELSE ?

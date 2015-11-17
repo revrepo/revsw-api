@@ -64,7 +64,7 @@ function User(mongoose, connection, options) {
     old_passwords: [String],
 
     validation: {
-      created: Date,
+      expiredAt: Date,
       token: String
     },
 
