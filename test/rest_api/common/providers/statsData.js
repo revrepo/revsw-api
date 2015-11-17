@@ -50,6 +50,7 @@ var opts = {
   _ids: []
 };
 
+//  ---------------------------------
 //  init parameters
 var init_ = function(  ) {
   client_ = new elastic.Client({
@@ -71,6 +72,59 @@ var init_ = function(  ) {
   opts.to = opts.from + 3600000 * 3;
 };
 
+//  ---------------------------------
+//  lm_rtt aggregations count abstraction
+var lm_rtt_agg_ = function( aggs, name, item ) {
+
+  var key;
+  if ( name === 'country' ) {
+    key = item.geoip && item.geoip.country_code2 ? item.geoip.country_code2 : '--';
+  } else {
+    key = item[name] ? item[name] : '--';
+  }
+
+  if ( !aggs[name][key] ) {
+    aggs[name][key] = {
+      key: key,
+      count: 0,
+      lm_rtt_avg_ms: 0,
+      lm_rtt_min_ms: 1000000,
+      lm_rtt_max_ms: 0
+    };
+  }
+  aggs[name][key].count++;
+  aggs[name][key].lm_rtt_avg_ms += item.lm_rtt;
+  if ( aggs[name][key].lm_rtt_min_ms > item.lm_rtt ) {
+    aggs[name][key].lm_rtt_min_ms = item.lm_rtt;
+  } else if ( aggs[name][key].lm_rtt_max_ms < item.lm_rtt ) {
+    aggs[name][key].lm_rtt_max_ms = item.lm_rtt;
+  }
+};
+
+//  ---------------------------------
+//  GBT/Traffic aggregations count abstraction
+var gbt_agg_ = function( aggs, name, item ) {
+
+  var key;
+  if ( name === 'country' ) {
+    key = item.geoip && item.geoip.country_code2 ? item.geoip.country_code2 : '--';
+  } else {
+    key = item[name] ? item[name] : '--';
+  }
+
+  if ( !aggs[name][key] ) {
+    aggs[name][key] = {
+      key: key,
+      count: 0,
+      sent_bytes: 0,
+      received_bytes: 0
+    };
+  }
+  aggs[name][key].count++;
+  aggs[name][key].sent_bytes += item.s_bytes;
+  aggs[name][key].received_bytes += item.r_bytes;
+};
+
 
 //  ----------------------------------------------------------------------------------------------//
 
@@ -87,7 +141,8 @@ module.exports = {
       to          - end interval timestamp
       data        - loaded data
       dataCount   - quess
-      aggs        - calculated aggregations
+      lm_rtt_aggs - calculated lm_rtt aggregations
+      gbt_aggs    - calculated gbt/traffic aggregations
       _ids        - cached _id's of the uploaded data
    }
    */
@@ -204,37 +259,15 @@ module.exports = {
     var step = Math.floor( ( opts.to - opts.from ) / opts.dataCount );
 
     var body = [];
-    var aggs = opts.aggs = {
+    var lm_rtt_aggs = opts.lm_rtt_aggs = {
       country: {},
       os: {},
       device: {}
     };
-    //  aggs count abstraction
-    var agg_ = function( name, item ) {
-
-      var key;
-      if ( name === 'country' ) {
-        key = item.geoip && item.geoip.country_code2 ? item.geoip.country_code2 : '--';
-      } else {
-        key = item[name] ? item[name] : '--';
-      }
-
-      if ( !aggs[name][key] ) {
-        aggs[name][key] = {
-          key: key,
-          count: 0,
-          lm_rtt_avg_ms: 0,
-          lm_rtt_min_ms: 1000000,
-          lm_rtt_max_ms: 0
-        };
-      }
-      aggs[name][key].count++;
-      aggs[name][key].lm_rtt_avg_ms += item.lm_rtt;
-      if ( aggs[name][key].lm_rtt_min_ms > item.lm_rtt ) {
-        aggs[name][key].lm_rtt_min_ms = item.lm_rtt;
-      } else if ( aggs[name][key].lm_rtt_max_ms < item.lm_rtt ) {
-        aggs[name][key].lm_rtt_max_ms = item.lm_rtt;
-      }
+    var gbt_aggs = opts.gbt_aggs = {
+      country: {},
+      os: {},
+      device: {}
     };
 
     //  prepare data to upload
@@ -248,16 +281,18 @@ module.exports = {
       t += step;
 
       //  "manually" collect aggregations for further tests
-      agg_( 'os', item );
-      agg_( 'device', item );
-      agg_( 'country', item );
-
+      lm_rtt_agg_( lm_rtt_aggs, 'os', item );
+      lm_rtt_agg_( lm_rtt_aggs, 'device', item );
+      lm_rtt_agg_( lm_rtt_aggs, 'country', item );
+      gbt_agg_( gbt_aggs, 'os', item );
+      gbt_agg_( gbt_aggs, 'device', item );
+      gbt_agg_( gbt_aggs, 'country', item );
     }
 
-    //  round aggregations
-    for ( var key0 in aggs ) {
-      for ( var key1 in aggs[key0] ) {
-        item = aggs[key0][key1];
+    //  round lm_rtt aggregations
+    for ( var key0 in lm_rtt_aggs ) {
+      for ( var key1 in lm_rtt_aggs[key0] ) {
+        item = lm_rtt_aggs[key0][key1];
         item.lm_rtt_avg_ms = Math.round( item.lm_rtt_avg_ms / item.count / 1000 );
         item.lm_rtt_min_ms = Math.round( item.lm_rtt_min_ms / 1000 );
         item.lm_rtt_max_ms = Math.round( item.lm_rtt_max_ms / 1000 );
