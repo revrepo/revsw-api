@@ -257,7 +257,7 @@ module.exports = {
     //  round aggregations
     for ( var key0 in aggs ) {
       for ( var key1 in aggs[key0] ) {
-        var item = aggs[key0][key1];
+        item = aggs[key0][key1];
         item.lm_rtt_avg_ms = Math.round( item.lm_rtt_avg_ms / item.count / 1000 );
         item.lm_rtt_min_ms = Math.round( item.lm_rtt_min_ms / 1000 );
         item.lm_rtt_max_ms = Math.round( item.lm_rtt_max_ms / 1000 );
@@ -317,7 +317,7 @@ module.exports = {
       refresh: true,
       body: body
     })
-    .then( function( res_ ) {
+    .then( function( /*res_*/ ) {
       opts.data = [];
       opts.dataCount = 0;
       opts.aggs = {};

@@ -16,12 +16,14 @@
  * from Rev Software, Inc.
  */
 
+'use strict';
+
 // Requiring common components to use in our spec/test.
 var API = require('./../common/api');
 var DP = require('./../common/providers/statsData');
 
-var should = require('should-http');
-var request = require('supertest-as-promised');
+// var should = require('should-http');
+// var request = require('supertest-as-promised');
 var config = require('config');
 
 var justtaUser = config.api.users.user;
@@ -42,7 +44,7 @@ describe('Stats API check:', function () {
         API.session.setCurrentUser(justtaUser);
 
         console.log( '  ### testing data - pre-clearing' );
-        return DP.killTestingData()
+        return DP.killTestingData();
       })
       .then( function() {
         console.log( '  ### testing data - reading' );
@@ -58,7 +60,7 @@ describe('Stats API check:', function () {
       })
       .catch( function( err ) {
         done( err );
-      })
+      });
   });
 
   after(function (done) {
@@ -69,7 +71,7 @@ describe('Stats API check:', function () {
       })
       .catch( function( err ) {
         done( err );
-      })
+      });
   });
 
   //  ---------------------------------
@@ -99,14 +101,14 @@ describe('Stats API check:', function () {
                 aggs[type][data[i].key].lm_rtt_avg_ms.should.be.equal( data[i].lm_rtt_avg_ms );
                 aggs[type][data[i].key].lm_rtt_max_ms.should.be.equal( data[i].lm_rtt_max_ms );
                 aggs[type][data[i].key].lm_rtt_min_ms.should.be.equal( data[i].lm_rtt_min_ms );
-              };
-              done()
+              }
+              done();
             })
             .catch( function( err ) {
               done( err );
             });
-        }
-      }
+        };
+      };
 
       it('Country aggregation', run_( 'country' ) );
       it('OS aggregation', run_( 'os' ) );
