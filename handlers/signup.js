@@ -37,6 +37,21 @@ var BillingPlan = require('../models/BillingPlan');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+var sendVerifyToken = function(user, token, cb) {
+  var mailOptions = {
+    to: user.email,
+    subject: config.get('user_verify_subject'),
+    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of account.\n\n' +
+    'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+    'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
+    'If you did not request this, please ignore this email.\n\n' +
+    'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
+    'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+  };
+
+  mail.sendMail(mailOptions, cb);
+}
+
 exports.signup = function(req, reply) {
 
   var data = req.payload;
@@ -106,20 +121,8 @@ exports.signup = function(req, reply) {
             operation_status: 'success'
           });
 
-          //@todo SEND REQUEST TO EBS
-          var mailOptions = {
-            to: user.email,
-            subject: config.get('user_verify_subject'),
-            text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of account.\n\n' +
-            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
-            'If you did not request this, please ignore this email and your password will remain unchanged.\n\n' +
-            'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-            'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
-          };
-
-          mail.sendMail(mailOptions, function (err, result) {
-            renderJSON(req, reply, err, statusResponse);
+          sendVerifyToken(user, token, function(err, res) {
+              renderJSON(req, reply, err, statusResponse);
           });
         }
       });
@@ -145,6 +148,36 @@ exports.resetToken = function(req, reply) {
       expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
       token: token
     };
+
+    result = publicRecordFields.handle(result, 'user');
+
+    AuditLogger.store({
+      ip_address        : req.info.remoteAddress,
+      datetime         : Date.now(),
+      user_id          : user.user_id,
+      user_name        : user.email,
+      user_type        : 'user',
+      account_id       : result.companyId,
+    //            domain_id        : result.domain,
+      activity_type    : 'modify',
+      activity_target  : 'user',
+      target_id        : result.user_id,
+      target_name      : result.email,
+      target_object    : result,
+      operation_status : 'success'
+    });
+
+    var statusResponse = {
+      statusCode: 200,
+      message: 'Successfully sent token to email.',
+      object_id: result.id
+    };
+
+    users.update(user, function(err, result) {
+      sendVerifyToken(user, token, function(err, res) {
+        renderJSON(req, reply, err, statusResponse);
+      });
+    });
   });
 };
 

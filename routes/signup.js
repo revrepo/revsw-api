@@ -49,7 +49,30 @@ module.exports = [
   },
 
   {
-    method : 'POST',
+    method : 'GET',
+    path   : '/v1/signup/resend/{email}',
+    config : {
+      handler     : handler.resetToken,
+      auth        : false,
+      description : 'An internal portal call for resend user verification',
+      tags        : ['api', 'web'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        params: {
+          tokemailen: Joi.string().email().required().description('Email to send verification')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+
+  {
+    method : 'GET',
     path   : '/v1/signup/verify/{token}',
     config : {
       handler     : handler.verify,
