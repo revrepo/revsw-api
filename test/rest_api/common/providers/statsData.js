@@ -101,7 +101,9 @@ module.exports = {
    */
   readTestingData: function () {
 
-    init_();
+    if ( !client_ ) {
+      init_();
+    }
 
     return fs.readFileAsync( file_ )
       .then( JSON.parse )
@@ -116,7 +118,7 @@ module.exports = {
       });
   },
 
-/**
+  /**
    * Stats DataProvider.importTestingData()
    * imports data from the production ES cluster, caches it to the json file
    *
@@ -124,7 +126,9 @@ module.exports = {
    */
   importTestingData: function () {
 
-    init_();
+    if ( !client_ ) {
+      init_();
+    }
 
     var countries2 = ['US','IN','PK','GB','EU'],
       devices = ['iPad','iPhone','GT-S7582','Nexus 5','Nokia 203'],
@@ -253,7 +257,7 @@ module.exports = {
     //  round aggregations
     for ( var key0 in aggs ) {
       for ( var key1 in aggs[key0] ) {
-        var item = aggs[key0][key1];
+        item = aggs[key0][key1];
         item.lm_rtt_avg_ms = Math.round( item.lm_rtt_avg_ms / item.count / 1000 );
         item.lm_rtt_min_ms = Math.round( item.lm_rtt_min_ms / 1000 );
         item.lm_rtt_max_ms = Math.round( item.lm_rtt_max_ms / 1000 );
@@ -313,7 +317,7 @@ module.exports = {
       refresh: true,
       body: body
     })
-    .then( function( res_ ) {
+    .then( function( /*res_*/ ) {
       opts.data = [];
       opts.dataCount = 0;
       opts.aggs = {};
@@ -347,7 +351,7 @@ module.exports = {
     })
     .then( function( resp ) {
 
-      if ( !resp.hits || !resp.hits.hits ) {
+      if ( !resp.hits || !resp.hits.hits || !resp.hits.hits.length ) {
         // console.log( resp );
         return false;
       }
