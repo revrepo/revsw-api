@@ -88,6 +88,8 @@ exports.signup = function(req, reply) {
             object_id: user.id
           };
 
+          user = publicRecordFields.handle(user, 'user');
+
           AuditLogger.store({
             ip_address: req.info.remoteAddress,
             datetime: Date.now(),
@@ -169,7 +171,7 @@ exports.verify = function(req, reply) {
         return reply(boom.badImplementation('Failed to update user details'));
       }
 
-      result = publicRecordFields.handle(result, 'users');
+      result = publicRecordFields.handle(result, 'user');
 
       AuditLogger.store({
         ip_address        : req.info.remoteAddress,
