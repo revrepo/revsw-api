@@ -58,28 +58,3 @@ before(function (done) {
 // after(function (done) {
 //   done();
 // });
-
-
-//  ----------------------------------------------------------------------------------------------//
-//  more simple example
-
-var justtaUser = config.api.users.user;
-
-//  suite
-describe('Bla-bla-bla testing suite:', function () {
-
-  //  global `before` ...
-  before(function (done) {
-    return API.resources.authenticate
-      .createOne({ email: justtaUser.name, password: justtaUser.password })
-      .then(function(response) {
-        justtaUser.token = response.body.token;
-        API.session.setCurrentUser(justtaUser);
-
-        done();
-      });
-  });
-  //  global `after` ...
-  // after(function (done) { ..................
-
-
