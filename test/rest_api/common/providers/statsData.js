@@ -101,7 +101,9 @@ module.exports = {
    */
   readTestingData: function () {
 
-    init_();
+    if ( !client_ ) {
+      init_();
+    }
 
     return fs.readFileAsync( file_ )
       .then( JSON.parse )
@@ -116,7 +118,7 @@ module.exports = {
       });
   },
 
-/**
+  /**
    * Stats DataProvider.importTestingData()
    * imports data from the production ES cluster, caches it to the json file
    *
@@ -124,7 +126,9 @@ module.exports = {
    */
   importTestingData: function () {
 
-    init_();
+    if ( !client_ ) {
+      init_();
+    }
 
     var countries2 = ['US','IN','PK','GB','EU'],
       devices = ['iPad','iPhone','GT-S7582','Nexus 5','Nokia 203'],
@@ -347,7 +351,7 @@ module.exports = {
     })
     .then( function( resp ) {
 
-      if ( !resp.hits || !resp.hits.hits ) {
+      if ( !resp.hits || !resp.hits.hits || !resp.hits.hits.length ) {
         // console.log( resp );
         return false;
       }

@@ -26,14 +26,20 @@ var config = require('config');
 var domains = config.api.stats.domains;
 var justtaUser = config.api.users.user;
 
+
 //  suite
 describe('Stats API check:', function () {
 
   this.timeout(config.api.request.maxTimeout);
 
   before(function (done) {
-    API.session.setCurrentUser(justtaUser);
-    done();
+    return API.resources.authenticate
+      .createOne({ email: justtaUser.name, password: justtaUser.password })
+      .then(function(response) {
+        justtaUser.token = response.body.token;
+        API.session.setCurrentUser(justtaUser);
+        done();
+      });
   });
   // after(function (done) {
   //   done();

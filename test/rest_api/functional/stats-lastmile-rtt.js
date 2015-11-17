@@ -27,20 +27,33 @@ var config = require('config');
 var justtaUser = config.api.users.user;
 var domains = config.api.stats.domains;
 
-
-
+//  ----------------------------------------------------------------------------------------------//
 //  suite
 describe('Stats API check:', function () {
 
   this.timeout(config.api.request.maxTimeout);
 
+  //  ---------------------------------
   before(function (done) {
-    API.session.setCurrentUser(justtaUser);
-    console.log( '  ### testing data - generation' );
-    DP.readTestingData()
-      .then( DP.uploadTestingData )
+    return API.resources.authenticate
+      .createOne({ email: justtaUser.name, password: justtaUser.password })
+      .then(function(response) {
+        justtaUser.token = response.body.token;
+        API.session.setCurrentUser(justtaUser);
+
+        console.log( '  ### testing data - pre-clearing' );
+        return DP.killTestingData()
+      })
       .then( function() {
-        console.log( '  ### testing data - uploaded\n' );
+        console.log( '  ### testing data - reading' );
+        return DP.readTestingData();
+      })
+      .then( function() {
+        console.log( '  ### testing data - uploading' );
+        return DP.uploadTestingData();
+      })
+      .then( function() {
+        console.log( '  ### testing data - ready\n' );
         done();
       })
       .catch( function( err ) {
@@ -59,6 +72,7 @@ describe('Stats API check:', function () {
       })
   });
 
+  //  ---------------------------------
   describe('Lastmile RTT requests: ', function () {
 
     describe('Functional/Aggregations: ', function () {
@@ -93,7 +107,6 @@ describe('Stats API check:', function () {
             });
         }
       }
-
 
       it('Country aggregation', run_( 'country' ) );
       it('OS aggregation', run_( 'os' ) );
