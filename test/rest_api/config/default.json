@@ -52,7 +52,6 @@
     "stats": {
       "request": "stats",
       "elastic_test": "testsjc20-esurl01.revsw.net:9200",
-      "elastic_import": "lga02-esurl01.revsw.net:9200",
       "domains": {
         "test": {
           "id": "55df7177bab6f4da0306f58e",

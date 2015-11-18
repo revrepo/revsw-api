@@ -36,8 +36,9 @@ var _ = require('lodash'),
 
 
 var client_ = false,
-  client_timeout_ = 600000,
-  portionSize_ = 10000, //  upload portion
+  client_timeout_ = 1200000,
+  uploadPortionSize_ = 5000,
+  uploadConcurrency_ = 3,
   type_ = 'apache_json_testing',
   host_ = config.api.stats.elastic_test,
   domain_ = config.api.stats.domains.google.name,
@@ -229,12 +230,12 @@ var count_aggs_ = function( opts ) {
     from        - start interval timestamp
     to          - end interval timestamp
     data        - loaded data
-    dataCount   - quess
+    dataCount   - mainly equal to data.length, but may contain length of the data stored in the ES cluster(after meta loading)
     spansNum    - whole range splitted to the number of smaller spans
     aggs        - array of pre-counted aggregations
  }
  */
-var DataProvider = function( from, to ) {
+var DataProvider = module.exports = function( from, to ) {
 
   this.options = {
     indicesList: '',
@@ -246,11 +247,13 @@ var DataProvider = function( from, to ) {
     aggs: []
   };
 
-  //  working timestamp interval, default is yesterday's first half
-  from = date_2_timestamp_( from );
-  to = date_2_timestamp_( to );
-  this.options.from = from || ( Math.floor( Date.now() / ( 3600000 * 24 ) - 1 ) * 3600000 * 24 );
+  //  working timestamp interval, converted and rounded 2 5 min
+  from = Math.floor( date_2_timestamp_( from ) / 300000 ) * 300000;
+  to = Math.floor( date_2_timestamp_( to ) / 300000 ) * 300000;
+  //  default is today's first half
+  this.options.from = from || ( Math.floor( Date.now() / ( 3600000 * 24 ) ) * 3600000 * 24 );
   this.options.to = to || ( this.options.from + 3600000 * 12 );
+
   if ( this.options.to < this.options.from ) {
     var t_ = this.options.to;
     this.options.to = this.options.from;
@@ -296,7 +299,6 @@ DataProvider.prototype.readTestingData = function () {
     .then( function( data ) {
       self.options = data;
       self.options.data = [];
-      self.options.dataCount = 0;
       meta_loaded = true;
       return self;
     })
@@ -388,7 +390,7 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
                     template.r_bytes = Math.floor(Math.random() * 900) + 100;
                     template.lm_rtt = Math.floor(Math.random() * 500000) + 4000;
 
-                    template['@timestamp'] = (new Date(t)).toISOString().slice(0,-5);
+                    template['@timestamp'] = (new Date(t)).toISOString().slice(0,-1);
 
                     var r_ = _.clone( template );
                     r_.geoip = _.clone( template.geoip );
@@ -407,7 +409,7 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
     count_aggs_( self.options );
 
     // save to a json file before further processing
-    fs.writeFileAsync( meta_file_, JSON.stringify( _.omit( self.options, 'data', 'dataCount' ), null, 2 ) );
+    fs.writeFileAsync( meta_file_, JSON.stringify( _.omit( self.options, 'data' ), null, 2 ) );
     if ( save_data ) {
       fs.writeFileAsync( file_, JSON.stringify( self.options.data, null, 2 ) );
     }
@@ -432,7 +434,7 @@ DataProvider.prototype.uploadTestingData = function () {
 
   while ( curr < this.options.dataCount ) {
 
-    var end = curr + portionSize_;
+    var end = curr + uploadPortionSize_;
     if ( end > this.options.dataCount ) {
       end = this.options.dataCount;
     }
@@ -445,16 +447,18 @@ DataProvider.prototype.uploadTestingData = function () {
       ++curr;
     }
 
-    //  push one bulk request to add portionSize_(10000) records
-    requests.push( client_.bulk({
+    requests.push({
       type: type_,
-      // refresh: true,
       body: body
-    }) );
-
+    });
   }
 
-  return promise.all( requests );
+  return promise.map( requests, function( req ) {
+    return client_.bulk( req )
+      .then( function( resp ) {
+        console.log( '      # portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
+      });
+  }, { concurrency: uploadConcurrency_ } );
   // .then( function( resp ) {
   //   // { took: 177,
   //   //   errors: false,
@@ -484,6 +488,8 @@ DataProvider.prototype.uploadTestingData = function () {
 DataProvider.prototype.removeTestingData = function () {
 
   var self = this;
+  var hits_num = 0;
+
   return client_.search({
     index: self.options.indicesList,
     type: type_,
@@ -512,15 +518,15 @@ DataProvider.prototype.removeTestingData = function () {
       return false;
     }
 
-    var len = resp.hits.hits.length;
     var requests = [];
     var curr = 0;
 
-    while ( curr < len ) {
+    hits_num = resp.hits.hits.length;
+    while ( curr < hits_num ) {
 
-      var end = curr + portionSize_ * 3;
-      if ( end > len ) {
-        end = len;
+      var end = curr + uploadPortionSize_;
+      if ( end > hits_num ) {
+        end = hits_num;
       }
 
       var body = [];
@@ -531,26 +537,27 @@ DataProvider.prototype.removeTestingData = function () {
         ++curr;
       }
 
-      //  push one bulk request to remove 3*portionSize_(30000) records
-      requests.push( client_.bulk({
+      //  push one bulk request to remove uploadPortionSize_ records
+      requests.push({
         type: type_,
-        // refresh: true,
         body: body
-      }) );
+      });
 
     }
 
-    return promise.all( requests );
+    return promise.map( requests, function( req ) {
+      return client_.bulk( req )
+        .then( function( resp ) {
+          console.log( '      # portion removing done' );
+        });
+    }, { concurrency: uploadConcurrency_ } );
+
   })
   .then( function() {
     self.clear();
-    return self;
+    return hits_num;
   });
 };
 
-
-
-//  ----------------------------------------------------------------------------------------------//
-module.exports = DataProvider;
 
 

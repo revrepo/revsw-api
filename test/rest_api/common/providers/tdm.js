@@ -187,8 +187,8 @@ if ( action === 'remove' ) {
     console.log( '    ### start data removing' );
     return DP.removeTestingData();
   })
-  .then( function() {
-    console.log( '    ### removing done' );
+  .then( function( num ) {
+    console.log( '    ### removing done, ' + num + ' records removed' );
     process.exit(0);
   })
   .catch( function( e ) {

@@ -20,7 +20,8 @@
 
 // Requiring common components to use in our spec/test.
 var API = require('./../common/api');
-var DP = require('./../common/providers/statsData');
+var dp = require('./../common/providers/statsData');
+var DP = new dp();
 
 var should = require('should-http');
 // var request = require('supertest-as-promised');
@@ -43,18 +44,16 @@ describe('Stats API check:', function () {
         justtaUser.token = response.body.token;
         API.session.setCurrentUser(justtaUser);
 
-        console.log( '  ### testing data - pre-clearing' );
-        return DP.killTestingData();
-      })
-      .then( function() {
         console.log( '  ### testing data - reading' );
         return DP.readTestingData();
       })
       .then( function() {
-        console.log( '  ### testing data - uploading' );
-        return DP.uploadTestingData();
-      })
-      .then( function() {
+        if ( Date.now() - DP.options.from > 3600000 * 24 ) {
+          console.log( '  ### testing data is more than 24 hrs old, please re-gen\n' );
+          done( new RangeError() );
+        }
+
+        // console.log( DP.options );
         console.log( '  ### testing data - ready\n' );
         done();
       })
@@ -64,14 +63,7 @@ describe('Stats API check:', function () {
   });
 
   after(function (done) {
-    DP.clearTestingData()
-      .then( function() {
-        console.log( '\n  ### testing data - cleared' );
-        done();
-      })
-      .catch( function( err ) {
-        done( err );
-      });
+    done();
   });
 
   //  ---------------------------------
@@ -93,7 +85,7 @@ describe('Stats API check:', function () {
               domains.google.name.should.be.equal( data.metadata.domain_name );
 
               data = data.data;
-              var aggs = DP.options.lm_rtt_aggs;
+              var aggs = DP.options.aggs[0].lm_rtt_aggs;
 
               //  check aggregated avg/min/max/count values
               for ( var i = 0, len = data.length; i < len; ++i ) {
@@ -132,7 +124,7 @@ describe('Stats API check:', function () {
               domains.google.name.should.be.equal( data.metadata.domain_name );
 
               data = data.data;
-              var aggs = DP.options.gbt_aggs;
+              var aggs = DP.options.aggs[0].gbt_aggs;
 
               //  check aggregated avg/min/max/count values
               for ( var i = 0, len = data.length; i < len; ++i ) {
