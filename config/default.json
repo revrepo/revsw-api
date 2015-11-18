@@ -23,6 +23,7 @@
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
   },
   "version_file": "./config/version.txt",
+  "mongoose_debug_logging": true,
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
 
