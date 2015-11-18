@@ -43,9 +43,9 @@ module.exports = [
           responseMessages : routeModels.standardHTTPErrors
         }
       },
-      response    : {
-        schema : routeModels.listOfDomainsModel
-      }
+    //  response    : {
+    //    schema : routeModels.listOfDomainsModel
+    //  }
     }
   },
 
@@ -68,11 +68,14 @@ module.exports = [
       validate    : {
         params : {
           domain_id : Joi.objectId().required().description('Domain ID')
-        }
+        },
+        query: {
+          version: Joi.number().integer().description('Configuration version number (request 0 for latest)')
+        },
       },
-      response    : {
-        schema : routeModels.domainModel
-      }
+//      response    : {
+//        schema : routeModels.domainModel
+//      }
     }
   },
 
@@ -97,9 +100,9 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID')
         }
       },
-      response    : {
-        schema : routeModels.domainModel
-      }
+//      response    : {
+//        schema : routeModels.domainModel
+//      }
     }
   },
 
@@ -113,7 +116,7 @@ module.exports = [
       handler     : domainConfigsHandlers.createDomainConfig,
       description : 'Create a new domain configuration',
       notes       : 'Use the call to create a new domain configuration with default caching/ALC/etc rules. After that you can use ' +
-      '/v1/domains/{domain_id}/details calls to read and update many low-level domain configuration properties.',
+      '/v1/domain_configs/{domain_id} calls to read and update all domain configuration properties.',
       tags        : ['api', 'domain_configs'],
       plugins     : {
         'hapi-swagger' : {
@@ -123,19 +126,19 @@ module.exports = [
       validate    : {
         payload : {
           // TODO: Enforce strict domain names (not string())
-          name                   : Joi.string().regex(routeModels.domainRegex)
+          domain_name                   : Joi.string().regex(routeModels.domainRegex)
             .required().description('The name of the new domain to be registered in the system'),
-          companyId              : Joi.objectId().required().description('Account ID of the account the domain should be created for'),
+          account_id             : Joi.objectId().required().description('Account ID of the account the domain should be created for'),
           origin_host_header     : Joi.string().regex(routeModels.domainRegex).required()
             .description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.string().required().description('Origin server host name or IP address'),
-          origin_server_location : Joi.string().required().description('The name of origin server location'),
-          tolerance              : Joi.string().required().description('APEX metric for RUM reports')
+          origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
+          tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)')
         }
       },
-      response    : {
-        schema : routeModels.statusModel
-      }
+//      response    : {
+//        schema : routeModels.statusModel
+//      }
     }
   },
 
@@ -159,7 +162,18 @@ module.exports = [
         params  : {
           domain_id : Joi.objectId().required().description('Domain ID')
         },
+        query: {
+          options: Joi.string().valid('verify_only', 'publish').optional()
+        },
         payload : {
+          domain_name                   : Joi.string().regex(routeModels.domainRegex)
+            .required().description('Domain name'),
+          account_id             : Joi.objectId().description('Account ID of the account the domain should be assiciated with'),
+          origin_host_header     : Joi.string().regex(routeModels.domainRegex)
+            .description('"Host" header value used when accessing the origin server'),
+          origin_server          : Joi.string().description('Origin server host name or IP address'),
+          origin_server_location_id : Joi.objectId().description('The ID of origin server location'),
+          tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           enable_origin_health_probe: Joi.boolean(),
           origin_health_probe: Joi.object({
             HTTP_REQUEST: Joi.string().required(),
@@ -167,7 +181,7 @@ module.exports = [
             PROBE_INTERVAL: Joi.number().integer().required(),
             HTTP_STATUS: Joi.number().integer().required()
           }),
-          proxy_timeout: Joi.boolean(),
+          proxy_timeout: Joi.number().integer(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -262,9 +276,9 @@ module.exports = [
           }).required()
         }
       },
-      response    : {
-        schema : routeModels.statusModel
-      }
+//      response    : {
+//        schema : routeModels.statusModel
+//      }
     }
   },
 
