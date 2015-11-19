@@ -1,4 +1,23 @@
 {
+  "log_config": {
+    "transports": {
+      "Console": {
+        "level": "debug",
+        "colorize": true,
+        "prettyPrint": true,
+        "humanReadableUnhandledException": true,
+        "showLevel": true
+      },
+      "File": {
+        "filename": "./log/revsw-api.log",
+        "level": "debug",
+        "prettyPrint": true
+      },
+      "Rsyslog": {
+        "silent": true
+      }
+    }
+  },
   "service": {
     "host": "0.0.0.0",
     "http_port": 7000,
@@ -23,6 +42,7 @@
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
   },
   "version_file": "./config/version.txt",
+  "mongoose_debug_logging": true,
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
 

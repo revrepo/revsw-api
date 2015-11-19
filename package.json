@@ -24,9 +24,15 @@
     "datejs": "0.0.2",
     "elasticsearch": "^8.0.1",
     "express": "^4.13.3",
+    "forever-monitor": "^1.7.0",
     "good": "^6.3.0",
     "good-console": "^5.0.2",
     "good-file": "^5.0.1",
+    "gulp": "^3.9.0",
+    "gulp-forever-monitor": "0.0.1",
+    "gulp-jshint": "^1.12.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-util": "^3.0.7",
     "handlebars": "1.3.x",
     "hapi": "8.4.x",
     "hapi-auth-basic": "~3.0.0",
@@ -38,6 +44,7 @@
     "inbox": "^1.1.59",
     "joi": "6.1.x",
     "joi-objectid": "~1.1.0",
+    "jshint-stylish": "^2.1.0",
     "jsonwebtoken": "^5.0.5",
     "lodash": "^3.10.1",
     "marked": "0.3.x",
@@ -52,7 +59,8 @@
     "revsw-audit": "0.0.x",
     "should": "^7.1.0",
     "should-http": "0.0.4",
-    "speakeasy": "^1.0.3"
+    "speakeasy": "^1.0.3",
+    "yargs": "^3.30.0"
   },
   "devDependencies": {
     "async": "^1.4.0",
