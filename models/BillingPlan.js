@@ -64,7 +64,7 @@ var BillingPlanSchema = new Schema({
 
   history: [{}],
 
-  overage_credit_linit: {
+  overage_credit_limit: {
     type: Number,
     default: 0
   }
@@ -144,10 +144,15 @@ BillingPlanSchema.statics = {
       _id: item.id
     }, function (err, doc) {
       if (doc) {
+        var old = _.clone(doc.toJSON());
         delete item.id;
         for (var attrname in item) {
           doc[attrname] = item[attrname];
         }
+        if (!doc.history) {
+          doc.history = [];
+        }
+        doc.history.push(old);
         doc.updated_at = new Date();
         doc.save(function (err, item) {
           callback(err, item);

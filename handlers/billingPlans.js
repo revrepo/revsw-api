@@ -20,6 +20,7 @@
 
 'use strict';
 
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var boom = require('boom');
 var AuditLogger = require('revsw-audit');
@@ -30,14 +31,13 @@ var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
 
 var User = require('../models/User');
-var Account = require('../models/Account');
-var Domain = require('../models/Domain');
-
 var BillingPlan = require('../models/BillingPlan');
+
+var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.list = function (request, reply) {
   BillingPlan.list(request, function (err, billingPlans) {
-    billingPlans = publicRecordFields.handle(billingPlans, 'billingPlan');
+    billingPlans = publicRecordFields.handle(billingPlans, 'billingPlans');
     renderJSON(request, reply, err, billingPlans);
   });
 };
@@ -173,35 +173,44 @@ exports.delete = function (request, reply) {
       return reply(boom.badRequest('Billing Plan not found'));
     }
 
-    BillingPlan.removeBillingPlan({_id: id}, function (error) {
-      if (error) {
-        return reply(boom.badImplementation('Error removing billing plan'));
+    // Get list of users who uses this billing plan
+    users.getUsersUsesBillingPlan(result.id, function(err, users) {
+      if (err) {
+        return reply(boom.badImplementation('Could not fetch list of users who using billing plan with id : ' + result.id));
       }
+      if (_.isArray(users) || users.length > 0) {
+        return reply(boom.badImplementation('There are users who using billing plan : ' + result.id));
+      }
+      BillingPlan.removeBillingPlan({_id: id}, function (error) {
+        if (error) {
+          return reply(boom.badImplementation('Error while removing billing plan with id ' + result.id));
+        }
 
-      var statusResponse;
-      statusResponse = {
-        statusCode: 200,
-        message: 'Successfully deleted the Billing plan'
-      };
+        var statusResponse = {
+          statusCode: 200,
+          message: 'Successfully deleted the Billing plan'
+        };
 
-      result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
+        result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
-      AuditLogger.store({
-        ip_address: request.info.remoteAddress,
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.user_id || '',
-        activity_type: 'delete',
-        activity_target: 'billing_plan',
-        target_id: result.id,
-        target_name: result.name,
-        target_object: result,
-        operation_status: 'success'
+        AuditLogger.store({
+          ip_address: request.info.remoteAddress,
+          datetime: Date.now(),
+          user_id: request.auth.credentials.user_id,
+          user_name: request.auth.credentials.email,
+          user_type: 'user',
+          account_id: request.auth.credentials.user_id || '',
+          activity_type: 'delete',
+          activity_target: 'billing_plan',
+          target_id: result.id,
+          target_name: result.name,
+          target_object: result,
+          operation_status: 'success'
+        });
+
+        renderJSON(request, reply, error, statusResponse);
       });
 
-      renderJSON(request, reply, error, statusResponse);
     });
   });
 };

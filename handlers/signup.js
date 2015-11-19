@@ -61,19 +61,19 @@ exports.signup = function(req, reply) {
     email: data.email
   }, function(err, user) {
     if (err) {
-      return reply(boom.badImplementation('Failed to sugnup'));
+      return reply(boom.badImplementation('Failed to fetch user details'));
     }
 
     if (user) {
       if (user.deleted) {
-        return reply(boom.badRequest('User remove error'));
+        return reply(boom.badRequest('User has delete flag'));
       }
       return reply(boom.badRequest('This email already exist in system'));
     }
     // Fetch billing plan
     BillingPlan.get({_id: data.billing_plan}, function(err, billingPlan) {
       if (err) {
-        return reply(boom.badImplementation('Error fetching billing plan'));
+        return reply(boom.badImplementation('Failed to fetch billing plan details'));
       }
       if (!billingPlan) {
         return reply(boom.notFound('No billing plan exist in system'));
@@ -92,7 +92,7 @@ exports.signup = function(req, reply) {
       // All ok
       users.add(data, function(err, user) {
         if (err || !user) {
-          return reply(boom.badImplementation('Could not add user'));
+          return reply(boom.badImplementation('Could not create new user'));
         }
 
         var statusResponse;
@@ -149,7 +149,7 @@ exports.resetToken = function(req, reply) {
       token: token
     };
 
-    result = publicRecordFields.handle(result, 'user');
+    var result = publicRecordFields.handle(result, 'user');
 
     AuditLogger.store({
       ip_address        : req.info.remoteAddress,

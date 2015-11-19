@@ -22,6 +22,7 @@
 //	data access layer
 
 var utils = require('../lib/utilities.js');
+var _ = require('lodash');
 
 function User(mongoose, connection, options) {
   this.options = options;
@@ -34,7 +35,7 @@ function User(mongoose, connection, options) {
       reports   : {type : Boolean, default : true},
       configure : {type : Boolean, default : true},
       test      : {type : Boolean, default : true},
-      readOnly  : {type : Boolean, default : false},
+      readOnly  : {type : Boolean, default : false}
     },
     'companyId'            : String,
     'domain'               : String,
@@ -299,6 +300,14 @@ User.prototype = {
     } else {
       callback(utils.buildError('400', 'No user ID passed to remove function'), null);
     }
+  },
+
+  getUsersUsesBillingPlan: function(billingPlanId, cb) {
+    cb = cb || _.noop;
+    this.get({
+      billing_plan: billingPlanId,
+      deleted: false
+    }, cb);
   }
 
 };
