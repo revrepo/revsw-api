@@ -233,6 +233,8 @@ var count_aggs_ = function( opts ) {
     dataCount   - mainly equal to data.length, but may contain length of the data stored in the ES cluster(after meta loading)
     spansNum    - whole range splitted to the number of smaller spans
     aggs        - array of pre-counted aggregations
+    template    -
+    keys        -
  }
  */
 var DataProvider = module.exports = function( from, to ) {
@@ -244,7 +246,18 @@ var DataProvider = module.exports = function( from, to ) {
     data: [],
     dataCount: 0,
     spansNum: 8,
-    aggs: []
+    aggs: [],
+    template: {},
+    keys: {
+      status_code: ['200','304','301','206','404','302','416','504','400','503'],
+      cache_code: ['HIT','MISS'],
+      request_status: ['OK','ERROR'],
+      protocol: ['HTTP','HTTPS'],
+      http_method: ['GET','HEAD','POST','PUT','DELETE','PATCH'],
+      quic: ['QUIC','-'],
+      country: ['US','GB','FR','IN','CN','EU'],
+      agents: []
+    }
   };
 
   //  working timestamp interval, converted and rounded 2 5 min
@@ -297,8 +310,19 @@ DataProvider.prototype.readTestingData = function () {
   return fs.readFileAsync( meta_file_ )
     .then( JSON.parse )
     .then( function( data ) {
-      self.options = data;
+      _.extend( self.options, data );
       self.options.data = [];
+      return self;
+    })
+    .then( function() {
+      return fs.readFileAsync( templates_file_ );
+    })
+    .then( JSON.parse )
+    .then( function( data ) {
+
+      self.options.template = data.template;
+      self.options.template.domain = domain_;
+      self.options.keys.agents = data.agent;
       meta_loaded = true;
       return self;
     })
@@ -329,75 +353,55 @@ DataProvider.prototype.readTestingData = function () {
  * Stats DataProvider.generateTestingData()
  * ..., caches it to the json file
  *
- * @returns {Object} promise with loaded/parsed data as a param
  */
 DataProvider.prototype.generateTestingData = function ( save_data ) {
 
-  var status_codes = ['200','304','301','206','404','302','416','504','400','503'],
-    cache_codes = ['HIT','MISS'],
-    request_statuses = ['OK','ERROR'],
-    protocols = ['80','443'],
-    http_methods = ['GET','HEAD','POST','PUT','DELETE','PATCH'],
-    quics = ['QUIC','-'],
-    countries = ['US','GB','FR','IN','CN','EU'],
-    dev_oses = [],
-    template,
-    self = this;
+  var keys = this.options.keys,
+    len0 = keys.status_code.length,
+    len1 = keys.cache_code.length,
+    len2 = keys.request_status.length,
+    len3 = keys.protocol.length,
+    len4 = keys.http_method.length,
+    len5 = keys.quic.length,
+    len6 = keys.country.length,
+    len7 = keys.agents.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7,
+    t = this.options.from,
+    span = Math.floor( ( this.options.to - this.options.from ) / total );
 
-  return fs.readFileAsync( templates_file_ )
-  .then( JSON.parse )
-  .then( function( data ) {
+  this.clear();
+  //  generate
+  for ( var i0 = 0; i0 < len0; ++i0 ) {
+    template.response = keys.status_code[i0];
+    for ( var i1 = 0; i1 < len1; ++i1 ) {
+      template.cache = keys.cache_code[i1];
+      for ( var i2 = 0; i2 < len2; ++i2 ) {
+        template.conn_status = keys.request_status[i2];
+        for ( var i3 = 0; i3 < len3; ++i3 ) {
+          template.ipport = keys.protocol[i3] === 'HTTP' ? '80' : '443';
+          for ( var i4 = 0; i4 < len4; ++i4 ) {
+            template.method = keys.http_method[i4];
+            for ( var i5 = 0; i5 < len5; ++i5 ) {
+              template.quic = keys.quic[i5];
+              for ( var i6 = 0; i6 < len6; ++i6 ) {
+                template.geoip.country_code2 = keys.country[i6];
+                for ( var i7 = 0; i7 < len7; ++i7 ) {
 
-    template = data.template;
-    template.domain = domain_;
+                  template.os = keys.agents[i7].os;
+                  template.agent = keys.agents[i7].agent;
+                  template.device = keys.agents[i7].device;
 
-    dev_oses = data.agent;
-    var len0 = status_codes.length,
-      len1 = cache_codes.length,
-      len2 = request_statuses.length,
-      len3 = protocols.length,
-      len4 = http_methods.length,
-      len5 = quics.length,
-      len6 = countries.length,
-      len7 = dev_oses.length,
-      total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7,
-      t = self.options.from,
-      span = Math.floor( ( self.options.to - self.options.from ) / total );
+                  template.s_bytes = Math.floor(Math.random() * 4500) + 500;
+                  template.r_bytes = Math.floor(Math.random() * 900) + 100;
+                  template.lm_rtt = Math.floor(Math.random() * 500000) + 4000;
 
-    self.clear();
-    //  generate
-    for ( var i0 = 0; i0 < len0; ++i0 ) {
-      template.response = status_codes[i0];
-      for ( var i1 = 0; i1 < len1; ++i1 ) {
-        template.cache = cache_codes[i1];
-        for ( var i2 = 0; i2 < len2; ++i2 ) {
-          template.conn_status = request_statuses[i2];
-          for ( var i3 = 0; i3 < len3; ++i3 ) {
-            template.ipport = protocols[i3];
-            for ( var i4 = 0; i4 < len4; ++i4 ) {
-              template.method = http_methods[i4];
-              for ( var i5 = 0; i5 < len5; ++i5 ) {
-                template.quic = quics[i5];
-                for ( var i6 = 0; i6 < len6; ++i6 ) {
-                  template.geoip.country_code2 = countries[i6];
-                  for ( var i7 = 0; i7 < len7; ++i7 ) {
+                  template['@timestamp'] = (new Date(t)).toISOString().slice(0,-1);
 
-                    template.os = dev_oses[i7].os;
-                    template.agent = dev_oses[i7].agent;
-                    template.device = dev_oses[i7].device;
+                  var r_ = _.clone( template );
+                  r_.geoip = _.clone( template.geoip );
+                  this.options.data.push({ _source: r_, t: t });
 
-                    template.s_bytes = Math.floor(Math.random() * 4500) + 500;
-                    template.r_bytes = Math.floor(Math.random() * 900) + 100;
-                    template.lm_rtt = Math.floor(Math.random() * 500000) + 4000;
-
-                    template['@timestamp'] = (new Date(t)).toISOString().slice(0,-1);
-
-                    var r_ = _.clone( template );
-                    r_.geoip = _.clone( template.geoip );
-                    self.options.data.push({ _source: r_, t: t });
-
-                    t += span;
-                  }
+                  t += span;
                 }
               }
             }
@@ -405,20 +409,97 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
         }
       }
     }
-    self.options.dataCount = self.options.data.length;
-    count_aggs_( self.options );
+  }
+  this.options.dataCount = this.options.data.length;
+  count_aggs_( this.options );
 
-    // save to a json file before further processing
-    fs.writeFileAsync( meta_file_, JSON.stringify( _.omit( self.options, 'data' ), null, 2 ) );
-    if ( save_data ) {
-      fs.writeFileAsync( file_, JSON.stringify( self.options.data, null, 2 ) );
+  // save to a json file before further processing
+  fs.writeFileAsync( meta_file_, JSON.stringify( _.omit( this.options, 'data', 'template', 'keys' ), null, 2 ) );
+  if ( save_data ) {
+    fs.writeFileAsync( file_, JSON.stringify( this.options.data, null, 2 ) );
+  }
+};
+
+/**
+ * Stats DataProvider.generateTestingData()
+ *
+ */
+DataProvider.prototype.generateTopObjectsTests = function () {
+
+  var keys = this.options.keys,
+    len0 = keys.status_code.length,
+    len1 = keys.cache_code.length,
+    len2 = keys.request_status.length,
+    len3 = keys.protocol.length,
+    len4 = keys.http_method.length,
+    len5 = keys.quic.length,
+    len6 = keys.country.length,
+    len7 = keys.agents.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7;
+
+  var tests = [];
+  for ( var i = 0; i < 256; ++i ) {
+    var keys_ = [],
+      count = total;
+
+    if ( i&1 ) {
+      keys_.push( 'status_code' );
+      count /= len0;
     }
-  })
-  .catch( SyntaxError, function( e ) {
-    e.fileName = templates_file_;
-    throw e;
-  });
+    if ( i&2 ) {
+      keys_.push( 'cache_code' );
+      count /= len1;
+    }
+    if ( i&4 ) {
+      keys_.push( 'request_status' );
+      count /= len2;
+    }
+    if ( i&8 ) {
+      keys_.push( 'protocol' );
+      count /= len3;
+    }
+    if ( i&16 ) {
+      keys_.push( 'http_method' );
+      count /= len4;
+    }
+    if ( i&32 ) {
+      keys_.push( 'quic' );
+      count /= len5;
+    }
+    if ( i&64 ) {
+      keys_.push( 'country' );
+      count /= len6;
+    }
+    if ( i&128 ) {
+      keys_.push( 'agents' );
+      count /= len7;
+    }
 
+    tests.push({
+      keys: keys_,
+      count: count
+    });
+  };
+
+  for ( var t = 0, lent = tests.length; t < lent; ++t ) {
+    var test = tests[t];
+    test.query = {};
+    for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
+      var key = test.keys[k],
+        val = keys[key][ Math.floor( keys[key].length * Math.random() ) ];
+
+      if ( key === 'agents' ) {
+        test.query.os = val.os;
+        test.query.device= val.device;
+      } else {
+        test.query[key] = val;
+      }
+    };
+  };
+
+  return _.map( tests, function( test ) {
+    return { query: test.query, count: test.count };
+  });
 };
 
 /**

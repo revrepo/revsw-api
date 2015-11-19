@@ -25,6 +25,7 @@ var DP = new dp();
 
 var should = require('should-http');
 // var request = require('supertest-as-promised');
+var promise = require('bluebird');
 var config = require('config');
 
 var justtaUser = config.api.users.user;
@@ -50,7 +51,7 @@ describe('Stats API check:', function () {
       .then( function() {
         if ( Date.now() - DP.options.from > 3600000 * 24 ) {
           console.log( '  ### testing data is more than 24 hrs old, please re-gen\n' );
-          done( new RangeError() );
+          return done( new RangeError() );
         }
 
         // console.log( DP.options );
@@ -89,7 +90,7 @@ describe('Stats API check:', function () {
 
               //  check aggregated avg/min/max/count values
               for ( var i = 0, len = data.length; i < len; ++i ) {
-                aggs[type][data[i].key].count.should.be.equal( data[i].count );
+                aggs[type][data[i].key].count.should.be.equal( data[i].count);
                 aggs[type][data[i].key].lm_rtt_avg_ms.should.be.equal( data[i].lm_rtt_avg_ms );
                 aggs[type][data[i].key].lm_rtt_max_ms.should.be.equal( data[i].lm_rtt_max_ms );
                 aggs[type][data[i].key].lm_rtt_min_ms.should.be.equal( data[i].lm_rtt_min_ms );
@@ -102,10 +103,10 @@ describe('Stats API check:', function () {
         };
       };
 
-      it('Country aggregation', run_( 'country' ) );
-      it('OS aggregation', run_( 'os' ) );
-      it('Device aggregation', run_( 'device' ) );
-
+      //  ---------------------------------
+      it('Country aggregations', run_( 'country' ) );
+      it('OS aggregations', run_( 'os' ) );
+      it('Device aggregations', run_( 'device' ) );
     });
 
     describe('GBT/Traffic requests: ', function () {
@@ -143,7 +144,6 @@ describe('Stats API check:', function () {
       it('Country aggregation', run_( 'country' ) );
       it('OS aggregation', run_( 'os' ) );
       it('Device aggregation', run_( 'device' ) );
-
     });
 
   });

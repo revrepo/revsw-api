@@ -1,20 +1,20 @@
 {
-  "indicesList": "logstash-2015.11.17,logstash-2015.11.18",
-  "from": 1447801200000,
-  "to": 1447873200000,
+  "indicesList": "logstash-2015.11.18",
+  "from": 1447869600000,
+  "to": 1447890600000,
   "dataCount": 230400,
   "spansNum": 8,
   "aggs": [
     {
-      "indicesList": "logstash-2015.11.17,logstash-2015.11.18",
-      "from": 1447801200000,
-      "to": 1447873200000,
+      "indicesList": "logstash-2015.11.18",
+      "from": 1447869600000,
+      "to": 1447890600000,
       "lm_rtt_aggs": {
         "country": {
           "US": {
             "key": "US",
             "count": 38400,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -42,7 +42,7 @@
           "CN": {
             "key": "CN",
             "count": 38400,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -58,28 +58,28 @@
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 17280,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 5760,
-            "lm_rtt_avg_ms": 258,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 17280,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 17280,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -93,28 +93,28 @@
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 5760,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 5760,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 5760,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 11520,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -128,70 +128,70 @@
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 17280,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 11520,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 28800,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 11520,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 17280,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 5760,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 11520,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 5760,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 5760,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 5760,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -200,14 +200,14 @@
           "iPhone": {
             "key": "iPhone",
             "count": 28800,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPad": {
             "key": "iPad",
             "count": 28800,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -221,21 +221,21 @@
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 28800,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 23040,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 5760,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -256,7 +256,7 @@
           "iPod": {
             "key": "iPod",
             "count": 28800,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -267,224 +267,224 @@
           "US": {
             "key": "US",
             "count": 38400,
-            "sent_bytes": 105222110,
-            "received_bytes": 21141238
+            "sent_bytes": 105529244,
+            "received_bytes": 21093528
           },
           "GB": {
             "key": "GB",
             "count": 38400,
-            "sent_bytes": 105660044,
-            "received_bytes": 21061541
+            "sent_bytes": 105895424,
+            "received_bytes": 21043523
           },
           "FR": {
             "key": "FR",
             "count": 38400,
-            "sent_bytes": 105435702,
-            "received_bytes": 21075420
+            "sent_bytes": 105463812,
+            "received_bytes": 20996146
           },
           "IN": {
             "key": "IN",
             "count": 38400,
-            "sent_bytes": 105715258,
-            "received_bytes": 21055136
+            "sent_bytes": 105724892,
+            "received_bytes": 21130509
           },
           "CN": {
             "key": "CN",
             "count": 38400,
-            "sent_bytes": 105320396,
-            "received_bytes": 21155938
+            "sent_bytes": 105558154,
+            "received_bytes": 21121389
           },
           "EU": {
             "key": "EU",
             "count": 38400,
-            "sent_bytes": 105512258,
-            "received_bytes": 21093726
+            "sent_bytes": 105811916,
+            "received_bytes": 21045208
           }
         },
         "os": {
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 17280,
-            "sent_bytes": 47373051,
-            "received_bytes": 9567070
+            "sent_bytes": 47650783,
+            "received_bytes": 9495324
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 5760,
-            "sent_bytes": 15890245,
-            "received_bytes": 3198157
+            "sent_bytes": 16041046,
+            "received_bytes": 3157605
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 17280,
-            "sent_bytes": 47412300,
-            "received_bytes": 9462709
+            "sent_bytes": 47684400,
+            "received_bytes": 9504266
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 17280,
-            "sent_bytes": 47272127,
-            "received_bytes": 9498758
+            "sent_bytes": 47502266,
+            "received_bytes": 9461309
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 17280,
-            "sent_bytes": 47450910,
-            "received_bytes": 9523365
+            "sent_bytes": 47422124,
+            "received_bytes": 9466733
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 5760,
-            "sent_bytes": 15946696,
-            "received_bytes": 3151774
+            "sent_bytes": 15966803,
+            "received_bytes": 3151275
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 5760,
-            "sent_bytes": 15787688,
-            "received_bytes": 3196295
+            "sent_bytes": 15785811,
+            "received_bytes": 3234804
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 5760,
-            "sent_bytes": 15830533,
-            "received_bytes": 3132534
+            "sent_bytes": 15755522,
+            "received_bytes": 3131151
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 11520,
-            "sent_bytes": 31640039,
-            "received_bytes": 6301599
+            "sent_bytes": 31627628,
+            "received_bytes": 6295404
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 5760,
-            "sent_bytes": 15760884,
-            "received_bytes": 3180622
+            "sent_bytes": 15900229,
+            "received_bytes": 3130951
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 17280,
-            "sent_bytes": 47589573,
-            "received_bytes": 9460628
+            "sent_bytes": 47689663,
+            "received_bytes": 9403754
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 11520,
-            "sent_bytes": 31539679,
-            "received_bytes": 6314784
+            "sent_bytes": 31459219,
+            "received_bytes": 6351020
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 28800,
-            "sent_bytes": 79243808,
-            "received_bytes": 15763988
+            "sent_bytes": 79200935,
+            "received_bytes": 15732043
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 11520,
-            "sent_bytes": 31811275,
-            "received_bytes": 6337211
+            "sent_bytes": 31624575,
+            "received_bytes": 6354048
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 17280,
-            "sent_bytes": 47654799,
-            "received_bytes": 9546202
+            "sent_bytes": 47680401,
+            "received_bytes": 9471420
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 5760,
-            "sent_bytes": 15759960,
-            "received_bytes": 3173141
+            "sent_bytes": 15972780,
+            "received_bytes": 3192515
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 11520,
-            "sent_bytes": 31354233,
-            "received_bytes": 6323755
+            "sent_bytes": 31663639,
+            "received_bytes": 6349019
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 5760,
-            "sent_bytes": 15872195,
-            "received_bytes": 3155293
+            "sent_bytes": 15801477,
+            "received_bytes": 3198452
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 5760,
-            "sent_bytes": 15794976,
-            "received_bytes": 3163185
+            "sent_bytes": 15702816,
+            "received_bytes": 3183225
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 5760,
-            "sent_bytes": 15880797,
-            "received_bytes": 3131929
+            "sent_bytes": 15851325,
+            "received_bytes": 3165985
           }
         },
         "device": {
           "iPhone": {
             "key": "iPhone",
             "count": 28800,
-            "sent_bytes": 79270111,
-            "received_bytes": 15899318
+            "sent_bytes": 79241173,
+            "received_bytes": 15777309
           },
           "iPad": {
             "key": "iPad",
             "count": 28800,
-            "sent_bytes": 79151783,
-            "received_bytes": 15868297
+            "sent_bytes": 79257209,
+            "received_bytes": 15804790
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 28800,
-            "sent_bytes": 79077691,
-            "received_bytes": 15840677
+            "sent_bytes": 79199547,
+            "received_bytes": 15754286
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 28800,
-            "sent_bytes": 78923303,
-            "received_bytes": 15839271
+            "sent_bytes": 79367788,
+            "received_bytes": 15847585
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 23040,
-            "sent_bytes": 63654963,
-            "received_bytes": 12640604
+            "sent_bytes": 63773786,
+            "received_bytes": 12605933
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 5760,
-            "sent_bytes": 15724296,
-            "received_bytes": 3146135
+            "sent_bytes": 15665240,
+            "received_bytes": 3138916
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 28800,
-            "sent_bytes": 79116711,
-            "received_bytes": 15786817
+            "sent_bytes": 78797850,
+            "received_bytes": 15799433
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 28800,
-            "sent_bytes": 79142678,
-            "received_bytes": 15795733
+            "sent_bytes": 79060484,
+            "received_bytes": 15881653
           },
           "iPod": {
             "key": "iPod",
             "count": 28800,
-            "sent_bytes": 78804232,
-            "received_bytes": 15766147
+            "sent_bytes": 79620365,
+            "received_bytes": 15820398
           }
         }
       }
     },
     {
-      "indicesList": "logstash-2015.11.17,logstash-2015.11.18",
-      "from": 1447801200000,
-      "to": 1447810200000,
+      "indicesList": "logstash-2015.11.18",
+      "from": 1447869600000,
+      "to": 1447872225000,
       "lm_rtt_aggs": {
         "country": {
           "US": {
@@ -497,35 +497,35 @@
           "GB": {
             "key": "GB",
             "count": 4807,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "FR": {
             "key": "FR",
             "count": 4800,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "IN": {
             "key": "IN",
             "count": 4800,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "CN": {
             "key": "CN",
             "count": 4800,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "EU": {
             "key": "EU",
             "count": 4800,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -534,141 +534,141 @@
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2165,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 260,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_max_ms": 504
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 722,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2165,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 250,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2164,
-            "lm_rtt_avg_ms": 247,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2164,
-            "lm_rtt_avg_ms": 247,
+            "lm_rtt_avg_ms": 250,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 721,
-            "lm_rtt_avg_ms": 259,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 721,
-            "lm_rtt_avg_ms": 260,
+            "lm_rtt_avg_ms": 259,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_max_ms": 503
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 8,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1442,
-            "lm_rtt_avg_ms": 248,
+            "lm_rtt_avg_ms": 258,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 721,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_avg_ms": 243,
+            "lm_rtt_min_ms": 6,
+            "lm_rtt_max_ms": 502
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2163,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1442,
-            "lm_rtt_avg_ms": 250,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3605,
-            "lm_rtt_avg_ms": 250,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 503
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1442,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
+            "lm_rtt_avg_ms": 259,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2163,
-            "lm_rtt_avg_ms": 261,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 721,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1442,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 261,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 7,
             "lm_rtt_max_ms": 504
           },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1442,
+            "lm_rtt_avg_ms": 262,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 247,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 721,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 5,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
         },
@@ -676,63 +676,63 @@
           "iPhone": {
             "key": "iPhone",
             "count": 3610,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPad": {
             "key": "iPad",
             "count": 3607,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 250,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3605,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3605,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2884,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 721,
-            "lm_rtt_avg_ms": 243,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 501
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPod": {
             "key": "iPod",
             "count": 3605,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -743,244 +743,244 @@
           "US": {
             "key": "US",
             "count": 4840,
-            "sent_bytes": 13247268,
-            "received_bytes": 2668869
+            "sent_bytes": 13114551,
+            "received_bytes": 2663555
           },
           "GB": {
             "key": "GB",
             "count": 4807,
-            "sent_bytes": 13120939,
-            "received_bytes": 2646057
+            "sent_bytes": 13178817,
+            "received_bytes": 2627006
           },
           "FR": {
             "key": "FR",
             "count": 4800,
-            "sent_bytes": 13109249,
-            "received_bytes": 2630716
+            "sent_bytes": 13226061,
+            "received_bytes": 2608344
           },
           "IN": {
             "key": "IN",
             "count": 4800,
-            "sent_bytes": 13201739,
-            "received_bytes": 2638466
+            "sent_bytes": 13172826,
+            "received_bytes": 2632107
           },
           "CN": {
             "key": "CN",
             "count": 4800,
-            "sent_bytes": 13031793,
-            "received_bytes": 2627405
+            "sent_bytes": 13161058,
+            "received_bytes": 2679704
           },
           "EU": {
             "key": "EU",
             "count": 4800,
-            "sent_bytes": 13092386,
-            "received_bytes": 2658056
+            "sent_bytes": 13442164,
+            "received_bytes": 2654479
           }
         },
         "os": {
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2165,
-            "sent_bytes": 5946561,
-            "received_bytes": 1187304
+            "sent_bytes": 5930941,
+            "received_bytes": 1175386
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 722,
-            "sent_bytes": 1994132,
-            "received_bytes": 401930
+            "sent_bytes": 2008705,
+            "received_bytes": 391919
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2165,
-            "sent_bytes": 5878813,
-            "received_bytes": 1182130
+            "sent_bytes": 5997864,
+            "received_bytes": 1179072
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2164,
-            "sent_bytes": 5902683,
-            "received_bytes": 1189020
+            "sent_bytes": 5857757,
+            "received_bytes": 1196798
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2164,
-            "sent_bytes": 5901164,
-            "received_bytes": 1188780
+            "sent_bytes": 5876232,
+            "received_bytes": 1202982
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 721,
-            "sent_bytes": 2013708,
-            "received_bytes": 404928
+            "sent_bytes": 2022460,
+            "received_bytes": 406171
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 721,
-            "sent_bytes": 1957608,
-            "received_bytes": 399485
+            "sent_bytes": 1962893,
+            "received_bytes": 407386
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 721,
-            "sent_bytes": 1988333,
-            "received_bytes": 403978
+            "sent_bytes": 2014412,
+            "received_bytes": 389734
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1442,
-            "sent_bytes": 3937627,
-            "received_bytes": 796602
+            "sent_bytes": 3920037,
+            "received_bytes": 794531
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 721,
-            "sent_bytes": 1917874,
-            "received_bytes": 396167
+            "sent_bytes": 1977813,
+            "received_bytes": 388552
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2163,
-            "sent_bytes": 5939942,
-            "received_bytes": 1182468
+            "sent_bytes": 5890279,
+            "received_bytes": 1155621
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1442,
-            "sent_bytes": 3894260,
-            "received_bytes": 809837
+            "sent_bytes": 3939396,
+            "received_bytes": 800826
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3605,
-            "sent_bytes": 9907865,
-            "received_bytes": 1974516
+            "sent_bytes": 10000692,
+            "received_bytes": 1981840
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1442,
-            "sent_bytes": 4056264,
-            "received_bytes": 802013
+            "sent_bytes": 3986340,
+            "received_bytes": 807289
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2163,
-            "sent_bytes": 5934393,
-            "received_bytes": 1197834
+            "sent_bytes": 6007490,
+            "received_bytes": 1181284
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 721,
-            "sent_bytes": 1993213,
-            "received_bytes": 398081
+            "sent_bytes": 2005364,
+            "received_bytes": 403544
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1442,
-            "sent_bytes": 3832145,
-            "received_bytes": 788367
+            "sent_bytes": 3963881,
+            "received_bytes": 806545
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 721,
-            "sent_bytes": 1953712,
-            "received_bytes": 385392
+            "sent_bytes": 1990670,
+            "received_bytes": 399532
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 721,
-            "sent_bytes": 1945737,
-            "received_bytes": 398983
+            "sent_bytes": 1951893,
+            "received_bytes": 401426
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 721,
-            "sent_bytes": 1907340,
-            "received_bytes": 381754
+            "sent_bytes": 1990358,
+            "received_bytes": 394757
           }
         },
         "device": {
           "iPhone": {
             "key": "iPhone",
             "count": 3610,
-            "sent_bytes": 9865675,
-            "received_bytes": 1994741
+            "sent_bytes": 9858901,
+            "received_bytes": 1984838
           },
           "iPad": {
             "key": "iPad",
             "count": 3607,
-            "sent_bytes": 9859107,
-            "received_bytes": 1991005
+            "sent_bytes": 9899857,
+            "received_bytes": 2003745
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3605,
-            "sent_bytes": 9822904,
-            "received_bytes": 2003142
+            "sent_bytes": 9867461,
+            "received_bytes": 1974682
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3605,
-            "sent_bytes": 9959688,
-            "received_bytes": 1992376
+            "sent_bytes": 9963645,
+            "received_bytes": 1984055
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2884,
-            "sent_bytes": 7914856,
-            "received_bytes": 1575755
+            "sent_bytes": 8057091,
+            "received_bytes": 1581051
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 721,
-            "sent_bytes": 1963356,
-            "received_bytes": 398202
+            "sent_bytes": 1989598,
+            "received_bytes": 401701
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "sent_bytes": 9797059,
-            "received_bytes": 1979456
+            "sent_bytes": 9779866,
+            "received_bytes": 1958124
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "sent_bytes": 9801110,
-            "received_bytes": 1984792
+            "sent_bytes": 9953499,
+            "received_bytes": 2018497
           },
           "iPod": {
             "key": "iPod",
             "count": 3605,
-            "sent_bytes": 9819619,
-            "received_bytes": 1950100
+            "sent_bytes": 9925559,
+            "received_bytes": 1958502
           }
         }
       }
     },
     {
       "indicesList": "logstash-2015.11.18",
-      "from": 1447810200000,
-      "to": 1447819200000,
+      "from": 1447872225000,
+      "to": 1447874850000,
       "lm_rtt_aggs": {
         "country": {
           "GB": {
             "key": "GB",
             "count": 4833,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "FR": {
             "key": "FR",
             "count": 4813,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 5,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "IN": {
             "key": "IN",
             "count": 4800,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -994,7 +994,7 @@
           "EU": {
             "key": "EU",
             "count": 4800,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -1010,140 +1010,140 @@
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2164,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 503
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2164,
             "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 503
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 722,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 264,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_max_ms": 503
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 722,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 257,
             "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 722,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 8,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1443,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 259,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_max_ms": 504
           },
           "Android 4.4": {
             "key": "Android 4.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 249,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.4.4": {
-            "key": "Android 4.4.4",
-            "count": 2163,
-            "lm_rtt_avg_ms": 259,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.2.2": {
-            "key": "Android 4.2.2",
-            "count": 1442,
-            "lm_rtt_avg_ms": 259,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3605,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1442,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0.2": {
-            "key": "Android 5.0.2",
-            "count": 2163,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1442,
-            "lm_rtt_avg_ms": 249,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 267,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
             "count": 721,
             "lm_rtt_avg_ms": 260,
             "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.4.4": {
+            "key": "Android 4.4.4",
+            "count": 2163,
+            "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.2.2": {
+            "key": "Android 4.2.2",
+            "count": 1442,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3605,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1442,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 503
+          },
+          "Android 5.0.2": {
+            "key": "Android 5.0.2",
+            "count": 2163,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1442,
+            "lm_rtt_avg_ms": 262,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2163,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 721,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2163,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 247,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 721,
-            "lm_rtt_avg_ms": 261,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -1159,35 +1159,35 @@
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3608,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 257,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3605,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2884,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 721,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 6,
+            "lm_rtt_avg_ms": 259,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 503
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -1201,14 +1201,14 @@
           "iPod": {
             "key": "iPod",
             "count": 3605,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPhone": {
             "key": "iPhone",
             "count": 3605,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -1219,265 +1219,265 @@
           "GB": {
             "key": "GB",
             "count": 4833,
-            "sent_bytes": 13249875,
-            "received_bytes": 2619770
+            "sent_bytes": 13207701,
+            "received_bytes": 2652483
           },
           "FR": {
             "key": "FR",
             "count": 4813,
-            "sent_bytes": 13218752,
-            "received_bytes": 2638435
+            "sent_bytes": 13173789,
+            "received_bytes": 2627947
           },
           "IN": {
             "key": "IN",
             "count": 4800,
-            "sent_bytes": 13191770,
-            "received_bytes": 2643187
+            "sent_bytes": 13165718,
+            "received_bytes": 2633090
           },
           "CN": {
             "key": "CN",
             "count": 4800,
-            "sent_bytes": 13201830,
-            "received_bytes": 2663130
+            "sent_bytes": 13218143,
+            "received_bytes": 2588446
           },
           "EU": {
             "key": "EU",
             "count": 4800,
-            "sent_bytes": 12978450,
-            "received_bytes": 2646326
+            "sent_bytes": 13280688,
+            "received_bytes": 2634668
           },
           "US": {
             "key": "US",
             "count": 4800,
-            "sent_bytes": 13206224,
-            "received_bytes": 2650366
+            "sent_bytes": 13119050,
+            "received_bytes": 2631905
           }
         },
         "os": {
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2164,
-            "sent_bytes": 5825445,
-            "received_bytes": 1190759
+            "sent_bytes": 5853152,
+            "received_bytes": 1179640
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2164,
-            "sent_bytes": 5965584,
-            "received_bytes": 1188634
+            "sent_bytes": 5970294,
+            "received_bytes": 1168756
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 722,
-            "sent_bytes": 2017847,
-            "received_bytes": 401278
+            "sent_bytes": 2002050,
+            "received_bytes": 390405
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 722,
-            "sent_bytes": 2026770,
-            "received_bytes": 394834
+            "sent_bytes": 1922072,
+            "received_bytes": 401779
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 722,
-            "sent_bytes": 2004174,
-            "received_bytes": 388742
+            "sent_bytes": 1970604,
+            "received_bytes": 403455
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1443,
-            "sent_bytes": 3991933,
-            "received_bytes": 783181
+            "sent_bytes": 3977320,
+            "received_bytes": 791839
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 721,
-            "sent_bytes": 2023035,
-            "received_bytes": 403704
+            "sent_bytes": 2024847,
+            "received_bytes": 390202
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2163,
-            "sent_bytes": 5993311,
-            "received_bytes": 1186627
+            "sent_bytes": 5907979,
+            "received_bytes": 1176979
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1442,
-            "sent_bytes": 3943796,
-            "received_bytes": 799131
+            "sent_bytes": 3880075,
+            "received_bytes": 786113
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3605,
-            "sent_bytes": 9836222,
-            "received_bytes": 1990979
+            "sent_bytes": 9875211,
+            "received_bytes": 1956208
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1442,
-            "sent_bytes": 3862184,
-            "received_bytes": 792629
+            "sent_bytes": 3945505,
+            "received_bytes": 798097
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2163,
-            "sent_bytes": 5867579,
-            "received_bytes": 1196355
+            "sent_bytes": 6013397,
+            "received_bytes": 1164848
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 721,
-            "sent_bytes": 2005246,
-            "received_bytes": 398460
+            "sent_bytes": 1988030,
+            "received_bytes": 387934
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1442,
-            "sent_bytes": 3922551,
-            "received_bytes": 796981
+            "sent_bytes": 4058956,
+            "received_bytes": 803844
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 721,
-            "sent_bytes": 1977887,
-            "received_bytes": 401837
+            "sent_bytes": 2019405,
+            "received_bytes": 403574
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 721,
-            "sent_bytes": 2013459,
-            "received_bytes": 382244
+            "sent_bytes": 1988974,
+            "received_bytes": 393238
           },
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2163,
-            "sent_bytes": 5893183,
-            "received_bytes": 1200826
+            "sent_bytes": 5944088,
+            "received_bytes": 1210780
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 721,
-            "sent_bytes": 2001444,
-            "received_bytes": 389871
+            "sent_bytes": 1920037,
+            "received_bytes": 381529
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2163,
-            "sent_bytes": 5998584,
-            "received_bytes": 1194520
+            "sent_bytes": 5962915,
+            "received_bytes": 1195907
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 721,
-            "sent_bytes": 1876667,
-            "received_bytes": 379622
+            "sent_bytes": 1940178,
+            "received_bytes": 383412
           }
         },
         "device": {
           "iPad": {
             "key": "iPad",
             "count": 3608,
-            "sent_bytes": 9942404,
-            "received_bytes": 2011403
+            "sent_bytes": 9979388,
+            "received_bytes": 1961310
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3608,
-            "sent_bytes": 10048514,
-            "received_bytes": 1985280
+            "sent_bytes": 9924274,
+            "received_bytes": 1989730
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3605,
-            "sent_bytes": 9774332,
-            "received_bytes": 1986147
+            "sent_bytes": 9919724,
+            "received_bytes": 1971312
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2884,
-            "sent_bytes": 8026388,
-            "received_bytes": 1577464
+            "sent_bytes": 7988900,
+            "received_bytes": 1563895
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 721,
-            "sent_bytes": 1937765,
-            "received_bytes": 394150
+            "sent_bytes": 1898977,
+            "received_bytes": 405300
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "sent_bytes": 9843534,
-            "received_bytes": 1994739
+            "sent_bytes": 9918148,
+            "received_bytes": 1942873
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "sent_bytes": 9837614,
-            "received_bytes": 1977924
+            "sent_bytes": 9922352,
+            "received_bytes": 1985000
           },
           "iPod": {
             "key": "iPod",
             "count": 3605,
-            "sent_bytes": 9827383,
-            "received_bytes": 1970272
+            "sent_bytes": 9850669,
+            "received_bytes": 1977593
           },
           "iPhone": {
             "key": "iPhone",
             "count": 3605,
-            "sent_bytes": 9808967,
-            "received_bytes": 1963835
+            "sent_bytes": 9762657,
+            "received_bytes": 1971526
           }
         }
       }
     },
     {
       "indicesList": "logstash-2015.11.18",
-      "from": 1447819200000,
-      "to": 1447828200000,
+      "from": 1447874850000,
+      "to": 1447877475000,
       "lm_rtt_aggs": {
         "country": {
           "FR": {
             "key": "FR",
             "count": 4827,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "IN": {
             "key": "IN",
             "count": 4819,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "CN": {
             "key": "CN",
             "count": 4800,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "EU": {
             "key": "EU",
             "count": 4800,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "US": {
             "key": "US",
             "count": 4800,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 5,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GB": {
             "key": "GB",
             "count": 4800,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -1486,681 +1486,681 @@
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 722,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 248,
             "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 503
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2164,
-            "lm_rtt_avg_ms": 247,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.2.2": {
-            "key": "Android 4.2.2",
-            "count": 1443,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3606,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1443,
-            "lm_rtt_avg_ms": 247,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0.2": {
-            "key": "Android 5.0.2",
-            "count": 2164,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.1.1": {
-            "key": "Android 5.1.1",
-            "count": 1442,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1442,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 721,
-            "lm_rtt_avg_ms": 246,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2163,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 267,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
             "lm_rtt_avg_ms": 248,
             "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
-          }
-        },
-        "device": {
-          "Nexus 5": {
-            "key": "Nexus 5",
-            "count": 3607,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GT-S7582": {
-            "key": "GT-S7582",
-            "count": 3609,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "SM-G530H": {
-            "key": "SM-G530H",
-            "count": 2884,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "SM-G355H": {
-            "key": "SM-G355H",
-            "count": 721,
-            "lm_rtt_avg_ms": 244,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "HTC Desire": {
-            "key": "HTC Desire",
-            "count": 3605,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GT-I9300": {
-            "key": "GT-I9300",
-            "count": 3605,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPod": {
-            "key": "iPod",
-            "count": 3605,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPhone": {
-            "key": "iPhone",
-            "count": 3605,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPad": {
-            "key": "iPad",
-            "count": 3605,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          }
-        }
-      },
-      "gbt_aggs": {
-        "country": {
-          "FR": {
-            "key": "FR",
-            "count": 4827,
-            "sent_bytes": 13267188,
-            "received_bytes": 2672055
-          },
-          "IN": {
-            "key": "IN",
-            "count": 4819,
-            "sent_bytes": 13246276,
-            "received_bytes": 2617473
-          },
-          "CN": {
-            "key": "CN",
-            "count": 4800,
-            "sent_bytes": 13323965,
-            "received_bytes": 2644960
-          },
-          "EU": {
-            "key": "EU",
-            "count": 4800,
-            "sent_bytes": 13178560,
-            "received_bytes": 2635542
-          },
-          "US": {
-            "key": "US",
-            "count": 4800,
-            "sent_bytes": 13236999,
-            "received_bytes": 2640831
-          },
-          "GB": {
-            "key": "GB",
-            "count": 4800,
-            "sent_bytes": 13249946,
-            "received_bytes": 2651872
-          }
-        },
-        "os": {
-          "Android 4.4": {
-            "key": "Android 4.4",
-            "count": 722,
-            "sent_bytes": 1944070,
-            "received_bytes": 389532
-          },
-          "Android 4.4.4": {
-            "key": "Android 4.4.4",
-            "count": 2164,
-            "sent_bytes": 5968108,
-            "received_bytes": 1195191
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1443,
-            "sent_bytes": 3962478,
-            "received_bytes": 791693
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3606,
-            "sent_bytes": 9905938,
-            "received_bytes": 1988753
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1443,
-            "sent_bytes": 4035738,
-            "received_bytes": 781353
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2164,
-            "sent_bytes": 5962617,
-            "received_bytes": 1180251
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "sent_bytes": 1925726,
-            "received_bytes": 400503
-          },
-          "Android 5.1.1": {
-            "key": "Android 5.1.1",
-            "count": 1442,
-            "sent_bytes": 3967845,
-            "received_bytes": 783901
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1442,
-            "sent_bytes": 4010030,
-            "received_bytes": 784343
-          },
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 721,
-            "sent_bytes": 2007826,
-            "received_bytes": 396448
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "sent_bytes": 1991172,
-            "received_bytes": 402330
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2163,
-            "sent_bytes": 5909477,
-            "received_bytes": 1201205
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 721,
-            "sent_bytes": 1994291,
-            "received_bytes": 394107
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "sent_bytes": 6069552,
-            "received_bytes": 1189552
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2163,
-            "sent_bytes": 5915760,
-            "received_bytes": 1189200
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2163,
-            "sent_bytes": 5925793,
-            "received_bytes": 1198062
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 721,
-            "sent_bytes": 1971678,
-            "received_bytes": 395447
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "sent_bytes": 2037701,
-            "received_bytes": 394297
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
-            "count": 721,
-            "sent_bytes": 1993376,
-            "received_bytes": 407086
-          },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
-            "sent_bytes": 2003758,
-            "received_bytes": 399479
-          }
-        },
-        "device": {
-          "Nexus 5": {
-            "key": "Nexus 5",
-            "count": 3607,
-            "sent_bytes": 9895860,
-            "received_bytes": 1984392
-          },
-          "GT-S7582": {
-            "key": "GT-S7582",
-            "count": 3609,
-            "sent_bytes": 9763030,
-            "received_bytes": 1991528
-          },
-          "SM-G530H": {
-            "key": "SM-G530H",
-            "count": 2884,
-            "sent_bytes": 7920971,
-            "received_bytes": 1575074
-          },
-          "SM-G355H": {
-            "key": "SM-G355H",
-            "count": 721,
-            "sent_bytes": 1993676,
-            "received_bytes": 399908
-          },
-          "HTC Desire": {
-            "key": "HTC Desire",
-            "count": 3605,
-            "sent_bytes": 10075343,
-            "received_bytes": 1990961
-          },
-          "GT-I9300": {
-            "key": "GT-I9300",
-            "count": 3605,
-            "sent_bytes": 10029802,
-            "received_bytes": 1959000
-          },
-          "iPod": {
-            "key": "iPod",
-            "count": 3605,
-            "sent_bytes": 9942143,
-            "received_bytes": 1984347
-          },
-          "iPhone": {
-            "key": "iPhone",
-            "count": 3605,
-            "sent_bytes": 9989599,
-            "received_bytes": 1966379
-          },
-          "iPad": {
-            "key": "iPad",
-            "count": 3605,
-            "sent_bytes": 9892510,
-            "received_bytes": 2011144
-          }
-        }
-      }
-    },
-    {
-      "indicesList": "logstash-2015.11.18",
-      "from": 1447828200000,
-      "to": 1447837200000,
-      "lm_rtt_aggs": {
-        "country": {
-          "IN": {
-            "key": "IN",
-            "count": 4821,
             "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
-          "CN": {
-            "key": "CN",
-            "count": 4825,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "EU": {
-            "key": "EU",
-            "count": 4800,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "US": {
-            "key": "US",
-            "count": 4800,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GB": {
-            "key": "GB",
-            "count": 4800,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "FR": {
-            "key": "FR",
-            "count": 4800,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          }
-        },
-        "os": {
           "Android 5.0": {
             "key": "Android 5.0",
-            "count": 722,
-            "lm_rtt_avg_ms": 251,
+            "count": 721,
+            "lm_rtt_avg_ms": 261,
             "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 503
-          },
-          "Android 4.4.4": {
-            "key": "Android 4.4.4",
-            "count": 2164,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0.2": {
-            "key": "Android 5.0.2",
-            "count": 2164,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3607,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
-            "count": 1443,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.2.2": {
-            "key": "Android 4.2.2",
             "count": 1442,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1442,
-            "lm_rtt_avg_ms": 249,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1442,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 721,
-            "lm_rtt_avg_ms": 247,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2163,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 6,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
             "count": 721,
             "lm_rtt_avg_ms": 246,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.4": {
-            "key": "Android 4.4",
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
             "count": 721,
             "lm_rtt_avg_ms": 265,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2163,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 721,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 6,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2163,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2163,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 264,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 259,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
           }
         },
         "device": {
+          "Nexus 5": {
+            "key": "Nexus 5",
+            "count": 3607,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
           "GT-S7582": {
             "key": "GT-S7582",
-            "count": 3606,
-            "lm_rtt_avg_ms": 249,
+            "count": 3609,
+            "lm_rtt_avg_ms": 259,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G530H": {
             "key": "SM-G530H",
-            "count": 2888,
-            "lm_rtt_avg_ms": 263,
+            "count": 2884,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G355H": {
             "key": "SM-G355H",
-            "count": 722,
-            "lm_rtt_avg_ms": 259,
-            "lm_rtt_min_ms": 4,
+            "count": 721,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 248,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPod": {
             "key": "iPod",
             "count": 3605,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 258,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPhone": {
             "key": "iPhone",
             "count": 3605,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPad": {
             "key": "iPad",
             "count": 3605,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          }
+        }
+      },
+      "gbt_aggs": {
+        "country": {
+          "FR": {
+            "key": "FR",
+            "count": 4827,
+            "sent_bytes": 13199639,
+            "received_bytes": 2670301
+          },
+          "IN": {
+            "key": "IN",
+            "count": 4819,
+            "sent_bytes": 13345289,
+            "received_bytes": 2659737
+          },
+          "CN": {
+            "key": "CN",
+            "count": 4800,
+            "sent_bytes": 13228249,
+            "received_bytes": 2625568
+          },
+          "EU": {
+            "key": "EU",
+            "count": 4800,
+            "sent_bytes": 13186073,
+            "received_bytes": 2597224
+          },
+          "US": {
+            "key": "US",
+            "count": 4800,
+            "sent_bytes": 13362338,
+            "received_bytes": 2635087
+          },
+          "GB": {
+            "key": "GB",
+            "count": 4800,
+            "sent_bytes": 13301403,
+            "received_bytes": 2633942
+          }
+        },
+        "os": {
+          "Android 4.4": {
+            "key": "Android 4.4",
+            "count": 722,
+            "sent_bytes": 1966336,
+            "received_bytes": 394609
+          },
+          "Android 4.4.4": {
+            "key": "Android 4.4.4",
+            "count": 2164,
+            "sent_bytes": 6021262,
+            "received_bytes": 1191660
+          },
+          "Android 4.2.2": {
+            "key": "Android 4.2.2",
+            "count": 1443,
+            "sent_bytes": 3915207,
+            "received_bytes": 795566
+          },
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3606,
+            "sent_bytes": 10023685,
+            "received_bytes": 1968515
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1443,
+            "sent_bytes": 3906814,
+            "received_bytes": 790363
+          },
+          "Android 5.0.2": {
+            "key": "Android 5.0.2",
+            "count": 2164,
+            "sent_bytes": 6057862,
+            "received_bytes": 1188918
+          },
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 721,
+            "sent_bytes": 1977768,
+            "received_bytes": 392141
+          },
+          "Android 5.1.1": {
+            "key": "Android 5.1.1",
+            "count": 1442,
+            "sent_bytes": 3982168,
+            "received_bytes": 772862
+          },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1442,
+            "sent_bytes": 3969484,
+            "received_bytes": 796797
+          },
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 721,
+            "sent_bytes": 1972064,
+            "received_bytes": 403185
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 721,
+            "sent_bytes": 1953417,
+            "received_bytes": 387564
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2163,
+            "sent_bytes": 6036240,
+            "received_bytes": 1206007
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 721,
+            "sent_bytes": 2035093,
+            "received_bytes": 413294
+          },
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2163,
+            "sent_bytes": 5915500,
+            "received_bytes": 1188231
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "sent_bytes": 5952640,
+            "received_bytes": 1203050
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2163,
+            "sent_bytes": 5946852,
+            "received_bytes": 1154707
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 721,
+            "sent_bytes": 2042909,
+            "received_bytes": 395425
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "sent_bytes": 1983757,
+            "received_bytes": 392237
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "sent_bytes": 2000881,
+            "received_bytes": 403432
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "sent_bytes": 1963052,
+            "received_bytes": 383296
+          }
+        },
+        "device": {
+          "Nexus 5": {
+            "key": "Nexus 5",
+            "count": 3607,
+            "sent_bytes": 9983311,
+            "received_bytes": 1962072
+          },
+          "GT-S7582": {
+            "key": "GT-S7582",
+            "count": 3609,
+            "sent_bytes": 9933272,
+            "received_bytes": 1958976
+          },
+          "SM-G530H": {
+            "key": "SM-G530H",
+            "count": 2884,
+            "sent_bytes": 8021774,
+            "received_bytes": 1580416
+          },
+          "SM-G355H": {
+            "key": "SM-G355H",
+            "count": 721,
+            "sent_bytes": 2001069,
+            "received_bytes": 393236
+          },
+          "HTC Desire": {
+            "key": "HTC Desire",
+            "count": 3605,
+            "sent_bytes": 9867590,
+            "received_bytes": 1983537
+          },
+          "GT-I9300": {
+            "key": "GT-I9300",
+            "count": 3605,
+            "sent_bytes": 9902984,
+            "received_bytes": 1990671
+          },
+          "iPod": {
+            "key": "iPod",
+            "count": 3605,
+            "sent_bytes": 10126976,
+            "received_bytes": 2001371
+          },
+          "iPhone": {
+            "key": "iPhone",
+            "count": 3605,
+            "sent_bytes": 9917525,
+            "received_bytes": 1969294
+          },
+          "iPad": {
+            "key": "iPad",
+            "count": 3605,
+            "sent_bytes": 9868490,
+            "received_bytes": 1982286
+          }
+        }
+      }
+    },
+    {
+      "indicesList": "logstash-2015.11.18",
+      "from": 1447877475000,
+      "to": 1447880100000,
+      "lm_rtt_aggs": {
+        "country": {
+          "IN": {
+            "key": "IN",
+            "count": 4821,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "CN": {
+            "key": "CN",
+            "count": 4825,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "EU": {
+            "key": "EU",
+            "count": 4800,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "US": {
+            "key": "US",
+            "count": 4800,
             "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
+          "GB": {
+            "key": "GB",
+            "count": 4800,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "FR": {
+            "key": "FR",
+            "count": 4800,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          }
+        },
+        "os": {
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 722,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 7,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.4.4": {
+            "key": "Android 4.4.4",
+            "count": 2164,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 5.0.2": {
+            "key": "Android 5.0.2",
+            "count": 2164,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3607,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 5.1.1": {
+            "key": "Android 5.1.1",
+            "count": 1443,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.2.2": {
+            "key": "Android 4.2.2",
+            "count": 1442,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1442,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1442,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 245,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 502
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2163,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 721,
+            "lm_rtt_avg_ms": 261,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2163,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2163,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 246,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 6,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.4": {
+            "key": "Android 4.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 259,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          }
+        },
+        "device": {
+          "GT-S7582": {
+            "key": "GT-S7582",
+            "count": 3606,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "SM-G530H": {
+            "key": "SM-G530H",
+            "count": 2888,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "SM-G355H": {
+            "key": "SM-G355H",
+            "count": 722,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "HTC Desire": {
+            "key": "HTC Desire",
+            "count": 3605,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "GT-I9300": {
+            "key": "GT-I9300",
+            "count": 3605,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPod": {
+            "key": "iPod",
+            "count": 3605,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPhone": {
+            "key": "iPhone",
+            "count": 3605,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPad": {
+            "key": "iPad",
+            "count": 3605,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3605,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -2171,224 +2171,224 @@
           "IN": {
             "key": "IN",
             "count": 4821,
-            "sent_bytes": 13221243,
-            "received_bytes": 2668917
+            "sent_bytes": 13230453,
+            "received_bytes": 2651075
           },
           "CN": {
             "key": "CN",
             "count": 4825,
-            "sent_bytes": 13216094,
-            "received_bytes": 2655395
+            "sent_bytes": 13262006,
+            "received_bytes": 2656672
           },
           "EU": {
             "key": "EU",
             "count": 4800,
-            "sent_bytes": 13284434,
-            "received_bytes": 2624047
+            "sent_bytes": 13019749,
+            "received_bytes": 2625607
           },
           "US": {
             "key": "US",
             "count": 4800,
-            "sent_bytes": 13297473,
-            "received_bytes": 2649235
+            "sent_bytes": 13186599,
+            "received_bytes": 2651792
           },
           "GB": {
             "key": "GB",
             "count": 4800,
-            "sent_bytes": 13130463,
-            "received_bytes": 2662992
+            "sent_bytes": 13255792,
+            "received_bytes": 2598692
           },
           "FR": {
             "key": "FR",
             "count": 4800,
-            "sent_bytes": 13126615,
-            "received_bytes": 2599904
+            "sent_bytes": 13150107,
+            "received_bytes": 2629756
           }
         },
         "os": {
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 722,
-            "sent_bytes": 1958594,
-            "received_bytes": 394205
+            "sent_bytes": 1992264,
+            "received_bytes": 423724
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2164,
-            "sent_bytes": 5883710,
-            "received_bytes": 1170302
+            "sent_bytes": 5944477,
+            "received_bytes": 1173354
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2164,
-            "sent_bytes": 5967196,
-            "received_bytes": 1213709
+            "sent_bytes": 5915763,
+            "received_bytes": 1189060
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3607,
-            "sent_bytes": 9922830,
-            "received_bytes": 1973308
+            "sent_bytes": 9879203,
+            "received_bytes": 1981110
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1443,
-            "sent_bytes": 4059574,
-            "received_bytes": 791795
+            "sent_bytes": 3959024,
+            "received_bytes": 802999
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1442,
-            "sent_bytes": 3918851,
-            "received_bytes": 796945
+            "sent_bytes": 3899085,
+            "received_bytes": 785668
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1442,
-            "sent_bytes": 3966131,
-            "received_bytes": 783135
+            "sent_bytes": 4004337,
+            "received_bytes": 785751
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 721,
-            "sent_bytes": 1965873,
-            "received_bytes": 399152
+            "sent_bytes": 1945303,
+            "received_bytes": 392341
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1442,
-            "sent_bytes": 3981573,
-            "received_bytes": 799820
+            "sent_bytes": 3879058,
+            "received_bytes": 774095
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 721,
-            "sent_bytes": 1931691,
-            "received_bytes": 387353
+            "sent_bytes": 1923310,
+            "received_bytes": 391105
           },
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2163,
-            "sent_bytes": 5938119,
-            "received_bytes": 1213492
+            "sent_bytes": 5925277,
+            "received_bytes": 1182393
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 721,
-            "sent_bytes": 2028034,
-            "received_bytes": 388320
+            "sent_bytes": 1961417,
+            "received_bytes": 393085
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2163,
-            "sent_bytes": 5980791,
-            "received_bytes": 1202520
+            "sent_bytes": 6020871,
+            "received_bytes": 1173032
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2163,
-            "sent_bytes": 5996048,
-            "received_bytes": 1190368
+            "sent_bytes": 6031158,
+            "received_bytes": 1208832
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2163,
-            "sent_bytes": 5882443,
-            "received_bytes": 1186304
+            "sent_bytes": 5895713,
+            "received_bytes": 1196778
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 721,
-            "sent_bytes": 2043766,
-            "received_bytes": 396154
+            "sent_bytes": 2000454,
+            "received_bytes": 392255
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 721,
-            "sent_bytes": 1929387,
-            "received_bytes": 395891
+            "sent_bytes": 1985319,
+            "received_bytes": 390241
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 721,
-            "sent_bytes": 1946489,
-            "received_bytes": 396148
+            "sent_bytes": 1994473,
+            "received_bytes": 395154
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 721,
-            "sent_bytes": 1978572,
-            "received_bytes": 389956
+            "sent_bytes": 1979068,
+            "received_bytes": 391036
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 721,
-            "sent_bytes": 1996650,
-            "received_bytes": 391613
+            "sent_bytes": 1969132,
+            "received_bytes": 391581
           }
         },
         "device": {
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3606,
-            "sent_bytes": 9964392,
-            "received_bytes": 1989902
+            "sent_bytes": 9810846,
+            "received_bytes": 1980147
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2888,
-            "sent_bytes": 7885034,
-            "received_bytes": 1596681
+            "sent_bytes": 7998777,
+            "received_bytes": 1595976
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 722,
-            "sent_bytes": 1960118,
-            "received_bytes": 387598
+            "sent_bytes": 1923581,
+            "received_bytes": 390550
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "sent_bytes": 9815283,
-            "received_bytes": 1966869
+            "sent_bytes": 9850236,
+            "received_bytes": 1979825
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "sent_bytes": 9880976,
-            "received_bytes": 1982029
+            "sent_bytes": 9811258,
+            "received_bytes": 1964631
           },
           "iPod": {
             "key": "iPod",
             "count": 3605,
-            "sent_bytes": 9939017,
-            "received_bytes": 1968495
+            "sent_bytes": 9940088,
+            "received_bytes": 1996722
           },
           "iPhone": {
             "key": "iPhone",
             "count": 3605,
-            "sent_bytes": 10041576,
-            "received_bytes": 2006594
+            "sent_bytes": 9971612,
+            "received_bytes": 1963130
           },
           "iPad": {
             "key": "iPad",
             "count": 3605,
-            "sent_bytes": 9817995,
-            "received_bytes": 1997960
+            "sent_bytes": 9908509,
+            "received_bytes": 1976764
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3605,
-            "sent_bytes": 9971931,
-            "received_bytes": 1964362
+            "sent_bytes": 9889799,
+            "received_bytes": 1965849
           }
         }
       }
     },
     {
       "indicesList": "logstash-2015.11.18",
-      "from": 1447837200000,
-      "to": 1447846200000,
+      "from": 1447880100000,
+      "to": 1447882725000,
       "lm_rtt_aggs": {
         "country": {
           "CN": {
@@ -2401,28 +2401,28 @@
           "EU": {
             "key": "EU",
             "count": 4831,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "US": {
             "key": "US",
             "count": 4800,
-            "lm_rtt_avg_ms": 258,
+            "lm_rtt_avg_ms": 259,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GB": {
             "key": "GB",
             "count": 4800,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "FR": {
             "key": "FR",
             "count": 4800,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -2438,23 +2438,23 @@
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3606,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_max_ms": 504
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2164,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1443,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
@@ -2466,982 +2466,541 @@
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1444,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 259,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1442,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 248,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 260,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 721,
-            "lm_rtt_avg_ms": 267,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2163,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2163,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 260,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
-          },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 246,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
-          },
-          "Android 5.1.1": {
-            "key": "Android 5.1.1",
-            "count": 1442,
             "lm_rtt_avg_ms": 259,
             "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
-          "Android 4.4": {
-            "key": "Android 4.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 246,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          }
-        },
-        "device": {
-          "HTC Desire": {
-            "key": "HTC Desire",
-            "count": 3610,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GT-I9300": {
-            "key": "GT-I9300",
-            "count": 3606,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPod": {
-            "key": "iPod",
-            "count": 3605,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPhone": {
-            "key": "iPhone",
-            "count": 3605,
-            "lm_rtt_avg_ms": 260,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPad": {
-            "key": "iPad",
-            "count": 3605,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Nexus 5": {
-            "key": "Nexus 5",
-            "count": 3605,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GT-S7582": {
-            "key": "GT-S7582",
-            "count": 3605,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "SM-G530H": {
-            "key": "SM-G530H",
-            "count": 2884,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "SM-G355H": {
-            "key": "SM-G355H",
-            "count": 721,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
-          }
-        }
-      },
-      "gbt_aggs": {
-        "country": {
-          "CN": {
-            "key": "CN",
-            "count": 4815,
-            "sent_bytes": 13107095,
-            "received_bytes": 2673893
-          },
-          "EU": {
-            "key": "EU",
-            "count": 4831,
-            "sent_bytes": 13399317,
-            "received_bytes": 2649780
-          },
-          "US": {
-            "key": "US",
-            "count": 4800,
-            "sent_bytes": 12978468,
-            "received_bytes": 2615797
-          },
-          "GB": {
-            "key": "GB",
-            "count": 4800,
-            "sent_bytes": 13180169,
-            "received_bytes": 2619663
-          },
-          "FR": {
-            "key": "FR",
-            "count": 4800,
-            "sent_bytes": 13082563,
-            "received_bytes": 2646158
-          },
-          "IN": {
-            "key": "IN",
-            "count": 4800,
-            "sent_bytes": 13160162,
-            "received_bytes": 2637636
-          }
-        },
-        "os": {
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3606,
-            "sent_bytes": 9938665,
-            "received_bytes": 1985802
-          },
-          "Android 5.0.2": {
-            "key": "Android 5.0.2",
-            "count": 2164,
-            "sent_bytes": 5984171,
-            "received_bytes": 1199775
-          },
-          "Android 4.2.2": {
-            "key": "Android 4.2.2",
-            "count": 1443,
-            "sent_bytes": 3970293,
-            "received_bytes": 763291
-          },
-          "Android 4.4.4": {
-            "key": "Android 4.4.4",
-            "count": 2164,
-            "sent_bytes": 5891683,
-            "received_bytes": 1182413
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1444,
-            "sent_bytes": 3910586,
-            "received_bytes": 792785
-          },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 721,
-            "sent_bytes": 1985722,
-            "received_bytes": 394196
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 7,
+            "lm_rtt_max_ms": 503
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1442,
-            "sent_bytes": 3914005,
-            "received_bytes": 776738
+            "lm_rtt_avg_ms": 266,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 721,
-            "sent_bytes": 1988714,
-            "received_bytes": 395831
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2163,
-            "sent_bytes": 5938872,
-            "received_bytes": 1206797
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 721,
-            "sent_bytes": 1999139,
-            "received_bytes": 395644
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "sent_bytes": 5956710,
-            "received_bytes": 1179177
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2163,
-            "sent_bytes": 5754382,
-            "received_bytes": 1175943
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2163,
-            "sent_bytes": 5887285,
-            "received_bytes": 1189097
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 721,
-            "sent_bytes": 2026333,
-            "received_bytes": 418314
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "sent_bytes": 1990313,
-            "received_bytes": 384985
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
-            "count": 721,
-            "sent_bytes": 2016790,
-            "received_bytes": 405382
-          },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
-            "sent_bytes": 1917332,
-            "received_bytes": 385457
-          },
-          "Android 5.1.1": {
-            "key": "Android 5.1.1",
-            "count": 1442,
-            "sent_bytes": 3915643,
-            "received_bytes": 808998
-          },
-          "Android 4.4": {
-            "key": "Android 4.4",
-            "count": 721,
-            "sent_bytes": 1932579,
-            "received_bytes": 407631
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "sent_bytes": 1988557,
-            "received_bytes": 394671
-          }
-        },
-        "device": {
-          "HTC Desire": {
-            "key": "HTC Desire",
-            "count": 3610,
-            "sent_bytes": 9916238,
-            "received_bytes": 1958666
-          },
-          "GT-I9300": {
-            "key": "GT-I9300",
-            "count": 3606,
-            "sent_bytes": 9836753,
-            "received_bytes": 1974470
-          },
-          "iPod": {
-            "key": "iPod",
-            "count": 3605,
-            "sent_bytes": 9783955,
-            "received_bytes": 1981843
-          },
-          "iPhone": {
-            "key": "iPhone",
-            "count": 3605,
-            "sent_bytes": 9860492,
-            "received_bytes": 2006224
-          },
-          "iPad": {
-            "key": "iPad",
-            "count": 3605,
-            "sent_bytes": 9908587,
-            "received_bytes": 1961890
-          },
-          "Nexus 5": {
-            "key": "Nexus 5",
-            "count": 3605,
-            "sent_bytes": 9792848,
-            "received_bytes": 1997834
-          },
-          "GT-S7582": {
-            "key": "GT-S7582",
-            "count": 3605,
-            "sent_bytes": 9865883,
-            "received_bytes": 1952951
-          },
-          "SM-G530H": {
-            "key": "SM-G530H",
-            "count": 2884,
-            "sent_bytes": 7979094,
-            "received_bytes": 1606017
-          },
-          "SM-G355H": {
-            "key": "SM-G355H",
-            "count": 721,
-            "sent_bytes": 1963924,
-            "received_bytes": 403032
-          }
-        }
-      }
-    },
-    {
-      "indicesList": "logstash-2015.11.18",
-      "from": 1447846200000,
-      "to": 1447855200000,
-      "lm_rtt_aggs": {
-        "country": {
-          "EU": {
-            "key": "EU",
-            "count": 4809,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "US": {
-            "key": "US",
-            "count": 4837,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GB": {
-            "key": "GB",
-            "count": 4800,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "FR": {
-            "key": "FR",
-            "count": 4800,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "IN": {
-            "key": "IN",
-            "count": 4800,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "CN": {
-            "key": "CN",
-            "count": 4800,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          }
-        },
-        "os": {
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 722,
             "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1443,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3606,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 722,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 502
           },
           "iOS 9.1": {
             "key": "iOS 9.1",
-            "count": 2164,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 4,
+            "count": 2163,
+            "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
-            "count": 722,
+            "count": 721,
             "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
             "count": 2163,
             "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2163,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 721,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 257,
             "lm_rtt_min_ms": 6,
             "lm_rtt_max_ms": 504
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.1.1": {
-            "key": "Android 5.1.1",
-            "count": 1442,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.4": {
-            "key": "Android 4.4",
-            "count": 721,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "Android 4.4.4": {
-            "key": "Android 4.4.4",
-            "count": 2163,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.2.2": {
-            "key": "Android 4.2.2",
-            "count": 1442,
-            "lm_rtt_avg_ms": 251,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0.2": {
-            "key": "Android 5.0.2",
-            "count": 2163,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1442,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          }
-        },
-        "device": {
-          "GT-I9300": {
-            "key": "GT-I9300",
-            "count": 3609,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPod": {
-            "key": "iPod",
-            "count": 3607,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "iPhone": {
-            "key": "iPhone",
-            "count": 3605,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iPad": {
-            "key": "iPad",
-            "count": 3605,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Nexus 5": {
-            "key": "Nexus 5",
-            "count": 3605,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "GT-S7582": {
-            "key": "GT-S7582",
-            "count": 3605,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
-          },
-          "SM-G530H": {
-            "key": "SM-G530H",
-            "count": 2884,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "SM-G355H": {
-            "key": "SM-G355H",
-            "count": 721,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "HTC Desire": {
-            "key": "HTC Desire",
-            "count": 3605,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          }
-        }
-      },
-      "gbt_aggs": {
-        "country": {
-          "EU": {
-            "key": "EU",
-            "count": 4809,
-            "sent_bytes": 13331847,
-            "received_bytes": 2655962
-          },
-          "US": {
-            "key": "US",
-            "count": 4837,
-            "sent_bytes": 13323491,
-            "received_bytes": 2674367
-          },
-          "GB": {
-            "key": "GB",
-            "count": 4800,
-            "sent_bytes": 13334137,
-            "received_bytes": 2646505
-          },
-          "FR": {
-            "key": "FR",
-            "count": 4800,
-            "sent_bytes": 13148168,
-            "received_bytes": 2659088
-          },
-          "IN": {
-            "key": "IN",
-            "count": 4800,
-            "sent_bytes": 13207256,
-            "received_bytes": 2650164
-          },
-          "CN": {
-            "key": "CN",
-            "count": 4800,
-            "sent_bytes": 13222992,
-            "received_bytes": 2619013
-          }
-        },
-        "os": {
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 722,
-            "sent_bytes": 1961776,
-            "received_bytes": 389917
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1443,
-            "sent_bytes": 4015996,
-            "received_bytes": 818608
-          },
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3606,
-            "sent_bytes": 9897720,
-            "received_bytes": 1981357
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 722,
-            "sent_bytes": 2004614,
-            "received_bytes": 410671
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2164,
-            "sent_bytes": 5889689,
-            "received_bytes": 1192403
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 722,
-            "sent_bytes": 2051379,
-            "received_bytes": 390029
-          },
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2163,
-            "sent_bytes": 5917578,
-            "received_bytes": 1195054
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2163,
-            "sent_bytes": 5951795,
-            "received_bytes": 1211625
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2163,
-            "sent_bytes": 5999214,
-            "received_bytes": 1188150
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 721,
-            "sent_bytes": 2041159,
-            "received_bytes": 403222
-          },
-          "iOS 8.4": {
-            "key": "iOS 8.4",
-            "count": 721,
-            "sent_bytes": 2071920,
-            "received_bytes": 385824
-          },
-          "Android 4.2.1": {
-            "key": "Android 4.2.1",
-            "count": 721,
-            "sent_bytes": 1889085,
-            "received_bytes": 396331
-          },
-          "Android 6.0": {
-            "key": "Android 6.0",
-            "count": 721,
-            "sent_bytes": 1965581,
-            "received_bytes": 387059
-          },
-          "Android 5.1.1": {
-            "key": "Android 5.1.1",
-            "count": 1442,
-            "sent_bytes": 3939180,
-            "received_bytes": 776600
-          },
-          "Android 4.4": {
-            "key": "Android 4.4",
-            "count": 721,
-            "sent_bytes": 1947547,
-            "received_bytes": 396944
-          },
-          "Android 4.4.4": {
-            "key": "Android 4.4.4",
-            "count": 2163,
-            "sent_bytes": 6009423,
-            "received_bytes": 1198211
-          },
-          "Android 4.2.2": {
-            "key": "Android 4.2.2",
-            "count": 1442,
-            "sent_bytes": 3955558,
-            "received_bytes": 795139
-          },
-          "Android 5.0.2": {
-            "key": "Android 5.0.2",
-            "count": 2163,
-            "sent_bytes": 6122513,
-            "received_bytes": 1192093
-          },
-          "Android 5.0": {
-            "key": "Android 5.0",
-            "count": 721,
-            "sent_bytes": 1980302,
-            "received_bytes": 395780
-          },
-          "Android 4.3": {
-            "key": "Android 4.3",
-            "count": 1442,
-            "sent_bytes": 3955862,
-            "received_bytes": 800082
-          }
-        },
-        "device": {
-          "GT-I9300": {
-            "key": "GT-I9300",
-            "count": 3609,
-            "sent_bytes": 9926261,
-            "received_bytes": 2007637
-          },
-          "iPod": {
-            "key": "iPod",
-            "count": 3607,
-            "sent_bytes": 9929118,
-            "received_bytes": 1975551
-          },
-          "iPhone": {
-            "key": "iPhone",
-            "count": 3605,
-            "sent_bytes": 10001417,
-            "received_bytes": 2021736
-          },
-          "iPad": {
-            "key": "iPad",
-            "count": 3605,
-            "sent_bytes": 9992199,
-            "received_bytes": 1969020
-          },
-          "Nexus 5": {
-            "key": "Nexus 5",
-            "count": 3605,
-            "sent_bytes": 9761065,
-            "received_bytes": 1960053
-          },
-          "GT-S7582": {
-            "key": "GT-S7582",
-            "count": 3605,
-            "sent_bytes": 9973522,
-            "received_bytes": 1983989
-          },
-          "SM-G530H": {
-            "key": "SM-G530H",
-            "count": 2884,
-            "sent_bytes": 8083992,
-            "received_bytes": 1589034
-          },
-          "SM-G355H": {
-            "key": "SM-G355H",
-            "count": 721,
-            "sent_bytes": 1933003,
-            "received_bytes": 401468
-          },
-          "HTC Desire": {
-            "key": "HTC Desire",
-            "count": 3605,
-            "sent_bytes": 9967314,
-            "received_bytes": 1996611
-          }
-        }
-      }
-    },
-    {
-      "indicesList": "logstash-2015.11.18",
-      "from": 1447855200000,
-      "to": 1447864200000,
-      "lm_rtt_aggs": {
-        "country": {
-          "US": {
-            "key": "US",
-            "count": 4803,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "GB": {
-            "key": "GB",
-            "count": 4840,
-            "lm_rtt_avg_ms": 258,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "FR": {
-            "key": "FR",
-            "count": 4804,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "IN": {
-            "key": "IN",
-            "count": 4800,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "CN": {
-            "key": "CN",
-            "count": 4800,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "EU": {
-            "key": "EU",
-            "count": 4800,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          }
-        },
-        "os": {
-          "iOS 9.0.2": {
-            "key": "iOS 9.0.2",
-            "count": 2165,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "iOS 8.3": {
-            "key": "iOS 8.3",
-            "count": 2165,
-            "lm_rtt_avg_ms": 253,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 8.4.1": {
-            "key": "iOS 8.4.1",
-            "count": 2164,
-            "lm_rtt_avg_ms": 254,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 9.1": {
-            "key": "iOS 9.1",
-            "count": 2164,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "iOS 7.1.2": {
-            "key": "iOS 7.1.2",
-            "count": 722,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 721,
             "lm_rtt_avg_ms": 247,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 259,
+            "lm_rtt_min_ms": 6,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 5.1.1": {
+            "key": "Android 5.1.1",
+            "count": 1442,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.4": {
+            "key": "Android 4.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          }
+        },
+        "device": {
+          "HTC Desire": {
+            "key": "HTC Desire",
+            "count": 3610,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "GT-I9300": {
+            "key": "GT-I9300",
+            "count": 3606,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPod": {
+            "key": "iPod",
+            "count": 3605,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPhone": {
+            "key": "iPhone",
+            "count": 3605,
+            "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPad": {
+            "key": "iPad",
+            "count": 3605,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Nexus 5": {
+            "key": "Nexus 5",
+            "count": 3605,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "GT-S7582": {
+            "key": "GT-S7582",
+            "count": 3605,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "SM-G530H": {
+            "key": "SM-G530H",
+            "count": 2884,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "SM-G355H": {
+            "key": "SM-G355H",
+            "count": 721,
+            "lm_rtt_avg_ms": 259,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          }
+        }
+      },
+      "gbt_aggs": {
+        "country": {
+          "CN": {
+            "key": "CN",
+            "count": 4815,
+            "sent_bytes": 13474907,
+            "received_bytes": 2646246
+          },
+          "EU": {
+            "key": "EU",
+            "count": 4831,
+            "sent_bytes": 13216898,
+            "received_bytes": 2661885
+          },
+          "US": {
+            "key": "US",
+            "count": 4800,
+            "sent_bytes": 13205299,
+            "received_bytes": 2637362
+          },
+          "GB": {
+            "key": "GB",
+            "count": 4800,
+            "sent_bytes": 13238309,
+            "received_bytes": 2645125
+          },
+          "FR": {
+            "key": "FR",
+            "count": 4800,
+            "sent_bytes": 13100282,
+            "received_bytes": 2613693
+          },
+          "IN": {
+            "key": "IN",
+            "count": 4800,
+            "sent_bytes": 13374253,
+            "received_bytes": 2663467
+          }
+        },
+        "os": {
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3606,
+            "sent_bytes": 9832549,
+            "received_bytes": 1959017
+          },
+          "Android 5.0.2": {
+            "key": "Android 5.0.2",
+            "count": 2164,
+            "sent_bytes": 6036571,
+            "received_bytes": 1193419
+          },
+          "Android 4.2.2": {
+            "key": "Android 4.2.2",
+            "count": 1443,
+            "sent_bytes": 4055220,
+            "received_bytes": 802154
+          },
+          "Android 4.4.4": {
+            "key": "Android 4.4.4",
+            "count": 2164,
+            "sent_bytes": 6072127,
+            "received_bytes": 1191812
+          },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1444,
+            "sent_bytes": 3965206,
+            "received_bytes": 798276
+          },
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 721,
+            "sent_bytes": 1975957,
+            "received_bytes": 395795
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1442,
+            "sent_bytes": 3976997,
+            "received_bytes": 803452
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 721,
+            "sent_bytes": 1969177,
+            "received_bytes": 409370
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2163,
+            "sent_bytes": 6032836,
+            "received_bytes": 1180020
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 721,
+            "sent_bytes": 1961933,
+            "received_bytes": 398719
+          },
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2163,
+            "sent_bytes": 5999582,
+            "received_bytes": 1180860
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "sent_bytes": 5887953,
+            "received_bytes": 1171942
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2163,
+            "sent_bytes": 6004227,
+            "received_bytes": 1177677
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 721,
+            "sent_bytes": 2002819,
+            "received_bytes": 404691
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "sent_bytes": 2002879,
+            "received_bytes": 399790
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "sent_bytes": 1974904,
+            "received_bytes": 397179
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "sent_bytes": 1953578,
+            "received_bytes": 404617
+          },
+          "Android 5.1.1": {
+            "key": "Android 5.1.1",
+            "count": 1442,
+            "sent_bytes": 3945110,
+            "received_bytes": 796827
+          },
+          "Android 4.4": {
+            "key": "Android 4.4",
+            "count": 721,
+            "sent_bytes": 1965550,
+            "received_bytes": 404278
+          },
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 721,
+            "sent_bytes": 1994773,
+            "received_bytes": 397883
+          }
+        },
+        "device": {
+          "HTC Desire": {
+            "key": "HTC Desire",
+            "count": 3610,
+            "sent_bytes": 10048292,
+            "received_bytes": 1993958
+          },
+          "GT-I9300": {
+            "key": "GT-I9300",
+            "count": 3606,
+            "sent_bytes": 9918522,
+            "received_bytes": 1992204
+          },
+          "iPod": {
+            "key": "iPod",
+            "count": 3605,
+            "sent_bytes": 9970615,
+            "received_bytes": 1975029
+          },
+          "iPhone": {
+            "key": "iPhone",
+            "count": 3605,
+            "sent_bytes": 10006384,
+            "received_bytes": 1987326
+          },
+          "iPad": {
+            "key": "iPad",
+            "count": 3605,
+            "sent_bytes": 9915230,
+            "received_bytes": 1951344
+          },
+          "Nexus 5": {
+            "key": "Nexus 5",
+            "count": 3605,
+            "sent_bytes": 9900567,
+            "received_bytes": 1992673
+          },
+          "GT-S7582": {
+            "key": "GT-S7582",
+            "count": 3605,
+            "sent_bytes": 9982023,
+            "received_bytes": 1998418
+          },
+          "SM-G530H": {
+            "key": "SM-G530H",
+            "count": 2884,
+            "sent_bytes": 7931115,
+            "received_bytes": 1587703
+          },
+          "SM-G355H": {
+            "key": "SM-G355H",
+            "count": 721,
+            "sent_bytes": 1937200,
+            "received_bytes": 389123
+          }
+        }
+      }
+    },
+    {
+      "indicesList": "logstash-2015.11.18",
+      "from": 1447882725000,
+      "to": 1447885350000,
+      "lm_rtt_aggs": {
+        "country": {
+          "EU": {
+            "key": "EU",
+            "count": 4809,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "US": {
+            "key": "US",
+            "count": 4837,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "GB": {
+            "key": "GB",
+            "count": 4800,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "FR": {
+            "key": "FR",
+            "count": 4800,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "IN": {
+            "key": "IN",
+            "count": 4800,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "CN": {
+            "key": "CN",
+            "count": 4800,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          }
+        },
+        "os": {
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 722,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1443,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3606,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 722,
+            "lm_rtt_avg_ms": 262,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2164,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 722,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 6,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2163,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2163,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 503
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_avg_ms": 261,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 721,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 501
+            "lm_rtt_max_ms": 503
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
@@ -3453,121 +3012,562 @@
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 721,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 249,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2163,
-            "lm_rtt_avg_ms": 259,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1442,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 250,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 503
-          },
-          "Android 4.4.2": {
-            "key": "Android 4.4.2",
-            "count": 3605,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
-          },
-          "Android 4.0.4": {
-            "key": "Android 4.0.4",
-            "count": 1442,
-            "lm_rtt_avg_ms": 261,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2163,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 721,
-            "lm_rtt_avg_ms": 261,
+            "lm_rtt_avg_ms": 247,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1442,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
-          },
-          "Android 4.1.2": {
-            "key": "Android 4.1.2",
-            "count": 721,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
-          },
-          "Android 4.1.1": {
-            "key": "Android 4.1.1",
-            "count": 721,
-            "lm_rtt_avg_ms": 256,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
-          },
-          "iOS 6.1.6": {
-            "key": "iOS 6.1.6",
-            "count": 721,
-            "lm_rtt_avg_ms": 255,
-            "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 502
           }
         },
         "device": {
+          "GT-I9300": {
+            "key": "GT-I9300",
+            "count": 3609,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
           "iPod": {
             "key": "iPod",
-            "count": 3608,
-            "lm_rtt_avg_ms": 257,
+            "count": 3607,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPhone": {
             "key": "iPhone",
-            "count": 3609,
-            "lm_rtt_avg_ms": 255,
+            "count": 3605,
+            "lm_rtt_avg_ms": 246,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iPad": {
             "key": "iPad",
             "count": 3605,
-            "lm_rtt_avg_ms": 250,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3605,
-            "lm_rtt_avg_ms": 258,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3605,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2884,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "SM-G355H": {
+            "key": "SM-G355H",
+            "count": 721,
+            "lm_rtt_avg_ms": 260,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "HTC Desire": {
+            "key": "HTC Desire",
+            "count": 3605,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          }
+        }
+      },
+      "gbt_aggs": {
+        "country": {
+          "EU": {
+            "key": "EU",
+            "count": 4809,
+            "sent_bytes": 13413445,
+            "received_bytes": 2641384
+          },
+          "US": {
+            "key": "US",
+            "count": 4837,
+            "sent_bytes": 13351769,
+            "received_bytes": 2659562
+          },
+          "GB": {
+            "key": "GB",
+            "count": 4800,
+            "sent_bytes": 13209237,
+            "received_bytes": 2633833
+          },
+          "FR": {
+            "key": "FR",
+            "count": 4800,
+            "sent_bytes": 13171926,
+            "received_bytes": 2627846
+          },
+          "IN": {
+            "key": "IN",
+            "count": 4800,
+            "sent_bytes": 13227563,
+            "received_bytes": 2653065
+          },
+          "CN": {
+            "key": "CN",
+            "count": 4800,
+            "sent_bytes": 13140601,
+            "received_bytes": 2658753
+          }
+        },
+        "os": {
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 722,
+            "sent_bytes": 1966380,
+            "received_bytes": 402780
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1443,
+            "sent_bytes": 3978551,
+            "received_bytes": 799433
+          },
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3606,
+            "sent_bytes": 9943906,
+            "received_bytes": 1965023
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 722,
+            "sent_bytes": 2030146,
+            "received_bytes": 409367
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2164,
+            "sent_bytes": 5930012,
+            "received_bytes": 1191069
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 722,
+            "sent_bytes": 2002479,
+            "received_bytes": 389861
+          },
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2163,
+            "sent_bytes": 6068211,
+            "received_bytes": 1190580
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2163,
+            "sent_bytes": 5938013,
+            "received_bytes": 1213062
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2163,
+            "sent_bytes": 6002491,
+            "received_bytes": 1191748
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 721,
+            "sent_bytes": 2039017,
+            "received_bytes": 398910
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "sent_bytes": 1954367,
+            "received_bytes": 385605
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "sent_bytes": 2004438,
+            "received_bytes": 412043
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "sent_bytes": 1923141,
+            "received_bytes": 394614
+          },
+          "Android 5.1.1": {
+            "key": "Android 5.1.1",
+            "count": 1442,
+            "sent_bytes": 3895571,
+            "received_bytes": 780316
+          },
+          "Android 4.4": {
+            "key": "Android 4.4",
+            "count": 721,
+            "sent_bytes": 2002986,
+            "received_bytes": 391200
+          },
+          "Android 4.4.4": {
+            "key": "Android 4.4.4",
+            "count": 2163,
+            "sent_bytes": 6044582,
+            "received_bytes": 1182939
+          },
+          "Android 4.2.2": {
+            "key": "Android 4.2.2",
+            "count": 1442,
+            "sent_bytes": 3930945,
+            "received_bytes": 802026
+          },
+          "Android 5.0.2": {
+            "key": "Android 5.0.2",
+            "count": 2163,
+            "sent_bytes": 5874409,
+            "received_bytes": 1189945
+          },
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 721,
+            "sent_bytes": 2024232,
+            "received_bytes": 395933
+          },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1442,
+            "sent_bytes": 3960664,
+            "received_bytes": 787989
+          }
+        },
+        "device": {
+          "GT-I9300": {
+            "key": "GT-I9300",
+            "count": 3609,
+            "sent_bytes": 10031142,
+            "received_bytes": 1990554
+          },
+          "iPod": {
+            "key": "iPod",
+            "count": 3607,
+            "sent_bytes": 9997045,
+            "received_bytes": 1973470
+          },
+          "iPhone": {
+            "key": "iPhone",
+            "count": 3605,
+            "sent_bytes": 10006022,
+            "received_bytes": 1995322
+          },
+          "iPad": {
+            "key": "iPad",
+            "count": 3605,
+            "sent_bytes": 9931523,
+            "received_bytes": 1992043
+          },
+          "Nexus 5": {
+            "key": "Nexus 5",
+            "count": 3605,
+            "sent_bytes": 9883749,
+            "received_bytes": 1977217
+          },
+          "GT-S7582": {
+            "key": "GT-S7582",
+            "count": 3605,
+            "sent_bytes": 9982447,
+            "received_bytes": 1992065
+          },
+          "SM-G530H": {
+            "key": "SM-G530H",
+            "count": 2884,
+            "sent_bytes": 7852609,
+            "received_bytes": 1563487
+          },
+          "SM-G355H": {
+            "key": "SM-G355H",
+            "count": 721,
+            "sent_bytes": 1975226,
+            "received_bytes": 384382
+          },
+          "HTC Desire": {
+            "key": "HTC Desire",
+            "count": 3605,
+            "sent_bytes": 9854778,
+            "received_bytes": 2005903
+          }
+        }
+      }
+    },
+    {
+      "indicesList": "logstash-2015.11.18",
+      "from": 1447885350000,
+      "to": 1447887975000,
+      "lm_rtt_aggs": {
+        "country": {
+          "US": {
+            "key": "US",
+            "count": 4803,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 504
+          },
+          "GB": {
+            "key": "GB",
+            "count": 4840,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "FR": {
+            "key": "FR",
+            "count": 4804,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "IN": {
+            "key": "IN",
+            "count": 4800,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "CN": {
+            "key": "CN",
+            "count": 4800,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "EU": {
+            "key": "EU",
+            "count": 4800,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          }
+        },
+        "os": {
+          "iOS 9.0.2": {
+            "key": "iOS 9.0.2",
+            "count": 2165,
             "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.3": {
+            "key": "iOS 8.3",
+            "count": 2165,
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 8.4.1": {
+            "key": "iOS 8.4.1",
+            "count": 2164,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 9.1": {
+            "key": "iOS 9.1",
+            "count": 2164,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iOS 7.1.2": {
+            "key": "iOS 7.1.2",
+            "count": 722,
+            "lm_rtt_avg_ms": 254,
+            "lm_rtt_min_ms": 7,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 8.4": {
+            "key": "iOS 8.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 262,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.2.1": {
+            "key": "Android 4.2.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 252,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 6.0": {
+            "key": "Android 6.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 263,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 5.1.1": {
+            "key": "Android 5.1.1",
+            "count": 1442,
+            "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.4": {
+            "key": "Android 4.4",
+            "count": 721,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.4.4": {
+            "key": "Android 4.4.4",
+            "count": 2163,
+            "lm_rtt_avg_ms": 248,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.2.2": {
+            "key": "Android 4.2.2",
+            "count": 1442,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 4.4.2": {
+            "key": "Android 4.4.2",
+            "count": 3605,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.0.4": {
+            "key": "Android 4.0.4",
+            "count": 1442,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 503
+          },
+          "Android 5.0.2": {
+            "key": "Android 5.0.2",
+            "count": 2163,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 5.0": {
+            "key": "Android 5.0",
+            "count": 721,
+            "lm_rtt_avg_ms": 247,
+            "lm_rtt_min_ms": 5,
+            "lm_rtt_max_ms": 499
+          },
+          "Android 4.3": {
+            "key": "Android 4.3",
+            "count": 1442,
+            "lm_rtt_avg_ms": 247,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.1.2": {
+            "key": "Android 4.1.2",
+            "count": 721,
+            "lm_rtt_avg_ms": 251,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Android 4.1.1": {
+            "key": "Android 4.1.1",
+            "count": 721,
+            "lm_rtt_avg_ms": 250,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
+          },
+          "iOS 6.1.6": {
+            "key": "iOS 6.1.6",
+            "count": 721,
+            "lm_rtt_avg_ms": 243,
+            "lm_rtt_min_ms": 6,
+            "lm_rtt_max_ms": 504
+          }
+        },
+        "device": {
+          "iPod": {
+            "key": "iPod",
+            "count": 3608,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPhone": {
+            "key": "iPhone",
+            "count": 3609,
+            "lm_rtt_avg_ms": 253,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "iPad": {
+            "key": "iPad",
+            "count": 3605,
+            "lm_rtt_avg_ms": 258,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "Nexus 5": {
+            "key": "Nexus 5",
+            "count": 3605,
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "GT-S7582": {
+            "key": "GT-S7582",
+            "count": 3605,
+            "lm_rtt_avg_ms": 249,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
+          },
+          "SM-G530H": {
+            "key": "SM-G530H",
+            "count": 2884,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -3575,20 +3575,20 @@
             "key": "SM-G355H",
             "count": 721,
             "lm_rtt_avg_ms": 246,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 248,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "lm_rtt_avg_ms": 258,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -3599,224 +3599,224 @@
           "US": {
             "key": "US",
             "count": 4803,
-            "sent_bytes": 13022221,
-            "received_bytes": 2642903
+            "sent_bytes": 13208770,
+            "received_bytes": 2623389
           },
           "GB": {
             "key": "GB",
             "count": 4840,
-            "sent_bytes": 13298758,
-            "received_bytes": 2630397
+            "sent_bytes": 13492386,
+            "received_bytes": 2683717
           },
           "FR": {
             "key": "FR",
             "count": 4804,
-            "sent_bytes": 13485320,
-            "received_bytes": 2633883
+            "sent_bytes": 13325780,
+            "received_bytes": 2628912
           },
           "IN": {
             "key": "IN",
             "count": 4800,
-            "sent_bytes": 13257830,
-            "received_bytes": 2617195
+            "sent_bytes": 13164514,
+            "received_bytes": 2623142
           },
           "CN": {
             "key": "CN",
             "count": 4800,
-            "sent_bytes": 13131096,
-            "received_bytes": 2654917
+            "sent_bytes": 13115204,
+            "received_bytes": 2625909
           },
           "EU": {
             "key": "EU",
             "count": 4800,
-            "sent_bytes": 13140523,
-            "received_bytes": 2618666
+            "sent_bytes": 13152257,
+            "received_bytes": 2628306
           }
         },
         "os": {
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2165,
-            "sent_bytes": 5861530,
-            "received_bytes": 1179372
+            "sent_bytes": 5980068,
+            "received_bytes": 1192286
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2165,
-            "sent_bytes": 6002426,
-            "received_bytes": 1161071
+            "sent_bytes": 6023852,
+            "received_bytes": 1171593
           },
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2164,
-            "sent_bytes": 6011301,
-            "received_bytes": 1189110
+            "sent_bytes": 5902599,
+            "received_bytes": 1195692
           },
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2164,
-            "sent_bytes": 5978712,
-            "received_bytes": 1194391
+            "sent_bytes": 6000351,
+            "received_bytes": 1192893
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 722,
-            "sent_bytes": 1959564,
-            "received_bytes": 409830
+            "sent_bytes": 2046290,
+            "received_bytes": 390818
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 721,
-            "sent_bytes": 1933864,
-            "received_bytes": 388138
+            "sent_bytes": 2040006,
+            "received_bytes": 391017
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 721,
-            "sent_bytes": 1974400,
-            "received_bytes": 407070
+            "sent_bytes": 1955041,
+            "received_bytes": 411597
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 721,
-            "sent_bytes": 1962594,
-            "received_bytes": 393937
+            "sent_bytes": 2002760,
+            "received_bytes": 383339
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1442,
-            "sent_bytes": 3902819,
-            "received_bytes": 786323
+            "sent_bytes": 3976697,
+            "received_bytes": 783070
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 721,
-            "sent_bytes": 1988540,
-            "received_bytes": 403194
+            "sent_bytes": 2001205,
+            "received_bytes": 383191
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2163,
-            "sent_bytes": 5975481,
-            "received_bytes": 1174013
+            "sent_bytes": 5950902,
+            "received_bytes": 1179510
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1442,
-            "sent_bytes": 3965541,
-            "received_bytes": 779168
+            "sent_bytes": 3894291,
+            "received_bytes": 797112
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3605,
-            "sent_bytes": 9966012,
-            "received_bytes": 1940426
+            "sent_bytes": 9825711,
+            "received_bytes": 1961200
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1442,
-            "sent_bytes": 4045621,
-            "received_bytes": 793757
+            "sent_bytes": 4057002,
+            "received_bytes": 789161
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2163,
-            "sent_bytes": 5862372,
-            "received_bytes": 1196414
+            "sent_bytes": 5978069,
+            "received_bytes": 1190355
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 721,
-            "sent_bytes": 1995157,
-            "received_bytes": 403990
+            "sent_bytes": 2006447,
+            "received_bytes": 402966
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1442,
-            "sent_bytes": 3954232,
-            "received_bytes": 810533
+            "sent_bytes": 3879686,
+            "received_bytes": 796200
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 721,
-            "sent_bytes": 2061912,
-            "received_bytes": 391953
+            "sent_bytes": 1974558,
+            "received_bytes": 408212
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 721,
-            "sent_bytes": 1942848,
-            "received_bytes": 394887
+            "sent_bytes": 1971295,
+            "received_bytes": 396328
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 721,
-            "sent_bytes": 1990822,
-            "received_bytes": 400384
+            "sent_bytes": 1992081,
+            "received_bytes": 396835
           }
         },
         "device": {
           "iPod": {
             "key": "iPod",
             "count": 3608,
-            "sent_bytes": 9958628,
-            "received_bytes": 1975285
+            "sent_bytes": 9960051,
+            "received_bytes": 1978253
           },
           "iPhone": {
             "key": "iPhone",
             "count": 3609,
-            "sent_bytes": 9904041,
-            "received_bytes": 1981621
+            "sent_bytes": 9985958,
+            "received_bytes": 1967871
           },
           "iPad": {
             "key": "iPad",
             "count": 3605,
-            "sent_bytes": 9875550,
-            "received_bytes": 1965390
+            "sent_bytes": 10039238,
+            "received_bytes": 1985010
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3605,
-            "sent_bytes": 9853850,
-            "received_bytes": 1996859
+            "sent_bytes": 9927496,
+            "received_bytes": 1957650
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3605,
-            "sent_bytes": 9880761,
-            "received_bytes": 1996489
+            "sent_bytes": 9934351,
+            "received_bytes": 2009011
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2884,
-            "sent_bytes": 7943658,
-            "received_bytes": 1570166
+            "sent_bytes": 8051681,
+            "received_bytes": 1567263
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 721,
-            "sent_bytes": 1999641,
-            "received_bytes": 384050
+            "sent_bytes": 1931121,
+            "received_bytes": 387135
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3605,
-            "sent_bytes": 9890730,
-            "received_bytes": 1964750
+            "sent_bytes": 9782769,
+            "received_bytes": 1976738
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3605,
-            "sent_bytes": 10028889,
-            "received_bytes": 1963351
+            "sent_bytes": 9846246,
+            "received_bytes": 1984444
           }
         }
       }
     },
     {
       "indicesList": "logstash-2015.11.18",
-      "from": 1447864200000,
-      "to": 1447873200000,
+      "from": 1447887975000,
+      "to": 1447890600000,
       "lm_rtt_aggs": {
         "country": {
           "FR": {
@@ -3829,35 +3829,35 @@
           "IN": {
             "key": "IN",
             "count": 4760,
-            "lm_rtt_avg_ms": 251,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "CN": {
             "key": "CN",
             "count": 4760,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 257,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "EU": {
             "key": "EU",
             "count": 4760,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "US": {
             "key": "US",
             "count": 4720,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "GB": {
             "key": "GB",
             "count": 4720,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -3866,35 +3866,35 @@
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2136,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2135,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 260,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2135,
-            "lm_rtt_avg_ms": 255,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2135,
-            "lm_rtt_avg_ms": 250,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 712,
-            "lm_rtt_avg_ms": 249,
+            "lm_rtt_avg_ms": 248,
             "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
@@ -3903,12 +3903,12 @@
             "count": 712,
             "lm_rtt_avg_ms": 244,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 503
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 712,
-            "lm_rtt_avg_ms": 245,
+            "lm_rtt_avg_ms": 248,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 503
           },
@@ -3922,86 +3922,86 @@
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 712,
-            "lm_rtt_avg_ms": 244,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 502
+            "lm_rtt_avg_ms": 260,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2136,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 252,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1424,
-            "lm_rtt_avg_ms": 250,
-            "lm_rtt_min_ms": 4,
+            "lm_rtt_avg_ms": 256,
+            "lm_rtt_min_ms": 5,
             "lm_rtt_max_ms": 504
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3560,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1424,
-            "lm_rtt_avg_ms": 263,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2136,
-            "lm_rtt_avg_ms": 254,
+            "lm_rtt_avg_ms": 255,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_max_ms": 504
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 712,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1424,
-            "lm_rtt_avg_ms": 250,
+            "lm_rtt_avg_ms": 258,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_max_ms": 504
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 712,
-            "lm_rtt_avg_ms": 257,
-            "lm_rtt_min_ms": 6,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_avg_ms": 255,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 504
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 712,
-            "lm_rtt_avg_ms": 252,
-            "lm_rtt_min_ms": 5,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_avg_ms": 257,
+            "lm_rtt_min_ms": 4,
+            "lm_rtt_max_ms": 503
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 712,
-            "lm_rtt_avg_ms": 256,
+            "lm_rtt_avg_ms": 254,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 504
+            "lm_rtt_max_ms": 503
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 711,
-            "lm_rtt_avg_ms": 257,
+            "lm_rtt_avg_ms": 260,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 501
+            "lm_rtt_max_ms": 504
           }
         },
         "device": {
@@ -4015,14 +4015,14 @@
           "iPad": {
             "key": "iPad",
             "count": 3560,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 253,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3560,
-            "lm_rtt_avg_ms": 248,
+            "lm_rtt_avg_ms": 251,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -4043,14 +4043,14 @@
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 712,
-            "lm_rtt_avg_ms": 261,
+            "lm_rtt_avg_ms": 260,
             "lm_rtt_min_ms": 4,
-            "lm_rtt_max_ms": 503
+            "lm_rtt_max_ms": 504
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3560,
-            "lm_rtt_avg_ms": 252,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           },
@@ -4064,7 +4064,7 @@
           "iPod": {
             "key": "iPod",
             "count": 3560,
-            "lm_rtt_avg_ms": 253,
+            "lm_rtt_avg_ms": 256,
             "lm_rtt_min_ms": 4,
             "lm_rtt_max_ms": 504
           }
@@ -4075,216 +4075,216 @@
           "FR": {
             "key": "FR",
             "count": 4756,
-            "sent_bytes": 12997847,
-            "received_bytes": 2595181
+            "sent_bytes": 13116228,
+            "received_bytes": 2589347
           },
           "IN": {
             "key": "IN",
             "count": 4760,
-            "sent_bytes": 13228982,
-            "received_bytes": 2582098
+            "sent_bytes": 13044276,
+            "received_bytes": 2614826
           },
           "CN": {
             "key": "CN",
             "count": 4760,
-            "sent_bytes": 13085531,
-            "received_bytes": 2617225
+            "sent_bytes": 12957986,
+            "received_bytes": 2640091
           },
           "EU": {
             "key": "EU",
             "count": 4760,
-            "sent_bytes": 13106741,
-            "received_bytes": 2605347
+            "sent_bytes": 13100642,
+            "received_bytes": 2601655
           },
           "US": {
             "key": "US",
             "count": 4720,
-            "sent_bytes": 12909966,
-            "received_bytes": 2598870
+            "sent_bytes": 12980868,
+            "received_bytes": 2590876
           },
           "GB": {
             "key": "GB",
             "count": 4720,
-            "sent_bytes": 13095757,
-            "received_bytes": 2584285
+            "sent_bytes": 13011779,
+            "received_bytes": 2568725
           }
         },
         "os": {
           "iOS 8.4.1": {
             "key": "iOS 8.4.1",
             "count": 2136,
-            "sent_bytes": 5878126,
-            "received_bytes": 1195228
+            "sent_bytes": 5823716,
+            "received_bytes": 1178393
           },
           "iOS 9.1": {
             "key": "iOS 9.1",
             "count": 2135,
-            "sent_bytes": 5878438,
-            "received_bytes": 1170652
+            "sent_bytes": 5851038,
+            "received_bytes": 1156776
           },
           "iOS 8.3": {
             "key": "iOS 8.3",
             "count": 2135,
-            "sent_bytes": 5914492,
-            "received_bytes": 1157852
+            "sent_bytes": 5890005,
+            "received_bytes": 1160808
           },
           "iOS 9.0.2": {
             "key": "iOS 9.0.2",
             "count": 2135,
-            "sent_bytes": 5757838,
-            "received_bytes": 1173304
+            "sent_bytes": 5807125,
+            "received_bytes": 1159882
           },
           "iOS 8.4": {
             "key": "iOS 8.4",
             "count": 712,
-            "sent_bytes": 1951956,
-            "received_bytes": 396433
+            "sent_bytes": 1975965,
+            "received_bytes": 395809
           },
           "Android 4.2.1": {
             "key": "Android 4.2.1",
             "count": 712,
-            "sent_bytes": 1983170,
-            "received_bytes": 389959
+            "sent_bytes": 1971109,
+            "received_bytes": 406234
           },
           "Android 6.0": {
             "key": "Android 6.0",
             "count": 712,
-            "sent_bytes": 2010189,
-            "received_bytes": 383926
+            "sent_bytes": 1948907,
+            "received_bytes": 381060
           },
           "Android 5.1.1": {
             "key": "Android 5.1.1",
             "count": 1424,
-            "sent_bytes": 3925418,
-            "received_bytes": 774199
+            "sent_bytes": 3971701,
+            "received_bytes": 772960
           },
           "Android 4.4": {
             "key": "Android 4.4",
             "count": 712,
-            "sent_bytes": 2010589,
-            "received_bytes": 391837
+            "sent_bytes": 1992360,
+            "received_bytes": 387338
           },
           "Android 4.4.4": {
             "key": "Android 4.4.4",
             "count": 2136,
-            "sent_bytes": 5927915,
-            "received_bytes": 1171403
+            "sent_bytes": 5858055,
+            "received_bytes": 1151879
           },
           "Android 4.2.2": {
             "key": "Android 4.2.2",
             "count": 1424,
-            "sent_bytes": 3928902,
-            "received_bytes": 779580
+            "sent_bytes": 3945000,
+            "received_bytes": 781555
           },
           "Android 4.4.2": {
             "key": "Android 4.4.2",
             "count": 3560,
-            "sent_bytes": 9868556,
-            "received_bytes": 1928847
+            "sent_bytes": 9819978,
+            "received_bytes": 1959130
           },
           "Android 4.0.4": {
             "key": "Android 4.0.4",
             "count": 1424,
-            "sent_bytes": 3899894,
-            "received_bytes": 772293
+            "sent_bytes": 3894308,
+            "received_bytes": 792158
           },
           "Android 5.0.2": {
             "key": "Android 5.0.2",
             "count": 2136,
-            "sent_bytes": 5953958,
-            "received_bytes": 1169771
+            "sent_bytes": 5796840,
+            "received_bytes": 1173591
           },
           "Android 5.0": {
             "key": "Android 5.0",
             "count": 712,
-            "sent_bytes": 1913165,
-            "received_bytes": 387451
+            "sent_bytes": 1983902,
+            "received_bytes": 388390
           },
           "Android 4.3": {
             "key": "Android 4.3",
             "count": 1424,
-            "sent_bytes": 3802696,
-            "received_bytes": 767529
+            "sent_bytes": 3861425,
+            "received_bytes": 773617
           },
           "Android 4.1.2": {
             "key": "Android 4.1.2",
             "count": 712,
-            "sent_bytes": 1957487,
-            "received_bytes": 396398
+            "sent_bytes": 1957140,
+            "received_bytes": 393033
           },
           "Android 4.1.1": {
             "key": "Android 4.1.1",
             "count": 712,
-            "sent_bytes": 1976741,
-            "received_bytes": 390886
+            "sent_bytes": 1914604,
+            "received_bytes": 394827
           },
           "iOS 6.1.6": {
             "key": "iOS 6.1.6",
             "count": 712,
-            "sent_bytes": 1908348,
-            "received_bytes": 391820
+            "sent_bytes": 1987927,
+            "received_bytes": 397905
           },
           "iOS 7.1.2": {
             "key": "iOS 7.1.2",
             "count": 711,
-            "sent_bytes": 1976946,
-            "received_bytes": 393638
+            "sent_bytes": 1960674,
+            "received_bytes": 400175
           }
         },
         "device": {
           "iPhone": {
             "key": "iPhone",
             "count": 3556,
-            "sent_bytes": 9798344,
-            "received_bytes": 1958188
+            "sent_bytes": 9732114,
+            "received_bytes": 1938002
           },
           "iPad": {
             "key": "iPad",
             "count": 3560,
-            "sent_bytes": 9863431,
-            "received_bytes": 1960485
+            "sent_bytes": 9714974,
+            "received_bytes": 1952288
           },
           "Nexus 5": {
             "key": "Nexus 5",
             "count": 3560,
-            "sent_bytes": 9930719,
-            "received_bytes": 1948755
+            "sent_bytes": 9822890,
+            "received_bytes": 1934413
           },
           "GT-S7582": {
             "key": "GT-S7582",
             "count": 3560,
-            "sent_bytes": 9741695,
-            "received_bytes": 1945889
+            "sent_bytes": 9841480,
+            "received_bytes": 1953601
           },
           "SM-G530H": {
             "key": "SM-G530H",
             "count": 2848,
-            "sent_bytes": 7900970,
-            "received_bytes": 1550413
+            "sent_bytes": 7871839,
+            "received_bytes": 1566142
           },
           "SM-G355H": {
             "key": "SM-G355H",
             "count": 712,
-            "sent_bytes": 1972813,
-            "received_bytes": 377727
+            "sent_bytes": 2008468,
+            "received_bytes": 387489
           },
           "HTC Desire": {
             "key": "HTC Desire",
             "count": 3560,
-            "sent_bytes": 9811210,
-            "received_bytes": 1934765
+            "sent_bytes": 9696171,
+            "received_bytes": 1958475
           },
           "GT-I9300": {
             "key": "GT-I9300",
             "count": 3560,
-            "sent_bytes": 9801273,
-            "received_bytes": 1946530
+            "sent_bytes": 9674481,
+            "received_bytes": 1955652
           },
           "iPod": {
             "key": "iPod",
             "count": 3560,
-            "sent_bytes": 9604369,
-            "received_bytes": 1960254
+            "sent_bytes": 9849362,
+            "received_bytes": 1959458
           }
         }
       }
