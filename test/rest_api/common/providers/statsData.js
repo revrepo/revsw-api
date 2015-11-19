@@ -254,7 +254,7 @@ var DataProvider = module.exports = function( from, to ) {
       request_status: ['OK','ERROR'],
       protocol: ['HTTP','HTTPS'],
       http_method: ['GET','HEAD','POST','PUT','DELETE','PATCH'],
-      quic: ['QUIC','-'],
+      quic: ['QUIC','HTTP'],
       country: ['US','GB','FR','IN','CN','EU'],
       agents: []
     }
@@ -273,6 +273,13 @@ var DataProvider = module.exports = function( from, to ) {
     this.options.from = t_;
   }
   this.options.indicesList = build_indices_list_( this.options.from, this.options.to );
+
+  //  read templates syncronously
+  var tmpl = fs.readFileSync( templates_file_ );
+  tmpl = JSON.parse( tmpl );
+  this.options.template = tmpl.template;
+  this.options.template.domain = domain_;
+  this.options.keys.agents = tmpl.agent;
 
   //  init client
   client_ = new elastic.Client({
@@ -312,17 +319,6 @@ DataProvider.prototype.readTestingData = function () {
     .then( function( data ) {
       _.extend( self.options, data );
       self.options.data = [];
-      return self;
-    })
-    .then( function() {
-      return fs.readFileAsync( templates_file_ );
-    })
-    .then( JSON.parse )
-    .then( function( data ) {
-
-      self.options.template = data.template;
-      self.options.template.domain = domain_;
-      self.options.keys.agents = data.agent;
       meta_loaded = true;
       return self;
     })
@@ -357,6 +353,7 @@ DataProvider.prototype.readTestingData = function () {
 DataProvider.prototype.generateTestingData = function ( save_data ) {
 
   var keys = this.options.keys,
+    tmpl = this.options.template,
     len0 = keys.status_code.length,
     len1 = keys.cache_code.length,
     len2 = keys.request_status.length,
@@ -372,33 +369,33 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
   this.clear();
   //  generate
   for ( var i0 = 0; i0 < len0; ++i0 ) {
-    template.response = keys.status_code[i0];
+    tmpl.response = keys.status_code[i0];
     for ( var i1 = 0; i1 < len1; ++i1 ) {
-      template.cache = keys.cache_code[i1];
+      tmpl.cache = keys.cache_code[i1];
       for ( var i2 = 0; i2 < len2; ++i2 ) {
-        template.conn_status = keys.request_status[i2];
+        tmpl.conn_status = keys.request_status[i2];
         for ( var i3 = 0; i3 < len3; ++i3 ) {
-          template.ipport = keys.protocol[i3] === 'HTTP' ? '80' : '443';
+          tmpl.ipport = keys.protocol[i3] === 'HTTP' ? '80' : '443';
           for ( var i4 = 0; i4 < len4; ++i4 ) {
-            template.method = keys.http_method[i4];
+            tmpl.method = keys.http_method[i4];
             for ( var i5 = 0; i5 < len5; ++i5 ) {
-              template.quic = keys.quic[i5];
+              tmpl.quic = keys.quic[i5];
               for ( var i6 = 0; i6 < len6; ++i6 ) {
-                template.geoip.country_code2 = keys.country[i6];
+                tmpl.geoip.country_code2 = keys.country[i6];
                 for ( var i7 = 0; i7 < len7; ++i7 ) {
 
-                  template.os = keys.agents[i7].os;
-                  template.agent = keys.agents[i7].agent;
-                  template.device = keys.agents[i7].device;
+                  tmpl.os = keys.agents[i7].os;
+                  tmpl.agent = keys.agents[i7].agent;
+                  tmpl.device = keys.agents[i7].device;
 
-                  template.s_bytes = Math.floor(Math.random() * 4500) + 500;
-                  template.r_bytes = Math.floor(Math.random() * 900) + 100;
-                  template.lm_rtt = Math.floor(Math.random() * 500000) + 4000;
+                  tmpl.s_bytes = Math.floor(Math.random() * 4500) + 500;
+                  tmpl.r_bytes = Math.floor(Math.random() * 900) + 100;
+                  tmpl.lm_rtt = Math.floor(Math.random() * 500000) + 4000;
 
-                  template['@timestamp'] = (new Date(t)).toISOString().slice(0,-1);
+                  tmpl['@timestamp'] = (new Date(t)).toISOString().slice(0,-1);
 
-                  var r_ = _.clone( template );
-                  r_.geoip = _.clone( template.geoip );
+                  var r_ = _.clone( tmpl );
+                  r_.geoip = _.clone( tmpl.geoip );
                   this.options.data.push({ _source: r_, t: t });
 
                   t += span;
@@ -490,7 +487,7 @@ DataProvider.prototype.generateTopObjectsTests = function () {
 
       if ( key === 'agents' ) {
         test.query.os = val.os;
-        test.query.device= val.device;
+        test.query.device = val.device;
       } else {
         test.query[key] = val;
       }

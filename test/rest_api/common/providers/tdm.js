@@ -48,8 +48,6 @@ var showHelp = function() {
   console.log('        save generated data, not only meta');
   console.log('    --not-upload :');
   console.log('        do not upload generated data to ES cluster');
-  console.log('    -v, --verbose :');
-  console.log('        blabbing output');
   console.log('    -h, --help :');
   console.log('        this message');
   console.log('    --dry-run :');
@@ -131,35 +129,35 @@ if ( action === 'generate' ) {
       return promise.resolve( DP );
     }
   })()
-  .then( function() {
-    console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-    console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-    console.log( '      Indices: ' + DP.options.indicesList );
-    if ( conf.dry ) {
+    .then( function() {
+      console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
+      console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
+      console.log( '      Indices: ' + DP.options.indicesList );
+      if ( conf.dry ) {
+        process.exit(0);
+      }
+      console.log( '    ### start data generation' );
+      return DP.generateTestingData( conf.savedata );
+    })
+    .then( function() {
+      console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
+      if ( conf.notupload ) {
+        return false;
+      }
+      console.log( '    ### start data uploading' );
+      return DP.uploadTestingData();
+    })
+    .then( function() {
+      if ( conf.notupload ) {
+        return false;
+      }
+      console.log( '    ### uploading done' );
       process.exit(0);
-    }
-    console.log( '    ### start data generation' );
-    return DP.generateTestingData( conf.savedata );
-  })
-  .then( function() {
-    console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
-    if ( conf.notupload ) {
-      return false;
-    }
-    console.log( '    ### start data uploading' );
-    return DP.uploadTestingData();
-  })
-  .then( function() {
-    if ( conf.notupload ) {
-      return false;
-    }
-    console.log( '    ### uploading done' );
-    process.exit(0);
-  })
-  .catch( function( e ) {
-    console.trace( e );
-    process.exit(1);
-  })
+    })
+    .catch( function( e ) {
+      console.trace( e );
+      process.exit(1);
+    })
 
   return;
 }
