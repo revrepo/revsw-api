@@ -88,14 +88,12 @@ describe('Smoke check', function () {
     // Setting a user for all upcoming API requests
     API.session.setCurrentUser(adminUser);
 
-    API.resources.accounts
+    API.resources.billingPlans
       .createOneAsPrerequisite(sample)
       .then(function (response) {
         sample.id = response.body.object_id;
         done();
       });
-
-    done();
   });
 
   // This block is run after a suite run all their tests. Same idea applies
@@ -110,7 +108,6 @@ describe('Smoke check', function () {
 
     API.resources.billingPlans.deleteAllPrerequisites(done);
 
-    done();
   });
 
   describe('BillingPlan resource', function () {
@@ -169,55 +166,12 @@ describe('Smoke check', function () {
           // `supertest-as-promised` package. It receives as param the sucess
           // response.
           .then(function (response) {
-            console.log(response.body);
             // Since we got a success response, we need to clean account created
             API.resources.accounts
               .deleteOne(response.body.object_id)
               .end(done);
           })
-          .catch(function (data) {
-            console.log(data);
-          })
           .finally(done);
       });
-    /*
-     // ### Test to update account
-     it('should return a response when updating specific account.',
-     function (done) {
-     var newAccount = DataProvider.generateAccount();
-     var updatedAccount = DataProvider.generateAccount('UPDATED');
-     API.session.setCurrentUser(adminUser);
-     API.resources.accounts
-     // Creating one account as pre-requisite since it is need to do a
-     // `update` REST API call. Note, no validations after it.
-     .createOneAsPrerequisite(newAccount)
-     .then(function (response) {
-     // Since account was created, we can `update` it
-     API.resources.accounts
-     .update(response.body.object_id, updatedAccount)
-     // Validate `update` was a success
-     .expect(200)
-     .end(done);
-     });
-     });
-
-     // ### Test to delete account
-     it('should return a response when deleting an account.', function (done) {
-     var newProject = DataProvider.generateAccount();
-     API.session.setCurrentUser(adminUser);
-     API.resources.accounts
-     // Creating one account as pre-requisite since it is need to do a
-     // `delete` REST API call. Note, no validations after it.
-     .createOneAsPrerequisite(newProject)
-     .then(function (response) {
-     // Since account was created, we can `delete` it
-     var objectId = response.body.object_id;
-     API.resources.accounts
-     .deleteOne(objectId)
-     // Validate `delete` was a success
-     .expect(200)
-     .end(done);
-     });
-     });*/
   });
 });
