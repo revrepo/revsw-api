@@ -216,6 +216,11 @@ module.exports = [
             css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required()
           }).required(),
           rev_component_bp : Joi.object({
+            end_user_response_headers: Joi.array().items({
+              header_value: Joi.string(),
+              header_name: Joi.string(),
+              operation: Joi.string().allow('add', 'remove', 'replace')
+            }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),
             cdn_overlay_urls       : Joi.array().items(Joi.string()).required(),
