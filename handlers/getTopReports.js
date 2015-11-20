@@ -79,10 +79,6 @@ exports.getTopReports = function(request, reply) {
         return reply(boom.badRequest('Requested report period exceeds 24 hours'));
       }
 
-      if (request.query.country) {
-        filter = ' AND country_code2: \"' + request.query.country + '\"';
-      }
-
       request.query.report_type = (request.query.report_type) ? request.query.report_type : 'referer';
 
       switch (request.query.report_type) {
@@ -130,27 +126,20 @@ exports.getTopReports = function(request, reply) {
       }
 
       var requestBody = {
-        'query': {
-          'filtered': {
-            'query': {
-              'query_string': {
-                'query': 'domain: \"' + domain_name + '\"' + filter,
-                'analyze_wildcard': true
+        query: {
+          bool: {
+            must: [{
+              range: {
+                '@timestamp': {
+                  'gte': start_time,
+                  'lte': end_time
+                }
               }
-            },
-            'filter': {
-              'bool': {
-                'must': [{
-                  'range': {
-                    '@timestamp': {
-                      'gte': start_time,
-                      'lte': end_time
-                    }
-                  }
-                }],
-                'must_not': []
+            }, {
+              term: {
+                domain: domain_name
               }
-            }
+            }]
           }
         },
         'size': 0,
@@ -171,6 +160,14 @@ exports.getTopReports = function(request, reply) {
           }
         }
       };
+
+      if (request.query.country) {
+        requestBody.query.bool.must.push({
+          term: {
+            'geoip.country_code2': request.query.country
+          }
+        });
+      }
 
       var indicesList = utils.buildIndexList(start_time, end_time);
       elasticSearch.getClientURL().search({

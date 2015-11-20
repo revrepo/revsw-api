@@ -69,6 +69,7 @@ exports.getRTTReports = function(request, reply) {
         end_time = request.query.to_timestamp || Date.now();
       }
 
+      //  5 min round
       start_time = Math.floor(start_time/300000)*300000;
       end_time = Math.floor(end_time/300000)*300000;
 
