@@ -70,6 +70,7 @@ module.exports = [
         schema: routeModels.statusModel
       }
     }
+  },
 
   {
     method : 'GET',
