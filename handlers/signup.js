@@ -50,7 +50,7 @@ var sendVerifyToken = function(user, token, cb) {
   };
 
   mail.sendMail(mailOptions, cb);
-}
+};
 
 exports.signup = function(req, reply) {
 
