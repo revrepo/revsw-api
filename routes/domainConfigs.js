@@ -136,9 +136,9 @@ module.exports = [
           tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)')
         }
       },
-//      response    : {
-//        schema : routeModels.statusModel
-//      }
+      response    : {
+        schema : routeModels.statusModel
+      }
     }
   },
 
@@ -166,14 +166,19 @@ module.exports = [
           options: Joi.string().valid('verify_only', 'publish').optional()
         },
         payload : {
-          domain_name                   : Joi.string().regex(routeModels.domainRegex)
-            .required().description('Domain name'),
           account_id             : Joi.objectId().description('Account ID of the account the domain should be assiciated with'),
-          origin_host_header     : Joi.string().regex(routeModels.domainRegex)
-            .description('"Host" header value used when accessing the origin server'),
+          origin_host_header     : Joi.string().regex(routeModels.domainRegex).description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.string().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().description('The ID of origin server location'),
           tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          '3rd_party_rewrite': Joi.object({
+            '3rd_party_root_rewrite_domains': Joi.string().allow('').required(),
+            '3rd_party_runtime_domains': Joi.string().allow('').required(),
+            '3rd_party_urls': Joi.string().allow('').required(),
+            enable_3rd_party_rewrite: Joi.boolean().required(),
+            enable_3rd_party_root_rewrite: Joi.boolean().required(),
+            enable_3rd_party_runtime_rewrite: Joi.boolean().required()
+          }).required(),
           enable_origin_health_probe: Joi.boolean(),
           origin_health_probe: Joi.object({
             HTTP_REQUEST: Joi.string().required(),
@@ -303,9 +308,9 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID to delete')
         }
       },
-      response    : {
-        schema : routeModels.statusModel
-      }
+//      response    : {
+//        schema : routeModels.statusModel
+//      }
     }
   }
 ];
