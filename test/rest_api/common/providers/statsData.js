@@ -379,7 +379,7 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
           for ( var i4 = 0; i4 < len4; ++i4 ) {
             tmpl.method = keys.http_method[i4];
             for ( var i5 = 0; i5 < len5; ++i5 ) {
-              tmpl.quic = keys.quic[i5];
+              tmpl.quic = keys.quic[i5] === 'QUIC' ? 'QUIC' : '-';
               for ( var i6 = 0; i6 < len6; ++i6 ) {
                 tmpl.geoip.country_code2 = keys.country[i6];
                 for ( var i7 = 0; i7 < len7; ++i7 ) {
@@ -418,7 +418,7 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
 };
 
 /**
- * Stats DataProvider.generateTestingData()
+ * Stats DataProvider.generateTopObjectsTests()
  *
  */
 DataProvider.prototype.generateTopObjectsTests = function () {
@@ -497,6 +497,219 @@ DataProvider.prototype.generateTopObjectsTests = function () {
   return _.map( tests, function( test ) {
     return { query: test.query, count: test.count };
   });
+};
+
+/**
+ * Stats DataProvider.generateTopTests()
+ *
+ */
+DataProvider.prototype.generateTopTests = function () {
+
+  var keys = this.options.keys,
+    len0 = keys.status_code.length,
+    len1 = keys.cache_code.length,
+    len2 = keys.request_status.length,
+    len3 = keys.protocol.length,
+    len4 = keys.http_method.length,
+    len5 = keys.quic.length,
+    len6 = keys.country.length,
+    len7 = keys.agents.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7;
+
+  var oses = {};
+  var len8 = 0;
+  var devices = {};
+  var len9 = 0;
+  for ( var i = 0, lenka = keys.agents.length; i < lenka; ++i ) {
+      var item = keys.agents[i];
+      if ( !oses[item.os] ) {
+        oses[item.os] = 0;
+        ++len8;
+      }
+      ++oses[item.os];
+      if ( !devices[item.device] ) {
+        devices[item.device] = 0;
+        ++len9;
+      }
+      ++devices[item.device];
+  };
+  _.each( oses, function( val, key ) {
+    oses[key] = val * total / len7/*agents*/;
+  });
+  _.each( devices, function( val, key ) {
+    devices[key] = val * total / len7/*agents*/;
+  });
+
+  return [
+    {
+      name: 'referer',
+      query: { report_type: 'referer' },
+      total_hits: total,
+      data_points_count: 0,
+      count: false
+    },
+    {
+      name: 'referer-country',
+      query: { report_type: 'referer', country: 'IN' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: 0,
+      count: false
+    },
+    {
+      name: 'status_code',
+      query: { report_type: 'status_code' },
+      total_hits: total,
+      data_points_count: len0,
+      count: function( key ) { return total / len0; }
+    },
+    {
+      name: 'status_code-country',
+      query: { report_type: 'status_code', country: 'US' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len0,
+      count: function( key ) { return total / len6 / len0; }
+    },
+    {
+      name: 'cache_status',
+      query: { report_type: 'cache_status' },
+      total_hits: total,
+      data_points_count: len1,
+      count: function( key ) { return total / len1; }
+    },
+    {
+      name: 'cache_status-country',
+      query: { report_type: 'cache_status', country: 'CN' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len1,
+      count: function( key ) { return total / len6 / len1 }
+    },
+    {
+      name: 'content_type',
+      query: { report_type: 'content_type' },
+      total_hits: total,
+      data_points_count: 1,
+      count: false
+    },
+    {
+      name: 'content_type-country',
+      query: { report_type: 'content_type', country: 'IN' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: 1,
+      count: false
+    },
+    {
+      name: 'request_status',
+      query: { report_type: 'request_status' },
+      total_hits: total,
+      data_points_count: len2,
+      count: function( key ) { return total / len2; }
+    },
+    {
+      name: 'request_status-country',
+      query: { report_type: 'request_status', country: 'GB' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len2,
+      count: function( key ) { return total / len6 / len2; }
+    },
+    {
+      name: 'protocol',
+      query: { report_type: 'protocol' },
+      total_hits: total,
+      data_points_count: len3,
+      count: function( key ) { return total / len3; }
+    },
+    {
+      name: 'protocol-country',
+      query: { report_type: 'protocol', country: 'FR' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len3,
+      count: function( key ) { return total / len6 / len3; }
+    },
+    {
+      name: 'http_method',
+      query: { report_type: 'http_method' },
+      total_hits: total,
+      data_points_count: len4,
+      count: function( key ) { return total / len4; }
+    },
+    {
+      name: 'http_method-country',
+      query: { report_type: 'http_method', country: 'EU' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len4,
+      count: function( key ) { return total / len6 / len4; }
+    },
+    {
+      name: 'content_encoding',
+      query: { report_type: 'content_encoding' },
+      total_hits: total,
+      data_points_count: 0,
+      count: false
+    },
+    {
+      name: 'content_encoding-country',
+      query: { report_type: 'content_encoding', country: 'IN' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: 0,
+      count: false
+    },
+    {
+      name: 'quic',
+      query: { report_type: 'QUIC' },
+      total_hits: total,
+      data_points_count: len5,
+      count: function( key ) { return total / len5; }
+    },
+    {
+      name: 'quic-country',
+      query: { report_type: 'QUIC', country: 'GB' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len5,
+      count: function( key ) { return total / len6 / len5; }
+    },
+    {
+      name: 'country',
+      query: { report_type: 'country' },
+      total_hits: total,
+      data_points_count: len6,
+      count: function( key ) { return total / len6; }
+    },
+    {
+      name: 'country-country',
+      query: { report_type: 'country', country: 'US' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: 1,
+      count: function( key ) { return total / len6; }
+    },
+    {
+      name: 'os',
+      query: { report_type: 'os' },
+      total_hits: total,
+      data_points_count: len8,
+      count: function( key ) { return oses[key]; }
+    },
+    {
+      name: 'os-country',
+      query: { report_type: 'os', country: 'US' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len8,
+      count: function( key ) { return oses[key] / len6; }
+    },
+    {
+      name: 'device',
+      query: { report_type: 'device' },
+      total_hits: total,
+      data_points_count: len9,
+      count: function( key ) { return devices[key]; }
+    },
+    {
+      name: 'device-country',
+      query: { report_type: 'device', country: 'IN' },
+      total_hits: total / len6/*country.length*/,
+      data_points_count: len9,
+      count: function( key ) { return devices[key] / len6; }
+    }
+  ];
 };
 
 /**
