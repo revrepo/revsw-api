@@ -476,7 +476,7 @@ DataProvider.prototype.generateTopObjectsTests = function () {
       keys: keys_,
       count: count
     });
-  };
+  }
 
   for ( var t = 0, lent = tests.length; t < lent; ++t ) {
     var test = tests[t];
@@ -491,8 +491,8 @@ DataProvider.prototype.generateTopObjectsTests = function () {
       } else {
         test.query[key] = val;
       }
-    };
-  };
+    }
+  }
 
   return _.map( tests, function( test ) {
     return { query: test.query, count: test.count };
@@ -532,7 +532,7 @@ DataProvider.prototype.generateTopTests = function () {
         ++len9;
       }
       ++devices[item.device];
-  };
+  }
   _.each( oses, function( val, key ) {
     oses[key] = val * total / len7/*agents*/;
   });
@@ -581,7 +581,7 @@ DataProvider.prototype.generateTopTests = function () {
       query: { report_type: 'cache_status', country: 'CN' },
       total_hits: total / len6/*country.length*/,
       data_points_count: len1,
-      count: function( key ) { return total / len6 / len1 }
+      count: function( key ) { return total / len6 / len1; }
     },
     {
       name: 'content_type',

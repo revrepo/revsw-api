@@ -20,12 +20,7 @@
 //  ----------------------------------------------------------------------------------------------//
 'use strict';
 
-var _ = require('lodash'),
-  elastic = require('elasticsearch'),
-  config = require( 'config' ),
-  promise = require('bluebird'),
-  fs = promise.promisifyAll(require('fs'));
-
+var promise = require('bluebird');
 var dp = require( './statsData.js' );
 
 //  CLI -----------------------------
@@ -39,11 +34,11 @@ var showHelp = function() {
   console.log('    --remove :');
   console.log('        remove testing data from ES cluster' );
   console.log('    --from :');
-  console.log('        from date');
+  console.log('        from date, for ex. "2015-11-19 15:00 UTC"');
   console.log('    --to :');
-  console.log('        to date');
+  console.log('        to date, for ex. "2015-11-19 23:59 UTC"');
   console.log('    --load-meta :');
-  console.log('        load parameters from statsMeta.json');
+  console.log('        load parameters from statsMeta.json (last used parameters and metadata are stored there)');
   console.log('    --save-data :');
   console.log('        save generated data, not only meta');
   console.log('    --not-upload :');
@@ -157,7 +152,7 @@ if ( action === 'generate' ) {
     .catch( function( e ) {
       console.trace( e );
       process.exit(1);
-    })
+    });
 
   return;
 }
@@ -192,7 +187,7 @@ if ( action === 'remove' ) {
   .catch( function( e ) {
     console.trace( e );
     process.exit(1);
-  })
+  });
 
   return;
 }

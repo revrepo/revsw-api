@@ -188,8 +188,8 @@ describe('Stats API check:', function () {
           })
           .catch( function( e ) {
             done( e );
-          })
-      })
+          });
+      });
     });
 
     describe('Top requests: ', function () {
@@ -242,8 +242,8 @@ describe('Stats API check:', function () {
           })
           .catch( function( e ) {
             done( e );
-          })
-      })
+          });
+      });
     });
 
   });
