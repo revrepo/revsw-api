@@ -61,7 +61,7 @@ var DataProvider = require('./../common/providers/data');
 // If you are not familiar with this, it is highly recommended to
 // review this resource: [API Testing
 // Dojo](http://www.soapui.org/testing-dojo/welcome-to-the-dojo/overview.html)
-describe('Smoke check', function () {
+xdescribe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds). Note that the
   // new value is retrieved from config file. It is recommended to have this

@@ -870,7 +870,7 @@ describe('Rev API Admin User', function() {
 
 
   it('should fail to create a new domain with existing domain name ' + newDomainName, function(done) {
-    this.timeout(60000);
+    this.timeout(120000);
     newDomainJson = {
       companyId: '55b6ff6a7957012304a49d04',
       name: testDomain,
@@ -971,7 +971,7 @@ describe('Rev API Admin User', function() {
 
 
   it('should create a new domain configuration for name ' + newDomainName, function(done) {
-    this.timeout(60000);
+    this.timeout(120000);
     newDomainJson = {
       companyId: '55b6ff6a7957012304a49d04',
       name: newDomainName,
@@ -1104,7 +1104,7 @@ describe('Rev API Admin User', function() {
   });
 
   it('should update all fields for test domain ' + newDomainName, function(done) {
-    this.timeout(60000);
+    this.timeout(120000);
     updateDomainJson = {
       companyId: '55b6ff6a7957012304a49d04',
       origin_server: 'origin_server2.com',
@@ -1281,7 +1281,7 @@ describe('Rev API Admin User', function() {
   });
 
   it('should update detailed domain configuration', function(done) {
-    this.timeout(60000);
+    this.timeout(120000);
 
     request(testAPIUrl)
       .put('/v1/domains/' + newDomainId + '/details')
@@ -1332,7 +1332,7 @@ describe('Rev API Admin User', function() {
   });
 
   it('should delete test domain ' + newDomainName, function(done) {
-    this.timeout(60000);
+    this.timeout(120000);
     request(testAPIUrl)
       .delete('/v1/domains/' + newDomainId)
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
