@@ -48,7 +48,7 @@
 
   "user_verify_subject" : "RevAPM Customer Portal Verify Profile",
   "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
-  "user_verify_token_lifetime" : 86400000
+  "user_verify_token_lifetime" : 86400000,
 
   "password_reset_token_lifespan": 3600000,     // 1 hour
   "password_reset_from_email" : "support@revapm.com",
