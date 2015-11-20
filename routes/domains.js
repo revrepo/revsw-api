@@ -205,7 +205,7 @@ module.exports = [
             PROBE_INTERVAL: Joi.number().integer().required(),
             HTTP_STATUS: Joi.number().integer().required()
           }),
-          proxy_timeout: Joi.boolean(),
+          proxy_timeout: Joi.number().integer(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
