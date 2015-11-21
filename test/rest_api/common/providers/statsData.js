@@ -31,20 +31,10 @@ var _ = require('lodash'),
   promise = require('bluebird'),
   fs = promise.promisifyAll(require('fs'));
 
-
 //  ----------------------------------------------------------------------------------------------//
 
-
 var client_ = false,
-  client_timeout_ = 1200000,
-  uploadPortionSize_ = 5000,
-  uploadConcurrency_ = 3,
-  type_ = 'apache_json_testing',
-  host_ = config.api.stats.elastic_test,
-  domain_ = config.api.stats.domains.google.name,
-  file_ = __dirname + '/statsData.json',
-  templates_file_ = __dirname + '/statsTemplates.json',
-  meta_file_ = __dirname + '/statsMeta.json';
+  client_url_ = false;
 
 //  ---------------------------------
 // creates indices list from the time span, like "logstash-2015.11.14,logstash-2015.11.15,logstash-2015.11.16,logstash-2015.11.17"
@@ -55,7 +45,7 @@ var build_indices_list_ = function ( from, to ) {
     day_ms = 24 * 3600000,
     list = 'logstash-' + d_start.getUTCFullYear() + '.' + ('0' + (d_start.getUTCMonth() + 1)).slice(-2) + '.' + ('0' + d_start.getUTCDate()).slice(-2);
 
-  to = Math.floor( to / day_ms + 1 ) * day_ms;
+  to = Math.floor( ( to - 1 ) / day_ms + 1 ) * day_ms;
   for ( var d = from + day_ms; d < to; d += day_ms ) {
     var d_curr = new Date( d );
     list += ',logstash-' + d_curr.getUTCFullYear() + '.' + ('0' + (d_curr.getUTCMonth() + 1)).slice(-2) + '.' + ('0' + d_curr.getUTCDate()).slice(-2);
@@ -77,148 +67,8 @@ var date_2_timestamp_ = function ( date ) {
   throw new Error( 'illegal date/timestamp value' );
 };
 
-//  ---------------------------------
-//  lm_rtt aggregations count abstraction
-var count_lm_rtt_agg_ = function( aggs, name, item ) {
-
-  var key;
-  if ( name === 'country' ) {
-    key = item.geoip && item.geoip.country_code2 ? item.geoip.country_code2 : '--';
-  } else {
-    key = item[name] ? item[name] : '--';
-  }
-
-  if ( !aggs[name][key] ) {
-    aggs[name][key] = {
-      key: key,
-      count: 0,
-      lm_rtt_avg_ms: 0,
-      lm_rtt_min_ms: 1000000,
-      lm_rtt_max_ms: 0
-    };
-  }
-  aggs[name][key].count++;
-  aggs[name][key].lm_rtt_avg_ms += item.lm_rtt;
-  if ( aggs[name][key].lm_rtt_min_ms > item.lm_rtt ) {
-    aggs[name][key].lm_rtt_min_ms = item.lm_rtt;
-  } else if ( aggs[name][key].lm_rtt_max_ms < item.lm_rtt ) {
-    aggs[name][key].lm_rtt_max_ms = item.lm_rtt;
-  }
-};
-
-//  ---------------------------------
-//  GBT/Traffic aggregations count abstraction
-var count_gbt_agg_ = function( aggs, name, item ) {
-
-  var key;
-  if ( name === 'country' ) {
-    key = item.geoip && item.geoip.country_code2 ? item.geoip.country_code2 : '--';
-  } else {
-    key = item[name] ? item[name] : '--';
-  }
-
-  if ( !aggs[name][key] ) {
-    aggs[name][key] = {
-      key: key,
-      count: 0,
-      sent_bytes: 0,
-      received_bytes: 0
-    };
-  }
-  aggs[name][key].count++;
-  aggs[name][key].sent_bytes += item.s_bytes;
-  aggs[name][key].received_bytes += item.r_bytes;
-};
-
-// var agg_ = {
-//   indicesList: ''
-//   from: 0,
-//   to: 0,
-//   lm_rtt_aggs: {},
-//   gbt_aggs: {}
-// };
-
-//  ---------------------------------
-var init_lm_rtt_aggs_ = function() {
-  return {
-    country: {},
-    os: {},
-    device: {}
-  };
-};
-var init_gbt_aggs_ = function() {
-  return {
-    country: {},
-    os: {},
-    device: {}
-  };
-};
-
-//  ---------------------------------
-var count_aggs_ = function( opts ) {
-
-  opts.aggs = [];
-  //  first aggregation is whole interval
-  opts.aggs.push({
-    indicesList: opts.indicesList,
-    from: opts.from,
-    to: opts.to,
-    lm_rtt_aggs: init_lm_rtt_aggs_(),
-    gbt_aggs: init_gbt_aggs_()
-  });
-
-  var span = Math.round( ( opts.to - opts.from ) / opts.spansNum );
-  var curr = opts.from;
-
-  for ( var i = 0; i < opts.spansNum; ++i ) {
-    opts.aggs.push({
-      indicesList: build_indices_list_( curr, curr + span ),
-      from: curr,
-      to: ( curr + span ),
-      lm_rtt_aggs: init_lm_rtt_aggs_(),
-      gbt_aggs: init_gbt_aggs_()
-    });
-    curr += span;
-  }
-
-  for ( i = 0; i < opts.dataCount; ++i ) {
-    var item = opts.data[i]._source,
-      span_i = Math.floor( ( opts.data[i].t - opts.from ) / span ) + 1,
-      agg = opts.aggs[span_i];
-
-    //  "manually" collect aggregations for further tests
-    count_lm_rtt_agg_( agg.lm_rtt_aggs, 'os', item );
-    count_lm_rtt_agg_( agg.lm_rtt_aggs, 'device', item );
-    count_lm_rtt_agg_( agg.lm_rtt_aggs, 'country', item );
-    count_gbt_agg_( agg.gbt_aggs, 'os', item );
-    count_gbt_agg_( agg.gbt_aggs, 'device', item );
-    count_gbt_agg_( agg.gbt_aggs, 'country', item );
-
-    count_lm_rtt_agg_( opts.aggs[0].lm_rtt_aggs, 'os', item );
-    count_lm_rtt_agg_( opts.aggs[0].lm_rtt_aggs, 'device', item );
-    count_lm_rtt_agg_( opts.aggs[0].lm_rtt_aggs, 'country', item );
-    count_gbt_agg_( opts.aggs[0].gbt_aggs, 'os', item );
-    count_gbt_agg_( opts.aggs[0].gbt_aggs, 'device', item );
-    count_gbt_agg_( opts.aggs[0].gbt_aggs, 'country', item );
-  }
-
-  //  round lm_rtt aggregations
-  for ( var a = 0, len = opts.aggs.length; a < len; ++a ) {
-    agg = opts.aggs[a];
-    for ( var key0 in agg.lm_rtt_aggs ) {
-      for ( var key1 in agg.lm_rtt_aggs[key0] ) {
-        item = agg.lm_rtt_aggs[key0][key1];
-        item.lm_rtt_avg_ms = Math.round( item.lm_rtt_avg_ms / item.count / 1000 );
-        item.lm_rtt_min_ms = Math.round( item.lm_rtt_min_ms / 1000 );
-        item.lm_rtt_max_ms = Math.round( item.lm_rtt_max_ms / 1000 );
-      }
-    }
-  }
-};
 
 //  DataProvider ---------------------------------------------------------------------------------//
-
-
 
 /**
  * Stats DataProvider.constructor
@@ -231,7 +81,6 @@ var count_aggs_ = function( opts ) {
     to          - end interval timestamp
     data        - loaded data
     dataCount   - mainly equal to data.length, but may contain length of the data stored in the ES cluster(after meta loading)
-    spansNum    - whole range splitted to the number of smaller spans
     aggs        - array of pre-counted aggregations
     template    -
     keys        -
@@ -245,9 +94,6 @@ var DataProvider = module.exports = function( from, to ) {
     to: 0,
     data: [],
     dataCount: 0,
-    spansNum: 8,
-    aggs: [],
-    template: {},
     keys: {
       status_code: ['200','304','301','206','404','302','416','504','400','503'],
       cache_code: ['HIT','MISS'],
@@ -255,8 +101,41 @@ var DataProvider = module.exports = function( from, to ) {
       protocol: ['HTTP','HTTPS'],
       http_method: ['GET','HEAD','POST','PUT','DELETE','PATCH'],
       quic: ['QUIC','HTTP'],
-      country: ['US','GB','FR','IN','CN','EU'],
-      agents: []
+      country: ['US','GB','FR','IN','CN'],
+      os: ['Android 4.4','Android 5.0','Android 5.1','iOS 8.4','iOS 9.0.2'],
+      device: ['iPhone','iPad','Nexus 5','GT-S7582','SM-G530H']
+    },
+    template: {
+      '@timestamp': '',
+      '@version': '1',
+      domain: config.api.stats.domains.google.name,
+      ipport: '80',
+      protocol: 'HTTP/1.1',
+      clientip: '66.249.93.145',
+      duration: 0.147,
+      upstream_time: '0.147',
+      response: '200',
+      request: '/favicon.ico',
+      s_bytes: 2000,
+      r_bytes: 200,
+      method: 'GET',
+      conn_status: 'OK',
+      KA: 24,
+      FBT_mu: 145921,
+      cache: 'MISS',
+      cache_age: '0',
+      cache_ttl: '-',
+      agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_4_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12H321',
+      cont_type: 'image/x-icon',
+      quic: '-',
+      lm_rtt: 0,
+      type: 'apache_json',
+      host: 'IAD02-BP01.REVSW.NET',
+      geoip: {
+        country_code2: 'US'
+      },
+      os: '',
+      device: ''
     }
   };
 
@@ -272,26 +151,12 @@ var DataProvider = module.exports = function( from, to ) {
     this.options.to = this.options.from;
     this.options.from = t_;
   }
+  this.options.to--;
   this.options.indicesList = build_indices_list_( this.options.from, this.options.to );
-
-  //  read templates syncronously
-  var tmpl = fs.readFileSync( templates_file_ );
-  tmpl = JSON.parse( tmpl );
-  this.options.template = tmpl.template;
-  this.options.template.domain = domain_;
-  this.options.keys.agents = tmpl.agent;
-
-  //  init client
-  client_ = new elastic.Client({
-    host: host_,
-    requestTimeout: client_timeout_,
-    // log: 'trace'
-    log: [{
-      type: 'stdio',
-      levels: [ 'error', 'warning' ]
-    }]
-  });
 };
+
+
+//  utils ----------------------------------------------------------------------------------------//
 
 /**
  * Stats DataProvider.clear()
@@ -300,57 +165,69 @@ var DataProvider = module.exports = function( from, to ) {
 DataProvider.prototype.clear = function () {
   this.options.data = [];
   this.options.dataCount = 0;
-  this.options.aggs = [];
 };
 
 /**
- * Stats DataProvider.readTestingData()
- * loads data from the json file
- *
- * @returns {Object} promise with loaded/parsed data as a param
+ * Stats DataProvider.setSpan()
+ * set time span
  */
-DataProvider.prototype.readTestingData = function () {
+DataProvider.prototype.setSpan = function ( from, to ) {
+  var day_ms = 3600000 * 24;
 
-  var self = this,
-    meta_loaded = false;
+  //  working timestamp interval, converted and rounded 2 5 min
+  this.options.from = Math.floor( date_2_timestamp_( from ) / 300000 ) * 300000;
+  this.options.to = Math.floor( date_2_timestamp_( to ) / 300000 ) * 300000;
 
-  return fs.readFileAsync( meta_file_ )
-    .then( JSON.parse )
-    .then( function( data ) {
-      _.extend( self.options, data );
-      self.options.data = [];
-      meta_loaded = true;
-      return self;
-    })
-    .then( function() {
-      return fs.accessAsync( file_, fs.R_OK );
-    })
-    .then( function() {
-      return fs.readFileAsync( file_ );
-    })
-    .then( JSON.parse )
-    .then( function( data ) {
-      self.options.data = data;
-      self.options.dataCount = data.length;
-      return self;
-    })
-    .catch( SyntaxError, function( e ) {
-      e.fileName = file_;
-      throw e;
-    })
-    .catch( function( e ) {
-      if ( !meta_loaded ) {
-        throw e;
-      }
-    });
+  if ( this.options.to < this.options.from ) {
+    var t_ = this.options.to;
+    this.options.to = this.options.from;
+    this.options.from = t_;
+  }
+  this.options.indicesList = build_indices_list_( this.options.from, this.options.to );
 };
+
+/**
+ * Stats DataProvider.todayAMSpan()
+ * this day first half span
+ */
+DataProvider.prototype.todayAMSpan = function () {
+  var day_ms = 3600000 * 24;
+  this.options.from = Math.floor( Date.now() / day_ms ) * day_ms;
+  this.options.to = this.options.from + ( day_ms / 2 );
+  this.options.indicesList = build_indices_list_( this.options.from, this.options.to );
+};
+
+/**
+ * Stats DataProvider.yesterdayPMSpan()
+ * yesterday's second half span
+ */
+DataProvider.prototype.yesterdayPMSpan = function () {
+  var day_ms = 3600000 * 24;
+  this.options.to = Math.floor( Date.now() / day_ms ) * day_ms;
+  this.options.from = this.options.to - ( day_ms / 2 );
+  this.options.indicesList = build_indices_list_( this.options.from, this.options.to - 1/**/ );
+};
+
+/**
+ * Stats DataProvider.autoSpan()
+ * invoke yesterdayPMSpan before noon and todayAMSpan after noon
+ */
+DataProvider.prototype.autoSpan = function () {
+  if ( ( Date.now() % ( 3600000 * 24 ) ) <= ( 3600000 * 12 ) ) {
+    this.yesterdayPMSpan();
+  } else {
+    this.todayAMSpan();
+  }
+};
+
+
+//  data generators ------------------------------------------------------------------------------//
 
 /**
  * Stats DataProvider.generateTestingData()
- * ..., caches it to the json file
  *
  */
-DataProvider.prototype.generateTestingData = function ( save_data ) {
+DataProvider.prototype.generateTestingData = function () {
 
   var keys = this.options.keys,
     tmpl = this.options.template,
@@ -361,10 +238,11 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
     len4 = keys.http_method.length,
     len5 = keys.quic.length,
     len6 = keys.country.length,
-    len7 = keys.agents.length,
-    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7,
+    len7 = keys.os.length,
+    len8 = keys.device.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7 * len8,
     t = this.options.from,
-    span = Math.floor( ( this.options.to - this.options.from ) / total );
+    span = ( this.options.to - this.options.from ) / total;
 
   this.clear();
   //  generate
@@ -383,22 +261,19 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
               for ( var i6 = 0; i6 < len6; ++i6 ) {
                 tmpl.geoip.country_code2 = keys.country[i6];
                 for ( var i7 = 0; i7 < len7; ++i7 ) {
+                  tmpl.os = keys.os[i7];
+                  for ( var i8 = 0; i8 < len8; ++i8 ) {
 
-                  tmpl.os = keys.agents[i7].os;
-                  tmpl.agent = keys.agents[i7].agent;
-                  tmpl.device = keys.agents[i7].device;
+                    tmpl.device = keys.device[i8];
+                    tmpl.lm_rtt = ( this.options.dataCount++ % 3 ) * 10000 + 10000;  //  min 10000 avg 20000 max 30000
+                    tmpl['@timestamp'] = new Date(Math.round(t)).toISOString().slice(0,-1);
 
-                  tmpl.s_bytes = Math.floor(Math.random() * 4500) + 500;
-                  tmpl.r_bytes = Math.floor(Math.random() * 900) + 100;
-                  tmpl.lm_rtt = Math.floor(Math.random() * 500000) + 4000;
+                    var r_ = _.clone( tmpl );
+                    r_.geoip = _.clone( tmpl.geoip );
+                    this.options.data.push({ _source: r_, t: t });
 
-                  tmpl['@timestamp'] = (new Date(t)).toISOString().slice(0,-1);
-
-                  var r_ = _.clone( tmpl );
-                  r_.geoip = _.clone( tmpl.geoip );
-                  this.options.data.push({ _source: r_, t: t });
-
-                  t += span;
+                    t += span;
+                  }
                 }
               }
             }
@@ -407,15 +282,174 @@ DataProvider.prototype.generateTestingData = function ( save_data ) {
       }
     }
   }
-  this.options.dataCount = this.options.data.length;
-  count_aggs_( this.options );
-
-  // save to a json file before further processing
-  fs.writeFileAsync( meta_file_, JSON.stringify( _.omit( this.options, 'data', 'template', 'keys' ), null, 2 ) );
-  if ( save_data ) {
-    fs.writeFileAsync( file_, JSON.stringify( this.options.data, null, 2 ) );
-  }
 };
+
+/**
+ * Stats DataProvider.uploadTestingData()
+ * upload data to the QA ES cluster
+ *
+ * @returns {Object} promise to check for success/error
+ */
+DataProvider.prototype.uploadTestingData = function () {
+
+  if ( !client_ ) {
+    //  init client
+    client_ = new elastic.Client({
+      host: config.api.stats.elastic_url,
+      requestTimeout: config.api.stats.client_timeout,
+      // log: 'trace'
+      log: [{
+        type: 'stdio',
+        levels: [ 'error', 'warning' ]
+      }]
+    });
+  }
+
+  var requests = [];
+  var curr = 0;
+
+  while ( curr < this.options.dataCount ) {
+
+    var end = curr + config.api.stats.upload_portion_size;
+    if ( end > this.options.dataCount ) {
+      end = this.options.dataCount;
+    }
+
+    var body = [];
+    while ( curr < end ) {
+      var item = this.options.data[curr];
+      body.push({ index: { _index: build_indices_list_( item.t, item.t ) } });
+      body.push( item._source );
+      ++curr;
+    }
+
+    requests.push({
+      type: config.api.stats.type,
+      body: body
+    });
+  }
+
+  return promise.map( requests, function( req ) {
+    return client_.bulk( req )
+      .then( function( resp ) {
+        console.log( '      # portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
+      });
+  }, { concurrency: config.api.stats.upload_concurrency } );
+  // .then( function( resp ) {
+  //   // { took: 177,
+  //   //   errors: false,
+  //   //   items:
+  //   //    [ { create:
+  //   //         { _index: 'logstash-2015.11.10',
+  //   //           _type: 'apache_json',
+  //   //           _id: 'AVD82nywkHRFAn3jA1B-',
+  //   //           _version: 1,
+  //   //           status: 201 } }, .....
+  //   if ( !resp.items ) {
+  //     return;
+  //   }
+  //   this.options._ids = _.map( resp.items, function( item ) {
+  //     return item.create._id;
+  //   });
+  //   return this.options;
+  // });
+};
+
+/**
+ * Stats DataProvider.removeTestingData()
+ * remove all uploaded data from the QA ES cluster, not using cached _id's but clear off all records with type === config.api.stats.type
+ *
+ * @returns {Object} promise to check for success/error
+ */
+DataProvider.prototype.removeTestingData = function () {
+
+  if ( !client_ ) {
+    //  init client
+    client_ = new elastic.Client({
+      host: config.api.stats.elastic_url,
+      requestTimeout: config.api.stats.client_timeout,
+      log: [{
+        type: 'stdio',
+        levels: [ 'error', 'warning' ]
+      }]
+    });
+  }
+
+  var self = this;
+  var hits_num = 0;
+
+  return client_.search({
+    index: self.options.indicesList,
+    ignoreUnavailable: true,
+    type: config.api.stats.type,
+    size: 500000,
+    body: {
+      query: {
+        match_all: {}
+      },
+      _source: false
+    }
+  })
+  .then( function( resp ) {
+
+    //  response:
+    // { took: 6874,
+    //   timed_out: false,
+    //   _shards: { total: 5, successful: 5, failed: 0 },
+    //   hits: { total: 220921, max_score: 1, hits: [ ..................... ] } }
+    //  hits[0]:
+    // { _index: 'logstash-2015.11.15',
+    //   _type: 'apache_json_testing',
+    //   _id: 'AVEOT1CTkHRFAn3jGiD2',
+    //   _score: 1 }
+
+    if ( !resp.hits || !resp.hits.hits || !resp.hits.hits.length ) {
+      return false;
+    }
+
+    var requests = [];
+    var curr = 0;
+
+    hits_num = resp.hits.hits.length;
+    while ( curr < hits_num ) {
+
+      var end = curr + ( config.api.stats.upload_portion_size * 4 );
+      if ( end > hits_num ) {
+        end = hits_num;
+      }
+
+      var body = [];
+      while ( curr < end ) {
+        body.push({
+          delete: _.omit( resp.hits.hits[curr], '_score' )
+        });
+        ++curr;
+      }
+
+      //  push one bulk request to remove portion of records
+      requests.push({
+        type: config.api.stats.type,
+        body: body
+      });
+
+    }
+
+    return promise.map( requests, function( req ) {
+      return client_.bulk( req )
+        .then( function( /*resp*/ ) {
+          console.log( '      # portion removing done' );
+        });
+    }, { concurrency: config.api.stats.upload_concurrency } );
+
+  })
+  .then( function() {
+    self.clear();
+    return hits_num;
+  });
+};
+
+
+//  test generators ------------------------------------------------------------------------------//
 
 /**
  * Stats DataProvider.generateTopObjectsTests()
@@ -431,11 +465,12 @@ DataProvider.prototype.generateTopObjectsTests = function () {
     len4 = keys.http_method.length,
     len5 = keys.quic.length,
     len6 = keys.country.length,
-    len7 = keys.agents.length,
-    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7;
+    len7 = keys.os.length,
+    len8 = keys.device.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7 * len8;
 
   var tests = [];
-  for ( var i = 0; i < 256; ++i ) {
+  for ( var i = 0; i < 512; ++i ) {
     var keys_ = [],
       count = total;
 
@@ -468,8 +503,12 @@ DataProvider.prototype.generateTopObjectsTests = function () {
       count /= len6;
     }
     if ( i&128 ) {
-      keys_.push( 'agents' );
+      keys_.push( 'os' );
       count /= len7;
+    }
+    if ( i&256 ) {
+      keys_.push( 'device' );
+      count /= len8;
     }
 
     tests.push({
@@ -478,24 +517,22 @@ DataProvider.prototype.generateTopObjectsTests = function () {
     });
   }
 
+  this.autoSpan();
   for ( var t = 0, lent = tests.length; t < lent; ++t ) {
     var test = tests[t];
-    test.query = {};
+    test.query = { from_timestamp: this.options.from, to_timestamp: this.options.to };
     for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
-      var key = test.keys[k],
-        val = keys[key][ Math.floor( keys[key].length * Math.random() ) ];
-
-      if ( key === 'agents' ) {
-        test.query.os = val.os;
-        test.query.device = val.device;
-      } else {
-        test.query[key] = val;
-      }
+      var key = test.keys[k];
+      test.query[key] = keys[key][ Math.floor( keys[key].length * Math.random() ) ];
     }
   }
 
   return _.map( tests, function( test ) {
-    return { query: test.query, count: test.count };
+    return {
+      name: test.keys.join(','),
+      query: test.query,
+      count: test.count
+    };
   });
 };
 
@@ -506,349 +543,140 @@ DataProvider.prototype.generateTopObjectsTests = function () {
 DataProvider.prototype.generateTopTests = function () {
 
   var keys = this.options.keys,
-    len0 = keys.status_code.length,
-    len1 = keys.cache_code.length,
-    len2 = keys.request_status.length,
-    len3 = keys.protocol.length,
-    len4 = keys.http_method.length,
-    len5 = keys.quic.length,
-    len6 = keys.country.length,
-    len7 = keys.agents.length,
-    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7;
+    test_keys = {
+      referer: 0,
+      content_type: 0,
+      content_encoding: 0,
+      status_code: keys.status_code.length,
+      cache_status: keys.cache_code.length,
+      request_status: keys.request_status.length,
+      protocol: keys.protocol.length,
+      http_method: keys.http_method.length,
+      quic: keys.quic.length,
+      country: keys.country.length,
+      os: keys.os.length,
+      device: keys.device.length,
+    },
+    total = test_keys.status_code * test_keys.cache_status * test_keys.request_status * test_keys.protocol *
+      test_keys.http_method * test_keys.quic * test_keys.country * test_keys.os * test_keys.device,
+    tests = [];
 
-  var oses = {};
-  var len8 = 0;
-  var devices = {};
-  var len9 = 0;
-  for ( var i = 0, lenka = keys.agents.length; i < lenka; ++i ) {
-      var item = keys.agents[i];
-      if ( !oses[item.os] ) {
-        oses[item.os] = 0;
-        ++len8;
-      }
-      ++oses[item.os];
-      if ( !devices[item.device] ) {
-        devices[item.device] = 0;
-        ++len9;
-      }
-      ++devices[item.device];
-  }
-  _.each( oses, function( val, key ) {
-    oses[key] = val * total / len7/*agents*/;
-  });
-  _.each( devices, function( val, key ) {
-    devices[key] = val * total / len7/*agents*/;
-  });
+  _.each( test_keys, function( val, key ) {
 
-  return [
-    {
-      name: 'referer',
-      query: { report_type: 'referer' },
-      total_hits: total,
-      data_points_count: 0,
-      count: false
-    },
-    {
-      name: 'referer-country',
-      query: { report_type: 'referer', country: 'IN' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: 0,
-      count: false
-    },
-    {
-      name: 'status_code',
-      query: { report_type: 'status_code' },
-      total_hits: total,
-      data_points_count: len0,
-      count: function( key ) { return total / len0; }
-    },
-    {
-      name: 'status_code-country',
-      query: { report_type: 'status_code', country: 'US' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len0,
-      count: function( key ) { return total / len6 / len0; }
-    },
-    {
-      name: 'cache_status',
-      query: { report_type: 'cache_status' },
-      total_hits: total,
-      data_points_count: len1,
-      count: function( key ) { return total / len1; }
-    },
-    {
-      name: 'cache_status-country',
-      query: { report_type: 'cache_status', country: 'CN' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len1,
-      count: function( key ) { return total / len6 / len1; }
-    },
-    {
-      name: 'content_type',
-      query: { report_type: 'content_type' },
-      total_hits: total,
-      data_points_count: 1,
-      count: false
-    },
-    {
-      name: 'content_type-country',
-      query: { report_type: 'content_type', country: 'IN' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: 1,
-      count: false
-    },
-    {
-      name: 'request_status',
-      query: { report_type: 'request_status' },
-      total_hits: total,
-      data_points_count: len2,
-      count: function( key ) { return total / len2; }
-    },
-    {
-      name: 'request_status-country',
-      query: { report_type: 'request_status', country: 'GB' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len2,
-      count: function( key ) { return total / len6 / len2; }
-    },
-    {
-      name: 'protocol',
-      query: { report_type: 'protocol' },
-      total_hits: total,
-      data_points_count: len3,
-      count: function( key ) { return total / len3; }
-    },
-    {
-      name: 'protocol-country',
-      query: { report_type: 'protocol', country: 'FR' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len3,
-      count: function( key ) { return total / len6 / len3; }
-    },
-    {
-      name: 'http_method',
-      query: { report_type: 'http_method' },
-      total_hits: total,
-      data_points_count: len4,
-      count: function( key ) { return total / len4; }
-    },
-    {
-      name: 'http_method-country',
-      query: { report_type: 'http_method', country: 'EU' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len4,
-      count: function( key ) { return total / len6 / len4; }
-    },
-    {
-      name: 'content_encoding',
-      query: { report_type: 'content_encoding' },
-      total_hits: total,
-      data_points_count: 0,
-      count: false
-    },
-    {
-      name: 'content_encoding-country',
-      query: { report_type: 'content_encoding', country: 'IN' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: 0,
-      count: false
-    },
-    {
-      name: 'quic',
-      query: { report_type: 'QUIC' },
-      total_hits: total,
-      data_points_count: len5,
-      count: function( key ) { return total / len5; }
-    },
-    {
-      name: 'quic-country',
-      query: { report_type: 'QUIC', country: 'GB' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len5,
-      count: function( key ) { return total / len6 / len5; }
-    },
-    {
-      name: 'country',
-      query: { report_type: 'country' },
-      total_hits: total,
-      data_points_count: len6,
-      count: function( key ) { return total / len6; }
-    },
-    {
-      name: 'country-country',
-      query: { report_type: 'country', country: 'US' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: 1,
-      count: function( key ) { return total / len6; }
-    },
-    {
-      name: 'os',
-      query: { report_type: 'os' },
-      total_hits: total,
-      data_points_count: len8,
-      count: function( key ) { return oses[key]; }
-    },
-    {
-      name: 'os-country',
-      query: { report_type: 'os', country: 'US' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len8,
-      count: function( key ) { return oses[key] / len6; }
-    },
-    {
-      name: 'device',
-      query: { report_type: 'device' },
-      total_hits: total,
-      data_points_count: len9,
-      count: function( key ) { return devices[key]; }
-    },
-    {
-      name: 'device-country',
-      query: { report_type: 'device', country: 'IN' },
-      total_hits: total / len6/*country.length*/,
-      data_points_count: len9,
-      count: function( key ) { return devices[key] / len6; }
-    }
-  ];
-};
-
-/**
- * Stats DataProvider.uploadTestingData()
- * upload data to the QA ES cluster
- *
- * @returns {Object} promise to check for success/error
- */
-DataProvider.prototype.uploadTestingData = function () {
-
-  var requests = [];
-  var curr = 0;
-
-  while ( curr < this.options.dataCount ) {
-
-    var end = curr + uploadPortionSize_;
-    if ( end > this.options.dataCount ) {
-      end = this.options.dataCount;
+    var dpt, dptc, cnt, cntc;
+    if ( val ) {
+      cnt = total / val;
+      cntc = key === 'country' ? total / test_keys.country : total / val / test_keys.country;
+      dpt = val;
+      dptc = key === 'country' ? 1 : val;
+    } else {
+      dptc = dpt = key === 'content_type' ? 1 : 0;
+      cnt = cntc = 0;
     }
 
-    var body = [];
-    while ( curr < end ) {
-      var item = this.options.data[curr];
-      body.push({ index: { _index: build_indices_list_( item.t, item.t ) } });
-      body.push( item._source );
-      ++curr;
+    if ( key === 'quic' ) {
+      key = 'QUIC';
     }
 
-    requests.push({
-      type: type_,
-      body: body
+    tests.push({
+      name: key,
+      query: { report_type: key },
+      total_hits: total,
+      data_points_count: dpt,
+      count: cnt
     });
-  }
+    tests.push({
+      name: ( key + ',country' ),
+      query: { report_type: key, country: this.options.keys.country[ Math.floor( Math.random() * test_keys.country ) ] },
+      total_hits: ( total / test_keys.country ),
+      data_points_count: dptc,
+      count: cntc
+    });
 
-  return promise.map( requests, function( req ) {
-    return client_.bulk( req )
-      .then( function( resp ) {
-        console.log( '      # portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
-      });
-  }, { concurrency: uploadConcurrency_ } );
-  // .then( function( resp ) {
-  //   // { took: 177,
-  //   //   errors: false,
-  //   //   items:
-  //   //    [ { create:
-  //   //         { _index: 'logstash-2015.11.10',
-  //   //           _type: 'apache_json',
-  //   //           _id: 'AVD82nywkHRFAn3jA1B-',
-  //   //           _version: 1,
-  //   //           status: 201 } }, .....
-  //   if ( !resp.items ) {
-  //     return;
-  //   }
-  //   this.options._ids = _.map( resp.items, function( item ) {
-  //     return item.create._id;
-  //   });
-  //   return this.options;
-  // });
+  }, this );
+
+  this.autoSpan();
+  for ( var i = 0, len = tests.length; i < len; ++i ) {
+    var test = tests[i];
+    test.query.from_timestamp = this.options.from;
+    test.query.to_timestamp = this.options.to;
+  };
+
+  return tests;
 };
 
 /**
- * Stats DataProvider.killTestingData()
- * remove all uploaded data from the QA ES cluster, not using cached _id's but clear off all records with type === type_
+ * Stats DataProvider.generateLMRTTTests()
  *
- * @returns {Object} promise to check for success/error
  */
-DataProvider.prototype.removeTestingData = function () {
+DataProvider.prototype.generateLMRTTTests = function () {
 
-  var self = this;
-  var hits_num = 0;
+  var keys = this.options.keys,
+    test_keys = {
+      country: keys.country.length,
+      os: keys.os.length,
+      device: keys.device.length,
+    },
+    total = test_keys.country * test_keys.os * test_keys.device * keys.status_code.length * keys.cache_code.length *
+      keys.request_status.length * keys.protocol.length * keys.http_method.length * keys.quic.length;
 
-  return client_.search({
-    index: self.options.indicesList,
-    type: type_,
-    size: 300000,
-    body: {
-      query: {
-        match_all: {}
-      },
-      _source: false
-    }
-  })
-  .then( function( resp ) {
+  this.autoSpan();
+  return _.mapValues({ country: {}, os: {}, device: {} }, function( v_, key ) {
+    var test = {
+        name: key ,
+        query: { report_type: key, from_timestamp: this.options.from, to_timestamp: this.options.to },
+        total_hits: total,
+        data_points_count: test_keys[key],
+        data: {}
+      };
 
-    //  response:
-    // { took: 6874,
-    //   timed_out: false,
-    //   _shards: { total: 5, successful: 5, failed: 0 },
-    //   hits: { total: 220921, max_score: 1, hits: [ ..................... ] } }
-    //  hits[0]:
-    // { _index: 'logstash-2015.11.15',
-    //   _type: 'apache_json_testing',
-    //   _id: 'AVEOT1CTkHRFAn3jGiD2',
-    //   _score: 1 }
-
-    if ( !resp.hits || !resp.hits.hits || !resp.hits.hits.length ) {
-      return false;
-    }
-
-    var requests = [];
-    var curr = 0;
-
-    hits_num = resp.hits.hits.length;
-    while ( curr < hits_num ) {
-
-      var end = curr + uploadPortionSize_;
-      if ( end > hits_num ) {
-        end = hits_num;
-      }
-
-      var body = [];
-      while ( curr < end ) {
-        body.push({
-          delete: _.omit( resp.hits.hits[curr], '_score' )
-        });
-        ++curr;
-      }
-
-      //  push one bulk request to remove uploadPortionSize_ records
-      requests.push({
-        type: type_,
-        body: body
-      });
-
-    }
-
-    return promise.map( requests, function( req ) {
-      return client_.bulk( req )
-        .then( function( resp ) {
-          console.log( '      # portion removing done' );
-        });
-    }, { concurrency: uploadConcurrency_ } );
-
-  })
-  .then( function() {
-    self.clear();
-    return hits_num;
-  });
+    _.each( keys[key], function( item ) {
+      test.data[item] = {
+        key: item,
+        count: (total / test_keys[key] ),
+        lm_rtt_avg_ms: 20,
+        lm_rtt_min_ms: 10,
+        lm_rtt_max_ms: 30
+      };
+    });
+    return test;
+  }, this );
 };
 
+/**
+ * Stats DataProvider.generateGBTTests()
+ *
+ */
+DataProvider.prototype.generateGBTTests = function () {
 
+  var keys = this.options.keys,
+    test_keys = {
+      country: keys.country.length,
+      os: keys.os.length,
+      device: keys.device.length,
+    },
+    total = test_keys.country * test_keys.os * test_keys.device * keys.status_code.length * keys.cache_code.length *
+      keys.request_status.length * keys.protocol.length * keys.http_method.length * keys.quic.length;
+
+  this.autoSpan();
+  return _.mapValues({ country: {}, os: {}, device: {} }, function( v_, key ) {
+    var test = {
+        name: key ,
+        query: { report_type: key, from_timestamp: this.options.from, to_timestamp: this.options.to },
+        total_hits: total,
+        data_points_count: test_keys[key],
+        data: {}
+      };
+
+    _.each( keys[key], function( item ) {
+      test.data[item] = {
+        key: item,
+        count: ( total / test_keys[key] ),
+        sent_bytes: ( total / test_keys[key] * this.options.template.s_bytes ),
+        received_bytes: ( total / test_keys[key] * this.options.template.r_bytes )
+      };
+    }, this );
+    return test;
+  }, this );
+};
 

@@ -27,26 +27,26 @@ var dp = require( './statsData.js' );
 
 var showHelp = function() {
   //  here's no place for logger
-  console.log('\n  Test Data Manager - a tool to generate, upload, remove test data from the ES cluster');
+  console.log('\n  Test Data Manager - a tool to generate, upload, remove test data from the ES clusters');
   console.log('  Usage:');
   console.log('    --gen, --generate :');
   console.log('        generate data' );
   console.log('    --remove :');
   console.log('        remove testing data from ES cluster' );
   console.log('    --from :');
-  console.log('        from date, for ex. "2015-11-19 15:00 UTC"');
+  console.log('        from date, for ex. "2015-11-19 15:00 UTC", required for generate and remove');
   console.log('    --to :');
-  console.log('        to date, for ex. "2015-11-19 23:59 UTC"');
-  console.log('    --load-meta :');
-  console.log('        load parameters from statsMeta.json (last used parameters and metadata are stored there)');
-  console.log('    --save-data :');
-  console.log('        save generated data, not only meta');
-  console.log('    --not-upload :');
-  console.log('        do not upload generated data to ES cluster');
+  console.log('        to date, for ex. "2015-11-19 23:59 UTC", required for generate and remove');
+  console.log('    --regenerate :');
+  console.log('        auto remove old data and regenerate a new:' );
+  console.log('         data will be removed within last 2 full days span' );
+  console.log('         data will be generated for the yesterday\'s second half of day if invoked before noon' );
+  console.log('         and for the todays\'s first half of day if invoked after noon' );
+  console.log('         --to and --from parameters will be ignored' );
   console.log('    -h, --help :');
   console.log('        this message');
   console.log('    --dry-run :');
-  console.log('        show config and return');
+  console.log('        show spans and return\n');
 };
 
 var conf = {},
@@ -75,18 +75,14 @@ for (var i = 0; i < parslen; ++i) {
     curr_par = 'from';
   } else if (pars[i] === '--to') {
     curr_par = 'to';
-  } else if (pars[i] === '--load-meta') {
-    conf.loadmeta = true;
-  } else if (pars[i] === '--save-data') {
-    conf.savedata = true;
-  } else if (pars[i] === '--not-upload') {
-    conf.notupload = true;
   } else if (pars[i] === '--dry-run') {
     conf.dry = true;
   } else if (pars[i] === '--gen' || pars[i] === '--generate') {
     action = 'generate';
   } else if (pars[i] === '--remove') {
     action = 'remove';
+  } else if (pars[i] === '--regenerate') {
+    action = 'regenerate';
   } else if (curr_par) {
     conf[curr_par] = pars[i];
   } else {
@@ -102,9 +98,10 @@ if (action === '') {
   return;
 }
 
-if ( ( !conf.to || !conf.from) && !conf.loadmeta ) {
-  conf.loadmeta = true;
-  console.log('insufficient from/to data, meta will be loaded ...');
+if ( ( !conf.to || !conf.from) && action !== 'regenerate' ) {
+  console.error( 'insufficient from/to data, meta will be loaded ...' );
+  showHelp();
+  return;
 }
 
 //  actions --------------------------------------------------------------------------------------//
@@ -113,39 +110,22 @@ if ( ( !conf.to || !conf.from) && !conf.loadmeta ) {
 
 if ( action === 'generate' ) {
 
-  var DP;
+  var DP = new dp( conf.from, conf.to );
+  console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
+  console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
+  console.log( '      Indices: ' + DP.options.indicesList );
 
-  ( function() {
-    if ( conf.loadmeta ) {
-      DP = new dp();
-      return DP.readTestingData();
-    } else {
-      DP = new dp( conf.from, conf.to );
-      return promise.resolve( DP );
-    }
-  })()
+  if ( conf.dry ) {
+    process.exit(0);
+    return;
+  }
+
+  console.log( '    ### start data generation' );
+  DP.generateTestingData();
+  console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
+  console.log( '    ### start data uploading' );
+  return DP.uploadTestingData()
     .then( function() {
-      console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-      console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-      console.log( '      Indices: ' + DP.options.indicesList );
-      if ( conf.dry ) {
-        process.exit(0);
-      }
-      console.log( '    ### start data generation' );
-      return DP.generateTestingData( conf.savedata );
-    })
-    .then( function() {
-      console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
-      if ( conf.notupload ) {
-        return false;
-      }
-      console.log( '    ### start data uploading' );
-      return DP.uploadTestingData();
-    })
-    .then( function() {
-      if ( conf.notupload ) {
-        return false;
-      }
       console.log( '    ### uploading done' );
       process.exit(0);
     })
@@ -157,37 +137,86 @@ if ( action === 'generate' ) {
   return;
 }
 
+//  ---------------------------------
 if ( action === 'remove' ) {
 
-  var DP;
+  var DP = new dp( conf.from, conf.to );
+  console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
+  console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
+  console.log( '      Indices: ' + DP.options.indicesList );
 
-  ( function() {
-    if ( conf.loadmeta ) {
-      DP = new dp();
-      return DP.readTestingData();
-    } else {
-      DP = new dp( conf.from, conf.to );
-      return promise.resolve( DP );
-    }
-  })()
-  .then( function() {
+  if ( conf.dry ) {
+    process.exit(0);
+    return;
+  }
+
+  console.log( '    ### start data removing' );
+  return DP.removeTestingData()
+    .then( function( num ) {
+      console.log( '    ### removing done, ' + num + ' records removed' );
+      process.exit(0);
+    })
+    .catch( function( e ) {
+      console.trace( e );
+      process.exit(1);
+    });
+
+  return;
+}
+
+//  ---------------------------------
+if ( action === 'regenerate' ) {
+
+  var DP,
+    day_ms = 3600000 * 24,
+    from = Math.floor( ( Date.now() / day_ms ) - 1 ) * day_ms;
+
+  if ( conf.dry ) {
+    DP = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
+    console.log( '    ### data clearance span:' );
     console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
     console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-    console.log( '      Indices: ' + DP.options.indicesList );
-    if ( conf.dry ) {
-      process.exit(0);
-    }
-    console.log( '    ### start data removing' );
-    return DP.removeTestingData();
-  })
-  .then( function( num ) {
-    console.log( '    ### removing done, ' + num + ' records removed' );
+    console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+
+    DP.autoSpan();
+    console.log( '    ### data generation span:' );
+    console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
+    console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
+    console.log( '      Indices: ' + DP.options.indicesList + '\n' );
     process.exit(0);
-  })
-  .catch( function( e ) {
-    console.trace( e );
-    process.exit(1);
-  });
+    return;
+  }
+
+  DP = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
+  console.log( '    ### data clearance span:' );
+  console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
+  console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
+  console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+
+  console.log( '    ### start data removing' );
+  return DP.removeTestingData()
+    .then( function( num ) {
+      console.log( '    ### removing done, ' + num + ' records removed\n' );
+      DP.autoSpan();
+      console.log( '    ### data generation span:' );
+      console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
+      console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
+      console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+
+      console.log( '    ### start data generation' );
+      DP.generateTestingData();
+      console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
+      console.log( '    ### start data uploading' );
+      return DP.uploadTestingData();
+    })
+    .then( function() {
+      console.log( '    ### uploading done' );
+      process.exit(0);
+    })
+    .catch( function( e ) {
+      console.trace( e );
+      process.exit(1);
+    });
 
   return;
 }

@@ -50,8 +50,12 @@
       }
     },
     "stats": {
-      "request": "stats",
-      "elastic_test": "testsjc20-esurl01.revsw.net:9200",
+      "elastic": "testsjc20-es01.revsw.net:9200",
+      "elastic_url": "testsjc20-esurl01.revsw.net:9200",
+      "client_timeout": 1200000,
+      "upload_portion_size": 10000,
+      "upload_concurrency": 3,
+      "type": "apache_json_testing",
       "domains": {
         "test": {
           "id": "55df7177bab6f4da0306f58e",
