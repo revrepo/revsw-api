@@ -188,6 +188,7 @@ module.exports = [
             HTTP_STATUS: Joi.number().integer().required()
           }),
           proxy_timeout: Joi.number().integer(),
+          domain_wildcard_alias: Joi.string(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
