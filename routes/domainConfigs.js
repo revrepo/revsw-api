@@ -180,6 +180,7 @@ module.exports = [
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
           }).required(),
           enable_origin_health_probe: Joi.boolean(),
+          domain_aliases: Joi.array().items(Joi.string()),
           origin_health_probe: Joi.object({
             HTTP_REQUEST: Joi.string().required(),
             PROBE_TIMEOUT: Joi.number().integer().required(),
