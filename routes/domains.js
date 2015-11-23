@@ -199,6 +199,7 @@ module.exports = [
         },
         payload : {
           enable_origin_health_probe: Joi.boolean(),
+          domain_aliases: Joi.array().items(Joi.string()),
           origin_health_probe: Joi.object({
             HTTP_REQUEST: Joi.string().required(),
             PROBE_TIMEOUT: Joi.number().integer().required(),
@@ -206,6 +207,7 @@ module.exports = [
             HTTP_STATUS: Joi.number().integer().required()
           }),
           proxy_timeout: Joi.number().integer(),
+          domain_wildcard_alias: Joi.string(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -216,6 +218,11 @@ module.exports = [
             css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required()
           }).required(),
           rev_component_bp : Joi.object({
+            end_user_response_headers: Joi.array().items({
+              header_value: Joi.string(),
+              header_name: Joi.string(),
+              operation: Joi.string().allow('add', 'remove', 'replace')
+            }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),
             cdn_overlay_urls       : Joi.array().items(Joi.string()).required(),

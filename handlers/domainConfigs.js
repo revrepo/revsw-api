@@ -38,6 +38,16 @@ var ServerGroup         = require('../models/ServerGroup');
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 
+function checkDomainAccessPermission(request, domain) {
+  if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.name) === -1) {
+     return false;
+  } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
+    request.auth.credentials.companyId.indexOf(domain.account_id) === -1) {
+    return false;
+  }  
+  return true;
+}
+
 exports.getDomainConfigStatus = function(request, reply) {
 
   var domain_id = request.params.domain_id;
@@ -49,10 +59,7 @@ exports.getDomainConfigStatus = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(result.name) === -1) {
-       return reply(boom.badRequest('Domain ID not found'));
-    } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-      request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -94,14 +101,8 @@ exports.getDomainConfigs = function(request, reply) {
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
-        if (request.auth.credentials.role === 'user') {
-          if (request.auth.credentials.domain.indexOf(response_json[i].name) !== -1) {
-            response.push(response_json[i]);
-          }
-        } else if (request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') {
-          if (request.auth.credentials.companyId.indexOf(response_json[i].account_id) !== -1) {
-            response.push(response_json[i]);
-          }
+        if (checkDomainAccessPermission(request,response_json[i])) {
+          response.push(response_json[i]);
         }
       }
       renderJSON(request, reply, err, response);
@@ -122,12 +123,7 @@ exports.getDomainConfig = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Domain ID not found'));
     }
-    var account_id = result.account_id;
-
-    if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(result.name) === -1) {
-       return reply(boom.badRequest('Domain ID not found'));
-    } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-      request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -156,6 +152,7 @@ exports.getDomainConfig = function(request, reply) {
 
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
+  var originalDomainJson = newDomainJson;
 
   if (request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
     return reply(boom.badRequest('Account ID not found'));
@@ -173,17 +170,13 @@ exports.createDomainConfig = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
     }
-    newDomainJson.origin_server_location = result.publicName;
     newDomainJson.created_by = request.auth.credentials.email;
-    newDomainJson.name = newDomainJson.domain_name;
-    delete newDomainJson.domain_name;
     if (!newDomainJson.tolerance) {
       newDomainJson.tolerance = 3000;
     }
-    delete newDomainJson.origin_server_location_id;
 
     domainConfigs.query({
-      name : newDomainJson.name,
+      domain_name : newDomainJson.domain_name,
       deleted: { $ne: true }
     }, function (error, result) {
       if (error) {
@@ -209,10 +202,30 @@ exports.createDomainConfig = function(request, reply) {
         if (res.statusCode === 400)  {
           return reply(boom.badRequest(response_json.message));
         }
-        var response = response_json;
-        if (response_json.proxy_config) {
-          response = response_json.proxy_config;
+        if (res.statusCode !== 200) {
+          return renderJSON(request, reply, err, response_json);
         }
+
+        var response = {  
+          statusCode: 200,
+          message: 'Successfully created new domain configuration',
+          object_id: response_json._id
+        };
+        AuditLogger.store({
+          ip_address        : request.info.remoteAddress,
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId,
+          activity_type    : 'add',
+          activity_target  : 'domain',
+          target_id        : response.object_id,
+          target_name      : originalDomainJson.domain_name,
+          target_object    : originalDomainJson,
+          operation_status : 'success'
+        });
+
         renderJSON(request, reply, err, response);
       });
     });
@@ -223,8 +236,7 @@ exports.updateDomainConfig = function(request, reply) {
 
   var newDomainJson = request.payload;
   var domain_id = request.params.domain_id;
-  var optionsFlag = (request.query.options && request.query.options === 'verify_only') ? '?verify=true':
-    ( (request.query.options && request.query.options === 'publish') ? '?publish=true' : '' );
+  var optionsFlag = (request.query.options) ? '?' + request.query.options : '';
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
@@ -233,12 +245,7 @@ exports.updateDomainConfig = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Domain ID not found'));
     }
-    var account_id = result.account_id;
-
-    if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(result.name) === -1) {
-       return reply(boom.badRequest('Domain ID not found'));
-    } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-      request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -259,6 +266,21 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
+      AuditLogger.store({
+        ip_address        : request.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId,
+        activity_type    : 'modify',
+        activity_target  : 'domain',
+        target_id        : result.domain_id,
+        target_name      : result.newDomainJson,
+        target_object    : result,
+        operation_status : 'success'
+      });
+
       renderJSON(request, reply, err, response);
     });
   });
@@ -266,5 +288,53 @@ exports.updateDomainConfig = function(request, reply) {
 };
 
 exports.deleteDomainConfig = function(request, reply) {
+
+  var domain_id = request.params.domain_id;
+
+  domainConfigs.get(domain_id, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+    }
+    if (!result) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+    if (!checkDomainAccessPermission(request,result)) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+
+    logger.info('Calling CDS to delete domain ID: ' + domain_id);
+
+    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id,
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer ' + config.get('cds_api_token')
+      },
+    }, function (err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to send a CDS command to delete domain ID ' + domain_id));
+      }
+      var response_json = JSON.parse(body);
+      if (res.statusCode === 400) {
+        return reply(boom.badRequest(response_json.message));
+      }
+
+      AuditLogger.store({
+        ip_address        : request.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId,
+        activity_type    : 'delete',
+        activity_target  : 'domain',
+        target_id        : result.domain_id,
+        target_name      : result.proxy_config,
+        target_object    : result,
+        operation_status : 'success'
+      });
+      var response = response_json;
+      renderJSON(request, reply, err, response);
+    });
+  });
 
 };

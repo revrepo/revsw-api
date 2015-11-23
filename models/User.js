@@ -22,6 +22,7 @@
 //	data access layer
 
 var utils = require('../lib/utilities.js');
+var _ = require('lodash');
 
 function User(mongoose, connection, options) {
   this.options = options;
@@ -34,7 +35,7 @@ function User(mongoose, connection, options) {
       reports   : {type : Boolean, default : true},
       configure : {type : Boolean, default : true},
       test      : {type : Boolean, default : true},
-      readOnly  : {type : Boolean, default : false},
+      readOnly  : {type : Boolean, default : false}
     },
     'companyId'            : String,
     'domain'               : String,
@@ -51,7 +52,27 @@ function User(mongoose, connection, options) {
     'resetPasswordToken'   : String,
     'resetPasswordExpires' : Number,
     'two_factor_auth_enabled': {type: Boolean, default: false},
-    'two_factor_auth_secret_base32': String
+    'two_factor_auth_secret_base32': String,
+
+    // Self register section
+    self_registered: {
+      type: Boolean,
+      default: false
+    },
+    company_name: {
+      type: String
+    },
+    old_passwords: [String],
+
+    validation: {
+      expiredAt: Date,
+      token: String
+    },
+
+    billing_plan: this.ObjectId,
+
+    deleted: { type: Boolean, default: false }
+
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
@@ -80,7 +101,7 @@ User.prototype = {
 
         delete item.__v;
         delete item._id;
-        delete item.id;
+        //delete item.id;
 
         callback(err, item);
       }
@@ -100,6 +121,8 @@ User.prototype = {
         delete doc.id;
         delete doc.token;
         delete doc.status;
+        delete doc.validation;
+        delete doc.old_passwords;
 
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
@@ -126,6 +149,9 @@ User.prototype = {
         delete doc.token;
         delete doc.status;
         delete doc.id;
+        delete doc.validation;
+        delete doc.old_passwords;
+
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
         }
@@ -171,6 +197,9 @@ User.prototype = {
             users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;
             delete users[i].__v;
+            delete users[i].validation;
+            delete users[i].old_passwords;
+
             if (users[i].domain && users[i].domain !== '') {
               users[i].domain = users[i].domain.split(',');
             } else {
@@ -199,6 +228,8 @@ User.prototype = {
 
           delete users[i]._id;
           delete users[i].__v;
+          delete users[i].validation;
+          delete users[i].old_passwords;
 
           if (users[i].domain && users[i].domain !== '') {
             users[i].domain = users[i].domain.split(',');
@@ -243,6 +274,8 @@ User.prototype = {
 
             delete item._id;
             delete item.__v;
+            delete item.validation;
+            delete item.old_passwords;
           }
           callback(err, item);
         });
@@ -267,6 +300,14 @@ User.prototype = {
     } else {
       callback(utils.buildError('400', 'No user ID passed to remove function'), null);
     }
+  },
+
+  getUsersUsesBillingPlan: function(billingPlanId, cb) {
+    cb = cb || _.noop;
+    this.get({
+      billing_plan: billingPlanId,
+      deleted: false
+    }, cb);
   }
 
 };
