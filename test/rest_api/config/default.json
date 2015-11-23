@@ -1,4 +1,15 @@
 {
+  "log_config": {
+    "transports": {
+      "Console": {
+        "level": "info",
+        "colorize": true,
+        "prettyPrint": true,
+        "humanReadableUnhandledException": true,
+        "showLevel": true
+      }
+    }
+  },
   "api": {
     "host": {
       "protocol": "https",

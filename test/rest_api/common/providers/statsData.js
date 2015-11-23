@@ -24,12 +24,13 @@
 //  working directly with the elasticsearch interfaces
 
 'use strict';
+
 var _ = require('lodash'),
-  date_ = require( 'datejs' ),
   elastic = require('elasticsearch'),
-  config = require( 'config' ),
   promise = require('bluebird'),
-  fs = promise.promisifyAll(require('fs'));
+  config = require( 'config' );
+
+require( 'datejs' );
 
 //  ----------------------------------------------------------------------------------------------//
 
@@ -37,18 +38,21 @@ var client_ = false,
   client_url_ = false;
 
 //  ---------------------------------
-// creates indices list from the time span, like "logstash-2015.11.14,logstash-2015.11.15,logstash-2015.11.16,logstash-2015.11.17"
+// creates indices list from the time span,
+//  like "logstash-2015.11.14,logstash-2015.11.15,logstash-2015.11.16,logstash-2015.11.17"
 // used in functions doing ElasticSearch calls
 // from and to both are Unix timestamps
 var build_indices_list_ = function ( from, to ) {
   var d_start = new Date( from ),
     day_ms = 24 * 3600000,
-    list = 'logstash-' + d_start.getUTCFullYear() + '.' + ('0' + (d_start.getUTCMonth() + 1)).slice(-2) + '.' + ('0' + d_start.getUTCDate()).slice(-2);
+    list = 'logstash-' + d_start.getUTCFullYear() + '.' + ('0' + (d_start.getUTCMonth() + 1)).slice(-2) +
+      '.' + ('0' + d_start.getUTCDate()).slice(-2);
 
   to = Math.floor( ( to - 1 ) / day_ms + 1 ) * day_ms;
   for ( var d = from + day_ms; d < to; d += day_ms ) {
     var d_curr = new Date( d );
-    list += ',logstash-' + d_curr.getUTCFullYear() + '.' + ('0' + (d_curr.getUTCMonth() + 1)).slice(-2) + '.' + ('0' + d_curr.getUTCDate()).slice(-2);
+    list += ',logstash-' + d_curr.getUTCFullYear() + '.' + ('0' + (d_curr.getUTCMonth() + 1)).slice(-2) +
+      '.' + ('0' + d_curr.getUTCDate()).slice(-2);
   }
   return list;
 };
@@ -76,14 +80,14 @@ var date_2_timestamp_ = function ( date ) {
  *
  * {Object} containing data for testing and comparison
  {
-    indicesList - list of indices generated for the given timespan
-    from        - start interval timestamp
-    to          - end interval timestamp
-    data        - loaded data
-    dataCount   - mainly equal to data.length, but may contain length of the data stored in the ES cluster(after meta loading)
-    aggs        - array of pre-counted aggregations
-    template    -
-    keys        -
+    indicesList     - list of indices generated for the given timespan
+    from            - start interval timestamp
+    to              - end interval timestamp
+    data            - generated data
+    dataCount       - guess
+    keys            - possible values for the generated data
+    template        - template record to insert into ESURL
+    template_short  - template record to insert into ES
  }
  */
 var DataProvider = module.exports = function( from, to ) {
@@ -132,11 +136,34 @@ var DataProvider = module.exports = function( from, to ) {
       type: 'apache_json',
       host: 'IAD02-BP01.REVSW.NET',
       geoip: {
-        country_code2: 'US'
+        country_code2: ''
       },
       os: '',
       device: ''
-    }
+    },
+    template_short: {
+      '@timestamp': '',
+      '@version': '1',
+      domain: config.api.stats.domains.google.name,
+      ipport: '80',
+      duration: 0.147,
+      upstream_time: '0.147',
+      response: '200',
+      s_bytes: 2000,
+      r_bytes: 200,
+      method: 'GET',
+      conn_status: 'OK',
+      KA: 24,
+      FBT_mu: 145921,
+      cache: 'MISS',
+      quic: '-',
+      host: 'IAD02-BP01.REVSW.NET',
+      geoip: {
+        country_code2: ''
+      },
+      os: '',
+      device: ''
+    },
   };
 
   //  working timestamp interval, converted and rounded 2 5 min
@@ -151,7 +178,6 @@ var DataProvider = module.exports = function( from, to ) {
     this.options.to = this.options.from;
     this.options.from = t_;
   }
-  this.options.to--;
   this.options.indicesList = build_indices_list_( this.options.from, this.options.to );
 };
 
@@ -172,7 +198,6 @@ DataProvider.prototype.clear = function () {
  * set time span
  */
 DataProvider.prototype.setSpan = function ( from, to ) {
-  var day_ms = 3600000 * 24;
 
   //  working timestamp interval, converted and rounded 2 5 min
   this.options.from = Math.floor( date_2_timestamp_( from ) / 300000 ) * 300000;
@@ -223,14 +248,59 @@ DataProvider.prototype.autoSpan = function () {
 
 //  data generators ------------------------------------------------------------------------------//
 
+
+//  utility function to init and return ES client, ES or ESURL depending on the parameter ('es'/'esurl')
+var get_client_ = function( which_one ) {
+
+  if ( which_one !== 'es' && which_one !== 'esurl' ) {
+    throw new Error( 'DataProvider, get_client_, invalid parameter value: ' + which_one );
+  }
+
+  if ( which_one === 'esurl' ) {
+
+    if ( !client_url_ ) {
+      //  init client
+      client_url_ = new elastic.Client({
+        host: config.api.stats.elastic_url,
+        requestTimeout: config.api.stats.client_timeout,
+        log: [{
+          type: 'stdio',
+          levels: [ 'error', 'warning' ]
+        }]
+      });
+    }
+    return client_url_;
+  }
+
+  if ( !client_ ) {
+    //  init client
+    client_ = new elastic.Client({
+      host: config.api.stats.elastic,
+      requestTimeout: config.api.stats.client_timeout,
+      log: [{
+        type: 'stdio',
+        levels: [ 'error', 'warning' ]
+      }]
+    });
+  }
+  return client_;
+}
+
+
 /**
  * Stats DataProvider.generateTestingData()
  *
+ * @parameter {String} 'es'/'esurl' to define what cluster to use
+ * @returns {Object} promise to check for success/error
  */
-DataProvider.prototype.generateTestingData = function () {
+DataProvider.prototype.generateTestingData = function ( which_one ) {
+
+  if ( which_one !== 'es' && which_one !== 'esurl' ) {
+    throw new Error( 'DataProvider.generateTestingData, invalid parameter value: ' + which_one );
+  }
 
   var keys = this.options.keys,
-    tmpl = this.options.template,
+    tmpl = ( which_one === 'es' ? this.options.template_short : this.options.template ),
     len0 = keys.status_code.length,
     len1 = keys.cache_code.length,
     len2 = keys.request_status.length,
@@ -265,8 +335,11 @@ DataProvider.prototype.generateTestingData = function () {
                   for ( var i8 = 0; i8 < len8; ++i8 ) {
 
                     tmpl.device = keys.device[i8];
-                    tmpl.lm_rtt = ( this.options.dataCount++ % 3 ) * 10000 + 10000;  //  min 10000 avg 20000 max 30000
                     tmpl['@timestamp'] = new Date(Math.round(t)).toISOString().slice(0,-1);
+                    if ( which_one === 'esurl' ) {
+                      tmpl.lm_rtt = ( this.options.dataCount % 3 ) * 10000 + 10000;  //  min 10000 avg 20000 max 30000
+                    }
+                    ++this.options.dataCount;
 
                     var r_ = _.clone( tmpl );
                     r_.geoip = _.clone( tmpl.geoip );
@@ -288,23 +361,13 @@ DataProvider.prototype.generateTestingData = function () {
  * Stats DataProvider.uploadTestingData()
  * upload data to the QA ES cluster
  *
- * @returns {Object} promise to check for success/error
+ * @parameter {String} 'es'/'esurl' to define what cluster to use
+ * @parameter {Bool} blabbing output
+ * @return {Object} promise to check for success/error
  */
-DataProvider.prototype.uploadTestingData = function () {
+DataProvider.prototype.uploadTestingData = function ( which_one, verbose ) {
 
-  if ( !client_ ) {
-    //  init client
-    client_ = new elastic.Client({
-      host: config.api.stats.elastic_url,
-      requestTimeout: config.api.stats.client_timeout,
-      // log: 'trace'
-      log: [{
-        type: 'stdio',
-        levels: [ 'error', 'warning' ]
-      }]
-    });
-  }
-
+  var client = get_client_( which_one );
   var requests = [];
   var curr = 0;
 
@@ -330,55 +393,30 @@ DataProvider.prototype.uploadTestingData = function () {
   }
 
   return promise.map( requests, function( req ) {
-    return client_.bulk( req )
+    return client.bulk( req )
       .then( function( resp ) {
-        console.log( '      # portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
+        if ( verbose ) {
+          console.log( '      # ' + which_one.toUpperCase() + ' portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
+        }
       });
   }, { concurrency: config.api.stats.upload_concurrency } );
-  // .then( function( resp ) {
-  //   // { took: 177,
-  //   //   errors: false,
-  //   //   items:
-  //   //    [ { create:
-  //   //         { _index: 'logstash-2015.11.10',
-  //   //           _type: 'apache_json',
-  //   //           _id: 'AVD82nywkHRFAn3jA1B-',
-  //   //           _version: 1,
-  //   //           status: 201 } }, .....
-  //   if ( !resp.items ) {
-  //     return;
-  //   }
-  //   this.options._ids = _.map( resp.items, function( item ) {
-  //     return item.create._id;
-  //   });
-  //   return this.options;
-  // });
 };
 
 /**
  * Stats DataProvider.removeTestingData()
- * remove all uploaded data from the QA ES cluster, not using cached _id's but clear off all records with type === config.api.stats.type
+ * remove all uploaded data from the QA ES cluster
  *
+ * @parameter {String} 'es'/'esurl' to define what cluster to use
+ * @parameter {Bool} blabbing output
  * @returns {Object} promise to check for success/error
  */
-DataProvider.prototype.removeTestingData = function () {
+DataProvider.prototype.removeTestingData = function ( which_one, verbose ) {
 
-  if ( !client_ ) {
-    //  init client
-    client_ = new elastic.Client({
-      host: config.api.stats.elastic_url,
-      requestTimeout: config.api.stats.client_timeout,
-      log: [{
-        type: 'stdio',
-        levels: [ 'error', 'warning' ]
-      }]
-    });
-  }
-
+  var client = get_client_( which_one );
   var self = this;
   var hits_num = 0;
 
-  return client_.search({
+  return client.search({
     index: self.options.indicesList,
     ignoreUnavailable: true,
     type: config.api.stats.type,
@@ -435,9 +473,11 @@ DataProvider.prototype.removeTestingData = function () {
     }
 
     return promise.map( requests, function( req ) {
-      return client_.bulk( req )
+      return client.bulk( req )
         .then( function( /*resp*/ ) {
-          console.log( '      # portion removing done' );
+          if ( verbose ) {
+            console.log( '      # ' + which_one.toUpperCase() + ' cluster, portion removing done' );
+          }
         });
     }, { concurrency: config.api.stats.upload_concurrency } );
 
@@ -587,7 +627,10 @@ DataProvider.prototype.generateTopTests = function () {
     });
     tests.push({
       name: ( key + ',country' ),
-      query: { report_type: key, country: this.options.keys.country[ Math.floor( Math.random() * test_keys.country ) ] },
+      query: {
+        report_type: key,
+        country: this.options.keys.country[ Math.floor( Math.random() * test_keys.country ) ]
+      },
       total_hits: ( total / test_keys.country ),
       data_points_count: dptc,
       count: cntc
@@ -600,7 +643,7 @@ DataProvider.prototype.generateTopTests = function () {
     var test = tests[i];
     test.query.from_timestamp = this.options.from;
     test.query.to_timestamp = this.options.to;
-  };
+  }
 
   return tests;
 };

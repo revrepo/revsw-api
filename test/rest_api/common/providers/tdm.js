@@ -22,6 +22,8 @@
 
 var promise = require('bluebird');
 var dp = require( './statsData.js' );
+var config = require( 'config' );
+var logger = require( 'revsw-logger' )( config.log_config );
 
 //  CLI -----------------------------
 
@@ -45,6 +47,8 @@ var showHelp = function() {
   console.log('         --to and --from parameters will be ignored' );
   console.log('    -h, --help :');
   console.log('        this message');
+  console.log('    -v, --verbose :');
+  console.log('        blubbing output');
   console.log('    --dry-run :');
   console.log('        show spans and return\n');
 };
@@ -79,6 +83,8 @@ for (var i = 0; i < parslen; ++i) {
     conf.dry = true;
   } else if (pars[i] === '--gen' || pars[i] === '--generate') {
     action = 'generate';
+  } else if (pars[i] === '-v' || pars[i] === '--verbose') {
+    conf.verbose = true;
   } else if (pars[i] === '--remove') {
     action = 'remove';
   } else if (pars[i] === '--regenerate') {
@@ -110,24 +116,38 @@ if ( ( !conf.to || !conf.from) && action !== 'regenerate' ) {
 
 if ( action === 'generate' ) {
 
-  var DP = new dp( conf.from, conf.to );
-  console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-  console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-  console.log( '      Indices: ' + DP.options.indicesList );
+  var DP_ES = new dp( conf.from, conf.to );
+  console.log( '    From date: ' + ( new Date( DP_ES.options.from ) ).toUTCString() );
+  console.log( '      To date: ' + ( new Date( DP_ES.options.to ) ).toUTCString() );
+  console.log( '      Indices: ' + DP_ES.options.indicesList );
 
   if ( conf.dry ) {
     process.exit(0);
     return;
   }
 
+  var DP_ESURL = new dp( conf.from, conf.to );
   console.log( '    ### start data generation' );
-  DP.generateTestingData();
-  console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
+  DP_ES.generateTestingData('es');
+  if ( conf.verbose ) {
+    console.log( '    ### ES cluster, generation done, ' + DP_ES.options.dataCount + ' records.' );
+  }
+  DP_ESURL.generateTestingData('esurl');
+  if ( conf.verbose ) {
+    console.log( '    ### ESURL cluster, generation done, ' + DP_ESURL.options.dataCount + ' records.' );
+  }
   console.log( '    ### start data uploading' );
-  return DP.uploadTestingData()
+
+  var up = [
+    DP_ESURL.uploadTestingData( 'esurl', conf.verbose ),
+    DP_ES.uploadTestingData( 'es', conf.verbose )
+  ];
+
+  return promise.all( up )
     .then( function() {
-      console.log( '    ### uploading done' );
+      console.log( '    ### done' );
       process.exit(0);
+      return;
     })
     .catch( function( e ) {
       console.trace( e );
@@ -140,20 +160,31 @@ if ( action === 'generate' ) {
 //  ---------------------------------
 if ( action === 'remove' ) {
 
-  var DP = new dp( conf.from, conf.to );
-  console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-  console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-  console.log( '      Indices: ' + DP.options.indicesList );
+  var DP_ES = new dp( conf.from, conf.to );
+  console.log( '    From date: ' + ( new Date( DP_ES.options.from ) ).toUTCString() );
+  console.log( '      To date: ' + ( new Date( DP_ES.options.to ) ).toUTCString() );
+  console.log( '      Indices: ' + DP_ES.options.indicesList );
 
   if ( conf.dry ) {
     process.exit(0);
     return;
   }
 
+  var DP_ESURL = new dp( conf.from, conf.to );
   console.log( '    ### start data removing' );
-  return DP.removeTestingData()
+
+  var rems = [
+    DP_ES.removeTestingData( 'es', conf.verbose ),
+    DP_ESURL.removeTestingData( 'esurl', conf.verbose )
+  ];
+
+  return promise.all( rems )
     .then( function( num ) {
-      console.log( '    ### removing done, ' + num + ' records removed' );
+      console.log( '    ### done' );
+      if ( conf.verbose ) {
+        console.log( '    ### ES cluster:    ' + num[0] + ' records removed' );
+        console.log( '    ### ESURL cluster: ' + num[1] + ' records removed' );
+      }
       process.exit(0);
     })
     .catch( function( e ) {
@@ -167,51 +198,73 @@ if ( action === 'remove' ) {
 //  ---------------------------------
 if ( action === 'regenerate' ) {
 
-  var DP,
+  var DP_ESURL,
     day_ms = 3600000 * 24,
     from = Math.floor( ( Date.now() / day_ms ) - 1 ) * day_ms;
 
+  var DP_ESURL = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
   if ( conf.dry ) {
-    DP = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
     console.log( '    ### data clearance span:' );
-    console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-    console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-    console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+    console.log( '    From date: ' + ( new Date( DP_ESURL.options.from ) ).toUTCString() );
+    console.log( '      To date: ' + ( new Date( DP_ESURL.options.to ) ).toUTCString() );
+    console.log( '      Indices: ' + DP_ESURL.options.indicesList + '\n' );
 
-    DP.autoSpan();
+    DP_ESURL.autoSpan();
     console.log( '    ### data generation span:' );
-    console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-    console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-    console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+    console.log( '    From date: ' + ( new Date( DP_ESURL.options.from ) ).toUTCString() );
+    console.log( '      To date: ' + ( new Date( DP_ESURL.options.to ) ).toUTCString() );
+    console.log( '      Indices: ' + DP_ESURL.options.indicesList + '\n' );
     process.exit(0);
     return;
   }
 
-  DP = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
+  var DP_ES = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
   console.log( '    ### data clearance span:' );
-  console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-  console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-  console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+  console.log( '    From date: ' + ( new Date( DP_ES.options.from ) ).toUTCString() );
+  console.log( '      To date: ' + ( new Date( DP_ES.options.to ) ).toUTCString() );
+  console.log( '      Indices: ' + DP_ES.options.indicesList + '\n' );
 
   console.log( '    ### start data removing' );
-  return DP.removeTestingData()
-    .then( function( num ) {
-      console.log( '    ### removing done, ' + num + ' records removed\n' );
-      DP.autoSpan();
-      console.log( '    ### data generation span:' );
-      console.log( '    From date: ' + ( new Date( DP.options.from ) ).toUTCString() );
-      console.log( '      To date: ' + ( new Date( DP.options.to ) ).toUTCString() );
-      console.log( '      Indices: ' + DP.options.indicesList + '\n' );
+  var rems = [
+    DP_ES.removeTestingData( 'es', conf.verbose ),
+    DP_ESURL.removeTestingData( 'esurl', conf.verbose )
+  ];
 
-      console.log( '    ### start data generation' );
-      DP.generateTestingData();
-      console.log( '    ### generation done, ' + DP.options.dataCount + ' records.' );
+  return promise.all( rems )
+    .then( function( num ) {
+      console.log( '    ### done' );
+      if ( conf.verbose ) {
+        console.log( '    ### ES cluster:    ' + num[0] + ' records removed' );
+        console.log( '    ### ESURL cluster: ' + num[1] + ' records removed' );
+      }
+      DP_ESURL.autoSpan();
+      DP_ES.autoSpan();
+      console.log( '\n    ### data generation span:' );
+      console.log( '    From date: ' + ( new Date( DP_ES.options.from ) ).toUTCString() );
+      console.log( '      To date: ' + ( new Date( DP_ES.options.to ) ).toUTCString() );
+      console.log( '      Indices: ' + DP_ES.options.indicesList + '\n' );
+
+      DP_ES.generateTestingData('es');
+      if ( conf.verbose ) {
+        console.log( '    ### ES cluster, generation done, ' + DP_ES.options.dataCount + ' records.' );
+      }
+      DP_ESURL.generateTestingData('esurl');
+      if ( conf.verbose ) {
+        console.log( '    ### ESURL cluster, generation done, ' + DP_ESURL.options.dataCount + ' records.' );
+      }
       console.log( '    ### start data uploading' );
-      return DP.uploadTestingData();
+
+      var up = [
+        DP_ESURL.uploadTestingData( 'esurl', conf.verbose ),
+        DP_ES.uploadTestingData( 'es', conf.verbose )
+      ];
+
+      return promise.all( up );
     })
     .then( function() {
-      console.log( '    ### uploading done' );
+      console.log( '    ### done' );
       process.exit(0);
+      return;
     })
     .catch( function( e ) {
       console.trace( e );
