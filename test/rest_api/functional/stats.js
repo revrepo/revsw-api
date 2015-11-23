@@ -241,6 +241,60 @@ describe('Stats API check:', function () {
       });
     });
 
+    describe('Stats requests: ', function () {
+
+      var to_tests = [];
+      this.timeout( config.api.request.maxTimeout * 128 );
+
+      before( function () {
+        console.log( '      ### stats testing run:' );
+        to_tests = DP.generateStatsTests();
+      });
+
+      it( 'All requests combinations', function( done ) {
+
+        var run_ = function( test ) {
+          console.log( '        + ' + test.name );
+          return API.resources.stats.stats
+            .getOne(domains.google.id)
+            .query(test.query)
+            // .expect( 200 )
+            .then( function( res ) {
+              var data = JSON.parse( res.text );
+              test.count.should.be.equal( data.metadata.total_hits );
+
+              data = data.data;
+              var sent = 0,
+                received = 0,
+                requests = 0;
+              for ( var i = 0, len = data.length; i < len; ++i ) {
+                requests += data[i].requests;
+                sent += data[i].sent_bytes;
+                received += data[i].received_bytes;
+              }
+              test.count.should.be.equal( requests );
+              test.sent_bytes.should.be.equal( sent );
+              test.received_bytes.should.be.equal( received );
+            })
+            .catch( function( e ) {
+              if ( e.response && e.response.error ) {
+                console.log( '  ERROR: ', e.response.error );
+              }
+              console.log( '  ERROR, query: ', test.query );
+              throw e;
+            });
+        };
+
+        promise.map( to_tests, run_, { concurrency: 32 } )
+          .then( function() {
+            done();
+          })
+          .catch( function( e ) {
+            done( e );
+          });
+      });
+    });
+
   });
 });
 
