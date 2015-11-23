@@ -33,7 +33,7 @@ var domains = config.api.stats.domains;
 
 //  ----------------------------------------------------------------------------------------------//
 //  suite
-xdescribe('Stats API check:', function () {
+describe('Stats API check:', function () {
 
   this.timeout(config.api.request.maxTimeout);
 
