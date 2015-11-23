@@ -21,14 +21,12 @@
 'use strict';
 
 var promise = require('bluebird');
-var dp = require( './statsData.js' );
-var config = require( 'config' );
-var logger = require( 'revsw-logger' )( config.log_config );
+// var config = require( 'config' );
+var dp = require( '../test/rest_api/common/providers/statsData.js' );
 
 //  CLI -----------------------------
 
 var showHelp = function() {
-  //  here's no place for logger
   console.log('\n  Test Data Manager - a tool to generate, upload, remove test data from the ES clusters');
   console.log('  Usage:');
   console.log('    --gen, --generate :');
@@ -198,8 +196,7 @@ if ( action === 'remove' ) {
 //  ---------------------------------
 if ( action === 'regenerate' ) {
 
-  var DP_ESURL,
-    day_ms = 3600000 * 24,
+  var day_ms = 3600000 * 24,
     from = Math.floor( ( Date.now() / day_ms ) - 1 ) * day_ms;
 
   var DP_ESURL = new dp( from, from + ( 2 * day_ms ) /*spans 2 whole days*/ );
