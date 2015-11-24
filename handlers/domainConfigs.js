@@ -144,6 +144,7 @@ exports.getDomainConfig = function(request, reply) {
       if (response_json.proxy_config) {
         response = response_json.proxy_config;
         response.account_id = response_json.account_id;
+        response.domain_name = response_json.domain_name;
       }
       renderJSON(request, reply, err, response);
     });
