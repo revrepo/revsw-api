@@ -143,6 +143,7 @@ exports.getDomainConfig = function(request, reply) {
       var response = response_json;
       if (response_json.proxy_config) {
         response = response_json.proxy_config;
+        response.account_id = response_json.account_id;
       }
       renderJSON(request, reply, err, response);
     });
@@ -236,7 +237,7 @@ exports.updateDomainConfig = function(request, reply) {
 
   var newDomainJson = request.payload;
   var domain_id = request.params.domain_id;
-  var optionsFlag = (request.query.options) ? '?' + request.query.options : '';
+  var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
