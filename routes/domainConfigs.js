@@ -32,7 +32,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['domain_ro', 'any']
       },
       handler     : domainConfigsHandlers.getDomainConfigs,
       description : 'Get a list of domains registered for a customer',
@@ -54,7 +54,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['domain_ro', 'any']
       },
       handler     : domainConfigsHandlers.getDomainConfig,
       description : 'Get basic domain configuration',
@@ -108,7 +108,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}/config_status',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['domain_ro', 'any']
       },
       handler     : domainConfigsHandlers.getDomainConfigStatus,
       description : 'Get the publishing status of a domain configuration',
@@ -135,7 +135,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['domain_rw', 'any']
       },
       handler     : domainConfigsHandlers.createDomainConfig,
       description : 'Create a new domain configuration',
@@ -171,7 +171,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['domain_rw', 'any']
       },
       handler     : domainConfigsHandlers.updateDomainConfig,
       description : 'Update detailed domain configuration',
@@ -326,7 +326,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['domain_rw', 'any']
       },
       handler     : domainConfigsHandlers.deleteDomainConfig,
       description : 'Delete a domain',

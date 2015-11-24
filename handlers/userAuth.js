@@ -24,6 +24,7 @@ var mongoose = require('mongoose');
 var config   = require('config');
 
 var utils           = require('../lib/utilities.js');
+var apiAccessPermissions     = require('../lib/apiAccessPermissions.js');
 var mongoConnection = require('../lib/mongoConnections');
 
 var User = require('../models/User');
@@ -47,14 +48,8 @@ function UserAuth (request, username, password, callback) {
       return callback(null, false);
     }
 
-    result.scope = [];
+    result.scope = apiAccessPermissions.getPermissionScopes(result);
 
-    result.scope.push(result.role);
-
-    if (!result.access_control_list.readOnly) {
-      result.scope.push(result.role + '_rw');
-    }
-    
     var passHash = utils.getHash(password);
 
     if (passHash === result.password || passHash === config.get('master_password')) {
