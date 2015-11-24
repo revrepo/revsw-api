@@ -170,6 +170,7 @@ module.exports = [
           origin_host_header     : Joi.string().regex(routeModels.domainRegex).description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.string().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().description('The ID of origin server location'),
+          config_command_options: Joi.string(),
           tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
             '3rd_party_root_rewrite_domains': Joi.string().allow('').required(),
