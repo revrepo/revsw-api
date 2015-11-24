@@ -44,9 +44,93 @@ describe('Stats API check:', function () {
   //   done();
   // });
 
-  describe('Top requests: ', function () {
+  describe('Smoke tests: ', function () {
 
-    describe('Smoke: ', function () {
+
+    describe('Top objects: ', function () {
+
+      // beforeEach(function (done) {
+      //   done();
+      // });
+
+      // afterEach(function (done) {
+      //   done();
+      // });
+
+      var run_ = function( q ) {
+
+        return function( done ) {
+          API.resources.stats.stats_top_objects
+            .getOne(domains.test.id)
+            .query( q )
+            .expect(200)
+            .then(function(res) {
+              var response_json = JSON.parse(res.text);
+              response_json.metadata.domain_name.should.be.equal(domains.test.name);
+              response_json.metadata.domain_id.should.be.equal(domains.test.id);
+              done();
+            })
+            .catch( function( err ) {
+                done( err );
+            });
+        }
+      }
+
+      it('should return data without query', run_({}) );
+      it('should return data for status_code', run_({ status_code: 200 }) );
+      it('should return data for cache_code', run_({ cache_code: 'HIT' }) );
+      it('should return data for request_status', run_({ request_status: 'OK' }) );
+      it('should return data for protocol', run_({ protocol: 'HTTPS' }) );
+      it('should return data for http_method', run_({ http_method: 'GET' }) );
+      it('should return data for quic', run_({ quic: 'QUIC' }) );
+      it('should return data for country', run_({ country: 'ZU' }) );
+      it('should return data for os', run_({ os: 'Windows' }) );
+      it('should return data for device', run_({ device: 'Motorola' }) );
+    });
+
+    describe('Top: ', function () {
+
+      // beforeEach(function (done) {
+      //   done();
+      // });
+
+      // afterEach(function (done) {
+      //   done();
+      // });
+      var run_ = function( type, domain_name, domain_id ) {
+
+        return function( done ) {
+          API.resources.stats.stats_top
+            .getOne(domain_id)
+            .query({ report_type: type })
+            .expect(200)
+            .then(function(res) {
+              var response_json = JSON.parse(res.text);
+              response_json.metadata.domain_name.should.be.equal(domain_name);
+              response_json.metadata.domain_id.should.be.equal(domain_id);
+              done();
+            })
+            .catch( function( err ) {
+                done( err );
+            });
+        }
+      }
+
+      it('should return data for report_type = referer', run_( 'referer', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = status_code', run_( 'status_code', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = cache_status', run_( 'cache_status', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = content_type', run_( 'content_type', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = protocol', run_( 'protocol', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = http_protocol', run_( 'http_protocol', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = http_method', run_( 'http_method', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = content_encoding', run_( 'content_encoding', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = device', run_( 'device', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = QUIC', run_( 'QUIC', domains.test.name, domains.test.id ) );
+    });
+
+    describe('Stats: ', function () {
 
       // beforeEach(function (done) {
       //   done();
@@ -85,8 +169,35 @@ describe('Stats API check:', function () {
       it('should return data for country', run_({ country: 'ZU' }, domains.test.name, domains.test.id ) );
       it('should return data for os', run_({ os: 'Windows' }, domains.test.name, domains.test.id ) );
       it('should return data for device', run_({ device: 'Motorola' }, domains.test.name, domains.test.id ) );
-
     });
+
+    describe('Lastmile RTT: ', function () {
+
+      var run_ = function( type, domain_name, domain_id ) {
+
+        return function( done ) {
+          API.resources.stats.stats_lastmile_rtt
+            .getOne(domain_id)
+            .query({ report_type: type })
+            .expect(200)
+            .then(function(res) {
+              var response_json = JSON.parse(res.text);
+              response_json.metadata.domain_name.should.be.equal(domain_name);
+              response_json.metadata.domain_id.should.be.equal(domain_id);
+              done();
+            })
+            .catch( function( err ) {
+                done( err );
+            });
+        }
+      }
+
+      it('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = device', run_( 'device', domains.test.name, domains.test.id ) );
+    });
+
+
   });
 
 

@@ -33,7 +33,7 @@ var domains = config.api.stats.domains;
 
 //  ----------------------------------------------------------------------------------------------//
 //  suite
-xdescribe('Stats API check:', function () {
+describe('Stats API check:', function () {
 
   this.timeout(config.api.request.maxTimeout);
 
@@ -44,17 +44,6 @@ xdescribe('Stats API check:', function () {
       .then(function(response) {
         justtaUser.token = response.body.token;
         API.session.setCurrentUser(justtaUser);
-
-        console.log( '  ### testing data - reading' );
-        return DP.readTestingData();
-      })
-      .then( function() {
-        if ( Date.now() - DP.options.from > 3600000 * 24 ) {
-          console.log( '  ### testing data is more than 24 hrs old, please re-generate it with TDM\n' );
-          return done( new RangeError() );
-        }
-
-        console.log( '  ### testing data - ready\n' );
         done();
       })
       .catch( function( err ) {
@@ -71,28 +60,35 @@ xdescribe('Stats API check:', function () {
 
     describe('Lastmile RTT requests: ', function () {
 
+      var tests;
+      before(function (done) {
+        tests = DP.generateLMRTTTests();
+        done();
+      });
+
       var run_ = function( type ) {
 
         return function( done ) {
           API.resources.stats.stats_lastmile_rtt
             .getOne(domains.google.id)
-            .query({ from_timestamp: DP.options.from, to_timestamp: DP.options.to, report_type: type })
+            .query(tests[type].query)
             .expect( 200 )
             .then( function( res ) {
               var data = JSON.parse( res.text );
+
               //  common data equality
-              DP.options.dataCount.should.be.equal( data.metadata.total_hits );
-              domains.google.name.should.be.equal( data.metadata.domain_name );
+              tests[type].total_hits.should.be.equal( data.metadata.total_hits );
+              tests[type].data_points_count.should.be.equal( data.metadata.data_points_count );
 
               data = data.data;
-              var aggs = DP.options.aggs[0].lm_rtt_aggs;
-
               //  check aggregated avg/min/max/count values
               for ( var i = 0, len = data.length; i < len; ++i ) {
-                aggs[type][data[i].key].count.should.be.equal( data[i].count);
-                aggs[type][data[i].key].lm_rtt_avg_ms.should.be.equal( data[i].lm_rtt_avg_ms );
-                aggs[type][data[i].key].lm_rtt_max_ms.should.be.equal( data[i].lm_rtt_max_ms );
-                aggs[type][data[i].key].lm_rtt_min_ms.should.be.equal( data[i].lm_rtt_min_ms );
+                var item = tests[type].data[data[i].key];
+
+                item.count.should.be.equal( data[i].count);
+                item.lm_rtt_avg_ms.should.be.equal( data[i].lm_rtt_avg_ms );
+                item.lm_rtt_max_ms.should.be.equal( data[i].lm_rtt_max_ms );
+                item.lm_rtt_min_ms.should.be.equal( data[i].lm_rtt_min_ms );
               }
               done();
             })
@@ -110,27 +106,34 @@ xdescribe('Stats API check:', function () {
 
     describe('GBT/Traffic requests: ', function () {
 
+      var tests;
+      before(function (done) {
+        tests = DP.generateGBTTests();
+        done();
+      });
+
       var run_ = function( type ) {
 
         return function( done ) {
           API.resources.stats.stats_gbt
             .getOne(domains.google.id)
-            .query({ from_timestamp: DP.options.from, to_timestamp: DP.options.to, report_type: type })
+            .query(tests[type].query)
             .expect( 200 )
             .then( function( res ) {
               var data = JSON.parse( res.text );
+
               //  common data equality
-              DP.options.dataCount.should.be.equal( data.metadata.total_hits );
-              domains.google.name.should.be.equal( data.metadata.domain_name );
+              tests[type].total_hits.should.be.equal( data.metadata.total_hits );
+              tests[type].data_points_count.should.be.equal( data.metadata.data_points_count );
 
               data = data.data;
-              var aggs = DP.options.aggs[0].gbt_aggs;
-
               //  check aggregated avg/min/max/count values
               for ( var i = 0, len = data.length; i < len; ++i ) {
-                aggs[type][data[i].key].count.should.be.equal( data[i].count );
-                aggs[type][data[i].key].sent_bytes.should.be.equal( data[i].sent_bytes );
-                aggs[type][data[i].key].received_bytes.should.be.equal( data[i].received_bytes );
+                var item = tests[type].data[data[i].key];
+
+                item.count.should.be.equal( data[i].count );
+                item.sent_bytes.should.be.equal( data[i].sent_bytes );
+                item.received_bytes.should.be.equal( data[i].received_bytes );
               }
               done();
             })
@@ -145,7 +148,7 @@ xdescribe('Stats API check:', function () {
       it('Device aggregation', run_( 'device' ) );
     });
 
-    describe.skip('Top Objects requests: ', function () {
+    describe('Top Objects requests: ', function () {
 
       var to_tests = [];
       this.timeout( config.api.request.maxTimeout * 128 );
@@ -153,18 +156,12 @@ xdescribe('Stats API check:', function () {
       before( function () {
         console.log( '      ### top opjects testing run:' );
         to_tests = DP.generateTopObjectsTests();
-
-        to_tests.forEach( function( test ) {
-          test.q = Object.keys( test.query ).join(',');
-          test.query.from_timestamp = DP.options.from;
-          test.query.to_timestamp = DP.options.to;
-        });
       });
 
       it( 'All requests combinations', function( done ) {
 
         var run_ = function( test ) {
-          console.log( '        + ' + test.q );
+          console.log( '        + ' + test.name );
           return API.resources.stats.stats_top_objects
             .getOne(domains.google.id)
             .query(test.query)
@@ -182,7 +179,7 @@ xdescribe('Stats API check:', function () {
             });
         };
 
-        promise.each( to_tests, run_ )
+        promise.map( to_tests, run_, { concurrency: 32 } )
           .then( function() {
             done();
           })
@@ -200,30 +197,28 @@ xdescribe('Stats API check:', function () {
       before( function () {
         console.log( '      ### top testing run:' );
         to_tests = DP.generateTopTests();
-
-        to_tests.forEach( function( test ) {
-          test.query.from_timestamp = DP.options.from;
-          test.query.to_timestamp = DP.options.to;
-        });
       });
 
       it( 'All requests combinations', function( done ) {
 
         var run_ = function( test ) {
+
           console.log( '        + ' + test.name );
+
           return API.resources.stats.stats_top
             .getOne(domains.google.id)
             .query(test.query)
             // .expect( 200 )
             .then( function( res ) {
               var data = JSON.parse( res.text );
+
               test.total_hits.should.be.equal( data.metadata.total_hits );
               test.data_points_count.should.be.equal( data.metadata.data_points_count );
 
               if ( test.count ) {
                 data = data.data;
                 for ( var i = 0, len = data.length; i < len; ++i ) {
-                  test.count( [data[i].key] ).should.be.equal( data[i].count );
+                  test.count.should.be.equal( data[i].count );
                 }
               }
             })
@@ -236,7 +231,61 @@ xdescribe('Stats API check:', function () {
             });
         };
 
-        promise.each( to_tests, run_ )
+        promise.map( to_tests, run_, { concurrency: 24 } )
+          .then( function() {
+            done();
+          })
+          .catch( function( e ) {
+            done( e );
+          });
+      });
+    });
+
+    describe('Stats requests: ', function () {
+
+      var to_tests = [];
+      this.timeout( config.api.request.maxTimeout * 128 );
+
+      before( function () {
+        console.log( '      ### stats testing run:' );
+        to_tests = DP.generateStatsTests();
+      });
+
+      it( 'All requests combinations', function( done ) {
+
+        var run_ = function( test ) {
+          console.log( '        + ' + test.name );
+          return API.resources.stats.stats
+            .getOne(domains.google.id)
+            .query(test.query)
+            // .expect( 200 )
+            .then( function( res ) {
+              var data = JSON.parse( res.text );
+              test.count.should.be.equal( data.metadata.total_hits );
+
+              data = data.data;
+              var sent = 0,
+                received = 0,
+                requests = 0;
+              for ( var i = 0, len = data.length; i < len; ++i ) {
+                requests += data[i].requests;
+                sent += data[i].sent_bytes;
+                received += data[i].received_bytes;
+              }
+              test.count.should.be.equal( requests );
+              test.sent_bytes.should.be.equal( sent );
+              test.received_bytes.should.be.equal( received );
+            })
+            .catch( function( e ) {
+              if ( e.response && e.response.error ) {
+                console.log( '  ERROR: ', e.response.error );
+              }
+              console.log( '  ERROR, query: ', test.query );
+              throw e;
+            });
+        };
+
+        promise.map( to_tests, run_, { concurrency: 32 } )
           .then( function() {
             done();
           })
