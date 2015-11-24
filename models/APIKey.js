@@ -23,6 +23,8 @@
 
 var utils = require('../lib/utilities.js');
 
+var PermissionsSchema = require('./common/PermissionsSchema');
+
 function APIKey(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -41,6 +43,10 @@ function APIKey(mongoose, connection, options) {
       purge           : {type: Boolean, default: false},
       reports         : {type: Boolean, default: false},
       admin           : {type: Boolean, default: false},
+    },
+    'access_permissions': {
+      type: PermissionsSchema,
+      ref: 'PermissionsSchema'
     },
     'read_only_status': {type: Boolean, default: false},
     'active'          : {type: Boolean, default: true},

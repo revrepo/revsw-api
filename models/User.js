@@ -24,6 +24,8 @@
 var utils = require('../lib/utilities.js');
 var _ = require('lodash');
 
+var PermissionsSchema = require('./common/PermissionsSchema');
+
 function User(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -36,6 +38,10 @@ function User(mongoose, connection, options) {
       configure : {type : Boolean, default : true},
       test      : {type : Boolean, default : true},
       readOnly  : {type : Boolean, default : false}
+    },
+    'access_permissions': {
+      type: PermissionsSchema,
+      ref: 'PermissionsSchema'
     },
     'companyId'            : String,
     'domain'               : String,
