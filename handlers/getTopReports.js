@@ -48,7 +48,7 @@ exports.getTopReports = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details'));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
       domain_name = result.name;
 
       if ( request.query.from_timestamp ) {

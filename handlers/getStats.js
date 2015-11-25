@@ -31,6 +31,8 @@ var elasticSearch   = require('../lib/elasticSearch');
 var Domain = require('../models/Domain');
 
 var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+
+
 //
 // Get traffic stats
 //
@@ -52,7 +54,7 @@ exports.getStats = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details'));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
       domain_name = result.name;
 
       if ( request.query.from_timestamp ) {
