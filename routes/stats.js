@@ -36,7 +36,7 @@ module.exports = [
     path: '/v1/stats/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: getStats.getStats,
       description: 'Get traffic stats for a domain',
@@ -74,7 +74,7 @@ module.exports = [
     path: '/v1/stats/top_objects/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: getTopObjects.getTopObjects,
       description: 'Get a list of top object requests for a domain',
@@ -113,7 +113,7 @@ module.exports = [
     path: '/v1/stats/top/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: getTopReports.getTopReports,
       description: 'Get a list of top traffic properties for a domain',
@@ -144,7 +144,7 @@ module.exports = [
     path: '/v1/stats/lastmile_rtt/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: RTTReports.getRTTReports,
       description: 'Get RTT stats for a domain',
@@ -173,7 +173,7 @@ module.exports = [
     path: '/v1/stats/gbt/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: GBTReports.getGBTReports,
       description: 'Get GBT stats for a domain',
