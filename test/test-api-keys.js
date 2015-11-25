@@ -4,7 +4,8 @@ var request = require('supertest');
 
 var config = require('config');
 
-var testAPIUrl = (process.env.API_QA_URL) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
+var testAPIUrl = (process.env.API_QA_URL) ? process.env.API_QA_URL : 'https://localhost:' +
+  config.get('service.https_port');
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com';
 var qaUserWithUserPermPassword = 'password1';
 var qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com';
@@ -20,9 +21,7 @@ describe('Rev API keys', function() {
     '55f9f0da5ca524340d761b70', '55f9f0fa5ca524340d761b76', '55f9f6825ca524340d761b7c',
     '55b701197957012304a49d05', '56188c7e144de0433c4e68f8'
   ];
-  var lessDomains = [
-    '55f9f6825ca524340d761b7c', '55b701197957012304a49d05', '56188c7e144de0433c4e68f8'
-  ];
+  var lessDomains = [ ];
   var wrongDomains = [
     '55f9f0da5ca524340d761b70', '55f9f0fa5ca524340f761b76', '55f9f6825ca524340d761b7c',
     '55b7011979570123aaa49d05', '56188c7e144de0433c4e68f8', '56188c7e144de0433c4e68a9'
@@ -313,7 +312,7 @@ describe('Rev API keys', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.should.be.an.Array;
+        response_json.should.be.an.Array();
         response_json.length.should.be.equal(1);
         response_json[0].id.should.be.equal(createdAPIKeyId);
         response_json[0].key_name.should.be.equal('New API Key');

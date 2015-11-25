@@ -28,9 +28,9 @@ var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var elasticSearch   = require('../lib/elasticSearch');
 
-var Domain = require('../models/Domain');
+var DomainConfig = require('../models/DomainConfig');
 
-var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 
 //
@@ -48,14 +48,12 @@ exports.getStats = function(request, reply) {
     time_period,
     end_time;
 
-  domains.get({
-    _id: domain_id
-  }, function(error, result) {
+  domainConfigs.get(domain_id, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details'));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
     }
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
-      domain_name = result.name;
+      domain_name = result.domain_name;
 
       if ( request.query.from_timestamp ) {
         start_time = utils.convertDateToTimestamp(request.query.from_timestamp);

@@ -32,12 +32,12 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
 var Account = require('../models/Account');
-var Domain = require('../models/Domain');
+var DomainConfig = require('../models/DomainConfig');
 
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
-var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 function verifyDomainOwnership(companyId, domainList, callback) {
   
@@ -47,10 +47,10 @@ function verifyDomainOwnership(companyId, domainList, callback) {
   var j = 0;
 
   function checkDomain(_i, l) {
-    domains.get({_id: domainList[_i]}, function(error, result) {
+    domainConfigs.get(domainList[_i], function(error, result) {
       j++;
       if (!error && result) {
-        if (!result.companyId || result.companyId !== companyId) {
+        if (!result.account_id || result.account_id !== companyId) {
           wrongDomains.push(domainList[_i]);
         } else {
           okDomains.push(domainList[_i]);
