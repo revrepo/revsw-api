@@ -228,20 +228,17 @@ describe('Rev API', function() {
       });
   });
 
-  it('should not allow user with RevAdmin role', function(done) {
+  it('should allow user with RevAdmin role to get a list of users', function(done) {
     request(testAPIUrl)
       .get('/v1/users')
       .auth(qaUserWithRevAdminPerm, 'password1')
-      .expect(401)
+      .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
-        res.statusCode.should.be.equal(401);
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(401);
-        response_json.error.should.be.equal('Unauthorized');
-        response_json.message.should.be.equal('Bad username or password');
+        response_json.legth.should.be.above(1);
         done();
       });
   });

@@ -70,16 +70,16 @@ exports.createUser = function(request, reply) {
   var newUser = request.payload;
 
   if (newUser.companyId) {
-    if (!utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
+    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
       return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
     }
   } else {
     newUser.companyId = request.auth.credentials.companyId;
   }
 
-  if (!newUser.domain) {
-    newUser.domain = request.auth.credentials.domain;
-  }
+//  if (!newUser.domain) {
+//    newUser.domain = request.auth.credentials.domain;
+//  }
 
   // TODO: Add a check for domains
 
@@ -142,7 +142,7 @@ exports.getUser = function(request, reply) {
         return reply(boom.badRequest('User not found'));
       }
 
-      if (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId)) {
+      if (request.auth.credentials.role === 'revadmin' || (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId))) {
 
         result = publicRecordFields.handle(result, 'user');
 
@@ -182,7 +182,7 @@ exports.updateUser = function(request, reply) {
   }
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
-  if (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
+  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId))) {
     return reply(boom.badRequest('The new companyId is not found'));
   }
   users.get({
@@ -300,7 +300,7 @@ exports.deleteUser = function(request, reply) {
   }, function(error, result) {
     if (result) {
 
-      if (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId)) {
+      if (request.auth.credentials.role !== 'revadmin' && (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId))) {
         return reply(boom.badRequest('User not found'));
       }
 

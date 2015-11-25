@@ -84,10 +84,15 @@ exports.getApiKey = function (request, reply) {
   var id = request.params.key_id;
   apiKeys.get({_id: id}, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to get API key ' + id));
+      return reply(boom.badImplementation('Failed to get API key ID ' + id));
     }
 
     if (result) {
+
+      if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+        return reply(boom.badRequest('API key not found'));
+      }
+
       result = publicRecordFields.handle(result, 'apiKeys');
       renderJSON(request, reply, error, result);
     } else {
@@ -102,7 +107,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = uuid();
   newApiKey.key_name = 'New API Key';
 
-  if (request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -198,7 +203,8 @@ exports.updateApiKey = function (request, reply) {
     });
   }
 
-  if (updatedApiKey.account_id && request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && (updatedApiKey.account_id &&
+    request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -243,7 +249,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -289,7 +295,7 @@ exports.deactivateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -335,7 +341,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 

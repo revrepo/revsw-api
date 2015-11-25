@@ -32,7 +32,7 @@ module.exports = [
     path   : '/v1/domains',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin' ]
       },
       handler     : domains.getDomains,
       description : 'Get a list of domains registered for a customer',
@@ -54,7 +54,7 @@ module.exports = [
     path   : '/v1/domains/{domain_id}',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
       handler     : domains.getDomain,
       description : 'Get basic domain configuration',
@@ -81,7 +81,7 @@ module.exports = [
     path   : '/v1/domains/{domain_id}/details',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
       handler     : domains.getDomainDetails,
       description : 'Get detailed domain configuration',
@@ -105,7 +105,7 @@ module.exports = [
     path   : '/v1/domains',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domains.createDomain,
       description : 'Create a new domain configuration',
@@ -141,7 +141,7 @@ module.exports = [
     path   : '/v1/domains/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domains.updateDomain,
       description : 'Update basic domain configuration',
@@ -182,7 +182,7 @@ module.exports = [
     path   : '/v1/domains/{domain_id}/details',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domains.updateDomainDetails,
       description : 'Update detailed domain configuration',
@@ -318,7 +318,7 @@ module.exports = [
     path   : '/v1/domains/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domains.deleteDomain,
       description : 'Delete a domain',

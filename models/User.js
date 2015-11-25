@@ -126,6 +126,8 @@ User.prototype = {
 
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
+        } else {
+          doc.companyId = [];
         }
         if (doc.domain) {
           doc.domain = doc.domain.split(',');
@@ -177,22 +179,25 @@ User.prototype = {
         for (var i = 0; i < users.length; i++) {
 
           // remove from the resulting array users without companyId property (most likely RevAdmin/system users)
-          if (!users[i].companyId) {
+          if (request.auth.credentials.role !== 'revadmin' && (!users[i].companyId)) {
             users.splice(i, 1);
             i--;
             continue;
           }
 
-          if (request.auth.credentials.role !== 'reseller' && users[i].role === 'reseller') {
+          if (request.auth.credentials.role !== 'revadmin' && (request.auth.credentials.role !== 'reseller' && users[i].role === 'reseller')) {
             users.splice(i, 1);
             i--;
             continue;
           }
-
-          users[i].companyId = users[i].companyId.split(',');
+          if (users[i].companyId) {
+            users[i].companyId = users[i].companyId.split(',');
+          } else {
+            users[i].companyId = [];
+          }
 
           // skip users which do not belong to the company
-          if (utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
+          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
             users[i].user_id = users[i]._id;
             users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;

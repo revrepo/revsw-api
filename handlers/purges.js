@@ -41,7 +41,7 @@ var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 //
 exports.purgeObject = function(request, reply) {
   var domain = request.payload.domainName;
-  if (request.auth.credentials.domain && request.auth.credentials.domain.indexOf(domain) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && (request.auth.credentials.domain && request.auth.credentials.domain.indexOf(domain) === -1)) {
     return reply(boom.badRequest('Domain not found'));
   }
   domains.get({
@@ -56,7 +56,7 @@ exports.purgeObject = function(request, reply) {
       return reply(boom.badRequest('Domain not found'));
     }
 
-    if (request.auth.credentials.companyId.indexOf(result.companyId) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.companyId) === -1) {
       return reply(boom.badRequest('Domain not found'));
     }
 
