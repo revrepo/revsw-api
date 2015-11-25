@@ -28,9 +28,9 @@ var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var elasticSearch   = require('../lib/elasticSearch');
 
-var Domain = require('../models/Domain');
+var DomainConfig = require('../models/DomainConfig');
 
-var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 
 exports.getTopReports = function(request, reply) {
@@ -42,14 +42,13 @@ exports.getTopReports = function(request, reply) {
     start_time,
     end_time;
 
-  domains.get({
-    _id: domain_id
-  }, function(error, result) {
+  domainConfigs.get(domain_id, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details'));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
-      domain_name = result.name;
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+
+      domain_name = result.domain_name;
 
       if ( request.query.from_timestamp ) {
         start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
@@ -77,10 +76,6 @@ exports.getTopReports = function(request, reply) {
       }
       if ( (end_time - start_time ) > (24*3600*1000 + 10*1000) ) {
         return reply(boom.badRequest('Requested report period exceeds 24 hours'));
-      }
-
-      if (request.query.country) {
-        filter = ' AND country_code2: \"' + request.query.country + '\"';
       }
 
       request.query.report_type = (request.query.report_type) ? request.query.report_type : 'referer';
@@ -122,32 +117,28 @@ exports.getTopReports = function(request, reply) {
         case 'request_status':
           field = 'conn_status';
           break;
+        case 'QUIC':
+          field = 'quic';
+          break;
         default:
           return reply(boom.badImplementation('Received bad report_type value ' + request.query.report_type));
       }
 
       var requestBody = {
-        'query': {
-          'filtered': {
-            'query': {
-              'query_string': {
-                'query': 'domain: \"' + domain_name + '\"' + filter,
-                'analyze_wildcard': true
+        query: {
+          bool: {
+            must: [{
+              range: {
+                '@timestamp': {
+                  'gte': start_time,
+                  'lte': end_time
+                }
               }
-            },
-            'filter': {
-              'bool': {
-                'must': [{
-                  'range': {
-                    '@timestamp': {
-                      'gte': start_time,
-                      'lte': end_time
-                    }
-                  }
-                }],
-                'must_not': []
+            }, {
+              term: {
+                domain: domain_name
               }
-            }
+            }]
           }
         },
         'size': 0,
@@ -169,14 +160,24 @@ exports.getTopReports = function(request, reply) {
         }
       };
 
+      if (request.query.country) {
+        requestBody.query.bool.must.push({
+          term: {
+            'geoip.country_code2': request.query.country
+          }
+        });
+      }
+
+      var indicesList = utils.buildIndexList(start_time, end_time);
       elasticSearch.getClientURL().search({
-        index: utils.buildIndexList(start_time, end_time),
+        index: indicesList,
         ignoreUnavailable: true,
-        timeout: 60,
+        timeout: 120000,
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
-          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence' ) );
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + start_time + ' ' + end_time + ', domain: ' + domain_name ) );
         }
         var dataArray = [];
         for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {

@@ -1,8 +1,24 @@
 {
+  "log_config": {
+    "transports": {
+      "Console": {
+        "silent": true
+      },
+      "File": {
+        "filename": "./log/revsw-api.log",
+        "level": "debug"
+      },
+      "Rsyslog": {
+        "Level" : "info",
+        "app-name" : "revsw-api"
+      }
+    }
+  },
   "service": {
     "http_port": 80,
     "https_port": 443 
   },
+  "enforce_2fa_for_revadmin_role": true,
   "master_password": "23a3ca5ff05d4f15631872d635539761",
   "key_path": "./config/ssl_certs/server.key",
   "cert_path": "./config/ssl_certs/server.crt",

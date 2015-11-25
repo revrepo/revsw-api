@@ -40,7 +40,7 @@ describe('Rev API /v1/activity call', function() {
   this.timeout(10000);
 
   var userId          = '55a45491bf0020ec6da33298';
-  var otherId         = '5601fda1f68c387c76544120';
+  var otherId         = '55e54267cb1e8d093f575adf';
   var companyId       = '5588869fbde7a0d00338ce8f';
   var wrongUserId     = 'dde2d231312';
   var userNotFound    = 'User not found';
@@ -122,7 +122,7 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return user detailed activity log (Other exist user_id with admin/resseler permissions)', function(done) {
+  xit('Should return user detailed activity log (Other exist user_id with admin/resseler permissions)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity')
@@ -343,7 +343,7 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return user summary activity log (Other exist user_id with admin/resseler permissions)', function(done) {
+  xit('Should return user summary activity log (Other exist user_id with admin/resseler permissions)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')

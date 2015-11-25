@@ -32,7 +32,7 @@ module.exports = [
     path   : '/v1/countries/list',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
       handler     : getCountriesList.getCountriesList,
       description : 'Get a list of country two-character codes',

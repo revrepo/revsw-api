@@ -52,7 +52,7 @@ exports.createAccount = function (request, reply) {
   }, function (error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to verify the new account name'));
+      return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
     }
 
     if (result) {
@@ -115,7 +115,7 @@ exports.getAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.companyId.indexOf(account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
 
@@ -136,7 +136,7 @@ exports.updateAccount = function (request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
 
-  if (request.auth.credentials.companyId.indexOf(updatedAccount.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(updatedAccount.account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
 
@@ -190,7 +190,7 @@ exports.deleteAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.companyId.indexOf(account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
   async.waterfall([

@@ -11,6 +11,13 @@ module.exports = function (grunt) {
       'test/rest_api/results'
     ],
 
+    env: {
+      test: {
+        NODE_ENV: 'qa',
+        NODE_CONFIG_DIR: './test/rest_api/config/'
+      }
+    },
+
     mochaTest: {
       test: {
         options: {
@@ -24,7 +31,44 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: ['test/rest_api/**/*.js']
-      }
+      },
+      //  stats endpoint tests
+      stats_smoke: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/smoke/stats.js']
+      },
+      stats_top_smoke: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/smoke/stats-top.js']
+      },
+      stats_top_objects_smoke: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/smoke/stats-top-objects.js']
+      },
+      stats_lastmile_rtt_smoke: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/smoke/stats-lastmile-rtt.js']
+      },
+      stats_top_negative: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/negative/stats-top.js']
+      },
+      stats_lastmile_rtt_func: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/rest_api/functional/stats-lastmile-rtt.js']
+      },
     },
 
     jshint: {
@@ -57,9 +101,18 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-docker');
+  grunt.loadNpmTasks('grunt-env');
 
   grunt.registerTask('default', ['clean', 'jshint:test', 'mochaTest',
     'docker']);
   grunt.registerTask('test', ['clean', 'jshint:test', 'mochaTest']);
   grunt.registerTask('doc', ['clean', 'docker']);
+
+  grunt.registerTask('stats_smoke', ['env', 'mochaTest:stats_smoke']);
+  grunt.registerTask('stats_top_smoke', ['env', 'mochaTest:stats_top_smoke']);
+  grunt.registerTask('stats_top_objects_smoke', ['env', 'mochaTest:stats_top_objects_smoke']);
+  grunt.registerTask('stats_lastmile_rtt_smoke', ['env', 'mochaTest:stats_lastmile_rtt_smoke']);
+  grunt.registerTask('stats_top_negative', ['env', 'mochaTest:stats_top_negative']);
+  grunt.registerTask('stats_lastmile_rtt_func', ['env', 'mochaTest:stats_lastmile_rtt_func']);
+
 };

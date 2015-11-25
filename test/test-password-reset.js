@@ -2,6 +2,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('supertest');
 var agent = require('supertest-as-promised');
+var MailParser = require('mailparser').MailParser,
+  mailparser = new MailParser();
 
 var express = require('express');
 var fs = require('fs');
@@ -11,9 +13,12 @@ var crypto = require('crypto');
 var utils = require('../lib/utilities.js');
 var config = require('config');
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
-var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
-var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + 
+  config.get('service.https_port');
+var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + 
+  config.get('service.http_port');
+var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + 
+  config.get('service.http_port');
 
 describe('Rev password reset API', function() {
 
@@ -220,13 +225,12 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
           if (error) { throw error; }
           var uid = messages[0].UID;
           process.stdin.setEncoding('utf8');
-          var messageStream = client.createMessageStream(uid);
-          var readable = messageStream;
-          readable.on('data', function(chunk) {
-            var text = chunk.toString();
-            var ytre = 'Your RevAPM Customer Portal password has been changed';
-            var resultArray = text.match(ytre);
-            resultArray.length.should.be.equal(1);
+          client.createMessageStream(uid).pipe(mailparser);
+          mailparser.on('end', function(mail_object){
+//            console.log('mail_object = ', mail_object);
+            if (mail_object.headers.subject !== 'Your RevAPM Customer Portal password has been changed') {
+              throw 'Failed to receive a portal password change confirmation email';
+            } 
             done();
           });
         });

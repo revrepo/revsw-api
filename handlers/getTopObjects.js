@@ -28,9 +28,9 @@ var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var elasticSearch   = require('../lib/elasticSearch');
 
-var Domain = require('../models/Domain');
+var DomainConfig = require('../models/DomainConfig');
 
-var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 //
 // Handler for Top Objects report
@@ -44,14 +44,13 @@ exports.getTopObjects = function(request, reply) {
       start_time,
       end_time;
 
-  domains.get({
-    _id: domain_id
-  }, function(error, result) {
+  domainConfigs.get(domain_id, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details'));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
-      domain_name = result.name;
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+
+      domain_name = result.domain_name;
 
       if ( request.query.from_timestamp ) {
         start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
@@ -122,14 +121,16 @@ exports.getTopObjects = function(request, reply) {
         }
       };
 
+      var indicesList = utils.buildIndexList(start_time, end_time);
       elasticSearch.getClientURL().search({
-        index: utils.buildIndexList(start_time, end_time),
+        index: indicesList,
         ignoreUnavailable: true,
-        timeout: 60,
+        timeout: 120000,
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
-          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence' ) );
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + start_time + ' ' + end_time + ', domain: ' + domain_name ) );
         }
         var dataArray = [];
         for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
