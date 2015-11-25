@@ -28,14 +28,8 @@ var renderJSON      = require('../lib/renderJSON');
 exports.getSDKConfig = function(request, reply) {
   var sdk_key = request.params.sdk_key;
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  cds_request({url: config.get('cds_url') + '/v1/apps/by_sdk_key/' + sdk_key, headers: authHeader}, function (err, res, body) {
+  cds_request({url: config.get('cds_url') + '/v1/sdk/config/' + sdk_key, headers: authHeader}, function (err, res, body) {
     if (err) {
-      console.log('****************************************');
-      console.log(err);
-      console.log(res);
-      console.log(body);
-      console.log('****************************************');
       return reply(boom.badImplementation('Failed to get the mobile app configuration from the CDS', {sdk_key: sdk_key}));
     }
     var response_json = JSON.parse(body);
