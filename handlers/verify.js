@@ -30,7 +30,7 @@ var renderJSON      = require('../lib/renderJSON');
 
 var Account     = require('../models/Account');
 var AuditEvents = require('../models/AuditEvents');
-var Domain      = require('../models/Domain');
+var DomainConfig      = require('../models/DomainConfig');
 var Location    = require('../models/Location');
 var PurgeJob    = require('../models/PurgeJob');
 var User        = require('../models/User');
@@ -39,7 +39,7 @@ var MasterConfiguration = require('../models/MasterConfiguration');
 
 var accounts      = new Account(mongoose, mongoConnection.getConnectionPortal());
 var audit_events  = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
-var domains       = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs       = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var locations     = new Location(mongoose, mongoConnection.getConnectionPortal());
 var users         = new User(mongoose, mongoConnection.getConnectionPortal());
 var purge_jobs    = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
@@ -68,12 +68,12 @@ exports.referenced = function (request, reply) {
       });
     },
 
-    domains : function (cb) {
-      domains.listAll(request, function (err, domains) {
+    domainConfigs : function (cb) {
+      domainConfigs.listAll(request, function (err, domainConfigs) {
         if (err) {
           cb(err);
         }
-        cb(null, domains);
+        cb(null, domainConfigs);
       });
     },
 
@@ -275,7 +275,7 @@ exports.indexes = function (request, reply) {
     },
 
     Domain : function (cb) {
-      domains.model.collection.getIndexes(function (err, data) {
+      domainConfigs.model.collection.getIndexes(function (err, data) {
         if (err) {
           cb(err);
         }

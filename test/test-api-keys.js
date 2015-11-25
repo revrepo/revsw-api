@@ -74,7 +74,7 @@ describe('Rev API keys', function() {
 
   it('should get a domains list as user with admin permissions', function(done) {
     request(testAPIUrl)
-      .get('/v1/domains')
+      .get('/v1/domain_configs')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
       .end(function(err, res) {
@@ -84,11 +84,10 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.length.should.be.above(0);
         for (var i = 0; i < response_json.length; i++) {
-          response_json[i].companyId.should.be.a.String();
-          response_json[i].name.should.be.a.String();
+          response_json[i].account_id.should.be.a.String();
+          response_json[i].domain_name.should.be.a.String();
           response_json[i].id.should.be.a.String();
-          response_json[i].sync_status.should.be.a.String();
-          if (response_json[i].name === testDomain) {
+          if (response_json[i].domain_name === testDomain) {
             testDomainId = response_json[i].id;
           }
         }
