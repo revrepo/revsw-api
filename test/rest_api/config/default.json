@@ -70,11 +70,11 @@
       "type": "apache_json_testing",
       "domains": {
         "test": {
-          "id": "55df7177bab6f4da0306f58e",
+          "id": "5655668638f201be519f9d87",
           "name": "portal-qa-domain.revsw.net"
         },
         "google": {
-          "id": "55888c861ef09d211562a439",
+          "id": "56558390b6eb546a6732ab4f",
           "name": "www.google-test.com"
         }
       }
