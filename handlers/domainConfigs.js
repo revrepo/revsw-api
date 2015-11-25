@@ -146,6 +146,7 @@ exports.getDomainConfig = function(request, reply) {
         response.account_id = response_json.account_id;
         response.domain_name = response_json.domain_name;
         response.origin_server_location_id = response_json.origin_server_location_id;
+        response.cname = response_json.cname;
       }
       renderJSON(request, reply, err, response);
     });

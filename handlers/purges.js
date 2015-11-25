@@ -25,6 +25,7 @@ var uuid        = require('node-uuid');
 var AuditLogger = require('revsw-audit');
 var config      = require('config');
 var cds_request = require('request');
+var utils           = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
 
 var renderJSON      = require('../lib/renderJSON');
@@ -42,9 +43,7 @@ var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 //
 exports.purgeObject = function(request, reply) {
   var domain = request.payload.domainName;
-  if (request.auth.credentials.role !== 'revadmin' && (request.auth.credentials.domain && request.auth.credentials.domain.indexOf(domain) === -1)) {
-    return reply(boom.badRequest('Domain not found'));
-  }
+
   domainConfigs.query({
     domain_name : domain
   }, function (error, result) {
@@ -58,7 +57,7 @@ exports.purgeObject = function(request, reply) {
     }
     result = result[0];
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain not found'));
     }
 
