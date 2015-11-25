@@ -133,7 +133,7 @@ describe('Rev API keys', function() {
       });
   });
 
-  it('should fail to create an API key without admin permissions' + testUser, function(done) {
+  it('should fail to create an API key without admin permissions ' + testUser, function(done) {
     request(testAPIUrl)
       .post('/v1/api_keys')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
@@ -146,7 +146,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -199,7 +199,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin');
         done();
       });
   });
@@ -265,7 +265,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin');
         done();
       });
   });
@@ -352,7 +352,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -468,7 +468,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -536,7 +536,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -620,7 +620,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });

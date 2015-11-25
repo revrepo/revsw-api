@@ -444,7 +444,8 @@ exports.disable2fa = function (request, reply) {
   var password = request.payload.password;
   if (request.params.user_id) {
     var user_id = request.params.user_id;
-    if ((user_id !== request.auth.credentials.user_id) && (request.auth.credentials.role !== 'admin')) {
+    if (request.auth.credentials.role !== 'revadmin' && ((user_id !== request.auth.credentials.user_id) &&
+      (request.auth.credentials.role !== 'admin'))) {
       return reply(boom.badRequest('User not found'));
     }
   } else {
@@ -454,7 +455,8 @@ exports.disable2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
-      if (user.companyId && utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId)) {
+      if (request.auth.credentials.role === 'revadmin' || (user.companyId &&
+        utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId))) {
         user.two_factor_auth_enabled = false;
         delete user.password;
         users.update(user, function(error, result) {
