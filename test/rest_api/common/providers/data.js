@@ -122,5 +122,24 @@ module.exports = {
       role: role || 'user',
       theme: 'light'
     };
+  },
+
+  /**
+   * ### DataProvider.generateSDKConfig()
+   *
+   * Generates valid data that represents a user and the user REST API
+   * end points accept.
+   *
+   * @param {String} prefix, a prefix value to put in the name
+   * @returns {Object} SDK Config with single value 'sdk_key' that currently
+   * exists in the database
+   * NOTE: due to lack of other endpoints (POST, PUT and DELETE) available
+   * from the customer API, this value is hardcoded
+   *
+   */
+  generateSDKConfig: function() {
+    return {
+      sdk_key: '0efbbd35-a131-4419-b330-00de5eb3696b'
+    };
   }
 };

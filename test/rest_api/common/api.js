@@ -24,6 +24,7 @@ var billingPlans = require('./resources/billingPlans');
 var authenticate = require('./resources/authenticate');
 var users = require('./resources/users');
 var stats = require('./resources/stats');
+var sdkConfigs = require('./resources/sdkConfigs');
 var Session = require('./session');
 
 // This allows to overpass SSL certificate check
@@ -40,6 +41,7 @@ module.exports = {
     billingPlans: billingPlans,
     authenticate: authenticate,
     users: users,
-    stats: stats
+    stats: stats,
+    sdkConfigs: sdkConfigs
   }
 };
