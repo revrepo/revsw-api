@@ -280,8 +280,8 @@ exports.updateDomainConfig = function(request, reply) {
         activity_type    : 'modify',
         activity_target  : 'domain',
         target_id        : result.domain_id,
-        target_name      : result.newDomainJson,
-        target_object    : result,
+        target_name      : result.domain_name,
+        target_object    : newDomainJson,
         operation_status : 'success'
       });
 
@@ -332,8 +332,8 @@ exports.deleteDomainConfig = function(request, reply) {
         activity_type    : 'delete',
         activity_target  : 'domain',
         target_id        : result.domain_id,
-        target_name      : result.proxy_config,
-        target_object    : result,
+        target_name      : result.domain_name,
+        target_object    : result.proxy_config,
         operation_status : 'success'
       });
       var response = response_json;
