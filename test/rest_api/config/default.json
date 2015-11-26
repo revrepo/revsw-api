@@ -1,4 +1,15 @@
 {
+  "log_config": {
+    "transports": {
+      "Console": {
+        "level": "info",
+        "colorize": true,
+        "prettyPrint": true,
+        "humanReadableUnhandledException": true,
+        "showLevel": true
+      }
+    }
+  },
   "api": {
     "host": {
       "protocol": "https",
@@ -9,6 +20,10 @@
     "resources": {
       "accounts": "accounts",
       "users": "users",
+      "billingPlans": "billing_plans",
+      "authenticate": "authenticate",
+      "users": "users",
+      "stats": "stats",
       "domainConfigs": "domain_configs"
     },
     "request": {
@@ -34,6 +49,36 @@
       "user": {
         "name": "qa_user_with_user_perm@revsw.com",
         "password": "password1"
+      },
+      "admin2": {
+        "name": "qa_user_with_admin_perm@revsw.com",
+        "password": "password1"
+      },
+      "reseller2": {
+        "name": "qa_user_with_reseller_perm@revsw.com",
+        "password": "password1"
+      },
+      "nobody": {
+        "name": "wrong_username@revsw.com",
+        "password": "we5rsdfsdfs"
+      }
+    },
+    "stats": {
+      "elastic": "testsjc20-es01.revsw.net:9200",
+      "elastic_url": "testsjc20-esurl01.revsw.net:9200",
+      "client_timeout": 1200000,
+      "upload_portion_size": 10000,
+      "upload_concurrency": 3,
+      "type": "apache_json_testing",
+      "domains": {
+        "test": {
+          "id": "5655668638f201be519f9d87",
+          "name": "portal-qa-domain.revsw.net"
+        },
+        "google": {
+          "id": "56558390b6eb546a6732ab4f",
+          "name": "www.google-test.com"
+        }
       }
     }
   }

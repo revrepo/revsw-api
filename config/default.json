@@ -1,9 +1,29 @@
 {
+  "log_config": {
+    "transports": {
+      "Console": {
+        "level": "debug",
+        "colorize": true,
+        "prettyPrint": true,
+        "humanReadableUnhandledException": true,
+        "showLevel": true
+      },
+      "File": {
+        "filename": "./log/revsw-api.log",
+        "level": "debug",
+        "prettyPrint": true
+      },
+      "Rsyslog": {
+        "silent": true
+      }
+    }
+  },
   "service": {
     "host": "0.0.0.0",
     "http_port": 7000,
     "https_port": 8000
   },
+  "enforce_2fa_for_revadmin_role": false,
   "master_password": "8cdea34a9c582e10940da5beb29b4597",
   // by default use a self-signed certificate distributed wih the package
   "key_path": "./config/dev_ssl_certs/server.key",
@@ -23,8 +43,13 @@
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
   },
   "version_file": "./config/version.txt",
+  "mongoose_debug_logging": true,
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
+
+  "user_verify_subject" : "RevAPM Customer Portal Verify Profile",
+  "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
+  "user_verify_token_lifetime" : 86400000,
 
   "password_reset_token_lifespan": 3600000,     // 1 hour
   "password_reset_from_email" : "support@revapm.com",
@@ -35,6 +60,13 @@
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
   "jwt_token_lifetime_minutes": 1440,   // 24 hours
-  "number_of_reported_audit_log_records": 40
-  
+  "number_of_reported_audit_log_records": 40,
+
+  "recurly": {
+    "API_KEY": "8282eeda404c4c39ac619b21aaeb0030",
+    "SUBDOMAIN": "kosdev",
+    "ENVIRONMENT": "sandbox",
+    "DEBUG": false
+  }
+
 }

@@ -20,7 +20,10 @@
 
 // Required resources to apply/attach to `API` object.
 var accounts = require('./resources/accounts');
+var billingPlans = require('./resources/billingPlans');
+var authenticate = require('./resources/authenticate');
 var users = require('./resources/users');
+var stats = require('./resources/stats');
 var Session = require('./session');
 var domainConfigs = require('./resources/domainConfigs');
 
@@ -35,7 +38,10 @@ module.exports = {
   // A set of all resources that the REST API service provides.
   resources: {
     accounts: accounts,
+    billingPlans: billingPlans,
+    authenticate: authenticate,
     users: users,
+    stats: stats,
     domainConfigs: domainConfigs
   }
 };

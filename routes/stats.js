@@ -26,6 +26,7 @@ var getStats = require('../handlers/getStats');
 var getTopObjects = require('../handlers/getTopObjects');
 var getTopReports = require('../handlers/getTopReports');
 var RTTReports = require('../handlers/getRTTReports');
+var GBTReports = require('../handlers/getGBTReports');
 
 var routeModels = require('../lib/routeModels');
 
@@ -35,7 +36,7 @@ module.exports = [
     path: '/v1/stats/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: getStats.getStats,
       description: 'Get traffic stats for a domain',
@@ -73,7 +74,7 @@ module.exports = [
     path: '/v1/stats/top_objects/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: getTopObjects.getTopObjects,
       description: 'Get a list of top object requests for a domain',
@@ -112,7 +113,7 @@ module.exports = [
     path: '/v1/stats/top/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: getTopReports.getTopReports,
       description: 'Get a list of top traffic properties for a domain',
@@ -143,10 +144,39 @@ module.exports = [
     path: '/v1/stats/lastmile_rtt/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: RTTReports.getRTTReports,
       description: 'Get RTT stats for a domain',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
+          report_type: Joi.string().valid ( 'country', 'device', 'os' ).description('Type of requested report (defaults to "country")'),
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/gbt/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: GBTReports.getGBTReports,
+      description: 'Get GBT stats for a domain',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {

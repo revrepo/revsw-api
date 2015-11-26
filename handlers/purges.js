@@ -25,15 +25,17 @@ var uuid        = require('node-uuid');
 var AuditLogger = require('revsw-audit');
 var config      = require('config');
 var cds_request = require('request');
+var utils           = require('../lib/utilities.js');
+var logger = require('revsw-logger')(config.log_config);
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
 
-var Domain   = require('../models/Domain');
+var DomainConfig   = require('../models/DomainConfig');
 var PurgeJob = require('../models/PurgeJob');
 
-var domains   = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 
 //
@@ -41,33 +43,22 @@ var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 //
 exports.purgeObject = function(request, reply) {
   var domain = request.payload.domainName;
-  if (request.auth.credentials.domain && request.auth.credentials.domain.indexOf(domain) === -1) {
-    return reply(boom.badRequest('Domain not found'));
-  }
-  domains.get({
-    name : domain
+
+  domainConfigs.query({
+    domain_name : domain
   }, function (error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to retrive domain details'));
+      return reply(boom.badImplementation('Failed to retrive domain details for domain name ' + domain));
     }
 
-    if (!result) {
+    if (!result[0]) {
       return reply(boom.badRequest('Domain not found'));
     }
+    result = result[0];
 
-    if (request.auth.credentials.companyId.indexOf(result.companyId) === -1) {
+    if (!utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain not found'));
-    }
-
-    if (!result.stats_url) {
-      return reply(boom.badImplementation('stats_url is empty'));
-    }
-
-    var proxy_list = result.stats_url.split(',');
-
-    for (var i1 = 0; i1 < proxy_list.length; i1++) {
-      proxy_list[i1] = proxy_list[i1].split(':')[0];
     }
 
     var newPurgeJob = {};
@@ -80,11 +71,10 @@ exports.purgeObject = function(request, reply) {
     newPurgeJob.request_json.version = 1;
     newPurgeJob.req_domain = domain;
     newPurgeJob.req_email = request.auth.credentials.email;
-    newPurgeJob.proxy_list = proxy_list.join(',').toLowerCase();
-    console.log('purge job to write = ', JSON.stringify(newPurgeJob));
+    logger.debug('Purge job to store = ' + JSON.stringify(newPurgeJob));
     purgeJobs.add(newPurgeJob, function (error, result) {
       if (error || !result) {
-        return reply(boom.badImplementation('Failed to write a new purgeJob object'));
+        return reply(boom.badImplementation('Failed to write new purgeJob object ' + JSON.stringify(newPurgeJob)));
       }
       var purgeStatusResponse;
       purgeStatusResponse = {
@@ -102,7 +92,6 @@ exports.purgeObject = function(request, reply) {
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
         account_id       : request.auth.credentials.companyId,
-//        domain_id        : request.auth.credentials.domain,
         activity_type    : 'purge',
         activity_target  : 'purge',
         target_id        : newPurgeJob.req_id,
@@ -126,7 +115,7 @@ exports.getPurgeJobStatus = function(request, reply) {
     }
   }, function (err, res, body) {
     if (err) {
-      return reply(boom.badImplementation('Failed to get purge job details from the CDS'));
+      return reply(boom.badImplementation('Failed to get purge job details from the CDS for request ID ' + request_id));
     }
     var response_json = JSON.parse(body);
     if ( res.statusCode === 400 ) {
@@ -136,5 +125,4 @@ exports.getPurgeJobStatus = function(request, reply) {
     }
   });
 };
-
 

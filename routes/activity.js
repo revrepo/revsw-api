@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/activity',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: auditInfo.getDetailedAuditInfo,
       description: 'Detailed audit reports',
@@ -58,7 +58,7 @@ module.exports = [
     path: '/v1/activity/summary',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: auditInfo.getSummaryAuditInfo,
       description: 'Summary audit reports',

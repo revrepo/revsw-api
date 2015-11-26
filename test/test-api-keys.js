@@ -4,7 +4,8 @@ var request = require('supertest');
 
 var config = require('config');
 
-var testAPIUrl = (process.env.API_QA_URL) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
+var testAPIUrl = (process.env.API_QA_URL) ? process.env.API_QA_URL : 'https://localhost:' +
+  config.get('service.https_port');
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com';
 var qaUserWithUserPermPassword = 'password1';
 var qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com';
@@ -20,9 +21,7 @@ describe('Rev API keys', function() {
     '55f9f0da5ca524340d761b70', '55f9f0fa5ca524340d761b76', '55f9f6825ca524340d761b7c',
     '55b701197957012304a49d05', '56188c7e144de0433c4e68f8'
   ];
-  var lessDomains = [
-    '55f9f6825ca524340d761b7c', '55b701197957012304a49d05', '56188c7e144de0433c4e68f8'
-  ];
+  var lessDomains = [ ];
   var wrongDomains = [
     '55f9f0da5ca524340d761b70', '55f9f0fa5ca524340f761b76', '55f9f6825ca524340d761b7c',
     '55b7011979570123aaa49d05', '56188c7e144de0433c4e68f8', '56188c7e144de0433c4e68a9'
@@ -75,7 +74,7 @@ describe('Rev API keys', function() {
 
   it('should get a domains list as user with admin permissions', function(done) {
     request(testAPIUrl)
-      .get('/v1/domains')
+      .get('/v1/domain_configs')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
       .end(function(err, res) {
@@ -85,11 +84,10 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.length.should.be.above(0);
         for (var i = 0; i < response_json.length; i++) {
-          response_json[i].companyId.should.be.a.String();
-          response_json[i].name.should.be.a.String();
+          response_json[i].account_id.should.be.a.String();
+          response_json[i].domain_name.should.be.a.String();
           response_json[i].id.should.be.a.String();
-          response_json[i].sync_status.should.be.a.String();
-          if (response_json[i].name === testDomain) {
+          if (response_json[i].domain_name === testDomain) {
             testDomainId = response_json[i].id;
           }
         }
@@ -133,7 +131,7 @@ describe('Rev API keys', function() {
       });
   });
 
-  it('should fail to create an API key without admin permissions' + testUser, function(done) {
+  it('should fail to create an API key without admin permissions ' + testUser, function(done) {
     request(testAPIUrl)
       .post('/v1/api_keys')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
@@ -146,7 +144,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -199,7 +197,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin');
         done();
       });
   });
@@ -265,7 +263,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin');
         done();
       });
   });
@@ -313,7 +311,7 @@ describe('Rev API keys', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.should.be.an.Array;
+        response_json.should.be.an.Array();
         response_json.length.should.be.equal(1);
         response_json[0].id.should.be.equal(createdAPIKeyId);
         response_json[0].key_name.should.be.equal('New API Key');
@@ -352,7 +350,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -468,7 +466,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -536,7 +534,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });
@@ -620,7 +618,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
         done();
       });
   });

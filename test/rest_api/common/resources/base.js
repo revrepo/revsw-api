@@ -82,8 +82,8 @@ var BaseResource = function(config) {
   // Receives as param the request instance
   var _setUserToRequest = function(request){
     var user = Session.getCurrentUser();
-    if (user) {
-      return request.auth(user.name, user.password);
+    if (user && user.token) {
+      return request.set('Authorization', 'Bearer ' + user.token);
     }
     return request;
   };
