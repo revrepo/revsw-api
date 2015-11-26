@@ -26,7 +26,7 @@
       "domainConfigs": "domain_configs"
     },
     "request": {
-      "maxTimeout": 10000
+      "maxTimeout": 120000
     },
     "users": {
       "revAdmin": {
