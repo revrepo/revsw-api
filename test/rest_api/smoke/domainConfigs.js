@@ -31,7 +31,7 @@ describe('Domain configs smoke check', function () {
   API.session.setCurrentUser(resellerUser);
 
   describe('Domain configs resource', function () {
-
+    this.timeout(70000);
 
 
     before(function (done) {
@@ -40,7 +40,7 @@ describe('Domain configs smoke check', function () {
         .createOneAsPrerequisite(DataProvider.generateAccount())
         .then(function (res){
           prerequisiteAccountID = res.body.object_id;
-          API.resources.domainConfigs
+          API.resources.domainConfigs.config
             .createOneAsPrerequisite(DataProvider
               .generateInitialDomainConfig(prerequisiteAccountID))
             .then(function (response) {
@@ -54,21 +54,13 @@ describe('Domain configs smoke check', function () {
 
     after(function (done) {
       API.session.setCurrentUser(resellerUser);
-      API.resources.domainConfigs.deleteAllPrerequisites(done);
-      done();
-    });
-
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
+      API.resources.domainConfigs.config.deleteAllPrerequisites(done);
       done();
     });
 
     it('should return 200 status code when getting a list of domains',
      function (done) {
-      API.resources.domainConfigs
+      API.resources.domainConfigs.config
         .getAll()
         .expect(200)
         .end(done);
@@ -76,31 +68,29 @@ describe('Domain configs smoke check', function () {
 
     it('should return a response when creating a new domain',
      function (done) {
-      API.resources.domainConfigs
+      API.resources.domainConfigs.config
         .createOne(DataProvider
           .generateInitialDomainConfig(prerequisiteAccountID))
         .expect(200)
         .then(function (response) {
-          API.resources.domainConfigs
+          API.resources.domainConfigs.config
             .deleteOne(response.body.object_id)
             .expect(200)
-            .then(function (){
-              done();
-            });
+            .end(done);
 
         });
     });
 
     it('should return a response when getting a specific domain',
      function (done) {
-      API.resources.domainConfigs
+      API.resources.domainConfigs.config
         .getOne(testDomainID)
         .expect(200)
         .end(done);
     });
 
     it('should return a response when updating a domain', function (done) {
-      API.resources.domainConfigs
+      API.resources.domainConfigs.config
         .update(
           testDomainID,
           DataProvider
@@ -111,15 +101,45 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should return a response when deleting a domain', function (done) {
-      API.resources.domainConfigs
+      API.resources.domainConfigs.config
         .createOne(DataProvider
           .generateInitialDomainConfig(prerequisiteAccountID))
         .then(function (res) {
-          API.resources.domainConfigs
+          API.resources.domainConfigs.config
             .deleteOne(res.body.object_id)
             .expect(200)
             .end(done);
         });
     });
+
+    it('should return a response on config status request', function (done) {
+      API.resources.domainConfigs.status
+        .getOne(testDomainID)
+        .expect(200)
+        .end(done);
+    });
+
+    it('should respond to PUT request with verify_only flag', function (done){
+      API.resources.domainConfigs.verify
+        .update(
+          testDomainID,
+          DataProvider
+            .generateFullDomainConfig(prerequisiteAccountID)
+        )
+        .expect(200)
+        .end(done);
+    });
+
+    it('should respond to PUT request with publish flag', function (done){
+      API.resources.domainConfigs.publish
+        .update(
+          testDomainID,
+          DataProvider
+            .generateFullDomainConfig(prerequisiteAccountID)
+        )
+        .expect(200)
+        .end(done);
+    });
+
   });
 });

@@ -23,8 +23,34 @@ var config = require('config');
 var BaseResource = require('./base');
 
 // Creating new instance of BaseResource which is going to represent the API
-module.exports = new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.domainConfigs
-});
+module.exports = {
+  config:
+    new BaseResource({
+      host: config.api.host,
+      apiVersion: config.api.version,
+      apiResource: config.api.resources.domainConfigs
+  }),
+  status: //GET only
+    new BaseResource({
+      host: config.api.host,
+      apiVersion: config.api.version,
+      apiResource: config.api.resources.domainConfigs,
+      ext: '/config_status'
+    }),
+  verify: //PUT only
+    new BaseResource({
+      host: config.api.host,
+      apiVersion: config.api.version,
+      apiResource: config.api.resources.domainConfigs,
+      ext: '?options=verify_only'
+    }),
+  publish: //PUT only
+    new BaseResource({
+      host: config.api.host,
+      apiVersion: config.api.version,
+      apiResource: config.api.resources.domainConfigs,
+      ext: '?options=publish'
+    }),
+};
+
+

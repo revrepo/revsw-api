@@ -210,5 +210,23 @@ module.exports = {
       return fullConfig;
     }
     return fullConfig;
+  },
+  generateInvalidDomainConfig: function (accountId){
+    return  {
+      '3rd_party_rewrite': {
+        '3rd_party_root_rewrite_domains': '',
+        '3rd_party_runtime_domains': '',
+        '3rd_party_urls': '',
+        'enable_3rd_party_rewrite': false,
+        'enable_3rd_party_root_rewrite': false,
+        'enable_3rd_party_runtime_rewrite': false
+      },
+      'domain_name': 'API-QA-name-' + Date.now() + '.revsw.net',
+      'account_id': accountId,
+      'origin_host_header': 'API-QA-config.revsw.net',
+      'origin_server': 'API-QA-website01.revsw.net',
+      'origin_server_location_id': '55a56fa6476c10c329a90741',
+      'proxy_timeout': 'this string should be an integer'
+    };
   }
 };

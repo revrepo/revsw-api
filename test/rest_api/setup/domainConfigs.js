@@ -52,9 +52,9 @@ describe('Clean up domainConfigs', function () {
 
     it('should clean domainConfigs environment.',
       function (done) {
-        var namePattern = /API-QA-name-[0-9]{13}/;
+        var namePattern = /API-QA-name-/;
         API.session.setCurrentUser(resellerUser);
-        API.resources.domainConfigs
+        API.resources.domainConfigs.config
           .getAll()
           .expect(200)
           .then(function (res) {
@@ -67,7 +67,7 @@ describe('Clean up domainConfigs', function () {
                 ids.push(domain.id);
               }
             }
-            API.resources.domainConfigs
+            API.resources.domainConfigs.config
               .deleteMany(ids)
               .finally(done);
           });
