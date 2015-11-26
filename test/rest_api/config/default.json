@@ -19,7 +19,6 @@
     "version": "v1",
     "resources": {
       "accounts": "accounts",
-      "users": "users",
       "billingPlans": "billing_plans",
       "authenticate": "authenticate",
       "users": "users",
@@ -27,7 +26,7 @@
       "domainConfigs": "domain_configs"
     },
     "request": {
-      "maxTimeout": 60000
+      "maxTimeout": 10000
     },
     "users": {
       "revAdmin": {
