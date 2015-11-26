@@ -22,6 +22,7 @@
 var accounts = require('./resources/accounts');
 var users = require('./resources/users');
 var Session = require('./session');
+var domainConfigs = require('./resources/domainConfigs');
 
 // This allows to overpass SSL certificate check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -34,6 +35,7 @@ module.exports = {
   // A set of all resources that the REST API service provides.
   resources: {
     accounts: accounts,
-    users: users
+    users: users,
+    domainConfigs: domainConfigs
   }
 };
