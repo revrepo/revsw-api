@@ -23,7 +23,8 @@
       "authenticate": "authenticate",
       "users": "users",
       "stats": "stats",
-      "sdkConfigs": "sdk/config"
+      "sdkConfigs": "sdk/config",
+      "domainConfigs": "domain_configs"
     },
     "request": {
       "maxTimeout": 10000

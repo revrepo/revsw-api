@@ -26,6 +26,8 @@ var users = require('./resources/users');
 var stats = require('./resources/stats');
 var sdkConfigs = require('./resources/sdkConfigs');
 var Session = require('./session');
+var domainConfigs = require('./resources/domainConfigs');
+
 
 // This allows to overpass SSL certificate check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -42,6 +44,7 @@ module.exports = {
     authenticate: authenticate,
     users: users,
     stats: stats,
-    sdkConfigs: sdkConfigs
+    sdkConfigs: sdkConfigs,
+    domainConfigs: domainConfigs
   }
 };
