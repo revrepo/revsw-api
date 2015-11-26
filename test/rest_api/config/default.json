@@ -8,10 +8,11 @@
     "version": "v1",
     "resources": {
       "accounts": "accounts",
-      "users": "users"
+      "users": "users",
+      "domainConfigs": "domain_configs"
     },
     "request": {
-      "maxTimeout": 10000
+      "maxTimeout": 60000
     },
     "users": {
       "revAdmin": {
