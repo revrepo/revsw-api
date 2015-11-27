@@ -29,9 +29,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/sdk/config/{sdk_key}',
     config: {
-      auth: {
-        scope: ['admin', 'reseller']
-      },
+      auth: false,
       handler: sdkConfig.getSDKConfig,
       description: 'Get SDK configuration details',
       notes: 'Use this function to get details of an SDK configuration',
@@ -43,7 +41,7 @@ module.exports = [
       },
       validate: {
         params: {
-          sdk_key: Joi.string().required().description('SDK key')
+          sdk_key: Joi.string().trim().length(36).required().description('SDK key')
         }
       },
       response: {
