@@ -30,12 +30,13 @@ var testDomain = {};
 
 describe('Domain configs functional test', function () {
 
-  this.timeout(200000);
+  this.timeout(300000);
   var resellerUser = config.api.users.reseller;
 
   API.session.setCurrentUser(resellerUser);
 
   before(function (done) {
+    this.timeout(300000);
 
     API.resources.accounts
       .createOneAsPrerequisite(DataProvider.generateAccount())
@@ -64,14 +65,16 @@ describe('Domain configs functional test', function () {
   });
 
   after(function (done) {
+    this.timeout(300000);
     API.session.setCurrentUser(resellerUser);
     API.resources.domainConfigs.config.deleteAllPrerequisites(done);
   });
 
   describe('Update functions', function () {
-    this.timeout(150000);
+    this.timeout(300000);
     it('should return Bad Request when updating with invalid config',
       function(done){
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .update(
           initialDomainID,
@@ -83,6 +86,7 @@ describe('Domain configs functional test', function () {
     it('should return Bad Request when updating with invalid config' +
       'and verify_only flag',
       function(done){
+        this.timeout(300000);
         API.resources.domainConfigs.verify
           .update(
             initialDomainID,
@@ -93,6 +97,7 @@ describe('Domain configs functional test', function () {
       });
     it('should return staging status as InProgress' +
       ' and global status Modified after update', function(done){
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .update(
           initialDomainID,
@@ -111,6 +116,7 @@ describe('Domain configs functional test', function () {
     });
     it('should return global status as Modified and staging status' +
       ' as Published in 120 sec after update', function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .update(
           initialDomainID,
@@ -157,6 +163,7 @@ describe('Domain configs functional test', function () {
 
     it('should return global and staging status as Published in 120 sec' +
       ' after update with publish flag', function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.publish
         .update(
           initialDomainID,
@@ -204,10 +211,11 @@ describe('Domain configs functional test', function () {
   });
 
   describe('Activity log check', function () {
-    this.timeout(200000);
+    this.timeout(300000);
 
     it('should get correct activity log after Update action',
       function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .update(
           initialDomainID,
@@ -231,6 +239,7 @@ describe('Domain configs functional test', function () {
         });
     });
     it('should get correct activity log after Publish action', function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.publish
         .update(
           initialDomainID,
@@ -253,17 +262,20 @@ describe('Domain configs functional test', function () {
         });
     });
     describe('Add and delete actions', function () {
+      this.timeout(300000);
 
       beforeEach(function (done) {
-       testDomain = DataProvider
-         .generateInitialDomainConfig(prerequisiteAccountID);
+        this.timeout(300000);
+        testDomain = DataProvider
+          .generateInitialDomainConfig(prerequisiteAccountID);
         done();
       });
       afterEach(function (done) {
-         testDomain = {};
+        testDomain = {};
         done();
       });
       it('should get correct activity log after Add action', function (done) {
+        this.timeout(300000);
         API.resources.domainConfigs.config
           .createOne(testDomain)
           .expect(200)
@@ -287,6 +299,7 @@ describe('Domain configs functional test', function () {
           });
       });
       it('should get correct activity log after Delete action', function (done) {
+        this.timeout(300000);
         API.resources.domainConfigs.config
           .createOne(testDomain)
           .expect(200)

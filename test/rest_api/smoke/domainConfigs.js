@@ -26,16 +26,17 @@ var initialDomain = {};
 
 describe('Domain configs smoke check', function () {
 
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(300000);
   var resellerUser = config.api.users.reseller;
 
   API.session.setCurrentUser(resellerUser);
 
   describe('Domain configs resource', function () {
-    this.timeout(200000);
+    this.timeout(300000);
 
 
     before(function (done) {
+      this.timeout(300000);
 
       API.resources.accounts
         .createOneAsPrerequisite(DataProvider.generateAccount())
@@ -57,12 +58,14 @@ describe('Domain configs smoke check', function () {
     });
 
     after(function (done) {
+      this.timeout(300000);
       API.session.setCurrentUser(resellerUser);
       API.resources.domainConfigs.config.deleteAllPrerequisites(done);
     });
 
     it('should return 200 status code when getting a list of domains',
-     function (done) {
+      function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .getAll()
         .expect(200)
@@ -70,7 +73,8 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should return a response when creating a new domain',
-     function (done) {
+      function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .createOne(DataProvider
           .generateInitialDomainConfig(prerequisiteAccountID))
@@ -85,7 +89,8 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should return a response when getting a specific domain',
-     function (done) {
+      function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .getOne(testDomainID)
         .expect(200)
@@ -93,6 +98,7 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should return a response when updating a domain', function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .update(
           testDomainID,
@@ -104,6 +110,7 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should return a response when deleting a domain', function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.config
         .createOne(DataProvider
           .generateInitialDomainConfig(prerequisiteAccountID))
@@ -116,6 +123,7 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should return a response on config status request', function (done) {
+      this.timeout(300000);
       API.resources.domainConfigs.status
         .getOne(testDomainID)
         .expect(200)
@@ -123,6 +131,7 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should respond to PUT request with verify_only flag', function (done){
+      this.timeout(300000);
       API.resources.domainConfigs.verify
         .update(
           testDomainID,
@@ -134,6 +143,7 @@ describe('Domain configs smoke check', function () {
     });
 
     it('should respond to PUT request with publish flag', function (done){
+      this.timeout(300000);
       API.resources.domainConfigs.publish
         .update(
           testDomainID,
