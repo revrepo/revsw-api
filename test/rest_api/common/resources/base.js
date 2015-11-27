@@ -108,12 +108,16 @@ var BaseResource = function (config) {
      * Sends a GET request to the API in order to get all object from the
      * requested type.
      *
+     * @param {object} query, will be transformed to a query string
+     *
      * @returns {object} the supertest-as-promised instance
      */
-    getAll: function () {
+
+    getAll: function (query) {
       var location = _getLocation();
       var request = _getRequest()
-        .get(location);
+        .get(location)
+        .send(query);
       return _setUserToRequest(request);
     },
 
@@ -125,12 +129,15 @@ var BaseResource = function (config) {
      *
      * @param {String} id, the uuid of the object
      *
+     * @param {object} query, will be transformed to a query string
+     *
      * @returns {object} the supertest-as-promised instance
      */
-    getOne: function (id) {
+    getOne: function (id, query) {
       var location = _getLocation(id);
       var request = _getRequest()
-        .get(location);
+        .get(location)
+        .send(query);
       return _setUserToRequest(request);
     },
 
@@ -141,12 +148,15 @@ var BaseResource = function (config) {
      *
      * @param {object} the supertest-as-promised instance
      *
+     * @param {object} query, will be transformed to a query string
+     *
      * @returns {object} the supertest-as-promised instance
      */
-    createOne: function (object) {
+    createOne: function (object, query) {
       var location = _getLocation();
       var request = _getRequest()
         .post(location)
+        .query(query)
         .send(object);
       return _setUserToRequest(request);
     },
@@ -180,13 +190,15 @@ var BaseResource = function (config) {
      * @param {string} id, the uui of the object
      * @param {object} object with the information/properties from the object
      * to update.
+     * @param {object} query, will be transformed to a query string
      *
      * @returns {object} the supertest-as-promised instance
      */
-    update: function (id, object) {
+    update: function (id, object, query) {
       var location = _getLocation(id);
       var request = _getRequest()
         .put(location)
+        .query(query)
         .send(object);
       return _setUserToRequest(request);
     },

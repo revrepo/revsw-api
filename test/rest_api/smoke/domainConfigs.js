@@ -22,6 +22,7 @@ var DataProvider = require('./../common/providers/data');
 
 var testDomainID = '';
 var prerequisiteAccountID = '';
+var initialDomain = {};
 
 describe('Domain configs smoke check', function () {
 
@@ -31,18 +32,21 @@ describe('Domain configs smoke check', function () {
   API.session.setCurrentUser(resellerUser);
 
   describe('Domain configs resource', function () {
-    this.timeout(110000);
+    this.timeout(200000);
 
 
     before(function (done) {
 
       API.resources.accounts
         .createOneAsPrerequisite(DataProvider.generateAccount())
-        .then(function (res){
+        .then(function (res) {
           prerequisiteAccountID = res.body.object_id;
+          initialDomain = DataProvider
+            .generateInitialDomainConfig(prerequisiteAccountID);
+        })
+        .then(function (res) {
           API.resources.domainConfigs.config
-            .createOneAsPrerequisite(DataProvider
-              .generateInitialDomainConfig(prerequisiteAccountID))
+            .createOneAsPrerequisite(initialDomain)
             .then(function (response) {
               testDomainID = response.body.object_id;
             })
@@ -55,7 +59,6 @@ describe('Domain configs smoke check', function () {
     after(function (done) {
       API.session.setCurrentUser(resellerUser);
       API.resources.domainConfigs.config.deleteAllPrerequisites(done);
-      done();
     });
 
     it('should return 200 status code when getting a list of domains',
