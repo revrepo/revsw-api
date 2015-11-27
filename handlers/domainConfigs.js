@@ -270,20 +270,29 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
-      AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        activity_type    : 'modify',
-        activity_target  : 'domain',
-        target_id        : result.domain_id,
-        target_name      : result.domain_name,
-        target_object    : newDomainJson,
-        operation_status : 'success'
-      });
+
+      var action = '';
+      if (request.query.options && request.query.options === 'publish') {
+        action = 'publish';
+      } else if (!request.query.options || request.query.options !== 'verify_only') {
+        action = 'modify';
+      }
+      if (action !== '') {
+        AuditLogger.store({
+          ip_address        : request.info.remoteAddress,
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId,
+          activity_type    : action,
+          activity_target  : 'domain',
+          target_id        : result.domain_id,
+          target_name      : result.domain_name,
+          target_object    : newDomainJson,
+          operation_status : 'success'
+        });
+      }
 
       renderJSON(request, reply, err, response);
     });
