@@ -23,7 +23,8 @@
       "authenticate": "authenticate",
       "users": "users",
       "stats": "stats",
-      "domainConfigs": "domain_configs"
+      "domainConfigs": "domain_configs",
+      "activity": "activity"
     },
     "request": {
       "maxTimeout": 120000
