@@ -25,7 +25,7 @@ var async = require('async');
 var testDomainID = '';
 var prerequisiteAccountID = '';
 
-describe('Domain configs functional test', function () {
+xdescribe('Domain configs functional test', function () {
 
   this.timeout(config.api.request.maxTimeout);
   var resellerUser = config.api.users.reseller;

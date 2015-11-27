@@ -31,7 +31,7 @@ describe('Domain configs smoke check', function () {
   API.session.setCurrentUser(resellerUser);
 
   describe('Domain configs resource', function () {
-    this.timeout(70000);
+    this.timeout(110000);
 
 
     before(function (done) {
