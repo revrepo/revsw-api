@@ -24,7 +24,7 @@ var testDomainID = '';
 var prerequisiteAccountID = '';
 var initialDomain = {};
 
-describe('Domain configs smoke check', function () {
+xdescribe('Domain configs smoke check', function () {
 
   this.timeout(300000);
   var resellerUser = config.api.users.reseller;
