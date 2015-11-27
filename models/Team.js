@@ -21,6 +21,9 @@
 'use strict';
 //	data access layer
 
+var utils = require('../lib/utilities.js');
+var _ = require('lodash');
+
 var PermissionsSchema = require('./common/PermissionsSchema');
 
 function Team(mongoose, connection, options) {
@@ -45,30 +48,108 @@ function Team(mongoose, connection, options) {
 
 Team.prototype = {
   add: function(item, callback) {
+    new this.model(item).save(function (err, item) {
+      if (item) {
+        item = utils.clone(item);
+        item.id = item._id + '';
 
+        delete item.__v;
+        delete item._id;
+      }
+      if (callback) {
+        callback(err, item);
+      }
+    });
   },
 
   get: function(item, callback) {
+    this.model.findOne(item, function(err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.id = doc._id + '';
 
+        doc = _.omit(doc, '__v', '_id');
+      }
+
+      callback(err, doc);
+    });
   },
 
   getById: function(id, callback) {
+    this.model.findById(id, function (err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.id = doc._id;
+        doc = _.omit(doc, '__v', '_id');
 
+        if (doc.account_id) {
+          doc.account_id = doc.account_id.split(',');
+        }
+      }
+      callback(err, doc);
+    });
   },
 
   list: function(request, callback) {
+    this.model.find(function (err, teams) {
+      if (teams) {
+        var isRevAdmin = request.auth.credentials.role === 'revadmin';
 
-  },
+        teams = utils.clone(teams);
 
-  listAll: function(request, callback) {
+        teams = _.chain(teams)
+          .filter(teams, function(t) {
+            return isRevAdmin || request.auth.credentials.companyId.indexOf(t.account_id) !== -1;
+          })
+          .map(function(t) {
+            return _.omit(t, '__v', '_id');
+          })
+          .value();
+      }
 
+      callback(err, teams);
+    });
   },
 
   update: function(item, callback) {
+    this.model.findOne({
+      _id: item.id
+    }, function (err, doc) {
+      if (doc) {
+        for (var attrname in item) {
+          doc[attrname] = item[attrname];
+        }
+        doc.updated_at = new Date();
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.id =  item._id + '';
 
+            item = _.omit(item, '__v', '_id');
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
+    });
   },
 
   remove: function(item, callback) {
+    var context = this;
 
+    if (item) {
+      this.get(item, function (err, data) {
+        if (data) {
+          context.model.remove(item, function (err) {
+            callback(err, null);
+          });
+        } else {
+          callback(true, null);
+        }
+      });
+    } else {
+      callback(utils.buildError('400', 'No user ID passed to remove function'), null);
+    }
   }
 };
