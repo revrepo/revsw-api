@@ -30,7 +30,7 @@ exports.getSDKConfig = function(request, reply) {
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   cds_request({url: config.get('cds_url') + '/v1/sdk/config/' + sdk_key, headers: authHeader}, function (err, res, body) {
     if (err) {
-      return reply(boom.badImplementation('Failed to get the mobile app configuration from the CDS', {sdk_key: sdk_key}));
+      return reply(boom.badImplementation('Failed to get the mobile app configuration from the CDS for SDK key ' + sdk_key));
     }
     var response_json = JSON.parse(body);
     if (res.statusCode === 400) {

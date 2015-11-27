@@ -70,7 +70,7 @@ describe('Clean up', function () {
               }
             }
             API.resources.accounts
-              .deleteMany(ids)
+              .deleteManyIfExist(ids)
               .finally(done);
           });
       });
