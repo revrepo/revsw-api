@@ -110,10 +110,11 @@ var BaseResource = function(config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    getAll: function(){
+    getAll: function(query){
       var location = _getLocation();
       var request = _getRequest()
-        .get(location);
+        .get(location)
+        .send(query);
       return _setUserToRequest(request);
     },
 
@@ -187,6 +188,7 @@ var BaseResource = function(config) {
       var location = _getLocation(id);
       var request = _getRequest()
         .put(location)
+        .query()
         .send(object);
       return _setUserToRequest(request);
     },
