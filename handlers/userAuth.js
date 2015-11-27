@@ -48,15 +48,18 @@ function UserAuth (request, username, password, callback) {
       return callback(null, false);
     }
 
-    result.scope = apiAccessPermissions.getPermissionScopes(result);
+    apiAccessPermissions.createPermissionScopes(result)
+      .then(function(scope) {
+        var passHash = utils.getHash(password);
 
-    var passHash = utils.getHash(password);
+        result.scope = scope;
 
-    if (passHash === result.password || passHash === config.get('master_password')) {
-      callback(error, true, result);
-    } else {
-      callback(error, false, result);
-    }
+        if (passHash === result.password || passHash === config.get('master_password')) {
+          callback(error, true, result);
+        } else {
+          callback(error, false, result);
+        }
+      });
   });
 }
 

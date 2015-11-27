@@ -43,6 +43,7 @@ function User(mongoose, connection, options) {
       type: PermissionsSchema,
       ref: 'PermissionsSchema'
     },
+    'team_id'              : this.ObjectId,
     'companyId'            : String,
     'domain'               : String,
     'email'                : String,
