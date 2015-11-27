@@ -22,10 +22,11 @@
       "billingPlans": "billing_plans",
       "authenticate": "authenticate",
       "users": "users",
-      "stats": "stats"
+      "stats": "stats",
+      "domainConfigs": "domain_configs"
     },
     "request": {
-      "maxTimeout": 10000
+      "maxTimeout": 120000
     },
     "users": {
       "revAdmin": {
