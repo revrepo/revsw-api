@@ -24,10 +24,11 @@
       "users": "users",
       "stats": "stats",
       "sdkConfigs": "sdk/config",
-      "domainConfigs": "domain_configs"
+      "domainConfigs": "domain_configs",
+      "activity": "activity"
     },
     "request": {
-      "maxTimeout": 10000
+      "maxTimeout": 120000
     },
     "users": {
       "revAdmin": {

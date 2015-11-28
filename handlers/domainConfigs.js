@@ -151,7 +151,38 @@ exports.getDomainConfig = function(request, reply) {
       renderJSON(request, reply, err, response);
     });
   });
+};
 
+exports.getDomainConfigVersions = function(request, reply) {
+  var domain_id = request.params.domain_id;
+  domainConfigs.get(domain_id, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+    }
+    if (!result) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+    if (!checkDomainAccessPermission(request,result)) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+
+    logger.info('Calling CDS to get configuration versions for domain ID: ', domain_id);
+    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/versions',
+      headers: {
+        Authorization: 'Bearer ' + config.get('cds_api_token')
+      },
+    }, function (err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to get from CDS the configuration for domain ID: ' + domain_id));
+      }
+      var response_json = JSON.parse(body);
+      if ( res.statusCode === 400 ) {
+        return reply(boom.badRequest(response_json.message));
+      }
+      var response = response_json;
+      renderJSON(request, reply, err, response);
+    });
+  });
 };
 
 exports.createDomainConfig = function(request, reply) {
@@ -270,20 +301,29 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
-      AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        activity_type    : 'modify',
-        activity_target  : 'domain',
-        target_id        : result.domain_id,
-        target_name      : result.domain_name,
-        target_object    : newDomainJson,
-        operation_status : 'success'
-      });
+
+      var action = '';
+      if (request.query.options && request.query.options === 'publish') {
+        action = 'publish';
+      } else if (!request.query.options || request.query.options !== 'verify_only') {
+        action = 'modify';
+      }
+      if (action !== '') {
+        AuditLogger.store({
+          ip_address        : request.info.remoteAddress,
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId,
+          activity_type    : action,
+          activity_target  : 'domain',
+          target_id        : result.domain_id,
+          target_name      : result.domain_name,
+          target_object    : newDomainJson,
+          operation_status : 'success'
+        });
+      }
 
       renderJSON(request, reply, err, response);
     });

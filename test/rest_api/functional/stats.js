@@ -161,7 +161,7 @@ describe('Stats API check:', function () {
       it( 'All requests combinations', function( done ) {
 
         var run_ = function( test ) {
-          console.log( '        + ' + test.name );
+          // console.log( '        + ' + test.name );
           return API.resources.stats.stats_top_objects
             .getOne(domains.google.id)
             .query(test.query)
@@ -203,7 +203,7 @@ describe('Stats API check:', function () {
 
         var run_ = function( test ) {
 
-          console.log( '        + ' + test.name );
+          // console.log( '        + ' + test.name );
 
           return API.resources.stats.stats_top
             .getOne(domains.google.id)
@@ -254,7 +254,7 @@ describe('Stats API check:', function () {
       it( 'All requests combinations', function( done ) {
 
         var run_ = function( test ) {
-          console.log( '        + ' + test.name );
+          // console.log( '        + ' + test.name );
           return API.resources.stats.stats
             .getOne(domains.google.id)
             .query(test.query)

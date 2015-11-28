@@ -57,7 +57,7 @@ var Session = require('./../session');
  * @constructor
  *
  */
-var BaseResource = function(config) {
+var BaseResource = function (config) {
 
   // Private properties
   var _cache = [];
@@ -70,7 +70,7 @@ var BaseResource = function(config) {
   //
   // Create an instance of super-test request which already has the reference
   // to the REST API HOST to point.
-  var _getRequest = function(){
+  var _getRequest = function () {
     return request(_url);
   };
 
@@ -80,7 +80,7 @@ var BaseResource = function(config) {
   // perform the API call.
   //
   // Receives as param the request instance
-  var _setUserToRequest = function(request){
+  var _setUserToRequest = function (request) {
     var user = Session.getCurrentUser();
     if (user && user.token) {
       return request.set('Authorization', 'Bearer ' + user.token);
@@ -93,7 +93,7 @@ var BaseResource = function(config) {
   // Return s the URI resource to consume from the REST API.
   //
   // Receives as param the request instance
-   var _getLocation = function(id){
+  var _getLocation = function (id) {
     if (id) {
       return _location + '/' + id + (_ext ? _ext : '');
     }
@@ -108,12 +108,16 @@ var BaseResource = function(config) {
      * Sends a GET request to the API in order to get all object from the
      * requested type.
      *
+     * @param {object} query, will be transformed to a query string
+     *
      * @returns {object} the supertest-as-promised instance
      */
-    getAll: function(){
+
+    getAll: function (query) {
       var location = _getLocation();
       var request = _getRequest()
-        .get(location);
+        .get(location)
+        .send(query);
       return _setUserToRequest(request);
     },
 
@@ -125,12 +129,15 @@ var BaseResource = function(config) {
      *
      * @param {String} id, the uuid of the object
      *
+     * @param {object} query, will be transformed to a query string
+     *
      * @returns {object} the supertest-as-promised instance
      */
-    getOne: function(id){
+    getOne: function (id, query) {
       var location = _getLocation(id);
       var request = _getRequest()
-        .get(location);
+        .get(location)
+        .send(query);
       return _setUserToRequest(request);
     },
 
@@ -141,12 +148,15 @@ var BaseResource = function(config) {
      *
      * @param {object} the supertest-as-promised instance
      *
+     * @param {object} query, will be transformed to a query string
+     *
      * @returns {object} the supertest-as-promised instance
      */
-    createOne: function(object){
+    createOne: function (object, query) {
       var location = _getLocation();
       var request = _getRequest()
         .post(location)
+        .query(query)
         .send(object);
       return _setUserToRequest(request);
     },
@@ -163,9 +173,9 @@ var BaseResource = function(config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    createOneAsPrerequisite: function(object){
+    createOneAsPrerequisite: function (object) {
       return this.createOne(object)
-        .then(function(res){
+        .then(function (res) {
           _cache.push(res.body.object_id);
           return res;
         });
@@ -180,13 +190,15 @@ var BaseResource = function(config) {
      * @param {string} id, the uui of the object
      * @param {object} object with the information/properties from the object
      * to update.
+     * @param {object} query, will be transformed to a query string
      *
      * @returns {object} the supertest-as-promised instance
      */
-    update: function(id, object){
+    update: function (id, object, query) {
       var location = _getLocation(id);
       var request = _getRequest()
         .put(location)
+        .query(query)
         .send(object);
       return _setUserToRequest(request);
     },
@@ -201,7 +213,7 @@ var BaseResource = function(config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    deleteOne: function(id){
+    deleteOne: function (id) {
       var location = _getLocation(id);
       var request = _getRequest()
         .del(location);
@@ -218,13 +230,40 @@ var BaseResource = function(config) {
      *
      * @returns {object} a promise instance
      */
-    deleteMany: function(ids){
+    deleteMany: function (ids) {
       var me = this;
       var deletions = [];
-      ids.forEach(function(id){
+      ids.forEach(function (id) {
         deletions.push(me
           .deleteOne(id)
           .then());
+      });
+      return Promise.all(deletions);
+    },
+
+    /**
+     * ### BaseResource.deleteManyIfExist()
+     *
+     * Sends the DELETE request to the API in order to delete specified objects
+     * with given IDs. All request are run in parallel using promises.
+     *
+     * NOTE: Items will be delete only if they exist. If not, it won't do
+     * anything.
+     *
+     * @param {Array} ids, list/array of the uuids of the objects to delete
+     *
+     * @returns {object} a promise instance
+     */
+    deleteManyIfExist: function (ids) {
+      var me = this;
+      var deletions = [];
+      ids.forEach(function (id) {
+        deletions.push(me
+          .deleteOne(id)
+          .then()
+          .catch(function (err) {
+            // console.log('Item does not exist. Do not do anything.');
+          }));
       });
       return Promise.all(deletions);
     },
@@ -255,7 +294,7 @@ var BaseResource = function(config) {
      *
      * @param {string} id, the uui of the object
      */
-    rememberAsPrerequisite: function(id){
+    rememberAsPrerequisite: function (id) {
       var index = _cache.indexOf(id);
       if (index === -1) {
         _cache.push(id);
@@ -270,7 +309,7 @@ var BaseResource = function(config) {
      *
      * @param {string} id, the uui of the object
      */
-    forgetPrerequisite: function(id){
+    forgetPrerequisite: function (id) {
       var index = _cache.indexOf(id);
       if (index > -1) {
         _cache.splice(index, 1);

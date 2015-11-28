@@ -81,6 +81,33 @@ module.exports = [
 
   {
     method : 'GET',
+    path   : '/v1/domain_configs/{domain_id}/versions',
+    config : {
+      auth        : {
+        scope : ['user', 'admin', 'reseller', 'revadmin']
+      },
+      handler     : domainConfigsHandlers.getDomainConfigVersions,
+      description : 'Get a list of domain configuration versions',
+      notes       : 'Use the call to receive a list of previous domain configurations for specified domain ID.',
+      tags        : ['api', 'domain_configs'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        params : {
+          domain_id : Joi.objectId().required().description('Domain ID')
+        }
+      },
+//      response    : {
+//        schema : routeModels.domainModel
+//      }
+    }
+  },
+
+  {
+    method : 'GET',
     path   : '/v1/domain_configs/{domain_id}/config_status',
     config : {
       auth        : {
