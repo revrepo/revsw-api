@@ -22,7 +22,7 @@ var config = require('config');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
 
-describe('Functional check', function () {
+describe('Boundary check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
@@ -45,24 +45,28 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should allow to `get` specific `SDK config` without authentication.',
+    it('should return `Bad Request` when trying to `get` an `SDK config` with a too long `SDK key`.',
       function (done) {
-        var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(200)
-          .end(done);
-      });
-
-    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
-      function (done) {
-        var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
+        var sdk_key = DataProvider.generateInvalidSDKConfig().too_long_sdk_key;
         API.resources.sdkConfigs
           .getOne(sdk_key)
           .expect(400)
           .end(function (err, res) {
             res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('Application not found');
+            res.body.message.should.equal('child "sdk_key" fails because ["sdk_key" length must be 36 characters long]');
+            done();
+          });
+      });
+
+    it('should return `Bad Request` when trying to `get` an `SDK config` with a too short `SDK key`.',
+      function (done) {
+        var sdk_key = DataProvider.generateInvalidSDKConfig().too_short_sdk_key;
+        API.resources.sdkConfigs
+          .getOne(sdk_key)
+          .expect(400)
+          .end(function (err, res) {
+            res.body.error.should.equal('Bad Request');
+            res.body.message.should.equal('child "sdk_key" fails because ["sdk_key" length must be 36 characters long]');
             done();
           });
       });

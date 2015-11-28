@@ -16,13 +16,10 @@
  * from Rev Software, Inc.
  */
 
-require('should-http');
-
 var config = require('config');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
 
-describe('Functional check', function () {
+describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
@@ -36,36 +33,28 @@ describe('Functional check', function () {
   });
 
   describe('SDK Configs resource', function () {
+    describe('With invalid data', function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should allow to `get` specific `SDK config` without authentication.',
-      function (done) {
-        var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(200)
-          .end(done);
+      beforeEach(function (done) {
+        done();
       });
 
-    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
-      function (done) {
-        var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(400)
-          .end(function (err, res) {
-            res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('Application not found');
-            done();
-          });
+      afterEach(function (done) {
+        done();
       });
 
+      it('should return `Bad Request` response when getting specific SDK Config.',
+        function (done) {
+          var invalid_key = 'invalid-sdk-key-length-is-exactly-36';
+          API.resources.sdkConfigs
+            .getOne(invalid_key)
+            .expect(400)
+            .end(function (err, res) {
+              res.body.message.should.equal('Application not found');
+              res.body.error.should.equal('Bad Request');
+              done();
+            });
+        });
+    });
   });
 });

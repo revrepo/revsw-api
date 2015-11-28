@@ -22,7 +22,7 @@ var config = require('config');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
 
-describe('Functional check', function () {
+describe('Sanity check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
@@ -36,36 +36,29 @@ describe('Functional check', function () {
   });
 
   describe('SDK Configs resource', function () {
+    describe('Fields Type', function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should allow to `get` specific `SDK config` without authentication.',
-      function (done) {
-        var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(200)
-          .end(done);
+      beforeEach(function (done) {
+        done();
       });
 
-    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
-      function (done) {
-        var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(400)
-          .end(function (err, res) {
-            res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('Application not found');
-            done();
-          });
+      afterEach(function (done) {
+        done();
       });
 
+      it('should return field of appropriate types when getting specific account.',
+        function (done) {
+          var sdk_key = DataProvider.generateSDKConfig().sdk_key;
+          API.resources.sdkConfigs
+            .getOne(sdk_key)
+            .expect(200)
+            .end(function(err, res) {
+              res.body.app_name.should.be.a.String();
+              res.body.os.should.be.a.String();
+              res.body.configs.should.be.an.Array();
+              done();
+            });
+        });
+    });
   });
 });
