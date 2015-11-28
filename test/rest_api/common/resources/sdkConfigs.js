@@ -16,21 +16,18 @@
  * from Rev Software, Inc.
  */
 
-// # Session object
+// # SDK Configs Resource object
 
-// This object stores in memory information about the current user being used.
-// It also provides additional methods to retrieve, update or reset that
-// information. Re-setting means as if no user was authenticated
-var currentUser;
+// Requiring config and `BaseResource`
+var config = require('config');
+var BaseResource = require('./base');
 
-module.exports = {
-  reset: function(){
-    currentUser = undefined;
-  },
-  setCurrentUser: function(user){
-    currentUser = user;
-  },
-  getCurrentUser: function(){
-    return currentUser;
-  }
-};
+// Creating new instance of BaseResource which is going to represent the API
+// `SDK Config resource`
+// TODO: In the future we need to improve this way of instantiation by providing
+// allowed method for the resource being created.
+module.exports = new BaseResource({
+  host: config.api.host,
+  apiVersion: config.api.version,
+  apiResource: config.api.resources.sdkConfigs
+});

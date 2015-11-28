@@ -124,5 +124,42 @@ module.exports = {
         updated_at: Joi.string().regex(dateFormatPattern).required()
       });
     return accountSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getSDKConfig()
+   *
+   * @returns {Object} SDK config schema
+   *
+   */
+  getSDKConfig: function() {
+    var schema = Joi.object()
+      .keys({
+        id: Joi.string().regex(idFormatPattern).required(),
+        app_name: Joi.string().required(),
+        os: Joi.string().valid('iOS', 'Android').required(),
+        configs: Joi.array().items(Joi.object({
+          sdk_release_version: Joi.number().integer(),
+          logging_level: Joi.string().valid('debug', 'info', 'warning', 'error', 'critical'),
+          configuration_refresh_interval_sec: Joi.number().integer(),
+          configuration_stale_timeout_sec: Joi.number().integer(),
+          operation_mode: Joi.string().valid('transfer_and_report', 'transfer_only', 'report_only', 'off'),
+          allowed_transport_protocols: Joi.array().items(Joi.string().valid('standard', 'quic', 'rmp')),
+          initial_transport_protocol: Joi.string().valid('standard', 'quic', 'rmp'),
+          stats_reporting_interval_sec: Joi.number().integer(),
+          stats_reporting_level: Joi.string(),
+          stats_reporting_max_requests_per_report: Joi.number().integer(),
+          domains_provisioned_list: Joi.array().items(Joi.string()),
+          domains_while_list: Joi.array().items(Joi.string()),
+          domains_black_list: Joi.array().items(Joi.string()),
+          a_b_testing_origin_offload_ratio: Joi.number().integer(),
+          configuration_api_url: Joi.string(),
+          configuration_request_timeout_sec: Joi.number().integer(),
+          stats_reporting_url: Joi.string(),
+          transport_monitoring_url: Joi.string(),
+          edge_host: Joi.string()
+        }))
+      });
+    return schema;
   }
 };
