@@ -23,6 +23,7 @@
       "authenticate": "authenticate",
       "users": "users",
       "stats": "stats",
+      "sdkConfigs": "sdk/config",
       "domainConfigs": "domain_configs",
       "activity": "activity"
     },

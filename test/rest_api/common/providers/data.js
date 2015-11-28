@@ -123,6 +123,45 @@ module.exports = {
       theme: 'light'
     };
   },
+
+  /**
+   * ### DataProvider.generateSDKConfig()
+   *
+   * Generates valid data that represents a user and the user REST API
+   * end points accept.
+   *
+   * @param {String} prefix, a prefix value to put in the name
+   * @returns {Object} SDK Config with single value 'sdk_key' that currently
+   * exists in the database
+   * NOTE: due to lack of other endpoints (POST, PUT and DELETE) available
+   * from the customer API, this value is hardcoded
+   *
+   */
+  generateSDKConfig: function() {
+    return {
+      sdk_key: '0efbbd35-a131-4419-b330-00de5eb3696b'
+    };
+  },
+
+  /**
+   * ### DataProvider.generateInvalidSDKConfig()
+   *
+   * Generates invalid data that represents a user and that the user REST API
+   * end points will not accept.
+   *
+   * @param {String} prefix, a prefix value to put in the name
+   * @returns {Object} SDK Config with single value 'sdk_key' that currently
+   * does not exist in the database
+   *
+   */
+  generateInvalidSDKConfig: function() {
+    return {
+      sdk_key: '1ef4bd35-a131-4219-b330-00debbb3696b',
+      too_long_sdk_key: '1ef4bd35-a131-4219-b330-00debbbf3696b',
+      too_short_sdk_key: '1ef4bd35-a131-4219-b330-00dbbb3696b',
+    };
+  },
+
   generateInitialDomainConfig: function (accountId) {
     return  {
       'domain_name': 'API-QA-name-' + Date.now() + '.revsw.net',
