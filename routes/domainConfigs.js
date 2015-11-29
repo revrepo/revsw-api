@@ -226,9 +226,9 @@ module.exports = [
           }).required(),
           rev_component_bp : Joi.object({
             end_user_response_headers: Joi.array().items({
-              header_value: Joi.string(),
-              header_name: Joi.string(),
-              operation: Joi.string().allow('add', 'remove', 'replace')
+              header_value: Joi.string().required(),
+              header_name: Joi.string().required(),
+              operation: Joi.string().valid('add', 'remove', 'replace').required()
             }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),
@@ -265,14 +265,14 @@ module.exports = [
                 enable: Joi.boolean()
               }),
               end_user_response_headers: Joi.array().items({
-                header_value: Joi.string(),
-                header_name: Joi.string(),
-                operation: Joi.string().allow('add', 'remove', 'replace')
+                header_value: Joi.string().required(),
+                header_name: Joi.string().required(),
+                operation: Joi.string().valid('add', 'remove', 'replace').required()
               }),
               origin_request_headers: Joi.array().items({
-                header_value: Joi.string(),
-                header_name: Joi.string(),
-                operation: Joi.string().allow('add', 'remove', 'replace')
+                header_value: Joi.string().required(),
+                header_name: Joi.string().required(),
+                operation: Joi.string().valid('add', 'remove', 'replace').required()
               }),
               cookies_cache_bypass : Joi.array().items(Joi.string())
             }).required(),
@@ -292,13 +292,13 @@ module.exports = [
             cache_bypass_locations : Joi.array().items(Joi.string()).required(),
             enable_vcl_geoip_headers: Joi.boolean(),
             custom_vcl: Joi.object({
-              enabled: Joi.boolean(),
+              enabled: Joi.boolean().required(),
               backends: Joi.array().items({
-                vcl: Joi.string(),
-                dynamic: Joi.boolean(),
-                port: Joi.number().integer(),
-                host: Joi.string(),
-                name: Joi.string()
+                vcl: Joi.string().required(),
+                dynamic: Joi.boolean().required(),
+                port: Joi.number().integer().required(),
+                host: Joi.string().required(),
+                name: Joi.string().required()
               }),
               recv: Joi.string(),
               backend_response: Joi.string(),
