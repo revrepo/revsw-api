@@ -22,7 +22,7 @@ var DataProvider = require('./../common/providers/data');
 
 
 
-describe('Domain configs smoke check', function () {
+xdescribe('Domain configs smoke check', function () {
 
   var testDomainID = '';
   var prerequisiteAccountID = '';
