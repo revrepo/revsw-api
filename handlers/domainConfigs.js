@@ -42,7 +42,7 @@ function checkDomainAccessPermission(request, domain) {
   if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.name) === -1) {
      return false;
   } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-    request.auth.credentials.companyId.indexOf(domain.account_id) === -1) {
+    request.auth.credentials.companyId.indexOf(domain.proxy_config.account_id) === -1) {
     return false;
   }  
   return true;
@@ -127,6 +127,10 @@ exports.getDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
+    if (!result.proxy_config) {
+      return reply(boom.badImplementation('No "proxy_config" section in configuraiton for domain ID ' + domain_id));
+    }
+
     logger.info('Calling CDS to get configuration for domain ID: ', domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
       headers: {
@@ -143,10 +147,6 @@ exports.getDomainConfig = function(request, reply) {
       var response = response_json;
       if (response_json.proxy_config) {
         response = response_json.proxy_config;
-        response.account_id = response_json.account_id;
-        response.domain_name = response_json.domain_name;
-        response.origin_server_location_id = response_json.origin_server_location_id;
-        response.cname = response_json.cname;
       }
       renderJSON(request, reply, err, response);
     });
@@ -215,14 +215,14 @@ exports.createDomainConfig = function(request, reply) {
       deleted: { $ne: true }
     }, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to retrieve domain details for domain' + newDomainJson.name));
+        return reply(boom.badImplementation('Failed to retrieve domain details for domain name ' + newDomainJson.name));
       }
       if (result.length > 0) {
         logger.debug('result = ', result);
         return reply(boom.badRequest('The domain name is already registered in the system'));
       }
 
-      logger.info('Calling CDS to create new domain', newDomainJson);
+      logger.info('Calling CDS to create new domain ' + newDomainJson);
       cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
         method: 'POST',
         headers: {
@@ -231,7 +231,7 @@ exports.createDomainConfig = function(request, reply) {
         body: JSON.stringify(newDomainJson)
       }, function (err, res, body) {
         if (err) {
-          return reply(boom.badImplementation('Failed to send to CDS a request to create new domain ', newDomainJson));
+          return reply(boom.badImplementation('Failed to send to CDS a request to create new domain ' + newDomainJson));
         }
         var response_json = JSON.parse(body);
         if (res.statusCode === 400)  {
@@ -275,7 +275,7 @@ exports.updateDomainConfig = function(request, reply) {
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domain_id));
     }
     if (!result) {
       return reply(boom.badRequest('Domain ID not found'));
@@ -283,6 +283,8 @@ exports.updateDomainConfig = function(request, reply) {
     if (!checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
+
+    newDomainJson.updated_by = request.auth.credentials.email;
 
     logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
 

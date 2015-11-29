@@ -193,10 +193,11 @@ module.exports = [
           options: Joi.string().valid('verify_only', 'publish').optional()
         },
         payload : {
-          account_id             : Joi.objectId().description('Account ID of the account the domain should be assiciated with'),
-          origin_host_header     : Joi.string().regex(routeModels.domainRegex).description('"Host" header value used when accessing the origin server'),
-          origin_server          : Joi.string().description('Origin server host name or IP address'),
-          origin_server_location_id : Joi.objectId().description('The ID of origin server location'),
+          account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
+          origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
+            .description('"Host" header value used when accessing the origin server'),
+          origin_server          : Joi.string().required().description('Origin server host name or IP address'),
+          origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
           config_command_options: Joi.string(),
           tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
