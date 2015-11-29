@@ -20,11 +20,13 @@ var config = require('config');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
 
-var testDomainID = '';
-var prerequisiteAccountID = '';
-var initialDomain = {};
 
-xdescribe('Domain configs smoke check', function () {
+
+describe('Domain configs smoke check', function () {
+
+  var testDomainID = '';
+  var prerequisiteAccountID = '';
+  var initialDomain = {};
 
   this.timeout(300000);
   var resellerUser = config.api.users.reseller;
@@ -47,11 +49,9 @@ xdescribe('Domain configs smoke check', function () {
         })
         .then(function (res) {
           API.resources.domainConfigs.config
-            .createOneAsPrerequisite(initialDomain)
-            .then(function (response) {
+            .createOne(initialDomain)
+            .expect(200, function (err, response) {
               testDomainID = response.body.object_id;
-            })
-            .finally(function (){
               done();
             });
         });
@@ -60,7 +60,13 @@ xdescribe('Domain configs smoke check', function () {
     after(function (done) {
       this.timeout(300000);
       API.session.setCurrentUser(resellerUser);
-      API.resources.domainConfigs.config.deleteAllPrerequisites(done);
+      API.resources.domainConfigs.config
+        .deleteOne(testDomainID)
+        .expect(200)
+        .then(function () {
+          API.resources.domainConfigs.config.deleteAllPrerequisites(done);
+        });
+
     });
 
     it('should return 200 status code when getting a list of domains',
