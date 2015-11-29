@@ -22,13 +22,15 @@ var DataProvider = require('./../common/providers/data');
 var should = require('chai').should;
 var async = require('async');
 
-var initialDomainID = '';
-var prerequisiteAccountID = '';
-var initialDomain = {};
-var userId = '';
-var testDomain = {};
+
 
 describe('Domain configs functional test', function () {
+
+  var initialDomainID = '';
+  var prerequisiteAccountID = '';
+  var initialDomain = {};
+  var userId = '';
+  var testDomain = {};
 
   this.timeout(300000);
   var resellerUser = config.api.users.reseller;
