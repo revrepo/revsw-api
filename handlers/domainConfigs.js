@@ -284,8 +284,6 @@ exports.updateDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    newDomainJson.updated_by = request.auth.credentials.email;
-
     logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
@@ -293,7 +291,10 @@ exports.updateDomainConfig = function(request, reply) {
       headers: {
         Authorization: 'Bearer ' + config.get('cds_api_token')
       },
-      body: JSON.stringify({ proxy_config: newDomainJson })
+      body: JSON.stringify({
+       updated_by: request.auth.credentials.email,
+       proxy_config: newDomainJson 
+      })
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domain_id));
