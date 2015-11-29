@@ -24,6 +24,7 @@ var billingPlans = require('./resources/billingPlans');
 var authenticate = require('./resources/authenticate');
 var users = require('./resources/users');
 var stats = require('./resources/stats');
+var sdkConfigs = require('./resources/sdkConfigs');
 var Session = require('./session');
 var domainConfigs = require('./resources/domainConfigs');
 var activity = require('./resources/activity');
@@ -43,6 +44,7 @@ module.exports = {
     authenticate: authenticate,
     users: users,
     stats: stats,
+    sdkConfigs: sdkConfigs,
     domainConfigs: domainConfigs,
     activity: activity
   }
