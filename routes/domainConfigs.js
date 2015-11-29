@@ -43,9 +43,9 @@ module.exports = [
           responseMessages : routeModels.standardHTTPErrors
         }
       },
-    //  response    : {
-    //    schema : routeModels.listOfDomainsModel
-    //  }
+      response    : {
+        schema : routeModels.listOfDomainsModel
+      }
     }
   },
 
@@ -72,10 +72,7 @@ module.exports = [
         query: {
           version: Joi.number().integer().description('Configuration version number (request 0 for latest)')
         },
-      },
-//      response    : {
-//        schema : routeModels.domainModel
-//      }
+      }
     }
   },
 
@@ -100,9 +97,9 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID')
         }
       },
-//      response    : {
-//        schema : routeModels.domainModel
-//      }
+      response    : {
+        schema : routeModels.listOfDomainsModel
+      }
     }
   },
 
@@ -127,9 +124,9 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID')
         }
       },
-//      response    : {
-//        schema : routeModels.domainModel
-//      }
+      response    : {
+        schema : routeModels.domainStatusModel
+      }
     }
   },
 

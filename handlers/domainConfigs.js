@@ -42,7 +42,7 @@ function checkDomainAccessPermission(request, domain) {
   if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.name) === -1) {
      return false;
   } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-    request.auth.credentials.companyId.indexOf(domain.proxy_config.account_id) === -1) {
+    request.auth.credentials.companyId.indexOf(domain.account_id) === -1) {
     return false;
   }  
   return true;
