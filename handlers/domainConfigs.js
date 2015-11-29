@@ -207,7 +207,7 @@ exports.createDomainConfig = function(request, reply) {
     }
     newDomainJson.created_by = request.auth.credentials.email;
     if (!newDomainJson.tolerance) {
-      newDomainJson.tolerance = 3000;
+      newDomainJson.tolerance = '3000';
     }
 
     domainConfigs.query({
