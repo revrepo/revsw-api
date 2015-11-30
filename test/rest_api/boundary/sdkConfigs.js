@@ -53,7 +53,8 @@ describe('Boundary check', function () {
           .expect(400)
           .end(function (err, res) {
             res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('child "sdk_key" fails because ["sdk_key" length must be 36 characters long]');
+            res.body.message.should.equal('child "sdk_key" fails because ' +
+                                          '["sdk_key" length must be 36 characters long]');
             done();
           });
       });
@@ -66,7 +67,8 @@ describe('Boundary check', function () {
           .expect(400)
           .end(function (err, res) {
             res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('child "sdk_key" fails because ["sdk_key" length must be 36 characters long]');
+            res.body.message.should.equal('child "sdk_key" fails because ' +
+                                          '["sdk_key" length must be 36 characters long]');
             done();
           });
       });
