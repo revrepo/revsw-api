@@ -15,7 +15,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
-
+'use strict';
 // ### Requiring common components to use in our spec/test.
 var API = require('./../common/api');
 
@@ -63,17 +63,17 @@ describe('Stats API check:', function () {
         API.resources.stats.stats_top
           .getOne(domains.test.id)
           .expect(401)
-          .then( function( res ) {
+          .then( function() {
             API.session.setCurrentUser(false);
             return API.resources.stats.stats_top
               .getOne(domains.test.id)
               .expect(401)
-              .then( function( res ) {
+              .then( function() {
                 done();
               });
           }).catch( function( err ) {
             done( err );
-          }).finally( function( res ) {
+          }).finally( function() {
             API.session.setCurrentUser(justtaUser);
           });
       });
@@ -90,7 +90,7 @@ describe('Stats API check:', function () {
         API.resources.stats.stats_top
           .getOne(domains.test.id)
           .query({ report_type: 'motherfucking-referer' })
-          .expect(400, done)
+          .expect(400, done);
       });
 
       it('should fail if report period exceeds 24h', function(done) {
@@ -98,7 +98,7 @@ describe('Stats API check:', function () {
         API.resources.stats.stats_top
           .getOne(domains.test.id)
           .query({ 'from_timestamp': '-72h', 'to_timestamp': '-2h' })
-          .expect(400, done)
+          .expect(400, done);
       });
 
     });

@@ -151,8 +151,6 @@ if ( action === 'generate' ) {
       console.trace( e );
       process.exit(1);
     });
-
-  return;
 }
 
 //  ---------------------------------
@@ -189,8 +187,6 @@ if ( action === 'remove' ) {
       console.trace( e );
       process.exit(1);
     });
-
-  return;
 }
 
 //  ---------------------------------
@@ -267,8 +263,6 @@ if ( action === 'regenerate' ) {
       console.trace( e );
       process.exit(1);
     });
-
-  return;
 }
 
 
