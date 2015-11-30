@@ -262,9 +262,9 @@ module.exports = [
                 remove_ignored_from_response : Joi.boolean().required()
               }).required(),
               serve_stale: Joi.object({
-                origin_sick_ttl: Joi.number().integer(),
-                while_fetching_ttl: Joi.number().integer(),
-                enable: Joi.boolean()
+                origin_sick_ttl: Joi.number().integer().required(),
+                while_fetching_ttl: Joi.number().integer().required(),
+                enable: Joi.boolean().required()
               }),
               end_user_response_headers: Joi.array().items({
                 header_value: Joi.string().required(),
@@ -275,6 +275,10 @@ module.exports = [
                 header_value: Joi.string().required(),
                 header_name: Joi.string().required(),
                 operation: Joi.string().valid('add', 'remove', 'replace').required()
+              }),
+              origin_redirects: Joi.object({
+                override: Joi.boolean().required(),
+                follow: Joi.boolean().required()
               }),
               cookies_cache_bypass : Joi.array().items(Joi.string())
             }).required(),
