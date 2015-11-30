@@ -284,7 +284,7 @@ var get_client_ = function( which_one ) {
     });
   }
   return client_;
-}
+};
 
 
 /**
@@ -396,7 +396,8 @@ DataProvider.prototype.uploadTestingData = function ( which_one, verbose ) {
     return client.bulk( req )
       .then( function( resp ) {
         if ( verbose ) {
-          console.log( '      # ' + which_one.toUpperCase() + ' portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
+          console.log( '      # ' + which_one.toUpperCase() + ' portion upload done, items: ' +
+            resp.items.length + ', errors: ' + resp.errors );
         }
       });
   }, { concurrency: config.api.stats.upload_concurrency } );
