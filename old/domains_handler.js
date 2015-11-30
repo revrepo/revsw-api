@@ -117,10 +117,11 @@ exports.getDomain = function (request, reply) {
   domains.get({
     _id : domain_id
   }, function (error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details'));
+    if (error || !result) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
+    if (request.auth.credentials.role === 'revadmin' || (request.auth.credentials.companyId.indexOf(result.companyId) !== -1 &&
+      request.auth.credentials.domain.indexOf(result.name) !== -1)) {
 
       servergroups.get({
         groupName : result.COGroup,
@@ -151,9 +152,10 @@ exports.getDomainDetails = function (request, reply) {
     _id : domain_id
   }, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details'));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
+    if (request.auth.credentials.role === 'revadmin' || (request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && 
+      request.auth.credentials.domain.indexOf(result.name) !== -1)) {
 
       masterconfigurations.get({
         domainName : result.name
@@ -187,7 +189,7 @@ exports.createDomain = function (request, reply) {
 
   var newDomainJson = request.payload;
 
-  if (request.auth.credentials.companyId.indexOf(newDomainJson.companyId) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.companyId) === -1) {
     return reply(boom.badRequest('Your user does not manage the specified company ID'));
   }
 
@@ -294,7 +296,7 @@ exports.updateDomain = function (request, reply) {
   var newDomainJson = request.payload;
 
   // Check that the user can use the new companyId
-  if (request.auth.credentials.companyId.indexOf(newDomainJson.companyId) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' || request.auth.credentials.companyId.indexOf(newDomainJson.companyId) === -1) {
     return reply(boom.badRequest('Your user does not manage the specified company ID'));
   }
 
@@ -412,7 +414,8 @@ exports.updateDomainDetails = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details'));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
+    if (request.auth.credentials.role === 'revadmin' || (request.auth.credentials.companyId.indexOf(result.companyId) !== -1 &&
+      request.auth.credentials.domain.indexOf(result.name) !== -1)) {
       masterconfigurations.get({
         domainName : result.name
       }, function (error, mconfig) {
@@ -509,7 +512,8 @@ exports.deleteDomain = function (request, reply) {
     if (!result) {
       return reply(boom.badRequest('Domain not found'));
     }
-    if (request.auth.credentials.companyId.indexOf(result.companyId) === -1 || request.auth.credentials.domain.indexOf(result.name) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && (request.auth.credentials.companyId.indexOf(result.companyId) === -1 ||
+      request.auth.credentials.domain.indexOf(result.name) === -1)) {
       return reply(boom.badRequest('Domain not found'));
     }
 

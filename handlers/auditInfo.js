@@ -92,9 +92,11 @@ exports.getDetailedAuditInfo = function (request, reply) {
           break;
       }
 
-      requestBody['meta.account_id'] = {
-        '$in' : request.query.company_id ? [request.query.company_id] : user.companyId
-      };
+      if (request.auth.credentials.role !== 'revadmin') {
+        requestBody['meta.account_id'] = {
+          '$in' : request.query.company_id ? [request.query.company_id] : user.companyId
+        };
+      }
 
       delete request.query.user_id;
       delete request.query.company_id;

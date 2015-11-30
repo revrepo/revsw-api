@@ -27,11 +27,11 @@ var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 
-var Domain   = require('../models/Domain');
+var DomainConfig   = require('../models/DomainConfig');
 var User     = require('../models/User');
 var PurgeJob = require('../models/PurgeJob');
 
-var domains   = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var users     = new User(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 
@@ -45,9 +45,7 @@ exports.healthCheck = function(request, reply) {
     errorMessage,
     error = false;
 
-  domains.get({
-    name: 'test_domain_name_which_may_not_exist.com'
-  }, function(error, result) {
+  domainConfigs.get('5655668638f201be51900000', function(error, result) {
     if (error) {
       error = true;
       errorMessage = 'ERROR: Failed to retrieve a domain record';

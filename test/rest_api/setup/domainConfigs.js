@@ -17,11 +17,11 @@
  */
 
 var config = require('config');
-var accounts = require('./../common/resources/accounts');
+var accounts = require('./../common/resources/domainConfigs');
 var API = require('./../common/api');
 var DataProvider = require('./../common/providers/data');
 
-describe('Clean up', function () {
+describe('Clean up domainConfigs', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
@@ -36,7 +36,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('Accounts resource', function () {
+  describe('domainConfigs resource', function () {
 
     // Use this block to run some statements before an spec/test starts its
     // execution. This is not the same as before method call.
@@ -50,27 +50,25 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean environment.',
+    it('should clean domainConfigs environment.',
       function (done) {
-        var namePattern = /API_TEST_COMPANY_[0-9]{13}/;
-        var updatedNamePattern = /UPDATED_API_TEST_COMPANY_[0-9]{13}]/;
+        var namePattern = /API-QA-name-/;
         API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
+        API.resources.domainConfigs.config
           .getAll()
           .expect(200)
           .then(function (res) {
             var ids = [];
-            var accounts = res.body;
-            var total = accounts.length;
+            var domains = res.body;
+            var total = domains.length;
             for (var i = 0; i < total; i++) {
-              var account = accounts[i];
-              if (namePattern.test(account.companyName) ||
-                  updatedNamePattern.test(account.companyName)) {
-                ids.push(account.id);
+              var domain = domains[i];
+              if (namePattern.test(domain.domain_name)) {
+                ids.push(domain.id);
               }
             }
-            API.resources.accounts
-              .deleteManyIfExist(ids)
+            API.resources.domainConfigs.config
+              .deleteMany(ids)
               .finally(done);
           });
       });

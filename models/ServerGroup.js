@@ -29,15 +29,17 @@ function ServerGroup(mongoose, connection, options) {
   this.ObjectId = this.Schema.ObjectId;
 
   this.ServerGroupSchema = new this.Schema({
-    'groupName'  : String,
-    'groupType'  : String,
-    'servers'    : String,
-    'co_cnames'  : String,
-    'serverType' : String,
-    'publicName' : String,
-    'id'         : String,
-    'created_at' : {type : Date, default : Date()},
-    'updated_at' : {type : Date, default : Date()}
+    'groupName'               : String,
+    'groupType'               : String,
+    'servers'                 : String,
+    'co_cnames'               : String,
+    'serverType'              : String,
+    'publicName'              : String,
+    'id'                      : String,
+    'transport_monitoring_url': String,
+    'edge_host'               : String,
+    'created_at'              : {type : Date, default : Date()},
+    'updated_at'              : {type : Date, default : Date()}
   });
 
   this.model = connection.model('ServerGroup', this.ServerGroupSchema, 'ServerGroup');

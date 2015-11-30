@@ -30,11 +30,11 @@ module.exports = [
     path: '/v1/verify/referenced',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller' ]
+        scope: [ 'admin', 'reseller', 'revadmin']
       },
       handler: verify.referenced,
       description: 'Verify record data (that all exist and referenced records exist)',
-      tags: ['api'],
+      tags: [ ],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -47,11 +47,11 @@ module.exports = [
     path: '/v1/verify/indexes',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller' ]
+        scope: [ 'admin', 'reseller', 'revadmin' ]
       },
       handler: verify.indexes,
       description: 'Verify required indexes',
-      tags: ['api'],
+      tags: [ ],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

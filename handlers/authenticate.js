@@ -54,7 +54,7 @@ exports.authenticate = function(request, reply) {
 
       if (passHash === user.password || passHash === config.get('master_password')) {
         var authPassed = true;
-        if (user.two_factor_auth_enabled) {
+        if (user.two_factor_auth_enabled || (user.role === 'revadmin' && config.get('enforce_2fa_for_revadmin_role') === true))  {
           authPassed = false;
           if (oneTimePassword) {
             if (user.two_factor_auth_secret_base32) {

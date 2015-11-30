@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'reseller' ]
+        scope: [ 'reseller', 'revadmin' ]
       },
       handler: account.getAccounts,
       description: 'Get a list of customer accounts registered for a customer/reseller',
@@ -54,7 +54,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'reseller_rw' ]
+        scope: [ 'reseller_rw' , 'revadmin_rw' ]
       },
       handler: account.createAccount,
       description: 'Create a new customer account in the system',
@@ -82,7 +82,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw' ]
       },
       handler: account.updateAccount,
       description: 'Update a customer account',
@@ -116,7 +116,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller' ]
+        scope: [ 'reseller', 'revadmin' ]
       },
       handler: account.getAccount,
       description: 'Get details about a customer account',
@@ -142,7 +142,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw' ]
       },
       handler: account.deleteAccount,
       description: 'Remove a customer account',

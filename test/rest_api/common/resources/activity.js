@@ -16,21 +16,15 @@
  * from Rev Software, Inc.
  */
 
-// # Session object
+// # Activity Resource object
 
-// This object stores in memory information about the current user being used.
-// It also provides additional methods to retrieve, update or reset that
-// information. Re-setting means as if no user was authenticated
-var currentUser;
+// Requiring config and `BaseResource`
+var config = require('config');
+var BaseResource = require('./base');
 
-module.exports = {
-  reset: function(){
-    currentUser = undefined;
-  },
-  setCurrentUser: function(user){
-    currentUser = user;
-  },
-  getCurrentUser: function(){
-    return currentUser;
-  }
-};
+
+module.exports = new BaseResource({
+  host: config.api.host,
+  apiVersion: config.api.version,
+  apiResource: config.api.resources.activity,
+});

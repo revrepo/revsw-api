@@ -23,6 +23,7 @@
     "http_port": 7000,
     "https_port": 8000
   },
+  "enforce_2fa_for_revadmin_role": false,
   "master_password": "8cdea34a9c582e10940da5beb29b4597",
   // by default use a self-signed certificate distributed wih the package
   "key_path": "./config/dev_ssl_certs/server.key",

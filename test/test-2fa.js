@@ -11,9 +11,12 @@ var utils = require('../lib/utilities.js');
 var config = require('config');
 var speakeasy = require('speakeasy');
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
-var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
-var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' +
+  config.get('service.https_port');
+var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' +
+  config.get('service.http_port');
+var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' +
+  config.get('service.http_port');
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',
@@ -118,7 +121,8 @@ describe('Rev API 2FA', function() {
         response_json.ascii.should.be.a.String().length(16);
         response_json.hex.should.be.a.String().length(32);
         response_json.base32.should.be.a.String();
-        response_json.google_auth_qr.should.be.a.String().and.match(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+.[A-Za-z0-9-_:%&;\?#/.=]+/g);
+        response_json.google_auth_qr.should.be.a.String().and
+          .match(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+.[A-Za-z0-9-_:%&;\?#/.=]+/g);
         secretKey = response_json.base32;
         done();
       });
@@ -265,17 +269,17 @@ describe('Rev API 2FA', function() {
     var oneTimePassword = speakeasy.time({key: secretKey, encoding: 'base32'});
     request(testAPIUrl)
       .post('/v1/2fa/disable/' + testUserId)
-      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
       .send({oneTimePassword: oneTimePassword})
-      .expect(401)
+      .expect(400)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(401);
-        response_json.error.should.be.equal('Unauthorized');
-        response_json.message.should.be.equal('Bad username or password');
+        response_json.statusCode.should.be.equal(400);
+        response_json.error.should.be.equal('Bad Request');
+        response_json.message.should.be.equal('User not found');
         done();
       });
   });

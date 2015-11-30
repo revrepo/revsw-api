@@ -94,8 +94,8 @@ Domain.prototype = {
 
           // ignore domains without companyId set or with companyId not belonging
           // to the user or domain name not managed by the user
-          if (!domains[i].companyId || request.auth.credentials.companyId.indexOf(domains[i].companyId) === -1 ||
-            request.auth.credentials.domain.indexOf(domains[i].name) === -1) {
+          if (request.auth.credentials.role !== 'revadmin' && (!domains[i].companyId || request.auth.credentials.companyId.indexOf(domains[i].companyId) === -1 ||
+            request.auth.credentials.domain.indexOf(domains[i].name) === -1)) {
             domains.splice(i, 1);
             i--;
             continue;

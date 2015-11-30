@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/users',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller' ]
+        scope: [ 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.getUsers,
       description: 'Get a list of registered users',
@@ -54,7 +54,7 @@ module.exports = [
     path: '/v1/users',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
       },
       handler: users.createUser,
       description: 'Create a new user in the system',
@@ -97,7 +97,7 @@ module.exports = [
     path: '/v1/users/{user_id}',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
       },
       handler: users.updateUser,
       description: 'Update a user profile',
@@ -149,7 +149,7 @@ module.exports = [
         }
       },
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.getMyUser,
       description: 'Get your user profile',
@@ -171,7 +171,7 @@ module.exports = [
     path: '/v1/users/password/{user_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.updateUserPassword,
       description: 'Update a user\'s password',
@@ -202,7 +202,7 @@ module.exports = [
     path: '/v1/users/{user_id}',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller' ]
+        scope: [ 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.getUser,
       description: 'Get a user profile',
@@ -229,7 +229,7 @@ module.exports = [
     path: '/v1/users/{user_id}',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
       },
       handler: users.deleteUser,
       description: 'Delete a user',
@@ -256,7 +256,7 @@ module.exports = [
     path: '/v1/2fa/init',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.init2fa,
       description: 'Initialize two factor authentication',
@@ -279,7 +279,7 @@ module.exports = [
     path: '/v1/2fa/enable',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.enable2fa,
       description: 'Enable two factor authentication for the user',
@@ -306,7 +306,7 @@ module.exports = [
     path: '/v1/2fa/disable/{user_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: users.disable2fa,
       description: 'Disable two factor authentication for the user',

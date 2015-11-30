@@ -19,7 +19,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
   wrongPassword = 'we5rsdfsdfs',
-  testDomainId = '55df7177bab6f4da0306f58e',
+  testDomainId = '5655668638f201be519f9d87',
   testDomain = 'portal-qa-domain.revsw.net';  // this domain should exist in the QA environment
 
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');

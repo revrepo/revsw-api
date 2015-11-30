@@ -122,5 +122,151 @@ module.exports = {
       role: role || 'user',
       theme: 'light'
     };
+  },
+
+  /**
+   * ### DataProvider.generateSDKConfig()
+   *
+   * Generates valid data that represents a user and the user REST API
+   * end points accept.
+   *
+   * @param {String} prefix, a prefix value to put in the name
+   * @returns {Object} SDK Config with single value 'sdk_key' that currently
+   * exists in the database
+   * NOTE: due to lack of other endpoints (POST, PUT and DELETE) available
+   * from the customer API, this value is hardcoded
+   *
+   */
+  generateSDKConfig: function() {
+    return {
+      sdk_key: '0efbbd35-a131-4419-b330-00de5eb3696b'
+    };
+  },
+
+  /**
+   * ### DataProvider.generateInvalidSDKConfig()
+   *
+   * Generates invalid data that represents a user and that the user REST API
+   * end points will not accept.
+   *
+   * @param {String} prefix, a prefix value to put in the name
+   * @returns {Object} SDK Config with single value 'sdk_key' that currently
+   * does not exist in the database
+   *
+   */
+  generateInvalidSDKConfig: function() {
+    return {
+      sdk_key: '1ef4bd35-a131-4219-b330-00debbb3696b',
+      too_long_sdk_key: '1ef4bd35-a131-4219-b330-00debbbf3696b',
+      too_short_sdk_key: '1ef4bd35-a131-4219-b330-00dbbb3696b',
+    };
+  },
+
+  generateInitialDomainConfig: function (accountId) {
+    return  {
+      'domain_name': 'API-QA-name-' + Date.now() + '.revsw.net',
+      'account_id': accountId,
+      'origin_host_header': 'API-QA-config.revsw.net',
+      'origin_server': 'API-QA-website01.revsw.net',
+      'origin_server_location_id': '55a56fa6476c10c329a90741',
+    };
+  },
+  generateFullDomainConfig: function (accountID, prefix) {
+    var fullConfig = {
+      '3rd_party_rewrite': {
+        '3rd_party_root_rewrite_domains': '',
+        '3rd_party_runtime_domains': '',
+        '3rd_party_urls': '',
+        'enable_3rd_party_rewrite': false,
+        'enable_3rd_party_root_rewrite': false,
+        'enable_3rd_party_runtime_rewrite': false
+      },
+      'proxy_timeout': 20,
+      'rev_component_bp': {
+        'acl': {
+          'acl_rules': [
+            {
+              'country_code': '',
+              'header_name': '',
+              'header_value': '',
+              'host_name': '',
+              'subnet_mask': ''
+            }
+          ],
+          'action': 'deny_except',
+          'enabled': false
+        },
+        'block_crawlers': false,
+        'cache_bypass_locations': [],
+        'caching_rules': [
+          {
+            'browser_caching': {
+              'force_revalidate': false,
+              'new_ttl': 1,
+              'override_edge': false
+            },
+            'cookies': {
+              'ignore_all': false,
+              'keep_or_ignore_list': [],
+              'list_is_keep': false,
+              'override': false,
+              'remove_ignored_from_request': false,
+              'remove_ignored_from_response': false
+            },
+            'edge_caching': {
+              'new_ttl': 0,
+              'override_no_cc': false,
+              'override_origin': false
+            },
+            'url': {
+              'is_wildcard': true,
+              'value': '**'
+            },
+            'version': 1
+          }
+        ],
+        'cdn_overlay_urls': [],
+        'enable_cache': true,
+        'enable_security': true,
+        'web_app_firewall': 'off'
+      },
+      'rev_component_co': {
+        'css_choice': 'medium',
+        'enable_optimization': false,
+        'enable_rum': false,
+        'img_choice': 'medium',
+        'js_choice': 'medium',
+        'mode': 'moderate'
+      },
+      'origin_server': 'API-QA-config.revsw.net',
+      'origin_host_header': 'API-QA-website01.revsw.net',
+      'account_id': accountID,
+      'tolerance': '3000',
+      'origin_server_location_id': '55a56fa6476c10c329a90741'
+    };
+    if(prefix){
+      fullConfig.origin_host_header = 'API-QA-website01' +
+        prefix + '.revsw.net';
+      return fullConfig;
+    }
+    return fullConfig;
+  },
+  generateInvalidDomainConfig: function (accountId){
+    return  {
+      '3rd_party_rewrite': {
+        '3rd_party_root_rewrite_domains': '',
+        '3rd_party_runtime_domains': '',
+        '3rd_party_urls': '',
+        'enable_3rd_party_rewrite': false,
+        'enable_3rd_party_root_rewrite': false,
+        'enable_3rd_party_runtime_rewrite': false
+      },
+      'domain_name': 'API-QA-name-' + Date.now() + '.revsw.net',
+      'account_id': accountId,
+      'origin_host_header': 'API-QA-config.revsw.net',
+      'origin_server': 'API-QA-website01.revsw.net',
+      'origin_server_location_id': '55a56fa6476c10c329a90741',
+      'proxy_timeout': 'this string should be an integer'
+    };
   }
 };

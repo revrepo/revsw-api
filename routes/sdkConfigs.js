@@ -21,26 +21,31 @@
 'use strict';
 
 var Joi = require('joi');
-
-var getCountriesList = require('../handlers/getCountriesList');
-
+var sdkConfig = require('../handlers/sdkConfigs');
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
   {
-    method : 'GET',
-    path   : '/v1/countries/list',
-    config : {
-      auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
-      },
-      handler     : getCountriesList.getCountriesList,
-      description : 'Get a list of country two-character codes',
-      tags        : ['api'],
-      plugins     : {
-        'hapi-swagger' : {
-          responseMessages : routeModels.standardHTTPErrors
+    method: 'GET',
+    path: '/v1/sdk/config/{sdk_key}',
+    config: {
+      auth: false,
+      handler: sdkConfig.getSDKConfig,
+      description: 'Get SDK configuration details',
+      notes: 'Use this function to get details of an SDK configuration',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
         }
+      },
+      validate: {
+        params: {
+          sdk_key: Joi.string().trim().length(36).required().description('SDK key')
+        }
+      },
+      response: {
+        schema: routeModels.SDKConfigModel
       }
     }
   }
