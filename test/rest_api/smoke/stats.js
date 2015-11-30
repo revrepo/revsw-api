@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+'use strict';
+
 // ### Requiring common components to use in our spec/test.
 var API = require('./../common/api');
 
@@ -73,8 +75,8 @@ describe('Stats API check:', function () {
             .catch( function( err ) {
                 done( err );
             });
-        }
-      }
+        };
+      };
 
       it('should return data without query', run_({}) );
       it('should return data for status_code', run_({ status_code: 200 }) );
@@ -113,21 +115,33 @@ describe('Stats API check:', function () {
             .catch( function( err ) {
                 done( err );
             });
-        }
-      }
+        };
+      };
 
-      it('should return data for report_type = referer', run_( 'referer', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = status_code', run_( 'status_code', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = cache_status', run_( 'cache_status', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = content_type', run_( 'content_type', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = protocol', run_( 'protocol', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = http_protocol', run_( 'http_protocol', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = http_method', run_( 'http_method', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = content_encoding', run_( 'content_encoding', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = device', run_( 'device', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = QUIC', run_( 'QUIC', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = referer',
+        run_( 'referer', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = status_code',
+        run_( 'status_code', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = cache_status',
+        run_( 'cache_status', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = content_type',
+        run_( 'content_type', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = protocol',
+        run_( 'protocol', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = http_protocol',
+        run_( 'http_protocol', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = http_method',
+        run_( 'http_method', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = content_encoding',
+        run_( 'content_encoding', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = os',
+        run_( 'os', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = device',
+        run_( 'device', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = country',
+        run_( 'country', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = QUIC',
+        run_( 'QUIC', domains.test.name, domains.test.id ) );
     });
 
     describe('Stats: ', function () {
@@ -156,8 +170,8 @@ describe('Stats API check:', function () {
             .catch( function( err ) {
                 done( err );
             });
-        }
-      }
+        };
+      };
 
       it('should return data without query', run_({}, domains.test.name, domains.test.id ) );
       it('should return data for status_code', run_({ status_code: 200 }, domains.test.name, domains.test.id ) );
@@ -189,8 +203,8 @@ describe('Stats API check:', function () {
             .catch( function( err ) {
                 done( err );
             });
-        }
-      }
+        };
+      };
 
       it('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
       it('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );

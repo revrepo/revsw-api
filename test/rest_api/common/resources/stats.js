@@ -18,6 +18,8 @@
 
 // # Users Resource object
 
+'use strict';
+
 // Requiring config and `BaseResource`
 var config = require('config');
 var BaseResource = require('./base');
