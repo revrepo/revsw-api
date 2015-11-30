@@ -168,6 +168,24 @@ User.prototype = {
     });
   },
 
+  query: function (where, callback) {
+    if (!where || typeof (where) !== 'object') {
+      callback(new Error('where clause not specified'));
+    }
+    this.model.find(where, function (err, doc) {
+      if (err) {
+        callback(err);
+      }
+      if (doc) {
+        doc = utils.clone(doc).map(function (r) {
+          delete r.__v;
+          return r;
+        });
+      }
+      callback(null, doc);
+    });
+  },
+
   list : function (request, callback) {
 
 //    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
