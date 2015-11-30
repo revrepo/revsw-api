@@ -147,6 +147,9 @@ exports.getDomainConfig = function(request, reply) {
       var response = response_json;
       if (response_json.proxy_config) {
         response = response_json.proxy_config;
+        if (!response.tolerance) {
+          response.tolerance = '3000';
+        }
       }
       renderJSON(request, reply, err, response);
     });
