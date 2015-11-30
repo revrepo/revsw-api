@@ -138,8 +138,8 @@ var BaseResource = function (config) {
       var request = _getRequest()
         .get(location)
         .send(query);
-      console.log(request.url);
-      console.log(request.method);
+//      console.log(request.url);
+//      console.log(request.method);
       return _setUserToRequest(request);
     },
 
@@ -160,9 +160,9 @@ var BaseResource = function (config) {
         .post(location)
         .query(query)
         .send(object);
-      console.log(request.url);
-      console.log(request.method);
-      console.log(request._data);
+//      console.log(request.url);
+//      console.log(request.method);
+//      console.log(request._data);
       return _setUserToRequest(request);
     },
 
