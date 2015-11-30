@@ -29,7 +29,6 @@ function AuditEvents(mongoose, connection, options) {
 
   this.AuditEventsSchema = new this.Schema({
     meta : {
-//      domain_id        : {type : Array},
       company_id       : {type : String},
       datetime         : {type : Number},
       user_type        : {type : String},
@@ -51,7 +50,7 @@ function AuditEvents(mongoose, connection, options) {
 
 AuditEvents.prototype = {
   detailed : function (request, callback) {
-    this.model.find(request).sort({timestamp: 'descending'}).limit(config.get('number_of_reported_audit_log_records')).exec( function (err, auditevents) {
+    this.model.find(request).sort({'meta.timestamp': 'descending'}).limit(config.get('number_of_reported_audit_log_records')).exec( function (err, auditevents) {
       var data      = [];
       for (var key in auditevents) {
         var innerData = {
@@ -59,7 +58,6 @@ AuditEvents.prototype = {
           user_id          : auditevents[key].meta.user_id,
           user_name        : auditevents[key].meta.user_name,
           user_type        : auditevents[key].meta.user_type,
-//           domain_id        : auditevents[key].meta.domain_id,
           company_id       : auditevents[key].meta.company_id,
           datetime         : auditevents[key].meta.datetime,
           account          : auditevents[key].meta.account,
