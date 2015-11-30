@@ -222,7 +222,8 @@ module.exports = [
             mode                : Joi.string().valid('least', 'moderate', 'aggressive', 'custom', 'adaptive').required(),
             img_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             js_choice           : Joi.string().valid('off', 'low', 'medium', 'high').required(),
-            css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required()
+            css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
+            origin_http_keepalive_ttl:  Joi.number().integer(),
           }).required(),
           rev_component_bp : Joi.object({
             end_user_response_headers: Joi.array().items({
