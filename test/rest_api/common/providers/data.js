@@ -241,6 +241,7 @@ module.exports = {
       'origin_server': 'API-QA-config.revsw.net',
       'origin_host_header': 'API-QA-website01.revsw.net',
       'account_id': accountID,
+      'tolerance': '3000',
       'origin_server_location_id': '55a56fa6476c10c329a90741'
     };
     if(prefix){
