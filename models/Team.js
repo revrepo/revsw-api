@@ -62,20 +62,7 @@ Team.prototype = {
     });
   },
 
-  get: function(item, callback) {
-    this.model.findOne(item, function(err, doc) {
-      if (doc) {
-        doc = utils.clone(doc);
-        doc.id = doc._id + '';
-
-        doc = _.omit(doc, '__v', '_id');
-      }
-
-      callback(err, doc);
-    });
-  },
-
-  getById: function(id, callback) {
+  get: function(id, callback) {
     this.model.findById(id, function (err, doc) {
       if (doc) {
         doc = utils.clone(doc);
@@ -90,8 +77,23 @@ Team.prototype = {
     });
   },
 
-  list: function(request, callback) {
-    this.model.find(function (err, teams) {
+  getByName: function(name, callback) {
+    this.model.findOne({ name: name }, function(err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.id = doc._id;
+        doc = _.omit(doc, '__v', '_id');
+
+        if (doc.account_id) {
+          doc.account_id = doc.account_id.split(',');
+        }
+      }
+      callback(err, doc);
+    });
+  },
+
+  query: function(query, request, callback) {
+    this.model.find(query, function (err, teams) {
       if (teams) {
         var isRevAdmin = request.auth.credentials.role === 'revadmin';
 
@@ -109,6 +111,10 @@ Team.prototype = {
 
       callback(err, teams);
     });
+  },
+
+  list: function(request, callback) {
+    return this.query({}, request, callback);
   },
 
   update: function(item, callback) {
