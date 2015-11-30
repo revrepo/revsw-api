@@ -224,6 +224,7 @@ module.exports = [
             js_choice           : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             origin_http_keepalive_ttl:  Joi.number().integer(),
+            origin_http_keepalive_enabled: Joi.boolean()
           }).required(),
           rev_component_bp : Joi.object({
             end_user_response_headers: Joi.array().items({
@@ -261,9 +262,9 @@ module.exports = [
                 remove_ignored_from_response : Joi.boolean().required()
               }).required(),
               serve_stale: Joi.object({
-                origin_sick_ttl: Joi.number().integer(),
-                while_fetching_ttl: Joi.number().integer(),
-                enable: Joi.boolean()
+                origin_sick_ttl: Joi.number().integer().required(),
+                while_fetching_ttl: Joi.number().integer().required(),
+                enable: Joi.boolean().required()
               }),
               end_user_response_headers: Joi.array().items({
                 header_value: Joi.string().required(),
@@ -274,6 +275,10 @@ module.exports = [
                 header_value: Joi.string().required(),
                 header_name: Joi.string().required(),
                 operation: Joi.string().valid('add', 'remove', 'replace').required()
+              }),
+              origin_redirects: Joi.object({
+                override: Joi.boolean().required(),
+                follow: Joi.boolean().required()
               }),
               cookies_cache_bypass : Joi.array().items(Joi.string())
             }).required(),
@@ -291,6 +296,7 @@ module.exports = [
               }).required()
             }).required(),
             cache_bypass_locations : Joi.array().items(Joi.string()).required(),
+            co_bypass_locations : Joi.array().items(Joi.string().required()),
             enable_vcl_geoip_headers: Joi.boolean(),
             custom_vcl: Joi.object({
               enabled: Joi.boolean().required(),
