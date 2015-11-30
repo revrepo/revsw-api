@@ -21,11 +21,10 @@
 'use strict';
 //	data access layer
 
-var utils = require('../../lib/utilities.js');
+var utils = require('../lib/utilities.js');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var mongoose = require('mongoose');
-var autoIncrement = require('revsw-mongoose-auto-increment');
 
 function App(mongoose, connection, options) {
   this.options = options;
@@ -73,20 +72,8 @@ function App(mongoose, connection, options) {
     previous_app_values: [{}]
   });
 
-  autoIncrement.initialize(connection);
-  this.AppSchema.plugin(autoIncrement.plugin, {model: 'App', field: 'serial_id'});
   this.model = connection.model('App', this.AppSchema, 'App');
 }
-
-// mongodb connection for the portal database
-var PortalConnection = mongoose.createConnection(config.get('portal_mongo.connect_string'));
-PortalConnection.on('error', function(err) {
-  logger.error('revportal moungodb connect error: ', err);
-});
-
-PortalConnection.on('connected', function() {
-  logger.info('Mongoose connected to revportal connection');
-});
 
 mongoose.set('debug', config.get('mongoose_debug_logging'));
 
@@ -158,4 +145,4 @@ App.prototype = {
   },
 };
 
-exports.Apps = new App(mongoose, PortalConnection);
+module.exports = App;
