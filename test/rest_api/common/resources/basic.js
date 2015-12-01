@@ -75,10 +75,12 @@ var getPath = function (data, ids) {
     }
   }
   else {
-    path = path.replace('/{' + data.idKey + '}', ids ? '/' + ids : '');
+    if (data.idKey) {
+      path = path.replace('/{' + data.idKey + '}', ids ? '/' + ids : '');
+    }
   }
   path = path.replace(/\/\{.+\}/, '');
-  console.log('        >>> Resource PATH:', path);
+  //console.log('        >>> Resource PATH:', path);
   return path;
 };
 
@@ -86,7 +88,21 @@ var getBaseUrl = function () {
   var host = config.get('api.host');
   var apiVersion = config.get('api.version');
   return host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion;
-}
+};
+
+var getResourceBuilder = function (nestedResource, path, parentIdKey) {
+  var resource = nestedResource;
+  var data = {
+    path: path,
+    idKey: parentIdKey
+  };
+  // Return resource build which depends on
+  return function (id) {
+    // Path = parent-resource-path + nested-resource-path
+    resource.path = getPath(data, id) + resource.path;
+    return new BasicResource(resource);
+  };
+};
 
 /**
  * ### BasicResource.constructor()
@@ -128,12 +144,10 @@ var BasicResource = function (data) {
   // Generating nested resources id exist
   if (data.nestedResources) {
     for (var i = 0, len = data.nestedResources.length; i < len; i++) {
-      // Nested resource
       var nestedResource = data.nestedResources[i];
-      // Path = parent-resource-path + nested-resource-path
-      nestedResource.path = data.path + nestedResource.path;
-      // Append nested resource to parent
-      _resource[nestedResource.name] = new BasicResource(nestedResource);
+      // Append nested-resource builder to parent
+      _resource[nestedResource.name] =
+        getResourceBuilder(nestedResource, data.path, data.idKey);
     }
   }
 

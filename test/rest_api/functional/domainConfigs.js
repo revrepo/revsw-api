@@ -42,7 +42,7 @@ describe('Domain configs functional test', function () {
     this.timeout(300000);
 
     API.resources.accounts
-      .createOneAsPrerequisite(DataProvider.generateOne())
+      .createOneAsPrerequisite(AccountsDP.generateOne())
       .then(function (res) {
         prerequisiteAccountID = res.body.object_id;
         initialDomain = DataProvider

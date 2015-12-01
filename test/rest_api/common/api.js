@@ -47,5 +47,28 @@ module.exports = {
     sdkConfigs: sdkConfigs,
     domainConfigs: domainConfigs,
     activity: activity
+  },
+
+  /**
+   * ### API.authenticateUser()
+   *
+   * Helper method to Authenticate user before doing any type of request to
+   * the REST API services.
+   *
+   * @param user, user information. For instance
+   *     {
+   *       name: 'joe@email.com',
+   *       password: 'something'
+   *     }
+   *
+   * @returns {Promise}
+   */
+  authenticateUser: function (user) {
+    return authenticate
+      .createOne({ email: user.name, password: user.password })
+      .then(function(response) {
+        user.token = response.body.token;
+        Session.setCurrentUser(user);
+      });
   }
 };
