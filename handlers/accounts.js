@@ -84,7 +84,7 @@ exports.createAccount = function (request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : request.auth.credentials.account_id,
 //          domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'account',
@@ -95,10 +95,10 @@ exports.createAccount = function (request, reply) {
         });
 
         var updatedUser = {
-          user_id   : request.auth.credentials.user_id,
-          companyId : request.auth.credentials.companyId
+          user_id    : request.auth.credentials.user_id,
+          account_id : request.auth.credentials.account_id
         };
-        updatedUser.companyId.push(result.id);
+        updatedUser.account_id.push(result.id);
 
         console.log(updatedUser, result);
 
@@ -118,7 +118,7 @@ exports.getAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
 
@@ -139,7 +139,7 @@ exports.updateAccount = function (request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
 
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(updatedAccount.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(updatedAccount.account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
 
@@ -174,7 +174,7 @@ exports.updateAccount = function (request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
 //        domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'account',
@@ -193,7 +193,7 @@ exports.deleteAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
   async.waterfall([
@@ -214,7 +214,7 @@ exports.deleteAccount = function (request, reply) {
       accounts.get({
         _id : account_id
       }, function (error, account) {
-        if (error) { 
+        if (error) {
           return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
         }
         if (!account) {
@@ -244,7 +244,7 @@ exports.deleteAccount = function (request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : request.auth.credentials.account_id,
 //          domain_id        : request.auth.credentials.domain,
           activity_type    : 'delete',
           activity_target  : 'account',
@@ -254,13 +254,13 @@ exports.deleteAccount = function (request, reply) {
           operation_status : 'success'
         });
 
-        // now let's remove the account ID from the user's companyId array
+        // now let's remove the account ID from the user's account_id array
         var updatedUser = {
-          user_id   : request.auth.credentials.user_id,
-          companyId : request.auth.credentials.companyId
+          user_id    : request.auth.credentials.user_id,
+          account_id : request.auth.credentials.account_id
         };
 
-        updatedUser.companyId.splice(updatedUser.companyId.indexOf(account_id), 1);
+        updatedUser.account_id.splice(updatedUser.account_id.indexOf(account_id), 1);
 
         users.update(updatedUser, function (error, result) {
           if (error) {

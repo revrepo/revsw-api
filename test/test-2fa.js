@@ -51,7 +51,7 @@ describe('Rev API 2FA', function() {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
-    'companyId': [
+    'account_id': [
       '55b6ff6a7957012304a49d04'
     ],
     'domain': [

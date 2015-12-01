@@ -40,7 +40,7 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 function verifyDomainOwnership(companyId, domainList, callback) {
-  
+
   var verified = true;
   var okDomains = [];
   var wrongDomains = [];
@@ -89,7 +89,7 @@ exports.getApiKey = function (request, reply) {
 
     if (result) {
 
-      if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+      if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(result.account_id) === -1) {
         return reply(boom.badRequest('API key not found'));
       }
 
@@ -107,7 +107,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = uuid();
   newApiKey.key_name = 'New API Key';
 
-  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.account_id.indexOf(newApiKey.account_id) === -1) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -151,7 +151,7 @@ exports.createApiKey = function(request, reply) {
             user_id         : request.auth.credentials.user_id,
             user_name       : request.auth.credentials.email,
             user_type       : 'user',
-            account_id      : request.auth.credentials.companyId,
+            account_id      : request.auth.credentials.account_id,
             activity_type   : 'add',
             activity_target : 'apikey',
             target_id       : result.id,
@@ -170,7 +170,7 @@ exports.createApiKey = function(request, reply) {
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
   var id = request.params.key_id;
-  
+
   function doUpdate() {
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {
@@ -190,7 +190,7 @@ exports.updateApiKey = function (request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
         target_id        : result.id,
@@ -204,7 +204,7 @@ exports.updateApiKey = function (request, reply) {
   }
 
   if (request.auth.credentials.role !== 'revadmin' && (updatedApiKey.account_id &&
-    request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1)) {
+    request.auth.credentials.account_id.indexOf(updatedApiKey.account_id) === -1)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -249,7 +249,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -271,7 +271,7 @@ exports.activateApiKey = function (request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
         target_id        : result.id,
@@ -295,7 +295,7 @@ exports.deactivateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -317,7 +317,7 @@ exports.deactivateApiKey = function (request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
         target_id        : result.id,
@@ -341,7 +341,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.account_id.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -364,7 +364,7 @@ exports.deleteApiKey = function (request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
         activity_type    : 'delete',
         activity_target  : 'apikey',
         target_id        : result.id,

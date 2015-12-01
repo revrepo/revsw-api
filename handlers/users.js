@@ -69,12 +69,12 @@ exports.getUsers = function getUsers(request, reply) {
 exports.createUser = function(request, reply) {
   var newUser = request.payload;
 
-  if (newUser.companyId) {
-    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
+  if (newUser.account_id) {
+    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.account_id, request.auth.credentials.account_id)) {
       return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
     }
   } else {
-    newUser.companyId = request.auth.credentials.companyId;
+    newUser.account_id = request.auth.credentials.account_id;
   }
 
 //  if (!newUser.domain) {
@@ -112,7 +112,7 @@ exports.createUser = function(request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : request.auth.credentials.account_id,
 //          domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'user',
@@ -142,7 +142,7 @@ exports.getUser = function(request, reply) {
         return reply(boom.badRequest('User not found'));
       }
 
-      if (request.auth.credentials.role === 'revadmin' || (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId))) {
+      if (request.auth.credentials.role === 'revadmin' || (result.account_id && utils.areOverlappingArrays(result.account_id, request.auth.credentials.account_id))) {
 
         result = publicRecordFields.handle(result, 'user');
 
@@ -182,14 +182,14 @@ exports.updateUser = function(request, reply) {
   }
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
-  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId))) {
-    return reply(boom.badRequest('The new companyId is not found'));
+  if (request.auth.credentials.role !== 'revadmin' && (newUser.account_id && !utils.isArray1IncludedInArray2(newUser.account_id, request.auth.credentials.account_id))) {
+    return reply(boom.badRequest('The new account_id is not found'));
   }
   users.get({
     _id: user_id
   }, function(error, result) {
     if (result) {
-      if (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId)) {
+      if (!utils.areOverlappingArrays(request.auth.credentials.account_id, result.account_id)) {
         return reply(boom.badRequest('User not found'));
       }
       if ( request.auth.credentials.role !== 'reseller' && result.role === 'reseller' ) {
@@ -211,7 +211,7 @@ exports.updateUser = function(request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
+            account_id       : request.auth.credentials.account_id,
 //            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
@@ -267,7 +267,7 @@ exports.updateUserPassword = function(request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
+            account_id       : request.auth.credentials.account_id,
 //            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
@@ -300,7 +300,7 @@ exports.deleteUser = function(request, reply) {
   }, function(error, result) {
     if (result) {
 
-      if (request.auth.credentials.role !== 'revadmin' && (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId))) {
+      if (request.auth.credentials.role !== 'revadmin' && (!utils.areOverlappingArrays(request.auth.credentials.account_id, result.account_id))) {
         return reply(boom.badRequest('User not found'));
       }
 
@@ -312,7 +312,7 @@ exports.deleteUser = function(request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
+            account_id       : request.auth.credentials.account_id,
 //            domain_id        : request.auth.credentials.domain,
             activity_type    : 'delete',
             activity_target  : 'user',
@@ -365,7 +365,7 @@ exports.init2fa = function (request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
+            account_id       : request.auth.credentials.account_id,
 //            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
@@ -413,7 +413,7 @@ exports.enable2fa = function (request, reply) {
                 user_id          : request.auth.credentials.user_id,
                 user_name        : request.auth.credentials.email,
                 user_type        : 'user',
-                account_id       : request.auth.credentials.companyId,
+                account_id       : request.auth.credentials.account_id,
 //                domain_id        : request.auth.credentials.domain,
                 activity_type    : 'modify',
                 activity_target  : 'user',
@@ -455,8 +455,8 @@ exports.disable2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
-      if (request.auth.credentials.role === 'revadmin' || (user.companyId &&
-        utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId))) {
+      if (request.auth.credentials.role === 'revadmin' || (user.account_id &&
+        utils.areOverlappingArrays(user.account_id, request.auth.credentials.account_id))) {
         user.two_factor_auth_enabled = false;
         delete user.password;
         users.update(user, function(error, result) {
@@ -474,7 +474,7 @@ exports.disable2fa = function (request, reply) {
               user_id          : request.auth.credentials.user_id,
               user_name        : request.auth.credentials.email,
               user_type        : 'user',
-              account_id       : request.auth.credentials.companyId,
+              account_id       : request.auth.credentials.account_id,
 //              domain_id        : request.auth.credentials.domain,
               activity_type    : 'modify',
               activity_target  : 'user',

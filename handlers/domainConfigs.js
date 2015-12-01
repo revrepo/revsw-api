@@ -42,9 +42,9 @@ function checkDomainAccessPermission(request, domain) {
   if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.name) === -1) {
      return false;
   } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-    request.auth.credentials.companyId.indexOf(domain.account_id) === -1) {
+    request.auth.credentials.account_id.indexOf(domain.account_id) === -1) {
     return false;
-  }  
+  }
   return true;
 }
 
@@ -192,7 +192,7 @@ exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
 
-  if (request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+  if (request.auth.credentials.account_id.indexOf(newDomainJson.account_id) === -1) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -244,7 +244,7 @@ exports.createDomainConfig = function(request, reply) {
           return renderJSON(request, reply, err, response_json);
         }
 
-        var response = {  
+        var response = {
           statusCode: 200,
           message: 'Successfully created new domain configuration',
           object_id: response_json._id
@@ -255,7 +255,7 @@ exports.createDomainConfig = function(request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : request.auth.credentials.account_id,
           activity_type    : 'add',
           activity_target  : 'domain',
           target_id        : response.object_id,
@@ -296,7 +296,7 @@ exports.updateDomainConfig = function(request, reply) {
       },
       body: JSON.stringify({
        updated_by: request.auth.credentials.email,
-       proxy_config: newDomainJson 
+       proxy_config: newDomainJson
       })
     }, function (err, res, body) {
       if (err) {
@@ -321,7 +321,7 @@ exports.updateDomainConfig = function(request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : request.auth.credentials.account_id,
           activity_type    : action,
           activity_target  : 'domain',
           target_id        : result.domain_id,
@@ -374,7 +374,7 @@ exports.deleteDomainConfig = function(request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
         activity_type    : 'delete',
         activity_target  : 'domain',
         target_id        : result.domain_id,

@@ -42,8 +42,8 @@ function UserAuth (request, username, password, callback) {
       return callback(null, false);
     }
 
-    // Users without companyId data should not be able to log in
-    if (result.role !== 'revadmin' && !result.companyId) {
+    // Users without account_id data should not be able to log in
+    if (result.role !== 'revadmin' && !result.account_id) {
       return callback(null, false);
     }
 
@@ -54,7 +54,7 @@ function UserAuth (request, username, password, callback) {
     if (!result.access_control_list.readOnly) {
       result.scope.push(result.role + '_rw');
     }
-    
+
     var passHash = utils.getHash(password);
 
     if (passHash === result.password || passHash === config.get('master_password')) {

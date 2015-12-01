@@ -259,7 +259,7 @@ describe('Rev API', function() {
 
         response_json.length.should.be.above(0);
         for (var i=0; i < response_json.length; i++ ) {
-          response_json[i].companyId.should.be.a.String();
+          response_json[i].account_id.should.be.a.String();
           response_json[i].name.should.be.a.String();
           response_json[i].id.should.be.a.String();
           response_json[i].sync_status.should.be.a.String();
@@ -314,7 +314,7 @@ describe('Rev API Admin User', function() {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
-    'companyId': [
+    'account_id': [
       '55b6ff6a7957012304a49d04'
     ],
     'domain': [
@@ -336,7 +336,7 @@ describe('Rev API Admin User', function() {
   var updatedUserJson = {
     'firstname': 'Updated API QA User',
     'lastname': 'Updated With Admin Perm',
-    'companyId': [
+    'account_id': [
       '55b6ff6a7957012304a49d04'
     ],
     'domain': [
@@ -390,7 +390,7 @@ describe('Rev API Admin User', function() {
         // now let's find the ID of the API test user (variable qaUserWithAdminPerm)
         var foundMyself = false;
         for ( var i=0; i < numberOfUsers; i++ ) {
-          response_json[i].companyId.should.be.an.instanceOf(Array);
+          response_json[i].account_id.should.be.an.instanceOf(Array);
           response_json[i].domain.should.be.an.instanceOf(Array);
           response_json[i].email.should.be.type('string');
           response_json[i].firstname.should.be.type('string');
@@ -398,15 +398,15 @@ describe('Rev API Admin User', function() {
           if ( response_json[i].email === qaUserWithAdminPerm ) {
             foundMyself = true;
             userId = response_json[i].user_id;
-            myCompanyId = response_json[i].companyId;
+            myCompanyId = response_json[i].account_id;
             myDomains = response_json[i].domain;
           }
         }
         foundMyself.should.be.equal(true);
 
-        // check that the returned users all belong to the same companyId as the test user
+        // check that the returned users all belong to the same account_id as the test user
         for ( i=0; i < numberOfUsers; i++ ) {
-          var companyIdOverlap = utils.areOverlappingArrays(myCompanyId, response_json[i].companyId);
+          var companyIdOverlap = utils.areOverlappingArrays(myCompanyId, response_json[i].account_id);
           companyIdOverlap.should.be.equal(true);
         }
 
@@ -469,7 +469,7 @@ describe('Rev API Admin User', function() {
 
   it('should create a new user account ' + testUser, function(done) {
     newUserJson.email = testUser;
-    newUserJson.companyId = myCompanyId;
+    newUserJson.account_id = myCompanyId;
     newUserJson.domain = myDomains;
     request(testAPIUrl)
       .post('/v1/users')
@@ -645,9 +645,9 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should create new user account ' + testUser + ' without specifying companyId and domain', function(done) {
+  it('should create new user account ' + testUser + ' without specifying account_id and domain', function(done) {
     newUserJson.email = testUser;
-    delete newUserJson.companyId;
+    delete newUserJson.account_id;
     delete newUserJson.domain;
     newUserJson.password = testPassword;
     request(testAPIUrl)
@@ -686,7 +686,7 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  xit('should read back the configuration of freshly created user ' + testUser + ' and verify companyId and domain attributes', function(done) {
+  xit('should read back the configuration of freshly created user ' + testUser + ' and verify account_id and domain attributes', function(done) {
 
   var newUserJson = {
   'firstname': 'API QA User',
@@ -732,12 +732,12 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should fail to set new companyId 55ba46a67957012304a49d0f which does not belong to test user ' + testUser, function(done) {
+  it('should fail to set new account_id 55ba46a67957012304a49d0f which does not belong to test user ' + testUser, function(done) {
 
     request(testAPIUrl)
       .put('/v1/users/' + testUserId)
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
-      .send( { companyId: [ '55b6ff6a7957012304a49d04', '55ba46a67957012304a49d0f' ] })
+      .send( { account_id: [ '55b6ff6a7957012304a49d04', '55ba46a67957012304a49d0f' ] })
       .expect(400)
       .end(function(err, res) {
         if (err) {
@@ -746,7 +746,7 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(400);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('The new companyId is not found');
+        response_json.message.should.be.equal('The new account_id is not found');
         done();
       });
   });
@@ -867,7 +867,7 @@ describe('Rev API Admin User', function() {
   xit('should fail to create a new domain with existing domain name ' + newDomainName, function(done) {
     this.timeout(120000);
     var newDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       name: testDomain,
       origin_server: 'origin_server.com',
       tolerance: '3000',
@@ -895,7 +895,7 @@ describe('Rev API Admin User', function() {
   xit('should fail to create a new domain with unexisting CO group name', function(done) {
     this.timeout(60000);
     var newDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       name: newDomainName,
       origin_server: 'origin_server.com',
       tolerance: '3000',
@@ -919,10 +919,10 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  xit('should fail to create a new domain with companyId 55ba46a67957012304a49d0f which does not belong to the user', function(done) {
+  xit('should fail to create a new domain with account_id 55ba46a67957012304a49d0f which does not belong to the user', function(done) {
     this.timeout(60000);
     var newDomainJson = {
-      companyId: '55ba46a67957012304a49d0f',
+      account_id: '55ba46a67957012304a49d0f',
       name: newDomainName,
       origin_server: 'origin_server.com',
       tolerance: '3000',
@@ -968,7 +968,7 @@ describe('Rev API Admin User', function() {
   xit('should create a new domain configuration for name ' + newDomainName, function(done) {
     this.timeout(120000);
     var newDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       name: newDomainName,
       origin_server: 'origin_server.com',
       tolerance: '3000',
@@ -1015,7 +1015,7 @@ describe('Rev API Admin User', function() {
   xit('should read the basic confguration of freshly created domain ' + newDomainName, function(done) {
     this.timeout(60000);
     newDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       id: newDomainId,
       name: newDomainName,
       origin_server: 'origin_server.com',
@@ -1049,7 +1049,7 @@ describe('Rev API Admin User', function() {
   xit('should fail to update the new domain with unexisting CO group name', function(done) {
     this.timeout(60000);
     updateDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       origin_server: 'origin_server.com',
       tolerance: '3000',
       origin_server_location: 'HQ Test Lab which does not exist',
@@ -1072,10 +1072,10 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  xit('should fail to update the new domain with companyId 55ba46a67957012304a49d0f belonging to another user', function(done) {
+  xit('should fail to update the new domain with account_id 55ba46a67957012304a49d0f belonging to another user', function(done) {
     this.timeout(60000);
     updateDomainJson = {
-      companyId: '55ba46a67957012304a49d0f',
+      account_id: '55ba46a67957012304a49d0f',
       origin_server: 'origin_server.com',
       tolerance: '3000',
       origin_server_location: 'HQ Test Lab',
@@ -1101,7 +1101,7 @@ describe('Rev API Admin User', function() {
   xit('should update all fields for test domain ' + newDomainName, function(done) {
     this.timeout(120000);
     updateDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       origin_server: 'origin_server2.com',
       tolerance: '4000',
       origin_server_location: 'HQ Office Test Lab',
@@ -1145,7 +1145,7 @@ describe('Rev API Admin User', function() {
   xit('should read the updated configuration back and check all fields', function(done) {
     this.timeout(60000);
     newDomainJson = {
-      companyId: '55b6ff6a7957012304a49d04',
+      account_id: '55b6ff6a7957012304a49d04',
       id: newDomainId,
       name: newDomainName,
       origin_server: 'origin_server2.com',

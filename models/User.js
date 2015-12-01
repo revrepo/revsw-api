@@ -37,7 +37,7 @@ function User(mongoose, connection, options) {
       test      : {type : Boolean, default : true},
       readOnly  : {type : Boolean, default : false}
     },
-    'companyId'            : String,
+    'account_id'           : String,
     'domain'               : String,
     'email'                : String,
     'firstname'            : String,
@@ -90,8 +90,8 @@ User.prototype = {
       item.domain = item.domain.join(',');
     }
 
-    if (utils.isArray(item.companyId)) {
-      item.companyId = item.companyId.join(',');
+    if (utils.isArray(item.account_id)) {
+      item.account_id = item.account_id.join(',');
     }
 
     new this.model(item).save(function (err, item) {
@@ -124,10 +124,10 @@ User.prototype = {
         delete doc.validation;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
+        if (doc.account_id) {
+          doc.account_id = doc.account_id.split(',');
         } else {
-          doc.companyId = [];
+          doc.account_id = [];
         }
         if (doc.domain) {
           doc.domain = doc.domain.split(',');
@@ -154,8 +154,8 @@ User.prototype = {
         delete doc.validation;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
+        if (doc.account_id) {
+          doc.account_id = doc.account_id.split(',');
         }
         if (doc.domain) {
           doc.domain = doc.domain.split(',');
@@ -196,8 +196,8 @@ User.prototype = {
         users = utils.clone(users);
         for (var i = 0; i < users.length; i++) {
 
-          // remove from the resulting array users without companyId property (most likely RevAdmin/system users)
-          if (request.auth.credentials.role !== 'revadmin' && (!users[i].companyId)) {
+          // remove from the resulting array users without account_id property (most likely RevAdmin/system users)
+          if (request.auth.credentials.role !== 'revadmin' && (!users[i].account_id)) {
             users.splice(i, 1);
             i--;
             continue;
@@ -208,14 +208,14 @@ User.prototype = {
             i--;
             continue;
           }
-          if (users[i].companyId) {
-            users[i].companyId = users[i].companyId.split(',');
+          if (users[i].account_id) {
+            users[i].account_id = users[i].account_id.split(',');
           } else {
-            users[i].companyId = [];
+            users[i].account_id = [];
           }
 
           // skip users which do not belong to the company
-          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
+          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].account_id, request.auth.credentials.account_id)) {
             users[i].user_id = users[i]._id;
             users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;
@@ -246,7 +246,7 @@ User.prototype = {
         users = utils.clone(users);
 
         for (var i = 0; i < users.length; i++) {
-          users[i].companyId = users[i].companyId ? users[i].companyId.split(',') : '';
+          users[i].account_id = users[i].account_id ? users[i].account_id.split(',') : '';
           users[i].user_id   = users[i]._id;
 
           delete users[i]._id;
@@ -275,8 +275,8 @@ User.prototype = {
           item.domain = item.domain.join(',');
         }
 
-        if (utils.isArray(item.companyId)) {
-          item.companyId = item.companyId.join(',');
+        if (utils.isArray(item.account_id)) {
+          item.account_id = item.account_id.join(',');
         }
 
         if (item.password) {
