@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/apps',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin']
       },
       handler: app.getApps,
       description: 'Get a list of currently registered mobile applications',
@@ -52,7 +52,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin']
       },
       handler: app.getApp,
       description: 'Get current configuration of a mobile application',
@@ -77,13 +77,38 @@ module.exports = [
   },
   {
     method: 'GET',
+    path: '/v1/apps/{app_id}/versions',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin']
+      },
+      handler: app.getAppVersions,
+      description: 'Get list of previous configurations of a mobile application',
+      tags: ['api'],
+      validate: {
+        params: {
+          app_id: Joi.objectId().required().description('Unique application ID')
+        }
+      },
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: Joi.array().items(routeModels.AppModel)
+      }
+    }
+  },
+  {
+    method: 'GET',
     path: '/v1/apps/{app_id}/config_status',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin']
       },
       handler: app.getAppConfigStatus,
-      description: 'Get current configuration status of a mobile application',
+      description: 'Get current configuration publishing status of a mobile application',
       tags: ['api'],
       validate: {
         params: {
@@ -105,17 +130,16 @@ module.exports = [
     path: '/v1/apps',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler: app.addApp,
-      description: 'Create a new mobile application configuration',
+      description: 'Register a new mobile application configuration',
       tags: ['api'],
       validate: {
         payload: {
           account_id: Joi.objectId().required().description('Account ID the new app should be associated with'),
           app_name: Joi.string().required().description('Name of the mobile application'),
-          app_platform: Joi.string().required().valid('iOS', 'Android').description('Name of the mobile application platform'),
-          sdk_configuration_api_service: Joi.objectId()
+          app_platform: Joi.string().required().valid('iOS', 'Android').description('Name of the mobile application platform')
         }
       },
       plugins: {
@@ -133,7 +157,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler: app.updateApp,
       description: 'Update the current configuration of a mobile application',
@@ -169,10 +193,10 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler: app.deleteApp,
-      description: 'Delete mobile application configuration',
+      description: 'Delete a mobile application configuration',
       tags: ['api'],
       validate: {
         params: {

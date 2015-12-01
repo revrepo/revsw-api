@@ -96,6 +96,38 @@ exports.getApp = function(request, reply) {
   });
 };
 
+exports.getAppVersions = function(request, reply) {
+  var app_id = request.params.app_id;
+  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
+    }
+    if (!existing_app) {
+      return reply(boom.badRequest('App ID not found'));
+    }
+    if (!permissionAllowed(request, existing_app)) {
+      return reply(boom.badRequest('App ID not found'));
+    }
+    cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps/' + app_id + '/versions', headers: authHeader}, function (err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to get a list of configuration versions for mobile app from the CDS for App ID ' + app_id));
+      }
+      var response_json = JSON.parse(body);
+      if (res.statusCode === 400) {
+        return reply(boom.badRequest(response_json.message));
+      } else if (res.statusCode === 500) {
+        return reply(boom.badImplementation(response_json.message));
+      } else if (res.statusCode === 200) {
+        response_json = publicRecordFields.handle(response_json, 'apps');
+        renderJSON(request, reply, err, response_json);
+      } else {
+        return reply(boom.create(res.statusCode, res.message));
+      }
+    });
+  });
+};
+
 exports.getAppConfigStatus = function(request, reply) {
   var app_id = request.params.app_id;
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
