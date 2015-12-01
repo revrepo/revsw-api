@@ -16,7 +16,10 @@
  * from Rev Software, Inc.
  */
 
-// # Base Resource object
+// # Basic Resource object
+
+// Requiring config.
+var config = require('config');
 
 // Required third-party libraries.
 var Promise = require('bluebird');
@@ -24,19 +27,78 @@ var request = require('supertest-as-promised');
 
 // Required components form rest-api framework.
 var Session = require('./../session');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
+
+
+// #### Helper function _contains
+//
+// Validate is specified array contains specified element.
+var _contains = function (list, element) {
+  return list && list.indexOf(element) >= 0;
+};
+
+// #### Helper function getRequest
+//
+// Create an instance of super-test request which already has the reference
+// to the REST API HOST to point.
+var getRequest = function () {
+  return request(getBaseUrl());
+};
+
+// #### Helper function setUserToRequest
+//
+// In case there is a session with a current user, authenticates that user to
+// perform the API call.
+//
+// Receives as param the request instance
+var setUserToRequest = function (request) {
+  var user = Session.getCurrentUser();
+  if (user && user.token) {
+    return request.set('Authorization', 'Bearer ' + user.token);
+  }
+  return request;
+};
+
+// #### Helper function getPath
+//
+// Return s the URI resource to consume from the REST API.
+//
+// Receives as param the request instance
+var getPath = function (data, ids) {
+  var path = data.path;
+  if (typeof ids === 'object') {
+    for (var key in ids) {
+      if (ids.hasOwnProperty(key)) {
+        path = path.replace('/{' + key + '}', (ids[key] ? '/' + ids[key] : ''));
+      }
+    }
+  }
+  else {
+    path = path.replace('/{' + data.idKey + '}', ids ? '/' + ids : '');
+  }
+  path = path.replace(/\/\{.+\}/, '');
+  console.log('        >>> Resource PATH:', path);
+  return path;
+};
+
+var getBaseUrl = function () {
+  var host = config.get('api.host');
+  var apiVersion = config.get('api.version');
+  return host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion;
+}
 
 /**
- * ### BaseResource.constructor()
+ * ### BasicResource.constructor()
  *
  * Base implementation for Resource which defines all actions that could be
  * performed by triggering requests (using supported methods) to the REST API.
  *
- * @param {object} config, objet with configuration properties as follow:
+ * @param {object} data, object with configuration properties. For instance:
  *
  *     {
- *       host: config.api.host,
- *       apiVersion: config.api.version,
- *       apiResource: config.api.resources.accounts
+ *       name: 'accounts',
+ *       paht: '/accounts'
  *     }
  * @returns {object} which allows the user to perform some actions. With the
  * following schema:
@@ -57,53 +119,27 @@ var Session = require('./../session');
  * @constructor
  *
  */
-var BaseResource = function (config) {
+var BasicResource = function (data) {
 
   // Private properties
   var _cache = [];
-  var _host = config.host;
-  var _url = _host.protocol + '://' + _host.name + ':' + _host.port;
-  var _location = '/' + config.apiVersion + '/' + config.apiResource;
-  var _ext = config.ext;
+  var _resource = {};
 
-  // #### Helper function _getRequest
-  //
-  // Create an instance of super-test request which already has the reference
-  // to the REST API HOST to point.
-  var _getRequest = function () {
-    return request(_url);
-  };
-
-  // #### Helper function _getRequest
-  //
-  // In case there is a session with a current user, authenticates that user to
-  // perform the API call.
-  //
-  // Receives as param the request instance
-  var _setUserToRequest = function (request) {
-    var user = Session.getCurrentUser();
-    if (user && user.token) {
-      return request.set('Authorization', 'Bearer ' + user.token);
+  // Generating nested resources id exist
+  if (data.nestedResources) {
+    for (var i = 0, len = data.nestedResources.length; i < len; i++) {
+      // Nested resource
+      var nestedResource = data.nestedResources[i];
+      // Path = parent-resource-path + nested-resource-path
+      nestedResource.path = data.path + nestedResource.path;
+      // Append nested resource to parent
+      _resource[nestedResource.name] = new BasicResource(nestedResource);
     }
-    return request;
-  };
+  }
 
-  // #### Helper function _getRequest
-  //
-  // Return s the URI resource to consume from the REST API.
-  //
-  // Receives as param the request instance
-  var _getLocation = function (id) {
-    if (id) {
-      return _location + '/' + id + (_ext ? _ext : '');
-    }
-    return _location + (_ext ? _ext : '');
-  };
-
-  return {
-
+  if (_contains(data.methods, Methods.READ_ALL)) {
     /**
-     * ### BaseResource.getAll()
+     * ### BasicResource.getAll()
      *
      * Sends a GET request to the API in order to get all object from the
      * requested type.
@@ -112,17 +148,18 @@ var BaseResource = function (config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-
-    getAll: function (query) {
-      var location = _getLocation();
-      var request = _getRequest()
+    _resource.getAll = function (query) {
+      var location = getPath(data);
+      var request = getRequest()
         .get(location)
         .send(query);
-      return _setUserToRequest(request);
-    },
+      return setUserToRequest(request);
+    };
+  }
 
+  if (_contains(data.methods, Methods.READ_ONE)) {
     /**
-     * ### BaseResource.getOne()
+     * ### BasicResource.getOne()
      *
      * Sends a GET request to the API in order to get the object from the
      * requested type.
@@ -133,16 +170,18 @@ var BaseResource = function (config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    getOne: function (id, query) {
-      var location = _getLocation(id);
-      var request = _getRequest()
+    _resource.getOne = function (id, query) {
+      var location = getPath(data, id);
+      var request = getRequest()
         .get(location)
         .send(query);
-      return _setUserToRequest(request);
-    },
+      return setUserToRequest(request);
+    };
+  }
 
+  if (_contains(data.methods, Methods.CREATE)) {
     /**
-     * ### BaseResource.createOne()
+     * ### BasicResource.createOne()
      *
      * Creates a new object form the requested type.
      *
@@ -152,17 +191,19 @@ var BaseResource = function (config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    createOne: function (object, query) {
-      var location = _getLocation();
-      var request = _getRequest()
+    _resource.createOne = function (object, query) {
+      var location = getPath(data);
+      var request = getRequest()
         .post(location)
         .query(query)
         .send(object);
-      return _setUserToRequest(request);
-    },
+      return setUserToRequest(request);
+    };
+  }
 
+  if (_contains(data.methods, Methods.CREATE)) {
     /**
-     * ### BaseResource.createOneAsPrerequisite()
+     * ### BasicResource.createOneAsPrerequisite()
      *
      * Creates a new object form the requested type and stores its ID in the
      * _cache object property (which stores all IDs from all pre-requisite
@@ -173,16 +214,18 @@ var BaseResource = function (config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    createOneAsPrerequisite: function (object) {
+    _resource.createOneAsPrerequisite = function (object) {
       return this.createOne(object)
         .then(function (res) {
           _cache.push(res.body.object_id);
           return res;
         });
-    },
+    };
+  }
 
+  if (_contains(data.methods, Methods.UPDATE)) {
     /**
-     * ### BaseResource.update()
+     * ### BasicResource.update()
      *
      * Sends the PUT request to the API in order to update specified object with
      * given data.
@@ -194,17 +237,19 @@ var BaseResource = function (config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    update: function (id, object, query) {
-      var location = _getLocation(id);
-      var request = _getRequest()
+    _resource.update = function (id, object, query) {
+      var location = getPath(data, id);
+      var request = getRequest()
         .put(location)
         .query(query)
         .send(object);
-      return _setUserToRequest(request);
-    },
+      return setUserToRequest(request);
+    };
+  }
 
+  if (_contains(data.methods, Methods.DELETE)) {
     /**
-     * ### BaseResource.deleteOne()
+     * ### BasicResource.deleteOne()
      *
      * Sends the DELETE request to the API in order to delete specified object
      * with given ID.
@@ -213,15 +258,17 @@ var BaseResource = function (config) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    deleteOne: function (id) {
-      var location = _getLocation(id);
-      var request = _getRequest()
+    _resource.deleteOne = function (id) {
+      var location = getPath(data, id);
+      var request = getRequest()
         .del(location);
-      return _setUserToRequest(request);
-    },
+      return setUserToRequest(request);
+    };
+  }
 
+  if (_contains(data.methods, Methods.DELETE)) {
     /**
-     * ### BaseResource.deleteMany()
+     * ### BasicResource.deleteMany()
      *
      * Sends the DELETE request to the API in order to delete specified objects
      * with given IDs. All request are run in parallel using promises.
@@ -230,7 +277,7 @@ var BaseResource = function (config) {
      *
      * @returns {object} a promise instance
      */
-    deleteMany: function (ids) {
+    _resource.deleteMany = function (ids) {
       var me = this;
       var deletions = [];
       ids.forEach(function (id) {
@@ -239,10 +286,12 @@ var BaseResource = function (config) {
           .then());
       });
       return Promise.all(deletions);
-    },
+    };
+  }
 
+  if (_contains(data.methods, Methods.DELETE)) {
     /**
-     * ### BaseResource.deleteManyIfExist()
+     * ### BasicResource.deleteManyIfExist()
      *
      * Sends the DELETE request to the API in order to delete specified objects
      * with given IDs. All request are run in parallel using promises.
@@ -254,7 +303,7 @@ var BaseResource = function (config) {
      *
      * @returns {object} a promise instance
      */
-    deleteManyIfExist: function (ids) {
+    _resource.deleteManyIfExist = function (ids) {
       var me = this;
       var deletions = [];
       ids.forEach(function (id) {
@@ -266,14 +315,16 @@ var BaseResource = function (config) {
           }));
       });
       return Promise.all(deletions);
-    },
+    };
+  }
 
+  if (_contains(data.methods, Methods.DELETE)) {
     /**
-     * ### BaseResource.deleteAllPrerequisites()
+     * ### BasicResource.deleteAllPrerequisites()
      *
      * @returns {object} the supertest-as-promised instance
      */
-    deleteAllPrerequisites: function (done) {
+    _resource.deleteAllPrerequisites = function (done) {
       //return done();/*
       this.deleteMany(_cache)
         .then(function () {
@@ -284,39 +335,41 @@ var BaseResource = function (config) {
           // What to do in case a pre-requisite is NOT deleted successfully?
           done();
         });
-    },
+    };
+  }
 
-    /**
-     * ### BaseResource.rememberAsPrerequisite()
-     *
-     * Register an ID in order to handle it later (while cleaning up the
-     * application) as a pre-requisite.
-     *
-     * @param {string} id, the uui of the object
-     */
-    rememberAsPrerequisite: function (id) {
-      var index = _cache.indexOf(id);
-      if (index === -1) {
-        _cache.push(id);
-      }
-    },
-
-    /**
-     * ### BaseResource.forgetPrerequisite()
-     *
-     * Forgets an ID in order to avoid handling it later (while cleaning up the
-     * application) as a pre-requisite.
-     *
-     * @param {string} id, the uui of the object
-     */
-    forgetPrerequisite: function (id) {
-      var index = _cache.indexOf(id);
-      if (index > -1) {
-        _cache.splice(index, 1);
-      }
+  /**
+   * ### BasicResource.rememberAsPrerequisite()
+   *
+   * Register an ID in order to handle it later (while cleaning up the
+   * application) as a pre-requisite.
+   *
+   * @param {string} id, the uui of the object
+   */
+  _resource.rememberAsPrerequisite = function (id) {
+    var index = _cache.indexOf(id);
+    if (index === -1) {
+      _cache.push(id);
     }
   };
+
+  /**
+   * ### BasicResource.forgetPrerequisite()
+   *
+   * Forgets an ID in order to avoid handling it later (while cleaning up the
+   * application) as a pre-requisite.
+   *
+   * @param {string} id, the uui of the object
+   */
+  _resource.forgetPrerequisite = function (id) {
+    var index = _cache.indexOf(id);
+    if (index > -1) {
+      _cache.splice(index, 1);
+    }
+  };
+
+  return _resource;
 };
 
-// Exports the `BaseResource` class as module
-module.exports = BaseResource;
+// Exports the `BasicResource` class as module
+module.exports = BasicResource;

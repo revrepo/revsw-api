@@ -18,13 +18,11 @@
     },
     "version": "v1",
     "resources": {
-      "accounts": "accounts",
       "billingPlans": "billing_plans",
       "authenticate": "authenticate",
       "users": "users",
       "stats": "stats",
       "sdkConfigs": "sdk/config",
-      "domainConfigs": "domain_configs",
       "activity": "activity"
     },
     "request": {
