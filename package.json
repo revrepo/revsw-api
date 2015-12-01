@@ -78,6 +78,8 @@
     "jshint": "^2.8.0",
     "jshint-html-reporter": "^0.2.4",
     "mocha": "^2.3.3",
+    "mongodb": "^2.0.49",
+    "mongodb-migrate": "^1.2.3",
     "sleep": "^2.0.0",
     "supertest": "^1.1.0",
     "supertest-as-promised": "^2.0.2"
