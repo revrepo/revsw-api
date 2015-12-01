@@ -20,7 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var DomainConfigsDP = require('./../common/providers/data/domainConfigs');
 
 describe('CRUD check', function () {
 

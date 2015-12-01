@@ -17,9 +17,7 @@
  */
 
 var config = require('config');
-var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
 
 describe('Clean up', function () {
 

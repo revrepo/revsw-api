@@ -21,14 +21,14 @@ require('should-http');
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 
 describe('Sanity check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataProvider.generateAccount();
+  var accountSample = AccountsDP.generateOne();
   var resellerUser = config.api.users.reseller;
   var expectedDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 

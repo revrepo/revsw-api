@@ -21,7 +21,7 @@ require('should-http');
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 
 describe('Boundary check', function () {
 
@@ -51,7 +51,7 @@ describe('Boundary check', function () {
     it('should return `Bad Request` when trying to `create` account with' +
       '`empty` company name.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         newAccount.companyName = '';
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
@@ -73,7 +73,7 @@ describe('Boundary check', function () {
         for (var i = 0; i < iterations; i++) {
           str += str + str;
         }
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         newAccount.companyName = str;
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts

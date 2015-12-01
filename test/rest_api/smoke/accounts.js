@@ -50,9 +50,9 @@ var config = require('config');
 // spec/test that you would create. It is the entry point to all resources
 // that we could consume from the REVSW REST API.
 var API = require('./../common/api');
-// `DataProvider` is another important component which its main goal is to
-// provide valid test data for our specs/tests.
-var DataProvider = require('./../common/providers/data');
+// Data Provider are other important components which its main goal is to
+// provide valid test data for our specs/tests. In this case, accounts data.
+var AccountsDP = require('./../common/providers/data/accounts');
 
 // Defining our __siute__ for our set of tests that belongs to the same
 // category. Please, note that here wer are talking about categories or type
@@ -69,7 +69,7 @@ describe('Smoke check', function () {
   this.timeout(config.api.request.maxTimeout);
 
   // Generating new `account` data in order to use later in our tests.
-  var accountSample = DataProvider.generateAccount();
+  var accountSample = AccountsDP.generateOne();
   // Retrieving information about specific user that later we will use for
   // our API requests.
   var resellerUser = config.api.users.reseller;
@@ -166,7 +166,7 @@ describe('Smoke check', function () {
     it('should return a response when creating specific account.',
       function (done) {
         // Generating data for a new `account`
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           //Creating new account by using data generated
@@ -187,8 +187,8 @@ describe('Smoke check', function () {
     // ### Test to update account
     it('should return a response when updating specific account.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
-        var updatedAccount = DataProvider.generateAccount('UPDATED');
+        var newAccount = AccountsDP.generateOne();
+        var updatedAccount = AccountsDP.generateOne('UPDATED');
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           // Creating one account as pre-requisite since it is need to do a
@@ -206,7 +206,7 @@ describe('Smoke check', function () {
 
     // ### Test to delete account
     it('should return a response when deleting an account.', function (done) {
-      var newProject = DataProvider.generateAccount();
+      var newProject = AccountsDP.generateOne();
       API.session.setCurrentUser(resellerUser);
       API.resources.accounts
         // Creating one account as pre-requisite since it is need to do a

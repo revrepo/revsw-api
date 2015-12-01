@@ -41,7 +41,7 @@ xdescribe('Domain configs smoke check', function () {
       this.timeout(300000);
 
       API.resources.accounts
-        .createOneAsPrerequisite(DataProvider.generateAccount())
+        .createOneAsPrerequisite(DataProvider.generateOne())
         .then(function (res) {
           prerequisiteAccountID = res.body.object_id;
           initialDomain = DataProvider

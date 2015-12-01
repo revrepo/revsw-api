@@ -22,7 +22,7 @@ var Joi = require('joi');
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 var SchemaProvider = require('./../common/providers/schema');
 
 describe('Sanity check', function () {
@@ -30,7 +30,7 @@ describe('Sanity check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataProvider.generateAccount();
+  var accountSample = AccountsDP.generateOne();
   var resellerUser = config.api.users.reseller;
   var accountSchema = SchemaProvider.getAccount();
   var successResponseSchema = SchemaProvider.getSuccessResponse();
@@ -99,7 +99,7 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'creating specific account.',
         function (done) {
-          var newAccount = DataProvider.generateAccount();
+          var newAccount = AccountsDP.generateOne();
           API.session.setCurrentUser(resellerUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -121,8 +121,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'updating specific account.',
         function (done) {
-          var newAccount = DataProvider.generateAccount();
-          var updatedAccount = DataProvider.generateAccount('UPDATED');
+          var newAccount = AccountsDP.generateOne();
+          var updatedAccount = AccountsDP.generateOne('UPDATED');
           API.session.setCurrentUser(resellerUser);
           API.resources.accounts
             .createOneAsPrerequisite(newAccount)
@@ -140,7 +140,7 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'deleting an account.',
         function (done) {
-          var newProject = DataProvider.generateAccount();
+          var newProject = AccountsDP.generateOne();
           API.session.setCurrentUser(resellerUser);
           API.resources.accounts
             .createOneAsPrerequisite(newProject)

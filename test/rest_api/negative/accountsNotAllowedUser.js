@@ -19,14 +19,14 @@
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataProvider.generateAccount();
+  var accountSample = AccountsDP.generateOne();
   var revAdminUser = config.api.users.admin.revAdmin;
   var resellerUser = config.api.users.reseller;
   var adminUser = config.api.users.admin;
@@ -81,7 +81,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when creating specific account ' +
         'with `user-role` user.',
         function (done) {
-          var newAccount = DataProvider.generateAccount();
+          var newAccount = AccountsDP.generateOne();
           API.session.setCurrentUser(normalUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -92,7 +92,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when updating specific account ' +
         'with `user-role` user.',
         function (done) {
-          var updatedAccount = DataProvider.generateAccount('UPDATED');
+          var updatedAccount = AccountsDP.generateOne('UPDATED');
           API.session.setCurrentUser(normalUser);
           API.resources.accounts
             .update(accountSample.id, updatedAccount)
@@ -134,7 +134,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when creating specific account ' +
         'with `admin-role` user.',
         function (done) {
-          var newAccount = DataProvider.generateAccount();
+          var newAccount = AccountsDP.generateOne();
           API.session.setCurrentUser(adminUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -145,7 +145,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when updating specific account ' +
         'with `admin-role` user.',
         function (done) {
-          var updatedAccount = DataProvider.generateAccount('UPDATED');
+          var updatedAccount = AccountsDP.generateOne('UPDATED');
           API.session.setCurrentUser(adminUser);
           API.resources.accounts
             .update(accountSample.id, updatedAccount)
@@ -187,7 +187,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when creating specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
-          var newAccount = DataProvider.generateAccount();
+          var newAccount = AccountsDP.generateOne();
           API.session.setCurrentUser(revAdminUser);
           API.resources.accounts
             .createOne(newAccount)
@@ -198,7 +198,7 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when updating specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
-          var updatedAccount = DataProvider.generateAccount('UPDATED');
+          var updatedAccount = AccountsDP.generateOne('UPDATED');
           API.session.setCurrentUser(revAdminUser);
           API.resources.accounts
             .update(accountSample.id, updatedAccount)

@@ -21,7 +21,7 @@ require('should-http');
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 
 describe('Functional check', function () {
 
@@ -51,7 +51,7 @@ describe('Functional check', function () {
 
     it('should allow to `get` specific `account` from other `reseller` user.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -67,8 +67,8 @@ describe('Functional check', function () {
     it('should return `Bad Request` when trying to `update` account from ' +
       'another `reseller` user.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
-        var updatedAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
+        var updatedAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -84,7 +84,7 @@ describe('Functional check', function () {
     it('should return `Bad Request` when trying to `delete` account from ' +
       'another `reseller` user.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -100,7 +100,7 @@ describe('Functional check', function () {
     it('should return `Bad Request` when trying to `get` account already ' +
       'deleted.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -123,8 +123,8 @@ describe('Functional check', function () {
     it('should return `Bad Request` when trying to `update` account already ' +
       'deleted.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
-        var updatedAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
+        var updatedAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -147,7 +147,7 @@ describe('Functional check', function () {
     it('should return `Bad Request` when trying to `delete` account already ' +
       'deleted.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)

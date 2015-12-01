@@ -21,14 +21,14 @@ require('should-http');
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 
 describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataProvider.generateAccount();
+  var accountSample = AccountsDP.generateOne();
   var resellerUser = config.api.users.reseller;
 
   before(function (done) {
@@ -89,7 +89,7 @@ describe('CRUD check', function () {
 
     it('should allow to create an account.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
+        var newAccount = AccountsDP.generateOne();
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOne(newAccount)
@@ -108,8 +108,8 @@ describe('CRUD check', function () {
 
     it('should allow to update an account.',
       function (done) {
-        var newAccount = DataProvider.generateAccount();
-        var updatedAccount = DataProvider.generateAccount('UPDATED');
+        var newAccount = AccountsDP.generateOne();
+        var updatedAccount = AccountsDP.generateOne('UPDATED');
         API.session.setCurrentUser(resellerUser);
         API.resources.accounts
           .createOneAsPrerequisite(newAccount)
@@ -128,7 +128,7 @@ describe('CRUD check', function () {
       });
 
     it('should allow to delete an account.', function (done) {
-      var newProject = DataProvider.generateAccount();
+      var newProject = AccountsDP.generateOne();
       API.session.setCurrentUser(resellerUser);
       API.resources.accounts
         .createOneAsPrerequisite(newProject)

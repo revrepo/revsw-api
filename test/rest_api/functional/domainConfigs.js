@@ -18,6 +18,7 @@
 
 var config = require('config');
 var API = require('./../common/api');
+var AccountsDP = require('./../common/providers/data/accounts');
 var DataProvider = require('./../common/providers/data');
 var should = require('chai').should;
 var async = require('async');
@@ -41,7 +42,7 @@ describe('Domain configs functional test', function () {
     this.timeout(300000);
 
     API.resources.accounts
-      .createOneAsPrerequisite(DataProvider.generateAccount())
+      .createOneAsPrerequisite(DataProvider.generateOne())
       .then(function (res) {
         prerequisiteAccountID = res.body.object_id;
         initialDomain = DataProvider
