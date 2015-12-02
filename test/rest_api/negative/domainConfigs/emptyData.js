@@ -20,72 +20,228 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DomainConfigsDP = require('./../common/providers/data/domainConfigs');
+var AccountsDP = require('./../../common/providers/data/accounts');
+var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 
-describe('CRUD check', function () {
+describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.get('api.users.reseller');
+  var accountId;
+  var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    done();
+    API
+      .authenticateUser(reseller)
+      .then(function () {
+        API.resources.accounts
+          .createOneAsPrerequisite(AccountsDP.generateOne())
+          .then(function (res) {
+            accountId = res.body.object_id;
+            done();
+          });
+      })
+      .catch(done);
   });
 
   after(function (done) {
-    done();
+    API.resources.accounts.deleteAllPrerequisites(done);
   });
 
   describe('Domain Configs resource', function () {
+    describe('With empty data', function () {
 
-    beforeEach(function (done) {
-      done();
+      beforeEach(function (done) {
+        done();
+      });
+
+      afterEach(function (done) {
+        done();
+      });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `empty` name.',
+        function (done) {
+          var emptyDomainName = '';
+          var expectedMsg = 'child "domain_name" fails because ' +
+            '["domain_name" is not allowed to be empty]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.domain_name = emptyDomainName;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `empty` account id.',
+        function (done) {
+          var emptyAccountId = '';
+          var expectedMsg = 'child "account_id" fails because ["account_id" ' +
+            'is not allowed to be empty]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(emptyAccountId);
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `empty` origin host header.',
+        function (done) {
+          var emptyOriginHostHeader = '';
+          var expectedMsg = 'child "origin_host_header" fails because ' +
+            '["origin_host_header" is not allowed to be empty]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.origin_host_header = emptyOriginHostHeader;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `empty` origin server.',
+        function (done) {
+          var emptyOriginServer = '';
+          var expectedMsg = 'child "origin_server" fails because ' +
+            '["origin_server" is not allowed to be empty]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.origin_server = emptyOriginServer;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `empty` host server location id.',
+        function (done) {
+          var emptyLocationId = '';
+          var expectedMsg = 'child "origin_server_location_id" fails because ' +
+            '["origin_server_location_id" is not allowed to be empty]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.origin_server_location_id = emptyLocationId;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `empty` tolerance.',
+        function (done) {
+          var emptyTolerance = '';
+          var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
+            'is not allowed to be empty]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.tolerance = emptyTolerance;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to get `domain publishing ' +
+        'status` with `empty` id.',
+        function (done) {
+          var emptyDomainId = '';
+          var expMsg = 'child \"domain_id\" fails because [\"domain_id\" ' +
+            'with value \"config_status\" fails to match the required ' +
+            'pattern: /^[0-9a-fA-F]{24}$/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .status(emptyDomainId)
+                .getOne()
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to get `domain ' +
+        'configuration versions` with `empty` id.',
+        function (done) {
+          var emptyDomainId = '';
+          var expectedMsg = 'child \"domain_id\" fails because [\"domain_id' +
+            '\" with value \"versions\" fails to match the required ' +
+            'pattern: /^[0-9a-fA-F]{24}$/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .versions(emptyDomainId)
+                .getAll()
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
     });
-
-    afterEach(function (done) {
-      done();
-    });
-
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `empty` name.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `empty` account id.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `empty` origin host header.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `empty` origin server.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `empty` host server location id.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `empty` tolerance.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to get `domain publishing ' +
-      'status` with `empty` id.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to get `domain configuration ' +
-      'versions` with `empty` id.',
-      function () {
-      });
   });
 });
