@@ -20,73 +20,232 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DomainConfigsDP = require('./../common/providers/data/domainConfigs');
+var AccountsDP = require('./../../common/providers/data/accounts');
+var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 
 describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.get('api.users.reseller');
+  var accountId;
+  var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    done();
-  });
-
-  after(function (done) {
-    done();
+    API
+      .authenticateUser(reseller)
+      .then(function () {
+        API.resources.accounts
+          .createOneAsPrerequisite(AccountsDP.generateOne())
+          .then(function (res) {
+            accountId = res.body.object_id;
+            done();
+          });
+      })
+      .catch(done);
   });
 
   describe('Domain Configs resource', function () {
+    describe('With invalid data', function () {
 
-    beforeEach(function (done) {
-      done();
+      beforeEach(function (done) {
+        done();
+      });
+
+      afterEach(function (done) {
+        done();
+      });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `invalid` name.',
+        function (done) {
+          var invalidDomainName = 'invalid-domain-name';
+          var expMsg = 'child "domain_name" fails because ["domain_name" ' +
+            'with value "' + invalidDomainName + '" fails to match the ' +
+            'required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]' +
+            '{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.domain_name = invalidDomainName;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `invalid` account id.',
+        function (done) {
+          var invalidAccountId = 'vwxyzvwxyzvwxyzvwxyz1234';
+          var expectedMsg = 'child "account_id" fails because ["account_id" ' +
+            'with value "' + invalidAccountId + '" fails to match the ' +
+            'required pattern: /^[0-9a-fA-F]{24}$/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(invalidAccountId);
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `invalid` origin host header.',
+        function (done) {
+          var invalidOriginHostHeader = 'invalid-origin-host-header';
+          var expectedMsg = 'child "origin_host_header" fails because ["' +
+            'origin_host_header" with value "' + invalidOriginHostHeader +
+            '" fails to match the required pattern: /(?=^.{4,253}$)(^((?!-)' +
+            '(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.origin_host_header = invalidOriginHostHeader;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `invalid` origin server.',
+      function (done) {
+        var invalidOriginServer = '12345.12345.12345';
+        var expectedMsg = 'Failed to verify the domain configuration';
+        API
+          .authenticateUser(reseller)
+          .then(function () {
+            var domainConfig = DomainConfigsDP.generateOne(accountId);
+            domainConfig.origin_server = invalidOriginServer;
+            API.resources.domainConfigs
+              .createOne(domainConfig)
+              .expect(400)
+              .then(function (res) {
+                res.body.message.should.equal(expectedMsg);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+      it('should return `Bad Request` when trying to `create` domain config ' +
+        'with `invalid` host server location id.',
+        function (done) {
+          var invalidLocationId = 'vwxyzvwxyzvwxyzvwxyz1234';
+          var expectedMsg = 'child "origin_server_location_id" fails because ' +
+            '["origin_server_location_id" with value "' + invalidLocationId +
+            '" fails to match the required pattern: /^[0-9a-fA-F]{24}$/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.origin_server_location_id = invalidLocationId;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      /* TODO: BUG: Accepts STRING values. Returns 200 (success) */
+      xit('[BUG: Invalid input] ' +
+        'should return `Bad Request` when trying to `create` domain config ' +
+        'with `invalid` tolerance.',
+        function (done) {
+          var invalidTolerance = 'abcdefghijklmnopqrstuvwxyz';
+          var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
+            'with value "' + invalidTolerance + '" fails to match the ' +
+            'required pattern://]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              domainConfig.tolerance = invalidTolerance;
+              API.resources.domainConfigs
+                .createOne(domainConfig)
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to get `domain publishing ' +
+        'status` with `invalid` domain id.',
+        function (done) {
+          var invalidDomainId = 'vwxyzvwxyzvwxyzvwxyz1234';
+          var expectedMsg = 'child \"domain_id\" fails because [\"domain_id' +
+            '\" with value \"' + invalidDomainId + '\" fails to match the ' +
+            'required pattern: /^[0-9a-fA-F]{24}$/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .status(invalidDomainId)
+                .getOne()
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` when trying to get `domain ' +
+        'configuration versions` with `invalid` domain id.',
+        function (done) {
+          var invalidDomainId = 'vwxyzvwxyzvwxyzvwxyz1234';
+          var expectedMsg = 'child "domain_id" fails because ["domain_id" ' +
+            'with value "' + invalidDomainId + '" fails to match the ' +
+            'required pattern: /^[0-9a-fA-F]{24}$/]';
+          API
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .versions(invalidDomainId)
+                .getAll()
+                .expect(400)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
     });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `invalid` name.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `invalid` account id.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `invalid` origin host header.',
-      function () {
-      });
-
-    /* BUG? Accepts 0000 */
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `invalid` origin server.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `invalid` host server location id.',
-      function () {
-      });
-
-    /* BUG? Accepts any string */
-    it('should return `Bad Request` when trying to `create` domain config ' +
-      'with `invalid` tolerance.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to get `domain publishing ' +
-      'status` with `invalid` id.',
-      function () {
-      });
-
-    it('should return `Bad Request` when trying to get `domain configuration ' +
-      'versions` with `invalid` id.',
-      function () {
-      });
   });
 });
