@@ -45,6 +45,10 @@ describe('CRUD check', function () {
       .catch(done);
   });
 
+  after(function (done) {
+    API.resources.accounts.deleteAllPrerequisites(done);
+  });
+
   describe('Domain Configs resource', function () {
     describe('With non-existing data', function () {
 

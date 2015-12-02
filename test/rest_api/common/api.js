@@ -29,6 +29,9 @@ var Session = require('./session');
 var domainConfigs = require('./resources/domainConfigs');
 var activity = require('./resources/activity');
 
+var AccountsDP = require('./providers/data/accounts');
+var DomainConfigsDP = require('./providers/data/domainConfigs');
+
 // This allows to overpass SSL certificate check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -70,5 +73,34 @@ module.exports = {
         user.token = response.body.token;
         Session.setCurrentUser(user);
       });
+  },
+
+  helpers: {
+    accounts: {
+      createOne: function () {
+        var account = AccountsDP.generateOne();
+        return accounts
+          .createOneAsPrerequisite(account)
+          .then(function (res) {
+            account.id = res.body.object_id;
+            console.log('######################### Accounts');
+            console.log(account);
+            return account;
+          });
+      }
+    },
+    domainConfigs: {
+      createOne: function (accountId) {
+        var domainConfig = DomainConfigsDP.generateOne(accountId);
+        return domainConfigs
+          .createOneAsPrerequisite(domainConfig)
+          .then(function (res) {
+            domainConfig.id = res.body.object_id;
+            console.log('######################### DomainConfigs');
+            console.log(domainConfig);
+            return domainConfig;
+          });
+      }
+    }
   }
 };
