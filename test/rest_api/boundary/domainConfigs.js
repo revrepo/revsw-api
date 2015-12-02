@@ -26,8 +26,7 @@ var DomainConfigsDP = require('./../common/providers/data/domainConfigs');
 describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  //this.timeout(config.get('api.request.maxTimeout'));
-  this.timeout(900000);
+  this.timeout(config.get('api.request.maxTimeout'));
 
   var accountId;
   var reseller = config.get('api.users.reseller');
@@ -138,7 +137,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    /* TODO: BUG: Origin Server accepts long string */
+    /* TODO: BUG: Origin Server accepts long string. Returns 200 (success) */
     xit('[BUG: Long input] ' +
       'should return `Bad Request` when trying to `create` domain config ' +
       'with `long` origin server.',
@@ -191,7 +190,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    /* TODO: BUG: Returns success (200) */
+    /* TODO: BUG: Accepts long values. Returns 200 (success) */
     xit('[BUG: Long input] ' +
       'should return `Bad Request` when trying to `create` domain config ' +
       'with `long` tolerance.',

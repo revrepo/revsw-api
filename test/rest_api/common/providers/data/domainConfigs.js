@@ -52,7 +52,7 @@ var DomainConfigsDataProvider = {
       'origin_host_header': this.domainStr + '-config.revsw.net',
       'origin_server': this.domainStr + '-website01.revsw.net',
       'origin_server_location_id': '55a56fa6476c10c329a90741',
-      'tolerance': 4000
+      'tolerance': '4000'
     };
   }
 
