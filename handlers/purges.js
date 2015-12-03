@@ -91,7 +91,7 @@ exports.purgeObject = function(request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : request.auth.credentials.account_id,
         activity_type    : 'purge',
         activity_target  : 'purge',
         target_id        : newPurgeJob.req_id,

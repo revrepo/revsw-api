@@ -1,0 +1,6 @@
+{
+  "mongoAppDb": {
+    "host": "http://TESTSJC20-CMDB01.REVSW.NET",
+    "db": "revportal"
+  }
+}

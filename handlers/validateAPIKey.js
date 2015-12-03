@@ -43,8 +43,8 @@ exports.validateAPIKey = function (request, key, callback) {
       return callback(error, false, result);
     }
 
-    // Users without companyId data should not be able to log in
-    if (!result.companyId) {
+    // Users without account_id data should not be able to log in
+    if (!result.account_id) {
       return callback(error, false, result);
     }
 

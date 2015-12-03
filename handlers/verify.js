@@ -122,7 +122,7 @@ exports.referenced = function (request, reply) {
     // check broken referenced company id/domain name in users
     _.forEach(res.users, function (user) {
 
-      _.forEach(user.companyId, function (company_id) {
+      _.forEach(user.account_id, function (company_id) {
         if (!_.findWhere(res.accounts, {'id': company_id})) {
           broken_company_ids.push(company_id);
         }
@@ -156,8 +156,8 @@ exports.referenced = function (request, reply) {
       broken_domain_names = [];
 
       /*if (!_.isEmpty(broken_company_ids)) {
-        _.remove(user.companyId, function (companyId) {
-          return _.indexOf(broken_company_ids, companyId) !== -1
+        _.remove(user.account_id, function (account_id) {
+          return _.indexOf(broken_company_ids, account_id) !== -1
         });
       }*/
 
@@ -166,8 +166,8 @@ exports.referenced = function (request, reply) {
     // check broken referenced company id/BPGroup/COGroup in domains
     _.forEach(res.domains, function (domain) {
 
-      if (!_.findWhere(res.accounts, {'id' : domain.companyId})) {
-        broken_company_ids.push(domain.companyId);
+      if (!_.findWhere(res.accounts, {'id' : domain.account_id})) {
+        broken_company_ids.push(domain.account_id);
       }
 
       if (!_.findWhere(res.serverGroup, {'groupName' : domain.BPGroup, 'groupType' : 'BP'})) {

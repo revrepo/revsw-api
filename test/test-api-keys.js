@@ -37,7 +37,7 @@ describe('Rev API keys', function() {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
-    'companyId': [myCompanyId],
+    'account_id': [myCompanyId],
     'domain': ['qa-api-test-domain.revsw.net'],
     'theme': 'light',
     'role': 'admin',

@@ -40,8 +40,8 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
       return callback(error, false, result);
     }
 
-    // Users without companyId data should not be able to log in
-    if (result.role !== 'revadmin' && !result.companyId) {
+    // Users without account_id data should not be able to log in
+    if (result.role !== 'revadmin' && !result.account_id) {
       return callback(error, false, result);
     }
 

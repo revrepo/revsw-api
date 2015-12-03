@@ -58,7 +58,7 @@ module.exports = [
       },
       handler: users.createUser,
       description: 'Create a new user in the system',
-      notes: 'Use the call to create a new user account in the system. If you will not specify "companyId" and "domain" attrributes ' +
+      notes: 'Use the call to create a new user account in the system. If you will not specify "account_id" and "domain" attrributes ' +
       'the values will be inherited from your API user account.',
       tags: ['api', 'users'],
       plugins: {
@@ -72,7 +72,7 @@ module.exports = [
           firstname: Joi.string().required().trim().max(30).description('First name'),
           lastname: Joi.string().required().max(30).description('Last name'),
           password: Joi.string().min(8).max(15).required().description('Password'),
-          companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
+          account_id: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
           access_control_list: Joi.object( {
@@ -119,7 +119,7 @@ module.exports = [
           firstname: Joi.string().trim().max(30).description('First name'),
           lastname: Joi.string().max(30).description('Last name'),
           password: Joi.string().min(8).max(15).description('New Password'),
-          companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
+          account_id: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
           access_control_list: Joi.object( {
