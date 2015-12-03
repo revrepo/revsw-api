@@ -22,7 +22,7 @@ var config = require('config');
 var API = require('./../../common/api');
 var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 
-describe('CRUD check', function () {
+describe('Sanity check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -62,99 +62,101 @@ describe('CRUD check', function () {
   });
 
   describe('Domain Configs resource', function () {
+    describe('Date Format', function () {
 
-    beforeEach(function (done) {
-      done();
+      beforeEach(function (done) {
+        done();
+      });
+
+      afterEach(function (done) {
+        done();
+      });
+
+      it('should return `created_at` field in expected `Date format` when ' +
+        'getting all domain configs.',
+        function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .getAll()
+                .expect(200)
+                .then(function (response) {
+                  var domainConfigs = response.body;
+                  domainConfigs.forEach(function (domainConfig) {
+                    domainConfig.created_at.should.match(expectedDateFormat);
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `created_at` field in expected `Date format` when ' +
+        'getting versions of existing domain config.',
+        function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .versions(firstDc.id)
+                .getAll()
+                .expect(200)
+                .then(function (response) {
+                  var dcVersions = response.body;
+                  dcVersions.forEach(function (domainConfig) {
+                    domainConfig.created_at.should.match(expectedDateFormat);
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `updated_at` field in expected `Date format` when ' +
+        'getting all domain configs.',
+        function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .getAll()
+                .expect(200)
+                .then(function (response) {
+                  var domainConfigs = response.body;
+                  domainConfigs.forEach(function (domainConfig) {
+                    domainConfig.updated_at.should.match(expectedDateFormat);
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `updated_at` field in expected `Date format` when ' +
+        'getting versions of existing domain config.',
+        function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .versions(firstDc.id)
+                .getAll()
+                .expect(200)
+                .then(function (response) {
+                  var dcVersions = response.body;
+                  dcVersions.forEach(function (domainConfig) {
+                    domainConfig.updated_at.should.match(expectedDateFormat);
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
     });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should return `created_at` field in expected `Date format` when ' +
-      'getting all domain configs.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getAll()
-              .expect(200)
-              .then(function (response) {
-                var domainConfigs = response.body;
-                domainConfigs.forEach(function (domainConfig) {
-                  domainConfig.created_at.should.match(expectedDateFormat);
-                });
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should return `created_at` field in expected `Date format` when ' +
-      'getting versions of existing domain config.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .versions(firstDc.id)
-              .getAll()
-              .expect(200)
-              .then(function (response) {
-                var dcVersions = response.body;
-                dcVersions.forEach(function (domainConfig) {
-                  domainConfig.created_at.should.match(expectedDateFormat);
-                });
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should return `updated_at` field in expected `Date format` when ' +
-      'getting all domain configs.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getAll()
-              .expect(200)
-              .then(function (response) {
-                var domainConfigs = response.body;
-                domainConfigs.forEach(function (domainConfig) {
-                  domainConfig.updated_at.should.match(expectedDateFormat);
-                });
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should return `updated_at` field in expected `Date format` when ' +
-      'getting versions of existing domain config.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .versions(firstDc.id)
-              .getAll()
-              .expect(200)
-              .then(function (response) {
-                var dcVersions = response.body;
-                dcVersions.forEach(function (domainConfig) {
-                  domainConfig.updated_at.should.match(expectedDateFormat);
-                });
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
   });
 });

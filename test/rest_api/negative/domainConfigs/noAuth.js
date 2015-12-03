@@ -27,7 +27,7 @@ describe('Negative check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var commonAccount;
+  var account;
   var commonDomainConfig;
   var reseller = config.get('api.users.reseller');
 
@@ -37,9 +37,9 @@ describe('Negative check', function () {
       .then(function () {
         return API.helpers.accounts.createOne();
       })
-      .then(function (account) {
-        commonAccount = account;
-        return API.helpers.domainConfigs.createOne(account.id);
+      .then(function (newAccount) {
+        newAccount = newAccount;
+        return API.helpers.domainConfigs.createOne(newAccount.id);
       })
       .then(function (domainConfig) {
         commonDomainConfig = domainConfig;
@@ -61,87 +61,89 @@ describe('Negative check', function () {
   });
 
   describe('Domain Configs resource', function () {
+    describe('Without authentication', function () {
 
-    beforeEach(function (done) {
-      done();
+      beforeEach(function (done) {
+        done();
+      });
+
+      afterEach(function (done) {
+        done();
+      });
+
+      it('should return `Unauthorized` response when getting all domain ' +
+        'configs without authorization.',
+        function (done) {
+          API.session.reset();
+          API.resources.domainConfigs
+            .getAll()
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Unauthorized` response when getting one domain ' +
+        'configs without authorization.',
+        function (done) {
+          API.session.reset();
+          API.resources.domainConfigs
+            .getOne(commonDomainConfig.id)
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Unauthorized` response when creating new domain ' +
+        'configs without authorization.',
+        function (done) {
+          var newDomainConfig = DomainConfigsDP.generateOne(account.id);
+          API.session.reset();
+          API.resources.domainConfigs
+            .createOne(newDomainConfig)
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Unauthorized` response when updating a domain ' +
+        'config without authorization.',
+        function (done) {
+          var updatedDomainConfig = DomainConfigsDP.generateOne(account.id);
+          API.session.reset();
+          API.resources.domainConfigs
+            .update(commonDomainConfig.id, updatedDomainConfig)
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Unauthorized` response when deleting a domain ' +
+        'config without authorization.',
+        function (done) {
+          API.session.reset();
+          API.resources.domainConfigs
+            .deleteOne(commonDomainConfig.id)
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Bad Request` when trying to get `domain publishing ' +
+        'status` without authorization.',
+        function (done) {
+          API.session.reset();
+          API.resources.domainConfigs
+            .status(commonDomainConfig.id)
+            .getOne()
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Bad Request` when trying to get `domain config ' +
+        'versions` without authorization.',
+        function (done) {
+          API.session.reset();
+          API.resources.domainConfigs
+            .versions(commonDomainConfig.id)
+            .getAll()
+            .expect(401)
+            .end(done);
+        });
     });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should return `Unauthorized` response when getting all domain ' +
-      'configs without authorization.',
-      function (done) {
-        API.session.reset();
-        API.resources.domainConfigs
-          .getAll()
-          .expect(401)
-          .end(done);
-      });
-
-    it('should return `Unauthorized` response when getting one domain ' +
-      'configs without authorization.',
-      function (done) {
-        API.session.reset();
-        API.resources.domainConfigs
-          .getOne(commonDomainConfig.id)
-          .expect(401)
-          .end(done);
-      });
-
-    it('should return `Unauthorized` response when creating new domain ' +
-      'configs without authorization.',
-      function (done) {
-        var newDomainConfig = DomainConfigsDP.generateOne(commonAccount.id);
-        API.session.reset();
-        API.resources.domainConfigs
-          .createOne(newDomainConfig)
-          .expect(401)
-          .end(done);
-      });
-
-    it('should return `Unauthorized` response when updating a domain config ' +
-      'without authorization.',
-      function (done) {
-        var updatedDomainConfig = DomainConfigsDP.generateOne(commonAccount.id);
-        API.session.reset();
-        API.resources.domainConfigs
-          .update(commonDomainConfig.id, updatedDomainConfig)
-          .expect(401)
-          .end(done);
-      });
-
-    it('should return `Unauthorized` response when deleting a domain config ' +
-      'without authorization.',
-      function (done) {
-        API.session.reset();
-        API.resources.domainConfigs
-          .deleteOne(commonDomainConfig.id)
-          .expect(401)
-          .end(done);
-      });
-
-    it('should return `Bad Request` when trying to get `domain publishing ' +
-      'status` without authorization.',
-      function (done) {
-        API.session.reset();
-        API.resources.domainConfigs
-          .status(commonDomainConfig.id)
-          .getOne()
-          .expect(401)
-          .end(done);
-      });
-
-    it('should return `Bad Request` when trying to get `domain configuration ' +
-      'versions` without authorization.',
-      function (done) {
-        API.session.reset();
-        API.resources.domainConfigs
-          .versions(commonDomainConfig.id)
-          .getAll()
-          .expect(401)
-          .end(done);
-      });
   });
 });

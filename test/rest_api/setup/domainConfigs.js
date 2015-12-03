@@ -20,7 +20,7 @@ var config = require('config');
 var API = require('./../common/api');
 var DomainConfigDP = require('./../common/providers/data/domainConfigs');
 
-describe('Clean up domainConfigs', function () {
+describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -36,7 +36,7 @@ describe('Clean up domainConfigs', function () {
     done();
   });
 
-  describe('DomainConfigs resource', function () {
+  describe('Domain Configs resource', function () {
 
     beforeEach(function (done) {
       done();
