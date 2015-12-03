@@ -22,7 +22,8 @@ var Joi = require('joi');
 var config = require('config');
 var API = require('./../../common/api');
 var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
-var SchemaProvider = require('./../../common/providers/schema');
+var CommonResponseSP =
+  require('./../../common/providers/schema/commonResponse');
 
 describe('Sanity check', function () {
 
@@ -32,7 +33,7 @@ describe('Sanity check', function () {
   var commonAccount;
   var commonDomainConfig;
   var reseller = config.get('api.users.reseller');
-  var errorResponseSchema = SchemaProvider.getErrorResponse();
+  var errorResponseSchema = CommonResponseSP.getError();
 
   before(function (done) {
     API.helpers

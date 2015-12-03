@@ -119,6 +119,26 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
+    it('should allow to create new domain config',
+      function (done) {
+        secondDc = DomainConfigsDP.generateOne(account.id);
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .createOne(secondDc)
+              .expect(200)
+              .then(function (response) {
+                secondDc.id = response.body.object_id;
+                response.body.message.should
+                  .equal('Successfully created new domain configuration');
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
     it('should allow to update existing domain config',
       function (done) {
         firstFdc.origin_host_header = 'UPDATED-' + firstFdc.origin_host_header;
@@ -135,26 +155,6 @@ describe('CRUD check', function () {
                 firstDc.id = res.body.object_id;
                 res.body.message.should
                   .equal('Successfully saved the domain configuration');
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should allow to create new domain config',
-      function (done) {
-        secondDc = DomainConfigsDP.generateOne(account.id);
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .createOne(secondDc)
-              .expect(200)
-              .then(function (response) {
-                secondDc.id = response.body.object_id;
-                response.body.message.should
-                  .equal('Successfully created new domain configuration');
                 done();
               })
               .catch(done);
