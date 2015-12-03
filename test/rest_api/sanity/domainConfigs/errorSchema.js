@@ -35,7 +35,7 @@ describe('Sanity check', function () {
   var errorResponseSchema = SchemaProvider.getErrorResponse();
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
@@ -52,7 +52,7 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.resources.domainConfigs.deleteOne(commonDomainConfig.id);

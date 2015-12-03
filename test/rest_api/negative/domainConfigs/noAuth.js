@@ -32,7 +32,7 @@ describe('Negative check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
@@ -49,7 +49,7 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.resources.domainConfigs.deleteOne(commonDomainConfig.id);

@@ -33,7 +33,7 @@ describe('CRUD check', function () {
   var expectedDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
@@ -50,7 +50,7 @@ describe('CRUD check', function () {
   });
 
   after(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.resources.domainConfigs.deleteOne(firstDc.id);
@@ -74,7 +74,7 @@ describe('CRUD check', function () {
     it('should return `created_at` field in expected `Date format` when ' +
       'getting all domain configs.',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -95,7 +95,7 @@ describe('CRUD check', function () {
     it('should return `created_at` field in expected `Date format` when ' +
       'getting versions of existing domain config.',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -117,7 +117,7 @@ describe('CRUD check', function () {
     it('should return `updated_at` field in expected `Date format` when ' +
       'getting all domain configs.',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -138,7 +138,7 @@ describe('CRUD check', function () {
     it('should return `updated_at` field in expected `Date format` when ' +
       'getting versions of existing domain config.',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs

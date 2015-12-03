@@ -32,7 +32,7 @@ describe('Boundary check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         API.resources.accounts
@@ -70,7 +70,7 @@ describe('Boundary check', function () {
           'with value "' + longDomainName + '" fails to match the required ' +
           'pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-z' +
           'A-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -94,7 +94,7 @@ describe('Boundary check', function () {
         var expectedMsg = 'child "account_id" fails because ["account_id" ' +
           'with value "' + longAccountId + '" fails to match the required ' +
           'pattern: /^[0-9a-fA-F]{24}$/]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(longAccountId);
@@ -120,7 +120,7 @@ describe('Boundary check', function () {
           'host_header" with value "' + longOriginHostHeader + '" fails to ' +
           'match the required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z' +
           '0-9-\\_]{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -149,7 +149,7 @@ describe('Boundary check', function () {
         var expectedMsg = 'child "origin_server" fails because ["origin_' +
           'server" with value "' + longOriginServer + '" fails to match the ' +
           'required pattern: //]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -173,7 +173,7 @@ describe('Boundary check', function () {
         var expectedMsg = 'child "origin_server_location_id" fails because ["' +
           'origin_server_location_id" with value "' + longLocationId + '" ' +
           'fails to match the required pattern: /^[0-9a-fA-F]{24}$/]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -199,7 +199,7 @@ describe('Boundary check', function () {
         var expectedMsg = 'child "tolerance" fails because ["tolerance" with ' +
           'value "' + longTolerance + '" fails to match the required pattern:' +
           '//]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -223,7 +223,7 @@ describe('Boundary check', function () {
         var expectedMsg = 'child \"domain_id\" fails because [\"domain_id\" ' +
           'with value \"' + longDomainId + '\" fails to match the required ' +
           'pattern: /^[0-9a-fA-F]{24}$/]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -246,7 +246,7 @@ describe('Boundary check', function () {
         var expectedMsg = 'child \"domain_id\" fails because [\"domain_id\" ' +
           'with value \"' + longDomainId + '\" fails to match the required ' +
           'pattern: /^[0-9a-fA-F]{24}$/]';
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs

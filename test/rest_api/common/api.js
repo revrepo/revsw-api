@@ -52,30 +52,31 @@ module.exports = {
     activity: activity
   },
 
-  /**
-   * ### API.authenticateUser()
-   *
-   * Helper method to Authenticate user before doing any type of request to
-   * the REST API services.
-   *
-   * @param user, user information. For instance
-   *     {
-   *       name: 'joe@email.com',
-   *       password: 'something'
-   *     }
-   *
-   * @returns {Promise}
-   */
-  authenticateUser: function (user) {
-    return authenticate
-      .createOne({ email: user.name, password: user.password })
-      .then(function(response) {
-        user.token = response.body.token;
-        Session.setCurrentUser(user);
-      });
-  },
-
   helpers: {
+
+    /**
+     * ### API.authenticateUser()
+     *
+     * Helper method to Authenticate user before doing any type of request to
+     * the REST API services.
+     *
+     * @param user, user information. For instance
+     *     {
+     *       name: 'joe@email.com',
+     *       password: 'something'
+     *     }
+     *
+     * @returns {Promise}
+     */
+    authenticateUser: function (user) {
+      return authenticate
+        .createOne({email: user.name, password: user.password})
+        .then(function (response) {
+          user.token = response.body.token;
+          Session.setCurrentUser(user);
+        });
+    },
+
     accounts: {
       createOne: function () {
         var account = AccountsDP.generateOne();
@@ -83,7 +84,6 @@ module.exports = {
           .createOneAsPrerequisite(account)
           .then(function (res) {
             account.id = res.body.object_id;
-            console.log('######################### Accounts');
             console.log(account);
             return account;
           });
@@ -96,7 +96,6 @@ module.exports = {
           .createOneAsPrerequisite(domainConfig)
           .then(function (res) {
             domainConfig.id = res.body.object_id;
-            console.log('######################### DomainConfigs');
             console.log(domainConfig);
             return domainConfig;
           });

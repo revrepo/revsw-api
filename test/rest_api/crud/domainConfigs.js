@@ -34,7 +34,7 @@ describe('CRUD check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
@@ -51,7 +51,7 @@ describe('CRUD check', function () {
   });
 
   after(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       // TODO: BUG? Cannot delete DomainConfig right after updating it.
       //.then(function () {
@@ -75,7 +75,7 @@ describe('CRUD check', function () {
 
     it('should allow to get all domain configs',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -102,7 +102,7 @@ describe('CRUD check', function () {
 
     it('should allow to get one domain config',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -125,7 +125,7 @@ describe('CRUD check', function () {
         firstFdc.origin_server = 'UPDATED-' + firstFdc.origin_server;
         delete firstFdc.domain_name;
         delete firstFdc.cname;
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -145,7 +145,7 @@ describe('CRUD check', function () {
     it('should allow to create new domain config',
       function (done) {
         secondDc = DomainConfigsDP.generateOne(account.id);
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -164,7 +164,7 @@ describe('CRUD check', function () {
 
     it('should allow to get status of existing domain config',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -183,7 +183,7 @@ describe('CRUD check', function () {
 
     it('should allow to get versions of existing domain config',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
@@ -206,7 +206,7 @@ describe('CRUD check', function () {
 
     it('should allow to delete existing domain config',
       function (done) {
-        API
+        API.helpers
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs

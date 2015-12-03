@@ -32,7 +32,7 @@ describe('Negative check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         API.resources.accounts
@@ -66,7 +66,7 @@ describe('Negative check', function () {
           var emptyDomainName = '';
           var expectedMsg = 'child "domain_name" fails because ' +
             '["domain_name" is not allowed to be empty]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -89,7 +89,7 @@ describe('Negative check', function () {
           var emptyAccountId = '';
           var expectedMsg = 'child "account_id" fails because ["account_id" ' +
             'is not allowed to be empty]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(emptyAccountId);
@@ -111,7 +111,7 @@ describe('Negative check', function () {
           var emptyOriginHostHeader = '';
           var expectedMsg = 'child "origin_host_header" fails because ' +
             '["origin_host_header" is not allowed to be empty]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -134,7 +134,7 @@ describe('Negative check', function () {
           var emptyOriginServer = '';
           var expectedMsg = 'child "origin_server" fails because ' +
             '["origin_server" is not allowed to be empty]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -157,7 +157,7 @@ describe('Negative check', function () {
           var emptyLocationId = '';
           var expectedMsg = 'child "origin_server_location_id" fails because ' +
             '["origin_server_location_id" is not allowed to be empty]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -180,7 +180,7 @@ describe('Negative check', function () {
           var emptyTolerance = '';
           var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
             'is not allowed to be empty]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -204,7 +204,7 @@ describe('Negative check', function () {
           var expMsg = 'child \"domain_id\" fails because [\"domain_id\" ' +
             'with value \"config_status\" fails to match the required ' +
             'pattern: /^[0-9a-fA-F]{24}$/]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               API.resources.domainConfigs
@@ -227,7 +227,7 @@ describe('Negative check', function () {
           var expectedMsg = 'child \"domain_id\" fails because [\"domain_id' +
             '\" with value \"versions\" fails to match the required ' +
             'pattern: /^[0-9a-fA-F]{24}$/]';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               API.resources.domainConfigs

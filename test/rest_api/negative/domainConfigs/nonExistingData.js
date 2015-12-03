@@ -32,7 +32,7 @@ describe('CRUD check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API
+    API.helpers
       .authenticateUser(reseller)
       .then(function () {
         API.resources.accounts
@@ -65,7 +65,7 @@ describe('CRUD check', function () {
         function (done) {
           var nonExistingAccountId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Account ID not found';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig =
@@ -87,7 +87,7 @@ describe('CRUD check', function () {
         function (done) {
           var nonExistingLocationId = 'aaaafaaaafaaaafaaaaf1234';
           var expMsg = 'Specified Rev first mile location ID cannot be found';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(accountId);
@@ -109,7 +109,7 @@ describe('CRUD check', function () {
         function (done) {
           var nonExistingDomainId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Domain ID not found';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               API.resources.domainConfigs
@@ -130,7 +130,7 @@ describe('CRUD check', function () {
         function (done) {
           var nonExistingDomainId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Domain ID not found';
-          API
+          API.helpers
             .authenticateUser(reseller)
             .then(function () {
               API.resources.domainConfigs
