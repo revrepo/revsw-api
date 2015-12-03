@@ -171,6 +171,10 @@ describe('Stats API check:', function () {
               done();
             })
             .catch( function( err ) {
+                console.log( err );
+                console.log( 'query: ', q );
+                console.log( 'domain_name: ', domain_name );
+                console.log( 'domain_id: ', domain_id );
                 done( err );
             });
         };

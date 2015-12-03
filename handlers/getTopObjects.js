@@ -39,7 +39,6 @@ exports.getTopObjects = function(request, reply) {
 
   var domain_id = request.params.domain_id;
   var domain_name,
-      filter = '',
       metadataFilterField,
       start_time,
       end_time;
@@ -80,7 +79,7 @@ exports.getTopObjects = function(request, reply) {
         return reply(boom.badRequest('Requested report period exceeds 24 hours'));
       }
 
-      filter = elasticSearch.buildESFilterString(request);
+      // filter = elasticSearch.buildESFilterString(request);
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
@@ -99,7 +98,8 @@ exports.getTopObjects = function(request, reply) {
                   term: {
                     domain: domain_name
                   }
-                }]
+                }],
+                must_not: []
               }
             }
           }
@@ -117,6 +117,10 @@ exports.getTopObjects = function(request, reply) {
           }
         }
       };
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
 
       var indicesList = utils.buildIndexList(start_time, end_time);
       elasticSearch.getClientURL().search({
