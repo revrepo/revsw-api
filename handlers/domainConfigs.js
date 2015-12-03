@@ -192,7 +192,7 @@ exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
 
-  if (request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
