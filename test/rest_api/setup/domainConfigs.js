@@ -18,13 +18,15 @@
 
 var config = require('config');
 var API = require('./../common/api');
+var DomainConfigDP = require('./../common/providers/data/domainConfigs');
 
 describe('Clean up domainConfigs', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.api.users.reseller;
+  var reseller = config.get('api.users.reseller');
+  var namePattern = new RegExp(DomainConfigDP.prefix);
 
   before(function (done) {
     done();
@@ -34,41 +36,39 @@ describe('Clean up domainConfigs', function () {
     done();
   });
 
-  describe('domainConfigs resource', function () {
+  describe('DomainConfigs resource', function () {
 
-    // Use this block to run some statements before an spec/test starts its
-    // execution. This is not the same as before method call.
     beforeEach(function (done) {
       done();
     });
 
-    // Use this block to run some statements after an spec/test ends its
-    // execution. This is not the same as after method call.
     afterEach(function (done) {
       done();
     });
 
-    it('should clean domainConfigs environment.',
+    it('should clean DomainConfigs created for testing.',
       function (done) {
-        var namePattern = /API-QA-name-/;
-        API.session.setCurrentUser(resellerUser);
-        API.resources.domainConfigs.config
-          .getAll()
-          .expect(200)
-          .then(function (res) {
-            var ids = [];
-            var domains = res.body;
-            var total = domains.length;
-            for (var i = 0; i < total; i++) {
-              var domain = domains[i];
-              if (namePattern.test(domain.domain_name)) {
-                ids.push(domain.id);
-              }
-            }
-            API.resources.domainConfigs.config
-              .deleteMany(ids)
-              .finally(done);
-          });
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getAll()
+              .expect(200)
+              .then(function (res) {
+                var ids = [];
+                var domainConfigs = res.body;
+                domainConfigs.forEach(function (domainConfig) {
+                  if (namePattern.test(domainConfig.domain_name)) {
+                    ids.push(domainConfig.id);
+                  }
+                });
+                API.resources.domainConfigs
+                  .deleteManyIfExist(ids)
+                  .finally(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
   });
 });

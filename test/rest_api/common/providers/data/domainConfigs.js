@@ -25,7 +25,7 @@
 // depending on your test needs.
 var DomainConfigsDataProvider = {
 
-  domainStr: 'API-TEST',
+  prefix: 'API-TEST',
 
   /**
    * ### DomainConfigsDataProvider.generateOne()
@@ -47,10 +47,10 @@ var DomainConfigsDataProvider = {
    */
   generateOne: function (accountId) {
     return  {
-      'domain_name': this.domainStr + '-name-' + Date.now() + '.revsw.net',
+      'domain_name': this.prefix + '-name-' + Date.now() + '.revsw.net',
       'account_id': accountId,
-      'origin_host_header': this.domainStr + '-config.revsw.net',
-      'origin_server': this.domainStr + '-website01.revsw.net',
+      'origin_host_header': this.prefix + '-config.revsw.net',
+      'origin_server': this.prefix + '-website01.revsw.net',
       'origin_server_location_id': '55a56fa6476c10c329a90741',
       'tolerance': '4000'
     };
