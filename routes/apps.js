@@ -42,9 +42,9 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: {
-        schema: Joi.array().items(routeModels.AppModel)
-      }
+//      response: {
+//        schema: Joi.array().items(routeModels.listAppsModel)
+//      }
     }
   },
   {
@@ -95,9 +95,9 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: {
-        schema: Joi.array().items(routeModels.AppModel)
-      }
+ //     response: {
+ //       schema: Joi.array().items(routeModels.AppModel)
+ //     }
     }
   },
   {
@@ -120,9 +120,9 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: {
-        schema: routeModels.ConfigStatusModel
-      }
+//      response: {
+//        schema: routeModels.appConfigStatusModel
+//      }
     }
   },
   {
