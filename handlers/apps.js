@@ -50,7 +50,6 @@ exports.getApps = function(request, reply) {
     } else if (res.statusCode === 500) {
       return reply(boom.badImplementation(response_json.message));
     } else if (res.statusCode === 200) {
-      response_json = publicRecordFields.handle(response_json, 'apps');
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
@@ -67,6 +66,7 @@ exports.getApps = function(request, reply) {
 exports.getApp = function(request, reply) {
   var app_id = request.params.app_id;
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  var version = (request.query.version) ? '?version=' + request.query.version : '';
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -77,7 +77,7 @@ exports.getApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps/' + app_id, headers: authHeader}, function (err, res, body) {
+    cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps/' + app_id + version, headers: authHeader}, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get the mobile app from the CDS for App ID ' + app_id));
       }
@@ -209,6 +209,8 @@ exports.updateApp = function(request, reply) {
   var app_id = request.params.app_id;
   var updatedApp = request.payload;
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
+  var action = (optionsFlag === '?options=publish') ? 'publish' : 'modify';
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -219,7 +221,8 @@ exports.updateApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    cds_request({method: 'PUT', url: config.get('cds_url') + '/v1/apps/' + app_id, body: JSON.stringify(updatedApp), headers: authHeader}, function (err, res, body) {
+    cds_request({method: 'PUT', url: config.get('cds_url') + '/v1/apps/' + app_id + optionsFlag, body: JSON.stringify(updatedApp), headers: authHeader},
+      function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('CDS failed to update the mobile app with App ID ' + app_id));
       }
@@ -237,7 +240,7 @@ exports.updateApp = function(request, reply) {
           user_name       : request.auth.credentials.email,
           user_type       : 'user',
           account_id      : request.auth.credentials.companyId,
-          activity_type   : 'modify',
+          activity_type   : action,
           activity_target : 'app',
           target_id       : response_json.id,
           target_name     : updatedApp.app_name,
@@ -275,6 +278,7 @@ exports.deleteApp = function(request, reply) {
       } else if (res.statusCode === 500) {
         return reply(boom.badImplementation(response_json.message));
       } else if (res.statusCode === 200) {
+        existing_app = publicRecordFields.handle(existing_app, 'apps');
         AuditLogger.store({
           ip_address      : request.info.remoteAddress,
           datetime        : Date.now(),
