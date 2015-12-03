@@ -91,13 +91,14 @@ var getBaseUrl = function () {
 };
 
 var getResourceBuilder = function (nestedResource, path, parentIdKey) {
-  var resource = nestedResource;
+  var baseResource = nestedResource;
   var data = {
     path: path,
     idKey: parentIdKey
   };
   // Return resource build which depends on
   return function (id) {
+    var resource = JSON.parse(JSON.stringify(baseResource));
     // Path = parent-resource-path + nested-resource-path
     resource.path = getPath(data, id) + resource.path;
     return new BasicResource(resource);

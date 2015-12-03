@@ -162,6 +162,48 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
+    it('should allow to get status of existing domain config',
+      function (done) {
+        API
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .status(secondDc.id)
+              .getOne()
+              .expect(200)
+              .then(function (response) {
+                response.body.staging_status.should.not.be.undefined();
+                response.body.global_status.should.not.be.undefined();
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should allow to get versions of existing domain config',
+      function (done) {
+        API
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .versions(secondDc.id)
+              .getAll()
+              .expect(200)
+              .then(function (response) {
+                var firstVersion = response.body[0];
+                firstVersion.id.should.equal(secondDc.id);
+                firstVersion.domain_name.should.equal(secondDc.domain_name);
+                firstVersion.origin_server.should.equal(secondDc.origin_server);
+                firstVersion.origin_host_header.should
+                  .equal(secondDc.origin_host_header);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
     it('should allow to delete existing domain config',
       function (done) {
         API
