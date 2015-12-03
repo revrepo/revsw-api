@@ -84,37 +84,34 @@ exports.getTopObjects = function(request, reply) {
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
-        'query': {
-          'filtered': {
-            'query': {
-              'query_string': {
-                'query': 'domain: \"' + domain_name + '\"' + filter,
-                'analyze_wildcard': true
-              }
-            },
-            'filter': {
-              'bool': {
-                'must': [{
-                  'range': {
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  range: {
                     '@timestamp': {
-                      'gte': start_time,
-                      'lte': end_time
+                      gte: start_time,
+                      lte: end_time
                     }
                   }
-                }],
-                'must_not': []
+                }, {
+                  term: {
+                    domain: domain_name
+                  }
+                }]
               }
             }
           }
         },
-        'size': 0,
-        'aggs': {
-          'results': {
-            'terms': {
-              'field': 'request',
-              'size': request.query.count || 30,
-              'order': {
-                '_count': 'desc'
+        size: 0,
+        aggs: {
+          results: {
+            terms: {
+              field: 'request',
+              size: request.query.count || 30,
+              order: {
+                _count: 'desc'
               }
             }
           }

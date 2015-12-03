@@ -95,19 +95,23 @@ exports.getGBTReports = function(request, reply) {
 
       var requestBody = {
         'query': {
-          'bool': {
-            'must': [{
-              'term': {
-                'domain': domain_name
+          filtered: {
+            filter: {
+              'bool': {
+                'must': [{
+                  'term': {
+                    'domain': domain_name
+                  }
+                }, {
+                  'range': {
+                    '@timestamp': {
+                      'gte': start_time,
+                      'lte': end_time
+                    }
+                  }
+                }]
               }
-            }, {
-              'range': {
-                '@timestamp': {
-                  'gte': start_time,
-                  'lte': end_time
-                }
-              }
-            }]
+            }
           }
         },
         'size': 0,
