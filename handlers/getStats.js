@@ -32,7 +32,6 @@ var DomainConfig = require('../models/DomainConfig');
 
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
-
 //
 // Get traffic stats
 //
@@ -41,12 +40,9 @@ exports.getStats = function(request, reply) {
 
   var domain_id = request.params.domain_id,
     domain_name,
-    start_time,
-    filter = '',
     metadataFilterField,
     interval,
-    time_period,
-    end_time;
+    time_period;
 
   domainConfigs.get(domain_id, function(error, result) {
     if (error) {
@@ -55,78 +51,57 @@ exports.getStats = function(request, reply) {
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
       domain_name = result.domain_name;
 
-      if ( request.query.from_timestamp ) {
-        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
-        if ( ! start_time ) {
-          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
-        }
+      var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+
+      time_period = span.end - span.start;
+      if ( time_period <= 3*3600000 ) {
+        interval = 5*60000; // 5 minutes
+      } else if ( time_period <= 2*24*3600000 ) {
+        interval = 30*60000; // 30 minutes
+      } else if ( time_period <= 8*24*3600000 ) {
+        interval = 3*3600000; // 3 hours
       } else {
-        start_time = Date.now() - 3600000*24; // 24 hours back
+        interval = 12*3600000; // 12 hours
       }
 
-      if ( request.query.to_timestamp ) {
-        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
-        if ( ! end_time ) {
-          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
-        }
-      } else {
-        end_time = request.query.to_timestamp || Date.now();
-      }
-
-      if ( start_time >= end_time ) {
-        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-      }
-      if ( start_time < ( Date.now() - 31*24*3600*1000 ) ) {
-        return reply(boom.badRequest('Period start timestamp cannot be more than a month back from the current time'));
-      }
-
-      start_time = Math.floor(start_time/1000/300)*1000*300;
-      end_time = Math.floor(end_time/1000/300)*1000*300;
-
-      time_period = end_time - start_time;
-
-      if ( time_period <= 3*3600*1000 ) {
-        interval = 5*60*1000; // 5 minutes
-      } else if ( time_period <= 2*24*3600*1000 ) {
-        interval = 30*60*1000; // 30 minutes
-      } else if ( time_period <= 8*24*3600*1000 ) {
-        interval = 3*3600*1000; // 3 hours
-      } else {
-        interval = 12*3600*1000; // 12 hours
-      }
-
-      // filter = elasticSearch.buildESFilterString(request);
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
         size: 0,
         query: {
-          bool: {
-            must: [{
-              term: {
-                domain: domain_name
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  term: {
+                    domain: domain_name
+                  }
+                }, {
+                  range: {
+                    '@timestamp': {
+                      gte: span.start,
+                      lte: span.end
+                    }
+                  }
+                }],
+                must_not: []
               }
-            }, {
-              range: {
-                '@timestamp': {
-                  gte: start_time,
-                  lte: end_time
-                }
-              }
-            }],
-            must_not: []
+            }
           }
         },
         aggs: {
           results: {
             date_histogram: {
               field: '@timestamp',
-              interval: interval.toString(),
+              interval: ( '' + interval ),
               // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
               min_doc_count: 0,
               extended_bounds: {
-                min: start_time,
-                max: end_time
+                min: span.start,
+                max: span.end
               }
             },
             aggs: {
@@ -144,12 +119,14 @@ exports.getStats = function(request, reply) {
           }
         }
       };
+
       var terms = elasticSearch.buildESQueryTerms(request);
-      requestBody.query.bool.must = requestBody.query.bool.must.concat( terms.must );
-      requestBody.query.bool.must_not = requestBody.query.bool.must_not.concat( terms.must_not );
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
 
       elasticSearch.getClient().search({
-        index: utils.buildIndexList(start_time, end_time),
+        index: utils.buildIndexList(span.start, span.end),
         ignoreUnavailable: true,
         timeout: 120000,
         body: requestBody
@@ -168,10 +145,10 @@ exports.getStats = function(request, reply) {
           metadata: {
             domain_name: domain_name,
             domain_id: domain_id,
-            start_timestamp: start_time,
-            start_datetime: new Date(start_time),
-            end_timestamp: end_time,
-            end_datetime: new Date(end_time),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
             total_hits: body.hits.total,
             interval_sec: interval/1000,
             filter: metadataFilterField,

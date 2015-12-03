@@ -39,10 +39,7 @@ exports.getTopObjects = function(request, reply) {
 
   var domain_id = request.params.domain_id;
   var domain_name,
-      filter = '',
-      metadataFilterField,
-      start_time,
-      end_time;
+      metadataFilterField;
 
   domainConfigs.get(domain_id, function(error, result) {
     if (error) {
@@ -51,77 +48,55 @@ exports.getTopObjects = function(request, reply) {
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
 
       domain_name = result.domain_name;
-
-      if ( request.query.from_timestamp ) {
-        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
-        if ( ! start_time ) {
-          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
-        }
-      } else {
-        start_time = Date.now() - 3600000; // 1 hour back
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
       }
 
-      if ( request.query.to_timestamp ) {
-        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
-        if ( ! end_time ) {
-          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
-        }
-      } else {
-        end_time = request.query.to_timestamp || Date.now();
-      }
-
-      start_time = Math.floor(start_time/1000/300)*1000*300;
-      end_time = Math.floor(end_time/1000/300)*1000*300;
-
-      if ( start_time >= end_time ) {
-        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-      }
-      if ( (end_time - start_time ) > 24*3600*1000 ) {
-        return reply(boom.badRequest('Requested report period exceeds 24 hours'));
-      }
-
-      filter = elasticSearch.buildESFilterString(request);
+      // filter = elasticSearch.buildESFilterString(request);
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
-        'query': {
-          'filtered': {
-            'query': {
-              'query_string': {
-                'query': 'domain: \"' + domain_name + '\"' + filter,
-                'analyze_wildcard': true
-              }
-            },
-            'filter': {
-              'bool': {
-                'must': [{
-                  'range': {
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  range: {
                     '@timestamp': {
-                      'gte': start_time,
-                      'lte': end_time
+                      gte: span.start,
+                      lte: span.end
                     }
                   }
+                }, {
+                  term: {
+                    domain: domain_name
+                  }
                 }],
-                'must_not': []
+                must_not: []
               }
             }
           }
         },
-        'size': 0,
-        'aggs': {
-          'results': {
-            'terms': {
-              'field': 'request',
-              'size': request.query.count || 30,
-              'order': {
-                '_count': 'desc'
+        size: 0,
+        aggs: {
+          results: {
+            terms: {
+              field: 'request',
+              size: request.query.count || 30,
+              order: {
+                _count: 'desc'
               }
             }
           }
         }
       };
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
 
-      var indicesList = utils.buildIndexList(start_time, end_time);
+      var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
@@ -130,7 +105,7 @@ exports.getTopObjects = function(request, reply) {
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + start_time + ' ' + end_time + ', domain: ' + domain_name ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
         }
         var dataArray = [];
         for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
@@ -143,10 +118,10 @@ exports.getTopObjects = function(request, reply) {
           metadata: {
             domain_name: domain_name,
             domain_id: domain_id,
-            start_timestamp: start_time,
-            start_datetime: new Date(start_time),
-            end_timestamp: end_time,
-            end_datetime: new Date(end_time),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
             total_hits: body.hits.total,
             filter: metadataFilterField,
             data_points_count: body.aggregations.results.buckets.length
