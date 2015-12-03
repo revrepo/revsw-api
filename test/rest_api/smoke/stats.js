@@ -40,6 +40,9 @@ describe('Stats API check:', function () {
         justtaUser.token = response.body.token;
         API.session.setCurrentUser(justtaUser);
         done();
+      })
+      .catch( function( err ) {
+        done( err );
       });
   });
   // after(function (done) {

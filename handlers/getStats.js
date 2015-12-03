@@ -101,27 +101,30 @@ exports.getStats = function(request, reply) {
       var requestBody = {
         size: 0,
         query: {
-          bool: {
-            must: [{
-              term: {
-                domain: domain_name
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  term: {
+                    domain: domain_name
+                  }
+                }, {
+                  range: {
+                    '@timestamp': {
+                      gte: start_time,
+                      lte: end_time
+                    }
+                  }
+                }]
               }
-            }, {
-              range: {
-                '@timestamp': {
-                  gte: start_time,
-                  lte: end_time
-                }
-              }
-            }],
-            must_not: []
+            }
           }
         },
         aggs: {
           results: {
             date_histogram: {
               field: '@timestamp',
-              interval: interval.toString(),
+              interval: interval,
               // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
               min_doc_count: 0,
               extended_bounds: {

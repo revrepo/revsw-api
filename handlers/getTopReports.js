@@ -126,19 +126,23 @@ exports.getTopReports = function(request, reply) {
 
       var requestBody = {
         query: {
-          bool: {
-            must: [{
-              range: {
-                '@timestamp': {
-                  'gte': start_time,
-                  'lte': end_time
-                }
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  range: {
+                    '@timestamp': {
+                      'gte': start_time,
+                      'lte': end_time
+                    }
+                  }
+                }, {
+                  term: {
+                    domain: domain_name
+                  }
+                }]
               }
-            }, {
-              term: {
-                domain: domain_name
-              }
-            }]
+            }
           }
         },
         'size': 0,
