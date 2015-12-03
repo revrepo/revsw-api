@@ -165,7 +165,7 @@ exports.getTopReports = function(request, reply) {
       };
 
       if (request.query.country) {
-        requestBody.query.bool.must.push({
+        requestBody.query.filtered.filter.bool.must.push({
           term: {
             'geoip.country_code2': request.query.country
           }

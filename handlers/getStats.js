@@ -32,7 +32,6 @@ var DomainConfig = require('../models/DomainConfig');
 
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
-
 //
 // Get traffic stats
 //
@@ -42,7 +41,6 @@ exports.getStats = function(request, reply) {
   var domain_id = request.params.domain_id,
     domain_name,
     start_time,
-    filter = '',
     metadataFilterField,
     interval,
     time_period,
@@ -115,7 +113,8 @@ exports.getStats = function(request, reply) {
                       lte: end_time
                     }
                   }
-                }]
+                }],
+                must_not: []
               }
             }
           }
@@ -124,7 +123,7 @@ exports.getStats = function(request, reply) {
           results: {
             date_histogram: {
               field: '@timestamp',
-              interval: interval,
+              interval: ( '' + interval ),
               // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
               min_doc_count: 0,
               extended_bounds: {
@@ -147,9 +146,11 @@ exports.getStats = function(request, reply) {
           }
         }
       };
+
       var terms = elasticSearch.buildESQueryTerms(request);
-      requestBody.query.bool.must = requestBody.query.bool.must.concat( terms.must );
-      requestBody.query.bool.must_not = requestBody.query.bool.must_not.concat( terms.must_not );
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
 
       elasticSearch.getClient().search({
         index: utils.buildIndexList(start_time, end_time),
