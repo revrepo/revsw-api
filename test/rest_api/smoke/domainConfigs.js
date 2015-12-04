@@ -198,6 +198,34 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
+    it('should return success response code when getting specific versions ' +
+      'for an specific existing domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getOne(firstDc.id, {version: 1})
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return success response code when getting specific versions ' +
+      'for an specific existing domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getOne(firstDc.id, {version: 2})
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
     it('should return success response code when deleting a domain',
       function (done) {
         API.helpers

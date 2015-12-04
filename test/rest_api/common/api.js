@@ -84,7 +84,6 @@ module.exports = {
           .createOneAsPrerequisite(account)
           .then(function (res) {
             account.id = res.body.object_id;
-            console.log(account);
             return account;
           });
       }
@@ -96,7 +95,6 @@ module.exports = {
           .createOneAsPrerequisite(domainConfig)
           .then(function (res) {
             domainConfig.id = res.body.object_id;
-            console.log(domainConfig);
             return domainConfig;
           });
       }

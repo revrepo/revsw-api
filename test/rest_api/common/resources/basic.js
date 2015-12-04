@@ -167,7 +167,7 @@ var BasicResource = function (data) {
       var location = getPath(data);
       var request = getRequest()
         .get(location)
-        .send(query);
+        .query(query);
       return setUserToRequest(request);
     };
   }
@@ -189,7 +189,7 @@ var BasicResource = function (data) {
       var location = getPath(data, id);
       var request = getRequest()
         .get(location)
-        .send(query);
+        .query(query);
       return setUserToRequest(request);
     };
   }
