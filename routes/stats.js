@@ -100,6 +100,7 @@ module.exports = [
           http_method: Joi.string().valid( 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT', 'PATCH' )
             .description('HTTP method value to filter'),
           quic: Joi.string().valid( 'QUIC', 'HTTP' ).description('Last mile protocol to filter'),
+          http2: Joi.string().valid( 'h2', 'h2c' ).description('HTTP2 protocol type to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
           device: Joi.string().description('Device name/version to filter')
