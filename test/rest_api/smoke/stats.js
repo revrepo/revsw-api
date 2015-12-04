@@ -88,6 +88,7 @@ describe('Stats API check:', function () {
       it('should return data for protocol', run_({ protocol: 'HTTPS' }) );
       it('should return data for http_method', run_({ http_method: 'GET' }) );
       it('should return data for quic', run_({ quic: 'QUIC' }) );
+      it('should return data for HTTP2', run_({ http2: 'h2' }) );
       it('should return data for country', run_({ country: 'ZU' }) );
       it('should return data for os', run_({ os: 'Windows' }) );
       it('should return data for device', run_({ device: 'Motorola' }) );
@@ -145,6 +146,8 @@ describe('Stats API check:', function () {
         run_( 'country', domains.test.name, domains.test.id ) );
       it('should return data for report_type = QUIC',
         run_( 'QUIC', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = http2',
+        run_( 'http2', domains.test.name, domains.test.id ) );
     });
 
     describe('Stats: ', function () {

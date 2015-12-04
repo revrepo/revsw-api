@@ -93,6 +93,9 @@ exports.getTopReports = function(request, reply) {
         case 'QUIC':
           field = 'quic';
           break;
+        case 'http2':
+          field = 'http2';
+          break;
         default:
           return reply(boom.badImplementation('Received bad report_type value ' + request.query.report_type));
       }
