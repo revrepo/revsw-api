@@ -53,7 +53,6 @@ exports.getTopObjects = function(request, reply) {
         return reply(boom.badRequest( span.error ));
       }
 
-      // filter = elasticSearch.buildESFilterString(request);
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
