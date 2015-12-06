@@ -127,6 +127,10 @@ exports.getDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
+    if (!result.proxy_config) {
+      return reply(boom.badImplementation('No "proxy_config" section in configuraiton for domain ID ' + domain_id));
+    }
+
     logger.info('Calling CDS to get configuration for domain ID: ', domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
       headers: {
@@ -143,18 +147,52 @@ exports.getDomainConfig = function(request, reply) {
       var response = response_json;
       if (response_json.proxy_config) {
         response = response_json.proxy_config;
+        if (!response.tolerance) {
+          response.tolerance = '3000';
+        }
       }
       renderJSON(request, reply, err, response);
     });
   });
+};
 
+exports.getDomainConfigVersions = function(request, reply) {
+  var domain_id = request.params.domain_id;
+  domainConfigs.get(domain_id, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+    }
+    if (!result) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+    if (!checkDomainAccessPermission(request,result)) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+
+    logger.info('Calling CDS to get configuration versions for domain ID: ', domain_id);
+    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/versions',
+      headers: {
+        Authorization: 'Bearer ' + config.get('cds_api_token')
+      },
+    }, function (err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to get from CDS the configuration for domain ID: ' + domain_id));
+      }
+      var response_json = JSON.parse(body);
+      if ( res.statusCode === 400 ) {
+        return reply(boom.badRequest(response_json.message));
+      }
+      var response = response_json;
+      renderJSON(request, reply, err, response);
+    });
+  });
 };
 
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
 
-  if (request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -172,7 +210,7 @@ exports.createDomainConfig = function(request, reply) {
     }
     newDomainJson.created_by = request.auth.credentials.email;
     if (!newDomainJson.tolerance) {
-      newDomainJson.tolerance = 3000;
+      newDomainJson.tolerance = '3000';
     }
 
     domainConfigs.query({
@@ -180,14 +218,14 @@ exports.createDomainConfig = function(request, reply) {
       deleted: { $ne: true }
     }, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to retrieve domain details for domain' + newDomainJson.name));
+        return reply(boom.badImplementation('Failed to retrieve domain details for domain name ' + newDomainJson.name));
       }
       if (result.length > 0) {
         logger.debug('result = ', result);
         return reply(boom.badRequest('The domain name is already registered in the system'));
       }
 
-      logger.info('Calling CDS to create new domain', newDomainJson);
+      logger.info('Calling CDS to create new domain ' + newDomainJson);
       cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
         method: 'POST',
         headers: {
@@ -196,7 +234,7 @@ exports.createDomainConfig = function(request, reply) {
         body: JSON.stringify(newDomainJson)
       }, function (err, res, body) {
         if (err) {
-          return reply(boom.badImplementation('Failed to send to CDS a request to create new domain ', newDomainJson));
+          return reply(boom.badImplementation('Failed to send to CDS a request to create new domain ' + newDomainJson));
         }
         var response_json = JSON.parse(body);
         if (res.statusCode === 400)  {
@@ -236,11 +274,11 @@ exports.updateDomainConfig = function(request, reply) {
 
   var newDomainJson = request.payload;
   var domain_id = request.params.domain_id;
-  var optionsFlag = (request.query.options) ? '?' + request.query.options : '';
+  var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domain_id));
     }
     if (!result) {
       return reply(boom.badRequest('Domain ID not found'));
@@ -256,7 +294,10 @@ exports.updateDomainConfig = function(request, reply) {
       headers: {
         Authorization: 'Bearer ' + config.get('cds_api_token')
       },
-      body: JSON.stringify({ proxy_config: newDomainJson })
+      body: JSON.stringify({
+       updated_by: request.auth.credentials.email,
+       proxy_config: newDomainJson 
+      })
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domain_id));
@@ -266,20 +307,29 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
-      AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
-        activity_type    : 'modify',
-        activity_target  : 'domain',
-        target_id        : result.domain_id,
-        target_name      : result.newDomainJson,
-        target_object    : result,
-        operation_status : 'success'
-      });
+
+      var action = '';
+      if (request.query.options && request.query.options === 'publish') {
+        action = 'publish';
+      } else if (!request.query.options || request.query.options !== 'verify_only') {
+        action = 'modify';
+      }
+      if (action !== '') {
+        AuditLogger.store({
+          ip_address        : request.info.remoteAddress,
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId,
+          activity_type    : action,
+          activity_target  : 'domain',
+          target_id        : result.domain_id,
+          target_name      : result.domain_name,
+          target_object    : newDomainJson,
+          operation_status : 'success'
+        });
+      }
 
       renderJSON(request, reply, err, response);
     });
@@ -328,8 +378,8 @@ exports.deleteDomainConfig = function(request, reply) {
         activity_type    : 'delete',
         activity_target  : 'domain',
         target_id        : result.domain_id,
-        target_name      : result.proxy_config,
-        target_object    : result,
+        target_name      : result.domain_name,
+        target_object    : result.proxy_config,
         operation_status : 'success'
       });
       var response = response_json;

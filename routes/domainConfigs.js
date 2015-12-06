@@ -32,7 +32,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
       handler     : domainConfigsHandlers.getDomainConfigs,
       description : 'Get a list of domains registered for a customer',
@@ -43,9 +43,9 @@ module.exports = [
           responseMessages : routeModels.standardHTTPErrors
         }
       },
-    //  response    : {
-    //    schema : routeModels.listOfDomainsModel
-    //  }
+      response    : {
+        schema : routeModels.listOfDomainsModel
+      }
     }
   },
 
@@ -54,7 +54,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
       handler     : domainConfigsHandlers.getDomainConfig,
       description : 'Get basic domain configuration',
@@ -72,10 +72,34 @@ module.exports = [
         query: {
           version: Joi.number().integer().description('Configuration version number (request 0 for latest)')
         },
+      }
+    }
+  },
+
+  {
+    method : 'GET',
+    path   : '/v1/domain_configs/{domain_id}/versions',
+    config : {
+      auth        : {
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
-//      response    : {
-//        schema : routeModels.domainModel
-//      }
+      handler     : domainConfigsHandlers.getDomainConfigVersions,
+      description : 'Get a list of domain configuration versions',
+      notes       : 'Use the call to receive a list of previous domain configurations for specified domain ID.',
+      tags        : ['api', 'domain_configs'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        params : {
+          domain_id : Joi.objectId().required().description('Domain ID')
+        }
+      },
+      response    : {
+        schema : routeModels.listOfDomainsModel
+      }
     }
   },
 
@@ -84,7 +108,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}/config_status',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller']
+        scope : ['user', 'admin', 'reseller', 'revadmin']
       },
       handler     : domainConfigsHandlers.getDomainConfigStatus,
       description : 'Get the publishing status of a domain configuration',
@@ -100,9 +124,9 @@ module.exports = [
           domain_id : Joi.objectId().required().description('Domain ID')
         }
       },
-//      response    : {
-//        schema : routeModels.domainModel
-//      }
+      response    : {
+        schema : routeModels.domainStatusModel
+      }
     }
   },
 
@@ -111,7 +135,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domainConfigsHandlers.createDomainConfig,
       description : 'Create a new domain configuration',
@@ -147,7 +171,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domainConfigsHandlers.updateDomainConfig,
       description : 'Update detailed domain configuration',
@@ -166,10 +190,12 @@ module.exports = [
           options: Joi.string().valid('verify_only', 'publish').optional()
         },
         payload : {
-          account_id             : Joi.objectId().description('Account ID of the account the domain should be assiciated with'),
-          origin_host_header     : Joi.string().regex(routeModels.domainRegex).description('"Host" header value used when accessing the origin server'),
-          origin_server          : Joi.string().description('Origin server host name or IP address'),
-          origin_server_location_id : Joi.objectId().description('The ID of origin server location'),
+          account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
+          origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
+            .description('"Host" header value used when accessing the origin server'),
+          origin_server          : Joi.string().required().description('Origin server host name or IP address'),
+          origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
+          config_command_options: Joi.string(),
           tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
             '3rd_party_root_rewrite_domains': Joi.string().allow('').required(),
@@ -180,6 +206,7 @@ module.exports = [
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
           }).required(),
           enable_origin_health_probe: Joi.boolean(),
+          domain_aliases: Joi.array().items(Joi.string()),
           origin_health_probe: Joi.object({
             HTTP_REQUEST: Joi.string().required(),
             PROBE_TIMEOUT: Joi.number().integer().required(),
@@ -187,6 +214,7 @@ module.exports = [
             HTTP_STATUS: Joi.number().integer().required()
           }),
           proxy_timeout: Joi.number().integer(),
+          domain_wildcard_alias: Joi.string(),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -194,9 +222,16 @@ module.exports = [
             mode                : Joi.string().valid('least', 'moderate', 'aggressive', 'custom', 'adaptive').required(),
             img_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             js_choice           : Joi.string().valid('off', 'low', 'medium', 'high').required(),
-            css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required()
+            css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
+            origin_http_keepalive_ttl:  Joi.number().integer(),
+            origin_http_keepalive_enabled: Joi.boolean()
           }).required(),
           rev_component_bp : Joi.object({
+            end_user_response_headers: Joi.array().items({
+              header_value: Joi.string().required(),
+              header_name: Joi.string().required(),
+              operation: Joi.string().valid('add', 'remove', 'replace').required()
+            }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),
             cdn_overlay_urls       : Joi.array().items(Joi.string()).required(),
@@ -227,19 +262,23 @@ module.exports = [
                 remove_ignored_from_response : Joi.boolean().required()
               }).required(),
               serve_stale: Joi.object({
-                origin_sick_ttl: Joi.number().integer(),
-                while_fetching_ttl: Joi.number().integer(),
-                enable: Joi.boolean()
+                origin_sick_ttl: Joi.number().integer().required(),
+                while_fetching_ttl: Joi.number().integer().required(),
+                enable: Joi.boolean().required()
               }),
               end_user_response_headers: Joi.array().items({
-                header_value: Joi.string(),
-                header_name: Joi.string(),
-                operation: Joi.string().allow('add', 'remove', 'replace')
+                header_value: Joi.string().required(),
+                header_name: Joi.string().required(),
+                operation: Joi.string().valid('add', 'remove', 'replace').required()
               }),
               origin_request_headers: Joi.array().items({
-                header_value: Joi.string(),
-                header_name: Joi.string(),
-                operation: Joi.string().allow('add', 'remove', 'replace')
+                header_value: Joi.string().required(),
+                header_name: Joi.string().required(),
+                operation: Joi.string().valid('add', 'remove', 'replace').required()
+              }),
+              origin_redirects: Joi.object({
+                override: Joi.boolean().required(),
+                follow: Joi.boolean().required()
               }),
               cookies_cache_bypass : Joi.array().items(Joi.string())
             }).required(),
@@ -257,15 +296,16 @@ module.exports = [
               }).required()
             }).required(),
             cache_bypass_locations : Joi.array().items(Joi.string()).required(),
+            co_bypass_locations : Joi.array().items(Joi.string().required()),
             enable_vcl_geoip_headers: Joi.boolean(),
             custom_vcl: Joi.object({
-              enabled: Joi.boolean(),
+              enabled: Joi.boolean().required(),
               backends: Joi.array().items({
-                vcl: Joi.string(),
-                dynamic: Joi.boolean(),
-                port: Joi.number().integer(),
-                host: Joi.string(),
-                name: Joi.string()
+                vcl: Joi.string().required(),
+                dynamic: Joi.boolean().required(),
+                port: Joi.number().integer().required(),
+                host: Joi.string().required(),
+                name: Joi.string().required()
               }),
               recv: Joi.string(),
               backend_response: Joi.string(),
@@ -292,7 +332,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
       },
       handler     : domainConfigsHandlers.deleteDomainConfig,
       description : 'Delete a domain',

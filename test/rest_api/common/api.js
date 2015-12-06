@@ -24,7 +24,10 @@ var billingPlans = require('./resources/billingPlans');
 var authenticate = require('./resources/authenticate');
 var users = require('./resources/users');
 var stats = require('./resources/stats');
+var sdkConfigs = require('./resources/sdkConfigs');
 var Session = require('./session');
+var domainConfigs = require('./resources/domainConfigs');
+var activity = require('./resources/activity');
 
 // This allows to overpass SSL certificate check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -40,6 +43,9 @@ module.exports = {
     billingPlans: billingPlans,
     authenticate: authenticate,
     users: users,
-    stats: stats
+    stats: stats,
+    sdkConfigs: sdkConfigs,
+    domainConfigs: domainConfigs,
+    activity: activity
   }
 };

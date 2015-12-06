@@ -35,6 +35,9 @@ var User = require('../models/User');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+var DomainConfig   = require('../models/DomainConfig');
+var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+
 exports.getAccounts = function getAccounts(request, reply) {
   accounts.list(request, function (error, listOfAccounts) {
     var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
@@ -52,7 +55,7 @@ exports.createAccount = function (request, reply) {
   }, function (error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to verify the new account name'));
+      return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
     }
 
     if (result) {
@@ -115,7 +118,7 @@ exports.getAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.companyId.indexOf(account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
 
@@ -136,7 +139,7 @@ exports.updateAccount = function (request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
 
-  if (request.auth.credentials.companyId.indexOf(updatedAccount.account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(updatedAccount.account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
 
@@ -190,15 +193,31 @@ exports.deleteAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.companyId.indexOf(account_id) === -1) {
+  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
     return reply(boom.badRequest('Account not found'));
   }
   async.waterfall([
     function (cb) {
+      domainConfigs.query({
+        'proxy_config.account_id': account_id, deleted: { $ne: true }
+      }, function (error, domains) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to verify that there are no active domains for account ID ' + account_id));
+        }
+        if (domains.length > 0) {
+          return reply(boom.badRequest('There are active domains registered for the account - please remove the domains before removing the account'));
+        }
+        cb(error);
+      });
+    },
+    function (cb) {
       accounts.get({
         _id : account_id
       }, function (error, account) {
-        if (error || !account) {
+        if (error) { 
+          return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
+        }
+        if (!account) {
           return reply(boom.badRequest('Account not found'));
         }
         cb(error, account);
@@ -254,7 +273,7 @@ exports.deleteAccount = function (request, reply) {
     }
   ], function (err) {
     if (err) {
-      return reply(boom.badImplementation('Failed to delete account'));
+      return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
     }
   });
 };

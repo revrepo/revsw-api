@@ -18,8 +18,8 @@
 
 // # Session object
 
-// This object stores in emory information about the current user being used.
-// It also provide with additional methods to retrieve, update or reset that
+// This object stores in memory information about the current user being used.
+// It also provides additional methods to retrieve, update or reset that
 // information. Re-setting means as if no user was authenticated
 var currentUser;
 

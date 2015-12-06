@@ -18,6 +18,8 @@
 
 // # Users Resource object
 
+'use strict';
+
 // Requiring config and `BaseResource`
 var config = require('config');
 var BaseResource = require('./base');
@@ -48,6 +50,12 @@ module.exports = {
     host: config.api.host,
     apiVersion: config.api.version,
     apiResource: config.api.resources.stats + '/lastmile_rtt'
+  }),
+
+  stats_gbt: new BaseResource({
+    host: config.api.host,
+    apiVersion: config.api.version,
+    apiResource: config.api.resources.stats + '/gbt'
   })
 
 };

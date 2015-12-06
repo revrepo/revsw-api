@@ -28,9 +28,10 @@ var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var elasticSearch   = require('../lib/elasticSearch');
 
-var Domain = require('../models/Domain');
+var DomainConfig = require('../models/DomainConfig');
 
-var domains = new Domain(mongoose, mongoConnection.getConnectionPortal());
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+
 //
 // Get traffic stats
 //
@@ -39,111 +40,79 @@ exports.getStats = function(request, reply) {
 
   var domain_id = request.params.domain_id,
     domain_name,
-    start_time,
-    filter = '',
     metadataFilterField,
     interval,
-    time_period,
-    end_time;
+    time_period;
 
-  domains.get({
-    _id: domain_id
-  }, function(error, result) {
+  domainConfigs.get(domain_id, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details'));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
     }
-    if (result && request.auth.credentials.companyId.indexOf(result.companyId) !== -1 && request.auth.credentials.domain.indexOf(result.name) !== -1) {
-      domain_name = result.name;
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+      domain_name = result.domain_name;
 
-      if ( request.query.from_timestamp ) {
-        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
-        if ( ! start_time ) {
-          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
-        }
+      var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+
+      time_period = span.end - span.start;
+      if ( time_period <= 3*3600000 ) {
+        interval = 5*60000; // 5 minutes
+      } else if ( time_period <= 2*24*3600000 ) {
+        interval = 30*60000; // 30 minutes
+      } else if ( time_period <= 8*24*3600000 ) {
+        interval = 3*3600000; // 3 hours
       } else {
-        start_time = Date.now() - 3600000*24; // 24 hours back
+        interval = 12*3600000; // 12 hours
       }
 
-      if ( request.query.to_timestamp ) {
-        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
-        if ( ! end_time ) {
-          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
-        }
-      } else {
-        end_time = request.query.to_timestamp || Date.now();
-      }
-
-      if ( start_time >= end_time ) {
-        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-      }
-      if ( start_time < ( Date.now() - 31*24*3600*1000 ) ) {
-        return reply(boom.badRequest('Period start timestamp cannot be more than a month back from the current time'));
-      }
-
-      start_time = Math.floor(start_time/1000/300)*1000*300;
-      end_time = Math.floor(end_time/1000/300)*1000*300;
-
-      time_period = end_time - start_time;
-
-      if ( time_period <= 3*3600*1000 ) {
-        interval = 5*60*1000; // 5 minutes
-      } else if ( time_period <= 2*24*3600*1000 ) {
-        interval = 30*60*1000; // 30 minutes
-      } else if ( time_period <= 8*24*3600*1000 ) {
-        interval = 3*3600*1000; // 3 hours
-      } else {
-        interval = 12*3600*1000; // 12 hours
-      }
-
-      filter = elasticSearch.buildESFilterString(request);
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
       var requestBody = {
-        'size': 0,
-        'query': {
-          'filtered': {
-            'query': {
-              'query_string': {
-                'query': 'domain: \"' + domain_name + '\"' + filter,
-                'analyze_wildcard': true
-              }
-            },
-            'filter': {
-              'bool': {
-                'must': [{
-                  'range': {
+        size: 0,
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  term: {
+                    domain: domain_name
+                  }
+                }, {
+                  range: {
                     '@timestamp': {
-                      'gte': start_time,
-                      'lte': end_time
+                      gte: span.start,
+                      lte: span.end
                     }
                   }
                 }],
-                'must_not': []
+                must_not: []
               }
             }
           }
         },
-        'aggs': {
-          'results': {
-            'date_histogram': {
-              'field': '@timestamp',
-              'interval': interval.toString(),
-              'pre_zone_adjust_large_interval': true,
-              'min_doc_count': 0,
-              'extended_bounds': {
-                'min': start_time,
-                'max': end_time
+        aggs: {
+          results: {
+            date_histogram: {
+              field: '@timestamp',
+              interval: ( '' + interval ),
+              // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
+              min_doc_count: 0,
+              extended_bounds: {
+                min: span.start,
+                max: span.end
               }
             },
-            'aggs': {
-              'sent_bytes': {
-                'sum': {
-                  'field': 's_bytes'
+            aggs: {
+              sent_bytes: {
+                sum: {
+                  field: 's_bytes'
                 }
               },
-              'received_bytes': {
-                'sum': {
-                  'field': 'r_bytes'
+              received_bytes: {
+                sum: {
+                  field: 'r_bytes'
                 }
               }
             }
@@ -151,34 +120,39 @@ exports.getStats = function(request, reply) {
         }
       };
 
-      elasticSearch.getClient().msearch( { body: [ {
-        index: utils.buildIndexList(start_time, end_time),
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
+
+      elasticSearch.getClient().search({
+        index: utils.buildIndexList(span.start, span.end),
         ignoreUnavailable: true,
-        search_type: 'count',
-        timeout: 120000 },
-        requestBody ]
-      }).then(function(body) {
+        timeout: 120000,
+        body: requestBody
+      })
+      .then(function(body) {
         var dataArray = [];
-        for ( var i = 0; i < body.responses[0].aggregations.results.buckets.length; i++ ) {
+        for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
           dataArray[i] = {
-            time: body.responses[0].aggregations.results.buckets[i].key,
-            requests: body.responses[0].aggregations.results.buckets[i].doc_count,
-            sent_bytes: body.responses[0].aggregations.results.buckets[i].sent_bytes.value,
-            received_bytes: body.responses[0].aggregations.results.buckets[i].received_bytes.value
+            time: body.aggregations.results.buckets[i].key,
+            requests: body.aggregations.results.buckets[i].doc_count,
+            sent_bytes: body.aggregations.results.buckets[i].sent_bytes.value,
+            received_bytes: body.aggregations.results.buckets[i].received_bytes.value
           };
         }
         var response = {
           metadata: {
             domain_name: domain_name,
             domain_id: domain_id,
-            start_timestamp: start_time,
-            start_datetime: new Date(start_time),
-            end_timestamp: end_time,
-            end_datetime: new Date(end_time),
-            total_hits: body.responses[0].hits.total,
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: body.hits.total,
             interval_sec: interval/1000,
             filter: metadataFilterField,
-            data_points_count: body.responses[0].aggregations.results.buckets.length
+            data_points_count: body.aggregations.results.buckets.length
           },
           data: dataArray
         };

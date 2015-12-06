@@ -30,6 +30,9 @@ var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+//
+// This function is used by HAPI to perform user authentication and authorization
+//
 function UserAuth (request, username, password, callback) {
   users.get({
     email: username
@@ -40,12 +43,7 @@ function UserAuth (request, username, password, callback) {
     }
 
     // Users without companyId data should not be able to log in
-    if (!result.companyId) {
-      return callback(null, false);
-    }
-
-    // Only users with 'user' and 'admin' roles should be able to use API
-    if (result.role === 'revadmin') {
+    if (result.role !== 'revadmin' && !result.companyId) {
       return callback(null, false);
     }
 

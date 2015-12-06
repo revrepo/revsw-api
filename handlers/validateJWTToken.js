@@ -41,12 +41,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
     }
 
     // Users without companyId data should not be able to log in
-    if (!result.companyId) {
-      return callback(error, false, result);
-    }
-
-    // Only users with 'user' and 'admin' roles should be able to use API
-    if (result.role === 'revadmin') {
+    if (result.role !== 'revadmin' && !result.companyId) {
       return callback(error, false, result);
     }
 

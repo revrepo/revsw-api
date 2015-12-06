@@ -47,6 +47,7 @@
     "jshint-stylish": "^2.1.0",
     "jsonwebtoken": "^5.0.5",
     "lodash": "^3.10.1",
+    "mailparser": "^0.5.3",
     "marked": "0.3.x",
     "merge": "^1.2.0",
     "mongoose": "4.0.x",
