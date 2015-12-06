@@ -60,13 +60,6 @@
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
   "jwt_token_lifetime_minutes": 1440,   // 24 hours
-  "number_of_reported_audit_log_records": 40,
-
-  "recurly": {
-    "API_KEY": "8282eeda404c4c39ac619b21aaeb0030",
-    "SUBDOMAIN": "kosdev",
-    "ENVIRONMENT": "sandbox",
-    "DEBUG": false
-  }
+  "number_of_reported_audit_log_records": 40
 
 }
