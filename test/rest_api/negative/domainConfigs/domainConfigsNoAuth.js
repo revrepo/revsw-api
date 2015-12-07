@@ -38,8 +38,8 @@ describe('Negative check', function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
-        newAccount = newAccount;
-        return API.helpers.domainConfigs.createOne(newAccount.id);
+        account = newAccount;
+        return API.helpers.domainConfigs.createOne(account.id);
       })
       .then(function (domainConfig) {
         commonDomainConfig = domainConfig;

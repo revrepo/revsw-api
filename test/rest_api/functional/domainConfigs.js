@@ -23,8 +23,6 @@ var API = require('./../common/api');
 var AccountsDP = require('./../common/providers/data/accounts');
 var DomainConfigsDP = require('./../common/providers/data/domainConfigs');
 
-// var async = require('async');
-
 describe('Domain configs functional test', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
@@ -90,8 +88,8 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should return staging and global status as `Publish` after 30 seconds' +
-      'a domain config was created',
+    it('should return staging and global status as `Published` after 30 ' +
+      'seconds a domain config was created',
       function (done) {
         secondDc = DomainConfigsDP.generateOne(account.id);
         originServerV1 = secondDc.origin_server;
@@ -141,10 +139,6 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    // RELATED TO LAST *** ONE
-    // 1 test is to get VERSION 2
-    // 2 test is to get MODIFIED state
-    // 3 test is to avoid updating with already existing domain-name?? apparently not possible
     it('should allow to get `version 2` of recently updated domain config',
       function (done) {
         API.helpers
@@ -165,31 +159,19 @@ describe('Domain configs functional test', function () {
                 delete firstFdc.domain_name;
                 delete firstFdc.cname;
                 API.resources.domainConfigs
-                  .update(firstDc.id, firstFdc)
+                  .update(firstDc.id, firstFdc, {options: 'publish'})
                   .expect(200)
                   .then(function () {
-                    console.log(1111111);
-                    API.resources.domainConfigs
-                      .status(firstDc.id)
-                      .getOne()
-                      .expect(200)
-                      .then(function () {
-                        console.log(222222222);
-                        API.resources.domainConfigs
-                          .getOne(firstDc.id, {version: 2})
-                          .expect(200)
-                          .then(function (res) {
-                            console.log(33333333);
-                            res.body.origin_server.should.equal(originServerV2);
-                            done();
-                          })
-                          .catch(function(err){
-                            // TODO: getting bad request because there is no versin 2 yet, need to wait 120 secs apparently
-                            console.log(err);
-                            done();
-                          });
-                      })
-                      .catch(done);
+                    setTimeout(function () {
+                      API.resources.domainConfigs
+                        .getOne(firstDc.id, {version: 2})
+                        .expect(200)
+                        .then(function (res) {
+                          res.body.origin_server.should.equal(originServerV2);
+                          done();
+                        })
+                        .catch(done);
+                    }, 120000);
                   })
                   .catch(done);
               })
@@ -198,22 +180,59 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    //it('should allow to get `version 2` of recently updated domain config',
-    //  function (done) {
-    //    API.helpers
-    //      .authenticateUser(reseller)
-    //      .then(function () {
-    //        API.resources.domainConfigs
-    //          .getOne(firstDc.id, {version: 2})
-    //          //.expect(200)
-    //          .then(function (res) {
-    //            res.body.origin_server.should.equal(originServerV2);
-    //            done();
-    //          })
-    //          .catch(done);
-    //      })
-    //      .catch(done);
-    //  });
+    it('should return global status as `Modified` right after modifying the ' +
+      'domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .update(firstDc.id, firstFdc)
+              .expect(200)
+              .then(function () {
+                setTimeout(function () {
+                  API.resources.domainConfigs
+                    .status(firstDc.id)
+                    .getOne()
+                    .expect(200)
+                    .then(function (response) {
+                      response.body.global_status.should.equal('Modified');
+                      done();
+                    })
+                    .catch(done);
+                }, 120000);
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return global status as `Published` right after publishing a ' +
+      'modified domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .update(firstDc.id, firstFdc, {options: 'publish'})
+              .expect(200)
+              .then(function () {
+                setTimeout(function () {
+                  API.resources.domainConfigs
+                    .status(firstDc.id)
+                    .getOne()
+                    .expect(200)
+                    .then(function (response) {
+                      response.body.global_status.should.equal('Published');
+                      done();
+                    })
+                    .catch(done);
+                }, 120000);
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
 
     it('should nor create domain-config with already existing ' +
       'domain-config data',
@@ -235,40 +254,6 @@ describe('Domain configs functional test', function () {
           })
           .catch(done);
       });
-
-    // RELATED TO "PREVIOUS ***" ONE
-    // 1 test is to get VERSION 2
-    // 2 test is to get MODIFIED state
-    // 3 test is to avoid updating with already existing domain-name?? apparently not possible
-    it('should return global status as `Modified` right after modifying the ' +
-      'domain config',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .update(secondDc.id, firstFdc)
-              .then(function (response) {
-                API.resources.domainConfigs
-                  .status(secondDc.id)
-                  .getOne()
-                  .expect(200)
-                  .then(function (response) {
-                    //response.body.staging_status.should.equal('Published');
-                    response.body.global_status.should.equal('Modified');
-                    done();
-                  })
-                  .catch(done);
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    xit('should ...',
-      function (done) {
-      });
-
   });
 });
 
