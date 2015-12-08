@@ -32,7 +32,7 @@ var DomainConfig = require('../models/DomainConfig');
 
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
-
+//  ---------------------------------
 exports.getTopReports = function(request, reply) {
 
   var domain_id = request.params.domain_id;
@@ -178,6 +178,121 @@ exports.getTopReports = function(request, reply) {
             data_points_count: body.aggregations.results.buckets.length
           },
           data: dataArray
+        };
+        renderJSON(request, reply, error, response);
+      }, function(error) {
+        console.trace(error.message);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+    } else {
+      return reply(boom.badRequest('Domain not found'));
+    }
+  });
+};
+
+//  ---------------------------------
+exports.getTop5XX = function(request, reply) {
+
+  var domain_id = request.params.domain_id;
+  var domain_name;
+
+  domainConfigs.get(domain_id, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+    }
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+
+      domain_name = result.domain_name;
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+
+      var requestBody = {
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  range: {
+                    '@timestamp': {
+                      'gte': span.start,
+                      'lte': span.end
+                    }
+                  }
+                }, {
+                  term: {
+                    domain: domain_name
+                  }
+                }, {
+                  prefix: {
+                    response: '5'
+                  }
+                }]
+              }
+            }
+          }
+        },
+        size: 0,
+        aggs: {
+          responses: {
+            terms: {
+              field: 'response',
+              size: 30
+            },
+            aggs: {
+              requests: {
+                terms: {
+                  field: '',
+                  size: request.query.count || 30
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var indicesList = utils.buildIndexList(span.start, span.end);
+      elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      }).then(function(body) {
+        if ( !body.aggregations ) {
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+        }
+        var data = {};
+        var count = 0;
+        for ( var i0 = 0, len0 = body.aggregations.responses.buckets.length; i0 < len0; i0++ ) {
+          var item = body.aggregations.responses.buckets[i0];
+          data[item.key] = {
+            count: item.doc_count,
+            requests: []
+          };
+          for ( var i1 = 0, len1 = item.requests.buckets.length; i1 < len1; ++i1 ) {
+            var req = item.requests.buckets[i1];
+            data[item.key].requests.push({
+              count: req.doc_count,
+              request: req.key
+            });
+            ++count;
+          }
+        }
+
+        var response = {
+          metadata: {
+            domain_name: domain_name,
+            domain_id: domain_id,
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: body.hits.total,
+            data_points_count: count
+          },
+          data: data
         };
         renderJSON(request, reply, error, response);
       }, function(error) {

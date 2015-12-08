@@ -142,6 +142,34 @@ module.exports = [
 
   {
     method: 'GET',
+    path: '/v1/stats/top5xx/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: getTopReports.getTop5XX,
+      description: 'Get a list of top requests for a domain returned 5XX error',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
     path: '/v1/stats/lastmile_rtt/{domain_id}',
     config: {
       auth: {
