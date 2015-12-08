@@ -37,7 +37,7 @@ var BillingPlan = require('../models/BillingPlan');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var sendVerifyToken = function(user, token, cb) {
+var sendVerifyToken = function(user, token, callback) {
   var mailOptions = {
     to: user.email,
     subject: config.get('user_verify_subject'),
@@ -49,12 +49,12 @@ var sendVerifyToken = function(user, token, cb) {
     'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
   };
 
-  mail.sendMail(mailOptions, cb);
+  mail.sendMail(mailOptions, callback);
 };
 
-exports.signup = function(req, reply) {
+exports.signup = function(request, reply) {
 
-  var data = req.payload;
+  var data = request.payload;
 
   // Check user email address
   users.get({
@@ -106,7 +106,7 @@ exports.signup = function(req, reply) {
           user = publicRecordFields.handle(user, 'user');
 
           AuditLogger.store({
-            ip_address: req.info.remoteAddress,
+            ip_address: request.info.remoteAddress,
             datetime: Date.now(),
             //user_id: req.auth.credentials.user_id,
             //user_name: req.auth.credentials.email,
@@ -122,7 +122,7 @@ exports.signup = function(req, reply) {
           });
 
           sendVerifyToken(user, token, function(err, res) {
-              renderJSON(req, reply, err, statusResponse);
+              renderJSON(request, reply, err, statusResponse);
           });
         }
       });
@@ -131,8 +131,8 @@ exports.signup = function(req, reply) {
 
 };
 
-exports.resetToken = function(req, reply) {
-  var email = req.params.email;
+exports.resetToken = function(request, reply) {
+  var email = request.params.email;
 
   users.get({
     email: email
@@ -152,7 +152,7 @@ exports.resetToken = function(req, reply) {
     var result = publicRecordFields.handle(result, 'user');
 
     AuditLogger.store({
-      ip_address        : req.info.remoteAddress,
+      ip_address        : request.info.remoteAddress,
       datetime         : Date.now(),
       user_id          : user.user_id,
       user_name        : user.email,
@@ -175,14 +175,14 @@ exports.resetToken = function(req, reply) {
 
     users.update(user, function(err, result) {
       sendVerifyToken(user, token, function(err, res) {
-        renderJSON(req, reply, err, statusResponse);
+        renderJSON(request, reply, err, statusResponse);
       });
     });
   });
 };
 
-exports.verify = function(req, reply) {
-  var token = req.params.token;
+exports.verify = function(request, reply) {
+  var token = request.params.token;
   users.get({
     'validation.token': token,
     'validation.expiredAt': { $gt: Date.now() }
@@ -207,7 +207,7 @@ exports.verify = function(req, reply) {
       result = publicRecordFields.handle(result, 'user');
 
       AuditLogger.store({
-        ip_address        : req.info.remoteAddress,
+        ip_address       : request.info.remoteAddress,
         datetime         : Date.now(),
         user_id          : user.user_id,
         user_name        : user.email,
@@ -227,7 +227,7 @@ exports.verify = function(req, reply) {
         message: 'Successfully verified your account',
         object_id: result.id
       };
-      renderJSON(req, reply, error, statusResponse );
+      renderJSON(request, reply, error, statusResponse );
     });
   });
 };
