@@ -133,36 +133,8 @@ module.exports = [
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
           report_type: Joi.string().required().valid ( 'referer', 'status_code', 'cache_status', 'content_type', 'protocol', 'request_status',
-            'http_protocol', 'http_method', 'content_encoding', 'os', 'device', 'country', 'QUIC', 'http2' ).description('Type of requested report (defaults to "referer")'),
+            'http_protocol', 'http_method', 'content_encoding', 'os', 'device', 'country', 'QUIC', 'http2', 'top5xx' ).description('Type of requested report (defaults to "referer")'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
-        }
-      }
-    }
-  },
-
-  {
-    method: 'GET',
-    path: '/v1/stats/top5xx/{domain_id}',
-    config: {
-      auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
-      },
-      handler: getTopReports.getTop5XX,
-      description: 'Get a list of top requests for a domain returned 5XX error',
-      tags: ['api'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-      validate: {
-        params: {
-          domain_id: Joi.objectId().required().description('Domain ID')
-        },
-        query: {
-          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
-          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)')
         }
       }
     }
