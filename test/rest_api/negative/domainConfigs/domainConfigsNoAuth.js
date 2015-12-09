@@ -28,7 +28,7 @@ describe('Negative check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var account;
-  var commonDomainConfig;
+  var domainConfig;
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
@@ -41,8 +41,8 @@ describe('Negative check', function () {
         account = newAccount;
         return API.helpers.domainConfigs.createOne(account.id);
       })
-      .then(function (domainConfig) {
-        commonDomainConfig = domainConfig;
+      .then(function (newDomainConfig) {
+        domainConfig = newDomainConfig;
       })
       .then(done)
       .catch(done);
@@ -52,7 +52,7 @@ describe('Negative check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        return API.resources.domainConfigs.deleteOne(commonDomainConfig.id);
+        return API.resources.domainConfigs.deleteOne(domainConfig.id);
       })
       .then(function () {
         return API.resources.accounts.deleteAllPrerequisites(done);
@@ -86,7 +86,7 @@ describe('Negative check', function () {
         function (done) {
           API.session.reset();
           API.resources.domainConfigs
-            .getOne(commonDomainConfig.id)
+            .getOne(domainConfig.id)
             .expect(401)
             .end(done);
         });
@@ -108,7 +108,7 @@ describe('Negative check', function () {
           var updatedDomainConfig = DomainConfigsDP.generateOne(account.id);
           API.session.reset();
           API.resources.domainConfigs
-            .update(commonDomainConfig.id, updatedDomainConfig)
+            .update(domainConfig.id, updatedDomainConfig)
             .expect(401)
             .end(done);
         });
@@ -118,7 +118,7 @@ describe('Negative check', function () {
         function (done) {
           API.session.reset();
           API.resources.domainConfigs
-            .deleteOne(commonDomainConfig.id)
+            .deleteOne(domainConfig.id)
             .expect(401)
             .end(done);
         });
@@ -128,7 +128,7 @@ describe('Negative check', function () {
         function (done) {
           API.session.reset();
           API.resources.domainConfigs
-            .status(commonDomainConfig.id)
+            .status(domainConfig.id)
             .getOne()
             .expect(401)
             .end(done);
@@ -139,7 +139,7 @@ describe('Negative check', function () {
         function (done) {
           API.session.reset();
           API.resources.domainConfigs
-            .versions(commonDomainConfig.id)
+            .versions(domainConfig.id)
             .getAll()
             .expect(401)
             .end(done);

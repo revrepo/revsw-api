@@ -28,25 +28,37 @@ describe('Negative check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var accountId;
+  var account;
+  var domainConfig;
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        API.resources.accounts
-          .createOneAsPrerequisite(AccountsDP.generateOne())
-          .then(function (res) {
-            accountId = res.body.object_id;
-            done();
-          });
+        return API.helpers.accounts.createOne();
       })
+      .then(function (newAccount) {
+        account = newAccount;
+        return API.helpers.domainConfigs.createOne(account.id);
+      })
+      .then(function (newDomainConfig) {
+        domainConfig = newDomainConfig;
+      })
+      .then(done)
       .catch(done);
   });
 
   after(function (done) {
-    API.resources.accounts.deleteAllPrerequisites(done);
+    API.helpers
+      .authenticateUser(reseller)
+      .then(function () {
+        return API.resources.domainConfigs.deleteOne(domainConfig.id);
+      })
+      .then(function () {
+        return API.resources.accounts.deleteAllPrerequisites(done);
+      })
+      .catch(done);
   });
 
   describe('Domain Configs resource', function () {
@@ -72,7 +84,7 @@ describe('Negative check', function () {
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
-              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.domain_name = bogusDomainName;
               API.resources.domainConfigs
                 .createOne(domainConfig)
@@ -122,7 +134,7 @@ describe('Negative check', function () {
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
-              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_host_header = bogusOriginHostHeader;
               API.resources.domainConfigs
                 .createOne(domainConfig)
@@ -148,7 +160,7 @@ describe('Negative check', function () {
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
-              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_server = bogusOriginServer;
               API.resources.domainConfigs
                 .createOne(domainConfig)
@@ -173,7 +185,7 @@ describe('Negative check', function () {
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
-              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_server_location_id = bogusLocationId;
               API.resources.domainConfigs
                 .createOne(domainConfig)
@@ -199,7 +211,7 @@ describe('Negative check', function () {
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
-              var domainConfig = DomainConfigsDP.generateOne(accountId);
+              var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.tolerance = bogusTolerance;
               API.resources.domainConfigs
                 .createOne(domainConfig)
