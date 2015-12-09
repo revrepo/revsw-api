@@ -113,6 +113,28 @@ describe('Negative check', function () {
             .end(done);
         });
 
+      it('should return `Unauthorized` response when publishing a domain ' +
+        'config without authorization.',
+        function (done) {
+          var updatedDomainConfig = DomainConfigsDP.generateOne(account.id);
+          API.session.reset();
+          API.resources.domainConfigs
+            .update(domainConfig.id, updatedDomainConfig, {options: 'publish'})
+            .expect(401)
+            .end(done);
+        });
+
+      it('should return `Unauthorized` response when verifying a domain ' +
+        'config without authorization.',
+        function (done) {
+          var updatedDC = DomainConfigsDP.generateOne(account.id);
+          API.session.reset();
+          API.resources.domainConfigs
+            .update(domainConfig.id, updatedDC, {options: 'verify_only'})
+            .expect(401)
+            .end(done);
+        });
+
       it('should return `Unauthorized` response when deleting a domain ' +
         'config without authorization.',
         function (done) {
