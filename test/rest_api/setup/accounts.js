@@ -24,7 +24,7 @@ describe('Clean up', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var reseller = config.api.users.reseller;
+  var reseller = config.get('api.users.revAdmin');
   var namePattern = /API_TEST_COMPANY_[0-9]{13}/;
   var updatedNamePattern = /UPDATED_API_TEST_COMPANY_[0-9]{13}]/;
 

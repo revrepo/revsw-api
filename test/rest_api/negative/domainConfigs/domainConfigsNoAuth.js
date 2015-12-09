@@ -123,7 +123,7 @@ describe('Negative check', function () {
             .end(done);
         });
 
-      it('should return `Bad Request` when trying to get `domain publishing ' +
+      it('should return `Unauthorized` when trying to get `domain publishing ' +
         'status` without authorization.',
         function (done) {
           API.session.reset();
@@ -134,7 +134,7 @@ describe('Negative check', function () {
             .end(done);
         });
 
-      it('should return `Bad Request` when trying to get `domain config ' +
+      it('should return `Unauthorized` when trying to get `domain config ' +
         'versions` without authorization.',
         function (done) {
           API.session.reset();
