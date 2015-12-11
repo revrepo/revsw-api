@@ -19,37 +19,38 @@
 // # Accounts Resource object
 
 // Requiring config and `BaseResource`
-var config = require('config');
-var BaseResource = require('./base');
+var BasicResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
 
-// Creating new instance of BaseResource which is going to represent the API
-module.exports = {
-  config:
-    new BaseResource({
-      host: config.api.host,
-      apiVersion: config.api.version,
-      apiResource: config.api.resources.domainConfigs
-  }),
-  status: //GET only
-    new BaseResource({
-      host: config.api.host,
-      apiVersion: config.api.version,
-      apiResource: config.api.resources.domainConfigs,
-      ext: '/config_status'
-    }),
-  verify: //PUT only
-    new BaseResource({
-      host: config.api.host,
-      apiVersion: config.api.version,
-      apiResource: config.api.resources.domainConfigs,
-      ext: '?options=verify_only'
-    }),
-  publish: //PUT only
-    new BaseResource({
-      host: config.api.host,
-      apiVersion: config.api.version,
-      apiResource: config.api.resources.domainConfigs,
-      ext: '?options=publish'
-    }),
+var domainConfigIdKey = 'domainId';
+var resourceConfig = {
+  idKey: domainConfigIdKey,
+  name: 'domainConfigs',
+  path: '/domain_configs/{' + domainConfigIdKey + '}',
+  methods: [
+    Methods.CREATE,
+    Methods.READ_ALL,
+    Methods.READ_ONE,
+    Methods.UPDATE,
+    Methods.DELETE
+  ],
+  nestedResources: [
+    {
+      name: 'status',
+      path: '/config_status',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }, {
+      name: 'versions',
+      path: '/versions',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }
+  ]
 };
 
+// Creating new instance of BaseResource which is going to represent the API
+module.exports = new BasicResource(resourceConfig);

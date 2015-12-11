@@ -19,14 +19,14 @@
 var config = require('config');
 var accounts = require('./../common/resources/accounts');
 var API = require('./../common/api');
-var DataProvider = require('./../common/providers/data');
+var AccountsDP = require('./../common/providers/data/accounts');
 
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var accountSample = DataProvider.generateAccount();
+  var accountSample = AccountsDP.generateOne();
   var resellerUser = config.api.users.reseller;
 
   before(function (done) {
@@ -75,7 +75,7 @@ describe('Negative check', function () {
 
       it('should return `Unauthorized` response when creating specific account',
         function (done) {
-          var newAccount = DataProvider.generateAccount();
+          var newAccount = AccountsDP.generateOne();
           API.session.reset();
           API.resources.accounts
             .createOne(newAccount)
@@ -85,7 +85,7 @@ describe('Negative check', function () {
 
       it('should return `Unauthorized` response when updating specific account',
         function (done) {
-          var updatedAccount = DataProvider.generateAccount('UPDATED');
+          var updatedAccount = AccountsDP.generateOne('UPDATED');
           API.session.reset();
           API.resources.accounts
             .update(accountSample.id, updatedAccount)

@@ -20,14 +20,26 @@
 
 // Requiring config and `BaseResource`
 var config = require('config');
-var BaseResource = require('./base');
+var BasicResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
+
+var accountIdKey = 'accountId';
+var resourceConfig = {
+  idKey: accountIdKey,
+  name: 'accounts',
+  path: '/accounts/{' + accountIdKey + '}',
+  methods: [
+    Methods.CREATE,
+    Methods.READ_ALL,
+    Methods.READ_ONE,
+    Methods.UPDATE,
+    Methods.DELETE
+  ]
+};
 
 // Creating new instance of BaseResource which is going to represent the API
 // `accounts resource`
 // TODO: In the future we need to improve this way of instantiation by providing
 // allowed method for the resource being created.
-module.exports = new BaseResource({
-  host: config.api.host,
-  apiVersion: config.api.version,
-  apiResource: config.api.resources.accounts
-});
+module.exports = new BasicResource(resourceConfig);

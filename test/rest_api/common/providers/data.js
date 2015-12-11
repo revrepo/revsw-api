@@ -31,26 +31,6 @@ var _ = require('lodash');
 module.exports = {
 
   /**
-   * ### DataProvider.generateAccount()
-   *
-   * Generates valida data that represents an account and the account REST API
-   * end points accept.
-   *
-   * @param {String} prefix, a prefix value to put in the name
-   * @returns {Object} account info with the following schema
-   *
-   *     {
-   *         companyName: string
-   *     }
-   */
-  generateAccount: function (prefix) {
-    return {
-      companyName: (prefix ? prefix + '_' : '' ) + 'API_TEST_COMPANY_' +
-      (new Date()).getTime()
-    };
-  },
-
-  /**
    * ### DataProvider.generateBillingPlan()
    *
    * Generates valida data that represents an Billing Plan and the billing_plan REST API
