@@ -261,7 +261,7 @@ describe('Domain configs functional test', function () {
 
     it('should not be able to update domain using account from other customer',
       function (done) {
-        var domainConfig = DomainConfigsDP.cloneForUpdate(firstDc);
+        var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
         domainConfig.account_id = anotherAccount.id;
         API.helpers
           .authenticateUser(reseller)
@@ -314,7 +314,7 @@ describe('Domain configs functional test', function () {
               .getOne(firstDc.id)
               .expect(200)
               .then(function (response) {
-                response.body.domain_name.equal(firstDc.domain_name);
+                response.body.domain_name.should.equal(firstDc.domain_name);
                 done();
               })
               .catch(done);
@@ -333,7 +333,7 @@ describe('Domain configs functional test', function () {
               .then(function (response) {
                 response.body.forEach(function (domain) {
                   if (domain.id === firstDc.id) {
-                    domain.domain_name.equal(firstDc.domain_name);
+                    domain.domain_name.should.equal(firstDc.domain_name);
                   }
                 });
                 done();
@@ -379,7 +379,7 @@ describe('Domain configs functional test', function () {
               .getOne(firstDc.id)
               .expect(200)
               .then(function (response) {
-                response.body.domain_name.equal(firstDc.domain_name);
+                response.body.domain_name.should.equal(firstDc.domain_name);
                 done();
               })
               .catch(done);
@@ -398,7 +398,7 @@ describe('Domain configs functional test', function () {
               .then(function (response) {
                 response.body.forEach(function (domain) {
                   if (domain.id === firstDc.id) {
-                    domain.domain_name.equal(firstDc.domain_name);
+                    domain.domain_name.should.equal(firstDc.domain_name);
                   }
                 });
                 done();
@@ -444,7 +444,7 @@ describe('Domain configs functional test', function () {
               .getOne(firstDc.id)
               .expect(200)
               .then(function (response) {
-                response.body.domain_name.equal(firstDc.domain_name);
+                response.body.domain_name.should.equal(firstDc.domain_name);
                 done();
               })
               .catch(done);
@@ -463,7 +463,7 @@ describe('Domain configs functional test', function () {
               .then(function (response) {
                 response.body.forEach(function (domain) {
                   if (domain.id === firstDc.id) {
-                    domain.domain_name.equal(firstDc.domain_name);
+                    domain.domain_name.should.equal(firstDc.domain_name);
                   }
                 });
                 done();
