@@ -67,6 +67,10 @@
     "SUBDOMAIN": "kosdev",
     "ENVIRONMENT": "sandbox",
     "DEBUG": false
-  }
+  },
 
+  "available_sdk_release_versions": {
+    "iOS": [ "1", "1.2", "2.0" ],
+    "Android": [ "1.0", "1.0a", "4" ]
+  }
 }

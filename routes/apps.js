@@ -212,5 +212,26 @@ module.exports = [
         schema: routeModels.AppStatusModel
       }
     }
-  }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/apps/sdk_releases',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin']
+      },
+      handler: app.getSDKReleasedVersions,
+      description: 'Get a list of released SDK versions for supported mobile platforms',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+//      response: {
+//        schema: Joi.array().items(routeModels.listAppsModel)
+//      }
+    }
+  },
 ];

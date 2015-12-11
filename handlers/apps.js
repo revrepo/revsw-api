@@ -300,3 +300,11 @@ exports.deleteApp = function(request, reply) {
     });
   });
 };
+
+exports.getSDKReleasedVersions = function(request, reply) {
+  var response = {
+    iOS: config.get('available_sdk_release_versions.iOS'),
+    Android: config.get('available_sdk_release_versions.Android')
+  };
+  renderJSON(request, reply, null, response);
+};
