@@ -125,8 +125,8 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should return staging and global status as `Published` after 30 ' +
-      'seconds a domain config was created',
+    it('should return staging and global status as `Published` after some' +
+      'time a domain config was created',
       function (done) {
         secondDc = DomainConfigsDP.generateOne(account.id);
         originServerV1 = secondDc.origin_server;
@@ -152,7 +152,7 @@ describe('Domain configs functional test', function () {
                       done();
                     })
                     .catch(done);
-                }, 120000); // After 30 secs
+                }, 150000);
               })
               .catch(done);
           })
@@ -267,7 +267,7 @@ describe('Domain configs functional test', function () {
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
-              .update(domainConfig.id, domainConfig)
+              .update(firstDc.id, domainConfig)
               .expect(400)
               .then(function (response) {
                 response.body.message.should.equal('Account ID not found');
