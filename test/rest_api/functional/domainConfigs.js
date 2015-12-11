@@ -29,44 +29,81 @@ describe('Domain configs functional test', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var account;
+  var anotherAccount;
   var firstDc;
   var firstFdc;
   var secondDc;
   var originServerV1;
   var originServerV2;
   var reseller = config.get('api.users.reseller');
+  var secondReseller = config.get('api.users.secondReseller');
 
   before(function (done) {
     API.helpers
-      .authenticateUser(reseller)
+      .authenticateUser(secondReseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
-        account = newAccount;
-        return API.helpers.domainConfigs.createOne(account.id);
+        anotherAccount = newAccount;
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (newAccount) {
+            account = newAccount;
+            return API.helpers.domainConfigs.createOne(account.id);
+          })
+          .then(function (domainConfig) {
+            firstDc = domainConfig;
+          })
+          .then(done)
+          .catch(done);
       })
-      .then(function (domainConfig) {
-        firstDc = domainConfig;
-      })
-      .then(done)
       .catch(done);
   });
 
   after(function (done) {
     API.helpers
-      .authenticateUser(reseller)
-      // TODO: BUG? Cannot delete DomainConfig right after updating it.
-      //.then(function () {
-      //  return API.resources.domainConfigs.deleteOne(firstDc.id);
-      //})
+      .authenticateUser(secondReseller)
       .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
+        return API.resources.accounts.deleteOne(anotherAccount.id);
+      })
+      .then(function () {
+        API.helpers
+          .authenticateUser(reseller)
+          // TODO: BUG? Cannot delete DomainConfig right after updating it.
+          //.then(function () {
+          //  return API.resources.domainConfigs.deleteOne(firstDc.id);
+          //})
+          .then(function () {
+            return API.resources.accounts.deleteAllPrerequisites(done);
+          })
+          .catch(done);
       })
       .catch(done);
   });
 
   describe('Domain configs resource', function () {
+
+    it('should not be able to create domain using account from other customer',
+      function (done) {
+        var domainConfig = DomainConfigsDP.generateOne(anotherAccount.id);
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .createOne(domainConfig)
+              .expect(400)
+              .then(function (response) {
+                response.body.message.should.equal('Account ID not found');
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
 
     it('should return staging and global status as `In Progress` right after' +
       'create a domain config',
@@ -116,6 +153,48 @@ describe('Domain configs functional test', function () {
                     })
                     .catch(done);
                 }, 120000); // After 30 secs
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should not allow to create a domain having existing domain name in' +
+      '`domain_aliases`',
+      function (done) {
+        var newDomain = DomainConfigsDP.generateOne(account.id);
+        newDomain.domain_aliases = secondDc.domain_name;
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .createOne(newDomain)
+              .expect(400)
+              .then(function (response) { // This is needed for the next tests
+                var expMsg = '"domain_aliases" is not allowed';
+                response.body.message.should.equal(expMsg);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should not allow to create a domain having existing domain name in' +
+      '`domain_wildcard_alias`',
+      function (done) {
+        var newDomain = DomainConfigsDP.generateOne(account.id);
+        newDomain.domain_wildcard_alias = secondDc.domain_name;
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .createOne(newDomain)
+              .expect(400)
+              .then(function (response) { // This is needed for the next tests
+                var expMsg = '"domain_wildcard_alias" is not allowed';
+                response.body.message.should.equal(expMsg);
+                done();
               })
               .catch(done);
           })
@@ -180,6 +259,25 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
+    it('should not be able to update domain using account from other customer',
+      function (done) {
+        var domainConfig = DomainConfigsDP.cloneForUpdate(firstDc);
+        domainConfig.account_id = anotherAccount.id;
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .update(domainConfig.id, domainConfig)
+              .expect(400)
+              .then(function (response) {
+                response.body.message.should.equal('Account ID not found');
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
     it('should return global status as `Modified` right after modifying the ' +
       'domain config',
       function (done) {
@@ -201,6 +299,44 @@ describe('Domain configs functional test', function () {
                     })
                     .catch(done);
                 }, 120000);
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return recently modified domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getOne(firstDc.id)
+              .expect(200)
+              .then(function (response) {
+                response.body.domain_name.equal(firstDc.domain_name);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return recently modified domain config in the domain-list',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getAll()
+              .expect(200)
+              .then(function (response) {
+                response.body.forEach(function (domain) {
+                  if (domain.id === firstDc.id) {
+                    domain.domain_name.equal(firstDc.domain_name);
+                  }
+                });
+                done();
               })
               .catch(done);
           })
@@ -234,7 +370,110 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should nor create domain-config with already existing ' +
+    it('should return recently published domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getOne(firstDc.id)
+              .expect(200)
+              .then(function (response) {
+                response.body.domain_name.equal(firstDc.domain_name);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return recently published domain config in the domain-list',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getAll()
+              .expect(200)
+              .then(function (response) {
+                response.body.forEach(function (domain) {
+                  if (domain.id === firstDc.id) {
+                    domain.domain_name.equal(firstDc.domain_name);
+                  }
+                });
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return global status as `Published` right after verifying a ' +
+      'modified domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .update(firstDc.id, firstFdc, {options: 'verify_only'})
+              .expect(200)
+              .then(function () {
+                setTimeout(function () {
+                  API.resources.domainConfigs
+                    .status(firstDc.id)
+                    .getOne()
+                    .expect(200)
+                    .then(function (response) {
+                      response.body.global_status.should.equal('Published');
+                      done();
+                    })
+                    .catch(done);
+                }, 120000);
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return recently verified domain config',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getOne(firstDc.id)
+              .expect(200)
+              .then(function (response) {
+                response.body.domain_name.equal(firstDc.domain_name);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return recently verified domain config in the domain-list',
+      function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            API.resources.domainConfigs
+              .getAll()
+              .expect(200)
+              .then(function (response) {
+                response.body.forEach(function (domain) {
+                  if (domain.id === firstDc.id) {
+                    domain.domain_name.equal(firstDc.domain_name);
+                  }
+                });
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should not create domain-config with already existing ' +
       'domain-config data',
       function (done) {
         var secondDcClone = JSON.parse(JSON.stringify(secondDc));
