@@ -56,7 +56,17 @@ var DomainConfigsDataProvider = {
     };
   },
 
-  generateFull: function (accountID, prefix) {
+  /**
+   * ### DomainConfigsDataProvider.generateFull()
+   *
+   * Generates valid data that represents an FULL domain-config which the
+   * domain-configs REST API end points accept.
+   *
+   * @param accountId, Account id to use for domain config
+   * @param prefix, any prefix to add in domain name/values
+   * @returns {Full Domain Config}
+   */
+  generateFull: function (accountId, prefix) {
     var fullConfig = {
       '3rd_party_rewrite': {
         '3rd_party_root_rewrite_domains': '',
@@ -125,7 +135,7 @@ var DomainConfigsDataProvider = {
       },
       'origin_server': 'API-QA-config.revsw.net',
       'origin_host_header': 'API-QA-website01.revsw.net',
-      'account_id': accountID,
+      'account_id': accountId,
       'tolerance': '3000',
       'origin_server_location_id': '55a56fa6476c10c329a90741'
     };
@@ -137,6 +147,14 @@ var DomainConfigsDataProvider = {
     return fullConfig;
   },
 
+  /**
+   * ### DomainConfigsDataProvider.cloneForUpdate()
+   *
+   * Clones the given domain config in a new one which does not have a
+   * domain_name nor a cname.
+   *
+   * @param {Domain Config Object}
+   */
   cloneForUpdate: function (domain) {
     var newDomain = JSON.parse(JSON.stringify(domain));
     delete newDomain.domain_name;
@@ -145,25 +163,38 @@ var DomainConfigsDataProvider = {
   },
 
   DataDrivenHelper: {
+
+    /**
+     * ### DomainConfigsDataProvider.setValueByPath()
+     *
+     * @param {Domain Config Object} obj, object in which value is going to
+     * be set
+     * @param {String} pathString that represents the concatenation of keys and
+     * the last key is the one that is going to change
+     * @param {Object} any value that the property accepts
+     */
     setValueByPath: function (obj, pathString, value) {
       var prop = obj;
       var path = pathString.split('.');
       for (var i = 0; i < path.length - 1; i++) {
         var key = path[i] === '0' ? 0 : path[i];
-        //if (prop[key] === undefined) {
-        //  prop[key] = key === 0 ? [{}] : {};
-        //}
         prop = prop[key];
       }
-      //console.log('OLD value', prop[path[i]]);
       prop[path[i]] = value;
-      //console.log('NEW value', prop[path[i]]);
     },
 
+    /**
+     * ### DomainConfigsDataProvider.getValueByPath()
+     *
+     * @param {Domain Config Object} obj, object in which value is going to
+     * be set
+     * @param {String} pathString that represents the concatenation of keys and
+     * the last key is the one that for which the value is going to be get
+     * @returns {Onject|Undefined} the value that the key has in the specified
+     * object, undefined otherwise
+     */
     getValueByPath: function (obj, pathString) {
-      //console.log('ssssaa', obj);
       var prop = JSON.parse(JSON.stringify(obj));
-      //console.log('ssss', prop);
       var path = pathString.split('.');
       for (var i = 0; i < path.length - 1; i++) {
         prop = prop[path[i]];
@@ -171,11 +202,35 @@ var DomainConfigsDataProvider = {
           return undefined;
         }
       }
-      //console.log('OLD value', prop[path[i]]);
       return prop[path[i]];
-      //console.log('NEW value', prop[path[i]]);
     },
 
+    removeValueByPath: function (obj, pathString) {
+      var prop = obj;
+      var path = pathString.split('.');
+      for (var i = 0; i < path.length - 1; i++) {
+        prop = prop[path[i]];
+        if (prop === undefined) {
+          return;
+        }
+      }
+      delete prop[path[i]];
+    },
+
+    /**
+     * ### DomainConfigsDataProvider.generateEmptyData()
+     *
+     * Generates empty data for the key and based on the schema-definition
+     * provided.
+     *
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
     generateEmptyData: function (propertyPath, schemaDef) {
       var data = {
         spec: 'should return bad request when trying to update domain ' +
@@ -256,6 +311,9 @@ var DomainConfigsDataProvider = {
           if (/Joi\.objectId\(\)\.required\(\)/.test(schemaDef)) {
             data.testValue = '';
           }
+          else if (/oi\.string\(\)\.required\(\).allow\(""\)/.test(schemaDef)) {
+            data.testValue = undefined;
+          }
           else if (/Joi\.string\(\)\.required\(\)/.test(schemaDef)) {
             data.testValue = '';
           }
@@ -267,24 +325,193 @@ var DomainConfigsDataProvider = {
             data.testValue = undefined;
           }
       }
-      // TODO: Following cases update specified domain-property with empty value
-      switch (propertyPath) {
-        case 'origin_host_header':
-          data.skipReason = '[BUG: Getting Success response]';
-          data.spec = data.skipReason + ' ' + data.spec;
+      return data;
+    },
+
+    generateInvalidData: function (propertyPath, schemaDef) {
+      var data = {
+        spec: 'should return bad request when trying to update domain ' +
+        'with invalid `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        testValue: undefined
+      };
+      switch (schemaDef) {
+        // STRING values
+        case 'Joi.string()':
+          data.testValue = true;
           break;
-        case '3rd_party_rewrite.3rd_party_root_rewrite_domains':
-          data.skipReason = '[BUG: Getting Success response]';
-          data.spec = data.skipReason + ' ' + data.spec;
+        case 'Joi.string().allow("").required()':
+          data.testValue = true;
           break;
+        case 'Joi.string().required()':
+          data.testValue = true;
+          break;
+        case 'Joi.string().valid("off", "low", "medium", "high").required()':
+          data.testValue = true;
+          break;
+        case 'Joi.string().valid("add", "remove", "replace").required()':
+          data.testValue = true;
+          break;
+        case 'Joi.string().valid("least", "moderate", "aggressive", "custom", "adaptive").required()':
+          data.testValue = true;
+          break;
+        case 'Joi.string().valid("off", "detect", "block", "block_all").required()':
+          data.testValue = true;
+          break;
+        case 'Joi.string().valid("deny_except", "allow_except").required()':
+          data.testValue = true;
+          break;
+        // NUMBER values
+        case 'Joi.number().integer()':
+          data.testValue = true;
+          break;
+        case 'Joi.number().valid(1).required()':
+          data.testValue = [true, 5];
+          break;
+        case 'Joi.number().integer().required()':
+          data.testValue = true;
+          break;
+        // BOOLEAN values
+        case 'Joi.boolean()':
+          data.testValue = 123;
+          break;
+        case 'Joi.boolean().required()':
+          data.testValue = 123;
+          break;
+        // OBJECT values
+        case 'Joi.object({})':
+          data.testValue = 123;
+          break;
+        case 'Joi.object({}).required()':
+          data.testValue = 123;
+          break;
+        // ARRAY values
+        case 'Joi.array().items({})':
+          data.testValue = 'invalid-data';
+          break;
+        case 'Joi.array().items(Joi.string())':
+          data.testValue = 'invalid-data';
+          break;
+        case 'Joi.array().items({}).required()':
+          data.testValue = 'invalid-data';
+          break;
+        case 'Joi.array().items(Joi.string()).required()':
+          data.testValue = 'invalid-data';
+          break;
+        case 'Joi.array().items(Joi.string().required())':
+          data.testValue = 'invalid-data';
+          break;
+        // OTHER values
         default:
+          if (/Joi\.objectId\(\)\.required\(\)/.test(schemaDef)) {
+            data.testValue = [];
+          }
+          else if (/Joi\.string\(\)\.required\(\)/.test(schemaDef)) {
+            data.testValue = [];
+          }
+          else if (/Joi\.string\(\)\.optional\(\)/.test(schemaDef)) {
+            data.testValue = [];
+          }
+          else {
+            console.log('ALERT! not considered:', schemaDef);
+            data.testValue = undefined;
+          }
+      }
+      return data;
+    },
+
+    generateWithoutRequiredData: function (propertyPath, schemaDef) {
+      var data = {
+        spec: 'should return bad request when trying to update domain ' +
+        'without required `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        isRequired: undefined
+      };
+      switch (schemaDef) {
+        // STRING values
+        case 'Joi.string()':
+          data.isRequired = false;
           break;
+        case 'Joi.string().allow("").required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().valid("off", "low", "medium", "high").required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().valid("add", "remove", "replace").required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().valid("least", "moderate", "aggressive", "custom", "adaptive").required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().valid("off", "detect", "block", "block_all").required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().valid("deny_except", "allow_except").required()':
+          data.isRequired = true;
+          break;
+        // NUMBER values
+        case 'Joi.number().integer()':
+          data.isRequired = false;
+          break;
+        case 'Joi.number().valid(1).required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.number().integer().required()':
+          data.isRequired = true;
+          break;
+        // BOOLEAN values
+        case 'Joi.boolean()':
+          data.isRequired = false;
+          break;
+        case 'Joi.boolean().required()':
+          data.isRequired = true;
+          break;
+        // OBJECT values
+        case 'Joi.object({})':
+          data.isRequired = false;
+          break;
+        case 'Joi.object({}).required()':
+          data.isRequired = true;
+          break;
+        // ARRAY values
+        case 'Joi.array().items({})':
+          data.isRequired = false;
+          break;
+        case 'Joi.array().items(Joi.string())':
+          data.isRequired = false;
+          break;
+        case 'Joi.array().items({}).required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.array().items(Joi.string()).required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.array().items(Joi.string().required())':
+          data.isRequired = true;
+          break;
+        // OTHER values
+        default:
+          if (/Joi\.objectId\(\)\.required\(\)/.test(schemaDef)) {
+            data.isRequired = true;
+          }
+          else if (/Joi\.string\(\)\.required\(\)/.test(schemaDef)) {
+            data.isRequired = true;
+          }
+          else if (/Joi\.string\(\)\.optional\(\)/.test(schemaDef)) {
+            data.isRequired = false;
+          }
+          else {
+            console.log('ALERT! not considered:', schemaDef);
+            data.isRequired = false;
+          }
       }
       return data;
     }
-
   }
-
 };
 
 module.exports = DomainConfigsDataProvider;

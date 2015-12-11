@@ -41,11 +41,11 @@ describe('Negative check', function () {
    * @param {object} ddCase, specific data driven case
    * @returns {Function}, callback for mocha test
    */
-  var getEmptyDataCheckCallBack = function (ddCase) {
+  var getWithoutRequiredDataCheckCallBack = function (ddCase) {
     return function (done) {
       var clonedDc = DomainConfigsDP.cloneForUpdate(fullDomainConfig);
-      DomainConfigsDP.DataDrivenHelper
-        .setValueByPath(clonedDc, ddCase.propertyPath, ddCase.testValue);
+      DomainConfigsDP.DataDrivenHelper.removeValueByPath(clonedDc,
+        ddCase.propertyPath);
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
@@ -102,7 +102,7 @@ describe('Negative check', function () {
   });
 
   describe('Domain Configs resource', function () {
-    describe('Update with empty data', function () {
+    describe('Update without required data', function () {
 
       beforeEach(function (done) {
         done();
@@ -117,19 +117,19 @@ describe('Negative check', function () {
           continue;
         }
         var ddCase = DomainConfigsDP.DataDrivenHelper
-          .generateEmptyData(key, dcSchema[key]);
+          .generateWithoutRequiredData(key, dcSchema[key]);
         var propertyValue = DomainConfigsDP.DataDrivenHelper
           .getValueByPath(fullDomainConfig, key);
-        if (ddCase.testValue === undefined || propertyValue === undefined) {
+        if (ddCase.isRequired === false || propertyValue === undefined) {
           continue;
         }
         if (ddCase.skipReason) {
           // Setting test as pending as there is a reason (usually a BUG)
-          xit(ddCase.spec, getEmptyDataCheckCallBack(ddCase));
+          xit(ddCase.spec, getWithoutRequiredDataCheckCallBack(ddCase));
         }
         else {
           // Running the test for specific DataDriven case
-          it(ddCase.spec, getEmptyDataCheckCallBack(ddCase));
+          it(ddCase.spec, getWithoutRequiredDataCheckCallBack(ddCase));
         }
       }
     });

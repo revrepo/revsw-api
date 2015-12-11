@@ -41,7 +41,7 @@ describe('Negative check', function () {
    * @param {object} ddCase, specific data driven case
    * @returns {Function}, callback for mocha test
    */
-  var getEmptyDataCheckCallBack = function (ddCase) {
+  var getInvalidDataCheckCallBack = function (ddCase) {
     return function (done) {
       var clonedDc = DomainConfigsDP.cloneForUpdate(fullDomainConfig);
       DomainConfigsDP.DataDrivenHelper
@@ -102,7 +102,7 @@ describe('Negative check', function () {
   });
 
   describe('Domain Configs resource', function () {
-    describe('Update with empty data', function () {
+    describe('Update with invalid data', function () {
 
       beforeEach(function (done) {
         done();
@@ -117,7 +117,7 @@ describe('Negative check', function () {
           continue;
         }
         var ddCase = DomainConfigsDP.DataDrivenHelper
-          .generateEmptyData(key, dcSchema[key]);
+          .generateInvalidData(key, dcSchema[key]);
         var propertyValue = DomainConfigsDP.DataDrivenHelper
           .getValueByPath(fullDomainConfig, key);
         if (ddCase.testValue === undefined || propertyValue === undefined) {
@@ -125,11 +125,11 @@ describe('Negative check', function () {
         }
         if (ddCase.skipReason) {
           // Setting test as pending as there is a reason (usually a BUG)
-          xit(ddCase.spec, getEmptyDataCheckCallBack(ddCase));
+          xit(ddCase.spec, getInvalidDataCheckCallBack(ddCase));
         }
         else {
           // Running the test for specific DataDriven case
-          it(ddCase.spec, getEmptyDataCheckCallBack(ddCase));
+          it(ddCase.spec, getInvalidDataCheckCallBack(ddCase));
         }
       }
     });
