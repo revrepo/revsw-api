@@ -137,18 +137,18 @@ describe('Boundary check', function () {
           .catch(done);
       });
 
-    /* TODO: BUG: Origin Server accepts long string. Returns 200 (success) */
-    xit('[BUG: Long input] ' +
-      'should return `Bad Request` when trying to `create` domain config ' +
+    it('should return `Bad Request` when trying to `create` domain config ' +
       'with `long` origin server.',
       function (done) {
         var longOriginServer = 'LongOriginServerLongOriginServerLongOrigin' +
           'ServerLongOriginServerLongOriginServerLongOriginServerLongOrigin' +
           'ServerLongOriginServerLongOriginServerLongOriginServerLongOrigin' +
           'ServerLongOriginServerLongOriginServer';
-        var expectedMsg = 'child "origin_server" fails because ["origin_' +
-          'server" with value "' + longOriginServer + '" fails to match the ' +
-          'required pattern: //]';
+        var expectedMsg = 'child "origin_server" fails because ["origin_server" with value "' +
+          longOriginServer + '" fails to match the required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]' +
+          '{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/, "origin_server" with value "' + longOriginServer +
+          '" fails to match the required pattern: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}' +
+          '([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/]';
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
@@ -190,15 +190,12 @@ describe('Boundary check', function () {
           .catch(done);
       });
 
-    /* TODO: BUG: Accepts long values. Returns 200 (success) */
-    xit('[BUG: Long input] ' +
-      'should return `Bad Request` when trying to `create` domain config ' +
+    it('should return `Bad Request` when trying to `create` domain config ' +
       'with `long` tolerance.',
       function (done) {
         var longTolerance = '9876543210987654321098765432109876543210987654321';
-        var expectedMsg = 'child "tolerance" fails because ["tolerance" with ' +
-          'value "' + longTolerance + '" fails to match the required pattern:' +
-          '//]';
+        var expectedMsg = 'child "tolerance" fails because ["tolerance" length must be less than ' +
+          'or equal to 10 characters long]';
         API.helpers
           .authenticateUser(reseller)
           .then(function () {

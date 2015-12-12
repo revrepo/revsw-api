@@ -42,7 +42,7 @@
     "hapi-router": "^3.3.0",
     "hapi-swagger": "https://api.github.com/repos/glennjones/hapi-swagger/tarball/",
     "inbox": "^1.1.59",
-    "joi": "6.1.x",
+    "joi": "^6.1.2",
     "joi-objectid": "~1.1.0",
     "jshint-stylish": "^2.1.0",
     "jsonwebtoken": "^5.0.5",

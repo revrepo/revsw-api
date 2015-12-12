@@ -155,9 +155,12 @@ module.exports = [
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be created for'),
           origin_host_header     : Joi.string().regex(routeModels.domainRegex).required()
             .description('"Host" header value used when accessing the origin server'),
-          origin_server          : Joi.string().required().description('Origin server host name or IP address'),
+          origin_server          : Joi.alternatives().try([
+            Joi.string().regex(routeModels.domainRegex),
+            Joi.string().regex(routeModels.ipAddressRegex)
+          ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
-          tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)')
+          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)')
         }
       },
       response    : {

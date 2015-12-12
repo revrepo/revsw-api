@@ -97,7 +97,7 @@ exports.getDomainConfigs = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
     } else {
       if (!response_json || !utils.isArray(response_json)) {
-        return reply(boom.badImplementation('Recevied a strange CDS response for a list of domains: ', response_json));
+        return reply(boom.badImplementation('Recevied a strange CDS response for a list of domains: ' + response_json));
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
@@ -131,7 +131,7 @@ exports.getDomainConfig = function(request, reply) {
       return reply(boom.badImplementation('No "proxy_config" section in configuraiton for domain ID ' + domain_id));
     }
 
-    logger.info('Calling CDS to get configuration for domain ID: ', domain_id);
+    logger.info('Calling CDS to get configuration for domain ID: ' + domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
       headers: {
         Authorization: 'Bearer ' + config.get('cds_api_token')
@@ -225,7 +225,7 @@ exports.createDomainConfig = function(request, reply) {
         return reply(boom.badRequest('The domain name is already registered in the system'));
       }
 
-      logger.info('Calling CDS to create new domain ' + newDomainJson);
+      logger.info('Calling CDS to create new domain ' + JSON.stringify(newDomainJson));
       cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
         method: 'POST',
         headers: {
@@ -234,7 +234,7 @@ exports.createDomainConfig = function(request, reply) {
         body: JSON.stringify(newDomainJson)
       }, function (err, res, body) {
         if (err) {
-          return reply(boom.badImplementation('Failed to send to CDS a request to create new domain ' + newDomainJson));
+          return reply(boom.badImplementation('Failed to send to CDS a request to create new domain ' + JSON.stringify(newDomainJson)));
         }
         var response_json = JSON.parse(body);
         if (res.statusCode === 400)  {
@@ -275,6 +275,11 @@ exports.updateDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var domain_id = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
+
+  if (request.auth.credentials.role !== 'revadmin' && newDomainJson.account_id &&
+    request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {

@@ -148,15 +148,17 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      /* TODO: BUG: Origin Server accepts bogus data like '&&&&&'. Returns 200*/
-      xit('[BUG: Bogus input] should return `Bad Request` when ' +
+      it('should return `Bad Request` when ' +
         'trying to `create` domain config with `bogus` origin server.',
         function (done) {
           var bogusOriginServer = '&&&&&';
           var transformedStr = '&amp;&amp;&amp;&amp;&amp;';
-          var expectedMsg = 'child "origin_server" fails because ["origin_' +
-            'server" with value "' + transformedStr + '" fails to match the ' +
-            'required pattern: //]';
+          var expectedMsg = 'child "origin_server" fails because ["origin_server" with value "' +
+            transformedStr + '" fails to match the required pattern: /(?=^.{4,253}$)(^((?!-)' +
+            '(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/, "origin_server" with value "' + 
+            transformedStr + '" fails to match the required pattern: ' +
+            '/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]' +
+            '{2}|2[0-4][0-9]|25[0-5])$/]';
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
@@ -199,15 +201,14 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      /* TODO: BUG: Tolerance accepts bogus data like '&&&&&'. Returns 200*/
-      xit('[BUG: Bogus input] should return `Bad Request` when ' +
+      it('should return `Bad Request` when ' +
         'trying to `create` domain config with `bogus` tolerance.',
         function (done) {
           var bogusTolerance = '&&&&&';
           var transformedStr = '&amp;&amp;&amp;&amp;&amp;';
           var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
             'with value "' + transformedStr + '" fails to match the required ' +
-            'pattern://]';
+            'pattern: /^\\d+$/]';
           API.helpers
             .authenticateUser(reseller)
             .then(function () {

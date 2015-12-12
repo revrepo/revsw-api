@@ -149,7 +149,11 @@ describe('Negative check', function () {
         'with `invalid` origin server.',
       function (done) {
         var invalidOriginServer = '12345.12345.12345';
-        var expectedMsg = 'Failed to verify the domain configuration';
+        var expectedMsg = 'child "origin_server" fails because ["origin_server" with value "' + invalidOriginServer +
+          '" fails to match the required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]{0,62}' +
+          '[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/, "origin_server" with value "' + invalidOriginServer +
+          '" fails to match the required pattern: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.)' +
+          '{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/]';
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
@@ -191,15 +195,13 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      /* TODO: BUG: Accepts STRING values. Returns 200 (success) */
-      xit('[BUG: Invalid input] ' +
-        'should return `Bad Request` when trying to `create` domain config ' +
+      it('should return `Bad Request` when trying to `create` domain config ' +
         'with `invalid` tolerance.',
         function (done) {
           var invalidTolerance = 'abcdefghijklmnopqrstuvwxyz';
           var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
             'with value "' + invalidTolerance + '" fails to match the ' +
-            'required pattern://]';
+            'required pattern: /^\\d+$/]';
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
