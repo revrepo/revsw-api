@@ -144,8 +144,8 @@ describe('Negative check', function () {
         'with `empty` origin server.',
         function (done) {
           var emptyOriginServer = '';
-          var expectedMsg = 'child "origin_server" fails because ' +
-            '["origin_server" is not allowed to be empty]';
+          var expectedMsg = 'child "origin_server" fails because ["origin_server" is not allowed ' +
+            'to be empty, "origin_server" is not allowed to be empty]';
           API.helpers
             .authenticateUser(reseller)
             .then(function () {
