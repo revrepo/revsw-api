@@ -171,6 +171,7 @@ module.exports = [
         },
         payload: {
           app_name: Joi.string().description('Name of the mobile application'),
+          updated_by: Joi.string(),
           account_id: Joi.objectId().description('Account ID'),
           sdk_configuration_api_service: Joi.objectId(),
           sdk_stats_reporting_api_service: Joi.objectId(),
