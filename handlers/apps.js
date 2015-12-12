@@ -29,6 +29,7 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var mongoConnection    = require('../lib/mongoConnections');
 var App                = require('../models/App');
 var apps               = new App(mongoose, mongoConnection.getConnectionPortal());
+var logger = require('revsw-logger')(config.log_config);
 
 function permissionAllowed(request, app) {
   var result = true;
@@ -40,6 +41,7 @@ function permissionAllowed(request, app) {
 
 exports.getApps = function(request, reply) {
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
       return reply(boom.badImplementation('Failed to get list of mobile apps from the CDS'));
@@ -77,6 +79,7 @@ exports.getApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    logger.info('Calling CDS to get details for app ID ' + app_id);
     cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps/' + app_id + version, headers: authHeader}, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get the mobile app from the CDS for App ID ' + app_id));
@@ -109,6 +112,7 @@ exports.getAppVersions = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    logger.info('Calling CDS to get a list of configuration versions for app ID ' + app_id);
     cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps/' + app_id + '/versions', headers: authHeader}, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get a list of configuration versions for mobile app from the CDS for App ID ' + app_id));
@@ -141,6 +145,7 @@ exports.getAppConfigStatus = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    logger.info('Calling CDS to get configuration status for app ID: ' + app_id);
     cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps/' + app_id + '/config_status', headers: authHeader}, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get configuration status of a mobile app from the CDS for App ID ' + app_id));
@@ -172,6 +177,9 @@ exports.addApp = function(request, reply) {
     if (result) {
       return reply(boom.badRequest('The app name and platform is already registered in the system'));
     }
+
+    newApp.created_by = request.auth.credentials.email;
+    logger.info('Calling CDS to create a new app: ' + JSON.stringify(newApp));
     cds_request({method: 'POST', url: config.get('cds_url') + '/v1/apps', body: JSON.stringify(newApp), headers: authHeader}, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('CDS failed to create a new mobile app'));
@@ -221,6 +229,8 @@ exports.updateApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    updatedApp.updated_by =  request.auth.credentials.email;
+    logger.info('Calling CDS to update app ID ' + app_id + ' with new configuration: ' + JSON.stringify(updatedApp));
     cds_request({method: 'PUT', url: config.get('cds_url') + '/v1/apps/' + app_id + optionsFlag, body: JSON.stringify(updatedApp), headers: authHeader},
       function (err, res, body) {
       if (err) {
@@ -268,6 +278,7 @@ exports.deleteApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    logger.info('Calling CDS to delete app ID ' + app_id);
     cds_request({method: 'DELETE', url: config.get('cds_url') + '/v1/apps/' + app_id, headers: authHeader}, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('CDS failed to delete the mobile app with App ID ' + app_id));
