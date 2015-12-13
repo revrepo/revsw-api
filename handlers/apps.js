@@ -166,7 +166,7 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (request.auth.credentials.companyId.indexOf(newApp.account_id) === -1) {
+  if (!permissionAllowed(request, newApp)) {
     return reply(boom.badRequest('Account ID not found'));
   }
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
@@ -228,6 +228,9 @@ exports.updateApp = function(request, reply) {
     }
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
+    }
+    if (!permissionAllowed(request, updatedApp)) {
+      return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  request.auth.credentials.email;
     logger.info('Calling CDS to update app ID ' + app_id + ' with new configuration: ' + JSON.stringify(updatedApp));
