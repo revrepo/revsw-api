@@ -65,7 +65,7 @@ exports.createAccount = function (request, reply) {
     accounts.add(newAccount, function (error, result) {
 
       if (error || !result) {
-        return reply(boom.badImplementation('Failed to add new account'));
+        return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
       }
 
       result = publicRecordFields.handle(result, 'account');
@@ -85,7 +85,6 @@ exports.createAccount = function (request, reply) {
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
-//          domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'account',
           target_id        : result.id,
@@ -98,13 +97,14 @@ exports.createAccount = function (request, reply) {
           user_id   : request.auth.credentials.user_id,
           companyId : request.auth.credentials.companyId
         };
-        updatedUser.companyId.push(result.id);
-
-        console.log(updatedUser, result);
+        if (request.auth.credentials.role !== 'revadmin') {
+          updatedUser.companyId.push(result.id);
+        }
 
         users.update(updatedUser, function (error, result) {
           if (error) {
-            return reply(boom.badImplementation('Failed to update user details with new account ID'));
+            return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id + 
+              ' with details of new account IDs ' + updatedUser.companyId));
           } else {
             renderJSON(request, reply, error, statusResponse);
           }
@@ -175,7 +175,6 @@ exports.updateAccount = function (request, reply) {
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
         account_id       : request.auth.credentials.companyId,
-//        domain_id        : request.auth.credentials.domain,
         activity_type    : 'modify',
         activity_target  : 'account',
         target_id        : request.params.account_id,
@@ -245,7 +244,6 @@ exports.deleteAccount = function (request, reply) {
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
-//          domain_id        : request.auth.credentials.domain,
           activity_type    : 'delete',
           activity_target  : 'account',
           target_id        : account.id,
@@ -260,7 +258,9 @@ exports.deleteAccount = function (request, reply) {
           companyId : request.auth.credentials.companyId
         };
 
-        updatedUser.companyId.splice(updatedUser.companyId.indexOf(account_id), 1);
+        if (request.auth.credentials.role !== 'revadmin') {
+          updatedUser.companyId.splice(updatedUser.companyId.indexOf(account_id), 1);
+        }
 
         users.update(updatedUser, function (error, result) {
           if (error) {
