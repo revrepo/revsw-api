@@ -123,7 +123,6 @@ exports.getAppVersions = function(request, reply) {
       } else if (res.statusCode === 500) {
         return reply(boom.badImplementation(response_json.message));
       } else if (res.statusCode === 200) {
-        response_json = publicRecordFields.handle(response_json, 'apps');
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
