@@ -228,7 +228,7 @@ exports.updateApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, updatedApp)) {
+    if (updatedApp.account_id && !permissionAllowed(request, updatedApp)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  request.auth.credentials.email;
