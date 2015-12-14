@@ -67,9 +67,15 @@ exports.healthCheck = function(request, reply) {
         }
 
         if ( message ) {
-          reply( boom.badImplementation( message ) );
+          reply( boom.badImplementation( message, {
+            message: message,
+            version: version.trim()
+          } ) );
         } else {
-          reply( 'Everything is OK' );
+          reply({
+            message: 'Everything is OK',
+            version: version.trim()
+          });
         }
 
       });
