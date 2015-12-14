@@ -1,3 +1,5 @@
+
+
 /*************************************************************************
  *
  * REV SOFTWARE CONFIDENTIAL
@@ -22,9 +24,10 @@
 var mongoose = require('mongoose');
 var fs       = require('fs');
 var config   = require('config');
+var boom     = require('boom');
 
-var utils           = require('../lib/utilities.js');
-var renderJSON      = require('../lib/renderJSON');
+// var utils           = require('../lib/utilities.js');
+// var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 
 var DomainConfig   = require('../models/DomainConfig');
@@ -41,41 +44,34 @@ var version = fs.readFileSync(config.get('version_file'), {
 
 exports.healthCheck = function(request, reply) {
 
-  var message = '',
-    errorMessage,
-    error = false;
+  var message = '';
 
+  //  keys passed below have not useful meaning, and used just to check if service responses at least
+  //  kinda smoke tests
   domainConfigs.get('5655668638f201be51900000', function(error, result) {
     if (error) {
-      error = true;
-      errorMessage = 'ERROR: Failed to retrieve a domain record';
-      message = (message === '') ? errorMessage : message + '; ' + errorMessage;
+      message += ( message === '' ? '' : '; ' ) + 'ERROR: Failed to retrieve a domain record';
     }
     users.get({
       email: 'test_email_address_which_may_not_exist@revsw.com'
     }, function(error, result) {
       if (error) {
-        error = true;
-        errorMessage = 'ERROR: Failed to retrieve a user record';
-        message = (message === '') ? errorMessage : message + '; ' + errorMessage;
+        message += ( message === '' ? '' : '; ' ) + 'ERROR: Failed to retrieve a user record';
       }
       purgeJobs.get({
         _id: 'purge_job_id_which_may_not_exist'
       }, function(error, result) {
+
         if (error) {
-          error = true;
-          errorMessage = 'ERROR: Failed to retrieve a purge job record';
-          message = (message === '') ? errorMessage : message + '; ' + errorMessage;
+          message += ( message === '' ? '' : '; ' ) + 'ERROR: Failed to retrieve a purge job record';
         }
 
-        var statusResponse;
-        statusResponse = {
-          statusCode: (error) ? 500 : 200,
-          version: version.trim(),
-          message: (message === '') ? 'Everything is OK' : message
-        };
+        if ( message ) {
+          reply( boom.badImplementation( message ) );
+        } else {
+          reply( 'Everything is OK' );
+        }
 
-        renderJSON(request, reply, error, statusResponse);
       });
     });
   });
