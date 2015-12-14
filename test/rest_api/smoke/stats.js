@@ -148,6 +148,8 @@ describe('Stats API check:', function () {
         run_( 'QUIC', domains.test.name, domains.test.id ) );
       it('should return data for report_type = http2',
         run_( 'http2', domains.test.name, domains.test.id ) );
+      it('should return data for report_type = top5xx',
+        run_( 'top5xx', domains.test.name, domains.test.id ) );
     });
 
     describe('Stats: ', function () {
