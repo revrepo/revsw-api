@@ -328,6 +328,20 @@ var DomainConfigsDataProvider = {
       return data;
     },
 
+    /**
+     * ### DomainConfigsDataProvider.generateInvalidData()
+     *
+     * Generates invalid data for the key and based on the schema-definition
+     * provided.
+     *
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
     generateInvalidData: function (propertyPath, schemaDef) {
       var data = {
         spec: 'should return bad request when trying to update domain ' +
@@ -420,6 +434,20 @@ var DomainConfigsDataProvider = {
       return data;
     },
 
+    /**
+     * ### DomainConfigsDataProvider.generateWithoutRequiredData()
+     *
+     * Generates data without required data for the key and based on the
+     * schema-definition provided.
+     *
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {
+     *     spec: string,
+     *     propertyPath: *,
+     *     isRequired: {Boolean}
+     * }
+     */
     generateWithoutRequiredData: function (propertyPath, schemaDef) {
       var data = {
         spec: 'should return bad request when trying to update domain ' +
@@ -507,6 +535,131 @@ var DomainConfigsDataProvider = {
           else {
             console.log('ALERT! not considered:', schemaDef);
             data.isRequired = false;
+          }
+      }
+      return data;
+    },
+
+    /**
+     * ### DomainConfigsDataProvider.generateLongData()
+     *
+     * Generates long data for the key and based on the schema-definition
+     * provided.
+     *
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
+    generateLongData: function (propertyPath, schemaDef) {
+      var longObjectId = 'abcdef01234567890123456789';
+      var longNumber = 98765432109876543210987654321098765432109876543210;
+      var longText = 'LoremipsumdolorsitametconsecteturadipiscingelitPellente' +
+        'squeposuereturpisvelmolestiefeugiatmassaorcilacinianunceumolestiearc' +
+        'umetusatestProinsitametnequeefficiturelementumquamutcondimentumanteQ' +
+        'uisquesedipsumegetsemtempuseleifendinvelligulaNuncmaximusgravidalibe' +
+        'roquisultriciesnuncgravidaeuCrasaeratsitametfeliseuismodplaceratViva' +
+        'musfermentumduisitametsemaccumsansedvariusurnaaliquetIntegernonnunca' +
+        'cmassaconsequatimperdietidinterdummagnaCurabiturdolorexsollicitudinv' +
+        'iverranislegetsodalestempormagnaDuissitameturnaeratMaurisaccumsanleo' +
+        'sedquamlobortisvenenatisNullamimperdietetmagnasedaccumsanDuisposuere' +
+        'posuererisusvitaevolutpatVestibulumbibendumnislhendreritnisipharetra' +
+        'infaucibusnullarhoncusPellentesquepretiumuttellusidpellentesqueAenea' +
+        'nanteaugueultricesuttortorquisconsequatsemperfelis';
+      var data = {
+        spec: 'should return bad request when trying to update domain ' +
+        'with long `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        testValue: undefined
+      };
+      switch (schemaDef) {
+        // STRING values
+        case 'Joi.string()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().allow("").required()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().required()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid("off", "low", "medium", "high").required()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid("add", "remove", "replace").required()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid("least", "moderate", "aggressive", ' +
+        '"custom", "adaptive").required()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid("off", "detect", "block", "block_all")' +
+        '.required()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid("deny_except", "allow_except").required()':
+          data.testValue = longText;
+          break;
+        // NUMBER values
+        case 'Joi.number().integer()':
+          data.testValue = longNumber;
+          break;
+        case 'Joi.number().valid(1).required()':
+          data.testValue = longNumber;
+          break;
+        case 'Joi.number().integer().required()':
+          data.testValue = longNumber;
+          break;
+        // BOOLEAN values
+        case 'Joi.boolean()':
+          data.testValue = undefined;
+          break;
+        case 'Joi.boolean().required()':
+          data.testValue = undefined;
+          break;
+        // OBJECT values
+        case 'Joi.object({})':
+          data.testValue = undefined;
+          break;
+        case 'Joi.object({}).required()':
+          data.testValue = undefined;
+          break;
+        // ARRAY values
+        case 'Joi.array().items({})':
+          data.testValue = undefined;
+          break;
+        case 'Joi.array().items(Joi.string())':
+          data.testValue = [longText];
+          break;
+        case 'Joi.array().items({}).required()':
+          data.testValue = [longText];
+          break;
+        case 'Joi.array().items(Joi.string()).required()':
+          data.testValue = [longText];
+          break;
+        case 'Joi.array().items(Joi.string().required())':
+          data.testValue = [longText];
+          break;
+        // OTHER values
+        default:
+          if (/Joi\.objectId\(\)\.required\(\)/.test(schemaDef)) {
+            data.testValue = longObjectId;
+          }
+          else if (/oi\.string\(\)\.required\(\).allow\(""\)/.test(schemaDef)) {
+            data.testValue = longText;
+          }
+          else if (/Joi\.string\(\)\.required\(\)/.test(schemaDef)) {
+            data.testValue = longText;
+          }
+          else if (/Joi\.string\(\)\.optional\(\)/.test(schemaDef)) {
+            data.testValue = longText;
+          }
+          else {
+            //console.log('ALERT! not considered:', schemaDef);
+            data.testValue = undefined;
           }
       }
       return data;
