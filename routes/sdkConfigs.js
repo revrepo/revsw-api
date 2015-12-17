@@ -40,6 +40,9 @@ module.exports = [
         }
       },
       validate: {
+        query: {
+          staging: Joi.boolean().description('Set to true to get a staging version of the SDK configuration')
+        },
         params: {
           sdk_key: Joi.string().trim().length(36).required().description('SDK key')
         }
