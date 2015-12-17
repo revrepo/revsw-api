@@ -196,28 +196,31 @@ module.exports = [
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
           origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
             .description('"Host" header value used when accessing the origin server'),
-          origin_server          : Joi.string().required().description('Origin server host name or IP address'),
+          origin_server          : Joi.alternatives().try([
+            Joi.string().regex(routeModels.domainRegex),
+            Joi.string().regex(routeModels.ipAddressRegex)
+          ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
-          config_command_options: Joi.string(),
-          tolerance              : Joi.string().optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          config_command_options: Joi.string().allow('').max(150),
+          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
-            '3rd_party_root_rewrite_domains': Joi.string().allow('').required(),
-            '3rd_party_runtime_domains': Joi.string().allow('').required(),
-            '3rd_party_urls': Joi.string().allow('').required(),
+            '3rd_party_root_rewrite_domains': Joi.string().allow('').max(150).required(),
+            '3rd_party_runtime_domains': Joi.string().allow('').max(150).required(),
+            '3rd_party_urls': Joi.string().allow('').max(150).required(),
             enable_3rd_party_rewrite: Joi.boolean().required(),
             enable_3rd_party_root_rewrite: Joi.boolean().required(),
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
           }).required(),
           enable_origin_health_probe: Joi.boolean(),
-          domain_aliases: Joi.array().items(Joi.string()),
+          domain_aliases: Joi.array().items(Joi.string().regex(routeModels.domainRegex)),
           origin_health_probe: Joi.object({
-            HTTP_REQUEST: Joi.string().required(),
+            HTTP_REQUEST: Joi.string().required().max(150),
             PROBE_TIMEOUT: Joi.number().integer().required(),
             PROBE_INTERVAL: Joi.number().integer().required(),
             HTTP_STATUS: Joi.number().integer().required()
           }),
           proxy_timeout: Joi.number().integer(),
-          domain_wildcard_alias: Joi.string(),
+          domain_wildcard_alias: Joi.string().max(150),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -231,25 +234,25 @@ module.exports = [
           }).required(),
           rev_component_bp : Joi.object({
             end_user_response_headers: Joi.array().items({
-              header_value: Joi.string().required(),
-              header_name: Joi.string().required(),
+              header_value: Joi.string().regex(routeModels.httpHeaderValue).required(),
+              header_name: Joi.string().regex(routeModels.httpHeaderName).required(),
               operation: Joi.string().valid('add', 'remove', 'replace').required()
             }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),
-            cdn_overlay_urls       : Joi.array().items(Joi.string()).required(),
+            cdn_overlay_urls       : Joi.array().items(Joi.alternatives().try([Joi.string().uri(),Joi.string().regex(routeModels.domainRegex)])).required(),
             caching_rules          : Joi.array().items({
               version              : Joi.number().valid(1).required(),
               url                  : Joi.object({
                 is_wildcard : Joi.boolean().required(),
-                value       : Joi.string().required()
+                value       : Joi.string().max(150).required()
               }).required(),
               edge_caching         : Joi.object({
                 override_origin : Joi.boolean().required(),
                 new_ttl         : Joi.number().integer().required(),
                 override_no_cc  : Joi.boolean().required(),
                 query_string_list_is_keep: Joi.boolean(),
-                query_string_keep_or_remove_list: Joi.array().items(Joi.string()),
+                query_string_keep_or_remove_list: Joi.array().items(Joi.string().max(150)),
               }).required(),
               browser_caching      : Joi.object({
                 override_edge    : Joi.boolean().required(),
@@ -260,7 +263,7 @@ module.exports = [
                 override                     : Joi.boolean().required(),
                 ignore_all                   : Joi.boolean().required(),
                 list_is_keep                 : Joi.boolean().required(),
-                keep_or_ignore_list          : Joi.array().items(Joi.string()).required(),
+                keep_or_ignore_list          : Joi.array().items(Joi.string().max(150)).required(),
                 remove_ignored_from_request  : Joi.boolean().required(),
                 remove_ignored_from_response : Joi.boolean().required()
               }).required(),
@@ -270,20 +273,20 @@ module.exports = [
                 enable: Joi.boolean().required()
               }),
               end_user_response_headers: Joi.array().items({
-                header_value: Joi.string().required(),
-                header_name: Joi.string().required(),
+                header_value: Joi.string().regex(routeModels.httpHeaderValue).required(),
+                header_name: Joi.string().regex(routeModels.httpHeaderName).required(),
                 operation: Joi.string().valid('add', 'remove', 'replace').required()
               }),
               origin_request_headers: Joi.array().items({
-                header_value: Joi.string().required(),
-                header_name: Joi.string().required(),
+                header_value: Joi.string().regex(routeModels.httpHeaderValue).required(),
+                header_name: Joi.string().regex(routeModels.httpHeaderName).required(),
                 operation: Joi.string().valid('add', 'remove', 'replace').required()
               }),
               origin_redirects: Joi.object({
                 override: Joi.boolean().required(),
                 follow: Joi.boolean().required()
               }),
-              cookies_cache_bypass : Joi.array().items(Joi.string())
+              cookies_cache_bypass : Joi.array().items(Joi.string().max(150))
             }).required(),
             enable_security        : Joi.boolean().required(),
             web_app_firewall       : Joi.string().valid('off', 'detect', 'block', 'block_all').required(),
@@ -291,35 +294,35 @@ module.exports = [
               enabled   : Joi.boolean().required(),
               action    : Joi.string().valid('deny_except', 'allow_except').required(),
               acl_rules : Joi.array().items ({
-                host_name    : Joi.string().allow('').required(),
-                subnet_mask  : Joi.string().allow('').required(),
-                country_code : Joi.string().allow('').required(),
-                header_name  : Joi.string().allow('').required(),
-                header_value : Joi.string().allow('').required()
+                host_name    : Joi.string().allow('').hostname().required(),
+                subnet_mask  : Joi.string().allow('').regex(routeModels.subnetMask).required(),
+                country_code : Joi.string().allow('').regex(routeModels.countryCode).required(),
+                header_name  : Joi.string().allow('').regex(routeModels.httpHeaderName).required(),
+                header_value : Joi.string().allow('').regex(routeModels.httpHeaderValue).required()
               }).required()
             }).required(),
-            cache_bypass_locations : Joi.array().items(Joi.string()).required(),
-            co_bypass_locations : Joi.array().items(Joi.string().required()),
+            cache_bypass_locations : Joi.array().items(Joi.string().max(150)).required(),
+            co_bypass_locations : Joi.array().items(Joi.string().max(150).required()),
             enable_vcl_geoip_headers: Joi.boolean(),
             custom_vcl: Joi.object({
               enabled: Joi.boolean().required(),
               backends: Joi.array().items({
-                vcl: Joi.string().required(),
+                vcl: Joi.string().max(300).required(),
                 dynamic: Joi.boolean().required(),
                 port: Joi.number().integer().required(),
-                host: Joi.string().required(),
-                name: Joi.string().required()
+                host: Joi.alternatives().try([Joi.string().uri(),Joi.string().regex(routeModels.domainRegex)]).required(),
+                name: Joi.string().max(150).required()
               }),
-              recv: Joi.string(),
-              backend_response: Joi.string(),
-              backend_error: Joi.string(),
-              hit: Joi.string(),
-              miss: Joi.string(),
-              deliver: Joi.string(),
-              pass: Joi.string(),
-              pipe: Joi.string(),
-              hash: Joi.string(),
-              synth: Joi.string()
+              recv: Joi.string().max(300),
+              backend_response: Joi.string().max(300),
+              backend_error: Joi.string().max(300),
+              hit: Joi.string().max(300),
+              miss: Joi.string().max(300),
+              deliver: Joi.string().max(300),
+              pass: Joi.string().max(300),
+              pipe: Joi.string().max(300),
+              hash: Joi.string().max(300),
+              synth: Joi.string().max(300)
             })
           }).required()
         }
