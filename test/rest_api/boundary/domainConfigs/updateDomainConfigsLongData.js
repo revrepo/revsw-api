@@ -44,16 +44,17 @@ describe('Negative check', function () {
   var getLongDataCheckCallBack = function (ddCase) {
     return function (done) {
       var clonedDc = DomainConfigsDP.cloneForUpdate(fullDomainConfig);
+      var dcId = clonedDc.id;
+      delete clonedDc.id;
       DomainConfigsDP.DataDrivenHelper
         .setValueByPath(clonedDc, ddCase.propertyPath, ddCase.testValue);
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
           API.resources.domainConfigs
-            .update(clonedDc.id, clonedDc)
+            .update(dcId, clonedDc)
             .expect(400)
             .then(function (res) {
-              //console.log('res.body.message:', res.body.message);
               ddCase.propertyPath.split('.').forEach(function (key) {
                 if (key === '0') {
                   res.body.message.should.containEql('position 0');
