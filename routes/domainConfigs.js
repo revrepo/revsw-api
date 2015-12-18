@@ -245,7 +245,7 @@ module.exports = [
               version              : Joi.number().valid(1).required(),
               url                  : Joi.object({
                 is_wildcard : Joi.boolean().required(),
-                value       : Joi.string().max(150).required()
+                value       : Joi.string().max(300).required()
               }).required(),
               edge_caching         : Joi.object({
                 override_origin : Joi.boolean().required(),
@@ -313,16 +313,16 @@ module.exports = [
                 host: Joi.alternatives().try([Joi.string().uri(),Joi.string().regex(routeModels.domainRegex)]).required(),
                 name: Joi.string().max(150).required()
               }),
-              recv: Joi.string().max(300),
-              backend_response: Joi.string().max(300),
-              backend_error: Joi.string().max(300),
-              hit: Joi.string().max(300),
-              miss: Joi.string().max(300),
-              deliver: Joi.string().max(300),
-              pass: Joi.string().max(300),
-              pipe: Joi.string().max(300),
-              hash: Joi.string().max(300),
-              synth: Joi.string().max(300)
+              recv: Joi.string().max(3000),
+              backend_response: Joi.string().max(3000),
+              backend_error: Joi.string().max(3000),
+              hit: Joi.string().max(3000),
+              miss: Joi.string().max(3000),
+              deliver: Joi.string().max(3000),
+              pass: Joi.string().max(3000),
+              pipe: Joi.string().max(3000),
+              hash: Joi.string().max(3000),
+              synth: Joi.string().max(3000)
             })
           }).required()
         }
