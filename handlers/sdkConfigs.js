@@ -28,7 +28,9 @@ var renderJSON      = require('../lib/renderJSON');
 exports.getSDKConfig = function(request, reply) {
   var sdk_key = request.params.sdk_key;
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
-  cds_request({url: config.get('cds_url') + '/v1/sdk/config/' + sdk_key, headers: authHeader}, function (err, res, body) {
+  var options = (request.query.staging && request.query.staging === true) ? '?staging=true' : '';
+
+  cds_request({url: config.get('cds_url') + '/v1/sdk/config/' + sdk_key + options, headers: authHeader}, function (err, res, body) {
     if (err) {
       return reply(boom.badImplementation('Failed to get the mobile app configuration from the CDS for SDK key ' + sdk_key));
     }
