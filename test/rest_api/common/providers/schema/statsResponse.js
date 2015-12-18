@@ -71,7 +71,41 @@ var StatsResponseSP = {
           }).required(),
         data: Joi.array().required()
       });
-  }
+  },
+
+  /**
+   * ### StatsResponseSP.getValidationError()
+   *
+   * @returns {Object} Stats Validation Error Response schema as follows:
+   *
+   *     {
+   *       statusCode: {Number}, // required, between 100 and 599
+   *       error: {String}, // required
+   *       message: {String} // optional
+   *       validation: {
+   *         source: {String}, // required
+   *         keys: [
+   *           cache_code {String} // required
+   *         ]
+   *       }
+   *     }
+   */
+  getValidationError: function () {
+    var errorResponseSchema = Joi.object()
+      .keys({
+        statusCode: Joi.number().integer().min(100).max(599).required(),
+        error: Joi.string().required(),
+        message: Joi.string(),
+        validation: Joi.object({
+          source: Joi.string().required(),
+          keys: Joi.array([
+            Joi.string().required()
+          ])
+        }).required()
+      });
+    return errorResponseSchema;
+  },
+
 };
 
 module.exports = StatsResponseSP;

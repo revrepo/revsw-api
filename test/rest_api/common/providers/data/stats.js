@@ -91,6 +91,35 @@ var StatsDataProvider = {
         {quic: 'QUIC'},
         {quic: 'HTTP'}
       ];
+    },
+
+    getInvalidQueryParams: function () {
+      return [
+        // {from_timestamp: ''},
+        // {to_timestamp: ''},
+        // {status_code: 200},
+        // {country: ''},
+        // {os: ''},
+        // {device: ''},
+
+        {cache_code: 'INVALID'},
+        {cache_code: 'INVALID'},
+        {request_status: 'INVALID'},
+        {request_status: 'INVALID'},
+        {protocol: 'INVALID'},
+        {protocol: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {http_method: 'INVALID'},
+        {quic: 'INVALID'},
+        {quic: 'INVALID'}
+      ];
     }
   }
 };
