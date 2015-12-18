@@ -24,7 +24,6 @@ var Joi = require('joi');
 // Defining common variables
 var dateFormatPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 var idFormatPattern = /^([0-9]|[a-f]){24}$/;
-var timestampPattern = /^[0-9]{13}$/;
 
 // Defines some methods that defines the `schema` for different type of
 // responses that our Stats API returns.
@@ -66,7 +65,7 @@ var StatsResponseSP = {
             end_datetime: Joi.string().regex(dateFormatPattern).required(),
             total_hits: Joi.number().required(),
             interval_sec: Joi.number(),
-            filter: Joi.string(),
+            filter: Joi.string().allow(''),
             data_points_count: Joi.number().required()
           }).required(),
         data: Joi.array().required()
@@ -91,7 +90,7 @@ var StatsResponseSP = {
    *     }
    */
   getValidationError: function () {
-    var errorResponseSchema = Joi.object()
+    return Joi.object()
       .keys({
         statusCode: Joi.number().integer().min(100).max(599).required(),
         error: Joi.string().required(),
@@ -101,11 +100,9 @@ var StatsResponseSP = {
           keys: Joi.array([
             Joi.string().required()
           ])
-        }).required()
+        })
       });
-    return errorResponseSchema;
-  },
-
+  }
 };
 
 module.exports = StatsResponseSP;

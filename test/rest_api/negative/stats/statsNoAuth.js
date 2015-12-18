@@ -23,12 +23,10 @@ var Joi = require('joi');
 var config = require('config');
 var API = require('./../../common/api');
 var Utils = require('./../../common/utils');
-var CommonRespSP = require('./../../common/providers/schema/commonResponse');
-var StatsSP = require('./../../common/providers/schema/statsResponse');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
-describe('Sanity check', function () {
+describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -36,8 +34,6 @@ describe('Sanity check', function () {
   var account;
   var domainConfig;
   var reseller = config.get('api.users.reseller');
-  var statsErrorSchema = CommonRespSP.getError();
-  var statsValidationErrorSchema = StatsSP.getValidationError();
 
   before(function (done) {
     API.helpers
@@ -69,7 +65,7 @@ describe('Sanity check', function () {
   });
 
   describe('Stats resource', function () {
-    parallel('Error Response Data Schema', function () {
+    parallel('Without authentication', function () {
 
       beforeEach(function (done) {
         done();
@@ -80,37 +76,20 @@ describe('Sanity check', function () {
       });
 
       var getSpecDescription = function (queryData) {
-        return 'should return domain\'s stats applying `error response` ' +
-          'schema when using: ' + Utils.getJsonAsKeyValueString(queryData);
+        return 'should return `unauthorized` when trying get domain\'s stats ' +
+          '`without authentication` using: ' +
+          Utils.getJsonAsKeyValueString(queryData);
       };
 
-      var getSpecWithoutAuthCallback = function (queryData) {
+      var getSpecInvalidDataCallback = function (queryData) {
         return function (done) {
           API.session.reset();
           API.resources.stats
             .getOne(domainConfig.id, queryData)
             .expect(401)
-            .then(function (response) {
-              var stat = response.body;
-              Joi.validate(stat, statsErrorSchema, done);
-            })
-            .catch(done);
-        };
-      };
-
-      var getSpecInvalidDataCallback = function (queryData) {
-        return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
-            .then(function () {
-              API.resources.stats
-                .getOne(domainConfig.id, queryData)
-                .expect(400)
-                .then(function (response) {
-                  var stat = response.body;
-                  Joi.validate(stat, statsValidationErrorSchema, done);
-                })
-                .catch(done);
+            .then(function (res) {
+              res.body.message.should.equal('Missing authentication');
+              done();
             })
             .catch(done);
         };
@@ -118,15 +97,6 @@ describe('Sanity check', function () {
 
       StatsDDHelper
         .getQueryParams()
-        .forEach(function (queryParams) {
-          var specDescription = getSpecDescription(queryParams);
-          var specCallback = getSpecWithoutAuthCallback(queryParams);
-          /** Running spec for each query params */
-          it(specDescription, specCallback);
-        });
-
-      StatsDDHelper
-        .getInvalidQueryParams()
         .forEach(function (queryParams) {
           var specDescription = getSpecDescription(queryParams);
           var specCallback = getSpecInvalidDataCallback(queryParams);

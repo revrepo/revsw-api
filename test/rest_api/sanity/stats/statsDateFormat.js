@@ -23,9 +23,6 @@ var Joi = require('joi');
 var config = require('config');
 var API = require('./../../common/api');
 var Utils = require('./../../common/utils');
-var CommonRespSP = require('./../../common/providers/schema/commonResponse');
-var StatsSP = require('./../../common/providers/schema/statsResponse');
-var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
@@ -35,7 +32,7 @@ describe('Sanity check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var account;
-  var firstDc;
+  var domainConfig;
   var reseller = config.get('api.users.reseller');
   var expectedDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
   var maxTimestamp = 9999999999999;
@@ -50,8 +47,8 @@ describe('Sanity check', function () {
         account = newAccount;
         return API.helpers.domainConfigs.createOne(account.id);
       })
-      .then(function (domainConfig) {
-        firstDc = domainConfig;
+      .then(function (newDomainConfig) {
+        domainConfig = newDomainConfig;
       })
       .then(done)
       .catch(done);
@@ -61,7 +58,7 @@ describe('Sanity check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        return API.resources.domainConfigs.deleteOne(firstDc.id);
+        return API.resources.domainConfigs.deleteOne(domainConfig.id);
       })
       .then(function () {
         return API.resources.accounts.deleteAllPrerequisites(done);
@@ -91,7 +88,7 @@ describe('Sanity check', function () {
             .authenticateUser(reseller)
             .then(function () {
               API.resources.stats
-                .getOne(firstDc.id, queryData)
+                .getOne(domainConfig.id, queryData)
                 .expect(200)
                 .then(function (response) {
                   var metadata = response.body.metadata;

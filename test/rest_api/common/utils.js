@@ -37,6 +37,14 @@ var Utils = {
       .replace(/":"/g, '=')
       .replace(/","/g, ', ')
       .replace(/"/g, '');
+  },
+
+  removeJsonFromArray: function (jsonArray, key) {
+    jsonArray.forEach(function (json, index) {
+      if (json[key]) { // if JSON has provided key
+        jsonArray.splice(index, 1);
+      }
+    });
   }
 };
 
