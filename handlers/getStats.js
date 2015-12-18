@@ -83,7 +83,7 @@ exports.getStats = function(request, reply) {
                   range: {
                     '@timestamp': {
                       gte: span.start,
-                      lte: span.end
+                      lt: span.end
                     }
                   }
                 }],
@@ -99,10 +99,7 @@ exports.getStats = function(request, reply) {
               interval: ( '' + interval ),
               // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
               min_doc_count: 0,
-              extended_bounds: {
-                min: span.start,
-                max: span.end
-              }
+              offset: ( '' + ( span.end % interval ) )
             },
             aggs: {
               sent_bytes: {
