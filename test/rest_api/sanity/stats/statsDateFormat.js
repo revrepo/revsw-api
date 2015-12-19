@@ -26,7 +26,7 @@ var Utils = require('./../../common/utils');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
-describe('Sanity check', function () {
+describe('Sanity check.', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -66,16 +66,8 @@ describe('Sanity check', function () {
       .catch(done);
   });
 
-  describe('Stats resource', function () {
-    parallel('Date format', function () {
-
-      beforeEach(function (done) {
-        done();
-      });
-
-      afterEach(function (done) {
-        done();
-      });
+  describe('Stats resource.', function () {
+    parallel('Date format,', function () {
 
       var getSpecDescription = function (queryData) {
         return 'should return date|time fields in expected `Date|Time format`' +
@@ -105,6 +97,166 @@ describe('Sanity check', function () {
       };
 
       StatsDDHelper
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecDateFormatCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('GBT: Date format,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return date|time fields in expected `Date|Time format`' +
+          'when using: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecDateFormatCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .gbt()
+                .getOne(domainConfig.id, queryData)
+                .expect(200)
+                .then(function (response) {
+                  var metadata = response.body.metadata;
+                  metadata.start_datetime.should.match(expectedDateFormat);
+                  metadata.end_datetime.should.match(expectedDateFormat);
+                  metadata.start_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  metadata.end_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.gbt
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecDateFormatCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('Last Mile RTT: Date format,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return date|time fields in expected `Date|Time format`' +
+          'when using: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecDateFormatCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .lastMileRtt()
+                .getOne(domainConfig.id, queryData)
+                .expect(200)
+                .then(function (response) {
+                  var metadata = response.body.metadata;
+                  metadata.start_datetime.should.match(expectedDateFormat);
+                  metadata.end_datetime.should.match(expectedDateFormat);
+                  metadata.start_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  metadata.end_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.lastMileRtt
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecDateFormatCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('TOP: Date format,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return date|time fields in expected `Date|Time format`' +
+          'when using: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecDateFormatCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .top()
+                .getOne(domainConfig.id, queryData)
+                .expect(200)
+                .then(function (response) {
+                  var metadata = response.body.metadata;
+                  metadata.start_datetime.should.match(expectedDateFormat);
+                  metadata.end_datetime.should.match(expectedDateFormat);
+                  metadata.start_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  metadata.end_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.top
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecDateFormatCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('TOP Objects: Date format,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return date|time fields in expected `Date|Time format`' +
+          'when using: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecDateFormatCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .topObjects()
+                .getOne(domainConfig.id, queryData)
+                .expect(200)
+                .then(function (response) {
+                  var metadata = response.body.metadata;
+                  metadata.start_datetime.should.match(expectedDateFormat);
+                  metadata.end_datetime.should.match(expectedDateFormat);
+                  metadata.start_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  metadata.end_timestamp.should.be.belowOrEqual(maxTimestamp);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.topObjects
         .getQueryParams()
         .forEach(function (queryParams) {
           var specDescription = getSpecDescription(queryParams);

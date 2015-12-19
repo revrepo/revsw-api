@@ -52,7 +52,10 @@ var StatsDataProvider = {
       var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
       return [
         {from_timestamp: startTimestamp.toString()},
-        {to_timestamp: endTimestamp.toString()},
+        {
+          from_timestamp: startTimestamp.toString(),
+          to_timestamp: endTimestamp.toString()
+        },
         {status_code: 200},
         {country: 'US'},
         {os: 'Linux'},
@@ -174,7 +177,10 @@ var StatsDataProvider = {
         var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
         return [
           {from_timestamp: startTimestamp.toString()},
-          {to_timestamp: endTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
           {count: 10},
           {report_type: 'country'},
           {report_type: 'device'},
@@ -233,7 +239,10 @@ var StatsDataProvider = {
         var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
         return [
           {from_timestamp: startTimestamp.toString()},
-          {to_timestamp: endTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
           {count: 10},
           {report_type: 'country'},
           {report_type: 'device'},
@@ -292,7 +301,11 @@ var StatsDataProvider = {
         var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
         return [
           {from_timestamp: startTimestamp.toString(), report_type: 'referer'},
-          {to_timestamp: endTimestamp.toString(), report_type: 'referer'},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString(),
+            report_type: 'referer'
+          },
           {count: 10, report_type: 'referer'},
           {report_type: 'referer'},
           {report_type: 'status_code'},
@@ -362,7 +375,10 @@ var StatsDataProvider = {
         var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
         return [
           {from_timestamp: startTimestamp.toString()},
-          {to_timestamp: endTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
           {count: 10},
           {status_code: 200},
           {cache_code: 'HIT'},
