@@ -26,7 +26,7 @@ var Utils = require('./../../common/utils');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
-describe('Negative check', function () {
+describe('Negative check.', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -64,16 +64,8 @@ describe('Negative check', function () {
       .catch(done);
   });
 
-  describe('Stats resource', function () {
-    parallel('With empty data', function () {
-
-      beforeEach(function (done) {
-        done();
-      });
-
-      afterEach(function (done) {
-        done();
-      });
+  describe('Stats resource.', function () {
+    parallel('With empty data,', function () {
 
       var getSpecDescription = function (queryData) {
         return 'should return bad request when trying get domain\'s stats ' +
@@ -101,6 +93,162 @@ describe('Negative check', function () {
       };
 
       StatsDDHelper
+        .getEmptyQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecEmptyDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('GBT: With empty data,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return bad request when trying get domain\'s stats ' +
+          'with `empty` data like: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecEmptyDataCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .gbt()
+                .getOne(domainConfig.id, queryData)
+                .expect(400)
+                .then(function (res) {
+                  Object.keys(queryData).forEach(function (key) {
+                    res.body.message.should.containEql('"' + key + '" fails');
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.gbt
+        .getEmptyQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecEmptyDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('Last Mile RTT: With empty data,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return bad request when trying get domain\'s stats ' +
+          'with `empty` data like: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecEmptyDataCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .lastMileRtt()
+                .getOne(domainConfig.id, queryData)
+                .expect(400)
+                .then(function (res) {
+                  Object.keys(queryData).forEach(function (key) {
+                    res.body.message.should.containEql('"' + key + '" fails');
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.lastMileRtt
+        .getEmptyQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecEmptyDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('TOP: With empty data,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return bad request when trying get domain\'s stats ' +
+          'with `empty` data like: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecEmptyDataCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .top()
+                .getOne(domainConfig.id, queryData)
+                .expect(400)
+                .then(function (res) {
+                  var key = Object.keys(queryData);
+                  if (key.length > 1) {
+                    // Removing report_type as it is not relevant to validation
+                    delete queryData.report_type;
+                    key = Object.keys(queryData)[0];
+                  }
+                  res.body.message.should.containEql('"' + key + '" fails');
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.top
+        .getEmptyQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecEmptyDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('TOP Objects: With empty data,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return bad request when trying get domain\'s stats ' +
+          'with `empty` data like: ' + Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecEmptyDataCallback = function (queryData) {
+        return function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.stats
+                .topObjects()
+                .getOne(domainConfig.id, queryData)
+                .expect(400)
+                .then(function (res) {
+                  Object.keys(queryData).forEach(function (key) {
+                    res.body.message.should.containEql('"' + key + '" fails');
+                  });
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.topObjects
         .getEmptyQueryParams()
         .forEach(function (queryParams) {
           var specDescription = getSpecDescription(queryParams);

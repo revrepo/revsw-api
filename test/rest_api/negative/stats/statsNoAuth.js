@@ -26,7 +26,7 @@ var Utils = require('./../../common/utils');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
-describe('Negative check', function () {
+describe('Negative check.', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -64,16 +64,8 @@ describe('Negative check', function () {
       .catch(done);
   });
 
-  describe('Stats resource', function () {
-    parallel('Without authentication', function () {
-
-      beforeEach(function (done) {
-        done();
-      });
-
-      afterEach(function (done) {
-        done();
-      });
+  describe('Stats resource.', function () {
+    parallel('Without authentication,', function () {
 
       var getSpecDescription = function (queryData) {
         return 'should return `unauthorized` when trying get domain\'s stats ' +
@@ -96,6 +88,138 @@ describe('Negative check', function () {
       };
 
       StatsDDHelper
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecInvalidDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('GBT: Without authentication,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return `unauthorized` when trying get domain\'s stats ' +
+          '`without authentication` using: ' +
+          Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecInvalidDataCallback = function (queryData) {
+        return function (done) {
+          API.session.reset();
+          API.resources.stats
+            .gbt()
+            .getOne(domainConfig.id, queryData)
+            .expect(401)
+            .then(function (res) {
+              res.body.message.should.equal('Missing authentication');
+              done();
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.gbt
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecInvalidDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('Last Mile RTT: Without authentication,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return `unauthorized` when trying get domain\'s stats ' +
+          '`without authentication` using: ' +
+          Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecInvalidDataCallback = function (queryData) {
+        return function (done) {
+          API.session.reset();
+          API.resources.stats
+            .lastMileRtt()
+            .getOne(domainConfig.id, queryData)
+            .expect(401)
+            .then(function (res) {
+              res.body.message.should.equal('Missing authentication');
+              done();
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.lastMileRtt
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecInvalidDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('TOP: Without authentication,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return `unauthorized` when trying get domain\'s stats ' +
+          '`without authentication` using: ' +
+          Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecInvalidDataCallback = function (queryData) {
+        return function (done) {
+          API.session.reset();
+          API.resources.stats
+            .top()
+            .getOne(domainConfig.id, queryData)
+            .expect(401)
+            .then(function (res) {
+              res.body.message.should.equal('Missing authentication');
+              done();
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.top
+        .getQueryParams()
+        .forEach(function (queryParams) {
+          var specDescription = getSpecDescription(queryParams);
+          var specCallback = getSpecInvalidDataCallback(queryParams);
+          /** Running spec for each query params */
+          it(specDescription, specCallback);
+        });
+    });
+
+    parallel('TOP Objects: Without authentication,', function () {
+
+      var getSpecDescription = function (queryData) {
+        return 'should return `unauthorized` when trying get domain\'s stats ' +
+          '`without authentication` using: ' +
+          Utils.getJsonAsKeyValueString(queryData);
+      };
+
+      var getSpecInvalidDataCallback = function (queryData) {
+        return function (done) {
+          API.session.reset();
+          API.resources.stats
+            .topObjects()
+            .getOne(domainConfig.id, queryData)
+            .expect(401)
+            .then(function (res) {
+              res.body.message.should.equal('Missing authentication');
+              done();
+            })
+            .catch(done);
+        };
+      };
+
+      StatsDDHelper.topObjects
         .getQueryParams()
         .forEach(function (queryParams) {
           var specDescription = getSpecDescription(queryParams);

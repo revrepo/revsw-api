@@ -35,6 +35,7 @@ var longStr = 'LoremipsumdolorsitametconsecteturadipiscingelitPellente' +
   'nanteaugueultricesuttortorquisconsequatsemperfelis';
 var longNumber = 1234567890123456789012345678901234567890123456789012345;
 var bogusString = '!@#$%^&*()_+';
+var emptyString = '';
 
 // Defines some methods to generate valid and common domain-configs stats test
 // data. With common we mean it oes not have anything special on it.
@@ -139,16 +140,6 @@ var StatsDataProvider = {
       return params;
     },
 
-    getInvalidQueryParams: function () {
-      var params = this.getCustomQueryParams({
-        numberVal: 'INVALID',
-        stringVal: 'INVALID'
-      });
-      Utils.removeJsonFromArray(params, 'os');
-      Utils.removeJsonFromArray(params, 'device');
-      return params;
-    },
-
     getBogusQueryParams: function () {
       var params = this.getCustomQueryParams({
         numberVal: bogusString,
@@ -160,11 +151,20 @@ var StatsDataProvider = {
     },
 
     getEmptyQueryParams: function () {
-      var emptyString = '';
       return this.getCustomQueryParams({
         numberVal: emptyString,
         stringVal: emptyString
       });
+    },
+
+    getInvalidQueryParams: function () {
+      var params = this.getCustomQueryParams({
+        numberVal: 'INVALID',
+        stringVal: 'INVALID'
+      });
+      Utils.removeJsonFromArray(params, 'os');
+      Utils.removeJsonFromArray(params, 'device');
+      return params;
     },
 
     gbt: {
@@ -196,6 +196,33 @@ var StatsDataProvider = {
           numberVal: longNumber,
           stringVal: longStr
         });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
       }
     },
 
@@ -228,6 +255,33 @@ var StatsDataProvider = {
           numberVal: longNumber,
           stringVal: longStr
         });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
       }
     },
 
@@ -274,6 +328,30 @@ var StatsDataProvider = {
           numberVal: longNumber,
           stringVal: longStr
         });
+      },
+
+      getBogusQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
       }
     },
 
@@ -367,6 +445,33 @@ var StatsDataProvider = {
         var params = this.getCustomQueryParams({
           numberVal: longNumber,
           stringVal: longStr
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
         });
         Utils.removeJsonFromArray(params, 'os');
         Utils.removeJsonFromArray(params, 'device');
