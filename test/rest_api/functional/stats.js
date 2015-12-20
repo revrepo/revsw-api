@@ -99,9 +99,9 @@ describe('Stats API check:', function () {
       };
 
       //  ---------------------------------
-      it('Country aggregations', run_( 'country' ) );
-      it('OS aggregations', run_( 'os' ) );
-      it('Device aggregations', run_( 'device' ) );
+      xit('Country aggregations', run_( 'country' ) );
+      xit('OS aggregations', run_( 'os' ) );
+      xit('Device aggregations', run_( 'device' ) );
     });
 
     describe('GBT/Traffic requests: ', function () {
@@ -143,9 +143,9 @@ describe('Stats API check:', function () {
         };
       };
 
-      it('Country aggregation', run_( 'country' ) );
-      it('OS aggregation', run_( 'os' ) );
-      it('Device aggregation', run_( 'device' ) );
+      xit('Country aggregation', run_( 'country' ) );
+      xit('OS aggregation', run_( 'os' ) );
+      xit('Device aggregation', run_( 'device' ) );
     });
 
     describe('Top Objects requests: ', function () {
@@ -158,7 +158,7 @@ describe('Stats API check:', function () {
         to_tests = DP.generateTopObjectsTests();
       });
 
-      it( 'All requests combinations', function( done ) {
+      xit('All requests combinations', function( done ) {
 
         var run_ = function( test ) {
           // console.log( '        + ' + test.name );
@@ -199,7 +199,7 @@ describe('Stats API check:', function () {
         to_tests = DP.generateTopTests();
       });
 
-      it( 'All requests combinations', function( done ) {
+      xit('All requests combinations', function( done ) {
 
         var run_ = function( test ) {
 
@@ -251,7 +251,7 @@ describe('Stats API check:', function () {
         to_tests = DP.generateStatsTests();
       });
 
-      it( 'All requests combinations', function( done ) {
+      xit('All requests combinations', function( done ) {
 
         var run_ = function( test ) {
           // console.log( '        + ' + test.name );

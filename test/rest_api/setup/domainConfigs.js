@@ -46,7 +46,7 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean DomainConfigs created for testing.',
+    xit('should clean DomainConfigs created for testing.',
       function (done) {
         API.helpers
           .authenticateUser(reseller)

@@ -81,17 +81,17 @@ describe('Stats API check:', function () {
         };
       };
 
-      it('should return data without query', run_({}) );
-      it('should return data for status_code', run_({ status_code: 200 }) );
-      it('should return data for cache_code', run_({ cache_code: 'HIT' }) );
-      it('should return data for request_status', run_({ request_status: 'OK' }) );
-      it('should return data for protocol', run_({ protocol: 'HTTPS' }) );
-      it('should return data for http_method', run_({ http_method: 'GET' }) );
-      it('should return data for quic', run_({ quic: 'QUIC' }) );
-      it('should return data for HTTP2', run_({ http2: 'h2' }) );
-      it('should return data for country', run_({ country: 'ZU' }) );
-      it('should return data for os', run_({ os: 'Windows' }) );
-      it('should return data for device', run_({ device: 'Motorola' }) );
+      xit('should return data without query', run_({}) );
+      xit('should return data for status_code', run_({ status_code: 200 }) );
+      xit('should return data for cache_code', run_({ cache_code: 'HIT' }) );
+      xit('should return data for request_status', run_({ request_status: 'OK' }) );
+      xit('should return data for protocol', run_({ protocol: 'HTTPS' }) );
+      xit('should return data for http_method', run_({ http_method: 'GET' }) );
+      xit('should return data for quic', run_({ quic: 'QUIC' }) );
+      xit('should return data for HTTP2', run_({ http2: 'h2' }) );
+      xit('should return data for country', run_({ country: 'ZU' }) );
+      xit('should return data for os', run_({ os: 'Windows' }) );
+      xit('should return data for device', run_({ device: 'Motorola' }) );
     });
 
     describe('Top: ', function () {
@@ -122,31 +122,31 @@ describe('Stats API check:', function () {
         };
       };
 
-      it('should return data for report_type = referer',
+      xit('should return data for report_type = referer',
         run_( 'referer', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = status_code',
+      xit('should return data for report_type = status_code',
         run_( 'status_code', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = cache_status',
+      xit('should return data for report_type = cache_status',
         run_( 'cache_status', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = content_type',
+      xit('should return data for report_type = content_type',
         run_( 'content_type', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = protocol',
+      xit('should return data for report_type = protocol',
         run_( 'protocol', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = http_protocol',
+      xit('should return data for report_type = http_protocol',
         run_( 'http_protocol', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = http_method',
+      xit('should return data for report_type = http_method',
         run_( 'http_method', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = content_encoding',
+      xit('should return data for report_type = content_encoding',
         run_( 'content_encoding', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = os',
+      xit('should return data for report_type = os',
         run_( 'os', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = device',
+      xit('should return data for report_type = device',
         run_( 'device', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = country',
+      xit('should return data for report_type = country',
         run_( 'country', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = QUIC',
+      xit('should return data for report_type = QUIC',
         run_( 'QUIC', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = http2',
+      xit('should return data for report_type = http2',
         run_( 'http2', domains.test.name, domains.test.id ) );
     });
 
@@ -183,16 +183,16 @@ describe('Stats API check:', function () {
         };
       };
 
-      it('should return data without query', run_({}, domains.test.name, domains.test.id ) );
-      it('should return data for status_code', run_({ status_code: 200 }, domains.test.name, domains.test.id ) );
-      it('should return data for cache_code', run_({ cache_code: 'HIT' }, domains.test.name, domains.test.id ) );
-      it('should return data for request_status', run_({ request_status: 'OK' }, domains.test.name, domains.test.id ) );
-      it('should return data for protocol', run_({ protocol: 'HTTPS' }, domains.test.name, domains.test.id ) );
-      it('should return data for http_method', run_({ http_method: 'GET' }, domains.test.name, domains.test.id ) );
-      it('should return data for quic', run_({ quic: 'QUIC' }, domains.test.name, domains.test.id ) );
-      it('should return data for country', run_({ country: 'ZU' }, domains.test.name, domains.test.id ) );
-      it('should return data for os', run_({ os: 'Windows' }, domains.test.name, domains.test.id ) );
-      it('should return data for device', run_({ device: 'Motorola' }, domains.test.name, domains.test.id ) );
+      xit('should return data without query', run_({}, domains.test.name, domains.test.id ) );
+      xit('should return data for status_code', run_({ status_code: 200 }, domains.test.name, domains.test.id ) );
+      xit('should return data for cache_code', run_({ cache_code: 'HIT' }, domains.test.name, domains.test.id ) );
+      xit('should return data for request_status', run_({ request_status: 'OK' }, domains.test.name, domains.test.id ) );
+      xit('should return data for protocol', run_({ protocol: 'HTTPS' }, domains.test.name, domains.test.id ) );
+      xit('should return data for http_method', run_({ http_method: 'GET' }, domains.test.name, domains.test.id ) );
+      xit('should return data for quic', run_({ quic: 'QUIC' }, domains.test.name, domains.test.id ) );
+      xit('should return data for country', run_({ country: 'ZU' }, domains.test.name, domains.test.id ) );
+      xit('should return data for os', run_({ os: 'Windows' }, domains.test.name, domains.test.id ) );
+      xit('should return data for device', run_({ device: 'Motorola' }, domains.test.name, domains.test.id ) );
     });
 
     describe('Lastmile RTT: ', function () {
@@ -216,9 +216,9 @@ describe('Stats API check:', function () {
         };
       };
 
-      it('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );
-      it('should return data for report_type = device', run_( 'device', domains.test.name, domains.test.id ) );
+      xit('should return data for report_type = country', run_( 'country', domains.test.name, domains.test.id ) );
+      xit('should return data for report_type = os', run_( 'os', domains.test.name, domains.test.id ) );
+      xit('should return data for report_type = device', run_( 'device', domains.test.name, domains.test.id ) );
     });
 
 
