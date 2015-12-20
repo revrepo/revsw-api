@@ -23,9 +23,9 @@ var API= require('./../../common/api');
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.api.users.reseller;
+  var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
     done();
@@ -49,11 +49,15 @@ describe('Negative check', function () {
       it('should return `Bad Request` response when getting specific account.',
         function (done) {
           var bogusId = '+_)(*&^%$#@+_)(*&^%$#@';
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .getOne(bogusId)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .getOne(bogusId)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Bad Request` response when creating specific account',
@@ -61,13 +65,17 @@ describe('Negative check', function () {
           var invalidAccount = {
             companyName: '+_)(*&^%$#@+_)(*&^%$#@'
           };
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .createOne(invalidAccount)
-            .expect(400)
-            .then(function (response) {
-              response.body.error.should.equal('Bad Request');
-              done();
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(invalidAccount)
+                .expect(400)
+                .then(function (response) {
+                  response.body.error.should.equal('Bad Request');
+                  done();
+                })
+                .catch(done);
             })
             .catch(done);
         });
@@ -78,21 +86,29 @@ describe('Negative check', function () {
           var invalidUpdatedAccount = {
             companyName: '+_)(*&^%$#@+_)(*&^%$#@'
           };
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .update(bogusId, invalidUpdatedAccount)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .update(bogusId, invalidUpdatedAccount)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Bad Request` response when deleting an account.',
         function (done) {
           var bogusId = '+_)(*&^%$#@+_)(*&^%$#@';
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .deleteOne(bogusId)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(bogusId)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
     });
   });

@@ -23,9 +23,9 @@ var API= require('./../../common/api');
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.api.users.reseller;
+  var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
     done();
@@ -49,32 +49,44 @@ describe('Negative check', function () {
       it('should return `Bad Request` response when creating specific account',
         function (done) {
           var emptyAccount = {};
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .createOne(emptyAccount)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(emptyAccount)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Not Found` response when updating specific account',
         function (done) {
           var emptyId = '';
           var emptyAccount = {};
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .update(emptyId, emptyAccount)
-            .expect(404)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .update(emptyId, emptyAccount)
+                .expect(404)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Not Found` response when deleting an account.',
         function (done) {
           var emptyId = '';
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .deleteOne(emptyId)
-            .expect(404)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(emptyId)
+                .expect(404)
+                .end(done);
+            })
+            .catch(done);
         });
     });
   });

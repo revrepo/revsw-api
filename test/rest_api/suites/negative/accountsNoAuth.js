@@ -17,31 +17,40 @@
  */
 
 var config = require('config');
-var accounts= require('./../../common/resources/accounts');
-var API= require('./../../common/api');
-var AccountsDP= require('./../../common/providers/data/accounts');
+var accounts = require('./../../common/resources/accounts');
+var API = require('./../../common/api');
+var AccountsDP = require('./../../common/providers/data/accounts');
 
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var accountSample = AccountsDP.generateOne();
-  var resellerUser = config.api.users.reseller;
+  var accountSample = AccountsDP.generateOne('noAuth');
+  var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
-    API.session.setCurrentUser(resellerUser);
-    API.resources.accounts
-      .createOneAsPrerequisite(accountSample)
-      .then(function (response) {
-        accountSample.id = response.body.object_id;
-        done();
-      });
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.accounts
+          .createOneAsPrerequisite(accountSample)
+          .then(function (response) {
+            accountSample.id = response.body.object_id;
+            done();
+          })
+          .catch(done);
+      })
+      .catch(done);
   });
 
   after(function (done) {
-    API.session.setCurrentUser(resellerUser);
-    API.resources.accounts.deleteAllPrerequisites(done);
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.accounts.deleteAllPrerequisites(done);
+      })
+      .catch(done);
   });
 
   describe('Accounts resource', function () {
@@ -75,7 +84,7 @@ describe('Negative check', function () {
 
       it('should return `Unauthorized` response when creating specific account',
         function (done) {
-          var newAccount = AccountsDP.generateOne();
+          var newAccount = AccountsDP.generateOne('noAuth');
           API.session.reset();
           API.resources.accounts
             .createOne(newAccount)

@@ -17,34 +17,43 @@
  */
 
 var config = require('config');
-var accounts= require('./../../common/resources/accounts');
-var API= require('./../../common/api');
-var AccountsDP= require('./../../common/providers/data/accounts');
+var accounts = require('./../../common/resources/accounts');
+var API = require('./../../common/api');
+var AccountsDP = require('./../../common/providers/data/accounts');
 
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var accountSample = AccountsDP.generateOne();
-  var revAdminUser = config.api.users.admin.revAdmin;
-  var resellerUser = config.api.users.reseller;
-  var adminUser = config.api.users.admin;
-  var normalUser = config.api.users.user;
+  var accountSample = AccountsDP.generateOne('test');
+  var revAdminUser = config.get('api.users.admin.revAdmin');
+  var resellerUser = config.get('api.users.reseller');
+  var adminUser = config.get('api.users.admin');
+  var normalUser = config.get('api.users.user');
 
   before(function (done) {
-    API.session.setCurrentUser(resellerUser);
-    API.resources.accounts
-      .createOneAsPrerequisite(accountSample)
-      .then(function (response) {
-        accountSample.id = response.body.object_id;
-        done();
-      });
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.accounts
+          .createOneAsPrerequisite(accountSample)
+          .then(function (response) {
+            accountSample.id = response.body.object_id;
+            done();
+          })
+          .catch(done);
+      })
+      .catch(done);
   });
 
   after(function (done) {
-    API.session.setCurrentUser(resellerUser);
-    API.resources.accounts.deleteAllPrerequisites(done);
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.accounts.deleteAllPrerequisites(done);
+      })
+      .catch(done);
   });
 
   describe('Accounts resource', function () {
@@ -61,159 +70,217 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when getting all accounts with ' +
         '`user-role` user.',
         function (done) {
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .getAll()
-            .expect(403)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .getAll()
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when getting specific account ' +
         'with `user-role` user.',
         function (done) {
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .getOne(accountSample.id)
-            .expect(403)
-            .end(done);
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .getOne(accountSample.id)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when creating specific account ' +
         'with `user-role` user.',
         function (done) {
-          var newAccount = AccountsDP.generateOne();
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .createOne(newAccount)
-            .expect(403)
-            .end(done);
+          var newAccount = AccountsDP.generateOne('test');
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(newAccount)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when updating specific account ' +
         'with `user-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .update(accountSample.id, updatedAccount)
-            .expect(403)
-            .end(done);
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .update(accountSample.id, updatedAccount)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when deleting an account with ' +
         '`user-role` user.',
         function (done) {
-        API.session.setCurrentUser(normalUser);
-        API.resources.accounts
-          .deleteOne(accountSample.id)
-          .expect(403)
-          .end(done);
-
-      });
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(accountSample.id)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
+        });
 
       it('should return `Forbidden` response when getting all accounts with ' +
         '`admin-role` user.',
         function (done) {
-          API.session.setCurrentUser(adminUser);
-          API.resources.accounts
-            .getAll()
-            .expect(403)
-            .end(done);
+          API.helpers
+            .authenticateUser(adminUser)
+            .then(function () {
+              API.resources.accounts
+                .getAll()
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when getting specific account ' +
         'with `admin-role` user.',
         function (done) {
-          API.session.setCurrentUser(adminUser);
-          API.resources.accounts
-            .getOne(accountSample.id)
-            .expect(403)
-            .end(done);
+          API.helpers
+            .authenticateUser(adminUser)
+            .then(function () {
+              API.resources.accounts
+                .getOne(accountSample.id)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when creating specific account ' +
         'with `admin-role` user.',
         function (done) {
-          var newAccount = AccountsDP.generateOne();
-          API.session.setCurrentUser(adminUser);
-          API.resources.accounts
-            .createOne(newAccount)
-            .expect(403)
-            .end(done);
+          var newAccount = AccountsDP.generateOne('test');
+          API.helpers
+            .authenticateUser(adminUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(newAccount)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when updating specific account ' +
         'with `admin-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.session.setCurrentUser(adminUser);
-          API.resources.accounts
-            .update(accountSample.id, updatedAccount)
-            .expect(403)
-            .end(done);
+          API.helpers
+            .authenticateUser(adminUser)
+            .then(function () {
+              API.resources.accounts
+                .update(accountSample.id, updatedAccount)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when deleting an account with ' +
         '`admin-role` user.',
         function (done) {
-          API.session.setCurrentUser(adminUser);
-          API.resources.accounts
-            .deleteOne(accountSample.id)
-            .expect(403)
-            .end(done);
-
+          API.helpers
+            .authenticateUser(adminUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(accountSample.id)
+                .expect(403)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when getting all accounts with ' +
         '`rev-admin-role` user.',
         function (done) {
-          API.session.setCurrentUser(revAdminUser);
-          API.resources.accounts
-            .getAll()
-            .expect(401)
-            .end(done);
+          API.helpers
+            .authenticateUser(revAdminUser)
+            .then(function () {
+              API.resources.accounts
+                .getAll()
+                .expect(401)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when getting specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
-          API.session.setCurrentUser(revAdminUser);
-          API.resources.accounts
-            .getOne(accountSample.id)
-            .expect(401)
-            .end(done);
+          API.helpers
+            .authenticateUser(revAdminUser)
+            .then(function () {
+              API.resources.accounts
+                .getOne(accountSample.id)
+                .expect(401)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when creating specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
-          var newAccount = AccountsDP.generateOne();
-          API.session.setCurrentUser(revAdminUser);
-          API.resources.accounts
-            .createOne(newAccount)
-            .expect(401)
-            .end(done);
+          var newAccount = AccountsDP.generateOne('test');
+          API.helpers
+            .authenticateUser(revAdminUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(newAccount)
+                .expect(401)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when updating specific account ' +
         'with `rev-admin-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.session.setCurrentUser(revAdminUser);
-          API.resources.accounts
-            .update(accountSample.id, updatedAccount)
-            .expect(401)
-            .end(done);
+          API.helpers
+            .authenticateUser(revAdminUser)
+            .then(function () {
+              API.resources.accounts
+                .update(accountSample.id, updatedAccount)
+                .expect(401)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Forbidden` response when deleting an account with ' +
         '`rev-admin-role` user.',
         function (done) {
-          API.session.setCurrentUser(revAdminUser);
-          API.resources.accounts
-            .deleteOne(accountSample.id)
-            .expect(401)
-            .end(done);
+          API.helpers
+            .authenticateUser(revAdminUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(accountSample.id)
+                .expect(401)
+                .end(done);
+            })
+            .catch(done);
         });
     });
   });

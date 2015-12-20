@@ -17,15 +17,15 @@
  */
 
 var config = require('config');
-var accounts= require('./../../common/resources/accounts');
-var API= require('./../../common/api');
+var accounts = require('./../../common/resources/accounts');
+var API = require('./../../common/api');
 
 describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.api.users.reseller;
+  var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
     done();
@@ -49,11 +49,15 @@ describe('Negative check', function () {
       it('should return `Bad Request` response when getting specific account.',
         function (done) {
           var invalidId = 'invalid-account-id';
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .getOne(invalidId)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .getOne(invalidId)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Bad Request` response when creating specific account',
@@ -61,11 +65,15 @@ describe('Negative check', function () {
           var invalidAccount = {
             invalidKey: 'Invalid information'
           };
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .createOne(invalidAccount)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(invalidAccount)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Bad Request` response when updating specific account',
@@ -74,21 +82,29 @@ describe('Negative check', function () {
           var invalidUpdatedAccount = {
             invalidKey: 'Invalid information'
           };
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .update(invalidId, invalidUpdatedAccount)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .update(invalidId, invalidUpdatedAccount)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
 
       it('should return `Bad Request` response when deleting an account.',
         function (done) {
           var invalidId = 'invalid-account-id';
-          API.session.setCurrentUser(resellerUser);
-          API.resources.accounts
-            .deleteOne(invalidId)
-            .expect(400)
-            .end(done);
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(invalidId)
+                .expect(400)
+                .end(done);
+            })
+            .catch(done);
         });
     });
   });

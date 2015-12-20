@@ -26,10 +26,10 @@ var AccountsDP= require('./../../common/providers/data/accounts');
 describe('Functional check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.api.users.reseller;
-  var anotherResellerUser = config.api.users.secondReseller;
+  var resellerUser = config.get('api.users.reseller');
+  var anotherResellerUser = config.get('api.users.secondReseller');
 
   before(function (done) {
     done();
@@ -52,16 +52,25 @@ describe('Functional check', function () {
     it('should allow to `get` specific `account` from other `reseller` user.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOneAsPrerequisite(newAccount)
-          .then(function (response) {
-            API.session.setCurrentUser(anotherResellerUser);
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
             API.resources.accounts
-              .getOne(response.body.id)
-              .expect(200)
-              .end(done);
-          });
+              .createOneAsPrerequisite(newAccount)
+              .then(function (response) {
+                API.helpers
+                  .authenticateUser(anotherResellerUser)
+                  .then(function () {
+                    API.resources.accounts
+                      .getOne(response.body.id)
+                      .expect(200)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
 
     it('should return `Bad Request` when trying to `update` account from ' +
@@ -69,55 +78,79 @@ describe('Functional check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne();
         var updatedAccount = AccountsDP.generateOne();
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOneAsPrerequisite(newAccount)
-          .then(function (response) {
-            API.session.setCurrentUser(anotherResellerUser);
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
             API.resources.accounts
-              .update(response.body.object_id, updatedAccount)
-              .expect(400)
-              .end(done);
-          });
+              .createOneAsPrerequisite(newAccount)
+              .then(function (response) {
+                API.helpers
+                  .authenticateUser(anotherResellerUser)
+                  .then(function () {
+                    API.resources.accounts
+                      .update(response.body.object_id, updatedAccount)
+                      .expect(400)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
 
     it('should return `Bad Request` when trying to `delete` account from ' +
       'another `reseller` user.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOneAsPrerequisite(newAccount)
-          .then(function (response) {
-            API.session.setCurrentUser(anotherResellerUser);
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
             API.resources.accounts
-              .deleteOne(response.body.object_id)
-              .expect(400)
-              .end(done);
-          });
+              .createOneAsPrerequisite(newAccount)
+              .then(function (response) {
+                API.helpers
+                  .authenticateUser(anotherResellerUser)
+                  .then(function () {
+                    API.resources.accounts
+                      .deleteOne(response.body.object_id)
+                      .expect(400)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
 
     it('should return `Bad Request` when trying to `get` account already ' +
       'deleted.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOneAsPrerequisite(newAccount)
-          .then(function (response) {
-            var id = response.body.object_id;
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
             API.resources.accounts
-              .deleteOne(id)
-              .then(function () {
+              .createOneAsPrerequisite(newAccount)
+              .then(function (response) {
+                var id = response.body.object_id;
                 API.resources.accounts
-                  .getOne(id)
-                  .expect(400)
-                  .end(function (err, res) {
-                    res.body.message.should.equal('Account not found');
-                    done();
-                  });
-              });
-          });
+                  .deleteOne(id)
+                  .then(function () {
+                    API.resources.accounts
+                      .getOne(id)
+                      .expect(400)
+                      .end(function (err, res) {
+                        res.body.message.should.equal('Account not found');
+                        done();
+                      });
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
 
     it('should return `Bad Request` when trying to `update` account already ' +
@@ -125,46 +158,58 @@ describe('Functional check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne();
         var updatedAccount = AccountsDP.generateOne();
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOneAsPrerequisite(newAccount)
-          .then(function (response) {
-            var id = response.body.object_id;
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
             API.resources.accounts
-              .deleteOne(id)
-              .then(function () {
+              .createOneAsPrerequisite(newAccount)
+              .then(function (response) {
+                var id = response.body.object_id;
                 API.resources.accounts
-                  .update(id, updatedAccount)
-                  .expect(400)
-                  .end(function (err, res) {
-                    res.body.message.should.equal('Account not found');
-                    done();
-                  });
-              });
-          });
+                  .deleteOne(id)
+                  .then(function () {
+                    API.resources.accounts
+                      .update(id, updatedAccount)
+                      .expect(400)
+                      .end(function (err, res) {
+                        res.body.message.should.equal('Account not found');
+                        done();
+                      });
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
 
     it('should return `Bad Request` when trying to `delete` account already ' +
       'deleted.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOneAsPrerequisite(newAccount)
-          .then(function (response) {
-            var id = response.body.object_id;
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
             API.resources.accounts
-              .deleteOne(id)
-              .then(function () {
+              .createOneAsPrerequisite(newAccount)
+              .then(function (response) {
+                var id = response.body.object_id;
                 API.resources.accounts
                   .deleteOne(id)
-                  .expect(400)
-                  .end(function (err, res) {
-                    res.body.message.should.equal('Account not found');
-                    done();
-                  });
-              });
-          });
+                  .then(function () {
+                    API.resources.accounts
+                      .deleteOne(id)
+                      .expect(400)
+                      .end(function (err, res) {
+                        res.body.message.should.equal('Account not found');
+                        done();
+                      });
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
   });
 });

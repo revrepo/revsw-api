@@ -19,16 +19,16 @@
 require('should-http');
 
 var config = require('config');
-var accounts= require('./../../common/resources/accounts');
-var API= require('./../../common/api');
-var AccountsDP= require('./../../common/providers/data/accounts');
+var accounts = require('./../../../common/resources/accounts');
+var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
 
 describe('Boundary check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var resellerUser = config.api.users.reseller;
+  var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
     done();
@@ -53,15 +53,20 @@ describe('Boundary check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne();
         newAccount.companyName = '';
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOne(newAccount)
-          .expect(400)
-          .end(function (err, response) {
-            response.body.message.should.equal('child "companyName" fails ' +
-              'because ["companyName" is not allowed to be empty]');
-            done();
-          });
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
+            API.resources.accounts
+              .createOne(newAccount)
+              .expect(400)
+              .then(function (response) {
+                response.body.message.should.equal('child "companyName" ' +
+                  'fails because ["companyName" is not allowed to be empty]');
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
 
     it('should return `Bad Request` when trying to `create` account with' +
@@ -75,15 +80,19 @@ describe('Boundary check', function () {
         }
         var newAccount = AccountsDP.generateOne();
         newAccount.companyName = str;
-        API.session.setCurrentUser(resellerUser);
-        API.resources.accounts
-          .createOne(newAccount)
-          .expect(400)
-          .then(function (response) {
-            response.body.message.should.equal('child "companyName" fails ' +
-              'because ["companyName" length must be less than or equal to ' +
-              '150 characters long]');
-            done();
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
+            API.resources.accounts
+              .createOne(newAccount)
+              .expect(400)
+              .then(function (response) {
+                response.body.message.should.equal('child "companyName" ' +
+                  'fails because ["companyName" length must be less than or ' +
+                  'equal to 150 characters long]');
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       });

@@ -20,34 +20,43 @@ require('should-http');
 var Joi = require('joi');
 
 var config = require('config');
-var accounts= require('./../../common/resources/accounts');
-var API= require('./../../common/api');
-var AccountsDP= require('./../../common/providers/data/accounts');
-var SchemaProvider= require('./../../common/providers/schema');
+var accounts = require('./../../common/resources/accounts');
+var API = require('./../../common/api');
+var AccountsDP = require('./../../common/providers/data/accounts');
+var SchemaProvider = require('./../../common/providers/schema');
 
 describe('Sanity check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var accountSample = AccountsDP.generateOne();
-  var resellerUser = config.api.users.reseller;
-  var normalUser = config.api.users.user;
+  var accountSample = AccountsDP.generateOne('test');
+  var resellerUser = config.get('api.users.reseller');
+  var normalUser = config.get('api.users.user');
   var errorResponseSchema = SchemaProvider.getErrorResponse();
 
   before(function (done) {
-    API.session.setCurrentUser(resellerUser);
-    API.resources.accounts
-      .createOneAsPrerequisite(accountSample)
-      .then(function (response) {
-        accountSample.id = response.body.object_id;
-        done();
-      });
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.accounts
+          .createOneAsPrerequisite(accountSample)
+          .then(function (response) {
+            accountSample.id = response.body.object_id;
+            done();
+          })
+          .catch(done);
+      })
+      .catch(done);
   });
 
   after(function (done) {
-    API.session.setCurrentUser(resellerUser);
-    API.resources.accounts.deleteAllPrerequisites(done);
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.accounts.deleteAllPrerequisites(done);
+      })
+      .catch(done);
   });
 
   describe('Accounts resource', function () {
@@ -64,13 +73,17 @@ describe('Sanity check', function () {
       it('should return data applying `error response` schema when getting ' +
         'all accounts.',
         function (done) {
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .getAll()
-            .expect(403)
-            .then(function (response) {
-              var data = response.body;
-              Joi.validate(data, errorResponseSchema, done);
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .getAll()
+                .expect(403)
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
+                })
+                .catch(done);
             })
             .catch(done);
         });
@@ -78,13 +91,17 @@ describe('Sanity check', function () {
       it('should return data applying `error response` schema when getting ' +
         'specific account.',
         function (done) {
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .getOne(accountSample.id)
-            .expect(403)
-            .then(function (response) {
-              var data = response.body;
-              Joi.validate(data, errorResponseSchema, done);
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .getOne(accountSample.id)
+                .expect(403)
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
+                })
+                .catch(done);
             })
             .catch(done);
         });
@@ -92,29 +109,37 @@ describe('Sanity check', function () {
       it('should return data applying `error response` schema when ' +
         'creating specific account.',
         function (done) {
-          var newAccount = AccountsDP.generateOne();
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .createOne(newAccount)
-            .expect(403)
-            .then(function (response) {
-              var data = response.body;
-              Joi.validate(data, errorResponseSchema, done);
+          var newAccount = AccountsDP.generateOne('test');
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .createOne(newAccount)
+                .expect(403)
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
+                })
+                .catch(done);
             })
-            .catch(403);
+            .catch(done);
         });
 
       it('should return data applying `error response` schema when ' +
         'updating specific account.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .update(accountSample.id, updatedAccount)
-            .expect(403)
-            .then(function (response) {
-              var data = response.body;
-              Joi.validate(data, errorResponseSchema, done);
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .update(accountSample.id, updatedAccount)
+                .expect(403)
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
+                })
+                .catch(done);
             })
             .catch(done);
         });
@@ -122,13 +147,17 @@ describe('Sanity check', function () {
       it('should return data applying `error response` schema when deleting ' +
         'an account.',
         function (done) {
-          API.session.setCurrentUser(normalUser);
-          API.resources.accounts
-            .deleteOne(accountSample.id)
-            .expect(403)
-            .then(function (response) {
-              var data = response.body;
-              Joi.validate(data, errorResponseSchema, done);
+          API.helpers
+            .authenticateUser(normalUser)
+            .then(function () {
+              API.resources.accounts
+                .deleteOne(accountSample.id)
+                .expect(403)
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
+                })
+                .catch(done);
             })
             .catch(done);
         });
