@@ -30,7 +30,14 @@ module.exports = function (grunt) {
           // (defaults to false)
           clearRequireCache: false
         },
-        src: ['test/rest_api/**/*.js']
+        src: [
+          'test/rest_api/suites/**/account*.js', // Accounts specs
+          'test/rest_api/suites/**/*omainConfig*.js', // DomainConfigs specs
+          'test/rest_api/suites/**/stat*.js', // Stats specs
+          // Cleaning up env.
+          'test/rest_api/setup/domainConfigs.js',
+          'test/rest_api/setup/accounts.js'
+        ]
       },
     },
 

@@ -126,15 +126,16 @@ describe('Sanity check', function () {
                 .expect(200)
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, successCreateResponseSchema, function (error) {
-                    if (error) {
-                      return done(error);
-                    }
-                    // TODO: register prerequisite
-                    API.resources.accounts
-                      .deleteOne(data.object_id)
-                      .end(done);
-                  });
+                  Joi.validate(data, successCreateResponseSchema,
+                    function (error) {
+                      if (error) {
+                        return done(error);
+                      }
+                      // TODO: register prerequisite
+                      API.resources.accounts
+                        .deleteOne(data.object_id)
+                        .end(done);
+                    });
                 })
                 .catch(done);
             })
@@ -158,7 +159,8 @@ describe('Sanity check', function () {
                     .then(function (response) {
                       var data = response.body;
                       Joi.validate(data, successResponseSchema, done);
-                    });
+                    })
+                    .catch(done);
                 })
                 .catch(done);
             })
@@ -181,7 +183,8 @@ describe('Sanity check', function () {
                     .then(function (response) {
                       var data = response.body;
                       Joi.validate(data, successResponseSchema, done);
-                    });
+                    })
+                    .catch(done);
                 })
                 .catch(done);
             })

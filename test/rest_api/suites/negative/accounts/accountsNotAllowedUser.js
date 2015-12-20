@@ -27,7 +27,7 @@ describe('Negative check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var accountSample = AccountsDP.generateOne('test');
-  var revAdminUser = config.get('api.users.admin.revAdmin');
+  var anotherResellerUser = config.get('api.users.secondReseller');
   var resellerUser = config.get('api.users.reseller');
   var adminUser = config.get('api.users.admin');
   var normalUser = config.get('api.users.user');
@@ -71,7 +71,7 @@ describe('Negative check', function () {
         '`user-role` user.',
         function (done) {
           API.helpers
-            .authenticateUser(resellerUser)
+            .authenticateUser(normalUser)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -211,73 +211,44 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when getting all accounts with ' +
-        '`rev-admin-role` user.',
+      it('should return `bad request` response when getting specific account ' +
+        'with another `reseller` user.',
         function (done) {
           API.helpers
-            .authenticateUser(revAdminUser)
-            .then(function () {
-              API.resources.accounts
-                .getAll()
-                .expect(401)
-                .end(done);
-            })
-            .catch(done);
-        });
-
-      it('should return `Forbidden` response when getting specific account ' +
-        'with `rev-admin-role` user.',
-        function (done) {
-          API.helpers
-            .authenticateUser(revAdminUser)
+            .authenticateUser(anotherResellerUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)
-                .expect(401)
+                .expect(400)
                 .end(done);
             })
             .catch(done);
         });
 
-      it('should return `Forbidden` response when creating specific account ' +
-        'with `rev-admin-role` user.',
-        function (done) {
-          var newAccount = AccountsDP.generateOne('test');
-          API.helpers
-            .authenticateUser(revAdminUser)
-            .then(function () {
-              API.resources.accounts
-                .createOne(newAccount)
-                .expect(401)
-                .end(done);
-            })
-            .catch(done);
-        });
-
-      it('should return `Forbidden` response when updating specific account ' +
-        'with `rev-admin-role` user.',
+      it('should return `bad request` response when updating specific account ' +
+        'with another `reseller` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
           API.helpers
-            .authenticateUser(revAdminUser)
+            .authenticateUser(anotherResellerUser)
             .then(function () {
               API.resources.accounts
                 .update(accountSample.id, updatedAccount)
-                .expect(401)
+                .expect(400)
                 .end(done);
             })
             .catch(done);
         });
 
-      it('should return `Forbidden` response when deleting an account with ' +
-        '`rev-admin-role` user.',
+      it('should return `bad request` response when deleting an account with ' +
+        'another `reseller` user.',
         function (done) {
           API.helpers
-            .authenticateUser(revAdminUser)
+            .authenticateUser(anotherResellerUser)
             .then(function () {
               API.resources.accounts
                 .deleteOne(accountSample.id)
-                .expect(401)
+                .expect(400)
                 .end(done);
             })
             .catch(done);

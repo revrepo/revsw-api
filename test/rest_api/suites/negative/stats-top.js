@@ -57,7 +57,7 @@ describe('Stats API check:', function () {
       //   done();
       // });
 
-      it('should fail if creds are wrong or absent', function(done) {
+      xit('should fail if creds are wrong or absent', function(done) {
 
         API.session.setCurrentUser(someone);
         API.resources.stats.stats_top
@@ -78,14 +78,14 @@ describe('Stats API check:', function () {
           });
       });
 
-      it('should fail if report_type is not set', function(done) {
+      xit('should fail if report_type is not set', function(done) {
 
         API.resources.stats.stats_top
           .getOne(domains.test.id)
           .expect(400, done);
       });
 
-      it('should fail if report_type is set to some junk value', function(done) {
+      xit('should fail if report_type is set to some junk value', function(done) {
 
         API.resources.stats.stats_top
           .getOne(domains.test.id)
@@ -93,7 +93,7 @@ describe('Stats API check:', function () {
           .expect(400, done);
       });
 
-      it('should fail if report period exceeds 24h', function(done) {
+      xit('should fail if report period exceeds 24h', function(done) {
 
         API.resources.stats.stats_top
           .getOne(domains.test.id)
