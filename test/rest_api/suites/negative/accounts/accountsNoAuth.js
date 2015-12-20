@@ -17,9 +17,9 @@
  */
 
 var config = require('config');
-var accounts = require('./../../common/resources/accounts');
-var API = require('./../../common/api');
-var AccountsDP = require('./../../common/providers/data/accounts');
+var accounts = require('./../../../common/resources/accounts');
+var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
 
 describe('Negative check', function () {
 

@@ -17,8 +17,8 @@
  */
 
 var config = require('config');
-var accounts= require('./../../common/resources/accounts');
-var API= require('./../../common/api');
+var accounts= require('./../../../common/resources/accounts');
+var API= require('./../../../common/api');
 
 describe('Negative check', function () {
 
@@ -36,7 +36,7 @@ describe('Negative check', function () {
   });
 
   describe('Accounts resource', function () {
-    describe('With empty data', function () {
+    describe('With bogus data', function () {
 
       beforeEach(function (done) {
         done();
@@ -46,44 +46,66 @@ describe('Negative check', function () {
         done();
       });
 
-      it('should return `Bad Request` response when creating specific account',
+      it('should return `Bad Request` response when getting specific account.',
         function (done) {
-          var emptyAccount = {};
+          var bogusId = '+_)(*&^%$#@+_)(*&^%$#@';
           API.helpers
             .authenticateUser(resellerUser)
             .then(function () {
               API.resources.accounts
-                .createOne(emptyAccount)
+                .getOne(bogusId)
                 .expect(400)
                 .end(done);
             })
             .catch(done);
         });
 
-      it('should return `Not Found` response when updating specific account',
+      it('should return `Bad Request` response when creating specific account',
         function (done) {
-          var emptyId = '';
-          var emptyAccount = {};
+          var invalidAccount = {
+            companyName: '+_)(*&^%$#@+_)(*&^%$#@'
+          };
           API.helpers
             .authenticateUser(resellerUser)
             .then(function () {
               API.resources.accounts
-                .update(emptyId, emptyAccount)
-                .expect(404)
+                .createOne(invalidAccount)
+                .expect(400)
+                .then(function (response) {
+                  response.body.error.should.equal('Bad Request');
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return `Bad Request` response when updating specific account',
+        function (done) {
+          var bogusId = '+_)(*&^%$#@+_)(*&^%$#@';
+          var invalidUpdatedAccount = {
+            companyName: '+_)(*&^%$#@+_)(*&^%$#@'
+          };
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
+              API.resources.accounts
+                .update(bogusId, invalidUpdatedAccount)
+                .expect(400)
                 .end(done);
             })
             .catch(done);
         });
 
-      it('should return `Not Found` response when deleting an account.',
+      it('should return `Bad Request` response when deleting an account.',
         function (done) {
-          var emptyId = '';
+          var bogusId = '+_)(*&^%$#@+_)(*&^%$#@';
           API.helpers
             .authenticateUser(resellerUser)
             .then(function () {
               API.resources.accounts
-                .deleteOne(emptyId)
-                .expect(404)
+                .deleteOne(bogusId)
+                .expect(400)
                 .end(done);
             })
             .catch(done);
