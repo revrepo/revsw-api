@@ -23,7 +23,7 @@ var config = require('config');
 var API= require('./../../../common/api');
 var DomainConfigsDP= require('./../../../common/providers/data/domainConfigs');
 var CommonResponseSP =
-  require('./../../common/providers/schema/commonResponse');
+  require('./../../../common/providers/schema/commonResponse');
 
 describe('Sanity check', function () {
 
