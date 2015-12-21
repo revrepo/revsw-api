@@ -341,14 +341,14 @@ var BasicResource = function (data) {
      */
     _resource.deleteAllPrerequisites = function (done) {
       //return done();/*
-      this.deleteMany(_cache)
+      return this.deleteMany(_cache)
         .then(function () {
           // What to do in case a pre-requisite is deleted successfully?
-          done();
+          return done();
         })
         .catch(function () {
           // What to do in case a pre-requisite is NOT deleted successfully?
-          done();
+          return done();
         });
     };
   }
