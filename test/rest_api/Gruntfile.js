@@ -31,9 +31,9 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [
-          'suites/**/account*.js', // Accounts specs
-          'suites/**/*omainConfig*.js', // DomainConfigs specs
-          'suites/**/stat*.js', // Stats specs
+          // 'suites/**/account*.js', // Accounts specs
+          'suites/boundary/**/*omainConfig*.js', // DomainConfigs specs
+          // 'suites/**/stat*.js', // Stats specs
           // Cleaning up env.
           'setup/domainConfigs.js',
           'setup/accounts.js'
