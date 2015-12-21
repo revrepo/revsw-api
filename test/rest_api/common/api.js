@@ -31,6 +31,7 @@ var activity = require('./resources/activity');
 
 var AccountsDP = require('./providers/data/accounts');
 var DomainConfigsDP = require('./providers/data/domainConfigs');
+var APITestError = require('./apiTestError');
 
 // This allows to overpass SSL certificate check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -74,6 +75,9 @@ module.exports = {
         .then(function (response) {
           user.token = response.body.token;
           Session.setCurrentUser(user);
+        })
+        .catch(function(error){
+          throw new Error('Authenticating user', error.response.body, user);
         });
     },
 
@@ -82,6 +86,10 @@ module.exports = {
         var account = AccountsDP.generateOne();
         return accounts
           .createOneAsPrerequisite(account)
+          .catch(function(error){
+            throw new APITestError('Creating Account' , error.response.body,
+              account);
+          })
           .then(function (res) {
             account.id = res.body.object_id;
             return account;
@@ -93,6 +101,10 @@ module.exports = {
         var domainConfig = DomainConfigsDP.generateOne(accountId);
         return domainConfigs
           .createOneAsPrerequisite(domainConfig)
+          .catch(function(error){
+            throw new APITestError('Creating Domain Config' ,
+              error.response.body, domainConfig);
+          })
           .then(function (res) {
             domainConfig.id = res.body.object_id;
             return domainConfig;
