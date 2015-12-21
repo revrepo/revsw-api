@@ -229,7 +229,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/fbt/dist/{domain_id}',
+    path: '/v1/stats/fbt/distribution/{domain_id}',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
