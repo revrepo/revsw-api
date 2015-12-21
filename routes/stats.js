@@ -225,6 +225,33 @@ module.exports = [
         }
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/fbt/dist/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: FBTReports.getFBTDistribution,
+      description: 'Get FBT distribution for a domain',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+        }
+      }
+    }
   }
 
 ];
