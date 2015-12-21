@@ -213,7 +213,7 @@ exports.getFBTDistribution = function( request, reply ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; i++ ) {
             var item = body.aggregations.results.buckets[i];
             dataArray[i] = {
-              value: item.key,
+              key: item.key,
               requests: item.doc_count
             };
           }
