@@ -102,6 +102,11 @@ exports.getFBTAverage = function( request, reply ) {
         }
       };
 
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
+
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
           ignoreUnavailable: true,
@@ -202,6 +207,11 @@ exports.getFBTDistribution = function( request, reply ) {
         }
       };
 
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
+
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
           ignoreUnavailable: true,
@@ -242,3 +252,154 @@ exports.getFBTDistribution = function( request, reply ) {
   } );
 };
 
+//  ---------------------------------
+exports.getFBTHeatmap = function(request, reply) {
+
+  var domain_id = request.params.domain_id;
+  var domain_name;
+
+  domainConfigs.get(domain_id, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+    }
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+
+      domain_name = result.domain_name;
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+
+      var requestBody = {
+        'query': {
+          filtered: {
+            filter: {
+              'bool': {
+                'must': [{
+                  'term': {
+                    'domain': domain_name
+                  }
+                }, {
+                  'range': {
+                    'FBT_mu': {
+                      'gt': 0
+                    }
+                  }
+                }, {
+                  'range': {
+                    '@timestamp': {
+                      'gte': span.start,
+                      'lte': span.end
+                    }
+                  }
+                }]
+              }
+            }
+          }
+        },
+        'size': 0,
+        'aggs': {
+          'results': {
+            'terms': {
+              'field': 'geoip.country_code2',
+              'size': request.query.count || 30
+            },
+            'aggs': {
+              'fbt_avg': {
+                'avg': {
+                  'field': 'FBT_mu'
+                }
+              },
+              'fbt_min': {
+                'min': {
+                  'field': 'FBT_mu'
+                }
+              },
+              'fbt_max': {
+                'max': {
+                  'field': 'FBT_mu'
+                }
+              }
+            }
+          },
+          'missing_field': {
+            'missing': {
+              'field': 'geoip.country_code2',
+            },
+            'aggs': {
+              'fbt_avg': {
+                'avg': {
+                  'field': 'FBT_mu'
+                }
+              },
+              'fbt_min': {
+                'min': {
+                  'field': 'FBT_mu'
+                }
+              },
+              'fbt_max': {
+                'max': {
+                  'field': 'FBT_mu'
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var indicesList = utils.buildIndexList(span.start, span.end);
+      elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      }).then(function(body) {
+        if ( !body.aggregations ) {
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+        }
+        var dataArray = [];
+        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
+          var doc = body.aggregations.results.buckets[i];
+          dataArray.push({
+            key: doc.key,
+            count: doc.doc_count,
+            fbt_avg_ms: Math.round( doc.fbt_avg.value / 1000 ),
+            fbt_min_ms: Math.round( doc.fbt_min.value / 1000 ),
+            fbt_max_ms: Math.round( doc.fbt_max.value / 1000 )
+          });
+        }
+        if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
+          doc = body.aggregations.missing_field;
+          dataArray.push({
+            key: '--',
+            count: doc.doc_count,
+            fbt_avg_ms: Math.round( doc.fbt_avg.value / 1000 ),
+            fbt_min_ms: Math.round( doc.fbt_min.value / 1000 ),
+            fbt_max_ms: Math.round( doc.fbt_max.value / 1000 )
+          });
+        }
+
+        var response = {
+          metadata: {
+            domain_name: domain_name,
+            domain_id: domain_id,
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: body.hits.total,
+            data_points_count: body.aggregations.results.buckets.length
+          },
+          data: dataArray
+        };
+        renderJSON(request, reply, error, response);
+      }, function(error) {
+        console.trace(error.message);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+    } else {
+      return reply(boom.badRequest('Domain not found'));
+    }
+  });
+};

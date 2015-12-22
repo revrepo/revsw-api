@@ -221,7 +221,10 @@ module.exports = [
         },
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter')
         }
       }
     }
@@ -248,7 +251,39 @@ module.exports = [
         },
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/fbt/heatmap/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: FBTReports.getFBTHeatmap,
+      description: 'Get FBT for a domain grouped by countries',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
+          // report_type: Joi.string().valid ( 'country', 'device', 'os' ).description('Type of requested report (defaults to "country")'),
         }
       }
     }
