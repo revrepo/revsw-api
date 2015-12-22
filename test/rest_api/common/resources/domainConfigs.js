@@ -19,7 +19,7 @@
 // # Accounts Resource object
 
 // Requiring config and `BaseResource`
-var BasicResource = require('./basic');
+var BaseResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
@@ -53,4 +53,4 @@ var resourceConfig = {
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-module.exports = new BasicResource(resourceConfig);
+module.exports = new BaseResource(resourceConfig);

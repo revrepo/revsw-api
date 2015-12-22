@@ -18,44 +18,51 @@
 
 // # Users Resource object
 
-'use strict';
-
 // Requiring config and `BaseResource`
-var config = require('config');
-var BaseResource = require('./base');
+var BaseResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
+
+var domainConfigIdKey = 'domainId';
+var resourceConfig = {
+  idKey: domainConfigIdKey,
+  name: 'stats',
+  path: '/stats/{' + domainConfigIdKey + '}',
+  methods: [
+    Methods.READ_ONE
+  ],
+  nestedResources: [
+    {
+      idKey: domainConfigIdKey,
+      name: 'gbt',
+      path: '/gbt/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }, {
+      idKey: domainConfigIdKey,
+      name: 'lastMileRtt',
+      path: '/lastmile_rtt/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }, {
+      idKey: domainConfigIdKey,
+      name: 'top',
+      path: '/top/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }, {
+      idKey: domainConfigIdKey,
+      name: 'topObjects',
+      path: '/top_objects/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }
+  ]
+};
 
 // Creating new instance of BaseResource which is going to represent the API
-// `users resource`
-module.exports = {
-
-  stats: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.stats
-  }),
-
-  stats_top: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.stats + '/top'
-  }),
-
-  stats_top_objects: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.stats + '/top_objects'
-  }),
-
-  stats_lastmile_rtt: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.stats + '/lastmile_rtt'
-  }),
-
-  stats_gbt: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.stats + '/gbt'
-  })
-
-};
+module.exports = new BaseResource(resourceConfig);

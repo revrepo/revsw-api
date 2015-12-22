@@ -1,6 +1,7 @@
 test/rest_api/coverage/
 test/rest_api/docs/
 test/rest_api/results/
+test/rest_api/node_modules/
 config/local.json
 .DS_Store
 .idea
