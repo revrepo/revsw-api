@@ -221,7 +221,10 @@ module.exports = [
         },
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter')
         }
       }
     }
@@ -248,7 +251,10 @@ module.exports = [
         },
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter')
         }
       }
     }

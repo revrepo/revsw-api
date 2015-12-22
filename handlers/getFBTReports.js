@@ -102,6 +102,11 @@ exports.getFBTAverage = function( request, reply ) {
         }
       };
 
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
+
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
           ignoreUnavailable: true,
@@ -201,6 +206,11 @@ exports.getFBTDistribution = function( request, reply ) {
           }
         }
       };
+
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
 
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
