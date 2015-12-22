@@ -24,7 +24,7 @@ var dcSchema= require('./../../../common/providers/schema/domainConfigs.json');
 var AccountsDP= require('./../../../common/providers/data/accounts');
 var DomainConfigsDP= require('./../../../common/providers/data/domainConfigs');
 
-describe('Negative check', function () {
+describe('Boundary check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));

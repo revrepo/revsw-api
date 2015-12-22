@@ -25,7 +25,7 @@ var Utils = require('./../../common/utils');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
-describe('Smoke check.', function () {
+describe('CRUD check.', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -66,7 +66,7 @@ describe('Smoke check.', function () {
   parallel('Stats resource,', function () {
 
     var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
+      return 'should return domain-stat data when using: ' +
         Utils.getJsonAsKeyValueString(queryData);
     };
 
@@ -78,7 +78,13 @@ describe('Smoke check.', function () {
             API.resources.stats
               .getOne(domainConfig.id, queryData)
               .expect(200)
-              .end(done);
+              .then(function (res) {
+                var metadata = res.body.metadata;
+                metadata.domain_name.should.be.equal(domainConfig.domain_name);
+                metadata.domain_id.should.be.equal(domainConfig.id);
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       };
@@ -106,7 +112,7 @@ describe('Smoke check.', function () {
   parallel('GBT: Stats resource,', function () {
 
     var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
+      return 'should return domain-stat data when using: ' +
         Utils.getJsonAsKeyValueString(queryData);
     };
 
@@ -119,7 +125,13 @@ describe('Smoke check.', function () {
               .gbt()
               .getOne(domainConfig.id, queryData)
               .expect(200)
-              .end(done);
+              .then(function (res) {
+                var metadata = res.body.metadata;
+                metadata.domain_name.should.be.equal(domainConfig.domain_name);
+                metadata.domain_id.should.be.equal(domainConfig.id);
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       };
@@ -138,7 +150,7 @@ describe('Smoke check.', function () {
   parallel('Last Mile RTT: Stats resource,', function () {
 
     var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
+      return 'should return domain-stat data when using: ' +
         Utils.getJsonAsKeyValueString(queryData);
     };
 
@@ -151,7 +163,13 @@ describe('Smoke check.', function () {
               .lastMileRtt()
               .getOne(domainConfig.id, queryData)
               .expect(200)
-              .end(done);
+              .then(function (res) {
+                var metadata = res.body.metadata;
+                metadata.domain_name.should.be.equal(domainConfig.domain_name);
+                metadata.domain_id.should.be.equal(domainConfig.id);
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       };
@@ -170,7 +188,7 @@ describe('Smoke check.', function () {
   parallel('TOP: Stats resource,', function () {
 
     var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
+      return 'should return domain-stat data when using: ' +
         Utils.getJsonAsKeyValueString(queryData);
     };
 
@@ -183,7 +201,13 @@ describe('Smoke check.', function () {
               .top()
               .getOne(domainConfig.id, queryData)
               .expect(200)
-              .end(done);
+              .then(function (res) {
+                var metadata = res.body.metadata;
+                metadata.domain_name.should.be.equal(domainConfig.domain_name);
+                metadata.domain_id.should.be.equal(domainConfig.id);
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       };
@@ -202,7 +226,7 @@ describe('Smoke check.', function () {
   parallel('TOP Objects: Stats resource,', function () {
 
     var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
+      return 'should return domain-stat data when using: ' +
         Utils.getJsonAsKeyValueString(queryData);
     };
 
@@ -215,7 +239,13 @@ describe('Smoke check.', function () {
               .topObjects()
               .getOne(domainConfig.id, queryData)
               .expect(200)
-              .end(done);
+              .then(function (res) {
+                var metadata = res.body.metadata;
+                metadata.domain_name.should.be.equal(domainConfig.domain_name);
+                metadata.domain_id.should.be.equal(domainConfig.id);
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       };
