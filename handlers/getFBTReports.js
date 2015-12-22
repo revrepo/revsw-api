@@ -164,7 +164,8 @@ exports.getFBTDistribution = function( request, reply ) {
       }
 
       var domain_name = result.domain_name,
-        interval = 300000;
+        interval = ( request.query.interval_ms || 100 ) * 1000,
+        limit = ( request.query.limit_ms || 10000 ) * 1000;
 
       var requestBody = {
         size: 0,
@@ -187,7 +188,7 @@ exports.getFBTDistribution = function( request, reply ) {
                   range: {
                     FBT_mu: {
                       gt: 0,
-                      lte: 30000000
+                      lte: limit
                     }
                   }
                 }],
@@ -237,6 +238,7 @@ exports.getFBTDistribution = function( request, reply ) {
               end_datetime: new Date( span.end ),
               total_hits: body.hits.total,
               interval_ms: interval / 1000,
+              limit_ms: limit / 1000,
               data_points_count: body.aggregations.results.buckets.length
             },
             data: dataArray
@@ -282,7 +284,7 @@ exports.getFBTHeatmap = function(request, reply) {
                 }, {
                   'range': {
                     'FBT_mu': {
-                      'gt': 0
+                      'gt': 1000
                     }
                   }
                 }, {
