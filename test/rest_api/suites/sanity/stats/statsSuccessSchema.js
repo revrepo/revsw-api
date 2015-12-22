@@ -253,15 +253,6 @@ describe('Sanity check.', function () {
           /** Running spec for each query params */
           it(specDescription, specCallback);
         });
-
-      //StatsDDHelper.topObjects
-      //  .getCombinedQueryParams()
-      //  .forEach(function (queryParams) {
-      //    var specDescription = getSpecDescription(queryParams);
-      //    var specCallback = getSpecCallback(queryParams);
-      //    /** Running spec with a set of combined query params */
-      //    it(specDescription, specCallback);
-      //  });
     });
   });
 });
