@@ -254,7 +254,9 @@ module.exports = [
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
-          device: Joi.string().description('Device name/version to filter')
+          device: Joi.string().description('Device name/version to filter'),
+          interval_ms: Joi.number().integer().description('Distribution sampling size, step, ms'),
+          limit_ms: Joi.number().integer().description('Maximal value, ms'),
         }
       }
     }
