@@ -204,9 +204,9 @@ module.exports = [
           config_command_options: Joi.string().allow('').max(150),
           tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
-            '3rd_party_root_rewrite_domains': Joi.string().allow('').max(150).required(),
-            '3rd_party_runtime_domains': Joi.string().allow('').max(150).required(),
-            '3rd_party_urls': Joi.string().allow('').max(150).required(),
+            '3rd_party_root_rewrite_domains': Joi.string().allow('').max(500).required(),
+            '3rd_party_runtime_domains': Joi.string().allow('').max(500).required(),
+            '3rd_party_urls': Joi.string().allow('').max(500).required(),
             enable_3rd_party_rewrite: Joi.boolean().required(),
             enable_3rd_party_root_rewrite: Joi.boolean().required(),
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
