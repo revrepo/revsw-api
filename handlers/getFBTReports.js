@@ -288,7 +288,7 @@ exports.getFBTHeatmap = function(request, reply) {
                 }, {
                   'range': {
                     'FBT_mu': {
-                      'gt': 1000
+                      'gte': 0
                     }
                   }
                 }, {
