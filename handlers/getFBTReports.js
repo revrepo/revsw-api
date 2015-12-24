@@ -89,6 +89,10 @@ exports.getFBTAverage = function( request, reply ) {
               field: '@timestamp',
               interval: ( '' + interval ),
               min_doc_count: 0,
+              extended_bounds : {
+                min: span.start,
+                max: ( span.end - 1 )
+              },
               offset: ( '' + ( span.end % interval ) )
             },
             aggs: {
