@@ -191,7 +191,7 @@ exports.getFBTDistribution = function( request, reply ) {
                 }, {
                   range: {
                     FBT_mu: {
-                      gt: 0,
+                      gte: 0,
                       lte: limit
                     }
                   }
@@ -206,7 +206,11 @@ exports.getFBTDistribution = function( request, reply ) {
             histogram: {
               field: 'FBT_mu',
               interval: ( '' + interval ),
-              min_doc_count: 0
+              min_doc_count: 0,
+              extended_bounds : {
+                min: 0,
+                max: limit
+              },
             }
           }
         }
