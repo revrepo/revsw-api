@@ -138,7 +138,7 @@ module.exports = [
       validate: {
         payload: {
           account_id: Joi.objectId().required().description('Account ID the new app should be associated with'),
-          app_name: Joi.string().required().description('Name of the mobile application'),
+          app_name: Joi.string().max(50).required().description('Name of the mobile application'),
           app_platform: Joi.string().required().valid('iOS', 'Android').description('Name of the mobile application platform')
         }
       },
@@ -170,11 +170,8 @@ module.exports = [
           options: Joi.string().valid('verify_only', 'publish').optional()
         },
         payload: {
-          app_name: Joi.string().description('Name of the mobile application'),
+          app_name: Joi.string().max(50).description('Name of the mobile application'),
           account_id: Joi.objectId().description('Account ID'),
-          sdk_configuration_api_service: Joi.objectId(),
-          sdk_stats_reporting_api_service: Joi.objectId(),
-          bp_group_id: Joi.objectId(),
           configs: Joi.array().required().items(routeModels.AppConfigModel)
         }
       },
