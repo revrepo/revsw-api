@@ -92,7 +92,6 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_id').be.a.String();
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
-          response_json.data[key].should.have.property('domain_id').be.a.Array();
           response_json.data[key].should.have.property('datetime').be.a.Number();
           response_json.data[key].should.have.property('account_id').be.a.Array();
           response_json.data[key].should.have.property('activity_type').be.a.String();
@@ -140,7 +139,6 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_id').be.a.String();
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
-          response_json.data[key].should.have.property('domain_id').be.a.Array();
           response_json.data[key].should.have.property('datetime').be.a.Number();
           response_json.data[key].should.have.property('account_id').be.a.Array();
           response_json.data[key].should.have.property('activity_type').be.a.String();
@@ -172,7 +170,6 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_id').be.a.String();
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
-          response_json.data[key].should.have.property('domain_id').be.a.Array();
           response_json.data[key].should.have.property('datetime').be.a.Number();
           response_json.data[key].should.have.property('account_id').be.a.Array();
           response_json.data[key].should.have.property('activity_type').be.a.String();
@@ -204,7 +201,6 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_id').be.a.String();
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
-          response_json.data[key].should.have.property('domain_id').be.a.Array();
           response_json.data[key].should.have.property('datetime').be.a.Number();
           response_json.data[key].should.have.property('account_id').be.a.Array();
           response_json.data[key].should.have.property('activity_type').be.a.String();
@@ -252,7 +248,6 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_id').be.a.String();
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
-          response_json.data[key].should.have.property('domain_id').be.a.Array();
           response_json.data[key].should.have.property('datetime').be.a.Number();
           response_json.data[key].should.have.property('account_id').be.a.Array();
           response_json.data[key].should.have.property('activity_type').be.a.String();
