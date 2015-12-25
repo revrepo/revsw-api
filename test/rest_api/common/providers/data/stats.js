@@ -321,7 +321,7 @@ var StatsDataProvider = {
           {report_type: 'country'},
           {report_type: 'QUIC'},
           {report_type: 'http2'},
-          {report_type: 'top5xx'},
+//          {report_type: 'top5xx'},
           {country: 'US', report_type: 'referer'}
         ];
       },
