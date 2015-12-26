@@ -25,7 +25,7 @@
 // depending on your test needs.
 var AccountsDataProvider = {
 
-  companyStr: 'API_TEST_COMPANY_',
+  prefix: 'API_TEST_COMPANY_',
 
   /**
    * ### AccountsDataProvider.generateOne()
@@ -43,7 +43,7 @@ var AccountsDataProvider = {
    */
   generateOne: function (prefix) {
     return {
-      companyName: (prefix ? prefix + '_' : '' ) + this.companyStr + Date.now()
+      companyName: (prefix ? prefix + '_' : '' ) + this.prefix + Date.now()
     };
   }
 };

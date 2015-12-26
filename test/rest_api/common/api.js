@@ -28,9 +28,11 @@ var sdkConfigs = require('./resources/sdkConfigs');
 var Session = require('./session');
 var domainConfigs = require('./resources/domainConfigs');
 var activity = require('./resources/activity');
+var purge = require('./resources/purge');
 
 var AccountsDP = require('./providers/data/accounts');
 var DomainConfigsDP = require('./providers/data/domainConfigs');
+var PurgeDP = require('./providers/data/purge');
 var APITestError = require('./apiTestError');
 
 // This allows to overpass SSL certificate check
@@ -50,7 +52,12 @@ module.exports = {
     stats: stats,
     sdkConfigs: sdkConfigs,
     domainConfigs: domainConfigs,
-    activity: activity
+    activity: activity,
+    purge: purge
+  },
+
+  dataProvider: {
+    accounts: []
   },
 
   helpers: {
@@ -108,6 +115,21 @@ module.exports = {
           .then(function (res) {
             domainConfig.id = res.body.object_id;
             return domainConfig;
+          });
+      }
+    },
+    purge: {
+      createOne: function (domainName) {
+        var purgeData = PurgeDP.generateOne(domainName);
+        return purge
+          .createOneAsPrerequisite(purgeData)
+          .catch(function (error) {
+            throw new APITestError('Creating Account' , error.response.body,
+              purgeData);
+          })
+          .then(function (res) {
+            purgeData.id = res.body.request_id;
+            return purgeData;
           });
       }
     }

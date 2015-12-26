@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Accounts Resource object
+// # Purge Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
@@ -24,20 +24,17 @@ var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var accountIdKey = 'accountId';
+var purgeIdKey = 'purgeId';
 var resourceConfig = {
-  idKey: accountIdKey,
-  name: 'accounts',
-  path: '/accounts/{' + accountIdKey + '}',
+  idKey: purgeIdKey,
+  name: 'purge',
+  path: '/purge/{' + purgeIdKey + '}',
   methods: [
     Methods.CREATE,
-    Methods.READ_ALL,
-    Methods.READ_ONE,
-    Methods.UPDATE,
-    Methods.DELETE
+    Methods.READ_ONE
   ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `accounts resource`
+// `purge resource`
 module.exports = new BasicResource(resourceConfig);
