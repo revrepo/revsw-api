@@ -28,6 +28,7 @@ var getTopReports = require('../handlers/getTopReports');
 var RTTReports = require('../handlers/getRTTReports');
 var GBTReports = require('../handlers/getGBTReports');
 var FBTReports = require('../handlers/getFBTReports');
+var SDKReports = require('../handlers/getSDKReports');
 
 var routeModels = require('../lib/routeModels');
 
@@ -285,7 +286,62 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
-          // report_type: Joi.string().valid ( 'country', 'device', 'os' ).description('Type of requested report (defaults to "country")'),
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/sdk/app/{app_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getAppReport,
+      description: 'Get SDK stats for application',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          app_id: Joi.objectId().required().description('Application ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          report_type: Joi.string().valid ( 'hits', 'devices' ).description('Type of requested report (defaults to "hits")')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/sdk/account/{account_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getAccountReport,
+      description: 'Get SDK stats for account',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account(Customer) ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          report_type: Joi.string().valid ( 'hits', 'devices' ).description('Type of requested report (defaults to "hits")')
         }
       }
     }
