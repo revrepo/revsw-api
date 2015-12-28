@@ -42,76 +42,78 @@ describe('Sanity check', function () {
   });
 
   describe('2fa resource', function () {
+    describe('Error Response Data Schema', function () {
 
-    beforeEach(function (done) {
-      API.helpers
-        .authenticateUser(reseller)
-        .then(function () {
-          return API.helpers.users.createOne({
-            firstName: 'Tom',
-            lastName: 'Smith'
-          });
-        })
-        .then(function (newUser) {
-          user = newUser;
-        })
-        .then(done)
-        .catch(done);
+      beforeEach(function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            return API.helpers.users.createOne({
+              firstName: 'Tom',
+              lastName: 'Smith'
+            });
+          })
+          .then(function (newUser) {
+            user = newUser;
+          })
+          .then(done)
+          .catch(done);
+      });
+
+      afterEach(function (done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function () {
+            // TODO: this should be changed to the new way to create a resource
+            return API.resources.users.user.deleteAllPrerequisites(done);
+          })
+          .catch(done);
+      });
+
+      it('should return error response schema when initializing 2fa without ' +
+        'authentication',
+        function (done) {
+          API.session.reset();
+          API.resources.twoFA
+            .init()
+            .getOne()
+            .expect(401)
+            .then(function (res) {
+              var data = res.body;
+              Joi.validate(data, errorResponseSchema, done);
+            })
+            .catch(done);
+        });
+
+      it('should return error response schema when enabling 2fa without ' +
+        'authentication',
+        function (done) {
+          var key = 'res.body.base32';
+          var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+          API.resources.twoFA
+            .enable()
+            .createOne(oneTimePassword)
+            .expect(400)
+            .then(function (res) {
+              var data = res.body;
+              Joi.validate(data, errorResponseSchema, done);
+            })
+            .catch(done);
+        });
+
+      it('should return error response schema when disabling 2fa without ' +
+        'authentication',
+        function (done) {
+          API.resources.twoFA
+            .disable()
+            .createOne(user.id)
+            .expect(400)
+            .then(function (res) {
+              var data = res.body;
+              Joi.validate(data, errorResponseSchema, done);
+            })
+            .catch(done);
+        });
     });
-
-    afterEach(function (done) {
-      API.helpers
-        .authenticateUser(reseller)
-        .then(function () {
-          // TODO: this should be changed to the new way to create a resource
-          return API.resources.users.user.deleteAllPrerequisites(done);
-        })
-        .catch(done);
-    });
-
-    it('should return error response schema when initializing 2fa without ' +
-      'authentication',
-      function (done) {
-        API.session.reset();
-        API.resources.twoFA
-          .init()
-          .getOne()
-          .expect(401)
-          .then(function (res) {
-            var data = res.body;
-            Joi.validate(data, errorResponseSchema, done);
-          })
-          .catch(done);
-      });
-
-    it('should return error response schema when enabling 2fa without ' +
-      'authentication',
-      function (done) {
-        var key = 'res.body.base32';
-        var oneTimePassword = TwoFADP.generateOneTimePassword(key);
-        API.resources.twoFA
-          .enable()
-          .createOne(oneTimePassword)
-          .expect(400)
-          .then(function (res) {
-            var data = res.body;
-            Joi.validate(data, errorResponseSchema, done);
-          })
-          .catch(done);
-      });
-
-    it('should return error response schema when disabling 2fa without ' +
-      'authentication',
-      function (done) {
-        API.resources.twoFA
-          .disable()
-          .createOne(user.id)
-          .expect(400)
-          .then(function (res) {
-            var data = res.body;
-            Joi.validate(data, errorResponseSchema, done);
-          })
-          .catch(done);
-      });
   });
 });

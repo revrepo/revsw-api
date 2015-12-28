@@ -17,23 +17,19 @@
  */
 
 require('should-http');
-var Joi = require('joi');
 
 var config = require('config');
 var API = require('./../../../common/api');
 var TwoFADP = require('./../../../common/providers/data/2fa');
-var CommonRespSP = require('./../../../common/providers/schema/commonResponse');
-var TwoFARespSP = require('./../../../common/providers/schema/2faResponse');
 
-describe('Sanity check', function () {
+describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
   var user;
   var reseller = config.get('api.users.reseller');
-  var successResponseSchema = CommonRespSP.getSuccess();
-  var successTwoFAKeySchema = TwoFARespSP.getSuccessCreateKey();
+  var bogusString = '!@#$%^&*()';
 
   before(function (done) {
     done();
@@ -44,7 +40,7 @@ describe('Sanity check', function () {
   });
 
   describe('2fa resource', function () {
-    describe('Success Response Data Schema', function () {
+    describe('With bogus data,', function () {
 
       beforeEach(function (done) {
         API.helpers
@@ -72,26 +68,8 @@ describe('Sanity check', function () {
           .catch(done);
       });
 
-      it('should return success response schema when initializing 2fa for ' +
-        'specific user',
-        function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.twoFA
-                .init()
-                .getOne()
-                .expect(200)
-                .then(function (res) {
-                  var data = res.body;
-                  Joi.validate(data, successTwoFAKeySchema, done);
-                })
-                .catch(done);
-            })
-            .catch(done);
-        });
-
-      it('should return success response schema when enabling 2fa for user',
+      it('should return `bad request` when enabling 2fa for user with bogus ' +
+        'oneTimePassword',
         function (done) {
           API.helpers
             .authenticateUser(user)
@@ -103,13 +81,16 @@ describe('Sanity check', function () {
                 .then(function (res) {
                   var key = res.body.base32;
                   var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+                  oneTimePassword.oneTimePassword = bogusString;
                   API.resources.twoFA
                     .enable()
                     .createOne(oneTimePassword)
-                    .expect(200)
-                    .then(function (res) {
-                      var data = res.body;
-                      Joi.validate(data, successResponseSchema, done);
+                    .expect(400)
+                    .then(function (response) {
+                      var expMsg = 'The supplied one time password is ' +
+                        'incorrect';
+                      response.body.message.should.equal(expMsg);
+                      done();
                     })
                     .catch(done);
                 })
@@ -118,7 +99,8 @@ describe('Sanity check', function () {
             .catch(done);
         });
 
-      it('should return success response schema when disabling 2fa for user',
+      it('should return `bad request` when disabling 2fa for user with bogus ' +
+        'user ID',
         function (done) {
           API.helpers
             .authenticateUser(user)
@@ -137,11 +119,12 @@ describe('Sanity check', function () {
                     .then(function () {
                       API.resources.twoFA
                         .disable()
-                        .createOne(user.id)
-                        .expect(200)
-                        .then(function (res) {
-                          var data = res.body;
-                          Joi.validate(data, successResponseSchema, done);
+                        .createOne(bogusString)
+                        .expect(400)
+                        .then(function (response) {
+                          var expMsg = 'child "user_id" fails';
+                          response.body.message.should.containEql(expMsg);
+                          done();
                         })
                         .catch(done);
                     })

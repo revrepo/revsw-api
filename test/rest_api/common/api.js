@@ -67,7 +67,7 @@ module.exports = {
   helpers: {
 
     /**
-     * ### API.authenticateUser()
+     * ### API.helpers.authenticateUser()
      *
      * Helper method to Authenticate user before doing any type of request to
      * the REST API services.
@@ -89,6 +89,29 @@ module.exports = {
         })
         .catch(function(error){
           throw new Error('Authenticating user', error.response.body, user);
+        });
+    },
+
+    /**
+     * ### API.helpers.attemptToAuthenticateUser()
+     *
+     * Helper method to Attempt to authenticate user before doing any type of
+     * request to the REST API services without catching any errors.
+     *
+     * @param user, user information. For instance
+     *     {
+     *       name: 'joe@email.com',
+     *       password: 'something'
+     *     }
+     *
+     * @returns {Promise}
+     */
+    attemptToAuthenticateUser: function (user) {
+      return authenticate
+        .createOne({email: user.email, password: user.password})
+        .then(function (response) {
+          user.token = response.body.token;
+          Session.setCurrentUser(user);
         });
     },
 

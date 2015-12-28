@@ -22,7 +22,7 @@ var config = require('config');
 var API = require('./../../common/api');
 var TwoFADP = require('./../../common/providers/data/2fa');
 
-describe('Smoke check', function () {
+describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));

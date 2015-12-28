@@ -29,6 +29,7 @@ describe('Functional check', function () {
 
   var user;
   var reseller = config.get('api.users.reseller');
+  var secondReseller = config.get('api.users.secondReseller');
   var normalUser = config.get('api.users.user');
 
   before(function (done) {
@@ -80,25 +81,6 @@ describe('Functional check', function () {
               .then(function (res) {
                 var expectedMessage = 'Must call init first';
                 res.body.message.should.equal(expectedMessage);
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    // TODO: Need to make the test to use invalid credentials
-    xit('should fail to initialize 2fa for new user with wrong credentials',
-      function (done) {
-        API.helpers
-          .authenticateUser({email: 'some email', password: 'some password'})
-          .then(function () {
-            API.resources.twoFA
-              .init()
-              .getOne()
-              .expect(401)
-              .then(function (res) {
-                console.log(res.body);
                 done();
               })
               .catch(done);
@@ -174,8 +156,44 @@ describe('Functional check', function () {
       });
 
     // TODO: Need to create another user from another account
-    xit('should fail to disable 2FA for an existing user from another account',
+    it('should fail to disable 2FA for an existing user from another account',
       function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            API.resources.twoFA
+              .init()
+              .getOne()
+              .expect(200)
+              .then(function (res) {
+                var key = res.body.base32;
+                var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+                API.resources.twoFA
+                  .enable()
+                  .createOne(oneTimePassword)
+                  .expect(200)
+                  .then(function () {
+                    API.helpers
+                      .authenticateUser(secondReseller)
+                      .then(function () {
+                        API.resources.twoFA
+                          .disable()
+                          .createOne(user.id)
+                          .expect(400)
+                          .then(function (response) {
+                            var expMsg = 'User not found';
+                            response.body.message.should.equal(expMsg);
+                            done();
+                          })
+                          .catch(done);
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
   });
 });
