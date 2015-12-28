@@ -24,7 +24,7 @@ var API = require('./../../../common/api');
 var DomainConfigsDP = require('./../../../common/providers/data/domainConfigs');
 var PurgeDP = require('./../../../common/providers/data/purge');
 var CommonRespSP = require('./../../../common/providers/schema/commonResponse');
-var PurgeResponseSP = require('./../../../common/providers/schema/purgeSchema');
+var PurgeRespSP = require('./../../../common/providers/schema/purgeResponse');
 
 describe('Sanity check', function () {
 
@@ -36,7 +36,7 @@ describe('Sanity check', function () {
   var purge;
   var reseller = config.get('api.users.reseller');
   var successResponseSchema = CommonRespSP.getSuccess();
-  var successCreatePurgeResponseSchema = PurgeResponseSP.getSuccessCreate();
+  var successCreatePurgeResponseSchema = PurgeRespSP.getSuccessCreate();
 
   before(function (done) {
     API.helpers

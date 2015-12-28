@@ -207,7 +207,13 @@ var BasicResource = function (data) {
      * @returns {object} the supertest-as-promised instance
      */
     _resource.createOne = function (object, query) {
-      var location = getPath(data);
+      var location;
+      if (typeof object === 'string'){
+        location = getPath(data, object);
+      }
+      else {
+        location = getPath(data);
+      }
       var request = getRequest()
         .post(location)
         .query(query)
