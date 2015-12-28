@@ -110,7 +110,6 @@ describe('Rev API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Everything is OK');
         response_json.version.should.be.a.String();
         done();
@@ -131,7 +130,6 @@ describe('Rev API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.statusCode.should.be.equal(200);
         response_json.message.should.be.equal('Everything is OK');
         done();
       });
