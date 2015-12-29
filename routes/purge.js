@@ -54,7 +54,7 @@ module.exports = [
             url: Joi.object({
               is_wildcard: Joi.boolean().required()
                 .description('Set true if "expression" is a regular expression, set to "false" if the "expression" is a wildcard pattern'),
-              expression: Joi.string().required().description('Wildcard expression if "is_wildcard" is set to true, otherwise - a regular expression')
+              expression: Joi.string().max(150).trim().required().description('Wildcard expression if "is_wildcard" is set to true, otherwise - a regular expression')
             })
           }).required().description('Array of URLs to purge')
         }
@@ -83,7 +83,7 @@ module.exports = [
       },
       validate: {
         params: {
-          request_id: Joi.string().trim().length(36)
+          request_id: Joi.string().trim().regex(routeModels.uuidRegex)
             .required()
             .description('The ID of previously submitted purge request')
         }

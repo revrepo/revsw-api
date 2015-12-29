@@ -113,7 +113,8 @@ describe('Rev Purge API', function() {
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Bad Request');
         response_json.message.should.be
-          .equal('child "purges" fails because ["purges" at position 0 fails because [child "url" fails because ["blahblah" is not allowed]]]');
+          .equal('child "purges" fails because ["purges" at position 0 fails because ' +
+            '[child "url" fails because ["blahblah" is not allowed]]]');
         done();
       });
   });
@@ -266,7 +267,9 @@ describe('Rev Purge API', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(400);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('child \"request_id\" fails because [\"request_id\" length must be 36 characters long]');
+        response_json.message.should.be.equal('child \"request_id\" fails because [\"request_id\" with value ' +
+          '\"24qwerasfasdfsdfsdf\" fails to match the required pattern: ' +
+          '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/]');
         done();
       });
   });

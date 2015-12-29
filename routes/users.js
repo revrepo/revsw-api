@@ -292,7 +292,7 @@ module.exports = [
       },
       validate: {
         payload: {
-          oneTimePassword: Joi.string().required().description('One time password supplied by user')
+          oneTimePassword: Joi.string().regex(/^\d+$/).min(6).max(6).required().description('One time password supplied by user')
         }
       },
       response: {
