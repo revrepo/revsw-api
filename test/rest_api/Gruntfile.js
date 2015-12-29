@@ -34,6 +34,8 @@ module.exports = function (grunt) {
           'suites/**/account*.js', // Accounts specs
           'suites/**/*omainConfig*.js', // DomainConfigs specs
           'suites/**/stat*.js', // Stats specs
+          'suites/**/purge*.js', // Purge specs
+          'suites/**/2fa*.js', // 2fa specs
           // Cleaning up env.
           'setup/domainConfigs.js',
           'setup/accounts.js'

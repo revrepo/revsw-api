@@ -16,28 +16,28 @@
  * from Rev Software, Inc.
  */
 
-// # Accounts Resource object
+var speakeasy = require('speakeasy');
 
-// Requiring config and `BaseResource`
-var config = require('config');
-var BasicResource = require('./basic');
-var Constants = require('./../../common/constants');
-var Methods = Constants.API.METHODS;
+// # 2fa Data Provider object
+//
+// Defines some methods to generate valid and common 2fa test data.
+// With common we mean it does not have anything special on it.
+//
+// From there, you can modify and get bogus, invalid or other type of data
+// depending on your test needs.
+var TwoFADP = {
 
-var accountIdKey = 'accountId';
-var resourceConfig = {
-  idKey: accountIdKey,
-  name: 'accounts',
-  path: '/accounts/{' + accountIdKey + '}',
-  methods: [
-    Methods.CREATE,
-    Methods.READ_ALL,
-    Methods.READ_ONE,
-    Methods.UPDATE,
-    Methods.DELETE
-  ]
+  prefix: 'API-TEST',
+
+  generateOneTimePassword: function (base32Key) {
+    var encoding = 'base32';
+    return {
+      oneTimePassword: speakeasy.time({
+        key: base32Key,
+        encoding: encoding
+      })
+    };
+  }
 };
 
-// Creating new instance of BaseResource which is going to represent the API
-// `accounts resource`
-module.exports = new BasicResource(resourceConfig);
+module.exports = TwoFADP;

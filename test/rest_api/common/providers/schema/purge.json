@@ -1,0 +1,7 @@
+{
+  "domainName": "Joi.string().required().description('Domain name to purge objects for')",
+  "purges": "Joi.array().required().description('Array of URLs to purge')",
+  "purges.0.url": "Joi.object()",
+  "purges.0.url.is_wildcard": "Joi.boolean().required().description('Set true if \"expression\" is a regular expression, set to \"false\" if the \"expression\" is a wildcard pattern')",
+  "purges.0.url.expression": "Joi.string().required().description('Wildcard expression if \"is_wildcard\" is set to true, otherwise - a regular expression')})"
+}

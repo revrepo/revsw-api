@@ -28,9 +28,14 @@ var sdkConfigs = require('./resources/sdkConfigs');
 var Session = require('./session');
 var domainConfigs = require('./resources/domainConfigs');
 var activity = require('./resources/activity');
+var purge = require('./resources/purge');
+var twoFA = require('./resources/2fa');
 
 var AccountsDP = require('./providers/data/accounts');
 var DomainConfigsDP = require('./providers/data/domainConfigs');
+var PurgeDP = require('./providers/data/purge');
+var UsersDP = require('./providers/data/users');
+
 var APITestError = require('./apiTestError');
 
 // This allows to overpass SSL certificate check
@@ -50,13 +55,19 @@ module.exports = {
     stats: stats,
     sdkConfigs: sdkConfigs,
     domainConfigs: domainConfigs,
-    activity: activity
+    activity: activity,
+    purge: purge,
+    twoFA: twoFA
+  },
+
+  dataProvider: {
+    accounts: []
   },
 
   helpers: {
 
     /**
-     * ### API.authenticateUser()
+     * ### API.helpers.authenticateUser()
      *
      * Helper method to Authenticate user before doing any type of request to
      * the REST API services.
@@ -71,13 +82,36 @@ module.exports = {
      */
     authenticateUser: function (user) {
       return authenticate
-        .createOne({email: user.name, password: user.password})
+        .createOne({email: user.email, password: user.password})
         .then(function (response) {
           user.token = response.body.token;
           Session.setCurrentUser(user);
         })
         .catch(function(error){
           throw new Error('Authenticating user', error.response.body, user);
+        });
+    },
+
+    /**
+     * ### API.helpers.attemptToAuthenticateUser()
+     *
+     * Helper method to Attempt to authenticate user before doing any type of
+     * request to the REST API services without catching any errors.
+     *
+     * @param user, user information. For instance
+     *     {
+     *       name: 'joe@email.com',
+     *       password: 'something'
+     *     }
+     *
+     * @returns {Promise}
+     */
+    attemptToAuthenticateUser: function (user) {
+      return authenticate
+        .createOne({email: user.email, password: user.password})
+        .then(function (response) {
+          user.token = response.body.token;
+          Session.setCurrentUser(user);
         });
     },
 
@@ -108,6 +142,37 @@ module.exports = {
           .then(function (res) {
             domainConfig.id = res.body.object_id;
             return domainConfig;
+          });
+      }
+    },
+    purge: {
+      createOne: function (domainName) {
+        var purgeData = PurgeDP.generateOne(domainName);
+        return purge
+          .createOneAsPrerequisite(purgeData)
+          .catch(function (error) {
+            throw new APITestError('Creating Account' , error.response.body,
+              purgeData);
+          })
+          .then(function (res) {
+            purgeData.id = res.body.request_id;
+            return purgeData;
+          });
+      }
+    },
+    users: {
+      createOne: function (name) {
+        var user = UsersDP.generateOne(name);
+        // TODO: this should be changed to the new way to create a resource
+        return users.user
+          .createOneAsPrerequisite(user)
+          .catch(function(error){
+            throw new APITestError('Creating User' , error.response.body,
+              user);
+          })
+          .then(function (res) {
+            user.id = res.body.object_id;
+            return user;
           });
       }
     }

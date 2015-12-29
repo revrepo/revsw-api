@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Accounts Resource object
+// # 2fa Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
@@ -24,20 +24,37 @@ var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var accountIdKey = 'accountId';
+var userIdKey = 'userId';
 var resourceConfig = {
-  idKey: accountIdKey,
-  name: 'accounts',
-  path: '/accounts/{' + accountIdKey + '}',
-  methods: [
-    Methods.CREATE,
-    Methods.READ_ALL,
-    Methods.READ_ONE,
-    Methods.UPDATE,
-    Methods.DELETE
+  idKey: userIdKey,
+  name: 'twoFA',
+  path: '/2fa/{' + userIdKey + '}',
+  nestedResources: [
+    {
+      idKey: userIdKey,
+      name: 'disable',
+      path: '/disable/{' + userIdKey + '}',
+      methods: [
+        Methods.CREATE
+      ]
+    }, {
+      idKey: userIdKey,
+      name: 'enable',
+      path: '/enable',
+      methods: [
+        Methods.CREATE
+      ]
+    }, {
+      idKey: userIdKey,
+      name: 'init',
+      path: '/init',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }
   ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `accounts resource`
+// `purge resource`
 module.exports = new BasicResource(resourceConfig);
