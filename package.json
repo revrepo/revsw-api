@@ -12,6 +12,8 @@
   "main": "index",
   "scripts": {
     "start": "nodejs bin/revsw-api.js",
+    "st": "node bin/revsw-api.js",
+    "lint": "jshint -c .jshintrc lib/*.js handlers/*.js; jshint -c config/.jshintrc config/*.json",
     "test": "mocha --reporter spec --timeout=20000 test"
   },
   "dependencies": {

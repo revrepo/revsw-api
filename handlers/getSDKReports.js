@@ -65,7 +65,7 @@ exports.getAppReport = function( request, reply ) {
           precision_threshold: 100
         }
       }
-    }
+    };
   }
 
   elasticSearch.getClient().search( {
@@ -137,7 +137,7 @@ exports.getAccountReport = function( request, reply ) {
           precision_threshold: 100
         }
       }
-    }
+    };
   }
 
   elasticSearch.getClient().search( {
