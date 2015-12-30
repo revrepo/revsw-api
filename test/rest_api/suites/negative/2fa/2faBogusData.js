@@ -30,6 +30,7 @@ describe('Negative check', function () {
   var user;
   var reseller = config.get('api.users.reseller');
   var bogusString = '!@#$%^&*()';
+  var transformedString = '&#x21;&#x40;&#x23;&#x24;&#x25;&#x5e;&amp;&#x2a;&#x28;&#x29;';
 
   before(function (done) {
     done();
@@ -87,8 +88,8 @@ describe('Negative check', function () {
                     .createOne(oneTimePassword)
                     .expect(400)
                     .then(function (response) {
-                      var expMsg = 'The supplied one time password is ' +
-                        'incorrect';
+                      var expMsg = 'child "oneTimePassword" fails because ["oneTimePassword" with value "' +
+                        transformedString + '" fails to match the required pattern: /^\\d+$/]';
                       response.body.message.should.equal(expMsg);
                       done();
                     })

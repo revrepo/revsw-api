@@ -110,8 +110,9 @@ describe('Negative check', function () {
               .getOne(longObjectId)
               .expect(400)
               .then(function (res) {
-                var expMsg = 'child "request_id" fails because ["request_id" ' +
-                  'length must be 36 characters long]';
+                var expMsg = 'child "request_id" fails because ["request_id" with value "' +
+                  longObjectId + '" fails to match the required pattern: ' +
+                  '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/]';
                 res.body.message.should.equal(expMsg);
                 done();
               })

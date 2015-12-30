@@ -98,8 +98,8 @@ describe('Boundary check', function () {
                     .createOne(oneTimePassword)
                     .expect(400)
                     .then(function (response) {
-                      var expMsg = 'The supplied one time password is ' +
-                        'incorrect';
+                      var expMsg = 'child "oneTimePassword" fails because ["oneTimePassword" with value "' +
+                        longText +'" fails to match the required pattern: /^\\d+$/]';
                       response.body.message.should.equal(expMsg);
                       done();
                     })
