@@ -95,7 +95,7 @@ describe('CRUD check', function () {
               .then(function (response) {
                 var account = response.body;
                 account.companyName.should.equal(accountSample.companyName);
-                account.createdBy.should.equal(resellerUser.name);
+                account.createdBy.should.equal(resellerUser.email);
                 account.id.should.equal(accountSample.id);
                 account.created_at.should.not.be.empty();
                 account.updated_at.should.not.be.empty();
