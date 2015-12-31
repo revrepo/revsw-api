@@ -167,6 +167,10 @@ var PurgeDataProvider = {
       };
       if (/Joi\.string\(\)\.required\(\)/.test(schemaDef)) {
         data.testValue = bogusData;
+        if (propertyPath === 'purges.0.url.expression') {
+          data.skipReason = '"expression" field accepts regular expressions: we need to find a proper way ' +
+            'to validate this field type';
+        }
       }
       else if (/Joi\.array\(\)\.required\(\)/.test(schemaDef)) {
         data.testValue = bogusData;
