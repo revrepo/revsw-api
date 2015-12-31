@@ -299,7 +299,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: SDKReports.getAppReport,
-      description: 'Get SDK stats for application',
+      description: 'Get SDK stats for the application',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -327,7 +327,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: SDKReports.getAccountReport,
-      description: 'Get SDK stats for account',
+      description: 'Get SDK stats for the account',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -342,6 +342,34 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           report_type: Joi.string().valid ( 'hits', 'devices' ).description('Type of requested report (defaults to "hits")')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/sdk/hits/{account_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getHitsReport,
+      description: 'Get SDK total hits for account',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account(Customer) ID')
+        },
+        query: {
+          app_id: Joi.string().description('Application ID, optional'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
         }
       }
     }
