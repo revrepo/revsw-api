@@ -99,7 +99,6 @@ exports.getAppReport = function( request, reply ) {
 //  ---------------------------------
 exports.getAccountReport = function( request, reply ) {
 
-  console.log( 'boooooooooooo!!!' );
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
     return reply( boom.badRequest( span.error ) );
@@ -172,8 +171,6 @@ exports.getAccountReport = function( request, reply ) {
 //  ---------------------------------
 exports.getHitsReport = function( request, reply ) {
 
-  console.log( 'getHitsReport' );
-
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
     return reply( boom.badRequest( span.error ) );
@@ -183,9 +180,6 @@ exports.getHitsReport = function( request, reply ) {
     app_id = request.query.app_id || '',
     delta = span.end - span.start,
     interval;
-
-  console.log( account_id );
-  console.log( app_id );
 
   if ( delta <= 3 * 3600000 ) {
     interval = 5 * 60000; // 5 minutes
