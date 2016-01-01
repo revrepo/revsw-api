@@ -81,14 +81,16 @@ describe('CRUD check', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            API.resources.purge
-              .getOne(purge.id)
-              .expect(200)
-              .then(function (res) {
-                res.body.message.should.equal('Success');
-                done();
-              })
-              .catch(done);
+            setTimeout(function () {
+              API.resources.purge
+                .getOne(purge.id)
+                .expect(200)
+                .then(function (res) {
+                  res.body.message.should.equal('Success');
+                  done();
+                })
+                .catch(done);
+            }, 5000);
           })
           .catch(done);
       });

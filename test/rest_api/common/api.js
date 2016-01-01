@@ -151,7 +151,7 @@ module.exports = {
         return purge
           .createOneAsPrerequisite(purgeData)
           .catch(function (error) {
-            throw new APITestError('Creating Account' , error.response.body,
+            throw new APITestError('Creating Purge Request' , error.response.body,
               purgeData);
           })
           .then(function (res) {

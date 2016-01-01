@@ -34,7 +34,7 @@ describe('Stats API check:', function () {
 
   before(function (done) {
     return API.resources.authenticate
-      .createOne({ email: justtaUser.name, password: justtaUser.password })
+      .createOne({ email: justtaUser.email, password: justtaUser.password })
       .then(function(response) {
         justtaUser.token = response.body.token;
         API.session.setCurrentUser(justtaUser);
