@@ -210,8 +210,6 @@ module.exports = [
             enable_3rd_party_rewrite: Joi.boolean().required(),
             enable_3rd_party_root_rewrite: Joi.boolean().required(),
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
-          }).required(),
-          enable_quic: Joi.boolean(),
           enable_origin_health_probe: Joi.boolean(),
           domain_aliases: Joi.array().items(Joi.string().regex(routeModels.domainRegex)),
           origin_health_probe: Joi.object({
@@ -234,6 +232,7 @@ module.exports = [
             origin_http_keepalive_enabled: Joi.boolean()
           }).required(),
           rev_component_bp : Joi.object({
+            enable_quic: Joi.boolean(),
             end_user_response_headers: Joi.array().items({
               header_value: Joi.string().regex(routeModels.httpHeaderValue).required(),
               header_name: Joi.string().regex(routeModels.httpHeaderName).required(),
