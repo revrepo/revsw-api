@@ -150,7 +150,7 @@ module.exports = {
           stats_reporting_level: Joi.string(),
           stats_reporting_max_requests_per_report: Joi.number().integer(),
           domains_provisioned_list: Joi.array().items(Joi.string()),
-          domains_while_list: Joi.array().items(Joi.string()),
+          domains_white_list: Joi.array().items(Joi.string()),
           domains_black_list: Joi.array().items(Joi.string()),
           a_b_testing_origin_offload_ratio: Joi.number().integer(),
           configuration_api_url: Joi.string(),

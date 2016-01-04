@@ -44,7 +44,7 @@ function App(mongoose, connection, options) {
     stats_reporting_level: String,
     stats_reporting_max_requests_per_report: {type: Number},
     domains_provisioned_list: [String],
-    domains_while_list: [String],
+    domains_white_list: [String],
     domains_black_list: [String],
     a_b_testing_origin_offload_ratio: {type: Number}
   }, {
