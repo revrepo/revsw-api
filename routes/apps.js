@@ -83,7 +83,7 @@ module.exports = [
         scope: ['user', 'admin', 'reseller', 'revadmin']
       },
       handler: app.getAppVersions,
-      description: 'Get list of previous configurations of a mobile application',
+      description: 'Get a list of previous configurations of a mobile application',
       tags: ['api'],
       validate: {
         params: {
