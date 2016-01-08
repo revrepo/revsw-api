@@ -37,7 +37,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   var proxyServers = [ 'testsjc20-bp01.revsw.net', 'testsjc20-bp02.revsw.net' ];
 
 
-describe('Rev Purge API', function() {
+xdescribe('Rev Purge API', function() {
 
   var adminToken = '';
   var userToken = '';

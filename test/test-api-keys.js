@@ -30,7 +30,7 @@ describe('Rev API keys', function() {
   var testUserId;
   var testPassword = 'password1';
   var createdAPIKeyId;
-  var testDomain = 'qa-api-test-domain.revsw.net';
+  var testDomain = 'qa-api-test-proxy-nginx-custom-commands.revsw.net';
   var testDomainId;
 
   var newUserJson = {
@@ -38,7 +38,7 @@ describe('Rev API keys', function() {
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
     'companyId': [myCompanyId],
-    'domain': ['qa-api-test-domain.revsw.net'],
+    'domain': ['qa-api-test-proxy-nginx-custom-commands.revsw.net'],
     'theme': 'light',
     'role': 'admin',
     'password': 'password1',
