@@ -19,9 +19,9 @@
 require('should-http');
 
 var config = require('config');
-var API= require('./../../common/api');
-var AccountsDP= require('./../../common/providers/data/accounts');
-var DomainConfigsDP= require('./../../common/providers/data/domainConfigs');
+var API = require('./../../common/api');
+var AccountsDP = require('./../../common/providers/data/accounts');
+var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 
 describe('Domain configs functional test', function () {
 
@@ -105,27 +105,40 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should return staging and global status as `In Progress` right after' +
+    it('should return staging and global status as `In Progress` right after ' +
       'create a domain config',
       function (done) {
+        var counter = 180000; // 3 mins
+        var interval = 1000;
+        var cb = function () {
+          if (counter < 0) {
+            done(new Error('Timeout: waiting domain-status to change.'));
+          }
+          counter -= interval;
+          API.resources.domainConfigs
+            .status(firstDc.id)
+            .getOne()
+            .expect(200)
+            .then(function (response) {
+              if (response.body.staging_status !== 'InProgress') {
+                setTimeout(cb, interval);
+                return;
+              }
+              response.body.staging_status.should.equal('InProgress');
+              response.body.global_status.should.equal('InProgress');
+              done();
+            })
+            .catch(done);
+        };
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            API.resources.domainConfigs
-              .status(firstDc.id)
-              .getOne()
-              .expect(200)
-              .then(function (response) {
-                response.body.staging_status.should.equal('InProgress');
-                response.body.global_status.should.equal('InProgress');
-                done();
-              })
-              .catch(done);
+            setTimeout(cb, interval);
           })
           .catch(done);
       });
 
-    it('should return staging and global status as `Published` after some' +
+    it('should return staging and global status as `Published` after some ' +
       'time a domain config was created',
       function (done) {
         secondDc = DomainConfigsDP.generateOne(account.id);
@@ -133,6 +146,29 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
+            var counter = 180000; // 3 mins
+            var interval = 1000;
+            var cb = function () {
+              if (counter < 0) {
+                done(new Error('Timeout: waiting domain-status to change.'));
+              }
+              counter -= interval;
+              API.resources.domainConfigs
+                .status(secondDc.id)
+                .getOne()
+                .expect(200)
+                .then(function (response) {
+                  if (response.body.staging_status !== 'Published' ||
+                    response.body.global_status !== 'Published') {
+                    setTimeout(cb, interval);
+                    return;
+                  }
+                  response.body.staging_status.should.equal('Published');
+                  response.body.global_status.should.equal('Published');
+                  done();
+                })
+                .catch(done);
+            };
             API.resources.domainConfigs
               .createOne(secondDc)
               .expect(200)
@@ -141,26 +177,15 @@ describe('Domain configs functional test', function () {
                 return;
               })
               .then(function () {
-                setTimeout(function () {
-                  API.resources.domainConfigs
-                    .status(secondDc.id)
-                    .getOne()
-                    .expect(200)
-                    .then(function (response) {
-                      response.body.staging_status.should.equal('Published');
-                      response.body.global_status.should.equal('Published');
-                      done();
-                    })
-                    .catch(done);
-                }, 150000);
+                setTimeout(cb, interval);
               })
               .catch(done);
           })
           .catch(done);
       });
 
-    it('should not allow to create a domain having existing domain name in' +
-      '`domain_aliases`',
+    it('should not allow to create a domain when sending existing `domain-' +
+      'name` value in `domain_aliases` field',
       function (done) {
         var newDomain = DomainConfigsDP.generateOne(account.id);
         newDomain.domain_aliases = secondDc.domain_name;
@@ -180,8 +205,8 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should not allow to create a domain having existing domain name in' +
-      '`domain_wildcard_alias`',
+    it('should not allow to create a domain  when sending existing `domain-' +
+      'name` value in `domain_wildcard_alias` field',
       function (done) {
         var newDomain = DomainConfigsDP.generateOne(account.id);
         newDomain.domain_wildcard_alias = secondDc.domain_name;
@@ -237,20 +262,31 @@ describe('Domain configs functional test', function () {
                 originServerV2 = firstFdc.origin_server;
                 delete firstFdc.domain_name;
                 delete firstFdc.cname;
+                var counter = 180000; // 3 mins
+                var interval = 1000;
+                var cb = function () {
+                  if (counter < 0) {
+                    done(new Error('Timeout: waiting domain-status to change.'));
+                  }
+                  counter -= interval;
+                  API.resources.domainConfigs
+                    .getOne(firstDc.id, {version: 2})
+                    .expect(200)
+                    .then(function (res) {
+                      if (res.body.origin_server !== originServerV2) {
+                        setTimeout(cb, interval);
+                        return;
+                      }
+                      res.body.origin_server.should.equal(originServerV2);
+                      done();
+                    })
+                    .catch(done);
+                };
                 API.resources.domainConfigs
                   .update(firstDc.id, firstFdc, {options: 'publish'})
                   .expect(200)
                   .then(function () {
-                    setTimeout(function () {
-                      API.resources.domainConfigs
-                        .getOne(firstDc.id, {version: 2})
-                        .expect(200)
-                        .then(function (res) {
-                          res.body.origin_server.should.equal(originServerV2);
-                          done();
-                        })
-                        .catch(done);
-                    }, 120000);
+                    setTimeout(cb, interval);
                   })
                   .catch(done);
               })
@@ -284,21 +320,32 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
+            var counter = 180000; // 3 mins
+            var interval = 1000;
+            var cb = function () {
+              if (counter < 0) {
+                done(new Error('Timeout: waiting domain-status to change.'));
+              }
+              counter -= interval;
+              API.resources.domainConfigs
+                .status(firstDc.id)
+                .getOne()
+                .expect(200)
+                .then(function (response) {
+                  if (response.body.global_status !== 'Modified') {
+                    setTimeout(cb, interval);
+                    return;
+                  }
+                  response.body.global_status.should.equal('Modified');
+                  done();
+                })
+                .catch(done);
+            };
             API.resources.domainConfigs
               .update(firstDc.id, firstFdc)
               .expect(200)
               .then(function () {
-                setTimeout(function () {
-                  API.resources.domainConfigs
-                    .status(firstDc.id)
-                    .getOne()
-                    .expect(200)
-                    .then(function (response) {
-                      response.body.global_status.should.equal('Modified');
-                      done();
-                    })
-                    .catch(done);
-                }, 120000);
+                setTimeout(cb, interval);
               })
               .catch(done);
           })
@@ -349,21 +396,32 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
+            var counter = 180000; // 3 mins
+            var interval = 1000;
+            var cb = function () {
+              if (counter < 0) {
+                done(new Error('Timeout: waiting domain-status to change.'));
+              }
+              counter -= interval;
+              API.resources.domainConfigs
+                .status(firstDc.id)
+                .getOne()
+                .expect(200)
+                .then(function (response) {
+                  if (response.body.global_status !== 'Published') {
+                    setTimeout(cb, interval);
+                    return;
+                  }
+                  response.body.global_status.should.equal('Published');
+                  done();
+                })
+                .catch(done);
+            };
             API.resources.domainConfigs
               .update(firstDc.id, firstFdc, {options: 'publish'})
               .expect(200)
               .then(function () {
-                setTimeout(function () {
-                  API.resources.domainConfigs
-                    .status(firstDc.id)
-                    .getOne()
-                    .expect(200)
-                    .then(function (response) {
-                      response.body.global_status.should.equal('Published');
-                      done();
-                    })
-                    .catch(done);
-                }, 120000);
+                setTimeout(cb, interval);
               })
               .catch(done);
           })
@@ -414,21 +472,32 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
+            var counter = 180000; // 3 mins
+            var interval = 1000;
+            var cb = function () {
+              if (counter < 0) {
+                done(new Error('Timeout: waiting domain-status to change.'));
+              }
+              counter -= interval;
+              API.resources.domainConfigs
+                .status(firstDc.id)
+                .getOne()
+                .expect(200)
+                .then(function (response) {
+                  if (response.body.global_status !== 'Published') {
+                    setTimeout(cb, interval);
+                    return;
+                  }
+                  response.body.global_status.should.equal('Published');
+                  done();
+                })
+                .catch(done);
+            };
             API.resources.domainConfigs
               .update(firstDc.id, firstFdc, {options: 'verify_only'})
               .expect(200)
               .then(function () {
-                setTimeout(function () {
-                  API.resources.domainConfigs
-                    .status(firstDc.id)
-                    .getOne()
-                    .expect(200)
-                    .then(function (response) {
-                      response.body.global_status.should.equal('Published');
-                      done();
-                    })
-                    .catch(done);
-                }, 120000);
+                setTimeout(cb, interval);
               })
               .catch(done);
           })

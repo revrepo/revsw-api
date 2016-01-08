@@ -78,19 +78,30 @@ describe('CRUD check', function () {
 
     it('should return data when getting specific purge.',
       function (done) {
+        var counter = 10000; // 10 secs
+        var interval = 1000; // 1 sec
+        var cb = function () {
+          if (counter < 0) {
+            done(new Error('Timeout: waiting purge resp-message to change.'));
+          }
+          counter -= interval;
+          API.resources.purge
+            .getOne(purge.id)
+            .expect(200)
+            .then(function (res) {
+              if (res.body.message !== 'Success') {
+                setTimeout(cb, interval);
+                return;
+              }
+              res.body.message.should.equal('Success');
+              done();
+            })
+            .catch(done);
+        };
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            setTimeout(function () {
-              API.resources.purge
-                .getOne(purge.id)
-                .expect(200)
-                .then(function (res) {
-                  res.body.message.should.equal('Success');
-                  done();
-                })
-                .catch(done);
-            }, 5000);
+            setTimeout(cb, interval);
           })
           .catch(done);
       });
