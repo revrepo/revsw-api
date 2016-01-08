@@ -101,20 +101,31 @@ describe('Functional check', function () {
           .authenticateUser(reseller)
           .then(function () {
             var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+            var counter = 10000; // 10 secs
+            var interval = 1000; // 1 sec
+            var cb = function () {
+              if (counter < 0) {
+                done(new Error('Timeout: wait purge resp-message to change.'));
+              }
+              counter -= interval;
+              API.resources.purge
+                .getOne(purge.id)
+                .expect(200)
+                .then(function (resp) {
+                  if (resp.body.message !== 'Success') {
+                    setTimeout(cb, interval);
+                    return;
+                  }
+                  resp.body.message.should.equal('Success');
+                  done();
+                })
+                .catch(done);
+            };
             API.resources.purge
               .createOne(purgeData)
               .expect(200)
               .then(function () {
-                setTimeout(function () {
-                  API.resources.purge
-                    .getOne(purge.id)
-                    .expect(200)
-                    .then(function (resp) {
-                      resp.body.message.should.equal('Success');
-                      done();
-                    })
-                    .catch(done);
-                }, 5000);
+                setTimeout(cb, interval);
               })
               .catch(done);
           })
