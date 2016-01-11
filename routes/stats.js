@@ -349,13 +349,13 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/sdk/hits/{account_id}',
+    path: '/v1/stats/sdk/flow/{account_id}',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
-      handler: SDKReports.getHitsReport,
-      description: 'Get SDK total hits for account',
+      handler: SDKReports.getFlowReport,
+      description: 'Get SDK data flow for an account and (optionaly) application',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -373,6 +373,38 @@ module.exports = [
         }
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/sdk/top/{account_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getTopReports,
+      description: 'Get a list of top traffic properties for an account and (optionaly) application',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account(Customer) ID')
+        },
+        query: {
+          app_id: Joi.string().description('Application ID, optional'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
+          report_type: Joi.string().required().valid ( 'country', 'os', 'device', 'operator', 'network' )
+            .description('Type of requested report (defaults to "country")')
+        }
+      }
+    }
   }
+
 
 ];
