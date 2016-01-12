@@ -214,12 +214,12 @@ exports.getFlowReport = function( request, reply ) {
     aggs: {
       reqs: {
         nested: {
-          "path": "requests"
+          'path': 'requests'
         },
         aggs: {
           result: {
             date_histogram: {
-              field: "requests.start_ts",
+              field: 'requests.start_ts',
               interval: ( '' + interval ),
               min_doc_count: 0,
               extended_bounds : {
@@ -231,12 +231,12 @@ exports.getFlowReport = function( request, reply ) {
             aggs: {
               received_bytes: {
                 sum: {
-                  field: "requests.received_bytes"
+                  field: 'requests.received_bytes'
                 }
               },
               sent_bytes: {
                 sum: {
-                  field: "requests.sent_bytes"
+                  field: 'requests.sent_bytes'
                 }
               }
             }
@@ -294,12 +294,9 @@ exports.getFlowReport = function( request, reply ) {
     } );
 };
 
-
-
 //  ---------------------------------
-exports.getTopReports = function( request, reply ) {
+exports.getTopRequests = function( request, reply ) {
 
-  var domain_id = request.params.domain_id;
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
     return reply( boom.badRequest( span.error ) );
@@ -307,12 +304,11 @@ exports.getTopReports = function( request, reply ) {
 
   var account_id = request.params.account_id,
     app_id = request.query.app_id || '',
-    delta = span.end - span.start,
     count = request.query.count || 0,
     report_type = request.query.report_type || 'country';
 
   var field;
-  switch (report_type) {  //  'country', 'os', 'device', 'operator', 'network'
+  switch (report_type) {
     case 'country':
       field = 'geoip.country_code2';
       break;
@@ -364,7 +360,7 @@ exports.getTopReports = function( request, reply ) {
         aggs: {
           hits: {
             nested: {
-              "path": "requests"
+              path: 'requests'
             },
             aggs: {
               hits: {
@@ -385,58 +381,58 @@ exports.getTopReports = function( request, reply ) {
     }
   };
 
+  var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
   return elasticSearch.getClientURL().search({
-      index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+      index: indicesList,
       ignoreUnavailable: true,
       timeout: 120000,
       body: requestBody
     } )
     .then(function(body) {
-      if ( !body.aggregations ) {
-        return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
-      }
-/*
-"aggregations": {
-  "missing_field": {
-    "doc_count": 0
-  },
-  "results": {
-    "doc_count_error_upper_bound": 0,
-    "sum_other_doc_count": 0,
-    "buckets": [
-      {
-        "key": "WiFi",
-        "doc_count": 1,
-        "hits": {
-          "doc_count": 500,
-          "hits": {
-            "buckets": [
-              {
-                "key": "2016-01-10T09:45:00.000Z-2016-01-10T09:49:59.999Z",
-                "from": 1452419100000,
-                "from_as_string": "2016-01-10T09:45:00.000Z",
-                "to": 1452419399999,
-                "to_as_string": "2016-01-10T09:49:59.999Z",
-                "doc_count": 496
+      /*
+      "aggregations": {
+        "missing_field": {
+          "doc_count": 0
+        },
+        "results": {
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+          "buckets": [
+            {
+              "key": "WiFi",
+              "doc_count": 1,
+              "hits": {
+                "doc_count": 500,
+                "hits": {
+                  "buckets": [
+                    {
+                      "key": "2016-01-10T09:45:00.000Z-2016-01-10T09:49:59.999Z",
+                      "from": 1452419100000,
+                      "from_as_string": "2016-01-10T09:45:00.000Z",
+                      "to": 1452419399999,
+                      "to_as_string": "2016-01-10T09:49:59.999Z",
+                      "doc_count": 496
+                    }
+                  ]
+                }
               }
-            ]
-          }
+            }
+          ]
         }
       }
-    ]
-  }
-}
-*/
+      */
 
       var data = [];
-      for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
-        var item = body.aggregations.results.buckets[i];
-        data.push({
-          key: item.key,
-          count: ( ( item.hits && item.hits.hits && item.hits.hits.buckets.length && item.hits.hits.buckets[0].doc_count ) || 0 )
-        });
+      if ( body.aggregations ) {
+        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
+          var item = body.aggregations.results.buckets[i];
+          data.push({
+            key: item.key,
+            count: ( ( item.hits && item.hits.hits && item.hits.hits.buckets.length && item.hits.hits.buckets[0].doc_count ) || 0 )
+          });
+        }
       }
+
       var response = {
         metadata: {
           account_id: account_id,
@@ -446,7 +442,7 @@ exports.getTopReports = function( request, reply ) {
           end_timestamp: span.end,
           end_datetime: new Date(span.end),
           total_hits: body.hits.total,
-          data_points_count: body.aggregations.results.buckets.length
+          data_points_count: data.length
         },
         data: data
       };
@@ -460,6 +456,127 @@ exports.getTopReports = function( request, reply ) {
 };
 
 
+//  ---------------------------------
+exports.getTopUsers = function( request, reply ) {
+
+  var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+  if ( span.error ) {
+    return reply( boom.badRequest( span.error ) );
+  }
+
+  var account_id = request.params.account_id,
+    app_id = request.query.app_id || '',
+    count = request.query.count || 0,
+    report_type = request.query.report_type || 'country';
+
+  var field;
+  switch (report_type) {
+    case 'country':
+      field = 'geoip.country_code2';
+      break;
+    case 'os':
+      field = 'device.os';
+      break;
+    case 'device':
+      field = 'device.device';
+      break;
+    case 'operator':
+      field = 'carrier.net_operator';
+      break;
+    case 'network':
+      field = 'carrier.signal_type';
+      break;
+    default:
+      return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+  }
+
+  var requestBody = {
+    size: 0,
+    query: {
+      filtered: {
+        filter: {
+          bool: {
+            must: [ {
+              term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+            }, {
+              range: {
+                'start_ts': {
+                  gte: span.start,
+                  lt: span.end
+                }
+              }
+            } ]
+          }
+        }
+      }
+    },
+    aggs: {
+      results: {
+        terms: {
+          field: field,
+          size: count,
+          order: {
+            _count: 'desc'
+          }
+        },
+        aggs: {
+          users: {
+            cardinality: {
+              field: 'device.uuid',
+              precision_threshold: 100
+            }
+          }
+        }
+      },
+      missing_field: {
+        missing: {
+          field: field
+        }
+      }
+    }
+  };
+
+  var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+  return elasticSearch.getClientURL().search({
+      index: indicesList,
+      ignoreUnavailable: true,
+      timeout: 120000,
+      body: requestBody
+    } )
+    .then(function(body) {
+
+      var data = [];
+      if ( body.aggregations ) {
+        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
+          var item = body.aggregations.results.buckets[i];
+          data.push({
+            key: item.key,
+            count: ( ( item.users && item.users.value ) || 0 )
+          });
+        }
+      }
+
+      var response = {
+        metadata: {
+          account_id: account_id,
+          app_id: ( app_id || '*' ),
+          start_timestamp: span.start,
+          start_datetime: new Date(span.start),
+          end_timestamp: span.end,
+          end_datetime: new Date(span.end),
+          total_hits: body.hits.total,
+          data_points_count: data.length
+        },
+        data: data
+      };
+      renderJSON( request, reply, false/*error is undefined here*/, response );
+    })
+    .catch( function(error) {
+      console.trace(error.message);
+      return reply(boom.badImplementation('Failed to retrieve data from ES'));
+    });
+
+};
 
 //  ----------------------------------------------------------------------------------------------//
 //  dump
