@@ -452,9 +452,7 @@ exports.getTopRequests = function( request, reply ) {
       console.trace(error.message);
       return reply(boom.badImplementation('Failed to retrieve data from ES'));
     });
-
 };
-
 
 //  ---------------------------------
 exports.getTopUsers = function( request, reply ) {
@@ -575,8 +573,193 @@ exports.getTopUsers = function( request, reply ) {
       console.trace(error.message);
       return reply(boom.badImplementation('Failed to retrieve data from ES'));
     });
+};
+
+//  ---------------------------------
+exports.getTopGBT = function( request, reply ) {
+
+  var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+  if ( span.error ) {
+    return reply( boom.badRequest( span.error ) );
+  }
+
+  var account_id = request.params.account_id,
+    app_id = request.query.app_id || '',
+    count = request.query.count || 0,
+    report_type = request.query.report_type || 'country';
+
+  var field;
+  switch (report_type) {
+    case 'country':
+      field = 'geoip.country_code2';
+      break;
+    case 'os':
+      field = 'device.os';
+      break;
+    case 'device':
+      field = 'device.device';
+      break;
+    case 'operator':
+      field = 'carrier.net_operator';
+      break;
+    case 'network':
+      field = 'carrier.signal_type';
+      break;
+    default:
+      return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+  }
+
+  var requestBody = {
+    size: 0,
+    query: {
+      filtered: {
+        filter: {
+          bool: {
+            must: [ {
+              term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+            }, {
+              range: {
+                'start_ts': {
+                  gte: span.start,
+                  lt: span.end
+                }
+              }
+            } ]
+          }
+        }
+      }
+    },
+    aggs: {
+      results: {
+        terms: {
+          field: field,
+          size: count,
+          order: {
+            _count: 'desc'
+          }
+        },
+        aggs: {
+          deep: {
+            nested: {
+              path: 'requests'
+            },
+            aggs: {
+              hits: {
+                range: {
+                  field: 'requests.start_ts',
+                  ranges: [{ from: span.start, to: (span.end - 1) }]
+                },
+                aggs: {
+                  gbt: {
+                    sum: {
+                      field: 'requests.received_bytes'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      missing_field: {
+        missing: {
+          field: field
+        }
+      }
+    }
+  };
+
+  var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+  return elasticSearch.getClientURL().search({
+      index: indicesList,
+      ignoreUnavailable: true,
+      timeout: 120000,
+      body: requestBody
+    } )
+    .then(function(body) {
+
+      /*
+        "aggregations": {
+          "missing_field": {
+            "doc_count": 0
+          },
+          "results": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "iPhone7,2 A1549/A1586",
+                "doc_count": 1,
+                "deep": {
+                  "doc_count": 500,
+                  "hits": {
+                    "buckets": [
+                      {
+                        "key": "2016-01-10T00:45:00.000Z-2016-01-12T00:44:59.999Z",
+                        "from": 1452386700000,
+                        "from_as_string": "2016-01-10T00:45:00.000Z",
+                        "to": 1452559499999,
+                        "to_as_string": "2016-01-12T00:44:59.999Z",
+                        "doc_count": 500,
+                        "gbt": {
+                          "value": 10051575
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      */
+
+      var data = [];
+      if ( body.aggregations ) {
+        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
+          var item = body.aggregations.results.buckets[i];
+          data.push({
+            key: item.key,
+            count: ( ( item.deep && item.deep.hits && item.deep.hits.buckets.length && item.deep.hits.buckets[0].gbt.value ) || 0 )
+          });
+        }
+      }
+
+      var response = {
+        metadata: {
+          account_id: account_id,
+          app_id: ( app_id || '*' ),
+          start_timestamp: span.start,
+          start_datetime: new Date(span.start),
+          end_timestamp: span.end,
+          end_datetime: new Date(span.end),
+          total_hits: body.hits.total,
+          data_points_count: data.length
+        },
+        data: data
+      };
+      renderJSON( request, reply, false/*error is undefined here*/, response );
+    })
+    .catch( function(error) {
+      console.trace(error.message);
+      return reply(boom.badImplementation('Failed to retrieve data from ES'));
+    });
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //  ----------------------------------------------------------------------------------------------//
 //  dump
