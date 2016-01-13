@@ -349,7 +349,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/sdk/flow/{account_id}',
+    path: '/v1/stats/sdk/flow',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
@@ -363,11 +363,9 @@ module.exports = [
         }
       },
       validate: {
-        params: {
-          account_id: Joi.objectId().required().description('Account(Customer) ID')
-        },
         query: {
-          app_id: Joi.string().description('Application ID, optional'),
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
         }
@@ -377,7 +375,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/sdk/top_requests/{account_id}',
+    path: '/v1/stats/sdk/top_requests',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
@@ -391,11 +389,9 @@ module.exports = [
         }
       },
       validate: {
-        params: {
-          account_id: Joi.objectId().required().description('Account(Customer) ID')
-        },
         query: {
-          app_id: Joi.string().description('Application ID, optional'),
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
@@ -408,7 +404,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/sdk/top_users/{account_id}',
+    path: '/v1/stats/sdk/top_users',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
@@ -422,11 +418,9 @@ module.exports = [
         }
       },
       validate: {
-        params: {
-          account_id: Joi.objectId().required().description('Account(Customer) ID')
-        },
         query: {
-          app_id: Joi.string().description('Application ID, optional'),
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
@@ -439,7 +433,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/sdk/top_gbt/{account_id}',
+    path: '/v1/stats/sdk/top_gbt',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
@@ -453,11 +447,9 @@ module.exports = [
         }
       },
       validate: {
-        params: {
-          account_id: Joi.objectId().required().description('Account(Customer) ID')
-        },
         query: {
-          app_id: Joi.string().description('Application ID, optional'),
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
