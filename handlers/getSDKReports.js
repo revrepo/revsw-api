@@ -182,7 +182,7 @@ exports.getFlowReport = function( request, reply ) {
     interval;
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   if ( delta <= 3 * 3600000 ) {
@@ -312,7 +312,7 @@ exports.getTopRequests = function( request, reply ) {
     report_type = request.query.report_type || 'country';
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   var field;
@@ -476,7 +476,7 @@ exports.getTopUsers = function( request, reply ) {
     report_type = request.query.report_type || 'country';
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   var field;
@@ -601,7 +601,7 @@ exports.getTopGBT = function( request, reply ) {
     report_type = request.query.report_type || 'country';
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   var field;
