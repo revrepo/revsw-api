@@ -59,7 +59,7 @@ module.exports = [
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
           request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
           protocol: Joi.string().valid( 'HTTP', 'HTTPS' ).description('HTTP/HTTPS protocol to filter'),
-//        http_protocol: Joi.string().valid( 'HTTP\/1.0', 'HTTP\/1.1' ).description('HTTP protocol version value to filter'),
+          // http_protocol: Joi.string().valid( 'HTTP\/1.0', 'HTTP\/1.1' ).description('HTTP protocol version value to filter'),
           http_method: Joi.string().valid( 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT', 'PATCH' )
             .description('HTTP method value to filter'),
           quic: Joi.string().valid( 'QUIC', 'HTTP' ).description('Last mile protocol to filter'),
@@ -98,7 +98,7 @@ module.exports = [
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
           request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
           protocol: Joi.string().valid( 'HTTP', 'HTTPS' ).description('HTTP/HTTPS protocol to filter'),
-//        http_protocol: Joi.string().valid( 'HTTP\/1.0', 'HTTP\/1.1' ).description('HTTP protocol version value to filter'),
+          // http_protocol: Joi.string().valid( 'HTTP\/1.0', 'HTTP\/1.1' ).description('HTTP protocol version value to filter'),
           http_method: Joi.string().valid( 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT', 'PATCH' )
             .description('HTTP method value to filter'),
           quic: Joi.string().valid( 'QUIC', 'HTTP' ).description('Last mile protocol to filter'),
@@ -455,6 +455,34 @@ module.exports = [
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
           report_type: Joi.string().required().valid ( 'country', 'os', 'device', 'operator', 'network' )
             .description('Type of requested report (defaults to "country")')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/sdk/distributions',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getDistributions,
+      description: 'Get distributions of top traffic properties for an account and optionally application',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        query: {
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          report_type: Joi.string().required().valid ( 'destination', 'transport', 'status', 'cache' )
+            .description('Type of requested report (defaults to "destination")')
         }
       }
     }

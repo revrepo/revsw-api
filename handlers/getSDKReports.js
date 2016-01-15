@@ -182,7 +182,7 @@ exports.getFlowReport = function( request, reply ) {
     interval;
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   if ( delta <= 3 * 3600000 ) {
@@ -279,7 +279,7 @@ exports.getFlowReport = function( request, reply ) {
       }
       var response = {
         metadata: {
-          account_id: account_id,
+          account_id: ( account_id || '*' ),
           app_id: ( app_id || '*' ),
           start_timestamp: span.start,
           start_datetime: new Date( span.start ),
@@ -312,7 +312,7 @@ exports.getTopRequests = function( request, reply ) {
     report_type = request.query.report_type || 'country';
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   var field;
@@ -443,7 +443,7 @@ exports.getTopRequests = function( request, reply ) {
 
       var response = {
         metadata: {
-          account_id: account_id,
+          account_id: ( account_id || '*' ),
           app_id: ( app_id || '*' ),
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
@@ -476,7 +476,7 @@ exports.getTopUsers = function( request, reply ) {
     report_type = request.query.report_type || 'country';
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   var field;
@@ -568,7 +568,7 @@ exports.getTopUsers = function( request, reply ) {
 
       var response = {
         metadata: {
-          account_id: account_id,
+          account_id: ( account_id || '*' ),
           app_id: ( app_id || '*' ),
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
@@ -601,7 +601,7 @@ exports.getTopGBT = function( request, reply ) {
     report_type = request.query.report_type || 'country';
 
   if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'either Account ID or Application ID should be provided' ) );
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   var field;
@@ -743,7 +743,239 @@ exports.getTopGBT = function( request, reply ) {
 
       var response = {
         metadata: {
-          account_id: account_id,
+          account_id: ( account_id || '*' ),
+          app_id: ( app_id || '*' ),
+          start_timestamp: span.start,
+          start_datetime: new Date(span.start),
+          end_timestamp: span.end,
+          end_datetime: new Date(span.end),
+          total_hits: body.hits.total,
+          data_points_count: data.length
+        },
+        data: data
+      };
+      renderJSON( request, reply, false/*error is undefined here*/, response );
+    })
+    .catch( function(error) {
+      console.trace(error.message);
+      return reply(boom.badImplementation('Failed to retrieve data from ES'));
+    });
+};
+
+//  ---------------------------------
+exports.getDistributions = function( request, reply ) {
+
+  var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+  if ( span.error ) {
+    return reply( boom.badRequest( span.error ) );
+  }
+
+  var account_id = request.query.account_id,
+    app_id = request.query.app_id || '',
+    count = request.query.count || 0,
+    report_type = request.query.report_type || 'destination';
+
+  if ( !account_id && !app_id ) {
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
+  }
+
+  var field, keys;
+  switch (report_type) {
+    case 'destination':
+      field = 'requests.destination';
+      keys = {
+        'origin': 'Origin',
+        'rev_edge': 'RevAPM'
+      };
+      break;
+    case 'transport':
+      field = 'requests.edge_transport';
+      keys = {
+        'standard': 'Standard',
+        'quic': 'QUIC'
+      };
+      break;
+    case 'status':
+      field = 'requests.success_status';
+      keys = {
+        '0': 'Error',
+        '1': 'Success'
+      };
+      break;
+    case 'cache':
+      field = 'requests.x-rev-cache';
+      keys = {
+        'HIT': 'HIT',
+        'MISS': 'MISS'
+      };
+      break;
+    default:
+      return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+  }
+
+  var requestBody = {
+    size: 0,
+    query: {
+      filtered: {
+        filter: {
+          bool: {
+            must: [ {
+              term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+            }, {
+              range: {
+                'start_ts': {
+                  gte: span.start,
+                  lt: span.end
+                }
+              }
+            } ]
+          }
+        }
+      }
+    },
+
+    aggs: {
+      result: {
+        nested: {
+          path: 'requests'
+        },
+        aggs: {
+          result: {
+            range: {
+              field: 'requests.start_ts',
+              ranges: [{ from: span.start, to: (span.end - 1) }]
+            },
+            aggs: {
+              distribution: {
+                terms: { field: field },
+                aggs: {
+                  received_bytes: {
+                    sum: {
+                      field: 'requests.received_bytes'
+                    }
+                  },
+                  sent_bytes: {
+                    sum: {
+                      field: 'requests.sent_bytes'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+  return elasticSearch.getClientURL().search({
+      index: indicesList,
+      ignoreUnavailable: true,
+      timeout: 120000,
+      body: requestBody
+    } )
+    .then(function(body) {
+
+      /*
+      "aggregations": {
+      "result": {
+        "doc_count": 3991,
+        "result": {
+          "buckets": [
+            {
+              "key": "2016-01-13T22:50:00.000Z-2016-01-14T22:49:59.999Z",
+              "from": 1452725400000,
+              "from_as_string": "2016-01-13T22:50:00.000Z",
+              "to": 1452811799999,
+              "to_as_string": "2016-01-14T22:49:59.999Z",
+              "doc_count": 3991,
+              "distribution": {
+                "doc_count_error_upper_bound": 0,
+                "sum_other_doc_count": 0,
+                "buckets": [
+                  {
+                    "key": "MISS",
+                    "doc_count": 1740,
+                    "received_bytes": {
+                      "value": 28208157
+                    },
+                    "sent_bytes": {
+                      "value": 3767
+                    }
+                  },
+                  {
+                    "key": "HIT",
+                    "doc_count": 1240,
+                    "received_bytes": {
+                      "value": 112072849
+                    },
+                    "sent_bytes": {
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "-",
+                    "doc_count": 1011,
+                    "received_bytes": {
+                      "value": 60997388
+                    },
+                    "sent_bytes": {
+                      "value": 0
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }}
+
+      //  empty
+      "aggregations": {
+        "result": {
+          "doc_count": 0,
+          "result": {
+            "buckets": [
+              {
+                "key": "2016-01-13T22:50:00.000Z-2016-01-14T22:49:59.999Z",
+                "from": 1452725400000,
+                "from_as_string": "2016-01-13T22:50:00.000Z",
+                "to": 1452811799999,
+                "to_as_string": "2016-01-14T22:49:59.999Z",
+                "doc_count": 0,
+                "distribution": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": []
+                }
+              }
+            ]
+          }
+        }
+      }
+
+      */
+
+      var data = [];
+      if ( body.aggregations && body.aggregations.result.doc_count ) {
+        for ( var i = 0, len = body.aggregations.result.result.buckets[0].distribution.buckets.length; i < len; ++i ) {
+          var item = body.aggregations.result.result.buckets[0].distribution.buckets[i];
+          if ( keys[item.key] ) {
+            item.key = keys[item.key];
+            data.push({
+              key: item.key,
+              count: item.doc_count,
+              received_bytes: item.received_bytes.value,
+              sent_bytes: item.sent_bytes.value
+            });
+          }
+        }
+      }
+
+      var response = {
+        metadata: {
+          account_id: ( account_id || '*' ),
           app_id: ( app_id || '*' ),
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
