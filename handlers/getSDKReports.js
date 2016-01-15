@@ -666,9 +666,14 @@ exports.getTopGBT = function( request, reply ) {
                   ranges: [{ from: span.start, to: (span.end - 1) }]
                 },
                 aggs: {
-                  gbt: {
+                  received_bytes: {
                     sum: {
                       field: 'requests.received_bytes'
+                    }
+                  },
+                  sent_bytes: {
+                    sum: {
+                      field: 'requests.sent_bytes'
                     }
                   }
                 }
@@ -717,7 +722,7 @@ exports.getTopGBT = function( request, reply ) {
                         "to": 1452559499999,
                         "to_as_string": "2016-01-12T00:44:59.999Z",
                         "doc_count": 500,
-                        "gbt": {
+                        "received_bytes": {
                           "value": 10051575
                         }
                       }
@@ -734,10 +739,22 @@ exports.getTopGBT = function( request, reply ) {
       if ( body.aggregations ) {
         for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
           var item = body.aggregations.results.buckets[i];
-          data.push({
-            key: item.key,
-            count: ( ( item.deep && item.deep.hits && item.deep.hits.buckets.length && item.deep.hits.buckets[0].gbt.value ) || 0 )
-          });
+          if ( item.deep && item.deep.hits && item.deep.hits.buckets.length ) {
+            var deep = item.deep.hits.buckets[0];
+            data.push({
+              key: item.key,
+              count: deep.doc_count,
+              received_bytes: deep.received_bytes.value,
+              sent_bytes: deep.sent_bytes.value
+            });
+          } else {
+            data.push({
+              key: item.key,
+              count: 0,
+              received_bytes: 0,
+              sent_bytes: 0
+            });
+          }
         }
       }
 
