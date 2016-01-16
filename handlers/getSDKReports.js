@@ -216,31 +216,39 @@ exports.getFlowReport = function( request, reply ) {
       }
     },
     aggs: {
-      reqs: {
+      results: {
         nested: {
           'path': 'requests'
         },
         aggs: {
-          result: {
-            date_histogram: {
+          date_range: {
+            range: {
               field: 'requests.start_ts',
-              interval: ( '' + interval ),
-              min_doc_count: 0,
-              extended_bounds : {
-                min: span.start,
-                max: span.end - 1
-              },
-              offset: ( '' + ( span.end % interval ) )
+              ranges: [{ from: span.start, to: (span.end - 1) }]
             },
             aggs: {
-              received_bytes: {
-                sum: {
-                  field: 'requests.received_bytes'
-                }
-              },
-              sent_bytes: {
-                sum: {
-                  field: 'requests.sent_bytes'
+              date_histogram: {
+                date_histogram: {
+                  field: 'requests.start_ts',
+                  interval: ( '' + interval ),
+                  min_doc_count: 0,
+                  extended_bounds : {
+                    min: span.start,
+                    max: span.end - 1
+                  },
+                  offset: ( '' + ( span.end % interval ) )
+                },
+                aggs: {
+                  received_bytes: {
+                    sum: {
+                      field: 'requests.received_bytes'
+                    }
+                  },
+                  sent_bytes: {
+                    sum: {
+                      field: 'requests.sent_bytes'
+                    }
+                  }
                 }
               }
             }
@@ -262,16 +270,43 @@ exports.getFlowReport = function( request, reply ) {
       var total_sent = 0;
       var total_received = 0;
       var dataArray = [];
+      // "aggregations": {
+      //   "results": {
+      //     "doc_count": 9275,
+      //     "date_range": {
+      //       "buckets": [
+      //         {
+      //           "key": "2016-01-15T00:45:00.000Z-2016-01-16T00:44:59.999Z",
+      //           "from": 1452818700000,
+      //           "from_as_string": "2016-01-15T00:45:00.000Z",
+      //           "to": 1452905099999,
+      //           "to_as_string": "2016-01-16T00:44:59.999Z",
+      //           "doc_count": 9273,
+      //           "date_histogram": {
+      //             "buckets": [
+      //               {
+      //                 "key_as_string": "2016-01-15T00:45:00.000Z",
+      //                 "key": 1452818700000,
+      //                 "doc_count": 0,
+      //                 "received_bytes": {
+      //                   "value": 0
+      //                 },
+      //                 "sent_bytes": {
+      //                   "value": 0
+      //                 }
+      //               },
+
       if ( body.aggregations ) {
-        for ( var i = 0, len = body.aggregations.reqs.result.buckets.length; i < len; i++ ) {
-          var item = body.aggregations.reqs.result.buckets[i];
-          dataArray[i] = {
+        var buckets = body.aggregations.results.date_range.buckets[0].date_histogram.buckets;
+        for ( var i = 0, len = buckets.length; i < len; i++ ) {
+          var item = buckets[i];
+          dataArray.push({
             time: item.key,
             time_as_string: item.key_as_string,
             hits: item.doc_count,
             received_bytes: item.received_bytes.value,
             sent_bytes: item.sent_bytes.value
-          };
+          });
           total_hits += item.doc_count;
           total_received += item.received_bytes.value;
           total_sent += item.sent_bytes.value;
