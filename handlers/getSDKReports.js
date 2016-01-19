@@ -240,7 +240,7 @@ exports.getDirs = function( request, reply ) {
         devices: [],
         operators: [],
         oses: [],
-        countries: []
+        countries: {}
       };
       // "aggregations": {
       //   "devices": {
@@ -292,7 +292,7 @@ exports.getDirs = function( request, reply ) {
         }
         buckets = body.aggregations.countries.buckets;
         for ( i = 0, len = buckets.length; i < len; i++ ) {
-          data.countries.push( buckets[i].key );
+          data.countries[buckets[i].key] = utils.countries[buckets[i].key] || buckets[i].key;
         }
       }
 
