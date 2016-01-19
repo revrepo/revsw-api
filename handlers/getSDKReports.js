@@ -212,7 +212,7 @@ exports.getDirs = function( request, reply ) {
       },
       devices: {
         terms: {
-          "field": 'device.device'
+          field: 'device.device'
         }
       },
       countries: {
@@ -977,7 +977,7 @@ exports.getDistributions = function( request, reply ) {
 
   var account_id = request.query.account_id,
     app_id = request.query.app_id || '',
-    count = request.query.count || 0,
+    // count = request.query.count || 0,
     report_type = request.query.report_type || 'destination';
 
   if ( !account_id && !app_id ) {
