@@ -107,6 +107,16 @@ App.prototype = {
       callback(err, apps);
     });
   },
+  accountList: function(aid, callback) {
+    this.model.find({deleted: 0, account_id: aid}, {_id: 1}, function(err, apps) {
+      if (apps) {
+        apps = apps.map(function( a ) {
+          return a._id.toString();
+        });
+      }
+      callback(err, apps);
+    });
+  },
   update: function(item, callback) {
     this.model.findOne({_id: item._id}, function(err, doc) {
       if (doc) {

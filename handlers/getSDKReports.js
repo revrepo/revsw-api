@@ -25,8 +25,31 @@ var utils = require( '../lib/utilities.js' );
 var renderJSON = require( '../lib/renderJSON' );
 var elasticSearch = require( '../lib/elasticSearch' );
 
+//  ---------------------------------
+var check_app_access_ = function( request ) {
+
+  //  user is revadmin or request doesn't contain an application ID
+  if ( request.auth.credentials.role === 'revadmin' ||
+      !request.query.app_id ) {
+    return true;
+  }
+
+  //  user has no access to any application
+  if ( !request.auth.credentials.apps.length ) {
+    return false;
+  }
+
+  //  user's application list should contain requested application ID
+  return request.auth.credentials.apps.indexOf( request.query.app_id ) !== -1;
+};
+
+
 //  ----------------------------------------------------------------------------------------------//
 exports.getAppReport = function( request, reply ) {
+
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
 
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
@@ -171,6 +194,10 @@ exports.getAccountReport = function( request, reply ) {
 
 //  ---------------------------------
 exports.getDirs = function( request, reply ) {
+
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
 
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
@@ -317,6 +344,10 @@ exports.getDirs = function( request, reply ) {
 
 //  ---------------------------------
 exports.getFlowReport = function( request, reply ) {
+
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
 
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
@@ -489,6 +520,10 @@ exports.getFlowReport = function( request, reply ) {
 //  ---------------------------------
 exports.getTopRequests = function( request, reply ) {
 
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
+
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
     return reply( boom.badRequest( span.error ) );
@@ -653,6 +688,10 @@ exports.getTopRequests = function( request, reply ) {
 //  ---------------------------------
 exports.getTopUsers = function( request, reply ) {
 
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
+
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
     return reply( boom.badRequest( span.error ) );
@@ -777,6 +816,10 @@ exports.getTopUsers = function( request, reply ) {
 
 //  ---------------------------------
 exports.getTopGBT = function( request, reply ) {
+
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
 
   var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
   if ( span.error ) {
@@ -969,6 +1012,10 @@ exports.getTopGBT = function( request, reply ) {
 
 //  ---------------------------------
 exports.getDistributions = function( request, reply ) {
+
+  if ( !check_app_access_( request ) ) {
+    return reply(boom.unauthorized('You have no access to this Application'));
+  }
 
   var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
   if ( span.error ) {
