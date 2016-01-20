@@ -107,8 +107,8 @@ App.prototype = {
       callback(err, apps);
     });
   },
-  accountList: function(aid, callback) {
-    this.model.find({deleted: 0, account_id: aid}, {_id: 1}, function(err, apps) {
+  accountList: function(aids, callback) {
+    this.model.find({deleted: 0, account_id: { $in: aids }}, {_id: 1}, function(err, apps) {
       if (apps) {
         apps = apps.map(function( a ) {
           return a._id.toString();

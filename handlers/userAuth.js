@@ -48,7 +48,7 @@ function UserAuth (request, username, password, callback) {
       return callback(null, false);
     }
 
-    result.apps = [];
+    result.appId = [];
     result.scope = [];
     result.scope.push(result.role);
     if (!result.access_control_list.readOnly) {
@@ -61,8 +61,8 @@ function UserAuth (request, username, password, callback) {
       if ( result.role === 'revadmin' ) {
         callback(error, true, result);
       } else {
-        apps.accountList( result.companyId[0], function( err, appList ) {
-          result.apps = appList || [];
+        apps.accountList( result.companyId, function( err, appList ) {
+          result.appId = appList || [];
           callback(err, true, result);
         });
       }
