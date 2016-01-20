@@ -168,6 +168,153 @@ exports.getAccountReport = function( request, reply ) {
     } );
 };
 
+
+//  ---------------------------------
+exports.getDirs = function( request, reply ) {
+
+  var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+  if ( span.error ) {
+    return reply( boom.badRequest( span.error ) );
+  }
+
+  var account_id = request.query.account_id,
+    app_id = request.query.app_id || '' ;
+
+  if ( !account_id && !app_id ) {
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
+  }
+
+  var requestBody = {
+    size: 0,
+    query: {
+      filtered: {
+        filter: {
+          bool: {
+            must: [ {
+              term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+            }, {
+              range: {
+                'start_ts': {
+                  gte: span.start,
+                  lt: span.end
+                }
+              }
+            } ]
+          }
+        }
+      }
+    },
+    aggs: {
+      oses: {
+        terms: {
+          field: 'device.os'
+        }
+      },
+      devices: {
+        terms: {
+          field: 'device.device'
+        }
+      },
+      countries: {
+        terms: {
+          field: 'geoip.country_code2'
+        }
+      },
+      operators: {
+        terms: {
+          field: 'carrier.sim_operator'
+        }
+      }
+    }
+  };
+
+  elasticSearch.getClientURL().search( {
+      index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+      ignoreUnavailable: true,
+      timeout: 120000,
+      body: requestBody
+    } )
+    .then( function( body ) {
+
+      var data = {
+        devices: [],
+        operators: [],
+        oses: [],
+        countries: {}
+      };
+      // "aggregations": {
+      //   "devices": {
+      //     "doc_count_error_upper_bound": 0,
+      //     "sum_other_doc_count": 0,
+      //     "buckets": [
+      //       {
+      //         "key": "iPhone4,1 A1387/A1431",
+      //         "doc_count": 312
+      //       }, ...............
+      //     ]
+      //   },
+      //   "operators": {
+      //     "doc_count_error_upper_bound": 0,
+      //     "sum_other_doc_count": 0,
+      //     "buckets": [
+      //       {
+      //         "key": "AT&T",
+      //         "doc_count": 328
+      //       }, ..................
+      //     ]
+      //   },
+      //   "oses": { .............
+      //   },
+      //   "countries": { ...............
+      //   }
+      // }
+
+      if ( body.aggregations ) {
+        var buckets = body.aggregations.devices.buckets;
+        for ( var i = 0, len = buckets.length; i < len; i++ ) {
+          data.devices.push( buckets[i].key );
+        }
+        buckets = body.aggregations.operators.buckets;
+        var unknown_added = false;
+        for ( i = 0, len = buckets.length; i < len; i++ ) {
+          if ( buckets[i].key === '-' || buckets[i].key === '*' || buckets[i].key === '_' || buckets[i].key === '' ) {
+            if ( !unknown_added ) {
+              unknown_added = true;
+              data.operators.push( 'Unknown' );
+            }
+          } else {
+            data.operators.push( buckets[i].key );
+          }
+        }
+        buckets = body.aggregations.oses.buckets;
+        for ( i = 0, len = buckets.length; i < len; i++ ) {
+          data.oses.push( buckets[i].key );
+        }
+        buckets = body.aggregations.countries.buckets;
+        for ( i = 0, len = buckets.length; i < len; i++ ) {
+          data.countries[buckets[i].key] = utils.countries[buckets[i].key] || buckets[i].key;
+        }
+      }
+
+      var response = {
+        metadata: {
+          account_id: ( account_id || '*' ),
+          app_id: ( app_id || '*' ),
+          start_timestamp: span.start,
+          start_datetime: new Date( span.start ),
+          end_timestamp: span.end,
+          end_datetime: new Date( span.end ),
+          total_hits: body.hits.total
+        },
+        data: data
+      };
+      renderJSON( request, reply, false, response );
+    }, function( error ) {
+      console.trace( error.message );
+      return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+    } );
+};
+
 //  ---------------------------------
 exports.getFlowReport = function( request, reply ) {
 
@@ -210,7 +357,8 @@ exports.getFlowReport = function( request, reply ) {
                   lt: span.end
                 }
               }
-            } ]
+            } ],
+            must_not: []
           }
         }
       }
@@ -258,7 +406,12 @@ exports.getFlowReport = function( request, reply ) {
     }
   };
 
-  elasticSearch.getClient().search( {
+  var terms = elasticSearch.buildESQueryTerms4SDK(request);
+  var sub = requestBody.query.filtered.filter.bool;
+  sub.must = sub.must.concat( terms.must );
+  sub.must_not = sub.must_not.concat( terms.must_not );
+
+  elasticSearch.getClientURL().search( {
       index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
       ignoreUnavailable: true,
       timeout: 120000,
@@ -824,7 +977,7 @@ exports.getDistributions = function( request, reply ) {
 
   var account_id = request.query.account_id,
     app_id = request.query.app_id || '',
-    count = request.query.count || 0,
+    // count = request.query.count || 0,
     report_type = request.query.report_type || 'destination';
 
   if ( !account_id && !app_id ) {
