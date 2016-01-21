@@ -96,6 +96,20 @@ App.prototype = {
       callback(err, doc);
     });
   },
+  getAccountID: function(app_id, callback) {
+    try {
+      app_id = mongoose.Types.ObjectId(app_id);
+    } catch ( e ) {
+      logger.warn( 'getAccountID, wrong format of the ID', e.toString() );
+      return callback( 'Wrong format of the ID', '' );
+    }
+    this.model.findOne({deleted: 0, _id: app_id}, {_id: 0, account_id: 1}, function(err, doc) {
+      if (doc) {
+        doc = doc.account_id;
+      }
+      callback(err, doc);
+    });
+  },
   list: function(callback) {
     this.model.find({deleted: {$ne: true}}, function(err, apps) {
       if (apps) {

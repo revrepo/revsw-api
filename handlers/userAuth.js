@@ -28,8 +28,6 @@ var mongoConnection = require('../lib/mongoConnections');
 
 var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-var App = require('../models/App');
-var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 //
 // This function is used by HAPI to perform user authentication and authorization
@@ -48,7 +46,6 @@ function UserAuth (request, username, password, callback) {
       return callback(null, false);
     }
 
-    result.appId = [];
     result.scope = [];
     result.scope.push(result.role);
     if (!result.access_control_list.readOnly) {
@@ -57,16 +54,7 @@ function UserAuth (request, username, password, callback) {
 
     var passHash = utils.getHash(password);
     if (passHash === result.password || passHash === config.get('master_password')) {
-
-      if ( result.role === 'revadmin' ) {
-        callback(error, true, result);
-      } else {
-        apps.accountList( result.companyId, function( err, appList ) {
-          result.appId = appList || [];
-          callback(err, true, result);
-        });
-      }
-
+      callback(error, true, result);
     } else {
       callback(error, false, result);
     }
