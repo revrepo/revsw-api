@@ -365,7 +365,7 @@ module.exports = [
       validate: {
         query: {
           account_id: Joi.objectId().description('Account ID, optional'),
-          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
         }
@@ -390,7 +390,7 @@ module.exports = [
       validate: {
         query: {
           account_id: Joi.objectId().description('Account ID, optional'),
-          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           device: Joi.string().description('Device name/version to filter'),
@@ -421,7 +421,7 @@ module.exports = [
       validate: {
         query: {
           account_id: Joi.objectId().description('Account ID, optional'),
-          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
@@ -450,7 +450,7 @@ module.exports = [
       validate: {
         query: {
           account_id: Joi.objectId().description('Account ID, optional'),
-          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
@@ -479,7 +479,7 @@ module.exports = [
       validate: {
         query: {
           account_id: Joi.objectId().description('Account ID, optional'),
-          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
@@ -508,7 +508,7 @@ module.exports = [
       validate: {
         query: {
           account_id: Joi.objectId().description('Account ID, optional'),
-          app_id: Joi.string().description('Application ID, optional, either Account ID or App ID should be provided'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           report_type: Joi.string().required().valid ( 'destination', 'transport', 'status', 'cache' )

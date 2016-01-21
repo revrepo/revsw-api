@@ -52,33 +52,33 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 //  ---------------------------------
 var check_app_access_ = function( request, reply, callback ) {
 
-  var creds = request.auth.credentials;
-  //  user is revadmin
-  if ( creds.role === 'revadmin' ) {
-    return callback();
-  }
-
   var account_id = request.query.account_id || request.params.account_id || '';
   var app_id = request.query.app_id || request.params.app_id || '';
   if ( !account_id && !app_id ) {
     return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
+  var creds = request.auth.credentials;
+  //  user is revadmin
+  if ( creds.role === 'revadmin' ) {
+    return callback();
+  }
+
   //  account(company)
   if ( account_id &&
       creds.companyId.indexOf( account_id ) === -1 ) {
       //  user's companyId array must contain requested account ID
-    return reply(boom.unauthorized( 'Account ID not found' ));
+    return reply(boom.badRequest( 'Account ID not found' ));
   }
 
   //  app
   if ( app_id ) {
     apps.getAccountID( app_id, function( err, acc_id ) {
       if ( err ) {
-        return reply( boom.badRequest( err ) );
+        return reply( boom.badImplementation( err ) );
       }
       if ( creds.companyId.indexOf( acc_id ) === -1 ) {
-        return reply(boom.unauthorized( 'Application ID not found' ));
+        return reply(boom.badRequest( 'Application ID not found' ));
       }
       callback();
     });
