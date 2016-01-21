@@ -96,12 +96,30 @@ App.prototype = {
       callback(err, doc);
     });
   },
+  getAccountID: function(app_id, callback) {
+    this.model.findOne({deleted: 0, _id: app_id}, {_id: 0, account_id: 1}, function(err, doc) {
+      if (doc) {
+        doc = doc.account_id;
+      }
+      callback(err, doc);
+    });
+  },
   list: function(callback) {
     this.model.find({deleted: {$ne: true}}, function(err, apps) {
       if (apps) {
         apps = utils.clone(apps).map(function(app) {
           delete app.__v;
           return app;
+        });
+      }
+      callback(err, apps);
+    });
+  },
+  accountList: function(aids, callback) {
+    this.model.find({deleted: 0, account_id: { $in: aids }}, {_id: 1}, function(err, apps) {
+      if (apps) {
+        apps = apps.map(function( a ) {
+          return a._id.toString();
         });
       }
       callback(err, apps);

@@ -27,7 +27,6 @@ var utils           = require('../lib/utilities.js');
 var mongoConnection = require('../lib/mongoConnections');
 
 var User = require('../models/User');
-
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 //
@@ -48,15 +47,12 @@ function UserAuth (request, username, password, callback) {
     }
 
     result.scope = [];
-
     result.scope.push(result.role);
-
     if (!result.access_control_list.readOnly) {
       result.scope.push(result.role + '_rw');
     }
-    
-    var passHash = utils.getHash(password);
 
+    var passHash = utils.getHash(password);
     if (passHash === result.password || passHash === config.get('master_password')) {
       callback(error, true, result);
     } else {
