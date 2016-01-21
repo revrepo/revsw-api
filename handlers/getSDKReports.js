@@ -50,32 +50,40 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 
 //  ---------------------------------
-var check_access_ = function( request, callback ) {
+var check_app_access_ = function( request, reply, callback ) {
 
   var creds = request.auth.credentials;
   //  user is revadmin
   if ( creds.role === 'revadmin' ) {
-    return callback( null, true );
+    return callback();
+  }
+
+  var account_id = request.query.account_id || request.params.account_id || '';
+  var app_id = request.query.app_id || request.params.app_id || '';
+  if ( !account_id && !app_id ) {
+    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
   //  account(company)
-  if ( request.query.account_id &&
-      creds.companyId.indexOf( request.query.account_id ) === -1 ) {
+  if ( account_id &&
+      creds.companyId.indexOf( account_id ) === -1 ) {
       //  user's companyId array must contain requested account ID
-    return callback( 'Wrong Account ID provided', false );
+    return reply(boom.unauthorized( 'Account ID not found' ));
   }
 
   //  app
-  if ( request.query.app_id ) {
-    apps.getAccountID( request.query.app_id, function( err, acc_id ) {
+  if ( app_id ) {
+    apps.getAccountID( app_id, function( err, acc_id ) {
       if ( err ) {
-        return callback( err, false );
+        return reply( boom.badRequest( err ) );
       }
       if ( creds.companyId.indexOf( acc_id ) === -1 ) {
-        return callback( 'Wrong Application ID provided', false );
+        return reply(boom.unauthorized( 'Application ID not found' ));
       }
-      callback( null, true );
+      callback();
     });
+  } else {
+    callback();
   }
 };
 
@@ -83,10 +91,7 @@ var check_access_ = function( request, callback ) {
 
 exports.getAppReport = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -160,10 +165,7 @@ exports.getAppReport = function( request, reply ) {
 //  ---------------------------------
 exports.getAccountReport = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -238,10 +240,7 @@ exports.getAccountReport = function( request, reply ) {
 //  ---------------------------------
 exports.getDirs = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -250,10 +249,6 @@ exports.getDirs = function( request, reply ) {
 
     var account_id = request.query.account_id,
       app_id = request.query.app_id || '' ;
-
-    if ( !account_id && !app_id ) {
-      return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
-    }
 
     var requestBody = {
       size: 0,
@@ -391,10 +386,7 @@ exports.getDirs = function( request, reply ) {
 //  ---------------------------------
 exports.getFlowReport = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -405,10 +397,6 @@ exports.getFlowReport = function( request, reply ) {
       app_id = request.query.app_id || '',
       delta = span.end - span.start,
       interval;
-
-    if ( !account_id && !app_id ) {
-      return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
-    }
 
     if ( delta <= 3 * 3600000 ) {
       interval = 5 * 60000; // 5 minutes
@@ -569,10 +557,7 @@ exports.getFlowReport = function( request, reply ) {
 //  ---------------------------------
 exports.getTopRequests = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -583,10 +568,6 @@ exports.getTopRequests = function( request, reply ) {
       app_id = request.query.app_id || '',
       count = request.query.count || 0,
       report_type = request.query.report_type || 'country';
-
-    if ( !account_id && !app_id ) {
-      return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
-    }
 
     var field;
     switch (report_type) {
@@ -740,10 +721,7 @@ exports.getTopRequests = function( request, reply ) {
 //  ---------------------------------
 exports.getTopUsers = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -754,10 +732,6 @@ exports.getTopUsers = function( request, reply ) {
       app_id = request.query.app_id || '',
       count = request.query.count || 0,
       report_type = request.query.report_type || 'country';
-
-    if ( !account_id && !app_id ) {
-      return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
-    }
 
     var field;
     switch (report_type) {
@@ -872,10 +846,7 @@ exports.getTopUsers = function( request, reply ) {
 //  ---------------------------------
 exports.getTopGBT = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -886,10 +857,6 @@ exports.getTopGBT = function( request, reply ) {
       app_id = request.query.app_id || '',
       count = request.query.count || 0,
       report_type = request.query.report_type || 'country';
-
-    if ( !account_id && !app_id ) {
-      return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
-    }
 
     var field;
     switch (report_type) {
@@ -1071,10 +1038,7 @@ exports.getTopGBT = function( request, reply ) {
 //  ---------------------------------
 exports.getDistributions = function( request, reply ) {
 
-  check_access_( request, function( err ) {
-    if ( err ) {
-      return reply(boom.unauthorized(err));
-    }
+  check_app_access_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
     if ( span.error ) {
@@ -1085,10 +1049,6 @@ exports.getDistributions = function( request, reply ) {
       app_id = request.query.app_id || '',
       // count = request.query.count || 0,
       report_type = request.query.report_type || 'destination';
-
-    if ( !account_id && !app_id ) {
-      return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
-    }
 
     var field, keys;
     switch (report_type) {
