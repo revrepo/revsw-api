@@ -405,6 +405,34 @@ module.exports = [
 
   {
     method: 'GET',
+    path: '/v1/stats/sdk/agg_flow',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getAggFlowReport,
+      description: 'Get SDK data flow for an account and optionally application, grouped by the given type',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        query: {
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          report_type: Joi.string().required().valid ( 'status_code', 'destination', 'transport', 'status', 'cache' )
+            .description('Type of requested report (defaults to "status_code")')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
     path: '/v1/stats/sdk/top_requests',
     config: {
       auth: {

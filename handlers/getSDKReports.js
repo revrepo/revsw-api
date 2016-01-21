@@ -539,6 +539,265 @@ exports.getFlowReport = function( request, reply ) {
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
+            interval_sec: ( Math.floor( interval / 1000 ) ),
+            total_hits: total_hits,
+            total_received: total_received,
+            total_sent: total_sent
+          },
+          data: dataArray
+        };
+        renderJSON( request, reply, false, response );
+      }, function( error ) {
+        console.trace( error.message );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+      } );
+
+  });
+};
+
+//  ---------------------------------
+exports.getAggFlowReport = function( request, reply ) {
+
+  check_app_access_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 7 /*allowed period - month*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      delta = span.end - span.start,
+      interval,
+      report_type = request.query.report_type || 'status_code';
+
+    var field, keys;
+    switch (report_type) {
+      case 'status_code':
+        field = 'requests.status_code';
+        keys = {};
+        break;
+      case 'destination':
+        field = 'requests.destination';
+        keys = {
+          'origin': 'Origin',
+          'rev_edge': 'RevAPM'
+        };
+        break;
+      case 'transport':
+        field = 'requests.edge_transport';
+        keys = {
+          'standard': 'Standard',
+          'quic': 'QUIC'
+        };
+        break;
+      case 'status':
+        field = 'requests.success_status';
+        keys = {
+          '0': 'Error',
+          '1': 'Success'
+        };
+        break;
+      case 'cache':
+        field = 'requests.x-rev-cache';
+        keys = {
+          'HIT': 'HIT',
+          'MISS': 'MISS'
+        };
+        break;
+      default:
+        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+    }
+
+    if ( delta <= 3 * 3600000 ) {
+      interval = 5 * 60000; // 5 minutes
+    } else if ( delta <= 2 * 24 * 3600000 ) {
+      interval = 30 * 60000; // 30 minutes
+    } else if ( delta <= 8 * 24 * 3600000 ) {
+      interval = 3 * 3600000; // 3 hours
+    } else {
+      interval = 12 * 3600000; // 12 hours
+    }
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+      aggs: {
+        results: {
+          nested: {
+            'path': 'requests'
+          },
+          aggs: {
+            date_range: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                codes: {
+                  terms: { field: field },
+                  aggs: {
+                    date_histogram: {
+                      date_histogram: {
+                        field: 'requests.start_ts',
+                        interval: ( '' + interval ),
+                        min_doc_count: 0,
+                        extended_bounds : {
+                          min: span.start,
+                          max: span.end - 1
+                        },
+                        offset: ( '' + ( span.end % interval ) )
+                      },
+                      aggs: {
+                        received_bytes: {
+                          sum: {
+                            field: 'requests.received_bytes'
+                          }
+                        },
+                        sent_bytes: {
+                          sum: {
+                            field: 'requests.sent_bytes'
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    elasticSearch.getClientURL().search( {
+        index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then( function( body ) {
+
+        var total_hits = 0;
+        var total_sent = 0;
+        var total_received = 0;
+        var dataArray = [];
+        // "aggregations": {
+        //   "results": {
+        //     "doc_count": 56531,
+        //     "date_range": {
+        //       "buckets": [
+        //         {
+        //           "key": "2016-01-20T21:15:00.000Z-2016-01-21T21:14:59.999Z",
+        //           "from": 1453324500000,
+        //           "from_as_string": "2016-01-20T21:15:00.000Z",
+        //           "to": 1453410899999,
+        //           "to_as_string": "2016-01-21T21:14:59.999Z",
+        //           "doc_count": 56364,
+        //           "codes": {
+        //             "doc_count_error_upper_bound": 0,
+        //             "sum_other_doc_count": 82,
+        //             "buckets": [
+        //               {
+        //                 "key": 200,
+        //                 "doc_count": 47705
+        //                 "date_histogram": {
+        //                   "buckets": [
+        //                     {
+        //                       "key_as_string": "2016-01-20T21:20:00.000Z",
+        //                       "key": 1453324800000,
+        //                       "doc_count": 0,
+        //                       "received_bytes": {
+        //                         "value": 0
+        //                       },
+        //                       "sent_bytes": {
+        //                         "value": 0
+        //                       }
+        //                     },
+        //                     {
+        //                       "key_as_string": "2016-01-20T21:50:00.000Z",
+        //                       "key": 1453326600000,
+        //                       "doc_count": 5,
+        //                       "received_bytes": {
+        //                         "value": 175
+        //                       },
+        //                       "sent_bytes": {
+        //                         "value": 0
+        //                       }
+        //                     }, ...............................
+        //               },
+        //               {
+        //                 "key": 404,
+        //                 "doc_count": 4588
+        //                 ......................................
+        //               },......................................
+
+        if ( body.aggregations ) {
+          var codes = body.aggregations.results.date_range.buckets[0].codes.buckets;
+          for ( var ci = 0, clen = codes.length; ci < clen; ++ci ) {
+            var data = {
+              key: ( keys[codes[ci].key] || codes[ci].key ),
+              flow: [],
+              hits: 0,
+              received_bytes: 0,
+              sent_bytes: 0
+            };
+            var code_hits = 0;
+            var code_sent = 0;
+            var code_received = 0;
+            var flow = codes[ci].date_histogram.buckets;
+            for ( var fi = 0, flen = flow.length; fi < flen; ++fi ) {
+              var item = flow[fi];
+              data.flow.push({
+                time: item.key,
+                time_as_string: item.key_as_string,
+                hits: item.doc_count,
+                received_bytes: item.received_bytes.value,
+                sent_bytes: item.sent_bytes.value
+              });
+              data.hits += item.doc_count;
+              data.received_bytes += item.received_bytes.value;
+              data.sent_bytes += item.sent_bytes.value;
+            }
+            dataArray.push( data );
+            total_hits += data.hits;
+            total_sent += data.received_bytes;
+            total_received += data.sent_bytes;
+          }
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date( span.start ),
+            end_timestamp: span.end,
+            end_datetime: new Date( span.end ),
+            interval_sec: ( Math.floor( interval / 1000 ) ),
             total_hits: total_hits,
             total_received: total_received,
             total_sent: total_sent
