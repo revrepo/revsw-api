@@ -758,6 +758,10 @@ exports.getAggFlowReport = function( request, reply ) {
         if ( body.aggregations ) {
           var codes = body.aggregations.results.date_range.buckets[0].codes.buckets;
           for ( var ci = 0, clen = codes.length; ci < clen; ++ci ) {
+            if ( report_type === 'status_code' && codes[ci].key === 0 ) {
+              //  0 http status code actually means absense of the code in a failed requests
+              continue;
+            }
             var data = {
               key: ( keys[codes[ci].key] || codes[ci].key ),
               flow: [],
