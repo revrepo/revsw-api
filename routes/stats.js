@@ -397,7 +397,7 @@ module.exports = [
           os: Joi.string().description('OS name/version to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           operator: Joi.string().description('Operator to filter'),
-          network: Joi.string().valid( 'Mobile', 'WiFi' ).description('Network type to filter')
+          network: Joi.string().valid( 'Cellular', 'WiFi' ).description('Network type to filter')
         }
       }
     }
@@ -425,7 +425,12 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           report_type: Joi.string().required().valid ( 'status_code', 'destination', 'transport', 'status', 'cache' )
-            .description('Type of requested report (defaults to "status_code")')
+            .description('Type of requested report (defaults to "status_code")'),
+          device: Joi.string().description('Device name/version to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          operator: Joi.string().description('Operator to filter'),
+          network: Joi.string().valid( 'Cellular', 'WiFi' ).description('Network type to filter')
         }
       }
     }
