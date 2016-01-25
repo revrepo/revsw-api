@@ -544,7 +544,8 @@ module.exports = [
           app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
-          report_type: Joi.string().required().valid ( 'destination', 'transport', 'status', 'cache' )
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (optional, default to 30)'),
+          report_type: Joi.string().required().valid ( 'destination', 'transport', 'status', 'cache', 'domain', 'status_code' )
             .description('Type of requested report (defaults to "destination")')
         }
       }
