@@ -27,8 +27,11 @@ var utils = require( '../lib/utilities.js' );
 var renderJSON = require( '../lib/renderJSON' );
 var mongoConnection = require( '../lib/mongoConnections' );
 var elasticSearch = require( '../lib/elasticSearch' );
-var DomainConfig = require( '../models/DomainConfig' );
 
+var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
+
+var DomainConfig = require( '../models/DomainConfig' );
 var domainConfigs = new DomainConfig( mongoose, mongoConnection.getConnectionPortal() );
 
 //  ----------------------------------------------------------------------------------------------//
@@ -143,7 +146,7 @@ exports.getFBTAverage = function( request, reply ) {
           };
           renderJSON( request, reply, error, response );
         }, function( error ) {
-          console.trace( error.message );
+          logger.error(error);
           return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
         } );
     } else {
@@ -249,7 +252,7 @@ exports.getFBTDistribution = function( request, reply ) {
           };
           renderJSON( request, reply, error, response );
         }, function( error ) {
-          console.trace( error.message );
+          logger.error(error);
           return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
         } );
     } else {
@@ -401,7 +404,7 @@ exports.getFBTHeatmap = function(request, reply) {
         };
         renderJSON(request, reply, error, response);
       }, function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
     } else {

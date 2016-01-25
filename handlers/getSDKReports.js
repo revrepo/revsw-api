@@ -25,6 +25,9 @@ var utils = require( '../lib/utilities.js' );
 var renderJSON = require( '../lib/renderJSON' );
 var elasticSearch = require( '../lib/elasticSearch' );
 
+var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
+
 var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
 var App = require('../models/App');
@@ -156,7 +159,7 @@ exports.getAppReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
   });
@@ -231,7 +234,7 @@ exports.getAccountReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
   });
@@ -376,7 +379,8 @@ exports.getDirs = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+var logger = require('revsw-logger')(config.log_config);
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -548,7 +552,7 @@ exports.getFlowReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -810,7 +814,7 @@ exports.getAggFlowReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -974,7 +978,7 @@ exports.getTopRequests = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1099,7 +1103,7 @@ exports.getTopUsers = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1291,7 +1295,7 @@ exports.getTopGBT = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1310,7 +1314,7 @@ exports.getDistributions = function( request, reply ) {
 
     var account_id = request.query.account_id,
       app_id = request.query.app_id || '',
-      // count = request.query.count || 0,
+      count = request.query.count || 30,
       report_type = request.query.report_type || 'destination';
 
     var field, keys;
@@ -1341,6 +1345,18 @@ exports.getDistributions = function( request, reply ) {
         keys = {
           'HIT': 'HIT',
           'MISS': 'MISS'
+        };
+        break;
+      case 'domain':
+        field = 'requests.domain';
+        keys = {
+          allow_any: true
+        };
+        break;
+      case 'status_code':
+        field = 'requests.status_code';
+        keys = {
+          allow_any: true
         };
         break;
       default:
@@ -1381,18 +1397,9 @@ exports.getDistributions = function( request, reply ) {
               },
               aggs: {
                 distribution: {
-                  terms: { field: field },
-                  aggs: {
-                    received_bytes: {
-                      sum: {
-                        field: 'requests.received_bytes'
-                      }
-                    },
-                    sent_bytes: {
-                      sum: {
-                        field: 'requests.sent_bytes'
-                      }
-                    }
+                  terms: {
+                    field: field,
+                    size: count
                   }
                 }
               }
@@ -1401,6 +1408,20 @@ exports.getDistributions = function( request, reply ) {
         }
       }
     };
+    if ( report_type !== 'status_code' ) {
+      requestBody.aggs.result.aggs.result.aggs.distribution.aggs = {
+        received_bytes: {
+          sum: {
+            field: 'requests.received_bytes'
+          }
+        },
+        sent_bytes: {
+          sum: {
+            field: 'requests.sent_bytes'
+          }
+        }
+      };
+    }
 
     var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
     return elasticSearch.getClientURL().search({
@@ -1495,13 +1516,13 @@ exports.getDistributions = function( request, reply ) {
         if ( body.aggregations && body.aggregations.result.doc_count ) {
           for ( var i = 0, len = body.aggregations.result.result.buckets[0].distribution.buckets.length; i < len; ++i ) {
             var item = body.aggregations.result.result.buckets[0].distribution.buckets[i];
-            if ( keys[item.key] ) {
-              item.key = keys[item.key];
+            if ( keys.allow_any || keys[item.key] ) {
+              item.key = keys[item.key] || item.key;
               data.push({
                 key: item.key,
                 count: item.doc_count,
-                received_bytes: item.received_bytes.value,
-                sent_bytes: item.sent_bytes.value
+                received_bytes: ( ( item.received_bytes && item.received_bytes.value ) || 0 ),
+                sent_bytes: ( ( item.sent_bytes && item.sent_bytes.value ) || 0 )
               });
             }
           }
@@ -1523,7 +1544,7 @@ exports.getDistributions = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
