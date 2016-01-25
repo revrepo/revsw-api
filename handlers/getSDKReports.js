@@ -25,6 +25,9 @@ var utils = require( '../lib/utilities.js' );
 var renderJSON = require( '../lib/renderJSON' );
 var elasticSearch = require( '../lib/elasticSearch' );
 
+var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
+
 var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
 var App = require('../models/App');
@@ -156,7 +159,7 @@ exports.getAppReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
   });
@@ -231,7 +234,7 @@ exports.getAccountReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
   });
@@ -376,7 +379,8 @@ exports.getDirs = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+var logger = require('revsw-logger')(config.log_config);
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -548,7 +552,7 @@ exports.getFlowReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -810,7 +814,7 @@ exports.getAggFlowReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        console.trace( error.message );
+        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -974,7 +978,7 @@ exports.getTopRequests = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1099,7 +1103,7 @@ exports.getTopUsers = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1291,7 +1295,7 @@ exports.getTopGBT = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.trace(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1540,7 +1544,7 @@ exports.getDistributions = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        console.log(error.message);
+        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 

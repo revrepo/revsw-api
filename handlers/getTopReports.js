@@ -28,8 +28,10 @@ var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var elasticSearch   = require('../lib/elasticSearch');
 
-var DomainConfig = require('../models/DomainConfig');
+var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
 
+var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 //  ---------------------------------
@@ -171,7 +173,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
       renderJSON( req, reply, false/*error is undefined here*/, response );
     })
     .catch( function(error) {
-      console.trace(error.message);
+      logger.error(error);
       return reply(boom.badImplementation('Failed to retrieve data from ES'));
     });
 };
@@ -270,7 +272,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
       renderJSON( req, reply, false/*error is undefined here*/, response );
     })
     .catch( function(error) {
-      console.trace(error.message);
+      logger.error(error);
       return reply(boom.badImplementation('Failed to retrieve data from ES'));
     });
 };
