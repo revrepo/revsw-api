@@ -201,6 +201,7 @@ module.exports = [
             Joi.string().regex(routeModels.ipAddressRegex)
           ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
+          origin_secure_protocol : Joi.string().valid('use_end_user_protocol', 'http_only', 'https_only').required().description('Origin server protocol'),
           config_command_options: Joi.string().allow('').max(150),
           tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
