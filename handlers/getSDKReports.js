@@ -53,7 +53,7 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 
 //  ---------------------------------
-var check_app_access_ = function( request, reply, callback ) {
+var checkAppAccessPermissions_ = function( request, reply, callback ) {
 
   var account_id = request.query.account_id || request.params.account_id || '';
   var app_id = request.query.app_id || request.params.app_id || '';
@@ -94,7 +94,7 @@ var check_app_access_ = function( request, reply, callback ) {
 
 exports.getAppReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -168,7 +168,7 @@ exports.getAppReport = function( request, reply ) {
 //  ---------------------------------
 exports.getAccountReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -243,7 +243,7 @@ exports.getAccountReport = function( request, reply ) {
 //  ---------------------------------
 exports.getDirs = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -379,7 +379,6 @@ exports.getDirs = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-var logger = require('revsw-logger')(config.log_config);
         logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
@@ -390,7 +389,7 @@ var logger = require('revsw-logger')(config.log_config);
 //  ---------------------------------
 exports.getFlowReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -562,7 +561,7 @@ exports.getFlowReport = function( request, reply ) {
 //  ---------------------------------
 exports.getAggFlowReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 7 /*allowed period - month*/ );
     if ( span.error ) {
@@ -824,7 +823,7 @@ exports.getAggFlowReport = function( request, reply ) {
 //  ---------------------------------
 exports.getTopRequests = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -988,7 +987,7 @@ exports.getTopRequests = function( request, reply ) {
 //  ---------------------------------
 exports.getTopUsers = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -1113,7 +1112,7 @@ exports.getTopUsers = function( request, reply ) {
 //  ---------------------------------
 exports.getTopGBT = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -1305,7 +1304,7 @@ exports.getTopGBT = function( request, reply ) {
 //  ---------------------------------
 exports.getDistributions = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
     if ( span.error ) {
@@ -1537,6 +1536,543 @@ exports.getDistributions = function( request, reply ) {
             end_timestamp: span.end,
             end_datetime: new Date(span.end),
             total_hits: body.hits.total,
+            data_points_count: data.length
+          },
+          data: data
+        };
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+
+  });
+};
+
+
+//  ---------------------------------
+exports.getTopObjects = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      count = request.query.count || 30,
+      report_type = request.query.report_type || 'any_request',
+      term = false;
+
+    switch (report_type) {
+      case 'any_request':
+        break;
+      case 'cache_missed':
+        term = { 'x-rev-cache': 'MISS' };
+        break;
+      case 'failed':
+        term = { 'success_status': 0 };
+        break;
+      default:
+        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+    }
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+
+      aggs: {
+        result: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            result: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var sub = requestBody.aggs.result.aggs.result;
+    if ( term ) {
+      sub.aggs = {
+          filtered: {
+            filter: { term: term },
+            aggs: {
+              urls: {
+                terms: {
+                  field: 'requests.url',
+                  size: count
+                }
+              }
+            }
+          }
+        };
+    } else {
+      sub.aggs = {
+          urls: {
+            terms: {
+              field: 'requests.url',
+              size: count
+            }
+          }
+        };
+    }
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+    return elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then(function(body) {
+
+        /*
+        no term
+        "aggregations": {
+          "result": {
+            "doc_count": 12605,
+            "result": {
+              "buckets": [{
+                "doc_count": 12597,
+                "urls": {
+                  "buckets": [{
+                        "key": "https://monitor.revsw.net/test-cache.js",
+                        "doc_count": 502
+                      }, {
+                        "key": "https://www.hpe.com/us/en/home.html",
+                        "doc_count": 145
+                      },
+        empty
+        "aggregations": {
+          "result": {
+            "doc_count": 0,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 0,
+                  "urls": {
+                    "buckets": []
+
+        term
+        "aggregations": {
+          "result": {
+            "doc_count": 12591,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 12583,
+                  "filtered": {
+                    "doc_count": 8828,
+                    "urls": {
+                      "buckets": [
+                        {
+                          "key": "https://mobile-collector.newrelic.com/mobile/v3/data",
+                          "doc_count": 132
+                        },
+                        {
+                          "key": "https://edition.i.cdn.cnn.com/.a/1.238.0/js/\u0027).f(t.get(%5B",
+                          "doc_count": 90
+                        },
+        empty
+        "aggregations": {
+          "result": {
+            "doc_count": 0,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 0,
+                  "filtered": {
+                    "doc_count": 0,
+                    "urls": {
+                      "buckets": []
+
+
+        */
+
+        var data = [],
+          total = 0,
+          buckets = term ?
+            ( ( body.aggregations && body.aggregations.result.result.buckets[0].filtered.urls.buckets ) || [] ) :
+            ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets ) || [] );
+
+        for ( var i = 0, len = buckets.length; i < len; ++i ) {
+          data.push({
+            key: buckets[i].key,
+            count: buckets[i].doc_count
+          });
+          total += buckets[i].doc_count;
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: total,
+            data_points_count: data.length
+          },
+          data: data
+        };
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+
+  });
+};
+
+//  ---------------------------------
+exports.getTopObjectsSlowest = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      count = request.query.count || 30,
+      report_type = request.query.report_type || 'full';
+
+    var field;
+    switch (report_type) {
+      case 'full':
+        field = 'requests.end_ts';
+        break;
+      case 'first_byte':
+        field = 'requests.first_byte_ts';
+        break;
+      default:
+        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+    }
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+
+      aggs: {
+        result: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            result: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                urls: {
+                  terms: {
+                    field: 'requests.url',
+                    order: { avg_time : 'desc' },
+                    size: count
+                  },
+                  aggs: {
+                    avg_time: {
+                      avg: { field: field }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+    return elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then(function(body) {
+
+        /*
+        "aggregations": {
+          "result": {
+            "doc_count": 1315750,
+            "result": {
+              "buckets": [{
+                "doc_count": 280500,
+                "urls": {
+                  "buckets": [{
+                      "key": "https://app.resrc.it/O=100/https://static.ibmserviceengage.com/APImanagementCloud-hero.jpg",
+                      "doc_count": 5610,
+                      "avg_time": {
+                        "value": 2944,
+                      }
+                    }, {
+                      "key": "https://tags.tiqcdn.com/utag/ibm/main/prod/utag.694.js?utv=ut4.39.201601151731",
+                      "doc_count": 5610,
+                      "avg_time": {
+                        "value": 2349,
+                      }
+                    },
+
+        //  empty
+        "aggregations": {
+          "result": {
+            "doc_count": 1315750,
+            "result": {
+              "buckets": [{
+                "doc_count": 0,
+                "urls": {
+                  "buckets": []
+                }
+              }]
+            }
+          }
+        }
+        */
+
+        var data = [],
+          total = 0,
+          buckets = ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets ) || [] );
+
+        for ( var i = 0, len = buckets.length; i < len; ++i ) {
+          data.push({
+            key: buckets[i].key,
+            count: buckets[i].doc_count,
+            val: buckets[i].avg_time.value
+          });
+          total += buckets[i].doc_count;
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: total,
+            data_points_count: data.length
+          },
+          data: data
+        };
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+
+  });
+};
+
+//  ---------------------------------
+exports.getTopObjectsHTTPCodes = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      count = request.query.count || 30,
+      from_code = request.query.from_code,
+      to_code = request.query.to_code;
+
+    if ( from_code >= to_code ) {
+      return reply( boom.badRequest( '"from_code" parameter should be less then "to_code"' ) );
+    }
+
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+
+      aggs: {
+        result: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            result: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                codes: {
+                  range: {
+                    field: 'requests.status_code',
+                    ranges: [{ from: from_code, to: to_code }]
+                  },
+                  aggs: {
+                    urls: {
+                      terms: {
+                        field: 'requests.url',
+                        size: count
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+    return elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then(function(body) {
+
+        /*
+        "aggregations": {
+          "result": {
+            "doc_count": 650,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 649,
+                  "codes": {
+                    "buckets": [
+                      {
+                        "doc_count": 621,
+                        "urls": {
+                          "buckets": [
+                            { "key": "https://www.hpe.com/us/en/home.html",
+                              "doc_count": 14 },
+                            { "key": "http://google.com/client_204?atyp=i&biw=320&bih=370&dpr=2&ei=nBioVsqBLMTgjwO557KgBA",
+                              "doc_count": 1 },
+
+        //  empty
+        "aggregations": {
+          "result": {
+            "doc_count": 650,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 649,
+                  "codes": {
+                    "buckets": [
+                      {
+                        "doc_count": 0,
+                        "urls": {
+                          "buckets": []
+        */
+
+        var data = [],
+          total = 0,
+          buckets = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets ) || [] );
+
+        for ( var i = 0, len = buckets.length; i < len; ++i ) {
+          data.push({
+            key: buckets[i].key,
+            count: buckets[i].doc_count
+          });
+          total += buckets[i].doc_count;
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: total,
             data_points_count: data.length
           },
           data: data
