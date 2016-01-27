@@ -379,7 +379,6 @@ exports.getDirs = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-var logger = require('revsw-logger')(config.log_config);
         logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
@@ -1537,6 +1536,542 @@ exports.getDistributions = function( request, reply ) {
             end_timestamp: span.end,
             end_datetime: new Date(span.end),
             total_hits: body.hits.total,
+            data_points_count: data.length
+          },
+          data: data
+        };
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+
+  });
+};
+
+
+//  ---------------------------------
+exports.getTopObjects = function( request, reply ) {
+
+  check_app_access_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      count = request.query.count || 30;
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+
+      aggs: {
+        result: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            result: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                urls: {
+                  terms: {
+                    field: 'requests.url',
+                    size: count
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+    return elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then(function(body) {
+
+        /*
+        "aggregations": {
+          "result": {
+            "doc_count": 1315750,
+            "result": {
+              "buckets": [{
+                "key": "2016-01-26T20:00:00.000Z-*",
+                "from": 1453838400000,
+                "from_as_string": "2016-01-26T20:00:00.000Z",
+                "doc_count": 280500,
+                "urls": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [{
+                      "key": "https://app.resrc.it/O=100/https://static.ibmserviceengage.com/APImanagementCloud-hero.jpg",
+                      "doc_count": 5610
+                    }, {
+                      "key": "https://tags.tiqcdn.com/utag/ibm/main/prod/utag.694.js?utv=ut4.39.201601151731",
+                      "doc_count": 5610
+                    },
+
+        //  empty
+        "aggregations": {
+          "result": {
+            "doc_count": 1315750,
+            "result": {
+              "buckets": [{
+                "key": "2016-01-26T23:00:00.000Z-*",
+                "from": 1453849200000,
+                "from_as_string": "2016-01-26T23:00:00.000Z",
+                "doc_count": 0,
+                "urls": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": []
+                }
+              }]
+            }
+          }
+        }
+        */
+
+        var data = [],
+          total = 0,
+          len = ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets.length ) || 0 );
+        if ( len ) {
+          total = body.aggregations.result.result.buckets[0].doc_count;
+          for ( var i = 0; i < len; ++i ) {
+            var item = body.aggregations.result.result.buckets[0].urls.buckets[i];
+            data.push({
+              key: item.key,
+              count: item.doc_count
+            });
+          }
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: total,
+            data_points_count: data.length
+          },
+          data: data
+        };
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+
+  });
+};
+
+//  ---------------------------------
+exports.getTopObjectsSlowest = function( request, reply ) {
+
+  check_app_access_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      count = request.query.count || 30,
+      report_type = request.query.report_type || 'response';
+
+    var field;
+    switch (report_type) {
+      case 'response':
+        field = 'requests.end_ts';
+        break;
+      case 'first_byte':
+        field = 'requests.first_byte_ts';
+        break;
+      default:
+        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+    }
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+
+      aggs: {
+        result: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            result: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                urls: {
+                  terms: {
+                    field: 'requests.url',
+                    // min_doc_count: 10,
+                    order: { avg_time : 'desc' },
+                    size: count
+                  },
+                  aggs: {
+                    avg_time: {
+                      avg: { field: field }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+    return elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then(function(body) {
+
+        /*
+        "aggregations": {
+          "result": {
+            "doc_count": 1315750,
+            "result": {
+              "buckets": [{
+                "key": "2016-01-26T20:00:00.000Z-*",
+                "from": 1453838400000,
+                "from_as_string": "2016-01-26T20:00:00.000Z",
+                "doc_count": 280500,
+                "urls": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [{
+                      "key": "https://app.resrc.it/O=100/https://static.ibmserviceengage.com/APImanagementCloud-hero.jpg",
+                      "doc_count": 5610,
+                      "avg_time": {
+                        "value": 2944,
+                        "value_as_string": "1970-01-01T00:00:02.944Z"
+                      }
+                    }, {
+                      "key": "https://tags.tiqcdn.com/utag/ibm/main/prod/utag.694.js?utv=ut4.39.201601151731",
+                      "doc_count": 5610,
+                      "avg_time": {
+                        "value": 2349,
+                        "value_as_string": "1970-01-01T00:00:02.349Z"
+                      }
+                    },
+
+        //  empty
+        "aggregations": {
+          "result": {
+            "doc_count": 1315750,
+            "result": {
+              "buckets": [{
+                "key": "2016-01-26T23:00:00.000Z-*",
+                "from": 1453849200000,
+                "from_as_string": "2016-01-26T23:00:00.000Z",
+                "doc_count": 0,
+                "urls": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": []
+                }
+              }]
+            }
+          }
+        }
+        */
+
+        var data = [],
+          total = 0,
+          len = ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets.length ) || 0 );
+        if ( len ) {
+          total = body.aggregations.result.result.buckets[0].doc_count;
+          for ( var i = 0; i < len; ++i ) {
+            var item = body.aggregations.result.result.buckets[0].urls.buckets[i];
+            data.push({
+              key: item.key,
+              count: item.doc_count,
+              val: item.avg_time.value
+            });
+          }
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: total,
+            data_points_count: data.length
+          },
+          data: data
+        };
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      });
+
+  });
+};
+
+//  ---------------------------------
+exports.getTopObjectsHTTPCodes = function( request, reply ) {
+
+  check_app_access_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      count = request.query.count || 30,
+      from_code = request.query.from_code,
+      to_code = request.query.to_code;
+
+    if ( from_code >= to_code ) {
+      return reply( boom.badRequest( '"from_code" parameter should be less then "to_code"' ) );
+    }
+
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+
+      aggs: {
+        result: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            result: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                codes: {
+                  range: {
+                    field: 'requests.status_code',
+                    ranges: [{ from: from_code, to: to_code }]
+                  },
+                  aggs: {
+                    urls: {
+                      terms: {
+                        field: 'requests.url',
+                        size: count
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    var indicesList = utils.buildIndexList( span.start, span.end, 'sdkstats-' );
+    return elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then(function(body) {
+
+        /*
+        "aggregations": {
+          "result": {
+            "doc_count": 650,
+            "result": {
+              "buckets": [
+                {
+                  "key": "2016-01-27T01:05:00.000Z-2016-01-27T02:04:59.999Z",
+                  "from": 1453856700000,
+                  "from_as_string": "2016-01-27T01:05:00.000Z",
+                  "to": 1453860299999,
+                  "to_as_string": "2016-01-27T02:04:59.999Z",
+                  "doc_count": 649,
+                  "codes": {
+                    "buckets": [
+                      {
+                        "key": "200.0-210.0",
+                        "from": 200,
+                        "from_as_string": "200.0",
+                        "to": 210,
+                        "to_as_string": "210.0",
+                        "doc_count": 621,
+                        "urls": {
+                          "doc_count_error_upper_bound": 2,
+                          "sum_other_doc_count": 578,
+                          "buckets": [
+                            {
+                              "key": "https://www.hpe.com/us/en/home.html",
+                              "doc_count": 14
+                            },
+                            {
+                              "key": "http://google.com/client_204?atyp=i&biw=320&bih=370&dpr=2&ei=nBioVsqBLMTgjwO557KgBA",
+                              "doc_count": 1
+                            },
+
+        //  empty
+        "aggregations": {
+          "result": {
+            "doc_count": 650,
+            "result": {
+              "buckets": [
+                {
+                  "key": "2016-01-27T01:05:00.000Z-2016-01-27T02:04:59.999Z",
+                  "from": 1453856700000,
+                  "from_as_string": "2016-01-27T01:05:00.000Z",
+                  "to": 1453860299999,
+                  "to_as_string": "2016-01-27T02:04:59.999Z",
+                  "doc_count": 649,
+                  "codes": {
+                    "buckets": [
+                      {
+                        "key": "500.0-599.0",
+                        "from": 500,
+                        "from_as_string": "500.0",
+                        "to": 599,
+                        "to_as_string": "599.0",
+                        "doc_count": 0,
+                        "urls": {
+                          "doc_count_error_upper_bound": 0,
+                          "sum_other_doc_count": 0,
+                          "buckets": []
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        */
+
+        var data = [],
+          total = 0,
+          len = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets.length ) || 0 );
+        if ( len ) {
+          total = body.aggregations.result.result.buckets[0].codes.buckets[0].doc_count;
+          for ( var i = 0; i < len; ++i ) {
+            var item = body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets[i];
+            data.push({
+              key: item.key,
+              count: item.doc_count
+            });
+          }
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: total,
             data_points_count: data.length
           },
           data: data
