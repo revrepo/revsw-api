@@ -53,7 +53,7 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 
 //  ---------------------------------
-var check_app_access_ = function( request, reply, callback ) {
+var checkAppAccessPermissions_ = function( request, reply, callback ) {
 
   var account_id = request.query.account_id || request.params.account_id || '';
   var app_id = request.query.app_id || request.params.app_id || '';
@@ -94,7 +94,7 @@ var check_app_access_ = function( request, reply, callback ) {
 
 exports.getAppReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -168,7 +168,7 @@ exports.getAppReport = function( request, reply ) {
 //  ---------------------------------
 exports.getAccountReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -243,7 +243,7 @@ exports.getAccountReport = function( request, reply ) {
 //  ---------------------------------
 exports.getDirs = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -389,7 +389,7 @@ exports.getDirs = function( request, reply ) {
 //  ---------------------------------
 exports.getFlowReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -561,7 +561,7 @@ exports.getFlowReport = function( request, reply ) {
 //  ---------------------------------
 exports.getAggFlowReport = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 7 /*allowed period - month*/ );
     if ( span.error ) {
@@ -823,7 +823,7 @@ exports.getAggFlowReport = function( request, reply ) {
 //  ---------------------------------
 exports.getTopRequests = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -987,7 +987,7 @@ exports.getTopRequests = function( request, reply ) {
 //  ---------------------------------
 exports.getTopUsers = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -1112,7 +1112,7 @@ exports.getTopUsers = function( request, reply ) {
 //  ---------------------------------
 exports.getTopGBT = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
@@ -1304,7 +1304,7 @@ exports.getTopGBT = function( request, reply ) {
 //  ---------------------------------
 exports.getDistributions = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
     if ( span.error ) {
@@ -1554,7 +1554,7 @@ exports.getDistributions = function( request, reply ) {
 //  ---------------------------------
 exports.getTopObjects = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
     if ( span.error ) {
@@ -1762,7 +1762,7 @@ exports.getTopObjects = function( request, reply ) {
 //  ---------------------------------
 exports.getTopObjectsSlowest = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
     if ( span.error ) {
@@ -1930,7 +1930,7 @@ exports.getTopObjectsSlowest = function( request, reply ) {
 //  ---------------------------------
 exports.getTopObjectsHTTPCodes = function( request, reply ) {
 
-  check_app_access_( request, reply, function() {
+  checkAppAccessPermissions_( request, reply, function() {
 
     var span = utils.query2Span( request.query, 1 /*def start in hrs*/ , 24/*allowed period in hrs*/ );
     if ( span.error ) {

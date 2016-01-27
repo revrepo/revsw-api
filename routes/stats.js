@@ -609,7 +609,7 @@ module.exports = [
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (optional, default to 30)'),
           report_type: Joi.string().required().valid ( 'full', 'first_byte' )
-            .description('Type of requested report (defaults to "response")'),
+            .description('Type of requested report (defaults to "full")'),
           device: Joi.string().description('Device name/version to filter'),
           os: Joi.string().description('OS name/version to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
