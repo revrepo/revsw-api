@@ -1563,7 +1563,22 @@ exports.getTopObjects = function( request, reply ) {
 
     var account_id = request.query.account_id,
       app_id = request.query.app_id || '',
-      count = request.query.count || 30;
+      count = request.query.count || 30,
+      report_type = request.query.report_type || 'any_request',
+      term = false;
+
+    switch (report_type) {
+      case 'any_request':
+        break;
+      case 'cache_missed':
+        term = { 'x-rev-cache': 'MISS' };
+        break;
+      case 'failed':
+        term = { 'success_status': 0 };
+        break;
+      default:
+        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+    }
 
     var requestBody = {
       size: 0,
@@ -1597,14 +1612,6 @@ exports.getTopObjects = function( request, reply ) {
               range: {
                 field: 'requests.start_ts',
                 ranges: [{ from: span.start, to: (span.end - 1) }]
-              },
-              aggs: {
-                urls: {
-                  terms: {
-                    field: 'requests.url',
-                    size: count
-                  }
-                }
               }
             }
           }
@@ -1612,8 +1619,34 @@ exports.getTopObjects = function( request, reply ) {
       }
     };
 
+    var sub = requestBody.aggs.result.aggs.result;
+    if ( term ) {
+      sub.aggs = {
+          filtered: {
+            filter: { term: term },
+            aggs: {
+              urls: {
+                terms: {
+                  field: 'requests.url',
+                  size: count
+                }
+              }
+            }
+          }
+        };
+    } else {
+      sub.aggs = {
+          urls: {
+            terms: {
+              field: 'requests.url',
+              size: count
+            }
+          }
+        };
+    }
+
     var terms = elasticSearch.buildESQueryTerms4SDK(request);
-    var sub = requestBody.query.filtered.filter.bool;
+    sub = requestBody.query.filtered.filter.bool;
     sub.must = sub.must.concat( terms.must );
     sub.must_not = sub.must_not.concat( terms.must_not );
 
@@ -1627,59 +1660,80 @@ exports.getTopObjects = function( request, reply ) {
       .then(function(body) {
 
         /*
+        no term
         "aggregations": {
           "result": {
-            "doc_count": 1315750,
+            "doc_count": 12605,
             "result": {
               "buckets": [{
-                "key": "2016-01-26T20:00:00.000Z-*",
-                "from": 1453838400000,
-                "from_as_string": "2016-01-26T20:00:00.000Z",
-                "doc_count": 280500,
+                "doc_count": 12597,
                 "urls": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
                   "buckets": [{
-                      "key": "https://app.resrc.it/O=100/https://static.ibmserviceengage.com/APImanagementCloud-hero.jpg",
-                      "doc_count": 5610
-                    }, {
-                      "key": "https://tags.tiqcdn.com/utag/ibm/main/prod/utag.694.js?utv=ut4.39.201601151731",
-                      "doc_count": 5610
-                    },
-
-        //  empty
+                        "key": "https://monitor.revsw.net/test-cache.js",
+                        "doc_count": 502
+                      }, {
+                        "key": "https://www.hpe.com/us/en/home.html",
+                        "doc_count": 145
+                      },
+        empty
         "aggregations": {
           "result": {
-            "doc_count": 1315750,
+            "doc_count": 0,
             "result": {
-              "buckets": [{
-                "key": "2016-01-26T23:00:00.000Z-*",
-                "from": 1453849200000,
-                "from_as_string": "2016-01-26T23:00:00.000Z",
-                "doc_count": 0,
-                "urls": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": []
-                }
-              }]
-            }
-          }
-        }
+              "buckets": [
+                {
+                  "doc_count": 0,
+                  "urls": {
+                    "buckets": []
+
+        term
+        "aggregations": {
+          "result": {
+            "doc_count": 12591,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 12583,
+                  "filtered": {
+                    "doc_count": 8828,
+                    "urls": {
+                      "buckets": [
+                        {
+                          "key": "https://mobile-collector.newrelic.com/mobile/v3/data",
+                          "doc_count": 132
+                        },
+                        {
+                          "key": "https://edition.i.cdn.cnn.com/.a/1.238.0/js/\u0027).f(t.get(%5B",
+                          "doc_count": 90
+                        },
+        empty
+        "aggregations": {
+          "result": {
+            "doc_count": 0,
+            "result": {
+              "buckets": [
+                {
+                  "doc_count": 0,
+                  "filtered": {
+                    "doc_count": 0,
+                    "urls": {
+                      "buckets": []
+
+
         */
 
         var data = [],
           total = 0,
-          len = ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets.length ) || 0 );
-        if ( len ) {
-          total = body.aggregations.result.result.buckets[0].doc_count;
-          for ( var i = 0; i < len; ++i ) {
-            var item = body.aggregations.result.result.buckets[0].urls.buckets[i];
-            data.push({
-              key: item.key,
-              count: item.doc_count
-            });
-          }
+          buckets = term ?
+            ( ( body.aggregations && body.aggregations.result.result.buckets[0].filtered.urls.buckets ) || [] ) :
+            ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets ) || [] );
+
+        for ( var i = 0, len = buckets.length; i < len; ++i ) {
+          data.push({
+            key: buckets[i].key,
+            count: buckets[i].doc_count
+          });
+          total += buckets[i].doc_count;
         }
 
         var response = {
@@ -1718,11 +1772,11 @@ exports.getTopObjectsSlowest = function( request, reply ) {
     var account_id = request.query.account_id,
       app_id = request.query.app_id || '',
       count = request.query.count || 30,
-      report_type = request.query.report_type || 'response';
+      report_type = request.query.report_type || 'full';
 
     var field;
     switch (report_type) {
-      case 'response':
+      case 'full':
         field = 'requests.end_ts';
         break;
       case 'first_byte':
@@ -1769,7 +1823,6 @@ exports.getTopObjectsSlowest = function( request, reply ) {
                 urls: {
                   terms: {
                     field: 'requests.url',
-                    // min_doc_count: 10,
                     order: { avg_time : 'desc' },
                     size: count
                   },
@@ -1806,26 +1859,19 @@ exports.getTopObjectsSlowest = function( request, reply ) {
             "doc_count": 1315750,
             "result": {
               "buckets": [{
-                "key": "2016-01-26T20:00:00.000Z-*",
-                "from": 1453838400000,
-                "from_as_string": "2016-01-26T20:00:00.000Z",
                 "doc_count": 280500,
                 "urls": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
                   "buckets": [{
                       "key": "https://app.resrc.it/O=100/https://static.ibmserviceengage.com/APImanagementCloud-hero.jpg",
                       "doc_count": 5610,
                       "avg_time": {
                         "value": 2944,
-                        "value_as_string": "1970-01-01T00:00:02.944Z"
                       }
                     }, {
                       "key": "https://tags.tiqcdn.com/utag/ibm/main/prod/utag.694.js?utv=ut4.39.201601151731",
                       "doc_count": 5610,
                       "avg_time": {
                         "value": 2349,
-                        "value_as_string": "1970-01-01T00:00:02.349Z"
                       }
                     },
 
@@ -1835,13 +1881,8 @@ exports.getTopObjectsSlowest = function( request, reply ) {
             "doc_count": 1315750,
             "result": {
               "buckets": [{
-                "key": "2016-01-26T23:00:00.000Z-*",
-                "from": 1453849200000,
-                "from_as_string": "2016-01-26T23:00:00.000Z",
                 "doc_count": 0,
                 "urls": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
                   "buckets": []
                 }
               }]
@@ -1852,17 +1893,15 @@ exports.getTopObjectsSlowest = function( request, reply ) {
 
         var data = [],
           total = 0,
-          len = ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets.length ) || 0 );
-        if ( len ) {
-          total = body.aggregations.result.result.buckets[0].doc_count;
-          for ( var i = 0; i < len; ++i ) {
-            var item = body.aggregations.result.result.buckets[0].urls.buckets[i];
-            data.push({
-              key: item.key,
-              count: item.doc_count,
-              val: item.avg_time.value
-            });
-          }
+          buckets = ( ( body.aggregations && body.aggregations.result.result.buckets[0].urls.buckets ) || [] );
+
+        for ( var i = 0, len = buckets.length; i < len; ++i ) {
+          data.push({
+            key: buckets[i].key,
+            count: buckets[i].doc_count,
+            val: buckets[i].avg_time.value
+          });
+          total += buckets[i].doc_count;
         }
 
         var response = {
@@ -1985,33 +2024,17 @@ exports.getTopObjectsHTTPCodes = function( request, reply ) {
             "result": {
               "buckets": [
                 {
-                  "key": "2016-01-27T01:05:00.000Z-2016-01-27T02:04:59.999Z",
-                  "from": 1453856700000,
-                  "from_as_string": "2016-01-27T01:05:00.000Z",
-                  "to": 1453860299999,
-                  "to_as_string": "2016-01-27T02:04:59.999Z",
                   "doc_count": 649,
                   "codes": {
                     "buckets": [
                       {
-                        "key": "200.0-210.0",
-                        "from": 200,
-                        "from_as_string": "200.0",
-                        "to": 210,
-                        "to_as_string": "210.0",
                         "doc_count": 621,
                         "urls": {
-                          "doc_count_error_upper_bound": 2,
-                          "sum_other_doc_count": 578,
                           "buckets": [
-                            {
-                              "key": "https://www.hpe.com/us/en/home.html",
-                              "doc_count": 14
-                            },
-                            {
-                              "key": "http://google.com/client_204?atyp=i&biw=320&bih=370&dpr=2&ei=nBioVsqBLMTgjwO557KgBA",
-                              "doc_count": 1
-                            },
+                            { "key": "https://www.hpe.com/us/en/home.html",
+                              "doc_count": 14 },
+                            { "key": "http://google.com/client_204?atyp=i&biw=320&bih=370&dpr=2&ei=nBioVsqBLMTgjwO557KgBA",
+                              "doc_count": 1 },
 
         //  empty
         "aggregations": {
@@ -2020,47 +2043,25 @@ exports.getTopObjectsHTTPCodes = function( request, reply ) {
             "result": {
               "buckets": [
                 {
-                  "key": "2016-01-27T01:05:00.000Z-2016-01-27T02:04:59.999Z",
-                  "from": 1453856700000,
-                  "from_as_string": "2016-01-27T01:05:00.000Z",
-                  "to": 1453860299999,
-                  "to_as_string": "2016-01-27T02:04:59.999Z",
                   "doc_count": 649,
                   "codes": {
                     "buckets": [
                       {
-                        "key": "500.0-599.0",
-                        "from": 500,
-                        "from_as_string": "500.0",
-                        "to": 599,
-                        "to_as_string": "599.0",
                         "doc_count": 0,
                         "urls": {
-                          "doc_count_error_upper_bound": 0,
-                          "sum_other_doc_count": 0,
                           "buckets": []
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
         */
 
         var data = [],
           total = 0,
-          len = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets.length ) || 0 );
-        if ( len ) {
-          total = body.aggregations.result.result.buckets[0].codes.buckets[0].doc_count;
-          for ( var i = 0; i < len; ++i ) {
-            var item = body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets[i];
-            data.push({
-              key: item.key,
-              count: item.doc_count
-            });
-          }
+          buckets = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets ) || [] );
+
+        for ( var i = 0, len = buckets.length; i < len; ++i ) {
+          data.push({
+            key: buckets[i].key,
+            count: buckets[i].doc_count
+          });
+          total += buckets[i].doc_count;
         }
 
         var response = {

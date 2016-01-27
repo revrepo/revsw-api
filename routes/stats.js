@@ -573,6 +573,8 @@ module.exports = [
           app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          report_type: Joi.string().required().valid ( 'any_request', 'failed', 'cache_missed' )
+            .description('Type of requested report (default to "any_request")'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (optional, default to 30)'),
           device: Joi.string().description('Device name/version to filter'),
           os: Joi.string().description('OS name/version to filter'),
@@ -606,7 +608,7 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (optional, default to 30)'),
-          report_type: Joi.string().required().valid ( 'response', 'first_byte' )
+          report_type: Joi.string().required().valid ( 'full', 'first_byte' )
             .description('Type of requested report (defaults to "response")'),
           device: Joi.string().description('Device name/version to filter'),
           os: Joi.string().description('OS name/version to filter'),
