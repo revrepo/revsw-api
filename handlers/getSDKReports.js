@@ -1931,7 +1931,7 @@ exports.getTopObjectsSlowest = function( request, reply ) {
 };
 
 //  ---------------------------------
-exports.getTopObjectsHTTPCodes = function( request, reply ) {
+exports.getTopObjects5xx = function( request, reply ) {
 
   checkAppAccessPermissions_( request, reply, function() {
 
@@ -1942,14 +1942,7 @@ exports.getTopObjectsHTTPCodes = function( request, reply ) {
 
     var account_id = request.query.account_id,
       app_id = request.query.app_id || '',
-      count = request.query.count || 30,
-      from_code = request.query.from_code,
-      to_code = request.query.to_code;
-
-    if ( from_code >= to_code ) {
-      return reply( boom.badRequest( '"from_code" parameter should be less then "to_code"' ) );
-    }
-
+      count = request.query.count || 30;
 
     var requestBody = {
       size: 0,
@@ -1988,13 +1981,20 @@ exports.getTopObjectsHTTPCodes = function( request, reply ) {
                 codes: {
                   range: {
                     field: 'requests.status_code',
-                    ranges: [{ from: from_code, to: to_code }]
+                    ranges: [{ from: 500, to: 600 }]
                   },
                   aggs: {
-                    urls: {
+                    codes: {
                       terms: {
-                        field: 'requests.url',
-                        size: count
+                        field: 'requests.status_code',
+                      },
+                      aggs: {
+                        urls: {
+                          terms: {
+                            field: 'requests.url',
+                            size: count
+                          }
+                        }
                       }
                     }
                   }
@@ -2023,49 +2023,60 @@ exports.getTopObjectsHTTPCodes = function( request, reply ) {
         /*
         "aggregations": {
           "result": {
-            "doc_count": 650,
+            "doc_count": 7615,
             "result": {
               "buckets": [
                 {
-                  "doc_count": 649,
+                  "doc_count": 7615,
                   "codes": {
                     "buckets": [
                       {
-                        "doc_count": 621,
-                        "urls": {
+                        "doc_count": 179,
+                        "codes": {
                           "buckets": [
-                            { "key": "https://www.hpe.com/us/en/home.html",
-                              "doc_count": 14 },
-                            { "key": "http://google.com/client_204?atyp=i&biw=320&bih=370&dpr=2&ei=nBioVsqBLMTgjwO557KgBA",
-                              "doc_count": 1 },
+                            {
+                              "key": 503,
+                              "doc_count": 175,
+                              "urls": {
+                                "buckets": [
+                                  {
+                                    "key": "https://sonar-web.tmmp.io/v1/snapshots",
+                                    "doc_count": 24
+                                  },
+                                  {
+                                    "key": "https://mobile-collector.newrelic.com/mobile/v3/data",
+                                    "doc_count": 9
+                                  },
+
 
         //  empty
         "aggregations": {
           "result": {
-            "doc_count": 650,
+            "doc_count": 0,
             "result": {
               "buckets": [
                 {
-                  "doc_count": 649,
+                  "doc_count": 0,
                   "codes": {
                     "buckets": [
                       {
                         "doc_count": 0,
-                        "urls": {
+                        "codes": {
+                          "doc_count_error_upper_bound": 0,
+                          "sum_other_doc_count": 0,
                           "buckets": []
         */
 
-        var data = [],
-          total = 0,
-          buckets = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].urls.buckets ) || [] );
-
-        for ( var i = 0, len = buckets.length; i < len; ++i ) {
-          data.push({
-            key: buckets[i].key,
-            count: buckets[i].doc_count
+        var total = 0,
+          codes = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].codes.buckets ) || [] ),
+          data = codes.map( function( c ) {
+            total += c.doc_count;
+            return {
+              key: c.key,
+              count: c.doc_count,
+              items: c.urls.buckets
+            };
           });
-          total += buckets[i].doc_count;
-        }
 
         var response = {
           metadata: {
