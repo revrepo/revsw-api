@@ -281,7 +281,7 @@ exports.getDirs = function( request, reply ) {
         },
         devices: {
           terms: {
-            field: 'device.device'
+            field: 'device.model'
           }
         },
         countries: {
@@ -1575,6 +1575,9 @@ exports.getTopObjects = function( request, reply ) {
         break;
       case 'failed':
         term = { 'success_status': 0 };
+        break;
+      case 'not_found':
+        term = { 'status_code': 404 };
         break;
       default:
         return reply(boom.badImplementation('Received bad report_type value ' + report_type));
