@@ -844,7 +844,8 @@ exports.getTopRequests = function( request, reply ) {
         field = 'device.os';
         break;
       case 'device':
-        field = 'device.device';
+        field = 'device.model';
+        // field = 'device.device';
         break;
       case 'operator':
         field = 'carrier.net_operator';
@@ -1008,7 +1009,8 @@ exports.getTopUsers = function( request, reply ) {
         field = 'device.os';
         break;
       case 'device':
-        field = 'device.device';
+        // field = 'device.device';
+        field = 'device.model';
         break;
       case 'operator':
         field = 'carrier.net_operator';
@@ -1133,7 +1135,8 @@ exports.getTopGBT = function( request, reply ) {
         field = 'device.os';
         break;
       case 'device':
-        field = 'device.device';
+        // field = 'device.device';
+        field = 'device.model';
         break;
       case 'operator':
         field = 'carrier.net_operator';
