@@ -20,16 +20,18 @@
 
 // Required resources to apply/attach to `API` object.
 var accounts = require('./resources/accounts');
-var billingPlans = require('./resources/billingPlans');
-var authenticate = require('./resources/authenticate');
-var users = require('./resources/users');
-var stats = require('./resources/stats');
-var sdkConfigs = require('./resources/sdkConfigs');
-var Session = require('./session');
-var domainConfigs = require('./resources/domainConfigs');
 var activity = require('./resources/activity');
+var authenticate = require('./resources/authenticate');
+var billingPlans = require('./resources/billingPlans');
+var countries = require('./resources/countries');
+var domainConfigs = require('./resources/domainConfigs');
 var purge = require('./resources/purge');
+var sdkConfigs = require('./resources/sdkConfigs');
+var stats = require('./resources/stats');
 var twoFA = require('./resources/2fa');
+var users = require('./resources/users');
+
+var Session = require('./session');
 
 var AccountsDP = require('./providers/data/accounts');
 var DomainConfigsDP = require('./providers/data/domainConfigs');
@@ -49,15 +51,16 @@ module.exports = {
   // A set of all resources that the REST API service provides.
   resources: {
     accounts: accounts,
-    billingPlans: billingPlans,
-    authenticate: authenticate,
-    users: users,
-    stats: stats,
-    sdkConfigs: sdkConfigs,
-    domainConfigs: domainConfigs,
     activity: activity,
+    authenticate: authenticate,
+    billingPlans: billingPlans,
+    countries: countries,
+    domainConfigs: domainConfigs,
     purge: purge,
-    twoFA: twoFA
+    sdkConfigs: sdkConfigs,
+    stats: stats,
+    twoFA: twoFA,
+    users: users
   },
 
   dataProvider: {
