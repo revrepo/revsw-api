@@ -33,7 +33,7 @@ module.exports = [
       handler     : handler.signup,
       auth        : false,
       description : 'An internal portal call for user signup',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
@@ -55,7 +55,7 @@ module.exports = [
       handler     : handler.resetToken,
       auth        : false,
       description : 'An internal portal call for resend user verification',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
@@ -79,7 +79,7 @@ module.exports = [
       handler     : handler.verify,
       auth        : false,
       description : 'An internal portal call for user verification',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
