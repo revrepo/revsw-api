@@ -8,6 +8,6 @@ Build something great!
 This interface will allow you to learn a detailed specification of our customer API
 service and also easily try available functions using your RevAPM customer portal account.
 
-For general information about the service please see [RevAPM Customer API](https://revapm.zendesk.com/hc/en-us/sections/201324813-RevAPM-Customer-API)
+For general information about the service please see [RevAPM Customer API](https://revapm.zendesk.com/hc/en-us/categories/200833373-RevAPM-API)
 section on our Help Center site.
 
