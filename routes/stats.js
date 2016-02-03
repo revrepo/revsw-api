@@ -573,8 +573,8 @@ module.exports = [
           app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
-          report_type: Joi.string().required().valid ( 'any_request', 'failed', 'cache_missed' )
-            .description('Type of requested report (default to "any_request")'),
+          report_type: Joi.string().valid ( 'failed', 'cache_missed', 'not_found' )
+            .description('Type of requested report'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (optional, default to 30)'),
           device: Joi.string().description('Device name/version to filter'),
           os: Joi.string().description('OS name/version to filter'),
@@ -622,13 +622,13 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/stats/sdk/top_objects/http',
+    path: '/v1/stats/sdk/top_objects/5xx',
     config: {
       auth: {
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
-      handler: SDKReports.getTopObjectsHTTPCodes,
-      description: 'Get list of the SDK objects filtered by HTTP codes, for an account and optionally application',
+      handler: SDKReports.getTopObjects5xx,
+      description: 'Get list of the SDK objects with 5XX codes, for an account and optionally application',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -642,8 +642,6 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (optional, default to 30)'),
-          from_code: Joi.number().integer().required().min(200).max(600).description('lower bound HTTP response code, from 200 to 600, required'),
-          to_code: Joi.number().integer().required().min(200).max(600).description('upper bound HTTP response code, from 200 to 600, required'),
           device: Joi.string().description('Device name/version to filter'),
           os: Joi.string().description('OS name/version to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
