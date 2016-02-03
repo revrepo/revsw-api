@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Countries Resource object
+// # Locations Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
@@ -26,13 +26,29 @@ var Methods = Constants.API.METHODS;
 
 var resourceConfig = {
   idKey: null,
-  name: 'countries',
-  path: '/countries/list',
-  methods: [
-    Methods.READ_ALL
+  name: 'locations',
+  path: '/locations',
+  methods: [],
+  nestedResources: [
+    {
+      idKey: null,
+      name: 'firstmile',
+      path: '/firstmile',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: null,
+      name: 'lastmile',
+      path: '/lastmile',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }
   ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `countries resource`
+// `locations resource`
 module.exports = new BasicResource(resourceConfig);

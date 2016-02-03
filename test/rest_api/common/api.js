@@ -25,6 +25,8 @@ var authenticate = require('./resources/authenticate');
 var billingPlans = require('./resources/billingPlans');
 var countries = require('./resources/countries');
 var domainConfigs = require('./resources/domainConfigs');
+var forgot = require('./resources/forgot');
+var locations = require('./resources/locations');
 var purge = require('./resources/purge');
 var sdkConfigs = require('./resources/sdkConfigs');
 var stats = require('./resources/stats');
@@ -56,6 +58,8 @@ module.exports = {
     billingPlans: billingPlans,
     countries: countries,
     domainConfigs: domainConfigs,
+    forgot: forgot,
+    locations: locations,
     purge: purge,
     sdkConfigs: sdkConfigs,
     stats: stats,

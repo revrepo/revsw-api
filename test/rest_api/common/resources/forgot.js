@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Countries Resource object
+// # Forgot Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
@@ -26,13 +26,13 @@ var Methods = Constants.API.METHODS;
 
 var resourceConfig = {
   idKey: null,
-  name: 'countries',
-  path: '/countries/list',
+  name: 'forgot',
+  path: '/forgot',
   methods: [
-    Methods.READ_ALL
+    Methods.CREATE
   ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `countries resource`
+// `forgot resource`
 module.exports = new BasicResource(resourceConfig);
