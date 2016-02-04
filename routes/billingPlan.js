@@ -36,7 +36,7 @@ module.exports = [
       handler: billingPlanHandler.list,
       description: 'Get a list of Billing Plans registered in system',
       notes: 'Use this function to get a list of Billing Plans registered in system',
-      tags: ['api', 'web'],
+//      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -58,7 +58,7 @@ module.exports = [
       handler: billingPlanHandler.get,
       description: 'Get Billing Plan details',
       notes: 'Use this function to get details of an Billing plan',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -85,7 +85,7 @@ module.exports = [
       handler: billingPlanHandler.create,
       description: 'Create a new Billing plan in the system',
       notes: 'Use the call to create a new Billing plan in system.',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -110,7 +110,7 @@ module.exports = [
       handler: billingPlanHandler.update,
       description: 'Update a Billing plan',
       notes: 'Use this function to update Billing plan details',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -141,7 +141,7 @@ module.exports = [
       handler: billingPlanHandler.delete,
       description: 'Remove a billing plan',
       notes: 'This function should be used by a admin to delete an Billing plan',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

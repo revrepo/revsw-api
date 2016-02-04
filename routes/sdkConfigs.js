@@ -33,7 +33,7 @@ module.exports = [
       handler: sdkConfig.getSDKConfig,
       description: 'Get SDK configuration details',
       notes: 'Use this function to get details of an SDK configuration',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

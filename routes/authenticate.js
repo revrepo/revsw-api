@@ -34,7 +34,7 @@ module.exports = [
       handler     : authenticate.authenticate,
       auth        : false,
       description : 'An internal portal call for user authentication',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors

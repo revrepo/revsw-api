@@ -34,7 +34,7 @@ module.exports = [
       handler     : password.forgotPassword,
       auth        : false,
       description : 'An internal portal call to initiate a password reset process for a user',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
