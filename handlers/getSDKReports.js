@@ -2299,9 +2299,9 @@ exports.getAB4FBTReports = function( request, reply ) {
                   fbt_average: ( item.fbt_average.value ),
                   fbt_min: ( item.fbt_min.value ),
                   fbt_max: ( item.fbt_max.value )
-                }
+                };
               })
-            }
+            };
           });
         }
         var response = {
