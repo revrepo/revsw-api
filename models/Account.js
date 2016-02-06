@@ -34,6 +34,9 @@ function Account(mongoose, connection, options) {
     'status'      : {type : Boolean, default : true},
     'createdBy'   : String,
     'id'          : String,
+    'subscription_id': String,
+    'subscription_state': String,
+    'billing_plan': String,
     'created_at'  : {type : Date, default : Date()},
     'updated_at'  : {type : Date, default : Date()}
   });
