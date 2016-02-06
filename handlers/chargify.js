@@ -87,6 +87,13 @@ exports.webhookHandler = function (request, reply) {
         }
 
         return accounts.addAsync(company);
+      })
+      .then(function (account) {
+        var item = {
+          user_id: user.id,
+          companyId: account.id
+        }
+        return users.updateAsync(item)
       });
   }
 
