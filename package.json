@@ -74,6 +74,7 @@
     "bluebird": "^2.10.2",
     "chai": "1.9.x",
     "faker": "^3.0.1",
+    "ghooks": "^1.0.3",
     "grunt": "0.4.x",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
@@ -96,5 +97,4 @@
       "pre-commit": "npm run lint"
     }
   }
-
 }
