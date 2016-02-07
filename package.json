@@ -90,5 +90,11 @@
   },
   "engines": {
     "node": ">= 0.12.x"
+  },
+  "config": {
+    "ghooks": {
+      "pre-commit": "npm run lint"
+    }
   }
+
 }
