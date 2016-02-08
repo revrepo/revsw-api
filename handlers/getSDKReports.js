@@ -2456,3 +2456,135 @@ exports.getAB4FBTDistribution = function( request, reply ) {
   });
 };
 
+//  ---------------------------------
+exports.getAB4Errors = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '';
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+      aggs: {
+        results: {
+          nested: {
+            'path': 'requests'
+          },
+          aggs: {
+            date_range: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                errors: {
+                  filter: { term: { 'requests.success_status': 0 } },
+                  aggs: {
+                    destinations: {
+                      terms: { field: 'requests.destination' },
+                      aggs: {
+                        date_histogram: {
+                          date_histogram: {
+                            field: 'requests.start_ts',
+                            interval: ( '' + span.interval ),
+                            min_doc_count: 0,
+                            extended_bounds : {
+                              min: span.start,
+                              max: span.end - 1
+                            },
+                            offset: ( '' + ( span.end % span.interval ) )
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    elasticSearch.getClientURL().search( {
+        index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then( function( body ) {
+
+        var total_hits = 0;
+        var dataArray = [];
+
+        // if ( body.aggregations ) {
+        //   dataArray = body.aggregations.results.date_range.buckets[0].errors.buckets[0].destinations.buckets.map( function( d ) {
+        //     total_hits += d.doc_count;
+        //     return {
+        //       key: d.key,
+        //       count: d.doc_count,
+        //       items: d.date_histogram.buckets.map( function( item ) {
+        //         return {
+        //           key_as_string: item.key_as_string,
+        //           key: item.key,
+        //           count: item.doc_count,
+        //           fbt_average: ( item.fbt_average.value ),
+        //           fbt_min: ( item.fbt_min.value ),
+        //           fbt_max: ( item.fbt_max.value )
+        //         };
+        //       })
+        //     };
+        //   });
+        // }
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date( span.start ),
+            end_timestamp: span.end,
+            end_datetime: new Date( span.end ),
+            interval_sec: ( Math.floor( span.interval / 1000 ) ),
+            total_hits: total_hits
+          },
+          data: dataArray
+        };
+        renderJSON( request, reply, false, response );
+      }, function( error ) {
+        logger.error( error );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+      } );
+
+  });
+};
+

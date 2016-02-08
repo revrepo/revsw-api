@@ -715,7 +715,39 @@ module.exports = [
         }
       }
     }
-  }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/sdk/ab/errors',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      handler: SDKReports.getAB4Errors,
+      description: 'Get SDK errors graph, separated by destination, for an account and optionally application',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        query: {
+          account_id: Joi.objectId().description('Account ID, optional'),
+          app_id: Joi.objectId().description('Application ID, optional, either Account ID or App ID should be provided'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          device: Joi.string().description('Device name/version to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          operator: Joi.string().description('Operator to filter'),
+          network: Joi.string().valid( 'Cellular', 'WiFi' ).description('Network type to filter')
+        }
+      }
+    }
+  },
+
 
 
 
