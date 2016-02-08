@@ -2547,25 +2547,22 @@ exports.getAB4Errors = function( request, reply ) {
         var total_hits = 0;
         var dataArray = [];
 
-        // if ( body.aggregations ) {
-        //   dataArray = body.aggregations.results.date_range.buckets[0].errors.buckets[0].destinations.buckets.map( function( d ) {
-        //     total_hits += d.doc_count;
-        //     return {
-        //       key: d.key,
-        //       count: d.doc_count,
-        //       items: d.date_histogram.buckets.map( function( item ) {
-        //         return {
-        //           key_as_string: item.key_as_string,
-        //           key: item.key,
-        //           count: item.doc_count,
-        //           fbt_average: ( item.fbt_average.value ),
-        //           fbt_min: ( item.fbt_min.value ),
-        //           fbt_max: ( item.fbt_max.value )
-        //         };
-        //       })
-        //     };
-        //   });
-        // }
+        if ( body.aggregations ) {
+          dataArray = body.aggregations.results.date_range.buckets[0].errors.destinations.buckets.map( function( d ) {
+            total_hits += d.doc_count;
+            return {
+              key: d.key,
+              count: d.doc_count,
+              items: d.date_histogram.buckets.map( function( item ) {
+                return {
+                  key_as_string: item.key_as_string,
+                  key: item.key,
+                  count: item.doc_count
+                };
+              })
+            };
+          });
+        }
         var response = {
           metadata: {
             account_id: ( account_id || '*' ),
