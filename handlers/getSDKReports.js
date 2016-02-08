@@ -435,6 +435,11 @@ exports.getFlowReport = function( request, reply ) {
                       sum: {
                         field: 'requests.sent_bytes'
                       }
+                    },
+                    time_spent: {
+                      sum: {
+                        field: 'requests.end_ts'
+                      }
                     }
                   }
                 }
@@ -458,10 +463,12 @@ exports.getFlowReport = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0;
-        var total_sent = 0;
-        var total_received = 0;
-        var dataArray = [];
+        var total_hits = 0,
+          total_sent = 0,
+          total_received = 0,
+          total_spent = 0,
+          dataArray = [];
+
         // "aggregations": {
         //   "results": {
         //     "doc_count": 9275,
@@ -490,11 +497,13 @@ exports.getFlowReport = function( request, reply ) {
               time_as_string: item.key_as_string,
               hits: item.doc_count,
               received_bytes: item.received_bytes.value,
-              sent_bytes: item.sent_bytes.value
+              sent_bytes: item.sent_bytes.value,
+              time_spent: item.time_spent.value
             });
             total_hits += item.doc_count;
             total_received += item.received_bytes.value;
             total_sent += item.sent_bytes.value;
+            total_spent += item.time_spent.value;
           }
         }
         var response = {
@@ -508,7 +517,8 @@ exports.getFlowReport = function( request, reply ) {
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
             total_hits: total_hits,
             total_received: total_received,
-            total_sent: total_sent
+            total_sent: total_sent,
+            total_spent: total_spent
           },
           data: dataArray
         };
@@ -2584,4 +2594,3 @@ exports.getAB4Errors = function( request, reply ) {
 
   });
 };
-
