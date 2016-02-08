@@ -904,6 +904,9 @@ exports.getTopRequests = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
+            if ( report_type === 'operator' && item.key === '_' ) {
+              item.key = 'No Cellular Connection';
+            }
             data.push({
               key: item.key,
               count: ( ( item.hits && item.hits.hits && item.hits.hits.buckets.length && item.hits.hits.buckets[0].doc_count ) || 0 )

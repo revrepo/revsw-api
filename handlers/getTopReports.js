@@ -151,6 +151,9 @@ var top_reports_ = function( req, reply, domain_name, span ) {
       var data = [];
       for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
         var item = body.aggregations.results.buckets[i];
+        if ( field === 'cache' && item.key === '-' ) {
+          item.key = 'MISS';
+        }
         data.push({
           key: item.key,
           count: item.doc_count
