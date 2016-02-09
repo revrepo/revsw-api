@@ -436,7 +436,7 @@ exports.getFlowReport = function( request, reply ) {
                         field: 'requests.sent_bytes'
                       }
                     },
-                    time_spent: {
+                    time_spent_ms: {
                       sum: {
                         field: 'requests.end_ts'
                       }
@@ -466,7 +466,7 @@ exports.getFlowReport = function( request, reply ) {
         var total_hits = 0,
           total_sent = 0,
           total_received = 0,
-          total_spent = 0,
+          total_spent_ms = 0,
           dataArray = [];
 
         // "aggregations": {
@@ -498,12 +498,12 @@ exports.getFlowReport = function( request, reply ) {
               hits: item.doc_count,
               received_bytes: item.received_bytes.value,
               sent_bytes: item.sent_bytes.value,
-              time_spent: item.time_spent.value
+              time_spent_ms: item.time_spent_ms.value
             });
             total_hits += item.doc_count;
             total_received += item.received_bytes.value;
             total_sent += item.sent_bytes.value;
-            total_spent += item.time_spent.value;
+            total_spent_ms += item.time_spent_ms.value;
           }
         }
         var response = {
@@ -518,7 +518,7 @@ exports.getFlowReport = function( request, reply ) {
             total_hits: total_hits,
             total_received: total_received,
             total_sent: total_sent,
-            total_spent: total_spent
+            total_spent_ms: total_spent_ms
           },
           data: dataArray
         };
@@ -2676,7 +2676,7 @@ exports.getAB4Speed = function( request, reply ) {
                             field: 'requests.sent_bytes'
                           }
                         },
-                        time_spent: {
+                        time_spent_ms: {
                           sum: {
                             field: 'requests.end_ts'
                           }
@@ -2702,11 +2702,14 @@ exports.getAB4Speed = function( request, reply ) {
         ignoreUnavailable: true,
         timeout: 120000,
         body: requestBody
-      } )
+      })
       .then( function( body ) {
 
-        var total_hits = 0;
-        var dataArray = [];
+        var total_hits = 0,
+          total_sent = 0,
+          total_received = 0,
+          total_spent_ms = 0,
+          dataArray = [];
 
         if ( body.aggregations ) {
           dataArray = body.aggregations.results.date_range.buckets[0].destinations.buckets.map( function( d ) {
@@ -2715,18 +2718,25 @@ exports.getAB4Speed = function( request, reply ) {
               key: d.key,
               count: d.doc_count,
               items: d.date_histogram.buckets.map( function( item ) {
+
+                total_received += item.received_bytes.value;
+                total_sent += item.sent_bytes.value;
+                total_spent_ms += item.time_spent_ms.value;
                 return {
                   key_as_string: item.key_as_string,
                   key: item.key,
                   count: item.doc_count,
                   received_bytes: ( item.received_bytes.value ),
                   sent_bytes: ( item.sent_bytes.value ),
-                  time_spent: ( item.time_spent.value )
+                  time_spent_ms: ( item.time_spent_ms.value )
                 };
+
               })
             };
           });
         }
+
+
         var response = {
           metadata: {
             account_id: ( account_id || '*' ),
@@ -2736,7 +2746,10 @@ exports.getAB4Speed = function( request, reply ) {
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
-            total_hits: total_hits
+            total_hits: total_hits,
+            total_received: total_received,
+            total_sent: total_sent,
+            total_spent_ms: total_spent_ms
           },
           data: dataArray
         };
