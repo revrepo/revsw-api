@@ -22,15 +22,14 @@ var joi = require('joi');
 joi.objectId = require('joi-objectid');
 
 exports.signupPayload = {
-  first_name: joi.string().description('User first name').required(),
-  last_name: joi.string().description('Last name').required(),
+  firstname: joi.string().description('User first name').required(),
+  lastname: joi.string().description('Last name').required(),
   email: joi.string().email().description('Email address').required(),
   company_name: joi.string().description('Company name'),
   phone_number: joi.string().description('Phone number').required(),
   password: joi.string().description('Password').required(),
-  billing_plan: joi.objectId().description('Billing plan ID').required(),
+  billing_plan: joi.objectId().description('Billing plan ID'),
   address: joi.string().description('Address').required(),
   collection_method: joi.array().description('Collection method'),
-  billing_schedule: joi.string().description('Billing schedule').required()
-
+  billing_schedule: joi.string().description('Billing schedule')
 };
