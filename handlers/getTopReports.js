@@ -149,14 +149,23 @@ var top_reports_ = function( req, reply, domain_name, span ) {
       }
 
       var data = [];
+      var missed_total = 0;
       for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
         var item = body.aggregations.results.buckets[i];
-        if ( field === 'cache' && item.key === '-' ) {
-          item.key = 'MISS';
+        if ( field === 'cache' && item.key !== 'HIT' ) {
+          //  special treatment for cache's MISS and occasional "-" values
+          missed_total += item.doc_count;
+        } else {
+          data.push({
+            key: item.key,
+            count: item.doc_count
+          });
         }
+      }
+      if ( field === 'cache' ) {
         data.push({
-          key: item.key,
-          count: item.doc_count
+          key: 'MISS',
+          count: missed_total
         });
       }
       var response = {
