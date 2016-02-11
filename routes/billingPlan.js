@@ -42,9 +42,9 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: {
+/*      response: {
         schema: routeValidation.listOfBillingPlanModels
-      }
+      }*/
     }
   },
 
@@ -69,9 +69,34 @@ module.exports = [
           id: Joi.objectId().required().description('ID of the Billing plan')
         }
       },
-      response: {
+/*      response: {
         schema: routeValidation.BillingPlanModel
-      }
+      }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/billing_plans/{id}/hosted_page',
+    config: {
+      auth: false,
+      handler: billingPlanHandler.getHostedPage,
+      description: 'Get Billing Plan Hosted Signup Page',
+      notes: 'Use this function to get a signup page for a Billing plan',
+//      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          id: Joi.objectId().required().description('ID of the Billing plan')
+        }
+      },
+      /*      response: {
+       schema: routeValidation.BillingPlanModel
+       }*/
     }
   },
 
@@ -82,7 +107,7 @@ module.exports = [
       auth: {
         scope: ['admin_rw']
       },
-      handler: billingPlanHandler.create,
+      handler: billingPlanHandler.createBillingPlan,
       description: 'Create a new Billing plan in the system',
       notes: 'Use the call to create a new Billing plan in system.',
 //      tags: ['api'],
@@ -107,7 +132,7 @@ module.exports = [
       auth: {
         scope: ['admin_rw']
       },
-      handler: billingPlanHandler.update,
+      handler: billingPlanHandler.updateBillingPlan,
       description: 'Update a Billing plan',
       notes: 'Use this function to update Billing plan details',
 //      tags: ['api'],

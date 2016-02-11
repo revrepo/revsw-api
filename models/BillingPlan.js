@@ -32,6 +32,9 @@ var BillingPlanSchema = new Schema({
   name: String,
   description: String,
 
+  chargify_handle: String,
+  hosted_page: String,
+
   type: {
     type: String,
     enum: ['public', 'private'],
