@@ -27,6 +27,7 @@ var config      = require('config');
 var cds_request = require('request');
 var utils           = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
+var Promise = require('bluebird');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -34,7 +35,8 @@ var publicRecordFields = require('../lib/publicRecordFields');
 
 var DomainConfig   = require('../models/DomainConfig');
 var ServerGroup         = require('../models/ServerGroup');
-
+var Company = require('../models/Account');
+Promise.promisifyAll(Company);
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 
@@ -194,6 +196,22 @@ exports.getDomainConfigVersions = function(request, reply) {
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
+/*
+  var companyID = request.auth.credentials.companyId;
+
+  Company.getAsync({_id: companyID})
+    .then(function (company) {
+      return BillingPlan.getAsync({chargify_handle: company.billing_plan});
+    })
+    .then(function (plan) {
+      if(plan.services[0].included >= domainConfigs.model.count({account_id: companyID})){
+        return reply(boom.forbidden('Domain limit reached.'));
+      }
+
+
+
+    });
+*/
 
   if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
     return reply(boom.badRequest('Account ID not found'));
@@ -247,7 +265,7 @@ exports.createDomainConfig = function(request, reply) {
           return renderJSON(request, reply, err, response_json);
         }
 
-        var response = {  
+        var response = {
           statusCode: 200,
           message: 'Successfully created new domain configuration',
           object_id: response_json._id

@@ -76,7 +76,7 @@ exports.signup = function(req, reply) {
         return reply(boom.badImplementation('Failed to fetch billing plan details'));
       }
       if (!billingPlan) {
-        //TODO uncomment this
+        //We don't need a check for a billing plan on this stage
         //return reply(boom.notFound('No billing plan exist in system'));
       }
 
@@ -122,9 +122,9 @@ exports.signup = function(req, reply) {
             operation_status: 'success'
           });
           renderJSON(req, reply, err, statusResponse);
-          //sendVerifyToken(user, token, function(err, res) {
-          //
-          //});
+          sendVerifyToken(user, token, function(err, res) {
+
+          });
         }
       });
     });

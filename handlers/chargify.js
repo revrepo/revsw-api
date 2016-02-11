@@ -46,7 +46,7 @@ exports.webhookHandler = function (request, reply) {
 
 
   var onTest = function () {
-    reply(payload);
+    reply();
   }
 
   var onSignupSuccess = function () {
@@ -91,7 +91,8 @@ exports.webhookHandler = function (request, reply) {
       .then(function (account) {
         var item = {
           user_id: user.id,
-          companyId: account.id
+          companyId: account.id,
+          role: 'admin'
         }
         return users.updateAsync(item)
       });
