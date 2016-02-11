@@ -73,7 +73,9 @@
     "iOS": [ 1, 2, 4 ],
     "Android": [ 1, 4, 5 ]
   },
-  
+
   "chargify_password" : "x",
-  "chargify_domain": "https://revsw-test.chargify.com/"
+  "chargify_domain": "https://revsw-test.chargify.com/",
+  "chargify_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA"
+
 }
