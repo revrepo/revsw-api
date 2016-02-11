@@ -58,9 +58,8 @@ exports.webhookHandler = function (request, reply) {
       .then(function (user) {
 
         var company = {
-          companyName: user.company_name,
+          account_id: user.companyId,
           status: true,
-          createdBy: user.email,
           subscription_id: subscription.id,
           subscription_state: subscription.state,
           billing_plan: product.handle
@@ -75,26 +74,18 @@ exports.webhookHandler = function (request, reply) {
     var customer = subscription.customer;
     var product = subscription.product;
 
-    acccounts.getAsync({email: customer.email})
+    users.getAsync({email: customer.email})
       .then(function (user) {
+
         var company = {
-          companyName: user.company_name,
+          account_id: user.companyId,
           status: true,
-          createdBy: user.email,
           subscription_id: subscription.id,
           subscription_state: subscription.state,
           billing_plan: product.handle
         }
 
-        return accounts.addAsync(company);
-      })
-      .then(function (account) {
-        var item = {
-          user_id: user.id,
-          companyId: account.id,
-          role: 'admin'
-        }
-        return users.updateAsync(item)
+        return accounts.updateAsync(company);
       });
   }
 
