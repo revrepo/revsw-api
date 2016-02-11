@@ -49,20 +49,7 @@ exports.getFBTAverage = function( request, reply ) {
         return reply( boom.badRequest( span.error ) );
       }
 
-      var domain_name = result.domain_name,
-        delta = span.end - span.start,
-        interval;
-
-      if ( delta <= 3 * 3600000 ) {
-        interval = 5 * 60000; // 5 minutes
-      } else if ( delta <= 2 * 24 * 3600000 ) {
-        interval = 30 * 60000; // 30 minutes
-      } else if ( delta <= 8 * 24 * 3600000 ) {
-        interval = 3 * 3600000; // 3 hours
-      } else {
-        interval = 12 * 3600000; // 12 hours
-      }
-
+      var domain_name = result.domain_name;
       var requestBody = {
         size: 0,
         query: {
@@ -90,13 +77,13 @@ exports.getFBTAverage = function( request, reply ) {
           results: {
             date_histogram: {
               field: '@timestamp',
-              interval: ( '' + interval ),
+              interval: ( '' + span.interval ),
               min_doc_count: 0,
               extended_bounds : {
                 min: span.start,
                 max: ( span.end - 1 )
               },
-              offset: ( '' + ( span.end % interval ) )
+              offset: ( '' + ( span.end % span.interval ) )
             },
             aggs: {
               avg_fbt: {
@@ -139,7 +126,7 @@ exports.getFBTAverage = function( request, reply ) {
               end_timestamp: span.end,
               end_datetime: new Date( span.end ),
               total_hits: body.hits.total,
-              interval_sec: interval / 1000,
+              interval_sec: span.interval / 1000,
               data_points_count: body.aggregations.results.buckets.length
             },
             data: dataArray

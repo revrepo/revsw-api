@@ -42,9 +42,7 @@ exports.getStats = function(request, reply) {
 
   var domain_id = request.params.domain_id,
     domain_name,
-    metadataFilterField,
-    interval,
-    time_period;
+    metadataFilterField;
 
   domainConfigs.get(domain_id, function(error, result) {
     if (error) {
@@ -56,17 +54,6 @@ exports.getStats = function(request, reply) {
       var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
-      }
-
-      time_period = span.end - span.start;
-      if ( time_period <= 3*3600000 ) {
-        interval = 5*60000; // 5 minutes
-      } else if ( time_period <= 2*24*3600000 ) {
-        interval = 30*60000; // 30 minutes
-      } else if ( time_period <= 8*24*3600000 ) {
-        interval = 3*3600000; // 3 hours
-      } else {
-        interval = 12*3600000; // 12 hours
       }
 
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
@@ -98,14 +85,14 @@ exports.getStats = function(request, reply) {
           results: {
             date_histogram: {
               field: '@timestamp',
-              interval: ( '' + interval ),
+              interval: ( '' + span.interval ),
               // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
               min_doc_count: 0,
               extended_bounds : {
                 min: span.start,
                 max: ( span.end - 1 )
               },
-              offset: ( '' + ( span.end % interval ) )
+              offset: ( '' + ( span.end % span.interval ) )
             },
             aggs: {
               sent_bytes: {
@@ -153,7 +140,7 @@ exports.getStats = function(request, reply) {
             end_timestamp: span.end,
             end_datetime: new Date(span.end),
             total_hits: body.hits.total,
-            interval_sec: interval/1000,
+            interval_sec: span.interval/1000,
             filter: metadataFilterField,
             data_points_count: body.aggregations.results.buckets.length
           },

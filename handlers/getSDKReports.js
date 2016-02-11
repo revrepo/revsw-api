@@ -34,24 +34,6 @@ var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 
-  // checkUserAccessPermissionToDomain: function(request, domainObject) {
-  //   // Allow full access to Revadmin role
-  //   if (request.auth.credentials.role === 'revadmin') {
-  //     return true;
-  //   // Allow access to Admin and Reseller who manage the company
-  //   } else if ((request.auth.credentials.role === 'reseller' || request.auth.credentials.role === 'admin') &&
-  //     (request.auth.credentials.companyId.indexOf(domainObject.account_id) !== -1)) {
-  //     return true;
-  //   // For user role allow the access only if the user belongs to the company and has permissions to manage the specific domain
-  //   } else if ((request.auth.credentials.role === 'user' && request.auth.credentials.companyId.indexOf(domainObject.proxy_config.account_id) !== -1 &&
-  //     request.auth.credentials.domain.indexOf(domainObject.domain_name) !== -1)) {
-  //     return true;  // allow access
-  //   } else {
-  //     return false;  // deny access
-  //   }
-  // },
-
-
 //  ---------------------------------
 var checkAppAccessPermissions_ = function( request, reply, callback ) {
 
@@ -397,19 +379,7 @@ exports.getFlowReport = function( request, reply ) {
     }
 
     var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
-      delta = span.end - span.start,
-      interval;
-
-    if ( delta <= 3 * 3600000 ) {
-      interval = 5 * 60000; // 5 minutes
-    } else if ( delta <= 2 * 24 * 3600000 ) {
-      interval = 30 * 60000; // 30 minutes
-    } else if ( delta <= 8 * 24 * 3600000 ) {
-      interval = 3 * 3600000; // 3 hours
-    } else {
-      interval = 12 * 3600000; // 12 hours
-    }
+      app_id = request.query.app_id || '';
 
     var requestBody = {
       size: 0,
@@ -447,13 +417,13 @@ exports.getFlowReport = function( request, reply ) {
                 date_histogram: {
                   date_histogram: {
                     field: 'requests.start_ts',
-                    interval: ( '' + interval ),
+                    interval: ( '' + span.interval ),
                     min_doc_count: 0,
                     extended_bounds : {
                       min: span.start,
                       max: span.end - 1
                     },
-                    offset: ( '' + ( span.end % interval ) )
+                    offset: ( '' + ( span.end % span.interval ) )
                   },
                   aggs: {
                     received_bytes: {
@@ -464,6 +434,11 @@ exports.getFlowReport = function( request, reply ) {
                     sent_bytes: {
                       sum: {
                         field: 'requests.sent_bytes'
+                      }
+                    },
+                    time_spent_ms: {
+                      sum: {
+                        field: 'requests.end_ts'
                       }
                     }
                   }
@@ -488,10 +463,12 @@ exports.getFlowReport = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0;
-        var total_sent = 0;
-        var total_received = 0;
-        var dataArray = [];
+        var total_hits = 0,
+          total_sent = 0,
+          total_received = 0,
+          total_spent_ms = 0,
+          dataArray = [];
+
         // "aggregations": {
         //   "results": {
         //     "doc_count": 9275,
@@ -520,11 +497,13 @@ exports.getFlowReport = function( request, reply ) {
               time_as_string: item.key_as_string,
               hits: item.doc_count,
               received_bytes: item.received_bytes.value,
-              sent_bytes: item.sent_bytes.value
+              sent_bytes: item.sent_bytes.value,
+              time_spent_ms: item.time_spent_ms.value
             });
             total_hits += item.doc_count;
             total_received += item.received_bytes.value;
             total_sent += item.sent_bytes.value;
+            total_spent_ms += item.time_spent_ms.value;
           }
         }
         var response = {
@@ -535,10 +514,11 @@ exports.getFlowReport = function( request, reply ) {
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
-            interval_sec: ( Math.floor( interval / 1000 ) ),
+            interval_sec: ( Math.floor( span.interval / 1000 ) ),
             total_hits: total_hits,
             total_received: total_received,
-            total_sent: total_sent
+            total_sent: total_sent,
+            total_spent_ms: total_spent_ms
           },
           data: dataArray
         };
@@ -563,8 +543,6 @@ exports.getAggFlowReport = function( request, reply ) {
 
     var account_id = request.query.account_id,
       app_id = request.query.app_id || '',
-      delta = span.end - span.start,
-      interval,
       report_type = request.query.report_type || 'status_code';
 
     var field, keys;
@@ -603,16 +581,6 @@ exports.getAggFlowReport = function( request, reply ) {
         break;
       default:
         return reply(boom.badImplementation('Received bad report_type value ' + report_type));
-    }
-
-    if ( delta <= 3 * 3600000 ) {
-      interval = 5 * 60000; // 5 minutes
-    } else if ( delta <= 2 * 24 * 3600000 ) {
-      interval = 30 * 60000; // 30 minutes
-    } else if ( delta <= 8 * 24 * 3600000 ) {
-      interval = 3 * 3600000; // 3 hours
-    } else {
-      interval = 12 * 3600000; // 12 hours
     }
 
     var requestBody = {
@@ -654,13 +622,13 @@ exports.getAggFlowReport = function( request, reply ) {
                     date_histogram: {
                       date_histogram: {
                         field: 'requests.start_ts',
-                        interval: ( '' + interval ),
+                        interval: ( '' + span.interval ),
                         min_doc_count: 0,
                         extended_bounds : {
                           min: span.start,
                           max: span.end - 1
                         },
-                        offset: ( '' + ( span.end % interval ) )
+                        offset: ( '' + ( span.end % span.interval ) )
                       },
                       aggs: {
                         received_bytes: {
@@ -790,7 +758,7 @@ exports.getAggFlowReport = function( request, reply ) {
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
-            interval_sec: ( Math.floor( interval / 1000 ) ),
+            interval_sec: ( Math.floor( span.interval / 1000 ) ),
             total_hits: total_hits,
             total_received: total_received,
             total_sent: total_sent
@@ -936,6 +904,9 @@ exports.getTopRequests = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
+            if ( report_type === 'operator' && item.key === '_' ) {
+              item.key = 'No Cellular Connection';
+            }
             data.push({
               key: item.key,
               count: ( ( item.hits && item.hits.hits && item.hits.hits.buckets.length && item.hits.hits.buckets[0].doc_count ) || 0 )
@@ -1062,6 +1033,9 @@ exports.getTopUsers = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
+            if ( report_type === 'operator' && item.key === '_' ) {
+              item.key = 'No Cellular Connection';
+            }
             data.push({
               key: item.key,
               count: ( ( item.users && item.users.value ) || 0 )
@@ -1238,6 +1212,9 @@ exports.getTopGBT = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
+            if ( report_type === 'operator' && item.key === '_' ) {
+              item.key = 'No Cellular Connection';
+            }
             if ( item.deep && item.deep.hits && item.deep.hits.buckets.length ) {
               var deep = item.deep.hits.buckets[0];
               data.push({
@@ -1334,7 +1311,8 @@ exports.getDistributions = function( request, reply ) {
       case 'status_code':
         field = 'requests.status_code';
         keys = {
-          allow_any: true
+          allow_any: true,
+          '0': false  //  exception
         };
         break;
       default:
@@ -1482,7 +1460,7 @@ exports.getDistributions = function( request, reply ) {
         if ( body.aggregations && body.aggregations.result.doc_count ) {
           for ( var i = 0, len = body.aggregations.result.result.buckets[0].distribution.buckets.length; i < len; ++i ) {
             var item = body.aggregations.result.result.buckets[0].distribution.buckets[i];
-            if ( keys.allow_any || keys[item.key] ) {
+            if ( ( keys.allow_any && keys[item.key] !== false/*exception*/ ) || keys[item.key] ) {
               item.key = keys[item.key] || item.key;
               data.push({
                 key: item.key,
@@ -2068,7 +2046,7 @@ exports.getTopObjects5xx = function( request, reply ) {
 };
 
 //  ---------------------------------
-exports.getAB4FBTReports = function( request, reply ) {
+exports.getAB4FBTAverage = function( request, reply ) {
 
   checkAppAccessPermissions_( request, reply, function() {
 
@@ -2078,19 +2056,7 @@ exports.getAB4FBTReports = function( request, reply ) {
     }
 
     var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
-      delta = span.end - span.start,
-      interval;
-
-    if ( delta <= 3 * 3600000 ) {
-      interval = 5 * 60000; // 5 minutes
-    } else if ( delta <= 2 * 24 * 3600000 ) {
-      interval = 30 * 60000; // 30 minutes
-    } else if ( delta <= 8 * 24 * 3600000 ) {
-      interval = 3 * 3600000; // 3 hours
-    } else {
-      interval = 12 * 3600000; // 12 hours
-    }
+      app_id = request.query.app_id || '';
 
     var requestBody = {
       size: 0,
@@ -2131,13 +2097,13 @@ exports.getAB4FBTReports = function( request, reply ) {
                     date_histogram: {
                       date_histogram: {
                         field: 'requests.start_ts',
-                        interval: ( '' + interval ),
+                        interval: ( '' + span.interval ),
                         min_doc_count: 0,
                         extended_bounds : {
                           min: span.start,
                           max: span.end - 1
                         },
-                        offset: ( '' + ( span.end % interval ) )
+                        offset: ( '' + ( span.end % span.interval ) )
                       },
                       aggs: {
                         fbt_average: {
@@ -2312,8 +2278,478 @@ exports.getAB4FBTReports = function( request, reply ) {
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
-            interval_sec: ( Math.floor( interval / 1000 ) ),
+            interval_sec: ( Math.floor( span.interval / 1000 ) ),
             total_hits: total_hits
+          },
+          data: dataArray
+        };
+        renderJSON( request, reply, false, response );
+      }, function( error ) {
+        logger.error( error );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+      } );
+
+  });
+};
+
+//  ---------------------------------
+exports.getAB4FBTDistribution = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '',
+      interval = request.query.interval_ms || 100,
+      limit = request.query.limit_ms || 10000;
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+      aggs: {
+        results: {
+          nested: {
+            'path': 'requests'
+          },
+          aggs: {
+            date_range: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                value_range: {
+                  range: {
+                    field: 'requests.first_byte_ts',
+                    ranges: [{ from: 0, to: limit }]
+                  },
+                  aggs: {
+                    destinations: {
+                      terms: { field: 'requests.destination' },
+                      aggs: {
+                        histo: {
+                          histogram: {
+                            field: 'requests.first_byte_ts',
+                            interval: ( '' + interval ),
+                            min_doc_count: 0,
+                            extended_bounds : { min : 0, max : limit - 1 }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    elasticSearch.getClientURL().search( {
+        index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then( function( body ) {
+
+        var total_hits = 0;
+        var dataArray = [];
+
+        // "aggregations": {
+        //   "results": {
+        //     "doc_count": 2093,
+        //     "date_range": {
+        //       "buckets": [
+        //         {
+        //           "doc_count": 2093,
+        //           "value_range": {
+        //             "buckets": [
+        //               {
+        //                 "doc_count": 1850,
+        //                 "destinations": {
+        //                   "buckets": [
+        //                     {
+        //                       "key": "rev_edge",
+        //                       "doc_count": 1842,
+        //                       "histo": {
+        //                         "buckets": [
+        //                           {
+        //                             "key": 0,
+        //                             "doc_count": 73
+        //                           },
+        //                           {
+        //                             "key": 100,
+        //                             "doc_count": 384
+        //                           } .....
+        //                         ]
+        //                       }
+        //                     },
+        //                     {
+        //                       "key": "origin",
+        //                       "doc_count": 8,
+        //                       "histo": {
+        //                         "buckets": [
+        //                           {
+        //                             "key": 0,
+        //                             "doc_count": 0
+        //                           }, ..........
+
+
+        //  empty
+        // "aggregations": {
+        //   "results": {
+        //     "doc_count": 0,
+        //     "date_range": {
+        //       "buckets": [
+        //         {
+        //           "doc_count": 0,
+        //           "destinations": {
+        //             "buckets": []
+        //           } .........
+
+        if ( body.aggregations &&
+            body.aggregations.results.date_range.buckets[0].doc_count &&
+            body.aggregations.results.date_range.buckets[0].value_range.buckets[0].doc_count ) {
+          dataArray = body.aggregations.results.date_range.buckets[0].value_range.buckets[0].destinations.buckets.map( function( d ) {
+            total_hits += d.doc_count;
+            return {
+              key: d.key,
+              count: d.doc_count,
+              items: d.histo.buckets.map( function( item ) {
+                return {
+                  key: item.key,
+                  count: item.doc_count
+                };
+              })
+            };
+          });
+        }
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date( span.start ),
+            end_timestamp: span.end,
+            end_datetime: new Date( span.end ),
+            total_hits: total_hits
+          },
+          data: dataArray
+        };
+        renderJSON( request, reply, false, response );
+      }, function( error ) {
+        logger.error( error );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+      } );
+
+
+  });
+};
+
+//  ---------------------------------
+exports.getAB4Errors = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '';
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+      aggs: {
+        results: {
+          nested: {
+            'path': 'requests'
+          },
+          aggs: {
+            date_range: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                errors: {
+                  filter: { term: { 'requests.success_status': 0 } },
+                  aggs: {
+                    destinations: {
+                      terms: { field: 'requests.destination' },
+                      aggs: {
+                        date_histogram: {
+                          date_histogram: {
+                            field: 'requests.start_ts',
+                            interval: ( '' + span.interval ),
+                            min_doc_count: 0,
+                            extended_bounds : {
+                              min: span.start,
+                              max: span.end - 1
+                            },
+                            offset: ( '' + ( span.end % span.interval ) )
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    elasticSearch.getClientURL().search( {
+        index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      } )
+      .then( function( body ) {
+
+        var total_hits = 0;
+        var dataArray = [];
+
+        if ( body.aggregations ) {
+          dataArray = body.aggregations.results.date_range.buckets[0].errors.destinations.buckets.map( function( d ) {
+            total_hits += d.doc_count;
+            return {
+              key: d.key,
+              count: d.doc_count,
+              items: d.date_histogram.buckets.map( function( item ) {
+                return {
+                  key_as_string: item.key_as_string,
+                  key: item.key,
+                  count: item.doc_count
+                };
+              })
+            };
+          });
+        }
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date( span.start ),
+            end_timestamp: span.end,
+            end_datetime: new Date( span.end ),
+            interval_sec: ( Math.floor( span.interval / 1000 ) ),
+            total_hits: total_hits
+          },
+          data: dataArray
+        };
+        renderJSON( request, reply, false, response );
+      }, function( error ) {
+        logger.error( error );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+      } );
+
+  });
+};
+
+//  ---------------------------------
+exports.getAB4Speed = function( request, reply ) {
+
+  checkAppAccessPermissions_( request, reply, function() {
+
+    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+    if ( span.error ) {
+      return reply( boom.badRequest( span.error ) );
+    }
+
+    var account_id = request.query.account_id,
+      app_id = request.query.app_id || '';
+
+    var requestBody = {
+      size: 0,
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [ {
+                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+              }, {
+                range: {
+                  'start_ts': {
+                    gte: span.start,
+                    lt: span.end
+                  }
+                }
+              } ],
+              must_not: []
+            }
+          }
+        }
+      },
+      aggs: {
+        results: {
+          nested: {
+            'path': 'requests'
+          },
+          aggs: {
+            date_range: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                destinations: {
+                  terms: { field: 'requests.destination' },
+                  aggs: {
+                    date_histogram: {
+                      date_histogram: {
+                        field: 'requests.start_ts',
+                        interval: ( '' + span.interval ),
+                        min_doc_count: 0,
+                        extended_bounds : {
+                          min: span.start,
+                          max: span.end - 1
+                        },
+                        offset: ( '' + ( span.end % span.interval ) )
+                      },
+                      aggs: {
+                        received_bytes: {
+                          sum: {
+                            field: 'requests.received_bytes'
+                          }
+                        },
+                        sent_bytes: {
+                          sum: {
+                            field: 'requests.sent_bytes'
+                          }
+                        },
+                        time_spent_ms: {
+                          sum: {
+                            field: 'requests.end_ts'
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var terms = elasticSearch.buildESQueryTerms4SDK(request);
+    var sub = requestBody.query.filtered.filter.bool;
+    sub.must = sub.must.concat( terms.must );
+    sub.must_not = sub.must_not.concat( terms.must_not );
+
+    elasticSearch.getClientURL().search( {
+        index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
+        ignoreUnavailable: true,
+        timeout: 120000,
+        body: requestBody
+      })
+      .then( function( body ) {
+
+        var total_hits = 0,
+          total_sent = 0,
+          total_received = 0,
+          total_spent_ms = 0,
+          dataArray = [];
+
+        if ( body.aggregations ) {
+          dataArray = body.aggregations.results.date_range.buckets[0].destinations.buckets.map( function( d ) {
+            total_hits += d.doc_count;
+            return {
+              key: d.key,
+              count: d.doc_count,
+              items: d.date_histogram.buckets.map( function( item ) {
+
+                total_received += item.received_bytes.value;
+                total_sent += item.sent_bytes.value;
+                total_spent_ms += item.time_spent_ms.value;
+                return {
+                  key_as_string: item.key_as_string,
+                  key: item.key,
+                  count: item.doc_count,
+                  received_bytes: ( item.received_bytes.value ),
+                  sent_bytes: ( item.sent_bytes.value ),
+                  time_spent_ms: ( item.time_spent_ms.value )
+                };
+
+              })
+            };
+          });
+        }
+
+
+        var response = {
+          metadata: {
+            account_id: ( account_id || '*' ),
+            app_id: ( app_id || '*' ),
+            start_timestamp: span.start,
+            start_datetime: new Date( span.start ),
+            end_timestamp: span.end,
+            end_datetime: new Date( span.end ),
+            interval_sec: ( Math.floor( span.interval / 1000 ) ),
+            total_hits: total_hits,
+            total_received: total_received,
+            total_sent: total_sent,
+            total_spent_ms: total_spent_ms
           },
           data: dataArray
         };
