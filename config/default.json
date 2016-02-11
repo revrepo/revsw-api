@@ -72,5 +72,8 @@
   "available_sdk_release_versions": {
     "iOS": [ 1, 2, 4 ],
     "Android": [ 1, 4, 5 ]
-  }
+  },
+  
+  "chargify_password" : "x",
+  "chargify_domain": "https://revsw-test.chargify.com/"
 }
