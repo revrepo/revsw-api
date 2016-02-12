@@ -29,7 +29,7 @@ exports.signupPayload = {
   phone_number: joi.string().description('Phone number').required(),
   password: joi.string().description('Password').required(),
   address1: joi.string().description('Address 1').required(),
-  address2: joi.string().description('Address 2'),
+  address2: joi.string().description('Address 2').optional(),
   country: joi.string().description('Country').required(),
   state: joi.string().description('State'),
   city: joi.string().description('City').required(),

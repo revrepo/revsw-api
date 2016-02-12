@@ -20,15 +20,15 @@
 
 
 var mongoose = require('mongoose');
-var boom     = require('boom');
-var async    = require('async');
+var boom = require('boom');
+var async = require('async');
 var AuditLogger = require('revsw-audit');
 var utils = require('../lib/utilities');
 var mail = require('../lib/mail');
 var config = require('config');
 
 var mongoConnection = require('../lib/mongoConnections');
-var renderJSON      = require('../lib/renderJSON');
+var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
 
 var Account = require('../models/Account');
@@ -44,11 +44,11 @@ var sendVerifyToken = function(user, token, cb) {
     to: user.email,
     subject: config.get('user_verify_subject'),
     text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of account.\n\n' +
-    'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-    'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
-    'If you did not request this, please ignore this email.\n\n' +
-    'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-    'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+      'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+      'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
+      'If you did not request this, please ignore this email.\n\n' +
+      'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
+      'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
   };
 
   mail.sendMail(mailOptions, cb);
@@ -70,45 +70,46 @@ exports.signup = function(req, reply) {
       if (user.deleted) {
         return reply(boom.badRequest('User has delete flag'));
       }
-      return reply(boom.badRequest('This email already exist in system'));
+      return reply(boom.badRequest('This email already exists in the system'));
     }
 
-      if (!data.company_name) {
-        data.company_name = data.firstname + ' ' + data.lastname + '\'s Company';
-      }
-      var newUser = {
-        firstname: data.firstname,
-        lastname: data.lastname,
-        password: data.password,
-        company_name: data.company_name
-      };
+    if (!data.company_name) {
+      data.company_name = data.firstname + ' ' + data.lastname + '\'s Company';
+    }
+    var newUser = {
+      firstname: data.firstname,
+      lastname: data.lastname,
+      password: data.password,
+      role: 'admin',
+      email: data.email
+    };
 
-      var newCompany = {
-        companyName: data.company_name,
-        createdBy: data.email,
-        address1: data.address1,
-        address2: data.address2,
-        country: data.country,
-        state: data.state,
-        zipcode: data.zipcode,
-        phone_number: data.phone_number
-      };
+    var newCompany = {
+      companyName: data.company_name,
+      createdBy: data.email,
+      address1: data.address1,
+      address2: data.address2,
+      country: data.country,
+      state: data.state,
+      zipcode: data.zipcode,
+      phone_number: data.phone_number
+    };
     accounts.get({
-      companyName : newCompany.companyName
-    }, function (error, result) {
+      companyName: newCompany.companyName
+    }, function(error, result) {
 
       if (error) {
-        return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
+        return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newCompany.companyName));
       }
 
       if (result) {
         return reply(boom.badRequest('The company name is already registered in the system'));
       }
 
-      accounts.add(newCompany, function (error, result) {
+      accounts.add(newCompany, function(error, result) {
 
         if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
+          return reply(boom.badImplementation('Failed to add new account ' + newCompany.companyName));
         }
 
         result = publicRecordFields.handle(result, 'account');
@@ -125,7 +126,7 @@ exports.signup = function(req, reply) {
         // All ok
         users.add(newUser, function(err, user) {
           if (err || !user) {
-            return reply(boom.badImplementation('Could not create new user'));
+            return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
           }
 
           var statusResponse;
@@ -139,15 +140,16 @@ exports.signup = function(req, reply) {
             user = publicRecordFields.handle(user, 'user');
 
             AuditLogger.store({
-              ip_address        : req.info.remoteAddress,
-              datetime         : Date.now(),
-              user_type        : 'user',
-              activity_type    : 'add',
-              activity_target  : 'account',
-              target_id        : result.id,
-              target_name      : result.companyName,
-              target_object    : result,
-              operation_status : 'success'
+              ip_address: req.info.remoteAddress,
+              datetime: Date.now(),
+              user_type: 'user',
+              account_id: result.id,
+              activity_type: 'add',
+              activity_target: 'account',
+              target_id: result.id,
+              target_name: result.companyName,
+              target_object: result,
+              operation_status: 'success'
             });
 
             AuditLogger.store({
@@ -162,8 +164,8 @@ exports.signup = function(req, reply) {
               target_object: user,
               operation_status: 'success'
             });
-            renderJSON(req, reply, err, statusResponse);
             sendVerifyToken(user, token, function(err, res) {
+              renderJSON(req, reply, err, statusResponse);
             });
           }
         });
@@ -194,19 +196,19 @@ exports.resetToken = function(req, reply) {
     var result = publicRecordFields.handle(result, 'user');
 
     AuditLogger.store({
-      ip_address        : req.info.remoteAddress,
-      datetime         : Date.now(),
-      user_id          : user.user_id,
-      user_name        : user.email,
-      user_type        : 'user',
-      account_id       : result.companyId,
-    //            domain_id        : result.domain,
-      activity_type    : 'modify',
-      activity_target  : 'user',
-      target_id        : result.user_id,
-      target_name      : result.email,
-      target_object    : result,
-      operation_status : 'success'
+      ip_address: req.info.remoteAddress,
+      datetime: Date.now(),
+      user_id: user.user_id,
+      user_name: user.email,
+      user_type: 'user',
+      account_id: result.companyId,
+      //            domain_id        : result.domain,
+      activity_type: 'modify',
+      activity_target: 'user',
+      target_id: result.user_id,
+      target_name: result.email,
+      target_object: result,
+      operation_status: 'success'
     });
 
     var statusResponse = {
@@ -227,7 +229,9 @@ exports.verify = function(req, reply) {
   var token = req.params.token;
   users.get({
     'validation.token': token,
-    'validation.expiredAt': { $gt: Date.now() }
+    'validation.expiredAt': {
+      $gt: Date.now()
+    }
   }, function(error, user) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve validation token/user details'));
@@ -241,7 +245,7 @@ exports.verify = function(req, reply) {
     };
     //@todo UPDATE ANYTHING ELSE ?
 
-    users.update( user, function(error, result) {
+    users.update(user, function(error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update user details'));
       }
@@ -249,19 +253,19 @@ exports.verify = function(req, reply) {
       result = publicRecordFields.handle(result, 'user');
 
       AuditLogger.store({
-        ip_address        : req.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : user.user_id,
-        user_name        : user.email,
-        user_type        : 'user',
-        account_id       : result.companyId,
-//            domain_id        : result.domain,
-        activity_type    : 'modify',
-        activity_target  : 'user',
-        target_id        : result.user_id,
-        target_name      : result.email,
-        target_object    : result,
-        operation_status : 'success'
+        ip_address: req.info.remoteAddress,
+        datetime: Date.now(),
+        user_id: user.user_id,
+        user_name: user.email,
+        user_type: 'user',
+        account_id: result.companyId,
+        //            domain_id        : result.domain,
+        activity_type: 'modify',
+        activity_target: 'user',
+        target_id: result.user_id,
+        target_name: result.email,
+        target_object: result,
+        operation_status: 'success'
       });
 
       var statusResponse = {
@@ -269,7 +273,7 @@ exports.verify = function(req, reply) {
         message: 'Successfully verified your account',
         object_id: result.id
       };
-      renderJSON(req, reply, error, statusResponse );
+      renderJSON(req, reply, error, statusResponse);
     });
   });
 };
