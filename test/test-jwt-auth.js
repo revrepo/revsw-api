@@ -153,9 +153,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should fail to get a list of countries without any authorization', function(done) {
+  it('should fail to get a list of LM locations without any authorization', function(done) {
     request(testAPIUrl)
-      .get('/v1/countries/list')
+      .get('/v1/locations/lastmile')
       .expect(401)
       .end(function(err, res) {
         if (err) {
@@ -166,9 +166,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should fail to get a list of countries using wrong token', function(done) {
+  it('should fail to get a list of LN locations using wrong token', function(done) {
     request(testAPIUrl)
-      .get('/v1/countries/list')
+      .get('/v1/locations/lastmile')
       .set('Authorization', 'Bearer asdljgadlskgjladgjsldkjglsdkjgldkfjgldfkgjdlfkgjdflkgjdlfgjdl')
       .expect(400)
       .end(function(err, res) {
@@ -180,9 +180,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should get a list of countries using the new token', function(done) {
+  it('should get a list of LM locations using the new token', function(done) {
     request(testAPIUrl)
-      .get('/v1/countries/list')
+      .get('/v1/locations/lastmile')
       .set('Authorization', 'Bearer ' + jwtToken)
       .expect(200)
       .end(function(err, res) {
@@ -229,9 +229,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should fail to get a list of countries using the same token after password change', function(done) {
+  it('should fail to get a list of LM locations using the same token after password change', function(done) {
     request(testAPIUrl)
-      .get('/v1/countries/list')
+      .get('/v1/locations/lastmile')
       .set('Authorization', 'Bearer ' + jwtToken)
       .expect(401)
       .end(function(err, res) {
