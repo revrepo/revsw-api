@@ -116,7 +116,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller', 'revadmin' ]
+        scope: ['admin', 'reseller', 'revadmin' ]
       },
       handler: account.getAccount,
       description: 'Get details about a customer account',
