@@ -118,6 +118,7 @@ module.exports = {
     var accountSchema = Joi.object()
       .keys({
         companyName: Joi.string().required(),
+        country: Joi.string(),
         createdBy: Joi.string().required(),
         id: Joi.string().regex(idFormatPattern).required(),
         created_at: Joi.string().regex(dateFormatPattern).required(),
