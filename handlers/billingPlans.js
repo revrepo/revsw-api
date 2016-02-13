@@ -220,7 +220,7 @@ exports.getHostedPage = function (request, reply) {
   var id = request.params.id;
   BillingPlan.get({_id: id}, function (error, res) {
     if (error){
-      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id))
+      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id));
     }
     Chargify.Product.getHostedPage(res.chargify_handle, function (error, result) {
       if (error) {
@@ -232,9 +232,7 @@ exports.getHostedPage = function (request, reply) {
         body: result
       };
 
-
-
       renderJSON(request, reply, error, result);
-    })
-  })
-}
+    });
+  });
+};

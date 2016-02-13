@@ -19,6 +19,7 @@
 /*jslint node: true */
 
 'use strict';
+var config      = require('config');
 var renderJSON      = require('../lib/renderJSON');
 
 var mongoose = require('mongoose');
@@ -29,6 +30,7 @@ var async = require('async');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
+var logger = require('revsw-logger')(config.log_config);
 
 var Account = require('../models/Account');
 var User = require('../models/User');
@@ -47,7 +49,7 @@ exports.webhookHandler = function (request, reply) {
 
   var onTest = function () {
     reply();
-  }
+  };
 
   var onSignupSuccess = function () {
     var subscription = payload.subscription;
@@ -63,11 +65,11 @@ exports.webhookHandler = function (request, reply) {
           subscription_id: subscription.id,
           subscription_state: subscription.state,
           billing_plan: product.handle
-        }
+        };
 
         return accounts.updateAsync(company);
       });
-  }
+  };
 
   var onSubscriptionStateChange = function () {
     var subscription = payload.subscription;
@@ -83,11 +85,11 @@ exports.webhookHandler = function (request, reply) {
           subscription_id: subscription.id,
           subscription_state: subscription.state,
           billing_plan: product.handle
-        }
+        };
 
         return accounts.updateAsync(company);
       });
-  }
+  };
 
   switch (body.event) {
     case 'test':
@@ -97,18 +99,18 @@ exports.webhookHandler = function (request, reply) {
       reply();
       onSignupSuccess()
         .catch(function (err) {
-          logger.error('webhookHandler::onSignupSuccess :' + err)
+          logger.error('webhookHandler::onSignupSuccess :' + err);
         });
       break;
     case 'subscription_state_change':
       reply();
       onSubscriptionStateChange()
         .catch(function (err) {
-          logger.error('onSubscriptionStateChange :' + err)
+          logger.error('onSubscriptionStateChange :' + err);
         });
       break;
     default:
       reply();
   }
 
-}
+};
