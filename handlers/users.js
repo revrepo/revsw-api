@@ -428,6 +428,11 @@ exports.disable2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
+      }
+
+      console.log('Starting checkUserAccessPermissionToUser');
       if (utils.checkUserAccessPermissionToUser(request, user)) {
         user.two_factor_auth_enabled = false;
         delete user.password;
@@ -461,10 +466,10 @@ exports.disable2fa = function (request, reply) {
           }
         });
       } else {
-        return reply(boom.badImplementation('User not found'));
+        return reply(boom.badRequest('User not found'));
       }
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
+      return reply(boom.badRequest('User not found'));
     }
   });
 };
