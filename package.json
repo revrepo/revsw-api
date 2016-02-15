@@ -15,7 +15,7 @@
     "start_": "node bin/revsw-api.js",
     "sly": "NODE_ENV=local-prod node bin/revsw-api.js",
     "lint": "jshint -c .jshintrc lib/*.js handlers/*.js; jshint -c config/.jshintrc config/*.json",
-    "test": "mocha --reporter spec --timeout=20000 test",
+    "test": "cd test/rest_api/; NODE_ENV=qa mocha suites/**/*.js",
     "smoke": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/**/*.js",
     "smoke-stats": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/stats.js"
   },
