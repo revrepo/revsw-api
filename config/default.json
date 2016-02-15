@@ -3,7 +3,7 @@
     "transports": {
       "Console": {
         "level": "debug",
-        "colorize": true,
+        "colorize": false,
         "prettyPrint": true,
         "humanReadableUnhandledException": true,
         "showLevel": true
