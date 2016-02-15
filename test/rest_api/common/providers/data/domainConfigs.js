@@ -570,6 +570,7 @@ var DomainConfigsDataProvider = {
         'posuererisusvitaevolutpatVestibulumbibendumnislhendreritnisipharetra' +
         'infaucibusnullarhoncusPellentesquepretiumuttellusidpellentesqueAenea' +
         'nanteaugueultricesuttortorquisconsequatsemperfelis';
+      var veryLongText = longText + longText + longText + longText;
       var data = {
         spec: 'should return bad request when trying to update domain ' +
         'with long `' + propertyPath + '` property value',
@@ -580,6 +581,9 @@ var DomainConfigsDataProvider = {
         // STRING values
         case 'Joi.string()':
           data.testValue = longText;
+          break;
+        case 'Joi.string().max(1500).allow(\"\").required()':
+          data.testValue = veryLongText;
           break;
         case 'Joi.string().allow("").required()':
           data.testValue = longText;
