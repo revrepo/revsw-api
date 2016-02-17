@@ -66,7 +66,8 @@ function User(mongoose, connection, options) {
 
     validation: {
       expiredAt: Date,
-      token: String
+      token: String,
+      verified: {type: Boolean, default: false}
     },
 
     billing_plan: this.ObjectId,
