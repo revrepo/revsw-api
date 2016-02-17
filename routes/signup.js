@@ -91,7 +91,7 @@ module.exports = [
         }
       },
       response: {
-        schema: routeModels.statusModel
+        schema: routeModels.contactInfoModel
       }
     }
   }

@@ -19,7 +19,6 @@
 /*jslint node: true */
 
 'use strict';
-var config      = require('config');
 var renderJSON      = require('../lib/renderJSON');
 
 var mongoose = require('mongoose');
@@ -30,7 +29,6 @@ var async = require('async');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
-var logger = require('revsw-logger')(config.log_config);
 
 var Account = require('../models/Account');
 var User = require('../models/User');
@@ -42,71 +40,70 @@ Promise.promisifyAll(accounts);
 Promise.promisifyAll(users);
 
 exports.webhookHandler = function (request, reply) {
-  console.log('Webhook receives a request \n' + request);
   var body = request.payload;
   var payload = request.payload.payload;
 
-
   var onTest = function () {
-    reply();
-  };
+    reply(payload);
+  }
 
   var onSignupSuccess = function () {
-    var subscription = payload.subscription;
-    var customer = subscription.customer;
-    var product = subscription.product;
+    return new Promise(function (resolve) {
+      var subscription = payload.subscription;
+      var customer = subscription.customer;
+      var product = subscription.product;
 
-    users.getAsync({email: customer.email})
-      .then(function (user) {
-
-        var company = {
-          account_id: user.companyId,
-          status: true,
-          subscription_id: subscription.id,
-          subscription_state: subscription.state,
-          billing_plan: product.handle
-        };
-
-        return accounts.updateAsync(company);
-      });
+      users.getAsync({email: customer.email})
+        .then(function (user) {
+          accounts.getAsync({createdBy: customer.email})
+            .then(function (account) {
+              var company = {
+                account_id: account.id,
+                subscription_id: subscription.id,
+                subscription_state: subscription.state,
+              }
+              resolve(accounts.updateAsync(company));
+            });
+        });
+    });
   };
 
   var onSubscriptionStateChange = function () {
-    var subscription = payload.subscription;
-    var customer = subscription.customer;
-    var product = subscription.product;
+    return new Promise(function (resolve) {
+      var subscription = payload.subscription;
+      var customer = subscription.customer;
+      var product = subscription.product;
 
-    users.getAsync({email: customer.email})
-      .then(function (user) {
+      users.getAsync({email: customer.email})
+        .then(function (user) {
 
-        var company = {
-          account_id: user.companyId,
-          status: true,
-          subscription_id: subscription.id,
-          subscription_state: subscription.state,
-          billing_plan: product.handle
-        };
+          var company = {
+            subscription_state: subscription.state
+          }
 
-        return accounts.updateAsync(company);
-      });
-  };
+          resolve(accounts.updateAsync(company));
+        });
+    });
+  }
 
   switch (body.event) {
     case 'test':
       onTest();
       break;
     case 'signup_success':
-      reply();
       onSignupSuccess()
+        .then(function (res) {
+          reply({statusCode: 200, message: 'Signup completed'});
+        })
         .catch(function (err) {
-          logger.error('webhookHandler::onSignupSuccess :' + err);
+          logger.error('webhookHandler::onSignupSuccess :' + err)
         });
       break;
     case 'subscription_state_change':
       reply();
       onSubscriptionStateChange()
         .catch(function (err) {
-          logger.error('onSubscriptionStateChange :' + err);
+          logger.error('onSubscriptionStateChange :' + err)
         });
       break;
     default:

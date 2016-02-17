@@ -66,7 +66,8 @@ function User(mongoose, connection, options) {
 
     validation: {
       expiredAt: Date,
-      token: String
+      token: String,
+      verified: {type: Boolean, default: false}
     },
 
     billing_plan: this.ObjectId,
@@ -82,7 +83,7 @@ User.prototype = {
 
   // adds a new item
   add : function (item, callback) {
-
+    
     var hash = utils.getHash(item.password);
     item.password = hash;
 

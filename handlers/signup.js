@@ -26,6 +26,7 @@ var AuditLogger = require('revsw-audit');
 var utils = require('../lib/utilities');
 var mail = require('../lib/mail');
 var config = require('config');
+var _ = require('lodash');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
@@ -34,8 +35,8 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var Account = require('../models/Account');
 var User = require('../models/User');
 var Location = require('../models/Location');
-var BillingPlan = require('../models/BillingPlan');
 
+var billing_plans = require('../models/BillingPlan');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
@@ -92,7 +93,8 @@ exports.signup = function(req, reply) {
       country: data.country,
       state: data.state,
       zipcode: data.zipcode,
-      phone_number: data.phone_number
+      phone_number: data.phone_number,
+      billing_plan: data.billing_plan
     };
     accounts.get({
       companyName: newCompany.companyName
@@ -202,7 +204,6 @@ exports.resetToken = function(req, reply) {
       user_name: user.email,
       user_type: 'user',
       account_id: result.companyId,
-      //            domain_id        : result.domain,
       activity_type: 'modify',
       activity_target: 'user',
       target_id: result.user_id,
@@ -241,39 +242,46 @@ exports.verify = function(req, reply) {
     }
     user.validation = {
       expiredAt: undefined,
-      token: ''
+      token: '',
+      verified: true
     };
+    delete user.password;
     //@todo UPDATE ANYTHING ELSE ?
 
     users.update(user, function(error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update user details'));
       }
+      accounts.get({createdBy: user.email}, function (err, account) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to find an account associated with current user'));
+        }
+        billing_plans.get({_id: account.billing_plan}, function (err, bp) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to find a billing plan associated with account provided'));
+          }
+          var fields = _.merge(user, account);
+          fields.hosted_page = bp.hosted_page;
+          result = publicRecordFields.handle(fields, 'verify');
 
-      result = publicRecordFields.handle(result, 'user');
+          AuditLogger.store({
+            ip_address: req.info.remoteAddress,
+            datetime: Date.now(),
+            user_id: user.user_id,
+            user_name: user.email,
+            user_type: 'user',
+            account_id: result.companyId,
+            activity_type: 'modify',
+            activity_target: 'user',
+            target_id: result.user_id,
+            target_name: result.email,
+            target_object: result,
+            operation_status: 'success'
+          });
 
-      AuditLogger.store({
-        ip_address: req.info.remoteAddress,
-        datetime: Date.now(),
-        user_id: user.user_id,
-        user_name: user.email,
-        user_type: 'user',
-        account_id: result.companyId,
-        //            domain_id        : result.domain,
-        activity_type: 'modify',
-        activity_target: 'user',
-        target_id: result.user_id,
-        target_name: result.email,
-        target_object: result,
-        operation_status: 'success'
+          renderJSON(req, reply, error, result);
+        });
       });
-
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully verified your account',
-        object_id: result.id
-      };
-      renderJSON(req, reply, error, statusResponse);
     });
   });
 };
