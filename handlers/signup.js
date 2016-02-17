@@ -92,6 +92,7 @@ exports.signup = function(req, reply) {
       address2: data.address2,
       country: data.country,
       state: data.state,
+      city: data.city,
       zipcode: data.zipcode,
       phone_number: data.phone_number,
       billing_plan: data.billing_plan
@@ -250,15 +251,18 @@ exports.verify = function(req, reply) {
 
     users.update(user, function(error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update user details'));
+        return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
+          ' User ID: ' + user.id + ' Email: ' + user.email));
       }
-      accounts.get({createdBy: user.email}, function (err, account) {
+      accounts.get({_id: user.companyId}, function (err, account) {
         if (error) {
-          return reply(boom.badImplementation('Failed to find an account associated with current user'));
+          return reply(boom.badImplementation('Signup::verify:Failed to find an account associated with user' +
+            ' User ID: ' + user.id + ' Email: ' + user.email));
         }
         billing_plans.get({_id: account.billing_plan}, function (err, bp) {
           if (error) {
-            return reply(boom.badImplementation('Failed to find a billing plan associated with account provided'));
+            return reply(boom.badImplementation('Signup::verify: Failed to find a billing plan associated with account provided' +
+              ' Account ID: ' + account.id + ' CreatedBy: ' + account.createdBy));
           }
           var fields = _.merge(user, account);
           fields.hosted_page = bp.hosted_page;

@@ -19,6 +19,7 @@
 /*jslint node: true */
 
 'use strict';
+var config      = require('config');
 var renderJSON      = require('../lib/renderJSON');
 
 var mongoose = require('mongoose');
@@ -30,6 +31,7 @@ var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
 
+var logger = require('revsw-logger')(config.log_config);
 var Account = require('../models/Account');
 var User = require('../models/User');
 var Promise = require('bluebird');

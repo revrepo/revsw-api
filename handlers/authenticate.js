@@ -62,7 +62,8 @@ exports.authenticate = function(request, reply) {
     email: email
   }, function(error, user) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details with ' +
+        ' Email: ' + email));
     }
     if (!user) {
       return reply(boom.unauthorized());
@@ -74,9 +75,10 @@ exports.authenticate = function(request, reply) {
         var authPassed = true;
 
         if(user.self_registered){
-          accounts.get({createdBy: user.email}, function (error, account) {
+          accounts.get({_id: user.companyId}, function (error, account) {
             if(error){
-              return reply(boom.badImplementation('Failed to retrieve account details'));
+              return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
+                ' User ID: ' + user.id + ' Email: ' + user.email));
             }
             if(account.subscription_id === null || account.subscription_id === ''){
               authPassed = false;

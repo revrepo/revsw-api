@@ -83,7 +83,7 @@ User.prototype = {
 
   // adds a new item
   add : function (item, callback) {
-    
+
     var hash = utils.getHash(item.password);
     item.password = hash;
 
