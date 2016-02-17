@@ -31,17 +31,22 @@ function UsageReport( mongoose, connection, options ) {
   this.ObjectId = this.Schema.ObjectId;
 
   this.UsageReportSchema = new this.Schema({
-    '_id'       : String,
-    'for_date'  : Date,
-    'accounts'  : this.Schema.Types.Mixed
+    '_id'                       : String,
+    'account_id'                : String,
+    'report_for_day'            : Date,
+    'domains'                   : this.Schema.Types.Mixed,
+    'domains_usage'             : this.Schema.Types.Mixed,
+    'traffic_per_billing_zone'  : this.Schema.Types.Mixed
   });
-
+  this.UsageReportSchema.index({ account_id: 1, type: 1 });
+  this.UsageReportSchema.index({ report_for_day: 1, type: 1 });
   this.model = connection.model('UsageReport', this.UsageReportSchema, 'UsageReport');
 }
 
-//  ---------------------------------
+//  ----------------------------------------------------------------------------------------------//
 UsageReport.prototype = {
 
+  //  ---------------------------------
   get : function ( id, fields ) {
     fields = fields || {};
     if ( _.isDate( id ) ) {
@@ -53,21 +58,38 @@ UsageReport.prototype = {
       });
   },
 
+  //  ---------------------------------
   // adds a new item or update(overwrite) existing
   upsert : function ( item ) {
-    if ( !item.for_date ) {
+    if ( !item.report_for_day || !item.account_id ) {
       return promise.reject( new Error( 'UsageReport.add() error: insufficient data in item' ) );
     }
-    var _id = item.for_date.toISOString().slice(0,10);
+    var _id = item.account_id + '-' + item.report_for_day.toISOString().slice(0,10);
     return this.model.findOneAndUpdate({_id: _id}, item, { upsert: true }).exec();
   },
 
+  //  ---------------------------------
+  // adds a new items or update(overwrite) existing
+  bulk_upsert : function ( items ) {
+    var bulk = this.model.collection.initializeUnorderedBulkOp();
+    items.forEach( function( item ) {
+      item._id = item.account_id + '-' + item.report_for_day.toISOString().slice(0,10);
+      bulk.find({_id:item._id}).upsert().updateOne(item);
+    });
+    return bulk.execute();
+  },
+
+  //  ---------------------------------
   //  from/to - inclusive date interval
-  list : function ( from, to, fields ) {
+  list : function ( from, to, aid, fields ) {
     from = from || ( new Date() );
     to = to || ( new Date() );
     fields = fields || {};
-    return this.model.find({ for_date: { $gte: from, $lte: to } }, fields ).exec()
+    var where = { report_for_day: { $gte: from, $lte: to } };
+    if ( aid ) {
+      where.account_id = aid;
+    }
+    return this.model.find( where, fields ).exec()
       .then( function( docs ) {
         return ( docs ? docs.map( function( doc ) {
           return doc._doc;
@@ -75,6 +97,7 @@ UsageReport.prototype = {
       });
   },
 
+  //  ---------------------------------
   // free query
   queryP: function (where, fields) {
     where = where || {};
