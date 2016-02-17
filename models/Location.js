@@ -59,6 +59,12 @@ Location.prototype = {
     this.model.find({ status: 'online', visibility: 'public' }, function (err, results) {
       callback(err, results);
     });
+  },
+
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
   }
 
 };
