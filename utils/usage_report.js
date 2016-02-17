@@ -23,10 +23,10 @@
 var promise = require('bluebird');
 var rep = require( '../lib/usageReport.js' );
 
-//  this is 0.10, console.dir( obj, opts ) doesn't work, fuck yeah
+//  this is 0.10, console.dir( obj, opts ) doesn't work
 var util = require('util');
 var log_ = function( o ) {
-  console.log( util.inspect( o, { colors: true, depth: null, showHidden: true } ) );
+  console.log( util.inspect( o, { colors: true, depth: 100, showHidden: true } ) );
 }
 
 
@@ -36,15 +36,15 @@ var log_ = function( o ) {
 var showHelp = function() {
   console.log('\n  Usage Report Generator - a tool to collect usage data and store it to the MongoDB');
   console.log('  Usage:');
-  console.log('    --from :');
-  console.log('        date/time to start from, for ex. "2015-11-19 15:00 UTC", required');
-  console.log('    --to :');
-  console.log('        date/time to finish to, for ex. "2015-11-19 23:59 UTC"');
-  console.log('        if absent then the [--from] parameter denotes day to make span from');
+  console.log('    --date :');
+  console.log('        date of the report, for ex. "2015-11-19" or "-3d"');
+  console.log('        today assumed if absent');
+  console.log('    --get :');
+  console.log('        retrieve stored report if any\n');
+  console.log('    --dry-run :');
+  console.log('        show collected data, does not do anything\n');
   console.log('    -h, --help :');
   console.log('        this message');
-  console.log('    --dry-run :');
-  console.log('        show spans and collected data, does not store anything\n');
 };
 
 var conf = {},
@@ -64,20 +64,15 @@ for (var i = 0; i < parslen; ++i) {
     return;
   }
 
-  // if ( curr_par && pars[i].substr( 0, 1 ) === '-' ) {
-  //   curr_par = false;
-  // }
-
-  if (pars[i] === '--from') {
-    curr_par = 'from';
-  } else if (pars[i] === '--to') {
-    curr_par = 'to';
+  if (pars[i] === '--date') {
+    curr_par = 'date';
   } else if (pars[i] === '--dry-run') {
     conf.dry = true;
-  } else if (pars[i] === '-v' || pars[i] === '--verbose') {
-    conf.verbose = true;
+  } else if (pars[i] === '--get') {
+    conf.get = true;
   } else if (curr_par) {
     conf[curr_par] = pars[i];
+    curr_par = false;
   } else {
     console.error('\n    unknown parameter: ' + pars[i]);
     showHelp();
@@ -85,67 +80,35 @@ for (var i = 0; i < parslen; ++i) {
   }
 }
 
-
-if ( !conf.from ) {
-  console.error( 'from parameter required ...' );
-  showHelp();
-  return;
-}
-
 //  here we go ... -------------------------------------------------------------------------------//
 
+if ( conf.get ) {
+  rep.getReport( ( conf.date || 'now' ) )
+    .then( function( data ) {
+      console.dir( data, { showHidden: true, depth: 10, colors: true } );
+      // log_( data );
+    })
+    .catch( function( err ) {
+      console.log( err );
+    })
+    .finally( function() {
+      process.exit(0);
+      return;
+    });
 
-rep.collect( conf.from, conf.to )
-  .then( function( data ) {
-    // console.dir( data[0].account_domains_count, { showHidden: true, depth: 5, colors: true } );
-    // console.dir( data[1], { showHidden: true, depth: 5, colors: true } );
-    // console.dir( data[2], { showHidden: true, depth: 5, colors: true } );
-    log_( data );
-  })
-  .catch( function( err ) {
-    console.log( err );
-  })
-  .finally( function() {
-    process.exit(0);
-    return;
-  });
+} else {
+  rep.collect( ( conf.date || 'now' ), conf.dry/*do not save, return collected data*/ )
+    .then( function( data ) {
+      log_( data );
+    })
+    .catch( function( err ) {
+      console.log( err );
+    })
+    .finally( function() {
+      process.exit(0);
+      return;
+    });
+}
 
-// var DP_ES = new dp( conf.from, conf.to );
-// console.log( '    From date: ' + ( new Date( DP_ES.options.from ) ).toUTCString() );
-// console.log( '      To date: ' + ( new Date( DP_ES.options.to ) ).toUTCString() );
-// console.log( '      Indices: ' + DP_ES.options.indicesList );
-
-// if ( conf.dry ) {
-//   process.exit(0);
-//   return;
-// }
-
-// var DP_ESURL = new dp( conf.from, conf.to );
-// console.log( '    ### start data generation' );
-// DP_ES.generateTestingData('es');
-// if ( conf.verbose ) {
-//   console.log( '    ### ES cluster, generation done, ' + DP_ES.options.dataCount + ' records.' );
-// }
-// DP_ESURL.generateTestingData('esurl');
-// if ( conf.verbose ) {
-//   console.log( '    ### ESURL cluster, generation done, ' + DP_ESURL.options.dataCount + ' records.' );
-// }
-// console.log( '    ### start data uploading' );
-
-// var up = [
-//   DP_ESURL.uploadTestingData( 'esurl', conf.verbose ),
-//   DP_ES.uploadTestingData( 'es', conf.verbose )
-// ];
-
-// return promise.all( up )
-//   .then( function() {
-//     console.log( '    ### done' );
-//     process.exit(0);
-//     return;
-//   })
-//   .catch( function( e ) {
-//     console.trace( e );
-//     process.exit(1);
-//   });
 
 //  ----------------------------------------------------------------------------------------------//
