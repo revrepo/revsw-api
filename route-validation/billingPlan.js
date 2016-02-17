@@ -28,7 +28,8 @@ exports.listOfBillingPlanModels = Joi.array().items({
   description           : Joi.string().description('Billing plan description'),
   type                  : Joi.string().valid('public', 'private').description('Type of the billing plan'),
   monthly_fee           : Joi.number().description('Monthly fee of the billing plan'),
-
+  chargify_handle       : Joi.string().description('Product handler within EBS'),
+  hosted_page           : Joi.string().description('Chargify hosted signup page'),
   services              : Joi.array().items(Joi.object({
     code_name             : Joi.string().description('Name of the service'),
     description           : Joi.string().description('Description of the service'),
@@ -60,7 +61,8 @@ exports.BillingPlanRequestPayload = {
   description           : Joi.string().required().description('Billing plan description'),
   type                  : Joi.string().valid('public', 'private').description('Type of the billing plan'),
   monthly_fee           : Joi.number().required().description('Monthly fee of the billing plan'),
-
+  chargify_handle       : Joi.string().description('Product handler within EBS'),
+  hosted_page           : Joi.string().description('Chargify hosted signup page'),
   services              : Joi.array().items({
     code_name             : Joi.string().description('Name of the service'),
     description           : Joi.string().description('Description of the service'),
@@ -88,7 +90,8 @@ exports.BillingPlanModel = Joi.object({
   description           : Joi.string().description('Billing plan description'),
   type                  : Joi.string().valid('public', 'private').description('Type of the billing plan'),
   monthly_fee           : Joi.number().description('Monthly fee of the billing plan'),
-
+  chargify_handle       : Joi.string().description('Product handler within EBS'),
+  hosted_page           : Joi.string().description('Chargify hosted signup page'),
   services              : Joi.array().items(Joi.object({
     code_name             : Joi.string().description('Name of the service'),
     description           : Joi.string().description('Description of the service'),

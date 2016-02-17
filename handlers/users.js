@@ -34,23 +34,8 @@ var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var privateUserProfileFields = [
-  'password',
-  'resetPasswordToken',
-  'resetPasswordExpires',
-  'two_factor_auth_secret_base32'
-];
-
-function removePrivateFields(obj) {
-  for (var i in privateUserProfileFields) {
-    if (obj[privateUserProfileFields[i]]) {
-      delete obj[privateUserProfileFields[i]];
-    }
-  }
-  return obj;
-}
-
 exports.getUsers = function getUsers(request, reply) {
+  // TODO: move the user list filtering from the user DB model to this function
   users.list(request, function(error, listOfUsers) {
     if (error || !listOfUsers) {
       return reply(boom.badImplementation('Failed to get a list of users'));
@@ -76,10 +61,6 @@ exports.createUser = function(request, reply) {
   } else {
     newUser.companyId = request.auth.credentials.companyId;
   }
-
-//  if (!newUser.domain) {
-//    newUser.domain = request.auth.credentials.domain;
-//  }
 
   // TODO: Add a check for domains
 
@@ -113,7 +94,6 @@ exports.createUser = function(request, reply) {
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
           account_id       : request.auth.credentials.companyId,
-//          domain_id        : request.auth.credentials.domain,
           activity_type    : 'add',
           activity_target  : 'user',
           target_id        : result.user_id,
@@ -135,21 +115,16 @@ exports.getUser = function(request, reply) {
     _id: user_id
   }, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for user ID ' + user_id));
     }
     if (result) {
-      if (  request.auth.credentials.role !== 'reseller' && result.role === 'reseller' ) {
+      if (!utils.checkUserAccessPermissionToUser(request, result)) {
         return reply(boom.badRequest('User not found'));
       }
 
-      if (request.auth.credentials.role === 'revadmin' || (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId))) {
+      result = publicRecordFields.handle(result, 'user');
 
-        result = publicRecordFields.handle(result, 'user');
-
-        renderJSON(request, reply, error, result);
-      } else {
-        return reply(boom.badRequest('User not found'));
-      }
+      renderJSON(request, reply, error, result);
     } else {
       return reply(boom.badRequest('User not found'));
     }
@@ -163,7 +138,7 @@ exports.getMyUser = function(request, reply) {
     _id: user_id
   }, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
     if (result) {
       result = publicRecordFields.handle(result, 'user');
@@ -188,13 +163,14 @@ exports.updateUser = function(request, reply) {
   users.get({
     _id: user_id
   }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
+    }
     if (result) {
-      if (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId)) {
+      if (! utils.checkUserAccessPermissionToUser(request, result)) {
         return reply(boom.badRequest('User not found'));
       }
-      if ( request.auth.credentials.role !== 'reseller' && result.role === 'reseller' ) {
-        return reply(boom.badRequest('User not found'));
-      }
+
       users.update(newUser, function(error, result) {
         if (!error) {
           var statusResponse;
@@ -212,7 +188,6 @@ exports.updateUser = function(request, reply) {
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -223,7 +198,7 @@ exports.updateUser = function(request, reply) {
 
           renderJSON(request, reply, error, statusResponse);
         } else {
-          return reply(boom.badRequest('User not found'));
+          return reply(boom.badImplementation('Failed to update details for user with ID ' + user_id));
         }
       });
     } else {
@@ -268,7 +243,6 @@ exports.updateUserPassword = function(request, reply) {
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -279,11 +253,11 @@ exports.updateUserPassword = function(request, reply) {
 
           renderJSON(request, reply, error, statusResponse);
         } else {
-          return reply(boom.badImplementation('Failed to update user details'));
+          return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
         }
       });
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
   });
 };
@@ -298,29 +272,30 @@ exports.deleteUser = function(request, reply) {
   users.get({
     _id: user_id
   }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
+    }
     if (result) {
-
-      if (request.auth.credentials.role !== 'revadmin' && (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId))) {
+      if (! utils.checkUserAccessPermissionToUser(request, result)) {
         return reply(boom.badRequest('User not found'));
       }
 
       result = publicRecordFields.handle(result, 'user');
 
       var auditRecord = {
-            ip_address        : request.info.remoteAddress,
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
-            activity_type    : 'delete',
-            activity_target  : 'user',
-            target_id        : result.user_id,
-            target_name      : result.email,
-            target_object    : result,
-            operation_status : 'success'
-          };
+        ip_address        : request.info.remoteAddress,
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId,
+        activity_type    : 'delete',
+        activity_target  : 'user',
+        target_id        : result.user_id,
+        target_name      : result.email,
+        target_object    : result,
+        operation_status : 'success'
+      };
 
       users.remove({
         _id: user_id
@@ -366,7 +341,6 @@ exports.init2fa = function (request, reply) {
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
             account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -377,11 +351,11 @@ exports.init2fa = function (request, reply) {
 
           renderJSON(request, reply, error, secretKey);
         } else {
-          return reply(boom.badImplementation('Failed to update user details'));
+          return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
         }
       });
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
   });
 };
@@ -414,7 +388,6 @@ exports.enable2fa = function (request, reply) {
                 user_name        : request.auth.credentials.email,
                 user_type        : 'user',
                 account_id       : request.auth.credentials.companyId,
-//                domain_id        : request.auth.credentials.domain,
                 activity_type    : 'modify',
                 activity_target  : 'user',
                 target_id        : user.user_id,
@@ -425,7 +398,7 @@ exports.enable2fa = function (request, reply) {
 
               renderJSON(request, reply, error, statusResponse);
             } else {
-              return reply(boom.badImplementation('Failed to update user details'));
+              return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
             }
           });
         } else {
@@ -435,7 +408,7 @@ exports.enable2fa = function (request, reply) {
         return reply(boom.badRequest('Must call init first'));
       }
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
   });
 };
@@ -455,8 +428,12 @@ exports.disable2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
-      if (request.auth.credentials.role === 'revadmin' || (user.companyId &&
-        utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId))) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
+      }
+
+      console.log('Starting checkUserAccessPermissionToUser');
+      if (utils.checkUserAccessPermissionToUser(request, user)) {
         user.two_factor_auth_enabled = false;
         delete user.password;
         users.update(user, function(error, result) {
@@ -475,7 +452,6 @@ exports.disable2fa = function (request, reply) {
               user_name        : request.auth.credentials.email,
               user_type        : 'user',
               account_id       : request.auth.credentials.companyId,
-//              domain_id        : request.auth.credentials.domain,
               activity_type    : 'modify',
               activity_target  : 'user',
               target_id        : user.user_id,
@@ -486,14 +462,14 @@ exports.disable2fa = function (request, reply) {
 
             renderJSON(request, reply, error, statusResponse);
           } else {
-            return reply(boom.badImplementation('Failed to update user details'));
+            return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
           }
         });
       } else {
-        return reply(boom.badImplementation('User not found'));
+        return reply(boom.badRequest('User not found'));
       }
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badRequest('User not found'));
     }
   });
 };

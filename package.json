@@ -14,8 +14,9 @@
     "start": "nodejs bin/revsw-api.js",
     "start_": "node bin/revsw-api.js",
     "sly": "NODE_ENV=local-prod node bin/revsw-api.js",
-    "lint": "jshint -c .jshintrc lib/*.js handlers/*.js; jshint -c config/.jshintrc config/*.json",
-    "test": "mocha --reporter spec --timeout=20000 test",
+    "lint": "jshint -c .jshintrc lib/*.js handlers/*.js && jshint -c config/.jshintrc config/*.json",
+    "test": "cd test/rest_api/; NODE_ENV=qa grunt mochaTest",
+    "test-local": "cd test/rest_api/; grunt mochaTest",
     "smoke": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/**/*.js",
     "smoke-stats": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/stats.js"
   },
@@ -56,8 +57,8 @@
     "marked": "0.3.x",
     "merge": "^1.2.0",
     "mocha.parallel": "^0.11.2",
-    "mongoose": "4.0.x",
-    "mongoose-auto-increment": "^4.0.0",
+    "mongoose": "^4.1.0",
+    "mongoose-auto-increment": "^5.0.0",
     "mongoose-merge-plugin": "0.0.5",
     "node-recurly": "cgerrior/node-recurly",
     "node-uuid": "^1.4.3",
@@ -74,6 +75,7 @@
     "bluebird": "^2.10.2",
     "chai": "1.9.x",
     "faker": "^3.0.1",
+    "ghooks": "^1.0.3",
     "grunt": "0.4.x",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
@@ -90,5 +92,10 @@
   },
   "engines": {
     "node": ">= 0.12.x"
+  },
+  "config": {
+    "ghooks": {
+      "pre-commit": "npm run lint"
+    }
   }
 }

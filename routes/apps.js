@@ -62,7 +62,7 @@ module.exports = [
           app_id: Joi.objectId().required().description('Unique application ID')
         },
         query: {
-          version: Joi.number().integer().description('Configuration version number (request 0 for latest)')
+          version: Joi.number().integer().min(0).max(10000).description('Configuration version number (request 0 for latest)')
         },
       },
       plugins: {

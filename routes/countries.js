@@ -31,9 +31,10 @@ module.exports = [
     method : 'GET',
     path   : '/v1/countries/list',
     config : {
-      auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
-      },
+      //auth        : {
+      //  scope : ['user', 'admin', 'reseller', 'revadmin']
+      //},
+      auth: false,
       handler     : getCountriesList.getCountriesList,
       description : 'Get a list of country two-character codes',
       tags        : ['api'],
