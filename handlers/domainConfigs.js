@@ -307,27 +307,27 @@ exports.createDomainConfig = function(request, reply) {
   };
 
 
-  accounts.get({_id: request.auth.credentials.companyId}, function (err, account) {
+  accounts.get({_id: newDomainJson.account_id}, function (err, account) {
     if(err){
-      return reply(boom.badImplementation('DomainConfigs::checkDomainsList: Failed to find an account with ID' +
-        'Account ID: ' + request.auth.credentials.companyId));
+      return reply(boom.badImplementation('DomainConfigs::checkDomainsList: Failed to find an account with ID ' +
+        newDomainJson.account_id));
     }
     if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
       return reply(boom.badRequest('Account ID not found'));
     }
-    if(account.billing_plan){
-      isSubscriptionActive(request.auth.credentials.companyId, function (err, res) {
-          if(err){
+    if (account.billing_plan) {
+      isSubscriptionActive(newDomainJson.account_id, function (err, res) {
+          if (err) {
             return reply(boom.badImplementation(err));
           }
-          if(!res){
+          if (!res) {
             return reply(boom.forbidden(account.companyName + ' subscription is not active'));
           }
           checkDomainsLimit(request.auth.credentials.companyId, function (err, diff) {
-            if(err){
+            if (err) {
               return reply(boom.badImplementation(err));
             }
-            if(diff <= 0){
+            if (diff <= 0) {
               return reply(boom.forbidden('Billing plan service limit reached'));
             }
             serverGroups.get({
@@ -337,14 +337,14 @@ exports.createDomainConfig = function(request, reply) {
             }, createDomain);
           });
         });
-    }else{
+    } else {
       serverGroups.get({
         _id : newDomainJson.origin_server_location_id,
         serverType : 'public',
         groupType  : 'CO'
       }, function (error, result) {
         if (error) {
-          return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID' + newDomainJson.origin_server_location_id));
+          return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID ' + newDomainJson.origin_server_location_id));
         }
 
         if (!result) {
@@ -363,11 +363,6 @@ exports.createDomainConfig = function(request, reply) {
     }
 
   });
-
-
-
-
-
 };
 
 exports.updateDomainConfig = function(request, reply) {
