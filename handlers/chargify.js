@@ -47,7 +47,7 @@ exports.webhookHandler = function (request, reply) {
 
   var onTest = function () {
     reply(payload);
-  }
+  };
 
   var onSignupSuccess = function () {
     return new Promise(function (resolve) {
@@ -63,7 +63,7 @@ exports.webhookHandler = function (request, reply) {
                 account_id: account.id,
                 subscription_id: subscription.id,
                 subscription_state: subscription.state,
-              }
+              };
               resolve(accounts.updateAsync(company));
             });
         });
@@ -81,12 +81,12 @@ exports.webhookHandler = function (request, reply) {
 
           var company = {
             subscription_state: subscription.state
-          }
+          };
 
           resolve(accounts.updateAsync(company));
         });
     });
-  }
+  };
 
   switch (body.event) {
     case 'test':
@@ -98,7 +98,7 @@ exports.webhookHandler = function (request, reply) {
           reply({statusCode: 200, message: 'Signup completed'});
         })
         .catch(function (err) {
-          logger.error('webhookHandler::onSignupSuccess :' + err)
+          logger.error('webhookHandler::onSignupSuccess :' + err);
         });
       break;
     case 'subscription_state_change':
@@ -108,7 +108,7 @@ exports.webhookHandler = function (request, reply) {
           reply({statusCode: 200, message: 'Subscription state changed'});
         })
         .catch(function (err) {
-          logger.error('onSubscriptionStateChange :' + err)
+          logger.error('onSubscriptionStateChange :' + err);
         });
       break;
     default:

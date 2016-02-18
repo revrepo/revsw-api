@@ -196,7 +196,7 @@ User.prototype = {
 
       }
       callback(err, doc);
-    })
+    });
   },
 
   query: function (where, callback) {

@@ -49,7 +49,7 @@ var onAuthPassed = function (user, request, reply, error) {
   };
 
   renderJSON(request, reply, error, statusResponse);
-}
+};
 
 exports.authenticate = function(request, reply) {
   var email = request.payload.email;

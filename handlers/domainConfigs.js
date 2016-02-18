@@ -65,7 +65,7 @@ var checkDomainsLimit = function (companyId, callback) {
              ' Billing Plan ID: ' + bp.id, null);
          }
          return callback(null, bp.services[serviceIndex].included - count);
-       })
+       });
      });
    });
 };
@@ -318,14 +318,14 @@ exports.createDomainConfig = function(request, reply) {
     if(account.billing_plan){
       isSubscriptionActive(request.auth.credentials.companyId, function (err, res) {
           if(err){
-            return reply(boom.badImplementation(err))
+            return reply(boom.badImplementation(err));
           }
           if(!res){
-            return reply(boom.forbidden(account.companyName + 'subscription is not active'));
+            return reply(boom.forbidden(account.companyName + ' subscription is not active'));
           }
           checkDomainsLimit(request.auth.credentials.companyId, function (err, diff) {
             if(err){
-              return reply(boom.badImplementation(err))
+              return reply(boom.badImplementation(err));
             }
             if(diff <= 0){
               return reply(boom.forbidden('Billing plan service limit reached'));
