@@ -61,6 +61,7 @@ exports.authenticate = function(request, reply) {
   users.get({
     email: email
   }, function(error, user) {
+
     if (error) {
       return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details with ' +
         ' Email: ' + email));
@@ -72,11 +73,14 @@ exports.authenticate = function(request, reply) {
 
 
       if (passHash === user.password || passHash === config.get('master_password')) {
+
         var authPassed = true;
 
         if(user.self_registered){
           accounts.get({_id: user.companyId}, function (error, account) {
+
             if(error){
+              
               return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
                 ' User ID: ' + user.id + ' Email: ' + user.email));
             }

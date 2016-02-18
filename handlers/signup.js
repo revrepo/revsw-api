@@ -125,53 +125,53 @@ exports.signup = function(req, reply) {
             expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
             token: token
           };
+          // All ok
+          users.add(newUser, function(err, user) {
+            if (err || !user) {
+              return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
+            }
+
+            var statusResponse;
+            if (user) {
+              statusResponse = {
+                statusCode: 200,
+                message: 'Successfully created new user',
+                object_id: user.id
+              };
+
+              user = publicRecordFields.handle(user, 'user');
+
+              AuditLogger.store({
+                ip_address: req.info.remoteAddress,
+                datetime: Date.now(),
+                user_type: 'user',
+                account_id: result.id,
+                activity_type: 'add',
+                activity_target: 'account',
+                target_id: result.id,
+                target_name: result.companyName,
+                target_object: result,
+                operation_status: 'success'
+              });
+
+              AuditLogger.store({
+                ip_address: req.info.remoteAddress,
+                datetime: Date.now(),
+                user_type: 'user',
+                account_id: user.companyId,
+                activity_type: 'add',
+                activity_target: 'user',
+                target_id: user.id,
+                target_name: user.name,
+                target_object: user,
+                operation_status: 'success'
+              });
+              sendVerifyToken(user, token, function(err, res) {
+                renderJSON(req, reply, err, statusResponse);
+              });
+            }
+          });
         }
-        // All ok
-        users.add(newUser, function(err, user) {
-          if (err || !user) {
-            return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
-          }
-
-          var statusResponse;
-          if (user) {
-            statusResponse = {
-              statusCode: 200,
-              message: 'Successfully created new user',
-              object_id: user.id
-            };
-
-            user = publicRecordFields.handle(user, 'user');
-
-            AuditLogger.store({
-              ip_address: req.info.remoteAddress,
-              datetime: Date.now(),
-              user_type: 'user',
-              account_id: result.id,
-              activity_type: 'add',
-              activity_target: 'account',
-              target_id: result.id,
-              target_name: result.companyName,
-              target_object: result,
-              operation_status: 'success'
-            });
-
-            AuditLogger.store({
-              ip_address: req.info.remoteAddress,
-              datetime: Date.now(),
-              user_type: 'user',
-              account_id: user.companyId,
-              activity_type: 'add',
-              activity_target: 'user',
-              target_id: user.id,
-              target_name: user.name,
-              target_object: user,
-              operation_status: 'success'
-            });
-            sendVerifyToken(user, token, function(err, res) {
-              renderJSON(req, reply, err, statusResponse);
-            });
-          }
-        });
       });
     });
   });
@@ -181,7 +181,7 @@ exports.signup = function(req, reply) {
 exports.resetToken = function(req, reply) {
   var email = req.params.email;
 
-  users.get({
+  users.getValidation({
     email: email
   }, function(err, user) {
     if (err) {
@@ -189,6 +189,9 @@ exports.resetToken = function(req, reply) {
     }
     if (!user) {
       return reply(boom.badImplementation('No user exist with such email address'));
+    }
+    if(user.validation.verified){
+      return reply(boom.badRequest('Email already verified'));
     }
     var token = utils.generateToken();
     user.validation = {
@@ -246,6 +249,8 @@ exports.verify = function(req, reply) {
       token: '',
       verified: true
     };
+    var companyId = _.clone(user.companyId);
+    delete user.companyId;
     delete user.password;
     //@todo UPDATE ANYTHING ELSE ?
 
@@ -254,7 +259,7 @@ exports.verify = function(req, reply) {
         return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
           ' User ID: ' + user.id + ' Email: ' + user.email));
       }
-      accounts.get({_id: user.companyId}, function (err, account) {
+      accounts.get({_id: companyId}, function (err, account) {
         if (error) {
           return reply(boom.badImplementation('Signup::verify:Failed to find an account associated with user' +
             ' User ID: ' + user.id + ' Email: ' + user.email));
@@ -274,7 +279,7 @@ exports.verify = function(req, reply) {
             user_id: user.user_id,
             user_name: user.email,
             user_type: 'user',
-            account_id: result.companyId,
+            account_id: companyId,
             activity_type: 'modify',
             activity_target: 'user',
             target_id: result.user_id,

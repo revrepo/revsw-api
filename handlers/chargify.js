@@ -104,6 +104,9 @@ exports.webhookHandler = function (request, reply) {
     case 'subscription_state_change':
       reply();
       onSubscriptionStateChange()
+        .then(function (res) {
+          reply({statusCode: 200, message: 'Subscription state changed'});
+        })
         .catch(function (err) {
           logger.error('onSubscriptionStateChange :' + err)
         });
