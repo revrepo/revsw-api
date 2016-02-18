@@ -169,6 +169,36 @@ User.prototype = {
     });
   },
 
+  getValidation : function (item, callback) {
+    this.model.findOne(item, function (err, doc) {
+      if (doc) {
+
+        doc = utils.clone(doc);
+        doc.user_id = doc._id;
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.id;
+        delete doc.token;
+        delete doc.status;
+        delete doc.old_passwords;
+
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        } else {
+          doc.companyId = [];
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
+        } else {
+          doc.domain = [];
+        }
+
+      }
+      callback(err, doc);
+    })
+  },
+
   query: function (where, callback) {
     if (!where || typeof (where) !== 'object') {
       callback(new Error('where clause not specified'));
