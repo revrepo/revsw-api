@@ -59,12 +59,16 @@ exports.signup = function(req, reply) {
 
   var data = req.payload;
 
+  if (!config.get('enable_self_registration')) {
+    return reply(boom.badRequest('Customer self-registration is temporary disabled'));
+  }
+
   // Check user email address
   users.get({
     email: data.email
   }, function(err, user) {
     if (err) {
-      return reply(boom.badImplementation('Failed to fetch user details'));
+      return reply(boom.badImplementation('Failed to fetch user details for email ' + data.email));
     }
 
     if (user) {

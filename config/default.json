@@ -74,6 +74,8 @@
     "Android": [ 1, 4, 5 ]
   },
 
+  "enable_self_registration": true,
+
   "chargify_password" : "x",
   "chargify_domain": "https://revsw-test.chargify.com/",
   "chargify_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA"

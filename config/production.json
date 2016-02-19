@@ -38,5 +38,12 @@
   "available_sdk_release_versions": {
     "iOS": [ 1 ],
     "Android": [ 1 ]
-  }
+  },
+
+  "enable_self_registration": false,
+
+  "chargify_password" : "x",
+  "chargify_domain": "https://revsw-test.chargify.com/",
+  "chargify_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA"
+
 }
