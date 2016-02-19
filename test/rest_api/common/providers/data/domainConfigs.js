@@ -250,6 +250,9 @@ var DomainConfigsDataProvider = {
         case 'Joi.string().required()':
           data.testValue = '';
           break;
+        case 'Joi.string().max(1500).allow("").required()':
+          data.testValue = undefined;
+          break;
         case 'Joi.string().valid("off", "low", "medium", "high").required()':
           data.testValue = '';
           break;
@@ -322,7 +325,7 @@ var DomainConfigsDataProvider = {
             data.testValue = undefined;
           }
           else {
-            //console.log('ALERT! not considered:', schemaDef);
+            console.log('ALERT! In generateFull:: not considered:', schemaDef);
             data.testValue = undefined;
           }
       }
@@ -356,6 +359,9 @@ var DomainConfigsDataProvider = {
           data.testValue = true;
           break;
         case 'Joi.string().allow("").required()':
+          data.testValue = true;
+          break;
+        case 'Joi.string().max(1500).allow("").required()':
           data.testValue = true;
           break;
         case 'Joi.string().required()':
@@ -428,7 +434,7 @@ var DomainConfigsDataProvider = {
             data.testValue = [];
           }
           else {
-            console.log('ALERT! not considered:', schemaDef);
+            console.log('ALERT! In generateInvalidData:: not considered:', schemaDef);
             data.testValue = undefined;
           }
       }
@@ -462,6 +468,9 @@ var DomainConfigsDataProvider = {
           data.isRequired = false;
           break;
         case 'Joi.string().allow("").required()':
+          data.isRequired = true;
+          break;
+        case 'Joi.string().max(1500).allow("").required()':
           data.isRequired = true;
           break;
         case 'Joi.string().required()':
@@ -534,7 +543,7 @@ var DomainConfigsDataProvider = {
             data.isRequired = false;
           }
           else {
-            console.log('ALERT! not considered:', schemaDef);
+            console.log('ALERT! In generateWithoutRequiredData:: not considered:', schemaDef);
             data.isRequired = false;
           }
       }
@@ -663,7 +672,7 @@ var DomainConfigsDataProvider = {
             data.testValue = longText;
           }
           else {
-            //console.log('ALERT! not considered:', schemaDef);
+            console.log('ALERT! In generateLongData:: not considered:', schemaDef);
             data.testValue = undefined;
           }
       }

@@ -54,7 +54,7 @@ describe('Negative check', function () {
             .expect(400)
             .then(function (res) {
               ddCase.propertyPath.split('.').forEach(function (key) {
-                //console.log('res.body.message:', res.body.message);
+                // console.log('res.body.message:', res.body.message);
                 if (key === '0') {
                   res.body.message.should.containEql('position 0');
                 }
