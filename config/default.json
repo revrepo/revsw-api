@@ -62,13 +62,6 @@
   "jwt_token_lifetime_minutes": 1440,   // 24 hours
   "number_of_reported_audit_log_records": 40,
 
-  "recurly": {
-    "API_KEY": "8282eeda404c4c39ac619b21aaeb0030",
-    "SUBDOMAIN": "kosdev",
-    "ENVIRONMENT": "sandbox",
-    "DEBUG": false
-  },
-
   "available_sdk_release_versions": {
     "iOS": [ 1, 2, 4 ],
     "Android": [ 1, 4, 5 ]

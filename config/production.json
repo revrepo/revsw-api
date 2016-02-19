@@ -33,7 +33,10 @@
   "purge_mongo": {
     "connect_string": "mongodb://IAD02-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
   },
+
   "password_reset_portal_domain": "portal.revapm.net",
+  "user_verify_portal_domain" : "portal.revapm.net",
+
   "jwt_private_key" : "2c83899336891b6cfa571449f098c3fca7d4e2ef96e7",
   "available_sdk_release_versions": {
     "iOS": [ 1 ],
