@@ -19,9 +19,9 @@
 // # Smoke check: countries
 var config = require('config');
 
-var API= require('./../../common/api');
+var API = require('./../../common/api');
 
-describe('Smoke check', function () {
+describe('CRUD check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   // Retrieving information about specific user that later we will use for
@@ -37,7 +37,7 @@ describe('Smoke check', function () {
   });
 
   describe('Countries resource', function () {
-    it('should return a response when getting all countries.',
+    it('should return countries object that has specific country as property.',
       function (done) {
         API.helpers
           .authenticateUser(resellerUser)
@@ -45,7 +45,13 @@ describe('Smoke check', function () {
             API.resources.countries
               .getAll()
               .expect(200)
-              .end(done);
+              .then(function (response) {
+                var countries = response.body;
+                // Verify as example existence of US country
+                countries.US.should.equal('United States');
+                done();
+              })
+              .catch(done);
           })
           .catch(done);
       });
