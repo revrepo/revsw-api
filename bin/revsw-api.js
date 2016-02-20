@@ -29,6 +29,7 @@ var Hapi = require('hapi'),
   UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
   validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
+  validateHMAC = require ('../handlers/validateHMAC').validateHMAC,
   User = require('../models/User');
 
 var server = new Hapi.Server();
@@ -116,6 +117,10 @@ server.register(require('hapi-auth-jwt'), function (err) {
 
 server.register(require('hapi-auth-apikey'), function (err) {
   server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
+});
+
+server.register(require('../lib/chargify-webhook-signature'), function (err) {
+  server.auth.strategy('hmac', 'signature');
 });
 
 // adds swagger self documentation plugin
