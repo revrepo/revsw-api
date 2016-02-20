@@ -29,7 +29,6 @@ var Hapi = require('hapi'),
   UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
   validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
-  validateHMAC = require ('../handlers/validateHMAC').validateHMAC,
   User = require('../models/User');
 
 var server = new Hapi.Server();
