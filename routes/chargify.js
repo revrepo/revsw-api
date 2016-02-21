@@ -27,7 +27,7 @@ module.exports = [
     path   : '/webhooks/chargify',
     config : {
       handler     : handler.webhookHandler,
-      auth        : false,
+      auth        : 'hmac',
      payload: {
         parse: true,
         allow: 'application/x-www-form-urlencoded'

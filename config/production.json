@@ -45,8 +45,11 @@
 
   "enable_self_registration": false,
 
-  "chargify_password" : "x",
-  "chargify_domain": "https://revsw-test.chargify.com/",
-  "chargify_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA"
+  "chargify": {
+    "password" : "x",
+    "domain": "https://revsw-test.chargify.com/",
+    "api_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA",
+    "shared_key": "zc2F3fSl1nEZHJFDR2g6Xk9o4f40Aawgob4WrHKHDWY"
+  }
 
 }
