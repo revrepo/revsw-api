@@ -27,10 +27,10 @@ module.exports = [
     path   : '/webhooks/chargify',
     config : {
       handler     : handler.webhookHandler,
-      auth        : false,
+      auth        : 'hmac',
      payload: {
         parse: true,
-      //  allow: 'application/x-www-form-urlencoded'
+        allow: 'application/x-www-form-urlencoded'
       },
       plugins: {
         'hapi-swagger' : {

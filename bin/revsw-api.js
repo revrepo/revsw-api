@@ -118,6 +118,10 @@ server.register(require('hapi-auth-apikey'), function (err) {
   server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
 });
 
+server.register(require('../lib/chargify-webhook-signature'), function (err) {
+  server.auth.strategy('hmac', 'signature');
+});
+
 // adds swagger self documentation plugin
 server.register([{
   register: require('hapi-swagger'),

@@ -63,7 +63,7 @@ module.exports = [
       },
       validate    : {
         params: {
-          tokemailen: Joi.string().email().required().description('Email to send verification')
+          email: Joi.string().email().required().description('Email to send verification')
         }
       },
       response: {
@@ -91,7 +91,7 @@ module.exports = [
         }
       },
       response: {
-        schema: routeModels.statusModel
+        schema: routeModels.contactInfoModel
       }
     }
   }
