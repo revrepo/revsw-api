@@ -39,7 +39,7 @@ describe('CRUD check', function () {
   });
 
   describe('Locations resource', function () {
-    it('should allow to get `first-mile` data.',
+    it('should return `first-mile` data.',
       function (done) {
         API.helpers
           .authenticateUser(resellerUser)
@@ -52,6 +52,9 @@ describe('CRUD check', function () {
                 var locations = response.body;
                 locations.should.not.be.undefined();
                 locations.length.should.greaterThanOrEqual(0);
+                locations.forEach(function (location) {
+                  location.id.should.not.be.undefined();
+                });
                 done();
               })
               .catch(done);
@@ -59,7 +62,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should allow to get `last-mile` data.',
+    it('should return `last-mile` data.',
       function (done) {
         API.helpers
           .authenticateUser(resellerUser)
@@ -72,6 +75,9 @@ describe('CRUD check', function () {
                 var locations = response.body;
                 locations.should.not.be.undefined();
                 locations.length.should.greaterThanOrEqual(0);
+                locations.forEach(function (location) {
+                  location.id.should.not.be.undefined();
+                });
                 done();
               })
               .catch(done);
