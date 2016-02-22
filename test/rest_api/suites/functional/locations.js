@@ -23,7 +23,7 @@ var config = require('config');
 
 var API = require('./../../common/api');
 
-describe('CRUD check', function () {
+describe('Functional check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   // Retrieving information about specific user that later we will use for
