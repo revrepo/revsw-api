@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Smoke check: countries
+// # Smoke check: locations
 var config = require('config');
 
 var API = require('./../../common/api');
@@ -36,14 +36,29 @@ describe('Smoke check', function () {
     done();
   });
 
-  describe('Countries resource', function () {
-    it('should return a response when getting all countries.',
+  describe('Locations resource', function () {
+    it('should return a response when getting `first-mile`.',
       function (done) {
         API.helpers
           .authenticateUser(resellerUser)
           .then(function () {
-            API.resources.countries
-              .getAll()
+            API.resources.locations
+              .firstMile()
+              .getOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a response when getting `last-mile`.',
+      function (done) {
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
+            API.resources.locations
+              .lastMile()
+              .getOne()
               .expect(200)
               .end(done);
           })

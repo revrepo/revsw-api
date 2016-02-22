@@ -32,7 +32,7 @@ var resourceConfig = {
   nestedResources: [
     {
       idKey: null,
-      name: 'firstmile',
+      name: 'firstMile',
       path: '/firstmile',
       methods: [
         Methods.READ_ONE
@@ -40,7 +40,7 @@ var resourceConfig = {
     },
     {
       idKey: null,
-      name: 'lastmile',
+      name: 'lastMile',
       path: '/lastmile',
       methods: [
         Methods.READ_ONE
