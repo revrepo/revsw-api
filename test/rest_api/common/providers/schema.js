@@ -133,7 +133,7 @@ module.exports = {
    * @returns {Object} SDK config schema
    *
    */
-  getSDKConfig: function() {
+  getSDKConfig: function () {
     var schema = Joi.object()
       .keys({
         id: Joi.string().regex(idFormatPattern).required(),
@@ -162,5 +162,15 @@ module.exports = {
         }))
       });
     return schema;
+  },
+
+  /**
+   * ### SchemaProvider.getCountries()
+   *
+   * @returns {Object} Countries schema
+   */
+  getCountries: function () {
+    var countriesSchema = Joi.object();
+    return countriesSchema;
   }
 };

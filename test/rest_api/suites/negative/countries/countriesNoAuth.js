@@ -16,19 +16,13 @@
  * from Rev Software, Inc.
  */
 
-require('should-http');
-
-// # Smoke check: countries
 var config = require('config');
+var API = require('./../../../common/api');
 
-var API = require('./../../common/api');
+describe('Negative check', function () {
 
-describe('Functional check', function () {
+  // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
-
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
     done();
@@ -39,23 +33,25 @@ describe('Functional check', function () {
   });
 
   describe('Countries resource', function () {
-    it('should return countries object that has specific country as property.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.countries
-              .getAll()
-              .expect(200)
-              .then(function (response) {
-                var countries = response.body;
-                // Verify as example existence of US country
-                countries.US.should.equal('United States');
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
+    describe('Without authorization', function () {
+
+      beforeEach(function (done) {
+        done();
       });
+
+      afterEach(function (done) {
+        done();
+      });
+
+      xit('[BUG: Getting all countries is possible without authentication]' +
+        'should return `Unauthorized` response when getting all countries.',
+        function (done) {
+          API.session.reset();
+          API.resources.countries
+            .getAll()
+            .expect(401)
+            .end(done);
+        });
+    });
   });
 });

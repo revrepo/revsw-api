@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+require('should-http');
+
 // # Smoke check: countries
 var config = require('config');
 
@@ -50,7 +52,7 @@ describe('CRUD check', function () {
                 countriesObject.should.not.be.undefined();
                 var countriesKeys = Object.keys(countriesObject);
                 countriesKeys.should.not.be.empty();
-                countriesKeys.should.be.greatherThan(0);
+                countriesKeys.length.should.greaterThan(0);
                 done();
               })
               .catch(done);
