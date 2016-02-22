@@ -161,6 +161,12 @@ App.prototype = {
       }
     });
   },
+
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  }
 };
 
 module.exports = App;
