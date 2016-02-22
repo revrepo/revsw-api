@@ -60,7 +60,7 @@ describe('Sanity check', function () {
   });
 
   describe('Accounts resource', function () {
-    describe('Success Response Data Schema', function () {
+    describe('Error Response Data Schema', function () {
 
       beforeEach(function (done) {
         done();

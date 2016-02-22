@@ -17,15 +17,18 @@
  */
 
 require('should-http');
+var Joi = require('joi');
 
-// # Smoke check: locations
 var config = require('config');
 
 var API = require('./../../../common/api');
+var SchemaProvider = require('./../../../common/providers/schema');
 
-describe('Negative check', function () {
+describe('Sanity check', function () {
 
   this.timeout(config.get('api.request.maxTimeout'));
+
+  var errorResponseSchema = SchemaProvider.getErrorResponse();
 
   before(function (done) {
     done();
@@ -36,26 +39,36 @@ describe('Negative check', function () {
   });
 
   describe('Locations resource', function () {
-    describe('Without authorization', function () {
-      it('should return `Unauthorized` response when getting `first-mile` ' +
-        'data.',
+    describe('Error Response Data Schema', function () {
+
+      it('should return data applying `error response` schema when getting ' +
+        '`first-mile` data.',
         function (done) {
           API.session.reset();
           API.resources.locations
             .firstMile()
             .getOne()
             .expect(401)
-            .end(done);
+            .then(function (response) {
+              var data = response.body;
+              Joi.validate(data, errorResponseSchema, done);
+            })
+            .catch(done);
         });
 
-      it('should return `Unauthorized` response when getting `last-mile` data.',
+      it('should return data applying `error response` schema when getting ' +
+        '`last-mile` data.',
         function (done) {
           API.session.reset();
           API.resources.locations
             .lastMile()
             .getOne()
             .expect(401)
-            .end(done);
+            .then(function (response) {
+              var data = response.body;
+              Joi.validate(data, errorResponseSchema, done);
+            })
+            .catch(done);
         });
     });
   });

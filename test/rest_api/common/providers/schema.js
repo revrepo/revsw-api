@@ -172,5 +172,37 @@ module.exports = {
   getCountries: function () {
     var countriesSchema = Joi.object();
     return countriesSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getFirstMileLocation()
+   *
+   * @returns {Object} First-mile-location schema
+   */
+  getFirstMileLocation: function () {
+    var firstMileSchema = Joi.object()
+      .keys({
+        id: Joi.string().regex(idFormatPattern).required(),
+        locationName: Joi.string().required()
+      });
+    return firstMileSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getLastMileLocation()
+   *
+   * @returns {Object} Last-mile-location schema
+   */
+  getLastMileLocation: function () {
+    var lastMileSchema = Joi.object()
+      .keys({
+        id: Joi.string().regex(idFormatPattern).required(),
+        site_code_name: Joi.string().required(),
+        city: Joi.string().required(),
+        state: Joi.string().required().allow(''),
+        country: Joi.string().required(),
+        billing_zone: Joi.string().required()
+      });
+    return lastMileSchema;
   }
 };
