@@ -187,6 +187,12 @@ APIKey.prototype = {
     } else {
       callback(utils.buildError('400', 'No API key passed to remove function'), null);
     }
+  },
+
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
   }
 };
 

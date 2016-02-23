@@ -34,7 +34,7 @@ var mongoConnection = require('../lib/mongoConnections');
 var company = new Company(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var product = require('../lib/chargify.js').Product;
-describe('Chargify webhook', function () {
+xdescribe('Chargify webhook', function () {
   it('should activate a signup webhook', function (done) {
 
     var eventJSON =
