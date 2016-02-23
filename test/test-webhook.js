@@ -57,7 +57,7 @@ describe('Chargify webhook', function () {
             "created_at": "2012-09-09 11:38:32 -0400",
             "organization": "Acme, Inc.",
             "id": "",
-            "email": "testsignup-not-verified@revsw.com",
+            "email": "testsignupwf15@revsw.com",
             "country": "US",
             "city": "Pleasantville"
           },
@@ -127,7 +127,7 @@ describe('Chargify webhook', function () {
           "cancel_at_end_of_period": "false",
           "updated_at": "2012-09-09 11:38:33 -0400",
           "created_at": "2012-09-09 11:38:32 -0400",
-          "id": "11839401", //important!
+          "id": "11845913", //important!
           "activated_at": "2012-09-09 11:38:33 -0400",
           "current_period_ends_at": "2012-10-09 11:38:32 -0400",
           "balance_in_cents": "9900",
@@ -140,10 +140,12 @@ describe('Chargify webhook', function () {
       }
     };
 
-    request(testAPIUrl)
+    request('https://localhost:8000')
       .post('/webhooks/chargify')
+      .set('X-Chargify-Webhook-Id', 'testid')
+      .set('X-Chargify-Webhook-Signature-Hmac-Sha-256', '19826d51b9f866b26eda1f154de192593360f8d0bcb63df8a28540a5dcf733f1')
       .type('form')
-      .send(eventJSON)
+      .send('payload[chargify]=testing&event=test')
       .expect(200, function (err, res) {
         if (err) {
           throw err;
@@ -158,5 +160,8 @@ describe('Chargify webhook', function () {
         done();
       });
   });
+
+
+
 });
 
