@@ -31,9 +31,10 @@ exports.signupPayload = {
   address1: joi.string().description('Address 1').required(),
   address2: joi.string().description('Address 2').optional(),
   country: joi.string().description('Country').required(),
-  state: joi.string().description('State'),
+  state: joi.string().description('State').required(),
   city: joi.string().description('City').required(),
   zipcode: joi.string().description('Zip Code').required(),
   collection_method: joi.array().description('Collection method'),
-  billing_schedule: joi.string().description('Billing schedule')
+  billing_schedule: joi.string().description('Billing schedule'),
+  billing_plan: joi.string().description('Billing plan ID').required()
 };

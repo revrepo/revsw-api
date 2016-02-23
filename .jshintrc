@@ -6,7 +6,7 @@
   "indent": 2,
   "newcap": true,
   "quotmark": "single",
-  "maxdepth": 5,
+  "maxdepth": 6,
   "maxstatements": 38,
   "maxlen": 170,
   "eqnull": true,

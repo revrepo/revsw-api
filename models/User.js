@@ -66,7 +66,8 @@ function User(mongoose, connection, options) {
 
     validation: {
       expiredAt: Date,
-      token: String
+      token: String,
+      verified: {type: Boolean, default: false}
     },
 
     billing_plan: this.ObjectId,
@@ -156,6 +157,36 @@ User.prototype = {
 
         if (doc.companyId) {
           doc.companyId = doc.companyId.split(',');
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
+        } else {
+          doc.domain = [];
+        }
+
+      }
+      callback(err, doc);
+    });
+  },
+
+  getValidation : function (item, callback) {
+    this.model.findOne(item, function (err, doc) {
+      if (doc) {
+
+        doc = utils.clone(doc);
+        doc.user_id = doc._id;
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.id;
+        delete doc.token;
+        delete doc.status;
+        delete doc.old_passwords;
+
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        } else {
+          doc.companyId = [];
         }
         if (doc.domain) {
           doc.domain = doc.domain.split(',');

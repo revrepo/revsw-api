@@ -28,6 +28,7 @@ var cds_request = require('request');
 var utils           = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
 var Promise = require('bluebird');
+var _ = require('lodash');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -35,10 +36,49 @@ var publicRecordFields = require('../lib/publicRecordFields');
 
 var DomainConfig   = require('../models/DomainConfig');
 var ServerGroup         = require('../models/ServerGroup');
-var Company = require('../models/Account');
-Promise.promisifyAll(Company);
+var Account = require('../models/Account');
+
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var billing_plans = require('../models/BillingPlan');
+
+var checkDomainsLimit = function (companyId, callback) {
+   accounts.get({_id: companyId}, function (err, account) {
+     if (err) {
+       return callback('DomainConfigs::checkDomainsList: Failed to find an account with ID' +
+         'Account ID: ' + companyId, null);
+     }
+     billing_plans.get({_id: account.billing_plan}, function (err, bp) {
+       if (err) {
+         return callback('DomainConfigs::checkDomainsList:  Failed to find a billing plan associated with account provided' +
+           ' Account ID: ' + companyId + ' CreatedBy: ' + account.createdBy, null);
+       }
+       var serviceIndex = _.findIndex(bp.services, {code_name: 'domain'});
+       domainConfigs.model.count({account_id: companyId}, function (err, count) {
+         if(err){
+           return callback('DomainConfigs::checkDomainsList: Could not count domains for account' +
+             ' Account ID: ' + companyId + ' CreatedBy: ' + account.createdBy, null);
+         }
+         if(serviceIndex<0){
+           return callback('DomainConfigs::checkDomainsList: Could not find a \'domain\' service within billing plan' +
+             ' Billing Plan ID: ' + bp.id, null);
+         }
+         return callback(null, bp.services[serviceIndex].included - count);
+       });
+     });
+   });
+};
+
+var isSubscriptionActive = function (companyId, callback) {
+  accounts.get({_id: companyId}, function (err, account) {
+    if (err) {
+      return callback('DomainConfigs::isSubscriptionActive: Failed to find an account with ID' +
+        'Account ID: ' + companyId, null);
+    }
+    return account.subscription_state !== 'active' ? callback(false, null) : callback(true, null);
+  });
+};
 
 function checkDomainAccessPermission(request, domain) {
 
@@ -196,32 +236,8 @@ exports.getDomainConfigVersions = function(request, reply) {
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
-/*
-  var companyID = request.auth.credentials.companyId;
 
-  Company.getAsync({_id: companyID})
-    .then(function (company) {
-      return BillingPlan.getAsync({chargify_handle: company.billing_plan});
-    })
-    .then(function (plan) {
-      if(plan.services[0].included >= domainConfigs.model.count({account_id: companyID})){
-        return reply(boom.forbidden('Domain limit reached.'));
-      }
-
-
-
-    });
-*/
-
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
-    return reply(boom.badRequest('Account ID not found'));
-  }
-
-  serverGroups.get({
-    _id : newDomainJson.origin_server_location_id,
-    serverType : 'public',
-    groupType  : 'CO'
-  }, function (error, result) {
+  var createDomain = function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID' + newDomainJson.origin_server_location_id));
     }
@@ -288,6 +304,64 @@ exports.createDomainConfig = function(request, reply) {
         renderJSON(request, reply, err, response);
       });
     });
+  };
+
+
+  accounts.get({_id: newDomainJson.account_id}, function (err, account) {
+    if(err){
+      return reply(boom.badImplementation('DomainConfigs::checkDomainsList: Failed to find an account with ID ' +
+        newDomainJson.account_id));
+    }
+    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+    if (account.billing_plan) {
+      isSubscriptionActive(newDomainJson.account_id, function (err, res) {
+          if (err) {
+            return reply(boom.badImplementation(err));
+          }
+          if (!res) {
+            return reply(boom.forbidden(account.companyName + ' subscription is not active'));
+          }
+          checkDomainsLimit(request.auth.credentials.companyId, function (err, diff) {
+            if (err) {
+              return reply(boom.badImplementation(err));
+            }
+            if (diff <= 0) {
+              return reply(boom.forbidden('Billing plan service limit reached'));
+            }
+            serverGroups.get({
+              _id : newDomainJson.origin_server_location_id,
+              serverType : 'public',
+              groupType  : 'CO'
+            }, createDomain);
+          });
+        });
+    } else {
+      serverGroups.get({
+        _id : newDomainJson.origin_server_location_id,
+        serverType : 'public',
+        groupType  : 'CO'
+      }, function (error, result) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID ' + newDomainJson.origin_server_location_id));
+        }
+
+        if (!result) {
+          return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
+        }
+        newDomainJson.created_by = request.auth.credentials.email;
+        if (!newDomainJson.tolerance) {
+          newDomainJson.tolerance = '3000';
+        }
+
+        domainConfigs.query({
+          domain_name : newDomainJson.domain_name,
+          deleted: { $ne: true }
+        }, createDomain);
+      });
+    }
+
   });
 };
 
