@@ -166,7 +166,37 @@ App.prototype = {
     where = where || {};
     fields = fields || {};
     return this.model.find(where, fields).exec();
-  }
+  },
+
+  // returns _promise_ {
+  //    account_id: { total: X, deleted: Y, active: Z },
+  //    [account_id: { total: X, deleted: Y, active: Z },
+  //    ...]
+  //  }
+  //  if account ID is absent  then it returns data for all accounts
+  accountAppsData: function( account_id ) {
+
+    return this.model.find( ( account_id ? { account_id: account_id } : {} ),
+        { _id: 0, account_id: 1, deleted: 1 } )
+      .exec(/*mf mongoose*/)
+      .then( function( data ) {
+        var dist = {};
+        data.forEach( function( item ) {
+          if ( !dist[item.account_id] ) {
+            dist[item.account_id] = { total: 0, deleted: 0, active: 0 };
+          }
+          if ( item.deleted ) {
+            ++dist[item.account_id].deleted;
+          } else {
+            ++dist[item.account_id].active;
+          }
+          ++dist[item.account_id].total;
+        });
+        return dist;
+      });
+  },
+
+
 };
 
 module.exports = App;

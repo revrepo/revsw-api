@@ -21,9 +21,7 @@
 //  ----------------------------------------------------------------------------------------------//
 
 var _ = require('lodash');
-// var mongoose = require('mongoose');
 var promise = require('bluebird');
-// mongoose.Promise = promise;
 
 function UsageReport( mongoose, connection, options ) {
   this.options = options;
