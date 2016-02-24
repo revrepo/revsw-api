@@ -30,6 +30,7 @@ var Joi = require('joi');
 // Defining common variables
 var dateFormatPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 var idFormatPattern = /^([0-9]|[a-f]){24}$/;
+var tokenPattern = /^([0-9]|[a-zA-Z]|\.|-){239}$/;
 
 // # Data Provider object
 //
@@ -75,7 +76,11 @@ module.exports = {
       .keys({
         statusCode: Joi.number().integer().min(100).max(599).required(),
         error: Joi.string().required(),
-        message: Joi.string()
+        message: Joi.string(),
+        validation: Joi.object().keys({
+          source: Joi.string(),
+          keys: Joi.array()
+        })
       });
     return errorResponseSchema;
   },
@@ -204,5 +209,20 @@ module.exports = {
         billing_zone: Joi.string().required()
       });
     return lastMileSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getAuthenticateResponse()
+   *
+   * @returns {Object} authenticate response schema
+   */
+  getAuthenticateResponse: function () {
+    var authenticateSchema = Joi.object()
+      .keys({
+        statusCode: Joi.number().integer().min(100).max(599).required(),
+        message: Joi.string().required(),
+        token: Joi.string().regex(tokenPattern).required()
+      });
+    return authenticateSchema;
   }
 };
