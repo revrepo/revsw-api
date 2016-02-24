@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -121,7 +121,7 @@ exports.getAppReport = function( request, reply ) {
     elasticSearch.getClient().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -196,7 +196,7 @@ exports.getAccountReport = function( request, reply ) {
     elasticSearch.getClient().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -282,7 +282,7 @@ exports.getDirs = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -293,32 +293,6 @@ exports.getDirs = function( request, reply ) {
           oses: [],
           countries: {}
         };
-        // "aggregations": {
-        //   "devices": {
-        //     "doc_count_error_upper_bound": 0,
-        //     "sum_other_doc_count": 0,
-        //     "buckets": [
-        //       {
-        //         "key": "iPhone4,1 A1387/A1431",
-        //         "doc_count": 312
-        //       }, ...............
-        //     ]
-        //   },
-        //   "operators": {
-        //     "doc_count_error_upper_bound": 0,
-        //     "sum_other_doc_count": 0,
-        //     "buckets": [
-        //       {
-        //         "key": "AT&T",
-        //         "doc_count": 328
-        //       }, ..................
-        //     ]
-        //   },
-        //   "oses": { .............
-        //   },
-        //   "countries": { ...............
-        //   }
-        // }
 
         if ( body.aggregations ) {
           var buckets = body.aggregations.devices.buckets;
@@ -458,7 +432,7 @@ exports.getFlowReport = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -468,25 +442,6 @@ exports.getFlowReport = function( request, reply ) {
           total_received = 0,
           total_spent_ms = 0,
           dataArray = [];
-
-        // "aggregations": {
-        //   "results": {
-        //     "doc_count": 9275,
-        //     "date_range": {
-        //       "buckets": [
-        //         {
-        //           "doc_count": 9273,
-        //           "date_histogram": {
-        //             "buckets": [
-        //               {
-        //                 "doc_count": 0,
-        //                 "received_bytes": {
-        //                   "value": 0
-        //                 },
-        //                 "sent_bytes": {
-        //                   "value": 0
-        //                 }
-        //               },
 
         if ( body.aggregations ) {
           var buckets = body.aggregations.results.date_range.buckets[0].date_histogram.buckets;
@@ -536,7 +491,7 @@ exports.getAggFlowReport = function( request, reply ) {
 
   checkAppAccessPermissions_( request, reply, function() {
 
-    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 7 /*allowed period - month*/ );
+    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
     if ( span.error ) {
       return reply( boom.badRequest( span.error ) );
     }
@@ -660,7 +615,7 @@ exports.getAggFlowReport = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -669,48 +624,6 @@ exports.getAggFlowReport = function( request, reply ) {
         var total_sent = 0;
         var total_received = 0;
         var dataArray = [];
-        // "aggregations": {
-        //   "results": {
-        //     "doc_count": 56531,
-        //     "date_range": {
-        //       "buckets": [
-        //         {
-        //           "doc_count": 56364,
-        //           "codes": {
-        //             "buckets": [
-        //               {
-        //                 "key": 200,
-        //                 "doc_count": 47705
-        //                 "date_histogram": {
-        //                   "buckets": [
-        //                     {
-        //                       "key_as_string": "2016-01-20T21:20:00.000Z",
-        //                       "key": 1453324800000,
-        //                       "doc_count": 0,
-        //                       "received_bytes": {
-        //                         "value": 0
-        //                       },
-        //                       "sent_bytes": {
-        //                         "value": 0
-        //                       }
-        //                     },
-        //                     {
-        //                       "key_as_string": "2016-01-20T21:50:00.000Z",
-        //                       "key": 1453326600000,
-        //                       "doc_count": 5,
-        //                       "received_bytes": {
-        //                         "value": 175
-        //                       },
-        //                       "sent_bytes": {
-        //                         "value": 0
-        //                       }
-        //                     }, ...............................
-        //               },
-        //               {
-        //                 "key": 404,
-        //                 "doc_count": 4588
-        //                 ......................................
-        //               },......................................
 
         if ( body.aggregations ) {
           var codes = body.aggregations.results.date_range.buckets[0].codes.buckets;
@@ -868,37 +781,10 @@ exports.getTopRequests = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
       .then(function(body) {
-        /*
-        "aggregations": {
-          "missing_field": {
-            "doc_count": 0
-          },
-          "results": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "WiFi",
-                "doc_count": 1,
-                "hits": {
-                  "doc_count": 500,
-                  "hits": {
-                    "buckets": [
-                      {
-                        "doc_count": 496
-                      }
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-        */
 
         var data = [];
         if ( body.aggregations ) {
@@ -1024,7 +910,7 @@ exports.getTopUsers = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -1172,41 +1058,10 @@ exports.getTopGBT = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
-
-        /*
-          "aggregations": {
-            "missing_field": {
-              "doc_count": 0
-            },
-            "results": {
-              "doc_count_error_upper_bound": 0,
-              "sum_other_doc_count": 0,
-              "buckets": [
-                {
-                  "key": "iPhone7,2 A1549/A1586",
-                  "doc_count": 1,
-                  "deep": {
-                    "doc_count": 500,
-                    "hits": {
-                      "buckets": [
-                        {
-                          "doc_count": 500,
-                          "received_bytes": {
-                            "value": 10051575
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        */
 
         var data = [];
         if ( body.aggregations ) {
@@ -1383,78 +1238,10 @@ exports.getDistributions = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
-
-        /*
-        "aggregations": {
-        "result": {
-          "doc_count": 3991,
-          "result": {
-            "buckets": [
-              {
-                "doc_count": 3991,
-                "distribution": {
-                  "buckets": [
-                    {
-                      "key": "MISS",
-                      "doc_count": 1740,
-                      "received_bytes": {
-                        "value": 28208157
-                      },
-                      "sent_bytes": {
-                        "value": 3767
-                      }
-                    },
-                    {
-                      "key": "HIT",
-                      "doc_count": 1240,
-                      "received_bytes": {
-                        "value": 112072849
-                      },
-                      "sent_bytes": {
-                        "value": 0
-                      }
-                    },
-                    {
-                      "key": "-",
-                      "doc_count": 1011,
-                      "received_bytes": {
-                        "value": 60997388
-                      },
-                      "sent_bytes": {
-                        "value": 0
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }}
-
-        //  empty
-        "aggregations": {
-          "result": {
-            "doc_count": 0,
-            "result": {
-              "buckets": [
-                {
-                  "doc_count": 0,
-                  "distribution": {
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0,
-                    "buckets": []
-                  }
-                }
-              ]
-            }
-          }
-        }
-
-        */
 
         var data = [];
         if ( body.aggregations && body.aggregations.result.doc_count ) {
@@ -1601,73 +1388,10 @@ exports.getTopObjects = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
-
-        /*
-        no term
-        "aggregations": {
-          "result": {
-            "doc_count": 12605,
-            "result": {
-              "buckets": [{
-                "doc_count": 12597,
-                "urls": {
-                  "buckets": [{
-                        "key": "https://monitor.revsw.net/test-cache.js",
-                        "doc_count": 502
-                      }, {
-                        "key": "https://www.hpe.com/us/en/home.html",
-                        "doc_count": 145
-                      },
-        empty
-        "aggregations": {
-          "result": {
-            "doc_count": 0,
-            "result": {
-              "buckets": [
-                {
-                  "doc_count": 0,
-                  "urls": {
-                    "buckets": []
-
-        term
-        "aggregations": {
-          "result": {
-            "doc_count": 12591,
-            "result": {
-              "buckets": [
-                {
-                  "doc_count": 12583,
-                  "filtered": {
-                    "doc_count": 8828,
-                    "urls": {
-                      "buckets": [
-                        {
-                          "key": "https://mobile-collector.newrelic.com/mobile/v3/data",
-                          "doc_count": 132
-                        },
-                        {
-                          "key": "https://edition.i.cdn.cnn.com/.a/1.238.0/js/\u0027).f(t.get(%5B",
-                          "doc_count": 90
-                        },
-        empty
-        "aggregations": {
-          "result": {
-            "doc_count": 0,
-            "result": {
-              "buckets": [
-                {
-                  "doc_count": 0,
-                  "filtered": {
-                    "doc_count": 0,
-                    "urls": {
-                      "buckets": []
-
-
-        */
 
         var data = [],
           total = 0,
@@ -1795,48 +1519,10 @@ exports.getTopObjectsSlowest = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
-
-        /*
-        "aggregations": {
-          "result": {
-            "doc_count": 1315750,
-            "result": {
-              "buckets": [{
-                "doc_count": 280500,
-                "urls": {
-                  "buckets": [{
-                      "key": "https://app.resrc.it/O=100/https://static.ibmserviceengage.com/APImanagementCloud-hero.jpg",
-                      "doc_count": 5610,
-                      "avg_time": {
-                        "value": 2944,
-                      }
-                    }, {
-                      "key": "https://tags.tiqcdn.com/utag/ibm/main/prod/utag.694.js?utv=ut4.39.201601151731",
-                      "doc_count": 5610,
-                      "avg_time": {
-                        "value": 2349,
-                      }
-                    },
-
-        //  empty
-        "aggregations": {
-          "result": {
-            "doc_count": 1315750,
-            "result": {
-              "buckets": [{
-                "doc_count": 0,
-                "urls": {
-                  "buckets": []
-                }
-              }]
-            }
-          }
-        }
-        */
 
         var data = [],
           total = 0,
@@ -1959,57 +1645,10 @@ exports.getTopObjects5xx = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
-
-        /*
-        "aggregations": {
-          "result": {
-            "doc_count": 7615,
-            "result": {
-              "buckets": [
-                {
-                  "doc_count": 7615,
-                  "codes": {
-                    "buckets": [
-                      {
-                        "doc_count": 179,
-                        "codes": {
-                          "buckets": [
-                            {
-                              "key": 503,
-                              "doc_count": 175,
-                              "urls": {
-                                "buckets": [
-                                  {
-                                    "key": "https://sonar-web.tmmp.io/v1/snapshots",
-                                    "doc_count": 24
-                                  },
-                                  {
-                                    "key": "https://mobile-collector.newrelic.com/mobile/v3/data",
-                                    "doc_count": 9
-                                  },
-
-
-        //  empty
-        "aggregations": {
-          "result": {
-            "doc_count": 0,
-            "result": {
-              "buckets": [
-                {
-                  "doc_count": 0,
-                  "codes": {
-                    "buckets": [
-                      {
-                        "doc_count": 0,
-                        "codes": {
-                          "doc_count_error_upper_bound": 0,
-                          "sum_other_doc_count": 0,
-                          "buckets": []
-        */
 
         var total = 0,
           codes = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].codes.buckets ) || [] ),
@@ -2140,116 +1779,13 @@ exports.getAB4FBTAverage = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
 
         var total_hits = 0;
         var dataArray = [];
-
-        // "aggregations": {
-        //   "results": {
-        //     "doc_count": 16885,
-        //     "date_range": {
-        //       "buckets": [
-        //         {
-        //           "doc_count": 16882,
-        //           "destinations": {
-        //             "buckets": [
-        //               {
-        //                 "key": "rev_edge",
-        //                 "doc_count": 12237,
-        //                 "date_histogram": {
-        //                   "buckets": [
-        //                     {
-        //                       "key_as_string": "2016-02-02T22:10:00.000Z",
-        //                       "key": 1454451000000,
-        //                       "doc_count": 246,
-        //                       "fbt_max": {
-        //                         "value": 14737,
-        //                       },
-        //                       "fbt_average": {
-        //                         "value": 355.609756097561,
-        //                       },
-        //                       "fbt_min": {
-        //                         "value": 34,
-        //                       }
-        //                     },
-        //                     {
-        //                       "key_as_string": "2016-02-02T22:40:00.000Z",
-        //                       "key": 1454452800000,
-        //                       "doc_count": 456,
-        //                       "fbt_max": {
-        //                         "value": 2353,
-        //                       },
-        //                       "fbt_average": {
-        //                         "value": 304.14473684210526,
-        //                       },
-        //                       "fbt_min": {
-        //                         "value": 34,
-        //                       }
-        //                     }, ...............
-        //                   ]
-        //                 }
-        //               },
-        //               {
-        //                 "key": "origin",
-        //                 "doc_count": 4645,
-        //                 "date_histogram": {
-        //                   "buckets": [
-        //                     {
-        //                       "key_as_string": "2016-02-02T22:10:00.000Z",
-        //                       "key": 1454451000000,
-        //                       "doc_count": 83,
-        //                       "fbt_max": {
-        //                         "value": 2889,
-        //                       },
-        //                       "fbt_average": {
-        //                         "value": 265.69879518072287,
-        //                       },
-        //                       "fbt_min": {
-        //                         "value": 30,
-        //                       }
-        //                     },
-        //                     {
-        //                       "key_as_string": "2016-02-02T23:40:00.000Z",
-        //                       "key": 1454456400000,
-        //                       "doc_count": 0,
-        //                       "fbt_average": {
-        //                         "value": null
-        //                       },
-        //                       "fbt_min": {
-        //                         "value": null
-        //                       },
-        //                       "fbt_max": {
-        //                         "value": null
-        //                       }
-        //                     },........................
-        //                   ]
-        //                 }
-        //               }
-        //             ]
-        //           }
-        //         }
-        //       ]
-        //     }
-
-        //  empty
-        // "aggregations": {
-        //   "results": {
-        //     "doc_count": 0,
-        //     "date_range": {
-        //       "buckets": [
-        //         {
-        //           "doc_count": 0,
-        //           "destinations": {
-        //             "buckets": []
-        //           }
-        //         }
-        //       ]
-        //     }
-        //   }
 
         if ( body.aggregations ) {
           dataArray = body.aggregations.results.date_range.buckets[0].destinations.buckets.map( function( d ) {
@@ -2376,65 +1912,13 @@ exports.getAB4FBTDistribution = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
 
         var total_hits = 0;
         var dataArray = [];
-
-        // "aggregations": {
-        //   "results": {
-        //     "doc_count": 2093,
-        //     "date_range": {
-        //       "buckets": [
-        //         {
-        //           "doc_count": 2093,
-        //           "value_range": {
-        //             "buckets": [
-        //               {
-        //                 "doc_count": 1850,
-        //                 "destinations": {
-        //                   "buckets": [
-        //                     {
-        //                       "key": "rev_edge",
-        //                       "doc_count": 1842,
-        //                       "histo": {
-        //                         "buckets": [
-        //                           {
-        //                             "key": 0,
-        //                             "doc_count": 73
-        //                           },
-        //                           {
-        //                             "key": 100,
-        //                             "doc_count": 384
-        //                           } .....
-        //                         ]
-        //                       }
-        //                     },
-        //                     {
-        //                       "key": "origin",
-        //                       "doc_count": 8,
-        //                       "histo": {
-        //                         "buckets": [
-        //                           {
-        //                             "key": 0,
-        //                             "doc_count": 0
-        //                           }, ..........
-
-
-        //  empty
-        // "aggregations": {
-        //   "results": {
-        //     "doc_count": 0,
-        //     "date_range": {
-        //       "buckets": [
-        //         {
-        //           "doc_count": 0,
-        //           "destinations": {
-        //             "buckets": []
-        //           } .........
 
         if ( body.aggregations &&
             body.aggregations.results.date_range.buckets[0].doc_count &&
@@ -2559,7 +2043,7 @@ exports.getAB4Errors = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -2700,7 +2184,7 @@ exports.getAB4Speed = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
       .then( function( body ) {
