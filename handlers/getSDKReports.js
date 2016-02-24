@@ -121,7 +121,7 @@ exports.getAppReport = function( request, reply ) {
     elasticSearch.getClient().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -196,7 +196,7 @@ exports.getAccountReport = function( request, reply ) {
     elasticSearch.getClient().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -282,7 +282,7 @@ exports.getDirs = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -458,7 +458,7 @@ exports.getFlowReport = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -660,7 +660,7 @@ exports.getAggFlowReport = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -868,7 +868,7 @@ exports.getTopRequests = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
       .then(function(body) {
@@ -1024,7 +1024,7 @@ exports.getTopUsers = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -1172,7 +1172,7 @@ exports.getTopGBT = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -1383,7 +1383,7 @@ exports.getDistributions = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -1601,7 +1601,7 @@ exports.getTopObjects = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -1795,7 +1795,7 @@ exports.getTopObjectsSlowest = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -1959,7 +1959,7 @@ exports.getTopObjects5xx = function( request, reply ) {
     return elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then(function(body) {
@@ -2140,7 +2140,7 @@ exports.getAB4FBTAverage = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -2376,7 +2376,7 @@ exports.getAB4FBTDistribution = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -2559,7 +2559,7 @@ exports.getAB4Errors = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       } )
       .then( function( body ) {
@@ -2700,7 +2700,7 @@ exports.getAB4Speed = function( request, reply ) {
     elasticSearch.getClientURL().search( {
         index: utils.buildIndexList( span.start, span.end, 'sdkstats-' ),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
       .then( function( body ) {

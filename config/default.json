@@ -34,6 +34,7 @@
   "elasticsearch_url": "testsjc20-es01.revsw.net:9200",
   "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200",
   "elasticsearch_log_level": "trace",
+  "elasticsearch_timeout_ms": 120000,
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
   "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
   "default_cname_domain": "revdn.net",
