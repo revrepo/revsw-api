@@ -118,7 +118,7 @@ exports.getStats = function(request, reply) {
       elasticSearch.getClient().search({
         index: utils.buildIndexList(span.start, span.end),
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
       .then(function(body) {

@@ -139,7 +139,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
   return elasticSearch.getClientURL().search({
       index: indicesList,
       ignoreUnavailable: true,
-      timeout: 120000,
+      timeout: config.get('elasticsearch_timeout_ms'),
       body: requestBody
     })
     .then(function(body) {
@@ -241,7 +241,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
   return elasticSearch.getClientURL().search({
       index: indicesList,
       ignoreUnavailable: true,
-      timeout: 120000,
+      timeout: config.get('elasticsearch_timeout_ms'),
       body: requestBody
     })
     .then(function(body) {

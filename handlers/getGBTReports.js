@@ -134,7 +134,7 @@ exports.getGBTReports = function(request, reply) {
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
