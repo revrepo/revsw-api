@@ -21,7 +21,6 @@
 'use strict';
 
 var promise = require('bluebird');
-var rep = require( '../lib/usageReport.js' );
 
 //  this is 0.10, console.dir( obj, opts ) doesn't work
 var util = require('util');
@@ -40,9 +39,10 @@ var showHelp = function() {
   console.log('        date of the report, for ex. "2015-11-19" or "-3d"');
   console.log('        today assumed if absent');
   console.log('    --dry-run :');
-  console.log('        show collected data, does not do anything (debug)\n');
+  console.log('        show collected data, does not store anything (debug mode)');
   console.log('    -h, --help :');
-  console.log('        this message');
+  console.log('        this message\n\n');
+  process.exit(0);
 };
 
 var conf = {},
@@ -78,18 +78,17 @@ for (var i = 0; i < parslen; ++i) {
 
 //  here we go ... -------------------------------------------------------------------------------//
 
-
-  rep.collectDayReport( ( conf.date || 'now' ), conf.dry/*do not save, return collected data*/ )
-    .then( function( data ) {
-      log_( data, 3 );
-    })
-    .catch( function( err ) {
-      console.log( err );
-    })
-    .finally( function() {
-      process.exit(0);
-      return;
-    });
+require( '../lib/usageReport.js' ).collectDayReport( ( conf.date || 'now' ), conf.dry/*do not save, return collected data*/ )
+  .then( function( data ) {
+    log_( data, 3 );
+  })
+  .catch( function( err ) {
+    console.log( err );
+  })
+  .finally( function() {
+    process.exit(0);
+    return;
+  });
 
 
 //  ----------------------------------------------------------------------------------------------//
