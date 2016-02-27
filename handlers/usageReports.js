@@ -82,6 +82,19 @@ exports.getAccountReport = function( request, reply ) {
 
     reports.loadReports( from, to, request.params.account_id, request.query.extended, request.query.bandwidth )
       .then( function( response ) {
+
+        response = {
+          metadata: {
+            account_id: request.params.account_id,
+            from: from,
+            from_datetime: new Date(from),
+            to: to,
+            to_datetime: new Date(to),
+            data_points_count: response.length
+          },
+          data: response
+        };
+
         reply( response ).type( 'application/json; charset=utf-8' );
       })
       .catch( function( err ) {

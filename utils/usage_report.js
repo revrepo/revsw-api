@@ -80,7 +80,10 @@ for (var i = 0; i < parslen; ++i) {
 
 require( '../lib/usageReport.js' ).collectDayReport( ( conf.date || 'now' ), conf.dry/*do not save, return collected data*/ )
   .then( function( data ) {
-    log_( data, 3 );
+    if ( conf.dry ) {
+      log_( data, 3 );
+    }
+    console.log( 'done.\n' );
   })
   .catch( function( err ) {
     console.log( err );
