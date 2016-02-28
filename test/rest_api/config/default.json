@@ -60,6 +60,10 @@
       "nobody": {
         "email": "wrong_username@revsw.com",
         "password": "we5rsdfsdfs"
+      },
+      "gMail": {
+        "email": "",
+        "password": ""
       }
     },
     "stats": {
