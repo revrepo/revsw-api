@@ -223,5 +223,18 @@ module.exports = {
         token: Joi.string().length(239).required()
       });
     return authenticateSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getForgotResponse()
+   *
+   * @returns {Object} authenticate response schema
+   */
+  getForgotResponse: function () {
+    var forgotResponseSchema = Joi.object()
+      .keys({
+        message: Joi.string().required()
+      });
+    return forgotResponseSchema;
   }
 };

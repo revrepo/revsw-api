@@ -39,6 +39,7 @@ module.exports = function (grunt) {
           'suites/**/countries*.js', // Countries specs
           'suites/**/locations*.js', // Locations specs
           'suites/**/authenticate*.js', // Authenticate specs
+          'suites/**/forgot*.js', // Forgot specs
           // Cleaning up env.
           'setup/domainConfigs.js',
           'setup/accounts.js'
