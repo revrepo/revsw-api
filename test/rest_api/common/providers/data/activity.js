@@ -46,15 +46,25 @@ var ActivityDataProvider = {
 
   DataDrivenHelper: {
 
+    userId: undefined,
+    domainId: undefined,
+    companyId: undefined,
+
+    setQueryParams: function (data) {
+      this.userId = data.userId;
+      this.domainId = data.domainId;
+      this.companyId = data.companyId;
+    },
+
     getQueryParams: function () {
       var now = new Date();
       var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
       var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
       return [
         {}, // No query params
-        //{user_id: 'US'},
-        //{domain_id: 'Linux'},
-        //{company_id: 'Something'},
+        {user_id: this.userId},
+        {domain_id: this.domainId},
+        {company_id: this.companyId},
         {from_timestamp: startTimestamp.toString()},
         {
           from_timestamp: startTimestamp.toString(),
@@ -67,9 +77,9 @@ var ActivityDataProvider = {
       var now = new Date();
       var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
       return [
-        //{user_id: 'US'},
-        //{domain_id: 'Linux'},
-        //{company_id: 'Something'},
+        {user_id: bogusString},
+        {domain_id: bogusString},
+        {company_id: bogusString},
         {from_timestamp: bogusString},
         {
           from_timestamp: startTimestamp.toString(),
@@ -80,7 +90,7 @@ var ActivityDataProvider = {
 
     /*
 
-    /**
+     /**
      * ### StatsDataProvider.DataDrivenHelper.getCombinedQueryParams()
      *
      * Returns all possible combinations for query params that STATS end-point
@@ -88,98 +98,109 @@ var ActivityDataProvider = {
      *
      * @returns {Array}, Array of Stats Query Params Object
      * /
-    getCombinedQueryParams: function () {
-      var combinations = [];
-      var cacheCode = ['HIT', 'MISS'];
-      var requestStatus = ['OK', 'ERROR'];
-      var protocol = ['HTTP', 'HTTPS'];
-      var httpMethod = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE',
-        'OPTIONS', 'CONNECT', 'PATCH'];
-      var quic = ['QUIC', 'HTTP'];
+     getCombinedQueryParams: function () {
+     var combinations = [];
+     var cacheCode = ['HIT', 'MISS'];
+     var requestStatus = ['OK', 'ERROR'];
+     var protocol = ['HTTP', 'HTTPS'];
+     var httpMethod = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE',
+     'OPTIONS', 'CONNECT', 'PATCH'];
+     var quic = ['QUIC', 'HTTP'];
 
-      for (var i = 0, lenCC = cacheCode.length; i < lenCC; i++) {
-        for (var j = 0, lenRS = requestStatus.length; j < lenRS; j++) {
-          for (var k = 0, lenP = protocol.length; k < lenP; k++) {
-            for (var l = 0, lenHM = httpMethod.length; l < lenHM; l++) {
-              for (var m = 0, lenQ = quic.length; m < lenQ; m++) {
-                combinations.push({
-                  cache_code: cacheCode[i],
-                  request_status: requestStatus[j],
-                  protocol: protocol[k],
-                  http_method: httpMethod[l],
-                  quic: quic[m]
-                });
-              }
-            }
-          }
-        }
-      }
-      return combinations;
-    },
+     for (var i = 0, lenCC = cacheCode.length; i < lenCC; i++) {
+     for (var j = 0, lenRS = requestStatus.length; j < lenRS; j++) {
+     for (var k = 0, lenP = protocol.length; k < lenP; k++) {
+     for (var l = 0, lenHM = httpMethod.length; l < lenHM; l++) {
+     for (var m = 0, lenQ = quic.length; m < lenQ; m++) {
+     combinations.push({
+     cache_code: cacheCode[i],
+     request_status: requestStatus[j],
+     protocol: protocol[k],
+     http_method: httpMethod[l],
+     quic: quic[m]
+     });
+     }
+     }
+     }
+     }
+     }
+     return combinations;
+     },
 
-    getCustomQueryParams: function (data) {
-      return [
-        {from_timestamp: data.stringVal},
-        {to_timestamp: data.stringVal},
-        {status_code: data.numberVal},
-        {country: data.stringVal},
-        {os: data.stringVal},
-        {device: data.stringVal},
-        {cache_code: data.stringVal},
-        {request_status: data.stringVal},
-        {protocol: data.stringVal},
-        {http_method: data.stringVal},
-        {quic: data.stringVal}
-      ];
-    },
+     getCustomQueryParams: function (data) {
+     return [
+     {from_timestamp: data.stringVal},
+     {to_timestamp: data.stringVal},
+     {status_code: data.numberVal},
+     {country: data.stringVal},
+     {os: data.stringVal},
+     {device: data.stringVal},
+     {cache_code: data.stringVal},
+     {request_status: data.stringVal},
+     {protocol: data.stringVal},
+     {http_method: data.stringVal},
+     {quic: data.stringVal}
+     ];
+     },
 
-    getLongQueryParams: function () {
-      var params = this.getCustomQueryParams({
-        numberVal: longNumber,
-        stringVal: longStr
-      });
-      Utils.removeJsonFromArray(params, 'os');
-      Utils.removeJsonFromArray(params, 'device');
-      return params;
-    },
+     getLongQueryParams: function () {
+     var params = this.getCustomQueryParams({
+     numberVal: longNumber,
+     stringVal: longStr
+     });
+     Utils.removeJsonFromArray(params, 'os');
+     Utils.removeJsonFromArray(params, 'device');
+     return params;
+     },
 
-    getBogusQueryParams: function () {
-      var params = this.getCustomQueryParams({
-        numberVal: bogusString,
-        stringVal: bogusString
-      });
-      Utils.removeJsonFromArray(params, 'os');
-      Utils.removeJsonFromArray(params, 'device');
-      return params;
-    },
+     getBogusQueryParams: function () {
+     var params = this.getCustomQueryParams({
+     numberVal: bogusString,
+     stringVal: bogusString
+     });
+     Utils.removeJsonFromArray(params, 'os');
+     Utils.removeJsonFromArray(params, 'device');
+     return params;
+     },
 
-    getEmptyQueryParams: function () {
-      return this.getCustomQueryParams({
-        numberVal: emptyString,
-        stringVal: emptyString
-      });
-    },
+     getEmptyQueryParams: function () {
+     return this.getCustomQueryParams({
+     numberVal: emptyString,
+     stringVal: emptyString
+     });
+     },
 
-    getInvalidQueryParams: function () {
-      var params = this.getCustomQueryParams({
-        numberVal: 'INVALID',
-        stringVal: 'INVALID'
-      });
-      Utils.removeJsonFromArray(params, 'os');
-      Utils.removeJsonFromArray(params, 'device');
-      return params;
-    }*/
+     getInvalidQueryParams: function () {
+     var params = this.getCustomQueryParams({
+     numberVal: 'INVALID',
+     stringVal: 'INVALID'
+     });
+     Utils.removeJsonFromArray(params, 'os');
+     Utils.removeJsonFromArray(params, 'device');
+     return params;
+     }*/
 
     summary: {
+
+      userId: undefined,
+      domainId: undefined,
+      companyId: undefined,
+
+      setQueryParams: function (data) {
+        this.userId = data.userId;
+        this.domainId = data.domainId;
+        this.companyId = data.companyId;
+      },
+
       getQueryParams: function () {
         var now = new Date();
         var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
         var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
         return [
           {}, // No query params
-          //{user_id: 'US'},
-          //{domain_id: 'Linux'},
-          //{company_id: 'Something'},
+          {user_id: this.userId},
+          {domain_id: this.domainId},
+          {company_id: this.companyId},
           {from_timestamp: startTimestamp.toString()},
           {
             from_timestamp: startTimestamp.toString(),
@@ -192,9 +213,9 @@ var ActivityDataProvider = {
         var now = new Date();
         var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
         return [
-          //{user_id: 'US'},
-          //{domain_id: 'Linux'},
-          //{company_id: 'Something'},
+          {user_id: bogusString},
+          {domain_id: bogusString},
+          {company_id: bogusString},
           {from_timestamp: bogusString},
           {
             from_timestamp: startTimestamp.toString(),

@@ -29,7 +29,7 @@ describe('Negative check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.reseller');
+  var user = config.get('api.users.reseller');
 
   before(function (done) {
     done();
@@ -44,14 +44,14 @@ describe('Negative check', function () {
 
       var getSpecDescription = function (queryData) {
         var queryString = Utils.getJsonAsKeyValueString(queryData);
-        return 'should return success response' +
+        return 'should return `bad request` response' +
           (queryString === '' ? '' : ' when using: ' + queryString);
       };
 
       var getSpecCallback = function (queryData) {
         return function (done) {
           API.helpers
-            .authenticateUser(reseller)
+            .authenticateUser(user)
             .then(function () {
               API.resources.activity
                 .getAll(queryData)
@@ -77,40 +77,42 @@ describe('Negative check', function () {
     });
 
     describe('Summary: Activity resource', function () {
+      describe('With `bogus` data', function () {
 
-      var getSpecDescription = function (queryData) {
-        var queryString = Utils.getJsonAsKeyValueString(queryData);
-        return 'should return `bad request` response' +
-          (queryString === '' ? '' : ' when using: ' + queryString);
-      };
-
-      var getSpecCallback = function (queryData) {
-        return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
-            .then(function () {
-              API.resources.activity
-                .summary()
-                .getAll(queryData)
-                .expect(400)
-                .then(function (response) {
-                  response.body.error.should.containEql('Bad Request');
-                  done();
-                })
-                .catch(done);
-            })
-            .catch(done);
+        var getSpecDescription = function (queryData) {
+          var queryString = Utils.getJsonAsKeyValueString(queryData);
+          return 'should return `bad request` response' +
+            (queryString === '' ? '' : ' when using: ' + queryString);
         };
-      };
 
-      ActivityDDHelper.summary
-        .getBogusQueryParams()
-        .forEach(function (queryParams) {
-          var specDescription = getSpecDescription(queryParams);
-          var specCallback = getSpecCallback(queryParams);
-          /** Running spec for each query params */
-          it(specDescription, specCallback);
-        });
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.activity
+                  .summary()
+                  .getAll(queryData)
+                  .expect(400)
+                  .then(function (response) {
+                    response.body.error.should.containEql('Bad Request');
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        ActivityDDHelper.summary
+          .getBogusQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
     });
   });
 });

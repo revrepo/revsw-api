@@ -39,6 +39,25 @@ var Utils = {
       .replace(/"/g, '');
   },
 
+  /**
+   * ### Utils.getJsonKeysAsString()
+   *
+   * Returns keys from a JSON object as string with following format:
+   *
+   *    key1, key2, key3
+   *
+   * @returns {String}
+   */
+  getJsonKeysAsString: function (jsonObject) {
+    return Object.keys(jsonObject).join(', ');
+  },
+
+  /**
+   * Removes JSON from array if it has the provided key
+   *
+   * @param jsonArray
+   * @param key
+   */
   removeJsonFromArray: function (jsonArray, key) {
     jsonArray.forEach(function (json, index) {
       if (json[key]) { // if JSON has provided key
