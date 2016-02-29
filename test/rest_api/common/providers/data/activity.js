@@ -34,8 +34,13 @@ var longStr = 'LoremipsumdolorsitametconsecteturadipiscingelitPellente' +
   'infaucibusnullarhoncusPellentesquepretiumuttellusidpellentesqueAenea' +
   'nanteaugueultricesuttortorquisconsequatsemperfelis';
 var longNumber = 1234567890123456789012345678901234567890123456789012345;
+var longNumberStr = '1234567890123456789012345678901234567890123456789012345';
+var longId = '55a44ec7a6423355a44ec7a6423355a44ec7a6423355a44ec7a6423355a44';
 var bogusString = '!@#$%^&*()_+';
 var emptyString = '';
+var invalidId = 'aaaaa00000aaaaa11111aaaa';
+//var invalidTimestamp = '1456784291883';
+var invalidTimestamp = '1010101010101';
 
 // Defines some methods to generate valid and common domain-configs activity
 // test data. With common we mean it oes not have anything special on it.
@@ -88,97 +93,50 @@ var ActivityDataProvider = {
       ];
     },
 
-    /*
+    getEmptyQueryParams: function () {
+      var now = new Date();
+      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+      return [
+        {user_id: emptyString},
+        {domain_id: emptyString},
+        {company_id: emptyString},
+        {from_timestamp: emptyString},
+        {
+          from_timestamp: startTimestamp.toString(),
+          to_timestamp: emptyString
+        }
+      ];
+    },
 
-     /**
-     * ### StatsDataProvider.DataDrivenHelper.getCombinedQueryParams()
-     *
-     * Returns all possible combinations for query params that STATS end-point
-     * accepts.
-     *
-     * @returns {Array}, Array of Stats Query Params Object
-     * /
-     getCombinedQueryParams: function () {
-     var combinations = [];
-     var cacheCode = ['HIT', 'MISS'];
-     var requestStatus = ['OK', 'ERROR'];
-     var protocol = ['HTTP', 'HTTPS'];
-     var httpMethod = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE',
-     'OPTIONS', 'CONNECT', 'PATCH'];
-     var quic = ['QUIC', 'HTTP'];
+    getLongQueryParams: function () {
+      var now = new Date();
+      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+      return [
+        {user_id: longId},
+        {domain_id: longId},
+        {company_id: longId},
+        {from_timestamp: longNumberStr},
+        {
+          from_timestamp: startTimestamp.toString(),
+          to_timestamp: longNumberStr
+        }
+      ];
+    },
 
-     for (var i = 0, lenCC = cacheCode.length; i < lenCC; i++) {
-     for (var j = 0, lenRS = requestStatus.length; j < lenRS; j++) {
-     for (var k = 0, lenP = protocol.length; k < lenP; k++) {
-     for (var l = 0, lenHM = httpMethod.length; l < lenHM; l++) {
-     for (var m = 0, lenQ = quic.length; m < lenQ; m++) {
-     combinations.push({
-     cache_code: cacheCode[i],
-     request_status: requestStatus[j],
-     protocol: protocol[k],
-     http_method: httpMethod[l],
-     quic: quic[m]
-     });
-     }
-     }
-     }
-     }
-     }
-     return combinations;
-     },
-
-     getCustomQueryParams: function (data) {
-     return [
-     {from_timestamp: data.stringVal},
-     {to_timestamp: data.stringVal},
-     {status_code: data.numberVal},
-     {country: data.stringVal},
-     {os: data.stringVal},
-     {device: data.stringVal},
-     {cache_code: data.stringVal},
-     {request_status: data.stringVal},
-     {protocol: data.stringVal},
-     {http_method: data.stringVal},
-     {quic: data.stringVal}
-     ];
-     },
-
-     getLongQueryParams: function () {
-     var params = this.getCustomQueryParams({
-     numberVal: longNumber,
-     stringVal: longStr
-     });
-     Utils.removeJsonFromArray(params, 'os');
-     Utils.removeJsonFromArray(params, 'device');
-     return params;
-     },
-
-     getBogusQueryParams: function () {
-     var params = this.getCustomQueryParams({
-     numberVal: bogusString,
-     stringVal: bogusString
-     });
-     Utils.removeJsonFromArray(params, 'os');
-     Utils.removeJsonFromArray(params, 'device');
-     return params;
-     },
-
-     getEmptyQueryParams: function () {
-     return this.getCustomQueryParams({
-     numberVal: emptyString,
-     stringVal: emptyString
-     });
-     },
-
-     getInvalidQueryParams: function () {
-     var params = this.getCustomQueryParams({
-     numberVal: 'INVALID',
-     stringVal: 'INVALID'
-     });
-     Utils.removeJsonFromArray(params, 'os');
-     Utils.removeJsonFromArray(params, 'device');
-     return params;
-     }*/
+    getInvalidQueryParams: function () {
+      var now = new Date();
+      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+      return [
+        {user_id: invalidId},
+        {domain_id: invalidId},
+        {company_id: invalidId},
+        {from_timestamp: invalidTimestamp},
+        {
+          from_timestamp: startTimestamp.toString(),
+          to_timestamp: invalidTimestamp
+        }
+      ];
+    },
 
     summary: {
 
@@ -220,6 +178,51 @@ var ActivityDataProvider = {
           {
             from_timestamp: startTimestamp.toString(),
             to_timestamp: bogusString
+          }
+        ];
+      },
+
+      getEmptyQueryParams: function () {
+        var now = new Date();
+        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+        return [
+          {user_id: emptyString},
+          {domain_id: emptyString},
+          {company_id: emptyString},
+          {from_timestamp: emptyString},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: emptyString
+          }
+        ];
+      },
+
+      getLongQueryParams: function () {
+        var now = new Date();
+        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+        return [
+          {user_id: longId},
+          {domain_id: longId},
+          {company_id: longId},
+          {from_timestamp: longNumberStr},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: longNumberStr
+          }
+        ];
+      },
+
+      getInvalidQueryParams: function () {
+        var now = new Date();
+        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+        return [
+          {user_id: invalidId},
+          {domain_id: invalidId},
+          {company_id: invalidId},
+          {from_timestamp: invalidTimestamp},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: invalidTimestamp
           }
         ];
       },
