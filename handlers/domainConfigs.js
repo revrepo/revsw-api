@@ -84,6 +84,7 @@ function checkDomainAccessPermission(request, domain) {
 
   // Since domain list and single domain objects have the account_id attribute on different levels we need to use a proper field
   var accountId = (domain.proxy_config) ? domain.proxy_config.account_id : domain.account_id;
+  // TODO: fix a bug when account_id is not checked for user with role 'role'
   if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.domain_name) === -1) {
      return false;
   } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
