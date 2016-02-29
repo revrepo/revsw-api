@@ -36,73 +36,69 @@ var logger = require('revsw-logger')(config.log_config);
 
 
 //  ---------------------------------
-var checkAppAccessPermissions_ = function( request, reply, callback ) {
+var checkAccountAccessPermissions_ = function( request, reply ) {
 
   var account_id = request.query.account_id || request.params.account_id || '';
-  var app_id = request.query.app_id || request.params.app_id || '';
-  if ( !account_id && !app_id ) {
-    return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
+  if ( !account_id ) {
+    reply( boom.badRequest( 'Account ID should be provided' ) );
+    return false;
   }
 
   var creds = request.auth.credentials;
   //  user is revadmin
-  if ( creds.role === 'revadmin' ) {
-    return callback();
+  if ( creds.role === 'revadmin' || creds.companyId.indexOf( account_id ) !== -1 ) {
+    return true;
   }
 
-  //  account(company)
-  if ( account_id &&
-      creds.companyId.indexOf( account_id ) === -1 ) {
-      //  user's companyId array must contain requested account ID
-    return reply(boom.badRequest( 'Account ID not found' ));
-  }
-
-  callback();
+  reply(boom.badRequest( 'Account ID not found' ));
+  return false;
 };
 
 //  ----------------------------------------------------------------------------------------------//
 
 exports.getAccountReport = function( request, reply ) {
 
-  checkAppAccessPermissions_( request, reply, function() {
+  if ( !checkAccountAccessPermissions_( request, reply ) ) {
+    return false;
+  }
 
-    var from = request.query.from,
-      to = request.query.to;
+  var from = request.query.from,
+    to = request.query.to;
 
-    if ( !from ) {
-      from = new Date();
-      from.setUTCDate(1);             //  the very beginning of the month
-      from.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
-    }
+  if ( !from ) {
+    from = new Date();
+    from.setUTCDate(1);             //  the very beginning of the month
+    from.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+  }
 
-    if ( !to ) {
-      to = new Date();
-      to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
-    }
+  if ( !to ) {
+    to = new Date();
+    to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+  }
 
-    reports.loadReports( from, to, request.params.account_id, request.query.extended, request.query.bandwidth )
-      .then( function( response ) {
+  reports.loadReports( from, to, request.params.account_id, request.query.extended, request.query.bandwidth )
+    .then( function( response ) {
 
-        response = {
-          metadata: {
-            account_id: request.params.account_id,
-            from: from,
-            from_datetime: new Date(from),
-            to: to,
-            to_datetime: new Date(to),
-            data_points_count: response.length
-          },
-          data: response
-        };
+      response = {
+        metadata: {
+          account_id: request.params.account_id,
+          from: from,
+          from_datetime: new Date(from),
+          to: to,
+          to_datetime: new Date(to),
+          data_points_count: response.length
+        },
+        data: response
+      };
 
-        reply( response ).type( 'application/json; charset=utf-8' );
-      })
-      .catch( function( err ) {
-        logger.error( err );
-        return reply( boom.badImplementation( err.toString() ) );
-      });
+      reply( response ).type( 'application/json; charset=utf-8' );
+    })
+    .catch( function( err ) {
+      logger.error( err );
+      return reply( boom.badImplementation( err.toString() + ': account ID ' +
+        request.params.account_id + ', span from ' + from.toUTCString() + ', to ' + to.toUTCString() ) );
+    });
 
-  });
 };
 
 

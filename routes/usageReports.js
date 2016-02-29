@@ -22,9 +22,8 @@
 
 var Joi = require('joi');
 
-var usageReport = require('../handlers/usageReports');
+var usageReports = require('../handlers/usageReports');
 var routeModels = require('../lib/routeModels');
-var dayRegEx = /20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])/;
 
 module.exports = [
   {
@@ -32,10 +31,10 @@ module.exports = [
     path: '/v1/usage_reports/{account_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'admin', 'reseller', 'revadmin' ]
       },
-      handler: usageReport.getAccountReport,
-      description: 'Get Usage Report for the Account',
+      handler: usageReports.getAccountReport,
+      description: 'Get Usage Report for an Account',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -47,8 +46,8 @@ module.exports = [
           account_id: Joi.objectId().required().description('Account ID')
         },
         query: {
-          from: Joi.string().regex(dayRegEx).description('Report period start date in YYYY-MM-DD format'),
-          to: Joi.string().regex(dayRegEx).description('Report period end(inclusive) date in YYYY-MM-DD format'),
+          from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
+          to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
           extended: Joi.boolean().default(false).description('Report should contain 5min interval traffic data'),
           bandwidth: Joi.boolean().default(false).description('Count billable bandwidth data')
         }
