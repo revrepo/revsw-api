@@ -236,5 +236,28 @@ module.exports = {
         message: Joi.string().required()
       });
     return forgotResponseSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getActivityResponse()
+   *
+   * @returns {Object} activity response schema
+   */
+  getActivityResponse: function () {
+    var minTS = 1111111111111;
+    var maxTS = 9999999999999;
+    var activityResponseSchema = Joi.object().keys({
+      metadata: Joi.object().keys({
+        user_id: Joi.string().regex(idFormatPattern).required(),
+        company_id: Joi.any()/*.allow([
+          Joi.string().regex(idFormatPattern),
+          Joi.array().items(Joi.string().regex(idFormatPattern))
+        ])*/,
+        start_time: Joi.number().min(minTS).max(maxTS).required(),
+        end_time: Joi.number().min(minTS).max(maxTS).required()
+      }),
+      data: Joi.array().required()
+    });
+    return activityResponseSchema;
   }
 };
