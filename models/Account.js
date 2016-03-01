@@ -71,8 +71,6 @@ Account.prototype = {
 
   list : function (request, callback) {
 
-//    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
-
     this.model.find(function (err, accounts) {
       if (accounts) {
         accounts = utils.clone(accounts);
@@ -83,8 +81,6 @@ Account.prototype = {
             delete accounts[i].__v;
             delete accounts[i].status;
           } else {
-
-//            console.log('Removing accounts array record # ', i);
             accounts.splice(i, 1);
             i--;
           }
@@ -133,8 +129,6 @@ Account.prototype = {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
-
-//        console.log('Inside update: updated doc = ', doc);
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
