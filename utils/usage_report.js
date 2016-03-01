@@ -50,11 +50,6 @@ var conf = {},
   parslen = pars.length,
   curr_par = false;
 
-if (parslen === 0) {
-  showHelp();
-  return;
-}
-
 for (var i = 0; i < parslen; ++i) {
 
   if (pars[i] === '-h' || pars[i] === '--help') {
