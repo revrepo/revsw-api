@@ -21,9 +21,7 @@
 //  ----------------------------------------------------------------------------------------------//
 
 var _ = require('lodash');
-// var mongoose = require('mongoose');
 var promise = require('bluebird');
-// mongoose.Promise = promise;
 
 function UsageReport( mongoose, connection, options ) {
   this.options = options;
@@ -81,15 +79,18 @@ UsageReport.prototype = {
 
   //  ---------------------------------
   //  from/to - inclusive date interval
-  list : function ( from, to, aid, fields ) {
-    from = from || ( new Date() );
-    to = to || ( new Date() );
-    fields = fields || {};
-    var where = { report_for_day: { $gte: from, $lte: to } };
-    if ( aid ) {
-      where.account_id = aid;
+  //  aids - one account ID, an array of account IDs or false/undef for any
+  list : function ( from, to, aids, fields ) {
+    var where = {
+      report_for_day: {
+        $gte: ( from || ( new Date() ) ),
+        $lte: ( to || ( new Date() ) )
+      }
+    };
+    if ( aids ) {
+      where.account_id = _.isArray( aids ) ? { $in: aids } : aids;
     }
-    return this.model.find( where, fields ).exec()
+    return this.model.find( where, ( fields || {} ) ).exec()
       .then( function( docs ) {
         return ( docs ? docs.map( function( doc ) {
           return doc._doc;

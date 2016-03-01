@@ -135,7 +135,53 @@ DomainConfig.prototype = {
     where = where || {};
     fields = fields || {};
     return this.model.find(where, fields).exec();
+  },
+
+  // returns _promise_ {
+  //   domain_to_acc_id_map: {
+  //     domain_name: account_id,
+  //     ...
+  //   },
+  //   account_domains_count: {
+  //     account_id: {
+  //       total: X, deleted: Y, active: Z, ssl_enabled: S
+  //     }, ....
+  //   }
+  // }
+  //  if account ID is absent  then it returns data for all accounts
+  accountDomainsData: function( account_id ) {
+
+    return this.model.find( ( account_id ? { account_id: account_id } : {} ),
+      { _id: 0, domain_name: 1, account_id: 1, deleted: 1, 'proxy_config.rev_component_bp.enable_security': 1 } )
+      .exec()
+      .then( function( data ) {
+        var map = {};
+        var dist = {};
+        data.forEach( function( item ) {
+          map[item.domain_name] = item.account_id.toString();
+
+          if ( !dist[item.account_id] ) {
+            dist[item.account_id] = { total: 0, deleted: 0, active: 0, ssl_enabled: 0 };
+          }
+          if ( item.deleted ) {
+            ++dist[item.account_id].deleted;
+          } else {
+            ++dist[item.account_id].active;
+          }
+          if ( item.proxy_config &&
+              item.proxy_config.rev_component_bp &&
+              item.proxy_config.rev_component_bp.enable_security ) {
+            ++dist[item.account_id].ssl_enabled;
+          }
+          ++dist[item.account_id].total;
+        });
+        return {
+          domain_to_acc_id_map: map,
+          account_domains_count: dist
+        };
+      });
   }
+
 
 };
 
