@@ -124,17 +124,10 @@ var ActivityDataProvider = {
     },
 
     getInvalidQueryParams: function () {
-      var now = new Date();
-      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
       return [
         {user_id: invalidId},
         {domain_id: invalidId},
-        {company_id: invalidId},
-        {from_timestamp: invalidTimestamp},
-        {
-          from_timestamp: startTimestamp.toString(),
-          to_timestamp: invalidTimestamp
-        }
+        {company_id: invalidId}
       ];
     },
 
@@ -213,17 +206,10 @@ var ActivityDataProvider = {
       },
 
       getInvalidQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
         return [
           {user_id: invalidId},
           {domain_id: invalidId},
-          {company_id: invalidId},
-          {from_timestamp: invalidTimestamp},
-          {
-            from_timestamp: startTimestamp.toString(),
-            to_timestamp: invalidTimestamp
-          }
+          {company_id: invalidId}
         ];
       },
     }

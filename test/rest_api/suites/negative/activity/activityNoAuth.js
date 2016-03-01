@@ -40,75 +40,73 @@ describe('Negative check', function () {
   });
 
   describe('Activity resource', function () {
-    describe('With `invalid` data', function () {
+    describe('Without authentication', function () {
 
       var getSpecDescription = function (queryData) {
-        var queryString = Utils.getJsonAsKeyValueString(queryData);
-        return 'should return `bad request` response' +
+        var queryString = Utils.getJsonKeysAsString(queryData);
+        return 'should return `unauthorized` response' +
           (queryString === '' ? '' : ' when using: ' + queryString);
       };
 
-      var getSpecCallback = function (queryData) {
+      var getSpecCallback = function (index) {
         return function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.activity
-                .getAll(queryData)
-                .expect(400)
-                .then(function (response) {
-                  response.body.error.should.containEql('Bad Request');
-                  done();
-                })
-                .catch(done);
+          var queryData = ActivityDDHelper.getQueryParams()[index];
+          API.session.reset();
+          API.resources.activity
+            .getAll(queryData)
+            .expect(401)
+            .then(function (response) {
+              response.body.error.should.containEql('Unauthorized');
+              response.body.message.should
+                .containEql('Missing authentication');
+              done();
             })
             .catch(done);
         };
       };
 
       ActivityDDHelper
-        .getInvalidQueryParams()
-        .forEach(function (queryParams) {
+        .getQueryParams()
+        .forEach(function (queryParams, index) {
           var specDescription = getSpecDescription(queryParams);
-          var specCallback = getSpecCallback(queryParams);
+          var specCallback = getSpecCallback(index);
           /** Running spec for each query params */
           it(specDescription, specCallback);
         });
     });
 
     describe('Summary: Activity resource', function () {
-      describe('With `invalid` data', function () {
+      describe('Without authentication', function () {
 
         var getSpecDescription = function (queryData) {
-          var queryString = Utils.getJsonAsKeyValueString(queryData);
-          return 'should return `bad request` response' +
+          var queryString = Utils.getJsonKeysAsString(queryData);
+          return 'should return `unauthorized` response' +
             (queryString === '' ? '' : ' when using: ' + queryString);
         };
 
-        var getSpecCallback = function (queryData) {
+        var getSpecCallback = function (index) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.activity
-                  .summary()
-                  .getAll(queryData)
-                  .expect(400)
-                  .then(function (response) {
-                    response.body.error.should.containEql('Bad Request');
-                    done();
-                  })
-                  .catch(done);
+            var queryData = ActivityDDHelper.getQueryParams()[index];
+            API.session.reset();
+            API.resources.activity
+              .summary()
+              .getAll(queryData)
+              .expect(401)
+              .then(function (response) {
+                response.body.error.should.containEql('Unauthorized');
+                response.body.message.should
+                  .containEql('Missing authentication');
+                done();
               })
               .catch(done);
           };
         };
 
         ActivityDDHelper.summary
-          .getInvalidQueryParams()
-          .forEach(function (queryParams) {
+          .getQueryParams()
+          .forEach(function (queryParams, index) {
             var specDescription = getSpecDescription(queryParams);
-            var specCallback = getSpecCallback(queryParams);
+            var specCallback = getSpecCallback(index);
             /** Running spec for each query params */
             it(specDescription, specCallback);
           });
