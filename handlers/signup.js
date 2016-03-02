@@ -44,7 +44,7 @@ var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
     subject: config.get('user_verify_subject'),
-    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of account.\n\n' +
+    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
       'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
       'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
       'If you did not request this, please ignore this email.\n\n' +
@@ -75,7 +75,7 @@ exports.signup = function(req, reply) {
       if (user.deleted) {
         return reply(boom.badRequest('User has delete flag'));
       }
-      return reply(boom.badRequest('This email already exists in the system'));
+      return reply(boom.badRequest('This email address already exists in the system'));
     }
 
     if (!data.company_name) {
