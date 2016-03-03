@@ -40,13 +40,17 @@ exports.getDetailedAuditInfo = function (request, reply) {
   var end_time;
 
   var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
+  var account_id = request.query.account_id ? request.query.account_id : request.auth.credentials.companyId;
 
   async.waterfall([
 
     function (cb) {
       users.getById(user_id, function (err, result) {
-        if (err || !result) {
-          return reply(boom.badRequest('User not found'));
+        if (err) {
+          return reply(boom.badImplementation('Failed to retreive user details for ID ' + user_id));
+        }
+        if (!result) {
+          return reply(boom.badRequest('User ID not found'));
         }
         cb(null, result);
       });
@@ -56,55 +60,48 @@ exports.getDetailedAuditInfo = function (request, reply) {
 
       switch (request.auth.credentials.role) {
 
-        case 'user' :
+        case 'user':
           if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
-            return reply(boom.badRequest('User not found'));
+            return reply(boom.badRequest('User ID not found'));
           }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Company not found'));
-          }
-          requestBody['meta.user_id']    = user_id;
-
-          break;
-
-        case 'admin' :
-          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('User not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Company not found'));
+          if (request.query.account_id && !utils.isArray1IncludedInArray2([request.query.account_id], request.auth.credentials.companyId)) {
+            return reply(boom.badRequest('Account ID not found'));
           }
           requestBody['meta.user_id']    = user_id;
 
           break;
 
-        case 'reseller' :
+        case 'admin':
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('User not found'));
+            return reply(boom.badRequest('User ID not found'));
           }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Company not found'));
+          if (request.query.account_id && !utils.isArray1IncludedInArray2([request.query.account_id], request.auth.credentials.companyId)) {
+            return reply(boom.badRequest('Account ID not found'));
+          }
+          requestBody['meta.user_id']    = user_id;
+
+          break;
+
+        case 'reseller':
+          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+            return reply(boom.badRequest('User ID not found'));
+          }
+          if (request.query.account_id && !utils.isArray1IncludedInArray2([request.query.account_id], request.auth.credentials.companyId)) {
+            return reply(boom.badRequest('Account ID not found'));
           }
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;
           }
 
           break;
-      }
+        
+        case 'revadmin':
+          requestBody['meta.user_id'] = user_id;
+          if (request.query.account_id) {
+            requestBody['meta.account_id'] = account_id;
+          }
 
-      if (request.auth.credentials.role !== 'revadmin') {
-        requestBody['meta.account_id'] = {
-          '$in' : request.query.company_id ? [request.query.company_id] : user.companyId
-        };
-      }
-
-      delete request.query.user_id;
-      delete request.query.company_id;
-
-      for (var key in request.query) {
-        if (key !== 'to_timestamp' && key !== 'from_timestamp') {
-          requestBody['meta.' + key] = request.query[key];
-        }
+          break;
       }
 
       if ( request.query.from_timestamp ) {
@@ -126,7 +123,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
       }
 
       if (start_time >= end_time) {
-        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
+        return reply(boom.badRequest('The period end timestamp cannot be less or equal of the period start timestamp'));
       }
 
       requestBody['meta.datetime'] = {
@@ -138,8 +135,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
         var result = {
           metadata : {
             user_id    : user_id,
-            //domain_id  : request.query.domain_id,
-            company_id : request.query.company_id ? request.query.company_id : user.companyId,
+            account_id : account_id,
             start_time : start_time,
             end_time   : end_time
           },
@@ -150,7 +146,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
     }
   ], function (err) {
     if (err) {
-      return reply(boom.badImplementation('Failed to execute activity log'));
+      return reply(boom.badImplementation('Failed to execute activity log query, request: ' + JSON.stringify(request.query)));
     }
   });
 };
@@ -167,7 +163,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
     function (cb) {
       users.getById(user_id, function (err, result) {
         if (err || !result) {
-          return reply(boom.badRequest('User not found'));
+          return reply(boom.badRequest('User ID not found'));
         }
         cb(null, result);
       });
@@ -179,30 +175,30 @@ exports.getSummaryAuditInfo = function (request, reply) {
 
         case 'user' :
           if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
-            return reply(boom.badRequest('User not found'));
+            return reply(boom.badRequest('User ID not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Company not found'));
+            return reply(boom.badRequest('Account ID not found'));
           }
           requestBody['meta.user_id']    = user_id;
           break;
 
         case 'admin' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('User not found'));
+            return reply(boom.badRequest('User ID not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Company not found'));
+            return reply(boom.badRequest('Account ID not found'));
           }
           requestBody['meta.user_id']    = user_id;
           break;
 
         case 'reseller' :
           if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('User not found'));
+            return reply(boom.badRequest('User ID not found'));
           }
           if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Company not found'));
+            return reply(boom.badRequest('Account ID not found'));
           }
           if (request.query.user_id) {
             requestBody['meta.user_id'] = user_id;

@@ -49,7 +49,7 @@
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
 
-  "user_verify_subject" : "RevAPM Customer Portal Verify Profile",
+  "user_verify_subject" : "RevAPM New User Email Verification Request",
   "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
   "user_verify_token_lifetime" : 86400000,
 

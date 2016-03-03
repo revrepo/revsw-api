@@ -237,6 +237,9 @@ exports.getDomainConfigVersions = function(request, reply) {
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
+  var account_id = newDomainJson.account_id;
+
+  // TODO: add a check that specified account_id is correct
 
   var createDomain = function (error, result) {
     if (error) {
@@ -293,7 +296,7 @@ exports.createDomainConfig = function(request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'domain',
           target_id        : response.object_id,
@@ -422,7 +425,7 @@ exports.updateDomainConfig = function(request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : newDomainJson.account_id,
           activity_type    : action,
           activity_target  : 'domain',
           target_id        : result.domain_id,
@@ -475,7 +478,7 @@ exports.deleteDomainConfig = function(request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : result.proxy_config.account_id,
         activity_type    : 'delete',
         activity_target  : 'domain',
         target_id        : result.domain_id,
