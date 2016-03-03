@@ -30,22 +30,23 @@ function Account(mongoose, connection, options) {
   this.mongoose = mongoose;
 
   this.AccountSchema = new this.Schema({
-    'companyName' : String,
-    'status'      : {type : Boolean, default : true},
-    'createdBy'   : String,
-    'id'          : String,
-    'address1'             : String,
-    'address2'             : String,
-    'country'              : {type : String, default : 'US'},
-    'state'                : String,
-    'city'                 : String,
-    'zipcode'              : String,
-    'phone_number'         : String,
+    'companyName': String,
+    'status': {type: Boolean, default: true},
+    'createdBy': String,
+    'id': String,
+    'address1': String,
+    'address2': String,
+    'country': {type: String, default: 'US'},
+    'state': String,
+    'city': String,
+    'zipcode': String,
+    'phone_number': String,
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
-    'created_at'  : {type : Date, default : Date()},
-    'updated_at'  : {type : Date, default : Date()}
+    'billing_portal_link': {url: String, expires_at: Date},
+    'created_at': {type: Date, default: Date()},
+    'updated_at': {type: Date, default: Date()}
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
