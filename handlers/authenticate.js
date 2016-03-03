@@ -54,7 +54,7 @@ var onAuthPassed = function(user, request, reply, error) {
     token: token
   };
 
-  var remoteIP = request.info.remoteAddress;
+  var remoteIP = utils.getAPIUserRealIP(request);
 
   var userToUpdate = {
     user_id: user.user_id,
@@ -89,7 +89,7 @@ var onAuthPassed = function(user, request, reply, error) {
         to: email,
         subject: 'Portal login event for user ' + user.email,
         text: 'RevAPM login event for user ' + user.email +
-          '\n\nRemote IP address: ' + request.info.remoteAddress +
+          '\n\nRemote IP address: ' + remoteIP +
           '\nRole: ' + user.role
       };
 

@@ -88,7 +88,7 @@ exports.createUser = function(request, reply) {
         result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
+          ip_address       : utils.getAPIUserRealIP(request),
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
@@ -182,7 +182,7 @@ exports.updateUser = function(request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address        : request.info.remoteAddress,
+            ip_address       : utils.getAPIUserRealIP(request),
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
@@ -237,7 +237,7 @@ exports.updateUserPassword = function(request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address       : request.info.remoteAddress,
+            ip_address       : utils.getAPIUserRealIP(request),
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
@@ -283,7 +283,7 @@ exports.deleteUser = function(request, reply) {
       result = publicRecordFields.handle(result, 'user');
 
       var auditRecord = {
-        ip_address       : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
@@ -335,7 +335,7 @@ exports.init2fa = function (request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address       : request.info.remoteAddress,
+            ip_address       : utils.getAPIUserRealIP(request),
             datetime         : Date.now(),
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
@@ -382,7 +382,7 @@ exports.enable2fa = function (request, reply) {
               result = publicRecordFields.handle(result, 'user');
 
               AuditLogger.store({
-                ip_address        : request.info.remoteAddress,
+                ip_address       : utils.getAPIUserRealIP(request),
                 datetime         : Date.now(),
                 user_id          : request.auth.credentials.user_id,
                 user_name        : request.auth.credentials.email,
@@ -446,7 +446,7 @@ exports.disable2fa = function (request, reply) {
             result = publicRecordFields.handle(result, 'user');
 
             AuditLogger.store({
-              ip_address       : request.info.remoteAddress,
+              ip_address       : utils.getAPIUserRealIP(request),
               datetime         : Date.now(),
               user_id          : request.auth.credentials.user_id,
               user_name        : request.auth.credentials.email,

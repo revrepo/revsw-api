@@ -89,7 +89,7 @@ exports.purgeObject = function(request, reply) {
       newPurgeJob = publicRecordFields.handle(newPurgeJob, 'purge');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,

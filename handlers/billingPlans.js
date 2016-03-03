@@ -33,6 +33,7 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var User = require('../models/User');
 var BillingPlan = require('../models/BillingPlan');
 var Chargify = require('../lib/chargify');
+var utils = require('../lib/utilities.js');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
@@ -74,7 +75,7 @@ exports.createBillingPlan = function (request, reply) {
         };
 
         AuditLogger.store({
-          ip_address: request.info.remoteAddress,
+          ip_address: utils.getAPIUserRealIP(request),
           datetime: Date.now(),
           user_id: request.auth.credentials.user_id,
           user_name: request.auth.credentials.email,
@@ -143,7 +144,7 @@ exports.updateBillingPlan = function (request, reply) {
       // TODO: Update all current subscribed users
 
       AuditLogger.store({
-        ip_address: request.info.remoteAddress,
+        ip_address: utils.getAPIUserRealIP(request),
         datetime: Date.now(),
         user_id: request.auth.credentials.user_id,
         user_name: request.auth.credentials.email,
@@ -195,7 +196,7 @@ exports.delete = function (request, reply) {
         result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
         AuditLogger.store({
-          ip_address: request.info.remoteAddress,
+          ip_address: utils.getAPIUserRealIP(request),
           datetime: Date.now(),
           user_id: request.auth.credentials.user_id,
           user_name: request.auth.credentials.email,

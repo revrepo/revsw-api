@@ -33,6 +33,7 @@ var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
 var Account = require('../models/Account');
 var DomainConfig = require('../models/DomainConfig');
+var utils = require('../lib/utilities.js');
 
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
@@ -146,7 +147,7 @@ exports.createApiKey = function(request, reply) {
           };
 
           AuditLogger.store({
-            ip_address      : request.info.remoteAddress,
+            ip_address      : utils.getAPIUserRealIP(request),
             datetime        : Date.now(),
             user_id         : request.auth.credentials.user_id,
             user_name       : request.auth.credentials.email,
@@ -185,7 +186,7 @@ exports.updateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
@@ -266,7 +267,7 @@ exports.activateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
@@ -312,7 +313,7 @@ exports.deactivateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
@@ -359,7 +360,7 @@ exports.deleteApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,

@@ -29,7 +29,8 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var mongoConnection    = require('../lib/mongoConnections');
 var App                = require('../models/App');
 var apps               = new App(mongoose, mongoConnection.getConnectionPortal());
-var logger = require('revsw-logger')(config.log_config);
+var logger             = require('revsw-logger')(config.log_config);
+var utils              = require('../lib/utilities.js');
 
 function permissionAllowed(request, app) {
   var result = true;
@@ -191,7 +192,7 @@ exports.addApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         newApp.id = response_json.id;
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
+          ip_address      : utils.getAPIUserRealIP(request),
           datetime        : Date.now(),
           user_id         : request.auth.credentials.user_id,
           user_name       : request.auth.credentials.email,
@@ -246,7 +247,7 @@ exports.updateApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         updatedApp.id = app_id;
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
+          ip_address      : utils.getAPIUserRealIP(request),
           datetime        : Date.now(),
           user_id         : request.auth.credentials.user_id,
           user_name       : request.auth.credentials.email,
@@ -295,8 +296,9 @@ exports.deleteApp = function(request, reply) {
         return reply(boom.badImplementation(response_json.message));
       } else if (res.statusCode === 200) {
         existing_app = publicRecordFields.handle(existing_app, 'apps');
+
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
+          ip_address      : utils.getAPIUserRealIP(request),
           datetime        : Date.now(),
           user_id         : request.auth.credentials.user_id,
           user_name       : request.auth.credentials.email,

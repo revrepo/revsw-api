@@ -146,7 +146,7 @@ exports.signup = function(req, reply) {
               user = publicRecordFields.handle(user, 'user');
 
               AuditLogger.store({
-                ip_address: req.info.remoteAddress,
+                ip_address: utils.getAPIUserRealIP(req),
                 datetime: Date.now(),
                 user_type: 'user',
                 account_id: result.id,
@@ -159,7 +159,7 @@ exports.signup = function(req, reply) {
               });
 
               AuditLogger.store({
-                ip_address: req.info.remoteAddress,
+                ip_address: utils.getAPIUserRealIP(req),
                 datetime: Date.now(),
                 user_type: 'user',
                 account_id: user.companyId,
@@ -206,7 +206,7 @@ exports.resetToken = function(req, reply) {
     var result = publicRecordFields.handle(result, 'user');
 
     AuditLogger.store({
-      ip_address: req.info.remoteAddress,
+      ip_address: utils.getAPIUserRealIP(req),
       datetime: Date.now(),
       user_id: user.user_id,
       user_name: user.email,
@@ -278,7 +278,7 @@ exports.verify = function(req, reply) {
           result = publicRecordFields.handle(fields, 'verify');
 
           AuditLogger.store({
-            ip_address: req.info.remoteAddress,
+            ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
             user_id: user.user_id,
             user_name: user.email,

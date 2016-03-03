@@ -291,7 +291,7 @@ exports.createDomainConfig = function(request, reply) {
           object_id: response_json._id
         };
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
+          ip_address       : utils.getAPIUserRealIP(request),
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
@@ -420,7 +420,7 @@ exports.updateDomainConfig = function(request, reply) {
       }
       if (action !== '') {
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
+          ip_address       : utils.getAPIUserRealIP(request),
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
@@ -473,7 +473,7 @@ exports.deleteDomainConfig = function(request, reply) {
       }
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,

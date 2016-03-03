@@ -24,6 +24,7 @@ var mongoose = require('mongoose');
 var boom = require('boom');
 var AuditLogger = require('revsw-audit');
 var async = require('async');
+var utils           = require('../lib/utilities.js');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
@@ -79,7 +80,7 @@ exports.createAccount = function (request, reply) {
         };
 
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
+          ip_address       : utils.getAPIUserRealIP(request),
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
@@ -169,7 +170,7 @@ exports.updateAccount = function (request, reply) {
       };
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
@@ -238,7 +239,7 @@ exports.deleteAccount = function (request, reply) {
         account = publicRecordFields.handle(account, 'account');
 
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
+          ip_address       : utils.getAPIUserRealIP(request),
           datetime         : Date.now(),
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,

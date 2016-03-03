@@ -31,6 +31,7 @@ var AuditLogger = require('revsw-audit');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
+var utils           = require('../lib/utilities.js');
 
 var User = require('../models/User');
 
@@ -74,7 +75,7 @@ exports.forgotPassword = function(request, reply) {
             result = publicRecordFields.handle(result, 'users');
 
             AuditLogger.store({
-              ip_address        : request.info.remoteAddress,
+              ip_address       : utils.getAPIUserRealIP(request),
               datetime         : Date.now(),
               user_id          : result.id,
               user_name        : result.email,
@@ -170,7 +171,7 @@ exports.resetPassword = function(request, reply) {
           result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
-            ip_address        : request.info.remoteAddress,
+            ip_address       : utils.getAPIUserRealIP(request),
             datetime         : Date.now(),
             user_id          : user.user_id,
             user_name        : user.email,
