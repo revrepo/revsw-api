@@ -61,7 +61,7 @@ module.exports = [
       },
       handler: auditInfo.getSummaryAuditInfo,
       description: 'Summary audit reports',
-      tags: ['api'],
+      tags: [],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
