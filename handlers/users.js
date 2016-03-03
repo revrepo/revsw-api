@@ -61,6 +61,7 @@ exports.createUser = function(request, reply) {
   } else {
     newUser.companyId = request.auth.credentials.companyId;
   }
+  var account_id = newUser.companyId[0];
 
   // TODO: Add a check for domains
 
@@ -93,7 +94,7 @@ exports.createUser = function(request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : newUser.companyId,
+          account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'user',
           target_id        : result.user_id,
@@ -167,6 +168,7 @@ exports.updateUser = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
     if (result) {
+      var account_id = result.companyId[0];
       if (! utils.checkUserAccessPermissionToUser(request, result)) {
         return reply(boom.badRequest('User not found'));
       }
@@ -187,7 +189,7 @@ exports.updateUser = function(request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : result.companyId[0],
+            account_id       : account_id,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -218,6 +220,7 @@ exports.updateUserPassword = function(request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      var account_id = user.companyId[0];
       var currPassHash = utils.getHash(currentPassword);
       if ( currPassHash !== user.password ) {
         return reply(boom.badRequest('The current user password is not correct'));
@@ -242,7 +245,7 @@ exports.updateUserPassword = function(request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : result.companyId[0],
+            account_id       : account_id,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -276,6 +279,7 @@ exports.deleteUser = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
     if (result) {
+      var account_id = result.companyId[0];
       if (! utils.checkUserAccessPermissionToUser(request, result)) {
         return reply(boom.badRequest('User not found'));
       }
@@ -288,7 +292,7 @@ exports.deleteUser = function(request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : result.companyId[0],
+        account_id       : account_id,
         activity_type    : 'delete',
         activity_target  : 'user',
         target_id        : result.user_id,
@@ -326,6 +330,7 @@ exports.init2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      var account_id = user.companyId[0];
       var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true});
       user.two_factor_auth_secret_base32 = secretKey.base32;
       delete user.password;
@@ -340,7 +345,7 @@ exports.init2fa = function (request, reply) {
             user_id          : request.auth.credentials.user_id,
             user_name        : request.auth.credentials.email,
             user_type        : 'user',
-            account_id       : result.companyId[0],
+            account_id       : account_id,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -367,6 +372,7 @@ exports.enable2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      var account_id = user.companyId[0];
       if (user.two_factor_auth_secret_base32) {
         var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
         if (generatedOneTimePassword === oneTimePassword) {
@@ -387,7 +393,7 @@ exports.enable2fa = function (request, reply) {
                 user_id          : request.auth.credentials.user_id,
                 user_name        : request.auth.credentials.email,
                 user_type        : 'user',
-                account_id       : result.companyId[0],
+                account_id       : account_id,
                 activity_type    : 'modify',
                 activity_target  : 'user',
                 target_id        : user.user_id,
@@ -432,6 +438,8 @@ exports.disable2fa = function (request, reply) {
         return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
       }
 
+      var account_id = user.companyId[0];
+
       console.log('Starting checkUserAccessPermissionToUser');
       if (utils.checkUserAccessPermissionToUser(request, user)) {
         user.two_factor_auth_enabled = false;
@@ -451,7 +459,7 @@ exports.disable2fa = function (request, reply) {
               user_id          : request.auth.credentials.user_id,
               user_name        : request.auth.credentials.email,
               user_type        : 'user',
-              account_id       : result.companyId[0],
+              account_id       : account_id,
               activity_type    : 'modify',
               activity_target  : 'user',
               target_id        : user.user_id,

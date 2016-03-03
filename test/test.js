@@ -469,6 +469,7 @@ describe('Rev API Admin User', function() {
     newUserJson.email = testUser;
     newUserJson.companyId = myCompanyId;
     newUserJson.domain = myDomains;
+    console.log('newUserJson = ', newUserJson);
     request(testAPIUrl)
       .post('/v1/users')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -497,6 +498,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
+        console.log('response_json = ', response_json);
         var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('add');

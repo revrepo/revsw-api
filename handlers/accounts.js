@@ -85,7 +85,7 @@ exports.createAccount = function (request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : result.id,
+          account_id       : request.auth.credentials.companyId[0],
           activity_type    : 'add',
           activity_target  : 'account',
           target_id        : result.id,
@@ -119,8 +119,8 @@ exports.getAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
-    return reply(boom.badRequest('Account not found'));
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
   }
 
   accounts.get({
@@ -130,7 +130,7 @@ exports.getAccount = function (request, reply) {
       result = publicRecordFields.handle(result, 'account');
       renderJSON(request, reply, error, result);
     } else {
-      return reply(boom.badRequest('Account not found'));
+      return reply(boom.badRequest('Account ID not found'));
     }
   });
 };
@@ -140,8 +140,8 @@ exports.updateAccount = function (request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
 
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(updatedAccount.account_id) === -1) {
-    return reply(boom.badRequest('Account not found'));
+  if (!utils.checkUserAccessPermissionToAccount(request, updatedAccount.account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
   }
 
   // check that the company name is not used by another customer
@@ -175,7 +175,7 @@ exports.updateAccount = function (request, reply) {
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.params.account_id,
+        account_id       : request.auth.credentials.companyId[0],
         activity_type    : 'modify',
         activity_target  : 'account',
         target_id        : request.params.account_id,
@@ -193,9 +193,10 @@ exports.deleteAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(account_id) === -1) {
-    return reply(boom.badRequest('Account not found'));
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
   }
+
   async.waterfall([
     function (cb) {
       domainConfigs.query({
@@ -218,7 +219,7 @@ exports.deleteAccount = function (request, reply) {
           return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
         }
         if (!account) {
-          return reply(boom.badRequest('Account not found'));
+          return reply(boom.badRequest('Account ID not found'));
         }
         cb(error, account);
       });
@@ -228,7 +229,7 @@ exports.deleteAccount = function (request, reply) {
         _id : account_id
       }, function (error) {
         if (error) {
-          return reply(boom.badRequest('Account not found'));
+          return reply(boom.badRequest('Account ID not found'));
         }
         var statusResponse;
         statusResponse = {
@@ -244,7 +245,7 @@ exports.deleteAccount = function (request, reply) {
           user_id          : request.auth.credentials.user_id,
           user_name        : request.auth.credentials.email,
           user_type        : 'user',
-          account_id       : account_id,
+          account_id       : request.auth.credentials.companyId[0],
           activity_type    : 'delete',
           activity_target  : 'account',
           target_id        : account.id,
@@ -265,7 +266,7 @@ exports.deleteAccount = function (request, reply) {
 
         users.update(updatedUser, function (error, result) {
           if (error) {
-            return reply(boom.badImplementation('Failed to update user details with removed account ID'));
+            return reply(boom.badImplementation('Failed to update user details with removed account ID ' + account_id));
           } else {
             renderJSON(request, reply, error, statusResponse);
           }
