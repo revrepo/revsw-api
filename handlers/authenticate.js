@@ -29,9 +29,12 @@ var _ = require('lodash');
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
+var mail = require('../lib/mail');
 
 var User = require('../models/User');
 var Account = require('../models/Account');
+var publicRecordFields = require('../lib/publicRecordFields');
+var AuditLogger = require('revsw-audit');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
@@ -42,13 +45,45 @@ var onAuthPassed = function (user, request, reply, error) {
   });
 
   var statusResponse;
-  statusResponse = {
+    statusResponse = {
     statusCode: 200,
     message: 'Enjoy your token',
     token: token
   };
 
-  renderJSON(request, reply, error, statusResponse);
+  AuditLogger.store({
+    ip_address       : request.info.remoteAddress,
+    datetime         : Date.now(),
+    user_id          : user.user_id,
+    user_name        : user.email,
+    user_type        : 'user',
+    account_id       : user.companyId[0],
+    activity_type    : 'login',
+    activity_target  : 'user',
+    target_id        : user.user_id,
+    target_name      : user.email,
+    target_object    : publicRecordFields.handle(user, 'user'),
+    operation_status : 'success'
+  });
+
+
+  var email = config.get('notify_admin_by_email_on_user_login');
+  if (email !== '') {
+    var mailOptions = {
+      to: email,
+      subject: 'Portal login event for user ' + user.email,
+      text: 'RevAPM login event for user ' + user.email +
+      '\n\nRemote IP address: ' + request.info.remoteAddress +
+      '\nRole: ' + user.role
+    };
+
+    mail.sendMail(mailOptions, function () {
+      renderJSON(request, reply, error, statusResponse);
+    });
+
+  } else {
+    renderJSON(request, reply, error, statusResponse);
+  }
 };
 
 exports.authenticate = function(request, reply) {
@@ -78,15 +113,15 @@ exports.authenticate = function(request, reply) {
 
         if(user.self_registered){
           accounts.get({_id: user.companyId}, function (error, account) {
-
             if(error){
-              
               return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
                 ' User ID: ' + user.id + ' Email: ' + user.email));
             }
+
             if(account.subscription_id === null || account.subscription_id === ''){
               authPassed = false;
             }
+
             if (authPassed) {
               onAuthPassed(user, request, reply, error);
             } else {
@@ -108,15 +143,14 @@ exports.authenticate = function(request, reply) {
               return reply(boom.forbidden());
             }
           }
+
           if (authPassed) {
             onAuthPassed(user, request, reply, error);
           } else {
             return reply(boom.unauthorized());
           }
+
         }
-
-
-
 
       } else {
         return reply(boom.unauthorized());
