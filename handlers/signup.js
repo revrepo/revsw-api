@@ -44,7 +44,7 @@ var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
     subject: config.get('user_verify_subject'),
-    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of account.\n\n' +
+    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
       'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
       'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
       'If you did not request this, please ignore this email.\n\n' +
@@ -75,7 +75,7 @@ exports.signup = function(req, reply) {
       if (user.deleted) {
         return reply(boom.badRequest('User has delete flag'));
       }
-      return reply(boom.badRequest('This email already exists in the system'));
+      return reply(boom.badRequest('This email address already exists in the system'));
     }
 
     if (!data.company_name) {
@@ -146,7 +146,7 @@ exports.signup = function(req, reply) {
               user = publicRecordFields.handle(user, 'user');
 
               AuditLogger.store({
-                ip_address: req.info.remoteAddress,
+                ip_address: utils.getAPIUserRealIP(req),
                 datetime: Date.now(),
                 user_type: 'user',
                 account_id: result.id,
@@ -159,7 +159,7 @@ exports.signup = function(req, reply) {
               });
 
               AuditLogger.store({
-                ip_address: req.info.remoteAddress,
+                ip_address: utils.getAPIUserRealIP(req),
                 datetime: Date.now(),
                 user_type: 'user',
                 account_id: user.companyId,
@@ -206,7 +206,7 @@ exports.resetToken = function(req, reply) {
     var result = publicRecordFields.handle(result, 'user');
 
     AuditLogger.store({
-      ip_address: req.info.remoteAddress,
+      ip_address: utils.getAPIUserRealIP(req),
       datetime: Date.now(),
       user_id: user.user_id,
       user_name: user.email,
@@ -278,7 +278,7 @@ exports.verify = function(req, reply) {
           result = publicRecordFields.handle(fields, 'verify');
 
           AuditLogger.store({
-            ip_address: req.info.remoteAddress,
+            ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
             user_id: user.user_id,
             user_name: user.email,

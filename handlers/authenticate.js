@@ -21,23 +21,29 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var boom     = require('boom');
-var config   = require('config');
-var jwt      = require('jsonwebtoken');
+var boom = require('boom');
+var config = require('config');
+var jwt = require('jsonwebtoken');
 var speakeasy = require('speakeasy');
 var _ = require('lodash');
-var utils           = require('../lib/utilities.js');
-var renderJSON      = require('../lib/renderJSON');
+var utils = require('../lib/utilities.js');
+var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
+var mail = require('../lib/mail');
 
 var User = require('../models/User');
 var Account = require('../models/Account');
+var publicRecordFields = require('../lib/publicRecordFields');
+var AuditLogger = require('revsw-audit');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var onAuthPassed = function (user, request, reply, error) {
-  var token = jwt.sign( { user_id: user.user_id, password: user.password }, config.get('jwt_private_key'), {
+var onAuthPassed = function(user, request, reply, error) {
+  var token = jwt.sign({
+    user_id: user.user_id,
+    password: user.password
+  }, config.get('jwt_private_key'), {
     expiresInMinutes: config.get('jwt_token_lifetime_minutes')
   });
 
@@ -48,7 +54,53 @@ var onAuthPassed = function (user, request, reply, error) {
     token: token
   };
 
-  renderJSON(request, reply, error, statusResponse);
+  var remoteIP = utils.getAPIUserRealIP(request);
+
+  var userToUpdate = {
+    user_id: user.user_id,
+    last_login_at: Date.now(),
+    last_login_from: remoteIP
+  };
+
+  users.update(userToUpdate, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Authenticate::authenticate: Failed to update the database user record ' +
+        'with last login date/place details. User ID: ' + user.id + ' Email: ' + user.email));
+    }
+
+    AuditLogger.store({
+      ip_address: remoteIP,
+      datetime: Date.now(),
+      user_id: user.user_id,
+      user_name: user.email,
+      user_type: 'user',
+      account_id: user.companyId[0],
+      activity_type: 'login',
+      activity_target: 'user',
+      target_id: user.user_id,
+      target_name: user.email,
+      target_object: publicRecordFields.handle(result, 'user'),
+      operation_status: 'success'
+    });
+
+    var email = config.get('notify_admin_by_email_on_user_login');
+    if (email !== '') {
+      var mailOptions = {
+        to: email,
+        subject: 'Portal login event for user ' + user.email,
+        text: 'RevAPM login event for user ' + user.email +
+          '\n\nRemote IP address: ' + remoteIP +
+          '\nRole: ' + user.role
+      };
+
+      mail.sendMail(mailOptions, function() {
+        renderJSON(request, reply, error, statusResponse);
+      });
+
+    } else {
+      renderJSON(request, reply, error, statusResponse);
+    }
+  });
 };
 
 exports.authenticate = function(request, reply) {
@@ -76,30 +128,34 @@ exports.authenticate = function(request, reply) {
 
         var authPassed = true;
 
-        if(user.self_registered){
-          accounts.get({_id: user.companyId}, function (error, account) {
-
-            if(error){
-              
+        if (user.self_registered) {
+          accounts.get({
+            _id: user.companyId
+          }, function(error, account) {
+            if (error) {
               return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
                 ' User ID: ' + user.id + ' Email: ' + user.email));
             }
-            if(account.subscription_id === null || account.subscription_id === ''){
+
+            if (account.subscription_id === null || account.subscription_id === '') {
               authPassed = false;
             }
+
             if (authPassed) {
               onAuthPassed(user, request, reply, error);
             } else {
               return reply(boom.unauthorized());
             }
           });
-        }
-        else {
-          if (user.two_factor_auth_enabled || (user.role === 'revadmin' && config.get('enforce_2fa_for_revadmin_role') === true))  {
+        } else {
+          if (user.two_factor_auth_enabled || (user.role === 'revadmin' && config.get('enforce_2fa_for_revadmin_role') === true)) {
             authPassed = false;
             if (oneTimePassword) {
               if (user.two_factor_auth_secret_base32) {
-                var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
+                var generatedOneTimePassword = speakeasy.time({
+                  key: user.two_factor_auth_secret_base32,
+                  encoding: 'base32'
+                });
                 authPassed = oneTimePassword === generatedOneTimePassword;
               } else {
                 authPassed = false;
@@ -108,15 +164,14 @@ exports.authenticate = function(request, reply) {
               return reply(boom.forbidden());
             }
           }
+
           if (authPassed) {
             onAuthPassed(user, request, reply, error);
           } else {
             return reply(boom.unauthorized());
           }
+
         }
-
-
-
 
       } else {
         return reply(boom.unauthorized());

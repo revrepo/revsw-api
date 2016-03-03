@@ -469,6 +469,7 @@ describe('Rev API Admin User', function() {
     newUserJson.email = testUser;
     newUserJson.companyId = myCompanyId;
     newUserJson.domain = myDomains;
+    console.log('newUserJson = ', newUserJson);
     request(testAPIUrl)
       .post('/v1/users')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -497,6 +498,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
+        console.log('response_json = ', response_json);
         var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('add');
@@ -536,6 +538,8 @@ describe('Rev API Admin User', function() {
         var verifyUserJson = response_json;
         delete verifyUserJson.created_at;
         delete verifyUserJson.updated_at;
+        delete verifyUserJson.last_login_at;
+        delete verifyUserJson.last_login_from;
         delete verifyUserJson.user_id;
         delete newUserJson.password;
         verifyUserJson.should.be.eql(newUserJson);
@@ -721,6 +725,8 @@ describe('Rev API Admin User', function() {
         var verifyUserJson = response_json;
         delete verifyUserJson.created_at;
         delete verifyUserJson.updated_at;
+        delete verifyUserJson.last_login_at;
+        delete verifyUserJson.last_login_from;
         delete verifyUserJson.user_id;
         delete newUserJson.password;
         for (var attrname in newUserJson) {
@@ -802,6 +808,8 @@ describe('Rev API Admin User', function() {
         var verifyUserJson = response_json;
         delete verifyUserJson.created_at;
         delete verifyUserJson.updated_at;
+        delete verifyUserJson.last_login_at;
+        delete verifyUserJson.last_login_from;
         delete verifyUserJson.user_id;
         delete verifyUserJson.email;
         delete updatedUserJson.password;

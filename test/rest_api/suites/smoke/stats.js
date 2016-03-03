@@ -25,7 +25,7 @@ var Utils = require('./../../common/utils');
 var StatsDP = require('./../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 
-describe('Smoke check.', function () {
+describe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));

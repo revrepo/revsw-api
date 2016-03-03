@@ -268,7 +268,7 @@ describe('Rev API Reseller User', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('Account not found');
+        response_json.message.should.be.equal('Account ID not found');
         done();
       });
   });
@@ -284,7 +284,7 @@ describe('Rev API Reseller User', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('Account not found');
+        response_json.message.should.be.equal('Account ID not found');
         done();
       });
   });
