@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'reseller', 'revadmin' ]
+        scope: [ 'admin', 'reseller', 'revadmin' ]
       },
       handler: account.getAccounts,
       description: 'Get a list of customer accounts registered for a customer/reseller',
