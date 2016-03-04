@@ -49,6 +49,9 @@ function User(mongoose, connection, options) {
     'token'                : String,
     'created_at'           : {type : Date, default : Date()},
     'updated_at'           : {type : Date, default : Date()},
+    'last_login_at'        : {type : Date, default: null},
+    'last_login_from'      : {type : String, default: null},
+    // TODO: need to fix the ugly names of the two variables
     'resetPasswordToken'   : String,
     'resetPasswordExpires' : Number,
     'two_factor_auth_enabled': {type: Boolean, default: false},
@@ -65,6 +68,8 @@ function User(mongoose, connection, options) {
     old_passwords: [String],
 
     validation: {
+
+      // TODO: should be "expired_at"
       expiredAt: Date,
       token: String,
       verified: {type: Boolean, default: false}

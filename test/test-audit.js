@@ -33,7 +33,8 @@ var qaUserWithAdminPerm         = 'api_qa_user_with_admin_perm@revsw.com',
 var wrongUser         = 'test@test.com',
     wrongUserPassword = 'test123456';
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.https_port');
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' +
+  config.get('service.https_port');
 
 describe('Rev API /v1/activity call', function() {
 
@@ -42,9 +43,9 @@ describe('Rev API /v1/activity call', function() {
   var userId          = '55a45491bf0020ec6da33298';
   var otherId         = '55e54267cb1e8d093f575adf';
   var companyId       = '5588869fbde7a0d00338ce8f';
-  var wrongUserId     = 'dde2d231312';
-  var userNotFound    = 'User not found';
-  var companyNotFound = 'Company not found';
+  var wrongUserId     = 'dde2d2313121111111111111';
+  var userNotFound    = 'User ID not found';
+  var companyNotFound = 'Account ID not found';
 
   it('Should return 401 fail', function(done) {
     request(testAPIUrl)
@@ -93,7 +94,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
           response_json.data[key].should.have.property('datetime').be.a.Number();
-          response_json.data[key].should.have.property('account_id').be.a.Array();
+          response_json.data[key].should.have.property('account_id').be.a.String();
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
@@ -140,7 +141,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
           response_json.data[key].should.have.property('datetime').be.a.Number();
-          response_json.data[key].should.have.property('account_id').be.a.Array();
+          response_json.data[key].should.have.property('account_id').be.a.String();
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
@@ -171,7 +172,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
           response_json.data[key].should.have.property('datetime').be.a.Number();
-          response_json.data[key].should.have.property('account_id').be.a.Array();
+          response_json.data[key].should.have.property('account_id').be.a.String();
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
@@ -183,12 +184,12 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return user detailed activity log (with company_id)', function(done) {
+  it('Should return user detailed activity log (with account_id)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .query({ company_id : companyId })
+      .query({ account_id : companyId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -202,7 +203,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
           response_json.data[key].should.have.property('datetime').be.a.Number();
-          response_json.data[key].should.have.property('account_id').be.a.Array();
+          response_json.data[key].should.have.property('account_id').be.a.String();
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
@@ -214,13 +215,13 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return error 400 (With user_id and wrong company_id - Company not found)', function(done) {
+  it('Should return error 400 (With user_id and wrong account_id - Company not found)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .expect(400)
-      .query({ user_id : userId, company_id : '5588869fbde7a0d00338ce6f' })
+      .query({ user_id : userId, account_id : '5588869fbde7a0d00338ce6f' })
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -230,13 +231,13 @@ describe('Rev API /v1/activity call', function() {
       });
   });
 
-  it('Should return user detailed activity log (with user_id and company_id)', function(done) {
+  it('Should return user detailed activity log (with user_id and account_id)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
       .expect(200)
-      .query({ user_id : userId, company_id : companyId })
+      .query({ user_id : userId, account_id : companyId })
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -249,7 +250,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('user_name').be.a.String();
           response_json.data[key].should.have.property('user_type').be.a.String();
           response_json.data[key].should.have.property('datetime').be.a.Number();
-          response_json.data[key].should.have.property('account_id').be.a.Array();
+          response_json.data[key].should.have.property('account_id').be.a.String();
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
@@ -271,9 +272,9 @@ describe('Rev API /v1/activity/summary call', function() {
   var userId          = '55a45491bf0020ec6da33298';
   var otherId         = '5601fda1f68c387c76544120';
   var companyId       = '5588869fbde7a0d00338ce8f';
-  var wrongUserId     = 'dde2d231312';
-  var userNotFound    = 'User not found';
-  var companyNotFound = 'Company not found';
+  var wrongUserId     = 'dde2d2313121111111111111';
+  var userNotFound    = 'User ID not found';
+  var companyNotFound = 'Account ID not found';
 
   it('Should return 401 fail', function(done) {
     request(testAPIUrl)
@@ -376,12 +377,12 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return user summary activity log (with company_id)', function(done) {
+  it('Should return user summary activity log (with account_id)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .query({ company_id : companyId })
+      .query({ account_id : companyId })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -395,12 +396,12 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return error 400 (With user_id and wrong company_id - Company not found)', function(done) {
+  xit('Should return error 400 (With user_id and wrong account_id - Company not found)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .query({ user_id : userId, company_id : '5588869fbde7a0d00338ce6f' })
+      .query({ user_id : userId, account_id : '5588869fbde7a0d00338ce6f' })
       .expect(400)
       .end(function(err, res) {
         if (err) {
@@ -411,12 +412,12 @@ describe('Rev API /v1/activity/summary call', function() {
       });
   });
 
-  it('Should return user summary activity log (with user_id and company_id)', function(done) {
+  it('Should return user summary activity log (with user_id and account_id)', function(done) {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
       .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
-      .query({ user_id : userId, company_id : companyId })
+      .query({ user_id : userId, account_id : companyId })
       .expect(200)
       .end(function(err, res) {
         if (err) {

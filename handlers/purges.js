@@ -43,6 +43,7 @@ var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 //
 exports.purgeObject = function(request, reply) {
   var domain = request.payload.domainName;
+  var account_id;
 
   domainConfigs.query({
     domain_name : domain
@@ -60,6 +61,8 @@ exports.purgeObject = function(request, reply) {
     if (!utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain not found'));
     }
+
+    account_id = result.proxy_config.account_id;
 
     var newPurgeJob = {};
     newPurgeJob.request_json = request.payload;
@@ -86,12 +89,12 @@ exports.purgeObject = function(request, reply) {
       newPurgeJob = publicRecordFields.handle(newPurgeJob, 'purge');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
+        ip_address       : utils.getAPIUserRealIP(request),
         datetime         : Date.now(),
         user_id          : request.auth.credentials.user_id,
         user_name        : request.auth.credentials.email,
         user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : account_id,
         activity_type    : 'purge',
         activity_target  : 'purge',
         target_id        : newPurgeJob.req_id,
