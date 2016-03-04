@@ -221,7 +221,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[response_json.data.length - 1];
+        var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('modify');
         last_obj.activity_target.should.be.equal('user');

@@ -49,7 +49,7 @@
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
 
-  "user_verify_subject" : "RevAPM Customer Portal Verify Profile",
+  "user_verify_subject" : "RevAPM New User Email Verification Request",
   "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
   "user_verify_token_lifetime" : 86400000,
 
@@ -76,6 +76,8 @@
     "domain": "https://revsw-test.chargify.com/",
     "api_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA",
     "shared_key": "zc2F3fSl1nEZHJFDR2g6Xk9o4f40Aawgob4WrHKHDWY"
-  }
+  },
 
+  "notify_admin_by_email_on_user_login": "",
+  "trust_request_xff_header": true
 }

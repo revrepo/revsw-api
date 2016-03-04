@@ -29,7 +29,8 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var mongoConnection    = require('../lib/mongoConnections');
 var App                = require('../models/App');
 var apps               = new App(mongoose, mongoConnection.getConnectionPortal());
-var logger = require('revsw-logger')(config.log_config);
+var logger             = require('revsw-logger')(config.log_config);
+var utils              = require('../lib/utilities.js');
 
 function permissionAllowed(request, app) {
   var result = true;
@@ -191,12 +192,12 @@ exports.addApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         newApp.id = response_json.id;
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
+          ip_address      : utils.getAPIUserRealIP(request),
           datetime        : Date.now(),
           user_id         : request.auth.credentials.user_id,
           user_name       : request.auth.credentials.email,
           user_type       : 'user',
-          account_id      : request.auth.credentials.companyId,
+          account_id      : newApp.account_id,
           activity_type   : 'add',
           activity_target : 'app',
           target_id       : response_json.id,
@@ -246,12 +247,12 @@ exports.updateApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         updatedApp.id = app_id;
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
+          ip_address      : utils.getAPIUserRealIP(request),
           datetime        : Date.now(),
           user_id         : request.auth.credentials.user_id,
           user_name       : request.auth.credentials.email,
           user_type       : 'user',
-          account_id      : request.auth.credentials.companyId,
+          account_id      : existing_app.account_id,
           activity_type   : action,
           activity_target : 'app',
           target_id       : response_json.id,
@@ -270,6 +271,7 @@ exports.updateApp = function(request, reply) {
 exports.deleteApp = function(request, reply) {
   var app_id = request.params.app_id;
   var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  var account_id;
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -280,6 +282,8 @@ exports.deleteApp = function(request, reply) {
     if (!permissionAllowed(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    account_id = existing_app.account_id;
+
     logger.info('Calling CDS to delete app ID ' + app_id);
     cds_request({method: 'DELETE', url: config.get('cds_url') + '/v1/apps/' + app_id, headers: authHeader}, function (err, res, body) {
       if (err) {
@@ -292,13 +296,14 @@ exports.deleteApp = function(request, reply) {
         return reply(boom.badImplementation(response_json.message));
       } else if (res.statusCode === 200) {
         existing_app = publicRecordFields.handle(existing_app, 'apps');
+
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
+          ip_address      : utils.getAPIUserRealIP(request),
           datetime        : Date.now(),
           user_id         : request.auth.credentials.user_id,
           user_name       : request.auth.credentials.email,
           user_type       : 'user',
-          account_id      : request.auth.credentials.companyId,
+          account_id      : account_id,
           activity_type   : 'delete',
           activity_target : 'app',
           target_id       : response_json.id,

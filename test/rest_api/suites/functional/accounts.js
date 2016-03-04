@@ -142,7 +142,7 @@ describe('Functional check', function () {
                       .getOne(id)
                       .expect(400)
                       .end(function (err, res) {
-                        res.body.message.should.equal('Account not found');
+                        res.body.message.should.equal('Account ID not found');
                         done();
                       });
                   })
@@ -172,7 +172,7 @@ describe('Functional check', function () {
                       .update(id, updatedAccount)
                       .expect(400)
                       .end(function (err, res) {
-                        res.body.message.should.equal('Account not found');
+                        res.body.message.should.equal('Account ID not found');
                         done();
                       });
                   })
@@ -201,7 +201,7 @@ describe('Functional check', function () {
                       .deleteOne(id)
                       .expect(400)
                       .end(function (err, res) {
-                        res.body.message.should.equal('Account not found');
+                        res.body.message.should.equal('Account ID not found');
                         done();
                       });
                   })
