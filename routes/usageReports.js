@@ -48,8 +48,9 @@ module.exports = [
         query: {
           from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
           to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
-          extended: Joi.boolean().default(false).description('Report should contain 5min interval traffic data'),
-          bandwidth: Joi.boolean().default(false).description('Count billable bandwidth data')
+          only_summary: Joi.boolean().default(true).description('Report should contain only summed up data, default true'),
+          extended: Joi.boolean().default(false).description('Report should contain 5min interval traffic data, default false'),
+          bandwidth: Joi.boolean().default(false).description('Count billable bandwidth data, default false')
         }
       }
     }
