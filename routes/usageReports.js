@@ -28,13 +28,13 @@ var routeModels = require('../lib/routeModels');
 module.exports = [
   {
     method: 'GET',
-    path: '/v1/usage_reports/{account_id}',
+    path: '/v1/usage_reports/web',
     config: {
       auth: {
         scope: [ 'admin', 'reseller', 'revadmin' ]
       },
       handler: usageReports.getAccountReport,
-      description: 'Get Usage Report for an Account',
+      description: 'Get Usage Report for an Account(s)',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -43,9 +43,10 @@ module.exports = [
       },
       validate: {
         params: {
-          account_id: Joi.objectId().required().description('Account ID')
+          // account_id: Joi.objectId().required().description('Account ID')
         },
         query: {
+          account_id: Joi.objectId().default('').description('Account ID, optional'),
           from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
           to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
           only_summary: Joi.boolean().default(true).description('Report should contain only summed up data, default true'),

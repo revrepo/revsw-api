@@ -75,9 +75,7 @@ for (var i = 0; i < parslen; ++i) {
 
 require( '../lib/usageReport.js' ).collectDayReport( ( conf.date || 'now' ), conf.dry/*do not save, return collected data*/ )
   .then( function( data ) {
-    if ( conf.dry ) {
-      log_( data, 3 );
-    }
+    log_( data, 2 );
     console.log( 'done.\n' );
   })
   .catch( function( err ) {
