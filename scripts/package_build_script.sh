@@ -89,6 +89,7 @@ cp -rf  $WORKSPACE/templates $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/public $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/docs/revsw-api.txt $foldername/opt/$PackageName/docs/
 cp -rf  $WORKSPACE/utils/usage_report.js $foldername/opt/$PackageName/utils/
+cp -rf  $WORKSPACE/utils/generate_usage_report_for_yesterday.sh $foldername/opt/$PackageName/utils/
 
 mkdir -p $foldername/opt/$PackageName/log
 
