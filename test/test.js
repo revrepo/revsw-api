@@ -353,19 +353,18 @@ describe('Rev API Admin User', function() {
     }
   };
 
-  it('should be denied access to /v1/accounts functions', function(done) {
+  it('should get from /v1/accounts just one account', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
-      .expect(403)
+      .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
-        res.statusCode.should.be.equal(403);
+        res.statusCode.should.be.equal(200);
         var response_json = JSON.parse(res.text);
-        response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.startWith('Insufficient scope');
+        response_json.length.should.be.equal(1);
         done();
       });
   });
@@ -469,7 +468,7 @@ describe('Rev API Admin User', function() {
     newUserJson.email = testUser;
     newUserJson.companyId = myCompanyId;
     newUserJson.domain = myDomains;
-    console.log('newUserJson = ', newUserJson);
+    // console.log('newUserJson = ', newUserJson);
     request(testAPIUrl)
       .post('/v1/users')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -498,7 +497,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        console.log('response_json = ', response_json);
+        // console.log('response_json = ', response_json);
         var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('add');
