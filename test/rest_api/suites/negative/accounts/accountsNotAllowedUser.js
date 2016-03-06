@@ -139,7 +139,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when getting all accounts with ' +
+      xit('should return `Forbidden` response when getting all accounts with ' +
         '`admin-role` user.',
         function (done) {
           API.helpers

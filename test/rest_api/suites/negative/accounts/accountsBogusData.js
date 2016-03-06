@@ -71,11 +71,7 @@ describe('Negative check', function () {
               API.resources.accounts
                 .createOne(invalidAccount)
                 .expect(400)
-                .then(function (response) {
-                  response.body.error.should.equal('Bad Request');
-                  done();
-                })
-                .catch(done);
+                .end(done);
             })
             .catch(done);
         });

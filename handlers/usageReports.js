@@ -29,28 +29,32 @@ var reports = require( '../lib/usageReport' );
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
-// var mongoose = require('mongoose');
-// var mongoConnection = require('../lib/mongoConnections');
-// var App = require('../models/App');
-// var apps = new App(mongoose, mongoConnection.getConnectionPortal());
-
 
 //  ---------------------------------
-var checkAccountAccessPermissions_ = function( request, reply ) {
+var checkAccountAccessPermissions_ = function( request ) {
 
-  var account_id = request.query.account_id || request.params.account_id || '';
-  if ( !account_id ) {
-    reply( boom.badRequest( 'Account ID should be provided' ) );
-    return false;
-  }
-
+  var account_id = request.query.account_id || '';
   var creds = request.auth.credentials;
-  //  user is revadmin
-  if ( creds.role === 'revadmin' || creds.companyId.indexOf( account_id ) !== -1 ) {
-    return true;
+
+  if ( creds.role === 'revadmin' ) {
+    return account_id;
   }
 
-  reply(boom.badRequest( 'Account ID not found' ));
+  if ( !account_id ) {
+    account_id = creds.companyId;
+    if ( account_id.length === 0 ) {
+      return false;
+    }
+    if ( account_id.length === 1 ) {
+      account_id = account_id[0];
+    }
+    return account_id;
+  }
+
+  if ( creds.companyId.indexOf( account_id ) !== -1 ) {
+    return account_id;
+  }
+
   return false;
 };
 
@@ -58,7 +62,9 @@ var checkAccountAccessPermissions_ = function( request, reply ) {
 
 exports.getAccountReport = function( request, reply ) {
 
-  if ( !checkAccountAccessPermissions_( request, reply ) ) {
+  var account_id = checkAccountAccessPermissions_( request );
+  if ( account_id === false/*strict identity*/ ) {
+    reply(boom.badRequest( 'Account ID not found' ));
     return false;
   }
 
@@ -76,7 +82,8 @@ exports.getAccountReport = function( request, reply ) {
     to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
   }
 
-  reports.loadReports( from, to, request.params.account_id, request.query.extended, request.query.bandwidth )
+  // reports.loadReports( from, to, request.params.account_id, request.query.only_summary, request.query.extended, request.query.bandwidth )
+  reports.loadReports( from, to, account_id, request.query.only_summary, request.query.extended, request.query.bandwidth )
     .then( function( response ) {
 
       response = {
