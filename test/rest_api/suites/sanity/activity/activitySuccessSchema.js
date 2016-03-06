@@ -40,7 +40,8 @@ describe('Sanity check', function () {
     API.helpers
       .authenticateUser(user)
       .then(function () {
-        return API.resources.users.myself
+        return API.resources.users
+          .myself()
           .getOne()
           .then(function (response) {
             user.id = response.body.user_id;
@@ -118,7 +119,7 @@ describe('Sanity check', function () {
         });
     });
 
-    describe('Summary: Activity resource', function () {
+    xdescribe('Summary: Activity resource', function () {
       describe('Success Response Data Schema', function () {
 
         var getSpecDescription = function (queryData) {

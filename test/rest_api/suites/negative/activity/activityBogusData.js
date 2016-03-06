@@ -76,7 +76,7 @@ describe('Negative check', function () {
         });
     });
 
-    describe('Summary: Activity resource', function () {
+    xdescribe('Summary: Activity resource', function () {
       describe('With `bogus` data', function () {
 
         var getSpecDescription = function (queryData) {

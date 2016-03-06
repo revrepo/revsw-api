@@ -76,7 +76,7 @@ describe('Sanity check', function () {
         });
     });
 
-    describe('Summary: Activity resource', function () {
+    xdescribe('Summary: Activity resource', function () {
       describe('Error Response Data Schema', function () {
 
         var getSpecDescription = function (queryData) {

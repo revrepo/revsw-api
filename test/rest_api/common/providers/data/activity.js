@@ -53,12 +53,12 @@ var ActivityDataProvider = {
 
     userId: undefined,
     domainId: undefined,
-    companyId: undefined,
+    accountId: undefined,
 
     setQueryParams: function (data) {
       this.userId = data.userId;
       this.domainId = data.domainId;
-      this.companyId = data.companyId;
+      this.accountId = data.accountId;
     },
 
     getQueryParams: function () {
@@ -68,8 +68,8 @@ var ActivityDataProvider = {
       return [
         {}, // No query params
         {user_id: this.userId},
-        {domain_id: this.domainId},
-        {company_id: this.companyId},
+        // {domain_id: this.domainId},
+        {account_id: this.accountId},
         {from_timestamp: startTimestamp.toString()},
         {
           from_timestamp: startTimestamp.toString(),
@@ -83,8 +83,8 @@ var ActivityDataProvider = {
       var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
       return [
         {user_id: bogusString},
-        {domain_id: bogusString},
-        {company_id: bogusString},
+        // {domain_id: bogusString},
+        {account_id: bogusString},
         {from_timestamp: bogusString},
         {
           from_timestamp: startTimestamp.toString(),
@@ -98,8 +98,8 @@ var ActivityDataProvider = {
       var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
       return [
         {user_id: emptyString},
-        {domain_id: emptyString},
-        {company_id: emptyString},
+        // {domain_id: emptyString},
+        {account_id: emptyString},
         {from_timestamp: emptyString},
         {
           from_timestamp: startTimestamp.toString(),
@@ -113,8 +113,8 @@ var ActivityDataProvider = {
       var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
       return [
         {user_id: longId},
-        {domain_id: longId},
-        {company_id: longId},
+        // {domain_id: longId},
+        {account_id: longId},
         {from_timestamp: longNumberStr},
         {
           from_timestamp: startTimestamp.toString(),
@@ -126,8 +126,8 @@ var ActivityDataProvider = {
     getInvalidQueryParams: function () {
       return [
         {user_id: invalidId},
-        {domain_id: invalidId},
-        {company_id: invalidId}
+        // {domain_id: invalidId},
+        {account_id: invalidId}
       ];
     },
 
@@ -135,12 +135,12 @@ var ActivityDataProvider = {
 
       userId: undefined,
       domainId: undefined,
-      companyId: undefined,
+      accountId: undefined,
 
       setQueryParams: function (data) {
         this.userId = data.userId;
         this.domainId = data.domainId;
-        this.companyId = data.companyId;
+        this.accountId = data.accountId;
       },
 
       getQueryParams: function () {
@@ -150,8 +150,8 @@ var ActivityDataProvider = {
         return [
           {}, // No query params
           {user_id: this.userId},
-          {domain_id: this.domainId},
-          {company_id: this.companyId},
+          // {domain_id: this.domainId},
+          {account_id: this.accountId},
           {from_timestamp: startTimestamp.toString()},
           {
             from_timestamp: startTimestamp.toString(),
@@ -165,8 +165,8 @@ var ActivityDataProvider = {
         var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
         return [
           {user_id: bogusString},
-          {domain_id: bogusString},
-          {company_id: bogusString},
+          // {domain_id: bogusString},
+          {account_id: bogusString},
           {from_timestamp: bogusString},
           {
             from_timestamp: startTimestamp.toString(),
@@ -180,8 +180,8 @@ var ActivityDataProvider = {
         var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
         return [
           {user_id: emptyString},
-          {domain_id: emptyString},
-          {company_id: emptyString},
+          // {domain_id: emptyString},
+          {account_id: emptyString},
           {from_timestamp: emptyString},
           {
             from_timestamp: startTimestamp.toString(),
@@ -195,8 +195,8 @@ var ActivityDataProvider = {
         var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
         return [
           {user_id: longId},
-          {domain_id: longId},
-          {company_id: longId},
+          // {domain_id: longId},
+          {account_id: longId},
           {from_timestamp: longNumberStr},
           {
             from_timestamp: startTimestamp.toString(),
@@ -208,8 +208,8 @@ var ActivityDataProvider = {
       getInvalidQueryParams: function () {
         return [
           {user_id: invalidId},
-          {domain_id: invalidId},
-          {company_id: invalidId}
+          // {domain_id: invalidId},
+          {account_id: invalidId}
         ];
       },
     }

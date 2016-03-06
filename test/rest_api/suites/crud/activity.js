@@ -37,7 +37,8 @@ describe('CRUD check', function () {
     API.helpers
       .authenticateUser(user)
       .then(function () {
-        return API.resources.users.myself
+        return API.resources.users
+          .myself()
           .getOne()
           .then(function (response) {
             user.id = response.body.user_id;
@@ -115,7 +116,7 @@ describe('CRUD check', function () {
       });
   });
 
-  describe('Summary: Activity resource', function () {
+  xdescribe('Summary: Activity resource', function () {
 
     var getSpecDescription = function (queryData) {
       var queryString = Utils.getJsonKeysAsString(queryData);

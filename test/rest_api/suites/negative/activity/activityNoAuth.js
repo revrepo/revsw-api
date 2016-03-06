@@ -75,7 +75,7 @@ describe('Negative check', function () {
         });
     });
 
-    describe('Summary: Activity resource', function () {
+    xdescribe('Summary: Activity resource', function () {
       describe('Without authentication', function () {
 
         var getSpecDescription = function (queryData) {
