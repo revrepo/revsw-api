@@ -60,8 +60,7 @@ describe('Smoke check', function () {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
-          // TODO: this should be changed to the new way to create a resource
-          return API.resources.users.user.deleteAllPrerequisites(done);
+          return API.resources.users.deleteAllPrerequisites(done);
         })
         .catch(done);
     });

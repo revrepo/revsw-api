@@ -171,7 +171,7 @@ module.exports = {
       createOne: function (name) {
         var user = UsersDP.generateOne(name);
         // TODO: this should be changed to the new way to create a resource
-        return users.user
+        return users
           .createOneAsPrerequisite(user)
           .catch(function(error){
             throw new APITestError('Creating User' , error.response.body,
