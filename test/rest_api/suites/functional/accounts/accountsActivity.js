@@ -71,7 +71,6 @@ describe('Functional check', function () {
           API.resources.accounts.deleteAllPrerequisites(done);
         })
         .catch(done);
-      done();
     });
 
     xit('should return a response when getting all accounts.',
