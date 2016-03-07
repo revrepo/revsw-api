@@ -162,7 +162,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
           });
         }
       }
-      if ( field === 'cache' ) {
+      if (field === 'cache' && missed_total !== 0) {
         data.push({
           key: 'MISS',
           count: missed_total
