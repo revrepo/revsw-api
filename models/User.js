@@ -344,6 +344,34 @@ User.prototype = {
     });
   },
 
+  updateLastLoginAt : function (item, callback) {
+    var context = this;
+    this.model.findOne({_id : item.user_id}, function (err, doc) {
+      //     console.log('Inside update: doc = ', doc);
+      if (doc) {
+
+        doc.last_login_at = new Date();
+        doc.last_login_from = item.last_login_from;
+
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.user_id = item._id;
+
+            delete item._id;
+            delete item.__v;
+            delete item.validation;
+            delete item.old_passwords;
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
+    });
+  },
+
+
   remove : function (item, callback) {
     var context = this;
     if (item) {
@@ -372,3 +400,4 @@ User.prototype = {
 };
 
 module.exports = User;
+

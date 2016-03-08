@@ -58,11 +58,10 @@ var onAuthPassed = function(user, request, reply, error) {
 
   var userToUpdate = {
     user_id: user.user_id,
-    last_login_at: Date.now(),
     last_login_from: remoteIP
   };
 
-  users.update(userToUpdate, function(error, result) {
+  users.updateLastLoginAt(userToUpdate, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Authenticate::authenticate: Failed to update the database user record ' +
         'with last login date/place details. User ID: ' + user.id + ' Email: ' + user.email));
