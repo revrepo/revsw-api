@@ -102,6 +102,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
           break;
       }
 
+      // TODO: use function utils.query2Span() instead of the following timestamp checks
       if ( request.query.from_timestamp ) {
         start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
         if ( ! start_time ) {
@@ -129,6 +130,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
         '$lte' : end_time
       };
 
+      // TODO: Need to add proper indexes for the audit collection
       auditevents.detailed(requestBody, function (error, data) {
         var result = {
           metadata : {
@@ -149,6 +151,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
   });
 };
 
+// TODO: the Summary function is a mess - need to do a full review
 exports.getSummaryAuditInfo = function (request, reply) {
   var requestBody = {};
   var start_time;

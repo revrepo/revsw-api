@@ -181,8 +181,6 @@ DomainConfig.prototype = {
         };
       });
   }
-
-
 };
 
 module.exports = DomainConfig;

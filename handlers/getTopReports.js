@@ -186,7 +186,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     })
     .catch( function(error) {
       logger.error(error);
-      return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
     });
 };
 
@@ -285,7 +285,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
     })
     .catch( function(error) {
       logger.error(error);
-      return reply(boom.badImplementation('Failed to retrieve data from ES'));
+      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
     });
 };
 
@@ -314,7 +314,7 @@ exports.getTopReports = function( request, reply ) {
         return top_reports_( request, reply, result.domain_name, span );
       }
     } else {
-      return reply(boom.badRequest('Domain not found'));
+      return reply(boom.badRequest('Domain ID not found'));
     }
   });
 };

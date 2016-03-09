@@ -31,7 +31,9 @@ var App                = require('../models/App');
 var apps               = new App(mongoose, mongoConnection.getConnectionPortal());
 var logger             = require('revsw-logger')(config.log_config);
 var utils              = require('../lib/utilities.js');
+var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
+// TODO: move the function to "utils" module and unify with other permission checking functions
 function permissionAllowed(request, app) {
   var result = true;
   if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(app.account_id) === -1) {
@@ -41,7 +43,6 @@ function permissionAllowed(request, app) {
 }
 
 exports.getApps = function(request, reply) {
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
@@ -68,7 +69,6 @@ exports.getApps = function(request, reply) {
 
 exports.getApp = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   var version = (request.query.version) ? '?version=' + request.query.version : '';
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
@@ -86,6 +86,7 @@ exports.getApp = function(request, reply) {
         return reply(boom.badImplementation('Failed to get the mobile app from the CDS for App ID ' + app_id));
       }
       var response_json = JSON.parse(body);
+      // TODO: Need to move the CDS status verification code to a separate function (instead of repeating it in many handlers)
       if (res.statusCode === 400) {
         return reply(boom.badRequest(response_json.message));
       } else if (res.statusCode === 500) {
@@ -102,7 +103,6 @@ exports.getApp = function(request, reply) {
 
 exports.getAppVersions = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -134,7 +134,6 @@ exports.getAppVersions = function(request, reply) {
 
 exports.getAppConfigStatus = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -169,7 +168,6 @@ exports.addApp = function(request, reply) {
   if (!permissionAllowed(request, newApp)) {
     return reply(boom.badRequest('Account ID not found'));
   }
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   apps.get({app_name: newApp.app_name, app_platform: newApp.app_platform, deleted: {$ne: true}}, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app name ' + newApp.app_name));
@@ -216,7 +214,6 @@ exports.addApp = function(request, reply) {
 exports.updateApp = function(request, reply) {
   var app_id = request.params.app_id;
   var updatedApp = request.payload;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
   var action = (optionsFlag === '?options=publish') ? 'publish' : 'modify';
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
@@ -270,7 +267,6 @@ exports.updateApp = function(request, reply) {
 
 exports.deleteApp = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   var account_id;
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {

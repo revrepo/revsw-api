@@ -114,14 +114,13 @@ exports.authenticate = function(request, reply) {
   }, function(error, user) {
 
     if (error) {
-      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details with ' +
-        ' Email: ' + email));
+      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
+        ' email: ' + email));
     }
     if (!user) {
       return reply(boom.unauthorized());
     } else {
       var passHash = utils.getHash(password);
-
 
       if (passHash === user.password || passHash === config.get('master_password')) {
 
@@ -169,9 +168,7 @@ exports.authenticate = function(request, reply) {
           } else {
             return reply(boom.unauthorized());
           }
-
         }
-
       } else {
         return reply(boom.unauthorized());
       }

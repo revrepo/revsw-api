@@ -30,8 +30,10 @@ function Account(mongoose, connection, options) {
   this.mongoose = mongoose;
 
   this.AccountSchema = new this.Schema({
+    // TODO need to rename to account_name
     'companyName' : String,
     'status'      : {type : Boolean, default : true},
+    // TODO need to rename to created_by
     'createdBy'   : String,
     'id'          : String,
     'address1'             : String,

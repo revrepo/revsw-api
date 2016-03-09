@@ -18,7 +18,6 @@
 
 'use strict';
 
-
 var mongoose = require('mongoose');
 var boom = require('boom');
 var async = require('async');
@@ -60,7 +59,7 @@ exports.signup = function(req, reply) {
   var data = req.payload;
 
   if (!config.get('enable_self_registration')) {
-    return reply(boom.badRequest('Customer self-registration is temporary disabled'));
+    return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
 
   // Check user email address
@@ -72,6 +71,8 @@ exports.signup = function(req, reply) {
     }
 
     if (user) {
+
+      // TODO: not sure that we use "deleted" attribute
       if (user.deleted) {
         return reply(boom.badRequest('User has delete flag'));
       }
@@ -109,6 +110,7 @@ exports.signup = function(req, reply) {
         return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newCompany.companyName));
       }
 
+      // TODO: need to decide where allow the same company names in the system
       if (result) {
         return reply(boom.badRequest('The company name is already registered in the system'));
       }
@@ -189,13 +191,13 @@ exports.resetToken = function(req, reply) {
     email: email
   }, function(err, user) {
     if (err) {
-      return reply(boom.badImplementation('Failed to retrieve user details by given email'));
+      return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
     }
     if (!user) {
-      return reply(boom.badImplementation('No user exist with such email address'));
+      return reply(boom.badImplementation('No user exists with the email address'));
     }
     if(user.validation.verified){
-      return reply(boom.badRequest('Email already verified'));
+      return reply(boom.badRequest('The email is already verified'));
     }
     var token = utils.generateToken();
     user.validation = {
@@ -222,7 +224,7 @@ exports.resetToken = function(req, reply) {
 
     var statusResponse = {
       statusCode: 200,
-      message: 'Successfully sent token to email.',
+      message: 'Successfully sent token to specified email',
       object_id: result.id
     };
 
@@ -243,7 +245,7 @@ exports.verify = function(req, reply) {
     }
   }, function(error, user) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve validation token/user details'));
+      return reply(boom.badImplementation('Failed to retrieve validation token/user details for token ' + token));
     }
     if (!user) {
       return reply(boom.badRequest('The validation token is invalid or has expired'));
