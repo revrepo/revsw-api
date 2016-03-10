@@ -71,24 +71,8 @@ Account.prototype = {
     });
   },
 
-  list : function (request, callback) {
-
+  list : function (callback) {
     this.model.find(function (err, accounts) {
-      if (accounts) {
-        accounts = utils.clone(accounts);
-        for (var i = 0; i < accounts.length; i++) {
-          if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(accounts[i]._id) !== -1) {
-            accounts[i].id = accounts[i]._id + '';
-            delete accounts[i]._id;
-            delete accounts[i].__v;
-            delete accounts[i].status;
-          } else {
-            accounts.splice(i, 1);
-            i--;
-          }
-        }
-      }
-
       callback(err, accounts);
     });
   },

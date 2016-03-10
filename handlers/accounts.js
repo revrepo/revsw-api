@@ -41,8 +41,24 @@ var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPo
 
 exports.getAccounts = function getAccounts(request, reply) {
 
-  // TODO: Need to move the filtering functionality from account.list inside this function
-  accounts.list(request, function (error, listOfAccounts) {
+  accounts.list(function (error, listOfAccounts) {
+    if (listOfAccounts) {
+      listOfAccounts = utils.clone(listOfAccounts);
+      for (var i = 0; i < listOfAccounts.length; i++) {
+        var current = listOfAccounts[i];
+
+        if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(current._id) !== -1) {
+          current.id = current._id + '';
+          delete current._id;
+          delete current.__v;
+          delete current.status;
+        } else {
+          listOfAccounts.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
     var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
     renderJSON(request, reply, error, accounts_list);
   });
