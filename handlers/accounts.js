@@ -46,7 +46,6 @@ exports.getAccounts = function getAccounts(request, reply) {
       return reply(boom.badImplementation('Failed to read accounts list from the DB'));
     }
 
-    listOfAccounts = utils.clone(listOfAccounts);
     for (var i = 0; i < listOfAccounts.length; i++) {
       if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
         listOfAccounts.splice(i, 1);

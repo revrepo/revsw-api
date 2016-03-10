@@ -74,6 +74,7 @@ Account.prototype = {
   list : function (callback) {
     this.model.find(function (err, accounts) {
       if(accounts) {
+        accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
           var current = accounts[i];
 
