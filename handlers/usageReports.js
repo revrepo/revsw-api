@@ -31,6 +31,8 @@ var logger = require('revsw-logger')(config.log_config);
 
 
 //  ---------------------------------
+
+// TODO: need to move the function to "utils" module
 var checkAccountAccessPermissions_ = function( request ) {
 
   var account_id = request.query.account_id || '';
@@ -105,7 +107,4 @@ exports.getAccountReport = function( request, reply ) {
       return reply( boom.badImplementation( err.toString() + ': account ID ' +
         request.params.account_id + ', span from ' + from.toUTCString() + ', to ' + to.toUTCString() ) );
     });
-
 };
-
-

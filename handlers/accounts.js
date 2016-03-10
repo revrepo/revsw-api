@@ -40,7 +40,19 @@ var DomainConfig   = require('../models/DomainConfig');
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getAccounts = function getAccounts(request, reply) {
-  accounts.list(request, function (error, listOfAccounts) {
+
+  accounts.list(function (error, listOfAccounts) {
+    if(error){
+      return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+    }
+
+    for (var i = 0; i < listOfAccounts.length; i++) {
+      if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
+        listOfAccounts.splice(i, 1);
+        i--;
+      }
+    }
+
     var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
     renderJSON(request, reply, error, accounts_list);
   });
@@ -59,6 +71,7 @@ exports.createAccount = function (request, reply) {
       return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
     }
 
+    // TODO: need to remove the check - it is fine to have different accounts with the same companyName
     if (result) {
       return reply(boom.badRequest('The company name is already registered in the system'));
     }
@@ -94,6 +107,7 @@ exports.createAccount = function (request, reply) {
           operation_status : 'success'
         });
 
+        // Update the user who created the new company account with details of the new account ID
         var updatedUser = {
           user_id   : request.auth.credentials.user_id,
           companyId : request.auth.credentials.companyId
@@ -139,18 +153,19 @@ exports.updateAccount = function (request, reply) {
 
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
+  var account_id = updatedAccount.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, updatedAccount.account_id)) {
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
   // check that the company name is not used by another customer
   accounts.get({
-    companyName : updatedAccount.companyName, _id : {$ne : request.params.account_id}
+    companyName : updatedAccount.companyName, _id : {$ne : account_id}
   }, function (error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to verify the new account name'));
+      return reply(boom.badImplementation('Failed to verify new account name for account ID ' + account_id ));
     }
 
     if (result) {
@@ -159,7 +174,7 @@ exports.updateAccount = function (request, reply) {
 
     accounts.update(updatedAccount, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update the account'));
+        return reply(boom.badImplementation('Failed to update account ID ' + account_id ));
       }
 
       result = publicRecordFields.handle(result, 'account');
@@ -178,7 +193,7 @@ exports.updateAccount = function (request, reply) {
         account_id       : request.auth.credentials.companyId[0],
         activity_type    : 'modify',
         activity_target  : 'account',
-        target_id        : request.params.account_id,
+        target_id        : account_id,
         target_name      : result.companyName,
         target_object    : result,
         operation_status : 'success'
@@ -197,7 +212,11 @@ exports.deleteAccount = function (request, reply) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
+  // TODO: mark deleted accounts as deleted instead of actually deleting from the database
+
   async.waterfall([
+
+    // TODO: add a verification that there are no active apps for an account
     function (cb) {
       domainConfigs.query({
         'proxy_config.account_id': account_id, deleted: { $ne: true }
@@ -255,6 +274,8 @@ exports.deleteAccount = function (request, reply) {
         });
 
         // now let's remove the account ID from the user's companyId array
+        // TODO it looks like there is a bug in user.companyId update code - 
+        // the list keeps growing while it shold not
         var updatedUser = {
           user_id   : request.auth.credentials.user_id,
           companyId : request.auth.credentials.companyId

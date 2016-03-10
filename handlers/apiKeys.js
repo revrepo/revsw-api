@@ -50,6 +50,8 @@ function verifyDomainOwnership(companyId, domainList, callback) {
   function checkDomain(_i, l) {
     domainConfigs.get(domainList[_i], function(error, result) {
       j++;
+
+      // TODO: Need to use a centralized domain permissions check function from "utils" module
       if (!error && result) {
         if (!result.account_id || result.account_id !== companyId) {
           wrongDomains.push(domainList[_i]);
@@ -75,6 +77,7 @@ function verifyDomainOwnership(companyId, domainList, callback) {
 }
 
 exports.getApiKeys = function(request, reply) {
+  // TODO: Need to move the access check function from ".list" to this function
   apiKeys.list(request, function (error, listOfApiKeys) {
     listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
     renderJSON(request, reply, error, listOfApiKeys);
@@ -89,7 +92,7 @@ exports.getApiKey = function (request, reply) {
     }
 
     if (result) {
-
+      // TODO: Need to create a separate function to check API access permissions
       if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
         return reply(boom.badRequest('API key not found'));
       }
@@ -105,9 +108,11 @@ exports.getApiKey = function (request, reply) {
 exports.createApiKey = function(request, reply) {
   var newApiKey = request.payload;
   newApiKey.created_by = request.auth.credentials.email;
-  newApiKey.key = uuid();
+  var newKey = uuid();
+  newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
+  // TODO: Need to create a separate function to check API access permissions
   if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
       return reply(boom.badRequest('Company ID not found'));
   }
@@ -123,7 +128,7 @@ exports.createApiKey = function(request, reply) {
       key: newApiKey.key
     }, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to verify new API key ' + newApiKey.key));
+        return reply(boom.badImplementation('Failed to verify new API key ' + newKey));
       }
       if (result) {
         return reply(boom.badRequest('The API key is already registered in the system'));
@@ -131,7 +136,7 @@ exports.createApiKey = function(request, reply) {
 
       apiKeys.add(newApiKey, function (error, result) {
         if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key));
+          return reply(boom.badImplementation('Failed to add new API key ' + newKey));
         }
 
         var statusResponse;
@@ -142,7 +147,7 @@ exports.createApiKey = function(request, reply) {
           statusResponse = {
             statusCode: 200,
             message   : 'Successfully created new API key',
-            key       : result.key,
+            key       : newKey,
             object_id : result.id
           };
 
@@ -175,7 +180,7 @@ exports.updateApiKey = function (request, reply) {
   function doUpdate() {
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update API key ' + id));
+        return reply(boom.badImplementation('Failed to update API key ID ' + id));
       }
 
       var statusResponse = {
@@ -204,6 +209,7 @@ exports.updateApiKey = function (request, reply) {
     });
   }
 
+  // TODO: move the functionality to a separate procedure
   if (request.auth.credentials.role !== 'revadmin' && (updatedApiKey.account_id &&
     request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1)) {
       return reply(boom.badRequest('Company ID not found'));
@@ -250,6 +256,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
+    // TODO use a function
     if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
@@ -296,6 +303,7 @@ exports.deactivateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
+    // TODO: use a function
     if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
@@ -342,6 +350,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
+    // TODO: use a function
     if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }

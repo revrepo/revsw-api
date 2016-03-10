@@ -441,7 +441,7 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(400);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('User not found');
+        response_json.message.should.be.equal('User ID not found');
         done();
       });
   });

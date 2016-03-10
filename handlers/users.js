@@ -71,6 +71,7 @@ exports.createUser = function(request, reply) {
   }, function(error, result) {
     // got results so the email is in use
     if (result) {
+      // TODO fix the error message text
       return reply(boom.badRequest('The email address is already used by another user'));
 
     } else {
@@ -118,16 +119,11 @@ exports.getUser = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve user details for user ID ' + user_id));
     }
-    if (result) {
-      if (!utils.checkUserAccessPermissionToUser(request, result)) {
-        return reply(boom.badRequest('User not found'));
-      }
-
-      result = publicRecordFields.handle(result, 'user');
-
-      renderJSON(request, reply, error, result);
+    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+      return reply(boom.badRequest('User ID not found'));
     } else {
-      return reply(boom.badRequest('User not found'));
+      result = publicRecordFields.handle(result, 'user');
+      renderJSON(request, reply, error, result);
     }
   });
 };
@@ -146,7 +142,7 @@ exports.getMyUser = function(request, reply) {
 
       renderJSON(request, reply, error, result);
     } else {
-      return reply(boom.badRequest('User not found'));
+      return reply(boom.badRequest('User ID not found'));
     }
   });
 };
@@ -158,54 +154,52 @@ exports.updateUser = function(request, reply) {
   }
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
+  // TODO use an existing access verification function instead of the code
   if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId))) {
     return reply(boom.badRequest('The new companyId is not found'));
   }
+
   users.get({
     _id: user_id
   }, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
-    if (result) {
-      var account_id = result.companyId[0];
-      if (! utils.checkUserAccessPermissionToUser(request, result)) {
-        return reply(boom.badRequest('User not found'));
-      }
-
-      users.update(newUser, function(error, result) {
-        if (!error) {
-          var statusResponse;
-          statusResponse = {
-            statusCode: 200,
-            message: 'Successfully updated the user'
-          };
-
-          result = publicRecordFields.handle(result, 'user');
-
-          AuditLogger.store({
-            ip_address       : utils.getAPIUserRealIP(request),
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
-            account_id       : account_id,
-            activity_type    : 'modify',
-            activity_target  : 'user',
-            target_id        : result.user_id,
-            target_name      : result.email,
-            target_object    : result,
-            operation_status : 'success'
-          });
-
-          renderJSON(request, reply, error, statusResponse);
-        } else {
-          return reply(boom.badImplementation('Failed to update details for user with ID ' + user_id));
-        }
-      });
-    } else {
-      return reply(boom.badRequest('User not found'));
+    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+      return reply(boom.badRequest('User ID not found'));
     }
+    var account_id = result.companyId[0];
+
+    users.update(newUser, function(error, result) {
+      if (!error) {
+        var statusResponse;
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully updated the user'
+        };
+
+        result = publicRecordFields.handle(result, 'user');
+
+        AuditLogger.store({
+          ip_address       : utils.getAPIUserRealIP(request),
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : account_id,
+          activity_type    : 'modify',
+          activity_target  : 'user',
+          target_id        : result.user_id,
+          target_name      : result.email,
+          target_object    : result,
+          operation_status : 'success'
+        });
+
+        renderJSON(request, reply, error, statusResponse);
+      } else {
+        return reply(boom.badImplementation('Failed to update details for user with ID ' + user_id));
+      }
+    });
   });
 };
 
@@ -278,49 +272,45 @@ exports.deleteUser = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
-    if (result) {
-      var account_id = result.companyId[0];
-      if (! utils.checkUserAccessPermissionToUser(request, result)) {
-        return reply(boom.badRequest('User not found'));
-      }
-
-      result = publicRecordFields.handle(result, 'user');
-
-      var auditRecord = {
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : account_id,
-        activity_type    : 'delete',
-        activity_target  : 'user',
-        target_id        : result.user_id,
-        target_name      : result.email,
-        target_object    : result,
-        operation_status : 'success'
-      };
-
-      users.remove({
-        _id: user_id
-      }, function(error, result) {
-        if (!error) {
-          var statusResponse;
-          statusResponse = {
-            statusCode: 200,
-            message: 'Successfully deleted the user'
-          };
-
-          AuditLogger.store(auditRecord);
-
-          renderJSON(request, reply, error, statusResponse);
-        } else {
-          return reply(boom.badRequest('User not found'));
-        }
-      });
-    } else {
-      return reply(boom.badRequest('User not found'));
+    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+      return reply(boom.badRequest('User ID not found'));
     }
+    var account_id = result.companyId[0];
+
+    result = publicRecordFields.handle(result, 'user');
+
+    var auditRecord = {
+      ip_address       : utils.getAPIUserRealIP(request),
+      datetime         : Date.now(),
+      user_id          : request.auth.credentials.user_id,
+      user_name        : request.auth.credentials.email,
+      user_type        : 'user',
+      account_id       : account_id,
+      activity_type    : 'delete',
+      activity_target  : 'user',
+      target_id        : result.user_id,
+      target_name      : result.email,
+      target_object    : result,
+      operation_status : 'success'
+    };
+
+    users.remove({
+      _id: user_id
+    }, function(error, result) {
+      if (!error) {
+        var statusResponse;
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully deleted the user'
+        };
+
+        AuditLogger.store(auditRecord);
+
+        renderJSON(request, reply, error, statusResponse);
+      } else {
+        return reply(boom.badImplementation('Failed to delete user ID ' + user_id));
+      }
+    });
   });
 };
 
@@ -423,9 +413,10 @@ exports.disable2fa = function (request, reply) {
   var password = request.payload.password;
   if (request.params.user_id) {
     var user_id = request.params.user_id;
+    // TODO Call an existing "utils" function to verity user access permissions
     if (request.auth.credentials.role !== 'revadmin' && ((user_id !== request.auth.credentials.user_id) &&
       (request.auth.credentials.role !== 'admin'))) {
-      return reply(boom.badRequest('User not found'));
+      return reply(boom.badRequest('User ID not found'));
     }
   } else {
     user_id = request.auth.credentials.user_id;
@@ -433,51 +424,45 @@ exports.disable2fa = function (request, reply) {
   users.get({
     _id: user_id
   }, function(error, user) {
-    if (user) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
-      }
-
-      var account_id = user.companyId[0];
-
-      console.log('Starting checkUserAccessPermissionToUser');
-      if (utils.checkUserAccessPermissionToUser(request, user)) {
-        user.two_factor_auth_enabled = false;
-        delete user.password;
-        users.update(user, function(error, result) {
-          if (!error) {
-            var statusResponse = {
-              statusCode: 200,
-              message: 'Successfully disabled two factor authentication'
-            };
-
-            result = publicRecordFields.handle(result, 'user');
-
-            AuditLogger.store({
-              ip_address       : utils.getAPIUserRealIP(request),
-              datetime         : Date.now(),
-              user_id          : request.auth.credentials.user_id,
-              user_name        : request.auth.credentials.email,
-              user_type        : 'user',
-              account_id       : account_id,
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : user.user_id,
-              target_name      : result.email,
-              target_object    : result,
-              operation_status : 'success'
-            });
-
-            renderJSON(request, reply, error, statusResponse);
-          } else {
-            return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
-          }
-        });
-      } else {
-        return reply(boom.badRequest('User not found'));
-      }
-    } else {
-      return reply(boom.badRequest('User not found'));
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
+
+    if (!user || !utils.checkUserAccessPermissionToUser(request, user)) {
+      return reply(boom.badRequest('User ID not found'));
+    }
+
+    var account_id = user.companyId[0];
+    user.two_factor_auth_enabled = false;
+    delete user.password;
+    users.update(user, function(error, result) {
+      if (!error) {
+        var statusResponse = {
+          statusCode: 200,
+          message: 'Successfully disabled two factor authentication'
+        };
+
+        result = publicRecordFields.handle(result, 'user');
+
+        AuditLogger.store({
+          ip_address       : utils.getAPIUserRealIP(request),
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : account_id,
+          activity_type    : 'modify',
+          activity_target  : 'user',
+          target_id        : user.user_id,
+          target_name      : result.email,
+          target_object    : result,
+          operation_status : 'success'
+        });
+
+        renderJSON(request, reply, error, statusResponse);
+      } else {
+        return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
+      }
+    });
   });
 };

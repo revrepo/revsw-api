@@ -121,7 +121,7 @@ describe('Negative check', function () {
                         .createOne(nonExistingUserId)
                         .expect(400)
                         .then(function (response) {
-                          var expMsg = 'User not found';
+                          var expMsg = 'User ID not found';
                           response.body.message.should.containEql(expMsg);
                           done();
                         })

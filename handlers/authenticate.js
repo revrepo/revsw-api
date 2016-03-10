@@ -58,11 +58,10 @@ var onAuthPassed = function(user, request, reply, error) {
 
   var userToUpdate = {
     user_id: user.user_id,
-    last_login_at: Date.now(),
     last_login_from: remoteIP
   };
 
-  users.update(userToUpdate, function(error, result) {
+  users.updateLastLoginAt(userToUpdate, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Authenticate::authenticate: Failed to update the database user record ' +
         'with last login date/place details. User ID: ' + user.id + ' Email: ' + user.email));
@@ -115,14 +114,13 @@ exports.authenticate = function(request, reply) {
   }, function(error, user) {
 
     if (error) {
-      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details with ' +
-        ' Email: ' + email));
+      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
+        ' email: ' + email));
     }
     if (!user) {
       return reply(boom.unauthorized());
     } else {
       var passHash = utils.getHash(password);
-
 
       if (passHash === user.password || passHash === config.get('master_password')) {
 
@@ -170,9 +168,7 @@ exports.authenticate = function(request, reply) {
           } else {
             return reply(boom.unauthorized());
           }
-
         }
-
       } else {
         return reply(boom.unauthorized());
       }

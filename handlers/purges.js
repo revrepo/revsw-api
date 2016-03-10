@@ -53,14 +53,10 @@ exports.purgeObject = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrive domain details for domain name ' + domain));
     }
 
-    if (!result[0]) {
+    if (!result[0] || !utils.checkUserAccessPermissionToDomain(request,result[0])) {
       return reply(boom.badRequest('Domain not found'));
     }
     result = result[0];
-
-    if (!utils.checkUserAccessPermissionToDomain(request,result)) {
-      return reply(boom.badRequest('Domain not found'));
-    }
 
     account_id = result.proxy_config.account_id;
 
