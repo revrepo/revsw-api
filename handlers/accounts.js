@@ -48,7 +48,7 @@ exports.getAccounts = function getAccounts(request, reply) {
 
     listOfAccounts = utils.clone(listOfAccounts);
     for (var i = 0; i < listOfAccounts.length; i++) {
-      if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i]._id)) {
+      if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
         listOfAccounts.splice(i, 1);
         i--;
       }
