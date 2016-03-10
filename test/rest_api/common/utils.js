@@ -99,11 +99,11 @@ var Utils = {
   /**
    * ### PurgeDataProvider.setValueByPath()
    *
-   * @param {Domain Config Object} obj, object in which value is going to
+   * @param {Object} obj (Domain Config), object in which value is going to
    * be set
-   * @param {String} pathString that represents the concatenation of keys and
+   * @param {String} pathString, that represents the concatenation of keys and
    * the last key is the one that is going to change
-   * @param {Object} any value that the property accepts
+   * @param {Object} value, any value that the property accepts
    */
   setValueByPath: function (obj, pathString, value) {
     var prop = obj;
@@ -118,11 +118,11 @@ var Utils = {
   /**
    * ### PurgeDataProvider.getValueByPath()
    *
-   * @param {Domain Config Object} obj, object in which value is going to
+   * @param {Object} obj (Domain Config), object in which value is going to
    * be set
    * @param {String} pathString that represents the concatenation of keys and
    * the last key is the one that for which the value is going to be get
-   * @returns {Onject|Undefined} the value that the key has in the specified
+   * @returns {Object|Undefined} the value that the key has in the specified
    * object, undefined otherwise
    */
   getValueByPath: function (obj, pathString) {
