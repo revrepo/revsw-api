@@ -71,7 +71,7 @@ exports.createAccount = function (request, reply) {
       return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
     }
 
-    // TODO: need to decide whether to allow different company accounts to have the same name...
+    // TODO: need to remove the check - it is fine to have different accounts with the same companyName
     if (result) {
       return reply(boom.badRequest('The company name is already registered in the system'));
     }
@@ -274,6 +274,8 @@ exports.deleteAccount = function (request, reply) {
         });
 
         // now let's remove the account ID from the user's companyId array
+        // TODO it looks like there is a bug in user.companyId update code - 
+        // the list keeps growing while it shold not
         var updatedUser = {
           user_id   : request.auth.credentials.user_id,
           companyId : request.auth.credentials.companyId
