@@ -42,13 +42,15 @@ var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPo
 exports.getAccounts = function getAccounts(request, reply) {
 
   accounts.list(function (error, listOfAccounts) {
-    if(listOfAccounts) {
-      listOfAccounts = utils.clone(listOfAccounts);
-      for (var i = 0; i < listOfAccounts.length; i++) {
-        if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i]._id)) {
-          listOfAccounts.splice(i, 1);
-          i--;
-        }
+    if(error){
+      return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+    }
+
+    listOfAccounts = utils.clone(listOfAccounts);
+    for (var i = 0; i < listOfAccounts.length; i++) {
+      if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i]._id)) {
+        listOfAccounts.splice(i, 1);
+        i--;
       }
     }
 
