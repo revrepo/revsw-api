@@ -71,11 +71,6 @@ exports.createAccount = function (request, reply) {
       return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
     }
 
-    // TODO: need to decide whether to allow different company accounts to have the same name...
-    if (result) {
-      return reply(boom.badRequest('The company name is already registered in the system'));
-    }
-
     accounts.add(newAccount, function (error, result) {
 
       if (error || !result) {
