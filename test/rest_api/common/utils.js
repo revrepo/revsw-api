@@ -33,7 +33,7 @@ var Utils = {
   getJsonAsKeyValueString: function (jsonObject) {
     return JSON
       .stringify(jsonObject)
-      .replace(/\{|\}/g, '')
+      .replace(/{|}/g, '')
       .replace(/":"/g, '=')
       .replace(/","/g, ', ')
       .replace(/"/g, '');
