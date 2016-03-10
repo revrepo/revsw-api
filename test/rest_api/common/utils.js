@@ -70,8 +70,8 @@ var Utils = {
    * Searches JSON object in array that matches given properties and its values
    *
    * @param {Array} jsonArray
-   * @param {Json} matchProperties
-   * @returns {Json | Undefined} json found
+   * @param {Object} matchProperties
+   * @returns {Object} json found
    */
   searchJsonInArray: function (jsonArray, matchProperties) {
     var jsonFound, item, itemCounter, key;
