@@ -42,17 +42,10 @@ var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPo
 exports.getAccounts = function getAccounts(request, reply) {
 
   accounts.list(function (error, listOfAccounts) {
-    if (listOfAccounts) {
+    if(listOfAccounts) {
       listOfAccounts = utils.clone(listOfAccounts);
       for (var i = 0; i < listOfAccounts.length; i++) {
-        var current = listOfAccounts[i];
-
-        if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(current._id) !== -1) {
-          current.id = current._id + '';
-          delete current._id;
-          delete current.__v;
-          delete current.status;
-        } else {
+        if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i]._id)) {
           listOfAccounts.splice(i, 1);
           i--;
         }

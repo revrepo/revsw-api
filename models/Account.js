@@ -73,6 +73,17 @@ Account.prototype = {
 
   list : function (callback) {
     this.model.find(function (err, accounts) {
+      if(accounts) {
+        for (var i = 0; i < accounts.length; i++) {
+          var current = accounts[i];
+
+          current.id = current._id + '';
+          delete current._id;
+          delete current.__v;
+          delete current.status;
+        }
+      }
+
       callback(err, accounts);
     });
   },
