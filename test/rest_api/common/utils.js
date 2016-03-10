@@ -67,6 +67,36 @@ var Utils = {
   },
 
   /**
+   * Searches JSON object in array that matches given properties and its values
+   *
+   * @param {Array} jsonArray
+   * @param {Json} matchProperties
+   * @returns {Json | Undefined} json found
+   */
+  searchJsonInArray: function (jsonArray, matchProperties) {
+    var jsonFound, item, itemCounter, key;
+    var matchPropKeys = Object.keys(matchProperties);
+    var totalKeys = matchPropKeys.length;
+    for (var i = 0, arrayLength = jsonArray.length; i < arrayLength; i++) {
+      item = jsonArray[i];
+      itemCounter = 0;
+      for (var j = 0; j < totalKeys; j++) {
+        key = matchPropKeys[j];
+        if (item[key] === matchProperties[key]) {
+          itemCounter++;
+          continue;
+        }
+        break;
+      }
+      if (itemCounter === matchPropKeys.length) {
+        jsonFound = item;
+        break;
+      }
+    }
+    return jsonFound;
+  },
+
+  /**
    * ### PurgeDataProvider.setValueByPath()
    *
    * @param {Domain Config Object} obj, object in which value is going to

@@ -16,18 +16,19 @@
  * from Rev Software, Inc.
  */
 
-require('should-http');
+var should = require('should');
 
 var config = require('config');
 var API = require('./../../../common/api');
 var AccountsDP = require('./../../../common/providers/data/accounts');
+var Utils = require('./../../../common/utils');
 
 describe('Functional check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var accountSample = AccountsDP.generateOne('NEW');
+  var accountSample;
   var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
@@ -41,6 +42,7 @@ describe('Functional check', function () {
   describe('Accounts - Activity resource', function () {
 
     beforeEach(function (done) {
+      accountSample = AccountsDP.generateOne('NEW');
       API.helpers
         .authenticateUser(resellerUser)
         .then(function () {
@@ -73,33 +75,7 @@ describe('Functional check', function () {
         .catch(done);
     });
 
-    xit('should return a response when getting all accounts.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.accounts
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    xit('should return a response when getting specific account.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.accounts
-              .getOne(accountSample.id)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a response when creating specific account.',
+    it('should return activity data after creating an account.',
       function (done) {
         API.helpers
           .authenticateUser(resellerUser)
@@ -108,17 +84,13 @@ describe('Functional check', function () {
               .getAll({user_id: resellerUser.id})
               .expect(200)
               .then(function (response) {
-                // TODO: Move all of this to Utils.searchJsonInArray(json, array);
                 var activities = response.body.data;
-                var activity;
-                for (var i = 0, len = activities.length; i < len; i++) {
-                  activity = activities[i];
-                  if (activity.activity_type === 'add' &&
-                    activity.activity_target === 'account' &&
-                    activity.target_id === accountSample.id) {
-                    break;
-                  }
-                }
+                var activity = Utils.searchJsonInArray(activities, {
+                  'activity_type': 'add',
+                  'activity_target': 'account',
+                  'target_id': accountSample.id
+                });
+                should.exist(activity);
                 activity.activity_type.should.equal('add');
                 activity.activity_target.should.equal('account');
                 activity.target_id.should.equal(accountSample.id);
@@ -129,50 +101,81 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should return a response when updating specific account.',
+    it('should return activity data after updating specific account.',
       function (done) {
         var updatedAccount = AccountsDP.generateOne('UPDATED');
         API.helpers
           .authenticateUser(resellerUser)
           .then(function () {
-            API.resources.accounts
+            return API.resources.accounts
               .update(accountSample.id, updatedAccount)
               .expect(200)
-              .then(function () {
-                API.resources.activity
-                  .getAll()
-                  .expect(200)
-                  .then(function (response) {
-                    var activity = response.body.data[0];
-                    activity.activity_type.should.equal('modify');
-                    activity.activity_target.should.equal('account');
-                    activity.target_object.id.should.equal(accountSample.id);
-                    done();
-                  })
-                  .catch(done);
+              .then()
+              .catch(done);
+          })
+          .then(function () {
+            API.resources.activity
+              .getAll({user_id: resellerUser.id})
+              .expect(200)
+              .then(function (response) {
+                var activities = response.body.data;
+                var activity = Utils.searchJsonInArray(activities, {
+                  'activity_type': 'modify',
+                  'activity_target': 'account',
+                  'target_id': accountSample.id
+                });
+                should.exist(activity);
+                activity.activity_type.should.equal('modify');
+                activity.activity_target.should.equal('account');
+                activity.target_id.should.equal(accountSample.id);
+                done();
               })
               .catch(done);
           })
           .catch(done);
       });
 
-    xit('should return a response when deleting an account.', function (done) {
-      var newProject = AccountsDP.generateOne('NEW');
-      API.helpers
-        .authenticateUser(resellerUser)
-        .then(function () {
-          API.resources.accounts
-            .createOneAsPrerequisite(newProject)
-            .then(function (response) {
-              var objectId = response.body.object_id;
-              API.resources.accounts
-                .deleteOne(objectId)
-                .expect(200)
-                .end(done);
-            })
-            .catch(done);
-        })
-        .catch(done);
-    });
+    it('should return activity data after deleting an account.',
+      function (done) {
+        var newProject = AccountsDP.generateOne('NEW');
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
+            return API.resources.accounts
+              .createOneAsPrerequisite(newProject)
+              .then(function (response) {
+                return response.body.object_id;
+              })
+              .catch(done);
+          })
+          .then(function (objectId) {
+            console.log('objectId', objectId);
+            return API.resources.accounts
+              .deleteOne(objectId)
+              .expect(200)
+              .then()
+              .catch(done);
+          })
+          .then(function () {
+            API.resources.activity
+              .getAll({user_id: resellerUser.id})
+              .expect(200)
+              .then(function (response) {
+                var activities = response.body.data;
+                var activity = Utils.searchJsonInArray(activities, {
+                  'activity_type': 'delete',
+                  'activity_target': 'account',
+                  'target_id': accountSample.id
+                });
+                should.exist(activity);
+                activity.activity_type.should.equal('delete');
+                activity.activity_target.should.equal('account');
+                activity.target_id.should.equal(accountSample.id);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
   });
 });
