@@ -19,7 +19,7 @@
 require('should-http');
 
 var config = require('config');
-var API = require('./../../common/api');
+var API = require('./../../../common/api');
 
 describe('Functional check', function () {
 

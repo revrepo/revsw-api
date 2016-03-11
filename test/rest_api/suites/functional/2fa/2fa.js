@@ -19,8 +19,8 @@
 require('should-http');
 
 var config = require('config');
-var API = require('./../../common/api');
-var TwoFADP = require('./../../common/providers/data/2fa');
+var API = require('./../../../common/api');
+var TwoFADP = require('./../../../common/providers/data/2fa');
 
 describe('Functional check', function () {
 
