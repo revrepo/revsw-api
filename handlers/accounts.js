@@ -65,64 +65,55 @@ exports.createAccount = function (request, reply) {
   var newAccount = request.payload;
   newAccount.createdBy = request.auth.credentials.email;
 
-  accounts.get({
-    companyName : newAccount.companyName
-  }, function (error, result) {
+  accounts.add(newAccount, function (error, result) {
 
-    if (error) {
-      return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newAccount.companyName));
+    if (error || !result) {
+      return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
     }
 
-    accounts.add(newAccount, function (error, result) {
+    result = publicRecordFields.handle(result, 'account');
 
-      if (error || !result) {
-        return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
+    var statusResponse;
+    if (result) {
+      statusResponse = {
+        statusCode : 200,
+        message    : 'Successfully created new account',
+        object_id  : result.id
+      };
+
+      AuditLogger.store({
+        ip_address       : utils.getAPIUserRealIP(request),
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId[0],
+        activity_type    : 'add',
+        activity_target  : 'account',
+        target_id        : result.id,
+        target_name      : result.companyName,
+        target_object    : result,
+        operation_status : 'success'
+      });
+
+      // Update the user who created the new company account with details of the new account ID
+      var updatedUser = {
+        user_id   : request.auth.credentials.user_id,
+        companyId : request.auth.credentials.companyId
+      };
+      if (request.auth.credentials.role !== 'revadmin') {
+        updatedUser.companyId.push(result.id);
       }
 
-      result = publicRecordFields.handle(result, 'account');
-
-      var statusResponse;
-      if (result) {
-        statusResponse = {
-          statusCode : 200,
-          message    : 'Successfully created new account',
-          object_id  : result.id
-        };
-
-        AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId[0],
-          activity_type    : 'add',
-          activity_target  : 'account',
-          target_id        : result.id,
-          target_name      : result.companyName,
-          target_object    : result,
-          operation_status : 'success'
-        });
-
-        // Update the user who created the new company account with details of the new account ID
-        var updatedUser = {
-          user_id   : request.auth.credentials.user_id,
-          companyId : request.auth.credentials.companyId
-        };
-        if (request.auth.credentials.role !== 'revadmin') {
-          updatedUser.companyId.push(result.id);
+      users.update(updatedUser, function (error, result) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id +
+            ' with details of new account IDs ' + updatedUser.companyId));
+        } else {
+          renderJSON(request, reply, error, statusResponse);
         }
-
-        users.update(updatedUser, function (error, result) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id + 
-              ' with details of new account IDs ' + updatedUser.companyId));
-          } else {
-            renderJSON(request, reply, error, statusResponse);
-          }
-        });
-      }
-    });
+      });
+    }
   });
 };
 
@@ -160,48 +151,34 @@ exports.updateAccount = function (request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
-    // check that the company name is not used by another customer
-    accounts.get({
-      companyName : updatedAccount.companyName, _id : {$ne : account_id}
-      }, function (error, result) {
-
+    accounts.update(updatedAccount, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to verify new account name for account ID ' + account_id ));
+        return reply(boom.badImplementation('Failed to update account ID ' + account_id ));
       }
 
-      if (result) {
-        return reply(boom.badRequest('The company name is already registered in the system'));
-      }
+      result = publicRecordFields.handle(result, 'account');
 
-      accounts.update(updatedAccount, function (error, result) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to update account ID ' + account_id ));
-        }
+      var statusResponse = {
+        statusCode : 200,
+        message    : 'Successfully updated the account'
+      };
 
-        result = publicRecordFields.handle(result, 'account');
-
-        var statusResponse = {
-          statusCode : 200,
-          message    : 'Successfully updated the account'
-        };
-
-        AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId[0],
-          activity_type    : 'modify',
-          activity_target  : 'account',
-          target_id        : account_id,
-          target_name      : result.companyName,
-          target_object    : result,
-          operation_status : 'success'
-        });
-
-        renderJSON(request, reply, error, statusResponse);
+      AuditLogger.store({
+        ip_address       : utils.getAPIUserRealIP(request),
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId[0],
+        activity_type    : 'modify',
+        activity_target  : 'account',
+        target_id        : account_id,
+        target_name      : result.companyName,
+        target_object    : result,
+        operation_status : 'success'
       });
+
+      renderJSON(request, reply, error, statusResponse);
     });
   });
 };
@@ -237,7 +214,7 @@ exports.deleteAccount = function (request, reply) {
       accounts.get({
         _id : account_id
       }, function (error, account2) {
-        if (error) { 
+        if (error) {
           return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
         }
         if (!account2) {
@@ -274,36 +251,36 @@ exports.deleteAccount = function (request, reply) {
     },
     function (usersToUpdate,cb) {
       async.eachSeries(usersToUpdate, function(user, callback) {
-        var user_id = user.user_id;
-        if (user.companyId.lenght === 1) {  
-          logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
-          users.remove( { user_id: user.user_id }, function (error, result) {
-            if (error) {
-              return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
-            }
-            callback(error);
-          });
-        } else {  /// else just update the user account and delete the account_id from companyId array
-          logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
-          var indexToDelete = user.companyId.indexOf(account_id);
-          logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + account_id + ', user.companyId = ' + user.companyId);
-          user.companyId.splice(indexToDelete, 1);
-          var updatedUser = {
-            user_id   : user_id,
-            companyId : user.companyId
-          };
+          var user_id = user.user_id;
+          if (user.companyId.lenght === 1) {
+            logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
+            users.remove( { user_id: user.user_id }, function (error, result) {
+              if (error) {
+                return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+              }
+              callback(error);
+            });
+          } else {  /// else just update the user account and delete the account_id from companyId array
+            logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
+            var indexToDelete = user.companyId.indexOf(account_id);
+            logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + account_id + ', user.companyId = ' + user.companyId);
+            user.companyId.splice(indexToDelete, 1);
+            var updatedUser = {
+              user_id   : user_id,
+              companyId : user.companyId
+            };
 
-          users.update(updatedUser, function (error, result) {
-            if (error) {
-              return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
-            }
-            callback(error);
-          });
-        }
-      },
-      function(error) {
-        cb(error);
-      });
+            users.update(updatedUser, function (error, result) {
+              if (error) {
+                return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
+              }
+              callback(error);
+            });
+          }
+        },
+        function(error) {
+          cb(error);
+        });
     },
     function (cb) {
       var statusResponse;
