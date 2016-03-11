@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,12 +16,13 @@
  * from Rev Software, Inc.
  */
 
-require('should-http');
+var should = require('should');
 
 var config = require('config');
-var API = require('./../../common/api');
-var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
-var PurgeDP = require('./../../common/providers/data/purge');
+var API = require('./../../../common/api');
+var DomainConfigsDP = require('./../../../common/providers/data/domainConfigs');
+var PurgeDP = require('./../../../common/providers/data/purge');
+var Utils = require('./../../../common/utils');
 
 describe('Functional check', function () {
 
@@ -66,7 +67,7 @@ describe('Functional check', function () {
       .catch(done);
   });
 
-  describe('Purge resource', function () {
+  describe('Purge - Activity resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -76,56 +77,41 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should queue a purge that was just created.',
+    it('should return activity data after creating a purge.',
       function (done) {
+        var purgeData;
+        var startTime = Date.now();
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
-            API.resources.purge
+            purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+            return API.resources.purge
               .createOne(purgeData)
               .expect(200)
-              .then(function (response) {
-                var expMsg = 'The purge request has been successfully queued';
-                response.body.message.should.equal(expMsg);
-                done();
+              .then(function (res) {
+                purgeData.id = res.body.request_id;
               })
               .catch(done);
           })
-          .catch(done);
-      });
-
-    it('should set as `success` a purge after some time it was created.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
           .then(function () {
-            var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
-            var counter = 10000; // 10 secs
-            var interval = 1000; // 1 sec
-            var cb = function () {
-              if (counter < 0) {
-                done(new Error('Timeout: wait purge resp-message to change.'));
-              }
-              counter -= interval;
-              API.resources.purge
-                .getOne(purge.id)
-                .expect(200)
-                .then(function (resp) {
-                  if (resp.body.message !== 'Success') {
-                    setTimeout(cb, interval);
-                    return;
-                  }
-                  resp.body.message.should.equal('Success');
-                  done();
-                })
-                .catch(done);
-            };
-            API.resources.purge
-              .createOne(purgeData)
+            API.resources.activity
+              .getAll({
+                user_id: reseller.id,
+                from_timestamp: startTime
+              })
               .expect(200)
-              .then(function () {
-                setTimeout(cb, interval);
+              .then(function (response) {
+                var activities = response.body.data;
+                var activity = Utils.searchJsonInArray(activities, {
+                  'activity_type': 'purge',
+                  'activity_target': 'domain',
+                  'target_id': purgeData.id // Use domain id?
+                });
+                should.exist(activity);
+                activity.activity_type.should.equal('purge');
+                activity.activity_target.should.equal('domain');
+                activity.target_id.should.equal(purgeData.id); // Use domain id?
+                done();
               })
               .catch(done);
           })

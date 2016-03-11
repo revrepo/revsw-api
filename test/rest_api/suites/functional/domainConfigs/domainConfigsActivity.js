@@ -64,7 +64,7 @@ describe('Functional check', function () {
       .catch(done);
   });
 
-  describe('Domain Configs resource', function () {
+  describe('Domain Configs - Activity resource', function () {
 
     beforeEach(function (done) {
       done();
