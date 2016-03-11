@@ -102,81 +102,72 @@ exports.signup = function(req, reply) {
       phone_number: data.phone_number,
       billing_plan: data.billing_plan
     };
-    accounts.get({
-      companyName: newCompany.companyName
-    }, function(error, result) {
+    
+    accounts.add(newCompany, function(error, result) {
 
-      if (error) {
-        return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newCompany.companyName));
+      if (error || !result) {
+        return reply(boom.badImplementation('Failed to add new account ' + newCompany.companyName));
       }
 
-      accounts.add(newCompany, function(error, result) {
+      result = publicRecordFields.handle(result, 'account');
 
-        if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new account ' + newCompany.companyName));
-        }
+      if (result) {
+        newUser.companyId = result.id;
+        var token = utils.generateToken();
+        newUser.self_registered = true;
+        newUser.validation = {
+          expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+          token: token
+        };
+        // All ok
+        users.add(newUser, function(err, user) {
+          if (err || !user) {
+            return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
+          }
 
-        result = publicRecordFields.handle(result, 'account');
+          var statusResponse;
+          if (user) {
+            statusResponse = {
+              statusCode: 200,
+              message: 'Successfully created new user',
+              object_id: user.id
+            };
 
-        if (result) {
-          newUser.companyId = result.id;
-          var token = utils.generateToken();
-          newUser.self_registered = true;
-          newUser.validation = {
-            expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-            token: token
-          };
-          // All ok
-          users.add(newUser, function(err, user) {
-            if (err || !user) {
-              return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
-            }
+            user = publicRecordFields.handle(user, 'user');
 
-            var statusResponse;
-            if (user) {
-              statusResponse = {
-                statusCode: 200,
-                message: 'Successfully created new user',
-                object_id: user.id
-              };
+            AuditLogger.store({
+              ip_address: utils.getAPIUserRealIP(req),
+              datetime: Date.now(),
+              user_type: 'user',
+              account_id: result.id,
+              activity_type: 'add',
+              activity_target: 'account',
+              target_id: result.id,
+              target_name: result.companyName,
+              target_object: result,
+              operation_status: 'success'
+            });
 
-              user = publicRecordFields.handle(user, 'user');
-
-              AuditLogger.store({
-                ip_address: utils.getAPIUserRealIP(req),
-                datetime: Date.now(),
-                user_type: 'user',
-                account_id: result.id,
-                activity_type: 'add',
-                activity_target: 'account',
-                target_id: result.id,
-                target_name: result.companyName,
-                target_object: result,
-                operation_status: 'success'
-              });
-
-              AuditLogger.store({
-                ip_address: utils.getAPIUserRealIP(req),
-                datetime: Date.now(),
-                user_type: 'user',
-                account_id: user.companyId,
-                activity_type: 'add',
-                activity_target: 'user',
-                target_id: user.id,
-                target_name: user.name,
-                target_object: user,
-                operation_status: 'success'
-              });
-              sendVerifyToken(user, token, function(err, res) {
-                renderJSON(req, reply, err, statusResponse);
-              });
-            }
-          });
-        }
-      });
+            AuditLogger.store({
+              ip_address: utils.getAPIUserRealIP(req),
+              datetime: Date.now(),
+              user_type: 'user',
+              account_id: user.companyId,
+              activity_type: 'add',
+              activity_target: 'user',
+              target_id: user.id,
+              target_name: user.name,
+              target_object: user,
+              operation_status: 'success'
+            });
+            sendVerifyToken(user, token, function(err, res) {
+              renderJSON(req, reply, err, statusResponse);
+            });
+          }
+        });
+      }
     });
   });
-
 };
 
 exports.resetToken = function(req, reply) {
