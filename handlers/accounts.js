@@ -163,10 +163,6 @@ exports.updateAccount = function (request, reply) {
       return reply(boom.badImplementation('Failed to verify new account name for account ID ' + account_id ));
     }
 
-    if (result) {
-      return reply(boom.badRequest('The company name is already registered in the system'));
-    }
-
     accounts.update(updatedAccount, function (error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update account ID ' + account_id ));

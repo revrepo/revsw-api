@@ -110,11 +110,6 @@ exports.signup = function(req, reply) {
         return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newCompany.companyName));
       }
 
-      // TODO: need to decide where allow the same company names in the system
-      if (result) {
-        return reply(boom.badRequest('The company name is already registered in the system'));
-      }
-
       accounts.add(newCompany, function(error, result) {
 
         if (error || !result) {
