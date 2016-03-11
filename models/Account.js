@@ -43,6 +43,7 @@ function Account(mongoose, connection, options) {
     'city'                 : String,
     'zipcode'              : String,
     'phone_number'         : String,
+    'comment': {type: String, default: ''},
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
