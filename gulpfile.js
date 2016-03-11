@@ -82,7 +82,10 @@ gulp.task('reload', ['lint'], function (cb) {
 gulp.task('lint', [], function (cb) {
   return gulp.src([
     './bin/**/*.js',
-    './lib/**/*.js'
+    './lib/**/*.js',
+    './handlers/**/*.js',
+    './models/**/*.js',
+    './routes/**/*.js',
   ])
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));
