@@ -25,10 +25,12 @@ var boom = require('boom');
 var AuditLogger = require('revsw-audit');
 var async = require('async');
 var utils           = require('../lib/utilities.js');
+var config      = require('config');
 
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
+var logger = require('revsw-logger')(config.log_config);
 
 var Account = require('../models/Account');
 var User = require('../models/User');
@@ -149,48 +151,57 @@ exports.updateAccount = function (request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
   var account_id = updatedAccount.account_id;
-
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
-    return reply(boom.badRequest('Account ID not found'));
-  }
-
-  // check that the company name is not used by another customer
-  accounts.get({
-    companyName : updatedAccount.companyName, _id : {$ne : account_id}
-  }, function (error, result) {
-
+  accounts.get({ _id : account_id }, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to verify new account name for account ID ' + account_id ));
+      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id ));
     }
 
-    accounts.update(updatedAccount, function (error, result) {
+    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    // check that the company name is not used by another customer
+    accounts.get({
+      companyName : updatedAccount.companyName, _id : {$ne : account_id}
+      }, function (error, result) {
+
       if (error) {
-        return reply(boom.badImplementation('Failed to update account ID ' + account_id ));
+        return reply(boom.badImplementation('Failed to verify new account name for account ID ' + account_id ));
       }
 
-      result = publicRecordFields.handle(result, 'account');
+      if (result) {
+        return reply(boom.badRequest('The company name is already registered in the system'));
+      }
 
-      var statusResponse = {
-        statusCode : 200,
-        message    : 'Successfully updated the account'
-      };
+      accounts.update(updatedAccount, function (error, result) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to update account ID ' + account_id ));
+        }
 
-      AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId[0],
-        activity_type    : 'modify',
-        activity_target  : 'account',
-        target_id        : account_id,
-        target_name      : result.companyName,
-        target_object    : result,
-        operation_status : 'success'
+        result = publicRecordFields.handle(result, 'account');
+
+        var statusResponse = {
+          statusCode : 200,
+          message    : 'Successfully updated the account'
+        };
+
+        AuditLogger.store({
+          ip_address       : utils.getAPIUserRealIP(request),
+          datetime         : Date.now(),
+          user_id          : request.auth.credentials.user_id,
+          user_name        : request.auth.credentials.email,
+          user_type        : 'user',
+          account_id       : request.auth.credentials.companyId[0],
+          activity_type    : 'modify',
+          activity_target  : 'account',
+          target_id        : account_id,
+          target_name      : result.companyName,
+          target_object    : result,
+          operation_status : 'success'
+        });
+
+        renderJSON(request, reply, error, statusResponse);
       });
-
-      renderJSON(request, reply, error, statusResponse);
     });
   });
 };
@@ -198,6 +209,7 @@ exports.updateAccount = function (request, reply) {
 exports.deleteAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
+  var account;
 
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
@@ -224,64 +236,100 @@ exports.deleteAccount = function (request, reply) {
     function (cb) {
       accounts.get({
         _id : account_id
-      }, function (error, account) {
+      }, function (error, account2) {
         if (error) { 
           return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
         }
-        if (!account) {
+        if (!account2) {
           return reply(boom.badRequest('Account ID not found'));
         }
-        cb(error, account);
+        cb(error, account2);
       });
     },
-    function (account) {
+    function (account2, cb) {
+      account = account2;
       accounts.remove({
         _id : account_id
       }, function (error) {
         if (error) {
           return reply(boom.badRequest('Account ID not found'));
         }
-        var statusResponse;
-        statusResponse = {
-          statusCode : 200,
-          message    : 'Successfully deleted the account'
-        };
-
-        account = publicRecordFields.handle(account, 'account');
-
-        AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId[0],
-          activity_type    : 'delete',
-          activity_target  : 'account',
-          target_id        : account.id,
-          target_name      : account.companyName,
-          target_object    : account,
-          operation_status : 'success'
-        });
-
-        // now let's remove the account ID from the user's companyId array
-        var updatedUser = {
-          user_id   : request.auth.credentials.user_id,
-          companyId : request.auth.credentials.companyId
-        };
-
-        if (request.auth.credentials.role !== 'revadmin') {
-          updatedUser.companyId.splice(updatedUser.companyId.indexOf(account_id), 1);
-        }
-
-        users.update(updatedUser, function (error, result) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to update user details with removed account ID ' + account_id));
-          } else {
-            renderJSON(request, reply, error, statusResponse);
-          }
-        });
+        cb(error);
       });
+    },
+    function (cb) {
+      // Now we need to drop the deleted account_id from companyId of all users which are managing the account
+      users.listAll(request, function (error, usersToUpdate) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to retrieve from the DB a list of all users'));
+        }
+        for (var i = 0; i < usersToUpdate.length; i++) {
+          if (usersToUpdate[i].companyId.indexOf(account_id) === -1) {
+            usersToUpdate.splice(i, 1);
+            i--;
+          }
+        }
+        cb(error, usersToUpdate);
+      });
+    },
+    function (usersToUpdate,cb) {
+      async.eachSeries(usersToUpdate, function(user, callback) {
+        var user_id = user.user_id;
+        if (user.companyId.lenght === 1) {  
+          logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
+          users.remove( { user_id: user.user_id }, function (error, result) {
+            if (error) {
+              return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+            }
+            callback(error);
+          });
+        } else {  /// else just update the user account and delete the account_id from companyId array
+          logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
+          var indexToDelete = user.companyId.indexOf(account_id);
+          logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + account_id + ', user.companyId = ' + user.companyId);
+          user.companyId.splice(indexToDelete, 1);
+          var updatedUser = {
+            user_id   : user_id,
+            companyId : user.companyId
+          };
+
+          users.update(updatedUser, function (error, result) {
+            if (error) {
+              return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
+            }
+            callback(error);
+          });
+        }
+      },
+      function(error) {
+        cb(error);
+      });
+    },
+    function (cb) {
+      var statusResponse;
+      statusResponse = {
+        statusCode : 200,
+        message    : 'Successfully deleted the account'
+      };
+
+      account = publicRecordFields.handle(account, 'account');
+
+      AuditLogger.store({
+        ip_address       : utils.getAPIUserRealIP(request),
+        datetime         : Date.now(),
+        user_id          : request.auth.credentials.user_id,
+        user_name        : request.auth.credentials.email,
+        user_type        : 'user',
+        account_id       : request.auth.credentials.companyId[0],
+        activity_type    : 'delete',
+        activity_target  : 'account',
+        target_id        : account.id,
+        target_name      : account.companyName,
+        target_object    : account,
+        operation_status : 'success'
+      });
+
+      renderJSON(request, reply, null, statusResponse);
     }
   ], function (err) {
     if (err) {

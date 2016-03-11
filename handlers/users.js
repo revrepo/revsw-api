@@ -24,11 +24,13 @@ var boom        = require('boom');
 var mongoose    = require('mongoose');
 var AuditLogger = require('revsw-audit');
 var speakeasy   = require('speakeasy');
+var config      = require('config');
 
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
+var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
 
