@@ -79,6 +79,7 @@ Account.prototype = {
           var current = accounts[i];
 
           current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
           delete current._id;
           delete current.__v;
           delete current.status;
@@ -120,6 +121,7 @@ Account.prototype = {
   },
 
   update : function (item, callback) {
+    // TODO need to switch to use "id" instead of "account_id"
     this.model.findOne({_id : item.account_id}, function (err, doc) {
       if (doc) {
 

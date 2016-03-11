@@ -126,6 +126,8 @@ User.prototype = {
         doc = utils.clone(doc);
         doc.user_id = doc._id;
 
+        // TODO: need to move all the "delete" operations to a separate function (and call it from all User methods)
+
         delete doc.__v;
         delete doc._id;
         delete doc.id;
