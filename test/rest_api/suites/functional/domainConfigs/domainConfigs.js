@@ -19,9 +19,9 @@
 require('should-http');
 
 var config = require('config');
-var API = require('./../../common/api');
-var AccountsDP = require('./../../common/providers/data/accounts');
-var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
+var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
+var DomainConfigsDP = require('./../../../common/providers/data/domainConfigs');
 
 describe('Domain configs functional test', function () {
 
