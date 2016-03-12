@@ -63,10 +63,13 @@
     "node-uuid": "^1.4.3",
     "nodemailer": "^1.4.0",
     "request": "^2.60.0",
-    "revsw-audit": "0.0.x",
+    "revsw-logger": "git@github.com:/revrepo/revsw-logger",
     "should": "^7.1.0",
     "should-http": "0.0.4",
+    "sleep": "^3.0.1",
     "speakeasy": "^1.0.3",
+    "superagent": "^1.8.0",
+    "winston-mongodb": "^1.3.0",
     "yargs": "^3.30.0"
   },
   "devDependencies": {
@@ -85,7 +88,6 @@
     "jshint": "^2.8.0",
     "jshint-html-reporter": "^0.2.4",
     "mocha": "^2.3.3",
-    "sleep": "^2.0.0",
     "supertest": "^1.1.0",
     "supertest-as-promised": "^2.0.2"
   },

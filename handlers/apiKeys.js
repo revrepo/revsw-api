@@ -22,7 +22,7 @@
 
 var mongoose = require('mongoose');
 var boom = require('boom');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var uuid = require('node-uuid');
 
 var mongoConnection = require('../lib/mongoConnections');

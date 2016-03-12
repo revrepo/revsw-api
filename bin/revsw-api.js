@@ -24,7 +24,7 @@ var Hapi = require('hapi'),
   jwt = require('jsonwebtoken'),
   Fs = require('fs'),
   config = require('config'),
-  AuditLogger = require('revsw-audit'),
+  AuditLogger = require('../lib/audit'),
   Pack = require('../package'),
   UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
@@ -114,9 +114,9 @@ server.register(require('hapi-auth-jwt'), function (err) {
   });
 });
 
-server.register(require('hapi-auth-apikey'), function (err) {
-  server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
-});
+//server.register(require('hapi-auth-apikey'), function (err) {
+//  server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
+//});
 
 server.register(require('../lib/chargify-webhook-signature'), function (err) {
   server.auth.strategy('hmac', 'signature');

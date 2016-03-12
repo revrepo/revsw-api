@@ -24,7 +24,7 @@ var renderJSON      = require('../lib/renderJSON');
 
 var mongoose = require('mongoose');
 var boom = require('boom');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var async = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');

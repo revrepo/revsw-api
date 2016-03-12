@@ -34,7 +34,7 @@ var mail = require('../lib/mail');
 var User = require('../models/User');
 var Account = require('../models/Account');
 var publicRecordFields = require('../lib/publicRecordFields');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());

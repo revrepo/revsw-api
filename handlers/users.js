@@ -22,7 +22,7 @@
 
 var boom        = require('boom');
 var mongoose    = require('mongoose');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var speakeasy   = require('speakeasy');
 var config      = require('config');
 

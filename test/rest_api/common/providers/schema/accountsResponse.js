@@ -52,7 +52,8 @@ var AccountsResponseSP = {
         createdBy: Joi.string().required(),
         id: Joi.string().regex(idFormatPattern).required(),
         created_at: Joi.string().regex(dateFormatPattern).required(),
-        updated_at: Joi.string().regex(dateFormatPattern).required()
+        updated_at: Joi.string().regex(dateFormatPattern).required(),
+        comment: Joi.string()
       });
     return accountSchema;
   }

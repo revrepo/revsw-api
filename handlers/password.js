@@ -26,7 +26,7 @@ var async       = require('async');
 var nodemailer  = require('nodemailer');
 var config      = require('config');
 var crypto      = require('crypto');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
