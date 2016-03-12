@@ -135,7 +135,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should return activity data after deleting an account.',
+    xit('should return activity data after deleting an account.',
       function (done) {
         var newProject = AccountsDP.generateOne('NEW');
         API.helpers

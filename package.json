@@ -23,6 +23,7 @@
   "dependencies": {
     "bcrypt": "~0.8.3",
     "blipp": "2.1.x",
+    "bluebird": "^2.10.2",
     "boom": "2.7.x",
     "config": "^1.16.0",
     "convert-base": "~0.1.0",
@@ -53,10 +54,8 @@
     "jshint-stylish": "^2.1.0",
     "jsonwebtoken": "^5.0.5",
     "lodash": "^3.10.1",
-    "mailparser": "^0.5.3",
     "marked": "0.3.x",
     "merge": "^1.2.0",
-    "mocha.parallel": "^0.11.2",
     "mongoose": "^4.1.0",
     "mongoose-auto-increment": "^5.0.0",
     "mongoose-merge-plugin": "0.0.5",
@@ -74,7 +73,6 @@
   },
   "devDependencies": {
     "async": "^1.4.0",
-    "bluebird": "^2.10.2",
     "chai": "1.9.x",
     "faker": "^3.0.1",
     "ghooks": "^1.0.3",
@@ -87,7 +85,9 @@
     "grunt-mocha-test": "^0.12.7",
     "jshint": "^2.8.0",
     "jshint-html-reporter": "^0.2.4",
+    "mailparser": "^0.5.3",
     "mocha": "^2.3.3",
+    "mocha.parallel": "^0.11.2",
     "supertest": "^1.1.0",
     "supertest-as-promised": "^2.0.2"
   },

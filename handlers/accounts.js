@@ -282,6 +282,8 @@ exports.deleteAccount = function (request, reply) {
           cb(error);
         });
     },
+
+    // TODO also autoamtically delete all API keys belonging to the account ID
     function (cb) {
       var statusResponse;
       statusResponse = {

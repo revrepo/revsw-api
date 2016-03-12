@@ -67,7 +67,7 @@ describe('Functional check', function () {
       .catch(done);
   });
 
-  describe('Purge - Activity resource', function () {
+  xdescribe('Purge - Activity resource', function () {
 
     beforeEach(function (done) {
       done();

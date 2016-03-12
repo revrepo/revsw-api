@@ -250,7 +250,8 @@ module.exports = {
     var activityResponseSchema = Joi.object().keys({
       metadata: Joi.object().keys({
         user_id: Joi.string().regex(idFormatPattern).required(),
-        company_id: Joi.any()/*.allow([
+        account_id: Joi.string().regex(idFormatPattern)
+        /*.allow([
           Joi.string().regex(idFormatPattern),
           Joi.array().items(Joi.string().regex(idFormatPattern))
         ])*/,

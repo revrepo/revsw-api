@@ -100,7 +100,7 @@ describe('Sanity check', function () {
             .catch(done);
         });
 
-      it('should return error response schema when disabling 2fa without ' +
+      xit('should return error response schema when disabling 2fa without ' +
         'authentication',
         function (done) {
           API.resources.twoFA

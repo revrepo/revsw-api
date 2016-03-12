@@ -74,7 +74,7 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should return activity data after creating domain config',
+    xit('should return activity data after creating domain config',
       function (done) {
         var startTime = Date.now();
         secondDc = DomainConfigsDP.generateOne(account.id);
@@ -114,7 +114,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should return activity data after modifying domain config',
+    xit('should return activity data after modifying domain config',
       function (done) {
         var startTime = Date.now();
         API.helpers
@@ -167,7 +167,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should allow to delete existing domain config',
+    xit('should allow to delete existing domain config',
       function (done) {
         var startTime = Date.now();
         API.helpers
