@@ -26,38 +26,47 @@ var API = require('./../../common/api');
 describe('CRUD check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  var resellerUser = config.get('api.users.reseller');
+  // Defining set of users for which all below tests will be run
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    done();
-  });
+  users.forEach(function (user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function () {
 
-  describe('Countries resource', function () {
-    it('should allow to get all countries.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.countries
-              .getAll()
-              .expect(200)
-              .then(function (response) {
-                var countriesObject = response.body;
-                countriesObject.should.not.be.undefined();
-                var countriesKeys = Object.keys(countriesObject);
-                countriesKeys.should.not.be.empty();
-                countriesKeys.length.should.greaterThan(0);
-                done();
+      describe('Countries resource', function () {
+
+        before(function (done) {
+          done();
+        });
+
+        after(function (done) {
+          done();
+        });
+
+        it('should allow to get all countries.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.countries
+                  .getAll()
+                  .expect(200)
+                  .then(function (response) {
+                    var countriesObject = response.body;
+                    countriesObject.should.not.be.undefined();
+                    var countriesKeys = Object.keys(countriesObject);
+                    countriesKeys.should.not.be.empty();
+                    countriesKeys.length.should.greaterThan(0);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

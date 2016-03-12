@@ -26,37 +26,47 @@ describe('CRUD check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var user = config.get('api.users.reseller');
+  // Defining set of users for which all below tests will be run
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    done();
-  });
+  users.forEach(function (user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function () {
 
-  describe('Authenticate resource', function () {
+      describe('Authenticate resource', function () {
 
-    beforeEach(function (done) {
-      done();
-    });
+        before(function (done) {
+          done();
+        });
 
-    afterEach(function (done) {
-      done();
-    });
+        after(function (done) {
+          done();
+        });
 
-    it('should create successfully token when authenticating user',
-      function (done) {
-        API.resources.authenticate
-          .createOne({email: user.email, password: user.password})
-          .expect(200)
-          .then(function (response) {
-            response.body.token.should.not.be.undefined();
-            response.body.token.should.not.be.empty();
-            done();
-          })
-          .catch(done);
+        beforeEach(function (done) {
+          done();
+        });
+
+        afterEach(function (done) {
+          done();
+        });
+
+        it('should create successfully token when authenticating user',
+          function (done) {
+            API.resources.authenticate
+              .createOne({email: user.email, password: user.password})
+              .expect(200)
+              .then(function (response) {
+                response.body.token.should.not.be.undefined();
+                response.body.token.should.not.be.empty();
+                done();
+              })
+              .catch(done);
+          });
       });
+    });
   });
 });

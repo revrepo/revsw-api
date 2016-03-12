@@ -26,57 +26,66 @@ var API = require('./../../common/api');
 describe('CRUD check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  var resellerUser = config.get('api.users.reseller');
+  // Defining set of users for which all below tests will be run
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    done();
-  });
+  users.forEach(function (user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function () {
 
-  describe('Locations resource', function () {
-    it('should allow to get `first-mile` data.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .firstMile()
-              .getOne()
-              .expect(200)
-              .then(function (response) {
-                var locations = response.body;
-                locations.should.not.be.undefined();
-                locations.length.should.greaterThanOrEqual(0);
-                done();
+      describe('Locations resource', function () {
+
+        before(function (done) {
+          done();
+        });
+
+        after(function (done) {
+          done();
+        });
+
+        it('should allow to get `first-mile` data.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.locations
+                  .firstMile()
+                  .getOne()
+                  .expect(200)
+                  .then(function (response) {
+                    var locations = response.body;
+                    locations.should.not.be.undefined();
+                    locations.length.should.greaterThanOrEqual(0);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    it('should allow to get `last-mile` data.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .lastMile()
-              .getOne()
-              .expect(200)
-              .then(function (response) {
-                var locations = response.body;
-                locations.should.not.be.undefined();
-                locations.length.should.greaterThanOrEqual(0);
-                done();
+        it('should allow to get `last-mile` data.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.locations
+                  .lastMile()
+                  .getOne()
+                  .expect(200)
+                  .then(function (response) {
+                    var locations = response.body;
+                    locations.should.not.be.undefined();
+                    locations.length.should.greaterThanOrEqual(0);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });
