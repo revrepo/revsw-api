@@ -63,7 +63,7 @@
     "node-uuid": "^1.4.3",
     "nodemailer": "^1.4.0",
     "request": "^2.60.0",
-    "revsw-logger": "git@github.com:/revrepo/revsw-logger",
+    "revsw-logger": "git+ssh@github.com:/revrepo/revsw-logger",
     "should": "^7.1.0",
     "should-http": "0.0.4",
     "sleep": "^3.0.1",
