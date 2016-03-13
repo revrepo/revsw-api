@@ -316,7 +316,7 @@ exports.deleteAccount = function (request, reply) {
     function(cb){
       apiKeys.removeMany({ account_id: account_id}, function (error) {
         if (error) {
-          return reply(boom.badRequest('Failed to delete API keys for account ID ' + account_id));
+          return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
         }
 
         cb();
