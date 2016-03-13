@@ -38,8 +38,14 @@ var User = require('../models/User');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var DomainConfig   = require('../models/DomainConfig');
-var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+var DomainConfig = require('../models/DomainConfig');
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+
+var App = require('../models/App');
+var apps = new App(mongoose, mongoConnection.getConnectionPortal());
+
+var ApiKey = require('../models/APIKey');
+var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getAccounts = function getAccounts(request, reply) {
 
@@ -192,11 +198,45 @@ exports.deleteAccount = function (request, reply) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
-  // TODO: mark deleted accounts as deleted instead of actually deleting from the database
-
   async.waterfall([
 
-    // TODO: add a verification that there are no active apps for an account
+    // verify that account exists
+    function (cb) {
+      accounts.get({
+        _id : account_id
+      }, function (error, account2) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
+        }
+        if (!account2) {
+          return reply(boom.badRequest('Account ID not found'));
+        }
+
+        account = account2;
+
+        cb(error);
+      });
+    },
+    // Verify that there are no active apps for an account
+    function (cb) {
+      var getAppQuery = {
+        account_id: account_id,
+        deleted: { $ne: true }
+      };
+
+      apps.get(getAppQuery, function (error, existing_app) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to verify that there are no active apps for account ID ' + account_id));
+        }
+
+        if (existing_app){
+          return reply(boom.badRequest('There are active apps for the account - please remove the apps before removing the account'));
+        }
+
+        cb(error);
+      });
+    },
+    // verify that there are no active domains for an account
     function (cb) {
       domainConfigs.query({
         'proxy_config.account_id': account_id, deleted: { $ne: true }
@@ -210,32 +250,22 @@ exports.deleteAccount = function (request, reply) {
         cb(error);
       });
     },
+    // Mark account as deleted
     function (cb) {
-      accounts.get({
-        _id : account_id
-      }, function (error, account2) {
+      var deleteAccountQuery = {
+        account_id : account_id,
+        deleted : true
+      };
+
+      accounts.update(deleteAccountQuery, function (error) {
         if (error) {
-          return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
-        }
-        if (!account2) {
-          return reply(boom.badRequest('Account ID not found'));
-        }
-        cb(error, account2);
-      });
-    },
-    function (account2, cb) {
-      account = account2;
-      accounts.remove({
-        _id : account_id
-      }, function (error) {
-        if (error) {
-          return reply(boom.badRequest('Account ID not found'));
+          return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id));
         }
         cb(error);
       });
     },
+    // Drop the deleted account_id from companyId of all users which are managing the account
     function (cb) {
-      // Now we need to drop the deleted account_id from companyId of all users which are managing the account
       users.listAll(request, function (error, usersToUpdate) {
         if (error) {
           return reply(boom.badImplementation('Failed to retrieve from the DB a list of all users'));
@@ -282,8 +312,17 @@ exports.deleteAccount = function (request, reply) {
           cb(error);
         });
     },
+    // Automatically delete all API keys belonging to the account ID
+    function(cb){
+      apiKeys.removeMany({ account_id: account_id}, function (error) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
+        }
 
-    // TODO also autoamtically delete all API keys belonging to the account ID
+        cb();
+      });
+    },
+    // Log results and finish request
     function (cb) {
       var statusResponse;
       statusResponse = {

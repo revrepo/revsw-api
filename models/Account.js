@@ -44,6 +44,7 @@ function Account(mongoose, connection, options) {
     'zipcode'              : String,
     'phone_number'         : String,
     'comment': {type: String, default: ''},
+    'deleted': {type: Boolean, default: false},
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
@@ -73,7 +74,7 @@ Account.prototype = {
   },
 
   list : function (callback) {
-    this.model.find(function (err, accounts) {
+    this.model.find({ deleted: { $ne: true } },function (err, accounts) {
       if(accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
@@ -108,6 +109,8 @@ Account.prototype = {
   },
 
   get : function (item, callback) {
+    item.deleted = { $ne: true };
+
     this.model.findOne(item, function (err, doc) {
       if (doc) {
         doc = utils.clone(doc);
