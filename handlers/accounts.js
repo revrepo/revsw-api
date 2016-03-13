@@ -259,7 +259,7 @@ exports.deleteAccount = function (request, reply) {
 
       accounts.update(deleteAccountQuery, function (error) {
         if (error) {
-          return reply(boom.badRequest('Failed to delete account ID ' + account_id));
+          return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id));
         }
         cb(error);
       });
