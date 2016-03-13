@@ -190,6 +190,10 @@ APIKey.prototype = {
     }
   },
 
+  removeMany: function (data, callback) {
+    this.model.remove(data, callback);
+  },
+
   queryP: function (where, fields) {
     where = where || {};
     fields = fields || {};
