@@ -47,9 +47,10 @@ var StatsDataProvider = {
   DataDrivenHelper: {
 
     getQueryParams: function () {
-      var now = new Date();
-      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-      var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+      var now = Date.now();
+      var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+      var startTimestamp = now - (2 * hour); // 2 hours before
+      var endTimestamp = now - (1 * hour); // 1 hour before
       return [
         {from_timestamp: startTimestamp.toString()},
         {
@@ -172,9 +173,10 @@ var StatsDataProvider = {
 
     gbt: {
       getQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-        var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
         return [
           {from_timestamp: startTimestamp.toString()},
           {
@@ -234,9 +236,10 @@ var StatsDataProvider = {
 
     lastMileRtt: {
       getQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-        var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
         return [
           {from_timestamp: startTimestamp.toString()},
           {
@@ -296,9 +299,10 @@ var StatsDataProvider = {
 
     top: {
       getQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-        var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
         return [
           {from_timestamp: startTimestamp.toString(), report_type: 'referer'},
           {
@@ -370,9 +374,10 @@ var StatsDataProvider = {
 
     topObjects: {
       getQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-        var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
         return [
           {from_timestamp: startTimestamp.toString()},
           {
