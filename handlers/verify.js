@@ -35,7 +35,6 @@ var Location    = require('../models/Location');
 var PurgeJob    = require('../models/PurgeJob');
 var User        = require('../models/User');
 var ServerGroup = require('../models/ServerGroup');
-var MasterConfiguration = require('../models/MasterConfiguration');
 
 var accounts      = new Account(mongoose, mongoConnection.getConnectionPortal());
 var audit_events  = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
@@ -43,7 +42,6 @@ var domainConfigs       = new DomainConfig(mongoose, mongoConnection.getConnecti
 var locations     = new Location(mongoose, mongoConnection.getConnectionPortal());
 var users         = new User(mongoose, mongoConnection.getConnectionPortal());
 var purge_jobs    = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
-var master_conf   = new MasterConfiguration(mongoose, mongoConnection.getConnectionPortal());
 var server_groups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 
 /**
@@ -60,7 +58,7 @@ exports.referenced = function (request, reply) {
   async.parallel({
 
     accounts : function (cb) {
-      accounts.listAll(request, function (err, accounts) {
+      accounts.list(function (err, accounts) {
         if (err) {
           cb(err);
         }
@@ -83,15 +81,6 @@ exports.referenced = function (request, reply) {
           cb(err);
         }
         cb(null, users);
-      });
-    },
-
-    masterConfiguration : function (cb) {
-      master_conf.listAll(function (err, configs) {
-        if (err) {
-          cb(err);
-        }
-        cb(null, configs);
       });
     },
 
@@ -303,15 +292,6 @@ exports.indexes = function (request, reply) {
 
     PurgeJob : function (cb) {
       purge_jobs.model.collection.getIndexes(function (err, data) {
-        if (err) {
-          cb(err);
-        }
-        cb(null, data);
-      });
-    },
-
-    MasterConfiguration : function (cb) {
-      master_conf.model.collection.getIndexes(function (err, data) {
         if (err) {
           cb(err);
         }

@@ -20,11 +20,29 @@
 
 // Requiring config and `BaseResource`
 var config = require('config');
-var BaseResource = require('./base');
+var BasicResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
 
+var resourceConfig = {
+  idKey: null,
+  name: 'activity',
+  path: '/activity',
+  methods: [
+    Methods.READ_ALL
+  ],
+  nestedResources: [
+    {
+      idKey: null,
+      name: 'summary',
+      path: '/summary',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }
+  ]
+};
 
-module.exports = new BaseResource({
-  host: config.api.host,
-  apiVersion: config.api.version,
-  apiResource: config.api.resources.activity,
-});
+// Creating new instance of BaseResource which is going to represent the API
+// `activity resource`
+module.exports = new BasicResource(resourceConfig);

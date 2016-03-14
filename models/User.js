@@ -37,10 +37,13 @@ function User(mongoose, connection, options) {
       test      : {type : Boolean, default : true},
       readOnly  : {type : Boolean, default : false}
     },
+    // TODO need to rename to account_id
     'companyId'            : String,
     'domain'               : String,
     'email'                : String,
+     // TODO rename to first_name
     'firstname'            : String,
+    // TODO rename to last_name
     'lastname'             : String,
     'password'             : String,
     'role'                 : {type : String, default : 'user'},
@@ -52,6 +55,7 @@ function User(mongoose, connection, options) {
     'last_login_at'        : {type : Date, default: null},
     'last_login_from'      : {type : String, default: null},
     // TODO: need to fix the ugly names of the two variables
+    // should be reset_password_token and reset_password_expires
     'resetPasswordToken'   : String,
     'resetPasswordExpires' : Number,
     'two_factor_auth_enabled': {type: Boolean, default: false},
@@ -121,6 +125,8 @@ User.prototype = {
 
         doc = utils.clone(doc);
         doc.user_id = doc._id;
+
+        // TODO: need to move all the "delete" operations to a separate function (and call it from all User methods)
 
         delete doc.__v;
         delete doc._id;
@@ -231,6 +237,8 @@ User.prototype = {
 
         users = utils.clone(users);
         for (var i = 0; i < users.length; i++) {
+
+          // TODO need to move the access control stuff out of the method
 
           // remove from the resulting array users without companyId property (most likely RevAdmin/system users)
           if (request.auth.credentials.role !== 'revadmin' && (!users[i].companyId)) {
@@ -344,6 +352,34 @@ User.prototype = {
     });
   },
 
+  updateLastLoginAt : function (item, callback) {
+    var context = this;
+    this.model.findOne({_id : item.user_id}, function (err, doc) {
+      //     console.log('Inside update: doc = ', doc);
+      if (doc) {
+
+        doc.last_login_at = new Date();
+        doc.last_login_from = item.last_login_from;
+
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.user_id = item._id;
+
+            delete item._id;
+            delete item.__v;
+            delete item.validation;
+            delete item.old_passwords;
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
+    });
+  },
+
+
   remove : function (item, callback) {
     var context = this;
     if (item) {
@@ -372,3 +408,4 @@ User.prototype = {
 };
 
 module.exports = User;
+

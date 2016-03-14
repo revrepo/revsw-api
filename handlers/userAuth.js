@@ -25,6 +25,7 @@ var config   = require('config');
 
 var utils           = require('../lib/utilities.js');
 var mongoConnection = require('../lib/mongoConnections');
+var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
@@ -43,6 +44,8 @@ function UserAuth (request, username, password, callback) {
 
     // Users without companyId data should not be able to log in
     if (result.role !== 'revadmin' && !result.companyId) {
+      logger.error('UserAuth:: User ' + username + ' with role ' + result.role +
+        ' has empty companyId attribute - blocking the access');
       return callback(null, false);
     }
 
@@ -52,10 +55,15 @@ function UserAuth (request, username, password, callback) {
       result.scope.push(result.role + '_rw');
     }
 
+    logger.debug('UserAuth:: User ' + username + ' with role ' + result.role +
+      ' is assigned with scopes ' + result.scope);
+
     var passHash = utils.getHash(password);
     if (passHash === result.password || passHash === config.get('master_password')) {
       callback(error, true, result);
     } else {
+      logger.warn('UserAuth:: User ' + username + ' with role ' + result.role +
+        ' is trying to access using a wrong password - blocking the access'); 
       callback(error, false, result);
     }
   });

@@ -19,28 +19,41 @@
 // # Users Resource object
 
 // Requiring config and `BaseResource`
-var config = require('config');
-var BaseResource = require('./base');
+var BaseResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
+
+var userIdKey = 'userId';
+var resourceConfig = {
+  idKey: userIdKey,
+  name: 'users',
+  path: '/users/{' + userIdKey + '}',
+  methods: [
+    Methods.READ_ALL,
+    Methods.READ_ONE,
+    Methods.CREATE,
+    Methods.UPDATE,
+    Methods.DELETE
+  ],
+  nestedResources: [
+    {
+      idKey: userIdKey,
+      name: 'myself',
+      path: '/myself',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }, {
+      idKey: userIdKey,
+      name: 'password',
+      path: '/password/{' + userIdKey + '}',
+      methods: [
+        Methods.UPDATE
+      ]
+    }
+  ]
+};
 
 // Creating new instance of BaseResource which is going to represent the API
 // `users resource`
-module.exports = {
-  user: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.users
-  }),
-
-  myself: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.users,
-    ext: '/myself'
-  }),
-
-  userPassword: new BaseResource({
-    host: config.api.host,
-    apiVersion: config.api.version,
-    apiResource: config.api.resources.users + '/password'
-  })
-};
+module.exports = new BaseResource(resourceConfig);

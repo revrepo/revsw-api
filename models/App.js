@@ -33,9 +33,11 @@ function App(mongoose, connection, options) {
 
   var configSchema = mongoose.Schema({
     sdk_release_version: {type: Number},
+    // TODO add allowed logging levels
     logging_level: String, // (“debug”, “info”, “warning”, “error” or “critical”)
     configuration_refresh_interval_sec: {type: Number},
     configuration_stale_timeout_sec: {type: Number},
+    // TODO add allowed operation modes
     operation_mode: String, // (“transfer_and_report”, “transfer_only”, “report_only” or “off”)
     allowed_transport_protocols: [String],
     initial_transport_protocol: String,
@@ -54,6 +56,7 @@ function App(mongoose, connection, options) {
   this.AppSchema = new this.Schema({
     app_name: String,
     account_id: String,
+    // TODO add allowed app platforms
     app_platform: String, // (“iOS” or “Android”)
     deleted: {type: Boolean, default: false},
     deleted_at: {type: Date},

@@ -143,7 +143,7 @@ module.exports = [
       },
       validate: {
         options: {
-          stripUnknown: true
+          stripUnknown: false
         },
         params: {
           id: Joi.string().required().description('ID of the Billing plan to be updated')

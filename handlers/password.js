@@ -26,7 +26,7 @@ var async       = require('async');
 var nodemailer  = require('nodemailer');
 var config      = require('config');
 var crypto      = require('crypto');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -47,7 +47,7 @@ exports.forgotPassword = function(request, reply) {
     email: email
   }, function(error, user) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
     }
     if (user) {
       if (  user.role && user.role === 'revadmin' ) {
@@ -65,11 +65,11 @@ exports.forgotPassword = function(request, reply) {
         function(token, done) {
           delete user.password;
           user.resetPasswordToken   = token;
-          user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan'); // 1 hour
+          user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan');
 
           users.update(user, function(error, result) {
             if (error) {
-              return reply(boom.badImplementation('Failed to retrieve user details'));
+              return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user.user_id));
             }
 
             result = publicRecordFields.handle(result, 'users');
@@ -77,7 +77,7 @@ exports.forgotPassword = function(request, reply) {
             AuditLogger.store({
               ip_address       : utils.getAPIUserRealIP(request),
               datetime         : Date.now(),
-              user_id          : result.id,
+              user_id          : result.user_id,
               user_name        : result.email,
               user_type        : 'user',
               account_id       : result.companyId[0],
@@ -113,7 +113,7 @@ exports.forgotPassword = function(request, reply) {
 
       ], function(err) {
         if (err) {
-          return reply(boom.badImplementation('Failed to execute password reset procedure'));
+          return reply(boom.badImplementation('Failed to execute password reset procedure for email ' + email));
         }
       });
 
@@ -132,7 +132,7 @@ exports.checkPasswordResetToken = function(request, reply) {
     resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() }
   }, function(error, user) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve token/user details'));
+      return reply(boom.badImplementation('Failed to retrieve token/user details for token ' + token));
     }
     if (!user) {
       return reply(boom.badRequest('The password reset token is invalid or has expired'));
@@ -154,18 +154,20 @@ exports.resetPassword = function(request, reply) {
         resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() }
       }, function(error, user) {
         if (error) {
-          return reply(boom.badImplementation('Failed to retrieve token/user details'));
+          return reply(boom.badImplementation('Failed to retrieve token/user details for token ' + token));
         }
         if (!user) {
           return reply(boom.badRequest('The password reset token is invalid or has expired'));
         }
+
+        // TODO: need to move the password encyption function from user.update to a higher level
         user.password             = newPassword;
         user.resetPasswordToken   = undefined;
         user.resetPasswordExpires = undefined;
 
         users.update( user, function(error, result) {
           if (error) {
-            return reply(boom.badImplementation('Failed to update user details with new password'));
+            return reply(boom.badImplementation('Failed to update user ' + user.email + ' with new password'));
           }
 
           result = publicRecordFields.handle(result, 'users');

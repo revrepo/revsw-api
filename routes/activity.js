@@ -46,8 +46,8 @@ module.exports = [
         query: {
           user_id: Joi.objectId().description('User ID'),
           account_id: Joi.objectId().description('Account ID'),
-          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
+          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
         }
       }
     }
@@ -71,8 +71,8 @@ module.exports = [
         query: {
           user_id: Joi.objectId().description('User ID'),
           account_id: Joi.objectId().description('Account ID'),
-          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
+          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
         }
       }
     }

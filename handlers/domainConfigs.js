@@ -22,7 +22,7 @@
 var mongoose    = require('mongoose');
 var boom        = require('boom');
 var uuid        = require('node-uuid');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var config      = require('config');
 var cds_request = require('request');
 var utils           = require('../lib/utilities.js');
@@ -42,6 +42,7 @@ var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPo
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var billing_plans = require('../models/BillingPlan');
+var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
 var checkDomainsLimit = function (companyId, callback) {
    accounts.get({_id: companyId}, function (err, account) {
@@ -80,6 +81,7 @@ var isSubscriptionActive = function (companyId, callback) {
   });
 };
 
+// TODO: need to move the function to "utils" module
 function checkDomainAccessPermission(request, domain) {
 
   // Since domain list and single domain objects have the account_id attribute on different levels we need to use a proper field
@@ -101,18 +103,12 @@ exports.getDomainConfigStatus = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrive configuration details for domain ID ' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/config_status',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      }
+      headers: authHeader
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration status for domain ' + domain_id));
@@ -131,9 +127,7 @@ exports.getDomainConfigStatus = function(request, reply) {
 exports.getDomainConfigs = function(request, reply) {
 
   cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
-    headers: {
-      Authorization: 'Bearer ' + config.get('cds_api_token')
-    }
+    headers: authHeader
   }, function (err, res, body) {
     if (err) {
       return reply(boom.badImplementation('Failed to get from CDS a list of domains'));
@@ -166,10 +160,7 @@ exports.getDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -179,9 +170,7 @@ exports.getDomainConfig = function(request, reply) {
 
     logger.info('Calling CDS to get configuration for domain ID: ' + domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration for domain ID: ' + domain_id));
@@ -208,18 +197,13 @@ exports.getDomainConfigVersions = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
     logger.info('Calling CDS to get configuration versions for domain ID: ', domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/versions',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration for domain ID: ' + domain_id));
@@ -269,9 +253,7 @@ exports.createDomainConfig = function(request, reply) {
       logger.info('Calling CDS to create new domain ' + JSON.stringify(newDomainJson));
       cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
         method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + config.get('cds_api_token')
-        },
+        headers: authHeader,
         body: JSON.stringify(newDomainJson)
       }, function (err, res, body) {
         if (err) {
@@ -375,6 +357,7 @@ exports.updateDomainConfig = function(request, reply) {
   var domain_id = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
+  // TODO: use a function for access permission checks
   if (request.auth.credentials.role !== 'revadmin' && newDomainJson.account_id &&
     request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
     return reply(boom.badRequest('Account ID not found'));
@@ -395,9 +378,7 @@ exports.updateDomainConfig = function(request, reply) {
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
       method: 'PUT',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader,
       body: JSON.stringify({
        updated_by: request.auth.credentials.email,
        proxy_config: newDomainJson 
@@ -434,11 +415,9 @@ exports.updateDomainConfig = function(request, reply) {
           operation_status : 'success'
         });
       }
-
       renderJSON(request, reply, err, response);
     });
   });
-
 };
 
 exports.deleteDomainConfig = function(request, reply) {
@@ -449,10 +428,7 @@ exports.deleteDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !checkDomainAccessPermission(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -460,9 +436,7 @@ exports.deleteDomainConfig = function(request, reply) {
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id,
       method: 'DELETE',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader,
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to send a CDS command to delete domain ID ' + domain_id));
@@ -490,5 +464,4 @@ exports.deleteDomainConfig = function(request, reply) {
       renderJSON(request, reply, err, response);
     });
   });
-
 };

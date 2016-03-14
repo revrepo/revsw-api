@@ -24,6 +24,8 @@ var Joi = require('joi');
 
 var account = require('../handlers/accounts');
 
+var accountValidation = require('../route-validation/account');
+
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
@@ -67,7 +69,9 @@ module.exports = [
       },
       validate: {
         payload: {
-          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150).trim().description('Company name of newly registered customer account')
+          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
+            .trim().description('Company name of newly registered customer account'),
+          comment: Joi.string().max(300).trim().description('Free-text comment about the company')
         }
       },
       response: {
@@ -82,7 +86,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin' ]
       },
       handler: account.updateAccount,
       description: 'Update a customer account',
@@ -100,9 +104,7 @@ module.exports = [
         params: {
           account_id: Joi.objectId().required().description('Account ID to be updated')
         },
-        payload: {
-          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150).trim().description('Company name')
-        }
+        payload: accountValidation.accountUpdatePayload
       },
       response: {
         schema: routeModels.statusModel
@@ -138,11 +140,87 @@ module.exports = [
   },
 
   {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/invoices',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getAccountInvoices,
+      description: 'Get a list of customer invoices',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID')
+        }
+      },
+/*      response: {
+        schema: routeModels.accountModel
+      }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/invoices/{invoice_id}',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getAccountInvoice,
+      description: 'Get a specific invoic',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID'),
+          invoice_id: Joi.number().required().description('Invoice ID')
+        }
+      }
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/transactions',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getAccountTransactions,
+      description: 'Get a list of customer transactions',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID')
+        }
+      },
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
     method: 'DELETE',
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin' ]
       },
       handler: account.deleteAccount,
       description: 'Remove a customer account',

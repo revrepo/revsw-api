@@ -85,6 +85,7 @@ APIKey.prototype = {
   list: function (request, callback) {
     this.model.find(function (err, api_keys) {
       if (api_keys) {
+        // TODO need to move the accesss control stuff out of the database model
         var keys = utils.clone(api_keys);
         for (var i = 0; i < keys.length; i++) {
           if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(keys[i].account_id) !== -1) {
@@ -187,6 +188,10 @@ APIKey.prototype = {
     } else {
       callback(utils.buildError('400', 'No API key passed to remove function'), null);
     }
+  },
+
+  removeMany: function (data, callback) {
+    this.model.remove(data, callback);
   },
 
   queryP: function (where, fields) {

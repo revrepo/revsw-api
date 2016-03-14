@@ -35,6 +35,7 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 
 //  ---------------------------------
+// TODO Need to move the function to "utils" module
 var checkAppAccessPermissions_ = function( request, reply, callback ) {
 
   var account_id = request.query.account_id || request.params.account_id || '';
@@ -142,7 +143,7 @@ exports.getAppReport = function( request, reply ) {
         renderJSON( request, reply, false, response );
       }, function( error ) {
         logger.error( error );
-        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES for app ID ' + app_id ) );
       } );
   });
 };
@@ -217,7 +218,7 @@ exports.getAccountReport = function( request, reply ) {
         renderJSON( request, reply, false, response );
       }, function( error ) {
         logger.error( error );
-        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES for account ID ' + account_id ) );
       } );
   });
 };
@@ -336,7 +337,7 @@ exports.getDirs = function( request, reply ) {
         renderJSON( request, reply, false, response );
       }, function( error ) {
         logger.error( error );
-        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+        return reply(boom.badImplementation('Failed to retrieve data from ES for query ' + JSON.stringify(request.query)));
       } );
 
   });
@@ -480,7 +481,7 @@ exports.getFlowReport = function( request, reply ) {
         renderJSON( request, reply, false, response );
       }, function( error ) {
         logger.error( error );
-        return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+        return reply(boom.badImplementation('Failed to retrieve data from ES for query '  + JSON.stringify(request.query)));
       } );
 
   });

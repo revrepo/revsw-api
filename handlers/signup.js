@@ -18,11 +18,10 @@
 
 'use strict';
 
-
 var mongoose = require('mongoose');
 var boom = require('boom');
 var async = require('async');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var utils = require('../lib/utilities');
 var mail = require('../lib/mail');
 var config = require('config');
@@ -60,7 +59,7 @@ exports.signup = function(req, reply) {
   var data = req.payload;
 
   if (!config.get('enable_self_registration')) {
-    return reply(boom.badRequest('Customer self-registration is temporary disabled'));
+    return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
 
   // Check user email address
@@ -72,6 +71,8 @@ exports.signup = function(req, reply) {
     }
 
     if (user) {
+
+      // TODO: not sure that we use "deleted" attribute
       if (user.deleted) {
         return reply(boom.badRequest('User has delete flag'));
       }
@@ -101,85 +102,72 @@ exports.signup = function(req, reply) {
       phone_number: data.phone_number,
       billing_plan: data.billing_plan
     };
-    accounts.get({
-      companyName: newCompany.companyName
-    }, function(error, result) {
+    
+    accounts.add(newCompany, function(error, result) {
 
-      if (error) {
-        return reply(boom.badImplementation('Failed to read from the DB and verify new account name ' + newCompany.companyName));
+      if (error || !result) {
+        return reply(boom.badImplementation('Failed to add new account ' + newCompany.companyName));
       }
+
+      result = publicRecordFields.handle(result, 'account');
 
       if (result) {
-        return reply(boom.badRequest('The company name is already registered in the system'));
+        newUser.companyId = result.id;
+        var token = utils.generateToken();
+        newUser.self_registered = true;
+        newUser.validation = {
+          expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+          token: token
+        };
+        // All ok
+        users.add(newUser, function(err, user) {
+          if (err || !user) {
+            return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
+          }
+
+          var statusResponse;
+          if (user) {
+            statusResponse = {
+              statusCode: 200,
+              message: 'Successfully created new user',
+              object_id: user.id
+            };
+
+            user = publicRecordFields.handle(user, 'user');
+
+            AuditLogger.store({
+              ip_address: utils.getAPIUserRealIP(req),
+              datetime: Date.now(),
+              user_type: 'user',
+              account_id: result.id,
+              activity_type: 'add',
+              activity_target: 'account',
+              target_id: result.id,
+              target_name: result.companyName,
+              target_object: result,
+              operation_status: 'success'
+            });
+
+            AuditLogger.store({
+              ip_address: utils.getAPIUserRealIP(req),
+              datetime: Date.now(),
+              user_type: 'user',
+              account_id: user.companyId,
+              activity_type: 'add',
+              activity_target: 'user',
+              target_id: user.id,
+              target_name: user.name,
+              target_object: user,
+              operation_status: 'success'
+            });
+            sendVerifyToken(user, token, function(err, res) {
+              renderJSON(req, reply, err, statusResponse);
+            });
+          }
+        });
       }
-
-      accounts.add(newCompany, function(error, result) {
-
-        if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new account ' + newCompany.companyName));
-        }
-
-        result = publicRecordFields.handle(result, 'account');
-
-        if (result) {
-          newUser.companyId = result.id;
-          var token = utils.generateToken();
-          newUser.self_registered = true;
-          newUser.validation = {
-            expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-            token: token
-          };
-          // All ok
-          users.add(newUser, function(err, user) {
-            if (err || !user) {
-              return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
-            }
-
-            var statusResponse;
-            if (user) {
-              statusResponse = {
-                statusCode: 200,
-                message: 'Successfully created new user',
-                object_id: user.id
-              };
-
-              user = publicRecordFields.handle(user, 'user');
-
-              AuditLogger.store({
-                ip_address: utils.getAPIUserRealIP(req),
-                datetime: Date.now(),
-                user_type: 'user',
-                account_id: result.id,
-                activity_type: 'add',
-                activity_target: 'account',
-                target_id: result.id,
-                target_name: result.companyName,
-                target_object: result,
-                operation_status: 'success'
-              });
-
-              AuditLogger.store({
-                ip_address: utils.getAPIUserRealIP(req),
-                datetime: Date.now(),
-                user_type: 'user',
-                account_id: user.companyId,
-                activity_type: 'add',
-                activity_target: 'user',
-                target_id: user.id,
-                target_name: user.name,
-                target_object: user,
-                operation_status: 'success'
-              });
-              sendVerifyToken(user, token, function(err, res) {
-                renderJSON(req, reply, err, statusResponse);
-              });
-            }
-          });
-        }
-      });
     });
   });
-
 };
 
 exports.resetToken = function(req, reply) {
@@ -189,13 +177,13 @@ exports.resetToken = function(req, reply) {
     email: email
   }, function(err, user) {
     if (err) {
-      return reply(boom.badImplementation('Failed to retrieve user details by given email'));
+      return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
     }
     if (!user) {
-      return reply(boom.badImplementation('No user exist with such email address'));
+      return reply(boom.badImplementation('No user exists with the email address'));
     }
     if(user.validation.verified){
-      return reply(boom.badRequest('Email already verified'));
+      return reply(boom.badRequest('The email is already verified'));
     }
     var token = utils.generateToken();
     user.validation = {
@@ -222,7 +210,7 @@ exports.resetToken = function(req, reply) {
 
     var statusResponse = {
       statusCode: 200,
-      message: 'Successfully sent token to email.',
+      message: 'Successfully sent token to specified email',
       object_id: result.id
     };
 
@@ -243,7 +231,7 @@ exports.verify = function(req, reply) {
     }
   }, function(error, user) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve validation token/user details'));
+      return reply(boom.badImplementation('Failed to retrieve validation token/user details for token ' + token));
     }
     if (!user) {
       return reply(boom.badRequest('The validation token is invalid or has expired'));

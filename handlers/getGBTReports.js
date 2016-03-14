@@ -178,10 +178,10 @@ exports.getGBTReports = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domain_name));
       });
     } else {
-      return reply(boom.badRequest('Domain not found'));
+      return reply(boom.badRequest('Domain ID not found'));
     }
   });
 };

@@ -24,7 +24,7 @@ var renderJSON      = require('../lib/renderJSON');
 
 var mongoose = require('mongoose');
 var boom = require('boom');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var async = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -34,19 +34,23 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var logger = require('revsw-logger')(config.log_config);
 var Account = require('../models/Account');
 var User = require('../models/User');
+var chargify = require('../lib/chargify').Customer;
 var Promise = require('bluebird');
+
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(users);
+Promise.promisifyAll(chargify);
 
 exports.webhookHandler = function (request, reply) {
   var body = request.payload;
   var payload = request.payload.payload;
 
   var onTest = function () {
-    reply(payload);
+    request.payload.msg = 'Test passed';
+    reply(request.payload);
   };
 
   var onSignupSuccess = function () {
@@ -54,19 +58,34 @@ exports.webhookHandler = function (request, reply) {
       var subscription = payload.subscription;
       var customer = subscription.customer;
       var product = subscription.product;
-
-      users.getAsync({email: customer.email})
-        .then(function (user) {
-          accounts.getAsync({createdBy: customer.email})
-            .then(function (account) {
-              var company = {
-                account_id: account.id,
-                subscription_id: subscription.id,
-                subscription_state: subscription.state,
-              };
-              resolve(accounts.updateAsync(company));
+      var credit_card = payload.credit_card;
+      chargify.getBillingPortalLinkAsync(customer.id)
+        .then(function (link) {
+          var expires_at = Date.parse(link.expires_at);
+          users.getAsync({email: customer.email})
+            .then(function (user) {
+              accounts.getAsync({createdBy: customer.email})
+                .then(function (account) {
+                  var company = {
+                    'billing_portal_link': {url: link.url, expires_at: expires_at},
+                    account_id: account.id,
+                    subscription_id: subscription.id,
+                    subscription_state: subscription.state,
+                    'billing_info': {
+                      'address1': credit_card.billing_address,
+                      'address2': credit_card.billing_address_2,
+                      'country': credit_card.billing_country,
+                      'state': credit_card.billing_state,
+                      'city': credit_card.billing_city,
+                      'zipcode': credit_card.billing_zip,
+                      'masked_card_number': credit_card.masked_card_number
+                    }
+                  };
+                  resolve(accounts.updateAsync(company));
+                });
             });
         });
+
     });
   };
 

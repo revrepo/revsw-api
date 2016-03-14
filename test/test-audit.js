@@ -22,7 +22,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var request     = require('supertest');
 var should      = require('should-http');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 
 var config = require('config');
 

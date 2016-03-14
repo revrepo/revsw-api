@@ -11,3 +11,4 @@ npm-debug.log
 sftp-config.json
 config/local.json
 config/local-*.json
+node_modules

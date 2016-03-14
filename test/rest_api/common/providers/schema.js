@@ -75,7 +75,11 @@ module.exports = {
       .keys({
         statusCode: Joi.number().integer().min(100).max(599).required(),
         error: Joi.string().required(),
-        message: Joi.string()
+        message: Joi.string(),
+        validation: Joi.object().keys({
+          source: Joi.string(),
+          keys: Joi.array()
+        })
       });
     return errorResponseSchema;
   },
@@ -122,7 +126,8 @@ module.exports = {
         createdBy: Joi.string().required(),
         id: Joi.string().regex(idFormatPattern).required(),
         created_at: Joi.string().regex(dateFormatPattern).required(),
-        updated_at: Joi.string().regex(dateFormatPattern).required()
+        updated_at: Joi.string().regex(dateFormatPattern).required(),
+        comment: Joi.string().allow('')
       });
     return accountSchema;
   },
@@ -133,7 +138,7 @@ module.exports = {
    * @returns {Object} SDK config schema
    *
    */
-  getSDKConfig: function() {
+  getSDKConfig: function () {
     var schema = Joi.object()
       .keys({
         id: Joi.string().regex(idFormatPattern).required(),
@@ -162,5 +167,99 @@ module.exports = {
         }))
       });
     return schema;
+  },
+
+  /**
+   * ### SchemaProvider.getCountries()
+   *
+   * @returns {Object} Countries schema
+   */
+  getCountries: function () {
+    var countriesSchema = Joi.object();
+    return countriesSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getFirstMileLocation()
+   *
+   * @returns {Object} First-mile-location schema
+   */
+  getFirstMileLocation: function () {
+    var firstMileSchema = Joi.object()
+      .keys({
+        id: Joi.string().regex(idFormatPattern).required(),
+        locationName: Joi.string().required()
+      });
+    return firstMileSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getLastMileLocation()
+   *
+   * @returns {Object} Last-mile-location schema
+   */
+  getLastMileLocation: function () {
+    var lastMileSchema = Joi.object()
+      .keys({
+        id: Joi.string().regex(idFormatPattern).required(),
+        site_code_name: Joi.string().required(),
+        city: Joi.string().required(),
+        state: Joi.string().required().allow(''),
+        country: Joi.string().required(),
+        billing_zone: Joi.string().required()
+      });
+    return lastMileSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getAuthenticateResponse()
+   *
+   * @returns {Object} authenticate response schema
+   */
+  getAuthenticateResponse: function () {
+    var authenticateSchema = Joi.object()
+      .keys({
+        statusCode: Joi.number().integer().min(100).max(599).required(),
+        message: Joi.string().required(),
+        token: Joi.string().length(239).required()
+      });
+    return authenticateSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getForgotResponse()
+   *
+   * @returns {Object} authenticate response schema
+   */
+  getForgotResponse: function () {
+    var forgotResponseSchema = Joi.object()
+      .keys({
+        message: Joi.string().required()
+      });
+    return forgotResponseSchema;
+  },
+
+  /**
+   * ### SchemaProvider.getActivityResponse()
+   *
+   * @returns {Object} activity response schema
+   */
+  getActivityResponse: function () {
+    var minTS = 1111111111111;
+    var maxTS = 9999999999999;
+    var activityResponseSchema = Joi.object().keys({
+      metadata: Joi.object().keys({
+        user_id: Joi.string().regex(idFormatPattern).required(),
+        account_id: Joi.string().regex(idFormatPattern)
+        /*.allow([
+          Joi.string().regex(idFormatPattern),
+          Joi.array().items(Joi.string().regex(idFormatPattern))
+        ])*/,
+        start_time: Joi.number().min(minTS).max(maxTS).required(),
+        end_time: Joi.number().min(minTS).max(maxTS).required()
+      }),
+      data: Joi.array().required()
+    });
+    return activityResponseSchema;
   }
 };
