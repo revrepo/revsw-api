@@ -295,15 +295,11 @@ exports.getPdfStatement = function (request, reply) {
       var idx = _.findIndex(invoices, {id: request.params.invoice_id});
       Customer.getPdfStatement(invoices[idx].id, function (error, pdf) {
         if(error){
-          console.log(error);
-          
           return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive invoice for subscription' +
             ' Subscription ID: ' + account.subscription_id +
             ' Account ID: ' + account_id +
             ' Invoice ID: ' + request.params.invoice_id));
         }
-        console.log(pdf);
-        
         reply(pdf)
           .type('application/pdf; charset=utf-8');
       });
