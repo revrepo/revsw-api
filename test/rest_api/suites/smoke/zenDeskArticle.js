@@ -16,13 +16,15 @@
  * from Rev Software, Inc.
  */
 
+var request = require('supertest-as-promised');
+var should = require('should');
+
+// # Smoke check: ZenDesk Article
 var config = require('config');
-var API = require('./../../../common/api');
 
-describe('Negative check', function () {
-
-  // Changing default mocha's timeout (Default is 2 seconds).
+describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
+  var zenDeskUrl = config.get('api.zenDesk.url');
 
   before(function (done) {
     done();
@@ -32,26 +34,22 @@ describe('Negative check', function () {
     done();
   });
 
-  describe('Countries resource', function () {
-    describe('Without authorization', function () {
+  describe('ZenDesk Article', function () {
 
-      beforeEach(function (done) {
-        done();
+    it('should return a success response when accessing it.',
+      function (done) {
+        request = request(zenDeskUrl);
+        request
+          .get('/hc/en-us/categories/200833373-RevAPM-API')
+          .expect(200)
+          .end(function (err, res) {
+            if (err) {
+              done(err);
+            }
+            should.exist(res.body);
+            done();
+          });
       });
-
-      afterEach(function (done) {
-        done();
-      });
-
-      xit('[BUG: Getting all countries is possible without authentication]' +
-        'should return `Unauthorized` response when getting all countries.',
-        function (done) {
-          API.session.reset();
-          API.resources.countries
-            .getAll()
-            .expect(401)
-            .end(done);
-        });
-    });
   });
 });
+
