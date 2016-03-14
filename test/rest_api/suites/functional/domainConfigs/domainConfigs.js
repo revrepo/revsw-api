@@ -37,6 +37,7 @@ describe('Domain configs functional test', function () {
   var originServerV2;
   var user = config.get('api.users.reseller');
   var secondReseller = config.get('api.users.secondReseller');
+  var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
     API.helpers
@@ -561,7 +562,7 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should allow to change domain ownership to another company',
+    it('should allow to change domain ownership to another company as revadmin user',
       function (done) {
         var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
         domainConfig.account_id = secondAccount.id;
@@ -596,7 +597,7 @@ describe('Domain configs functional test', function () {
         };
         // Test
         API.helpers
-          .authenticateUser(user)
+          .authenticateUser(revAdmin)
           .then(function () {
             return API.resources.domainConfigs
               .update(firstDc.id, domainConfig)
