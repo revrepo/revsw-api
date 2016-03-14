@@ -35,7 +35,7 @@ describe('Domain configs functional test', function () {
   var secondDc;
   var originServerV1;
   var originServerV2;
-  var user = config.get('api.users.revAdmin');
+  var user = config.get('api.users.reseller');
   var secondReseller = config.get('api.users.secondReseller');
 
   before(function (done) {
