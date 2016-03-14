@@ -16,6 +16,9 @@
       "name": "0.0.0.0",
       "port": 8000
     },
+    "zenDesk": {
+      "url": "https://revapm.zendesk.com"
+    },
     "version": "v1",
     "resources": {
       "billingPlans": "billing_plans",

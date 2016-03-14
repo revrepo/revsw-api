@@ -62,9 +62,10 @@ var ActivityDataProvider = {
     },
 
     getQueryParams: function () {
-      var now = new Date();
-      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-      var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+      var now = Date.now();
+      var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+      var startTimestamp = now - (2 * hour); // 2 hours before
+      var endTimestamp = now - (1 * hour); // 1 hour before
       return [
         {}, // No query params
         {user_id: this.userId},
@@ -79,8 +80,9 @@ var ActivityDataProvider = {
     },
 
     getBogusQueryParams: function () {
-      var now = new Date();
-      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+      var now = Date.now();
+      var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+      var startTimestamp = now - (2 * hour); // 2 hours before
       return [
         {user_id: bogusString},
         // {domain_id: bogusString},
@@ -94,8 +96,9 @@ var ActivityDataProvider = {
     },
 
     getEmptyQueryParams: function () {
-      var now = new Date();
-      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+      var now = Date.now();
+      var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+      var startTimestamp = now - (2 * hour); // 2 hours before
       return [
         {user_id: emptyString},
         // {domain_id: emptyString},
@@ -109,8 +112,9 @@ var ActivityDataProvider = {
     },
 
     getLongQueryParams: function () {
-      var now = new Date();
-      var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+      var now = Date.now();
+      var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+      var startTimestamp = now - (2 * hour); // 2 hours before
       return [
         {user_id: longId},
         // {domain_id: longId},
@@ -144,9 +148,10 @@ var ActivityDataProvider = {
       },
 
       getQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
-        var endTimestamp = now.setHours(2, 0, 0, 0); // 2 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
         return [
           {}, // No query params
           {user_id: this.userId},
@@ -161,8 +166,9 @@ var ActivityDataProvider = {
       },
 
       getBogusQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
         return [
           {user_id: bogusString},
           // {domain_id: bogusString},
@@ -176,8 +182,9 @@ var ActivityDataProvider = {
       },
 
       getEmptyQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
         return [
           {user_id: emptyString},
           // {domain_id: emptyString},
@@ -191,8 +198,9 @@ var ActivityDataProvider = {
       },
 
       getLongQueryParams: function () {
-        var now = new Date();
-        var startTimestamp = now.setHours(1, 0, 0, 0); // 1 AM
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
         return [
           {user_id: longId},
           // {domain_id: longId},

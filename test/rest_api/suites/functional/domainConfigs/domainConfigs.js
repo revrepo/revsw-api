@@ -29,13 +29,13 @@ describe('Domain configs functional test', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var account;
-  var anotherAccount;
+  var secondAccount;
   var firstDc;
   var firstFdc;
   var secondDc;
   var originServerV1;
   var originServerV2;
-  var reseller = config.get('api.users.reseller');
+  var user = config.get('api.users.revAdmin');
   var secondReseller = config.get('api.users.secondReseller');
 
   before(function (done) {
@@ -45,9 +45,9 @@ describe('Domain configs functional test', function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
-        anotherAccount = newAccount;
+        secondAccount = newAccount;
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -68,11 +68,11 @@ describe('Domain configs functional test', function () {
     API.helpers
       .authenticateUser(secondReseller)
       .then(function () {
-        return API.resources.accounts.deleteOne(anotherAccount.id);
+        return API.resources.accounts.deleteOne(secondAccount.id);
       })
       .then(function () {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           // TODO: BUG? Cannot delete DomainConfig right after updating it.
           //.then(function () {
           //  return API.resources.domainConfigs.deleteOne(firstDc.id);
@@ -89,9 +89,9 @@ describe('Domain configs functional test', function () {
 
     it('should not be able to create domain using account from other customer',
       function (done) {
-        var domainConfig = DomainConfigsDP.generateOne(anotherAccount.id);
+        var domainConfig = DomainConfigsDP.generateOne(secondAccount.id);
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(domainConfig)
@@ -131,7 +131,7 @@ describe('Domain configs functional test', function () {
             .catch(done);
         };
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             setTimeout(cb, interval);
           })
@@ -144,7 +144,7 @@ describe('Domain configs functional test', function () {
         secondDc = DomainConfigsDP.generateOne(account.id);
         originServerV1 = secondDc.origin_server;
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             var counter = 180000; // 3 mins
             var interval = 1000;
@@ -174,7 +174,6 @@ describe('Domain configs functional test', function () {
               .expect(200)
               .then(function (response) { // This is needed for the next tests
                 secondDc.id = response.body.object_id;
-                return;
               })
               .then(function () {
                 setTimeout(cb, interval);
@@ -190,7 +189,7 @@ describe('Domain configs functional test', function () {
         var newDomain = DomainConfigsDP.generateOne(account.id);
         newDomain.domain_aliases = secondDc.domain_name;
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(newDomain)
@@ -211,7 +210,7 @@ describe('Domain configs functional test', function () {
         var newDomain = DomainConfigsDP.generateOne(account.id);
         newDomain.domain_wildcard_alias = secondDc.domain_name;
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(newDomain)
@@ -229,7 +228,7 @@ describe('Domain configs functional test', function () {
     it('should allow to get `version 1` of recently created domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id, {version: 1})
@@ -246,14 +245,13 @@ describe('Domain configs functional test', function () {
     it('should allow to get `version 2` of recently updated domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
               .expect(200)
               .then(function (response) { // This is needed for the next tests
                 firstFdc = response.body;
-                return;
               })
               .then(function () {
                 firstFdc.origin_host_header = 'PUBLISH-' +
@@ -298,9 +296,9 @@ describe('Domain configs functional test', function () {
     it('should not be able to update domain using account from other customer',
       function (done) {
         var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
-        domainConfig.account_id = anotherAccount.id;
+        domainConfig.account_id = secondAccount.id;
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .update(firstDc.id, domainConfig)
@@ -318,7 +316,7 @@ describe('Domain configs functional test', function () {
       'domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             var counter = 180000; // 3 mins
             var interval = 1000;
@@ -355,7 +353,7 @@ describe('Domain configs functional test', function () {
     it('should return recently modified domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -372,7 +370,7 @@ describe('Domain configs functional test', function () {
     it('should return recently modified domain config in the domain-list',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -394,7 +392,7 @@ describe('Domain configs functional test', function () {
       'modified domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             var counter = 180000; // 3 mins
             var interval = 1000;
@@ -431,7 +429,7 @@ describe('Domain configs functional test', function () {
     it('should return recently published domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -448,7 +446,7 @@ describe('Domain configs functional test', function () {
     it('should return recently published domain config in the domain-list',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -470,7 +468,7 @@ describe('Domain configs functional test', function () {
       'modified domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             var counter = 180000; // 3 mins
             var interval = 1000;
@@ -507,7 +505,7 @@ describe('Domain configs functional test', function () {
     it('should return recently verified domain config',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -524,7 +522,7 @@ describe('Domain configs functional test', function () {
     it('should return recently verified domain config in the domain-list',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -548,7 +546,7 @@ describe('Domain configs functional test', function () {
         var secondDcClone = JSON.parse(JSON.stringify(secondDc));
         delete secondDcClone.id;
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(secondDcClone)
@@ -557,6 +555,60 @@ describe('Domain configs functional test', function () {
                 response.body.message.should
                   .equal('The domain name is already registered in the system');
                 done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should allow to change domain ownership to another company',
+      function (done) {
+        var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
+        domainConfig.account_id = secondAccount.id;
+        var counter = 180000; // 3 mins
+        var interval = 1000;
+        var callBack = function () {
+          if (counter < 0) {
+            done(new Error('Timeout: waiting domain-status to change.'));
+          }
+          counter -= interval;
+          API.resources.domainConfigs
+            .status(firstDc.id)
+            .getOne()
+            .expect(200)
+            .then(function (response) {
+              if (response.body.staging_status !== 'Published') {
+                setTimeout(callBack, interval);
+                return;
+              }
+              API.resources.domainConfigs
+                .getOne(firstDc.id)
+                .expect(200)
+                .then(function (res) {
+                  var newDc = res.body;
+                  newDc.account_id.should.equal(domainConfig.account_id);
+                  newDc.domain_name.should.equal(firstDc.domain_name);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+        // Test
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            return API.resources.domainConfigs
+              .update(firstDc.id, domainConfig)
+              .expect(200)
+              .then()
+              .catch(done);
+          })
+          .then(function () {
+            API.helpers
+              .authenticateUser(secondReseller)
+              .then(function () {
+                setTimeout(callBack, interval);
               })
               .catch(done);
           })
