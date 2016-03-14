@@ -172,7 +172,33 @@ module.exports = [
         scope: ['admin', 'reseller', 'revadmin' ]
       },
       handler: account.getAccountInvoice,
-      description: 'Get a specific invoic',
+      description: 'Get a specific statement',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID'),
+          invoice_id: Joi.number().required().description('Invoice ID')
+        }
+      }
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/invoices/{invoice_id}/pdf',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getPdfStatement,
+      description: 'Get pdf of a statement',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

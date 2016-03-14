@@ -147,6 +147,171 @@ exports.getAccount = function (request, reply) {
   });
 };
 
+exports.getAccountInvoices = function (request, reply) {
+  var account_id = request.params.account_id;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Accounts::getAccountInvoices: Permission denied for' +
+      ' Account ID: ' + account_id));
+  }
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getAccountInvoices: Failed to get an account' +
+        ' Account ID: ' + account_id));
+     }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('Accounts::getAccountInvoices: No subscription registered for account.' +
+        ' Account ID: ' + account_id));
+    }
+    Customer.getStatements(account.subscription_id, function (error, invoices) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getAccountInvoices: Failed to receive invoices for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id));
+      }
+      invoices = publicRecordFields.handle(invoices, 'invoices');
+      renderJSON(request, reply, error, invoices);
+    });
+  });
+
+};
+
+exports.getAccountTransactions = function (request, reply) {
+  var account_id = request.params.account_id;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Accounts::getAccountInvoices: Permission denied for' +
+      ' Account ID: ' + account_id));
+  }
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getAccountInvoices: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('Accounts::getAccountInvoices: No subscription registered for account.' +
+        ' Account ID: ' + account_id));
+    }
+    Customer.getTransactions(account.subscription_id, function (error, transactions) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getAccountInvoices: Failed to receive transactions for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id));
+      }
+      transactions = publicRecordFields.handle(transactions, 'transactions');
+      renderJSON(request, reply, error, transactions);
+    });
+  });
+
+};
+
+exports.getAccountInvoice = function (request, reply) {
+  var account_id = request.params.account_id;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Accounts::getAccountInvoice: Permission denied for' +
+      ' Account ID: ' + account_id));
+  }
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getAccountInvoice: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('Accounts::getAccountInvoice: No subscription registered for account.' +
+        ' Account ID: ' + account_id));
+    }
+    Customer.getStatements(account.subscription_id, function (error, invoices) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getAccountInvoice: Failed to receive invoice for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id +
+          ' Invoice ID: ' + request.params.invoice_id));
+      }
+
+      var idx = _.findIndex(invoices, {id: request.params.invoice_id});
+      if(idx < 0){
+        return reply(boom.badRequest('Accounts::getAccountInvoice: Failed to receive invoice for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id +
+          ' Invoice ID: ' + request.params.invoice_id));
+      }
+      var invoice = invoices[idx];
+
+      var payments = [];
+      var transactions = [];
+      invoice.transactions.forEach(function (t) {
+        if(t.transaction_type === 'payment'){
+          payments.push(t);
+        }
+      });
+      invoice.transactions.forEach(function (t) {
+        if(t.transaction_type !== 'payment'){
+          transactions.push(t);
+        }
+      });
+      invoice.payments = payments;
+      invoice.transactions = transactions;
+
+      var result = publicRecordFields.handle(invoice, 'invoice');
+      renderJSON(request, reply, error, result);
+    });
+  });
+
+};
+
+exports.getPdfStatement = function (request, reply) {
+  var account_id = request.params.account_id;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Accounts::getPdfStatement: Permission denied for' +
+      ' Account ID: ' + account_id));
+  }
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('Accounts::getPdfStatement: No subscription registered for account.' +
+        ' Account ID: ' + account_id));
+    }
+    Customer.getStatements(account.subscription_id, function (error, invoices) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive invoice for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id +
+          ' Invoice ID: ' + request.params.invoice_id));
+      }
+
+      var idx = _.findIndex(invoices, {id: request.params.invoice_id});
+      Customer.getPdfStatement(invoices[idx].id, function (error, pdf) {
+        if(error){
+          console.log(error);
+          
+          return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive invoice for subscription' +
+            ' Subscription ID: ' + account.subscription_id +
+            ' Account ID: ' + account_id +
+            ' Invoice ID: ' + request.params.invoice_id));
+        }
+        console.log(pdf);
+        
+        reply(pdf)
+          .type('application/pdf; charset=utf-8');
+      });
+    });
+  });
+
+};
+
 exports.updateAccount = function (request, reply) {
 
   var updateAccount = function (request, reply) {
@@ -186,7 +351,7 @@ exports.updateAccount = function (request, reply) {
   var account_id = updatedAccount.account_id;
   accounts.get({ _id : account_id }, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id ));
+      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id));
     }
 
     if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -194,18 +359,18 @@ exports.updateAccount = function (request, reply) {
     }
 
     accounts.get({_id: updatedAccount.account_id}, function (error, account) {
-      if(error){
+      if (error) {
         return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
           ' Account ID: ' + updatedAccount.account_id));
       }
-      if(account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan)){
+      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan)) {
         BillingPlan.get({_id: updatedAccount.billing_plan}, function (error, plan) {
-          if(error){
+          if (error) {
             return reply(boom.badRequest('Accounts::updateAccount: failed to get a billing plan' +
               ' Billing Plan ID: ' + updatedAccount.billing_plan));
           }
           Customer.changeProduct(account.subscription_id, plan.chargify_handle, function (error) {
-            if(error){
+            if (error) {
               return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
                 ' Account ID: ' + updatedAccount.account_id +
                 ' Subscription ID: ' + account.subscription_id +
@@ -215,9 +380,10 @@ exports.updateAccount = function (request, reply) {
           });
         });
       }
-      else{
+      else {
         updateAccount(request, reply);
       }
+    });
   });
 };
 
@@ -246,8 +412,15 @@ exports.deleteAccount = function (request, reply) {
 
         account = account2;
 
-        cb(error);
+        cb(error, account);
       });
+    },
+    function (account, cb) {
+      if(account.subscription_id){
+        Customer.cancelSubscription(account.subscription_id, cb);
+      }else{
+        cb(null, account);
+      }
     },
     // Verify that there are no active apps for an account
     function (cb) {
@@ -296,17 +469,6 @@ exports.deleteAccount = function (request, reply) {
         cb(error);
       });
     },
-    function (account, cb) {
-      if(account.subscription_id){
-        Customer.cancelSubscription(account.subscription_id, cb);
-      }else{
-        cb(null, account);
-      }
-    },
-    function (account) {
-      accounts.remove({
-        _id : account_id
-      }, function (error) {
     // Drop the deleted account_id from companyId of all users which are managing the account
     function (cb) {
       users.listAll(request, function (error, usersToUpdate) {
@@ -391,10 +553,9 @@ exports.deleteAccount = function (request, reply) {
       });
 
       renderJSON(request, reply, null, statusResponse);
-    }
-  ], function (err) {
-    if (err) {
-      return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
-    }
-  });
+    }], function (err) {
+        if (err) {
+          return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
+        }
+      });
 };
