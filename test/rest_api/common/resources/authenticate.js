@@ -16,18 +16,24 @@
  * from Rev Software, Inc.
  */
 
-// # Accounts Resource object
+// # Authenticate Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
-var BaseResource = require('./base');
+var BasicResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
+
+var resourceConfig = {
+  idKey: null,
+  name: 'authenticate',
+  path: '/authenticate',
+  methods: [
+    Methods.CREATE
+  ],
+  nestedResources: []
+};
 
 // Creating new instance of BaseResource which is going to represent the API
 // `authenticate resource`
-// TODO: In the future we need to improve this way of instantiation by providing
-// allowed method for the resource being created.
-module.exports = new BaseResource({
-  host: config.api.host,
-  apiVersion: config.api.version,
-  apiResource: config.api.resources.authenticate
-});
+module.exports = new BasicResource(resourceConfig);

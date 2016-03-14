@@ -43,6 +43,8 @@ function Account(mongoose, connection, options) {
     'city'                 : String,
     'zipcode'              : String,
     'phone_number'         : String,
+    'comment': {type: String, default: ''},
+    'deleted': {type: Boolean, default: false},
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
@@ -71,21 +73,18 @@ Account.prototype = {
     });
   },
 
-  list : function (request, callback) {
-
-    this.model.find(function (err, accounts) {
-      if (accounts) {
+  list : function (callback) {
+    this.model.find({ deleted: { $ne: true } },function (err, accounts) {
+      if(accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
-          if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(accounts[i]._id) !== -1) {
-            accounts[i].id = accounts[i]._id + '';
-            delete accounts[i]._id;
-            delete accounts[i].__v;
-            delete accounts[i].status;
-          } else {
-            accounts.splice(i, 1);
-            i--;
-          }
+          var current = accounts[i];
+
+          current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
+          delete current._id;
+          delete current.__v;
+          delete current.status;
         }
       }
 
@@ -110,6 +109,8 @@ Account.prototype = {
   },
 
   get : function (item, callback) {
+    item.deleted = { $ne: true };
+
     this.model.findOne(item, function (err, doc) {
       if (doc) {
         doc = utils.clone(doc);
@@ -124,6 +125,7 @@ Account.prototype = {
   },
 
   update : function (item, callback) {
+    // TODO need to switch to use "id" instead of "account_id"
     this.model.findOne({_id : item.account_id}, function (err, doc) {
       if (doc) {
 

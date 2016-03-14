@@ -22,13 +22,15 @@
 
 var boom        = require('boom');
 var mongoose    = require('mongoose');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var speakeasy   = require('speakeasy');
+var config      = require('config');
 
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
+var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
 
@@ -411,16 +413,8 @@ exports.enable2fa = function (request, reply) {
 
 exports.disable2fa = function (request, reply) {
   var password = request.payload.password;
-  if (request.params.user_id) {
-    var user_id = request.params.user_id;
-    // TODO Call an existing "utils" function to verity user access permissions
-    if (request.auth.credentials.role !== 'revadmin' && ((user_id !== request.auth.credentials.user_id) &&
-      (request.auth.credentials.role !== 'admin'))) {
-      return reply(boom.badRequest('User ID not found'));
-    }
-  } else {
-    user_id = request.auth.credentials.user_id;
-  }
+  var user_id = request.params.user_id ? request.params.user_id : request.auth.credentials.user_id;
+
   users.get({
     _id: user_id
   }, function(error, user) {

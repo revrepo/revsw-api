@@ -58,7 +58,7 @@ exports.referenced = function (request, reply) {
   async.parallel({
 
     accounts : function (cb) {
-      accounts.listAll(request, function (err, accounts) {
+      accounts.list(function (err, accounts) {
         if (err) {
           cb(err);
         }

@@ -63,8 +63,7 @@ describe('Negative check', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            // TODO: this should be changed to the new way to create a resource
-            return API.resources.users.user.deleteAllPrerequisites(done);
+            return API.resources.users.deleteAllPrerequisites(done);
           })
           .catch(done);
       });
@@ -79,9 +78,9 @@ describe('Negative check', function () {
                 .init()
                 .getOne()
                 .expect(200)
-                .then(function (res) {
-                  var key = nonExistingBase32Key;
-                  var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+                .then(function () {
+                  var oneTimePassword = TwoFADP
+                    .generateOneTimePassword(nonExistingBase32Key);
                   API.resources.twoFA
                     .enable()
                     .createOne(oneTimePassword)

@@ -67,7 +67,9 @@ module.exports = [
       },
       validate: {
         payload: {
-          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150).trim().description('Company name of newly registered customer account')
+          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
+            .trim().description('Company name of newly registered customer account'),
+          comment: Joi.string().max(300).trim().description('Free-text comment about the company')
         }
       },
       response: {
@@ -101,7 +103,8 @@ module.exports = [
           account_id: Joi.objectId().required().description('Account ID to be updated')
         },
         payload: {
-          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150).trim().description('Company name')
+          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150).trim().description('Company name'),
+          comment: Joi.string().max(300).trim().description('Free-text comment about the company')
         }
       },
       response: {
