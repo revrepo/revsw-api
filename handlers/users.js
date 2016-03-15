@@ -57,12 +57,16 @@ exports.createUser = function(request, reply) {
   var newUser = request.payload;
 
   if (newUser.companyId) {
+    // TODO: need to move the permissions check to a separate function or use the existing function
     if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
       return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
     }
-  } else {
+  } else if (request.auth.credentials.companyId.length !== 0) {
     newUser.companyId = request.auth.credentials.companyId;
+  } else {
+    return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
   }
+
   var account_id = newUser.companyId[0];
 
   // TODO: Add a check for domains
@@ -421,6 +425,8 @@ exports.disable2fa = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
+
+    // console.log('user = ', JSON.stringify(user));
 
     if (!user || !utils.checkUserAccessPermissionToUser(request, user)) {
       return reply(boom.badRequest('User ID not found'));
