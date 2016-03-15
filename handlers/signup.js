@@ -155,8 +155,8 @@ exports.signup = function(req, reply) {
               account_id: user.companyId,
               activity_type: 'add',
               activity_target: 'user',
-              target_id: user.id,
-              target_name: user.name,
+              target_id: user.user_id,
+              target_name: user.email,
               target_object: user,
               operation_status: 'success'
             });
