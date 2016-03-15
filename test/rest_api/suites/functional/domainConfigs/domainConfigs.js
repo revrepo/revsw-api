@@ -30,6 +30,7 @@ describe('Domain configs functional test', function () {
 
   var account;
   var secondAccount;
+  var otherAccount;
   var firstDc;
   var firstFdc;
   var secondDc;
@@ -46,7 +47,7 @@ describe('Domain configs functional test', function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
-        secondAccount = newAccount;
+        otherAccount = newAccount;
         API.helpers
           .authenticateUser(user)
           .then(function () {
@@ -54,6 +55,10 @@ describe('Domain configs functional test', function () {
           })
           .then(function (newAccount) {
             account = newAccount;
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (newAccount) {
+            secondAccount = newAccount;
             return API.helpers.domainConfigs.createOne(account.id);
           })
           .then(function (domainConfig) {
@@ -69,7 +74,7 @@ describe('Domain configs functional test', function () {
     API.helpers
       .authenticateUser(secondReseller)
       .then(function () {
-        return API.resources.accounts.deleteOne(secondAccount.id);
+        return API.resources.accounts.deleteOne(otherAccount.id);
       })
       .then(function () {
         API.helpers
@@ -90,7 +95,7 @@ describe('Domain configs functional test', function () {
 
     it('should not be able to create domain using account from other customer',
       function (done) {
-        var domainConfig = DomainConfigsDP.generateOne(secondAccount.id);
+        var domainConfig = DomainConfigsDP.generateOne(otherAccount.id);
         API.helpers
           .authenticateUser(user)
           .then(function () {
@@ -297,7 +302,7 @@ describe('Domain configs functional test', function () {
     it('should not be able to update domain using account from other customer',
       function (done) {
         var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
-        domainConfig.account_id = secondAccount.id;
+        domainConfig.account_id = otherAccount.id;
         API.helpers
           .authenticateUser(user)
           .then(function () {
@@ -562,10 +567,11 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should allow to change domain ownership to another company as revadmin user',
+    it('should allow to change domain ownership to another company for same ' +
+      'reseller user',
       function (done) {
-        var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
-        domainConfig.account_id = secondAccount.id;
+        var updatedDc = DomainConfigsDP.cloneForUpdate(firstFdc);
+        updatedDc.account_id = secondAccount.id;
         var counter = 180000; // 3 mins
         var interval = 1000;
         var callBack = function () {
@@ -587,7 +593,62 @@ describe('Domain configs functional test', function () {
                 .expect(200)
                 .then(function (res) {
                   var newDc = res.body;
-                  newDc.account_id.should.equal(domainConfig.account_id);
+                  newDc.account_id.should.equal(updatedDc.account_id);
+                  newDc.domain_name.should.equal(firstDc.domain_name);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        };
+        // Test
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            return API.resources.domainConfigs
+              .update(firstDc.id, updatedDc)
+              .expect(200)
+              .then()
+              .catch(done);
+          })
+          .then(function () {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                setTimeout(callBack, interval);
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should allow to change domain ownership to another company as Rev ' +
+      'Admin user',
+      function (done) {
+        var updatedDc = DomainConfigsDP.cloneForUpdate(firstFdc);
+        updatedDc.account_id = otherAccount.id;
+        var counter = 180000; // 3 mins
+        var interval = 1000;
+        var callBack = function () {
+          if (counter < 0) {
+            done(new Error('Timeout: waiting domain-status to change.'));
+          }
+          counter -= interval;
+          API.resources.domainConfigs
+            .status(firstDc.id)
+            .getOne()
+            .expect(200)
+            .then(function (response) {
+              if (response.body.staging_status !== 'Published') {
+                setTimeout(callBack, interval);
+                return;
+              }
+              API.resources.domainConfigs
+                .getOne(firstDc.id)
+                .expect(200)
+                .then(function (res) {
+                  var newDc = res.body;
+                  newDc.account_id.should.equal(updatedDc.account_id);
                   newDc.domain_name.should.equal(firstDc.domain_name);
                   done();
                 })
@@ -600,7 +661,7 @@ describe('Domain configs functional test', function () {
           .authenticateUser(revAdmin)
           .then(function () {
             return API.resources.domainConfigs
-              .update(firstDc.id, domainConfig)
+              .update(firstDc.id, updatedDc)
               .expect(200)
               .then()
               .catch(done);
@@ -617,4 +678,3 @@ describe('Domain configs functional test', function () {
       });
   });
 });
-
