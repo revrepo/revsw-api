@@ -30,7 +30,7 @@ describe('CRUD check', function () {
   // Defining set of users for which all below tests will be run
   var users = [
     config.get('api.users.admin'),
-    config.get('api.users.revAdmin'),
+//    config.get('api.users.revAdmin'),
     config.get('api.users.reseller')
   ];
 
@@ -125,7 +125,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should disable 2fa for specific user',
+        it('should disable 2fa for specific user',
           function (done) {
             API.helpers
               .authenticateUser(newUser)
