@@ -70,16 +70,7 @@ exports.webhookHandler = function (request, reply) {
                     'billing_portal_link': {url: link.url, expires_at: expires_at},
                     account_id: account.id,
                     subscription_id: subscription.id,
-                    subscription_state: subscription.state,
-                    'billing_info': {
-                      'address1': credit_card.billing_address,
-                      'address2': credit_card.billing_address_2,
-                      'country': credit_card.billing_country,
-                      'state': credit_card.billing_state,
-                      'city': credit_card.billing_city,
-                      'zipcode': credit_card.billing_zip,
-                      'masked_card_number': credit_card.masked_card_number
-                    }
+                    subscription_state: subscription.state
                   };
                   resolve(accounts.updateAsync(company));
                 });
