@@ -58,8 +58,9 @@ function Account(mongoose, connection, options) {
       'masked_card_number': String
     },
     'billing_portal_link': {url: String, expires_at: Date},
-    'created_at': {type: Date, default: Date()},
-    'updated_at': {type: Date, default: Date()}
+    'created_at'  : {type : Date, default : Date()},
+    'updated_at'  : {type : Date, default : Date()}
+    // TODO: add deleted_at and deleted_by fields
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');

@@ -81,21 +81,6 @@ var isSubscriptionActive = function (companyId, callback) {
   });
 };
 
-// TODO: need to move the function to "utils" module
-function checkDomainAccessPermission(request, domain) {
-
-  // Since domain list and single domain objects have the account_id attribute on different levels we need to use a proper field
-  var accountId = (domain.proxy_config) ? domain.proxy_config.account_id : domain.account_id;
-  // TODO: fix a bug when account_id is not checked for user with role 'role'
-  if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.domain_name) === -1) {
-     return false;
-  } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-    request.auth.credentials.companyId.indexOf(accountId) === -1) {
-    return false;
-  }  
-  return true;
-}
-
 exports.getDomainConfigStatus = function(request, reply) {
 
   var domain_id = request.params.domain_id;
@@ -103,7 +88,7 @@ exports.getDomainConfigStatus = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrive configuration details for domain ID ' + domain_id));
     }
-    if (!result || !checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -141,7 +126,7 @@ exports.getDomainConfigs = function(request, reply) {
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
-        if (checkDomainAccessPermission(request,response_json[i])) {
+        if (utils.checkUserAccessPermissionToDomain(request,response_json[i])) {
           response.push(response_json[i]);
         }
       }
@@ -160,7 +145,7 @@ exports.getDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result || !checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -197,7 +182,7 @@ exports.getDomainConfigVersions = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result || !checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -223,7 +208,9 @@ exports.createDomainConfig = function(request, reply) {
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
 
-  // TODO: add a check that specified account_id is correct
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
 
   var createDomain = function (error, result) {
     if (error) {
@@ -233,6 +220,7 @@ exports.createDomainConfig = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
     }
+
     newDomainJson.created_by = request.auth.credentials.email;
     if (!newDomainJson.tolerance) {
       newDomainJson.tolerance = '3000';
@@ -293,14 +281,16 @@ exports.createDomainConfig = function(request, reply) {
   };
 
 
-  accounts.get({_id: newDomainJson.account_id}, function (err, account) {
-    if(err){
+  accounts.get({_id: account_id}, function (err, account) {
+    if(err) {
       return reply(boom.badImplementation('DomainConfigs::checkDomainsList: Failed to find an account with ID ' +
         newDomainJson.account_id));
     }
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+
+    if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
+
     if (account.billing_plan) {
       isSubscriptionActive(newDomainJson.account_id, function (err, res) {
           if (err) {
@@ -357,21 +347,16 @@ exports.updateDomainConfig = function(request, reply) {
   var domain_id = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
-  // TODO: use a function for access permission checks
-  if (request.auth.credentials.role !== 'revadmin' && newDomainJson.account_id &&
-    request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
-    return reply(boom.badRequest('Account ID not found'));
-  }
-
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domain_id));
     }
-    if (!result) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
-    if (!checkDomainAccessPermission(request,result)) {
-      return reply(boom.badRequest('Domain ID not found'));
+
+    if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
     }
 
     logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
@@ -428,9 +413,12 @@ exports.deleteDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result || !checkDomainAccessPermission(request,result)) {
+    
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
+
+    // TODO: add deleted_at and deleted_by fields
 
     logger.info('Calling CDS to delete domain ID: ' + domain_id);
 
