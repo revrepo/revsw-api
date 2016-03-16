@@ -29,7 +29,7 @@ module.exports = [
       handler     : handler.webhookHandler,
       auth        : 'hmac',
      payload: {
-        parse: true,
+        parse: false,
         allow: 'application/x-www-form-urlencoded'
       },
       plugins: {

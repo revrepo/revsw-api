@@ -48,6 +48,16 @@ function Account(mongoose, connection, options) {
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
+    'billing_info': {
+      'address1': String,
+      'address2': String,
+      'country': String,
+      'state': String,
+      'city': String,
+      'zipcode': String,
+      'masked_card_number': String
+    },
+    'billing_portal_link': {url: String, expires_at: Date},
     'created_at'  : {type : Date, default : Date()},
     'updated_at'  : {type : Date, default : Date()}
     // TODO: add deleted_at and deleted_by fields

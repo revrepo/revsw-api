@@ -24,6 +24,8 @@ var Joi = require('joi');
 
 var account = require('../handlers/accounts');
 
+var accountValidation = require('../route-validation/account');
+
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
@@ -84,7 +86,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw' ]
       },
       handler: account.updateAccount,
       description: 'Update a customer account',
@@ -102,10 +104,7 @@ module.exports = [
         params: {
           account_id: Joi.objectId().required().description('Account ID to be updated')
         },
-        payload: {
-          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150).trim().description('Company name'),
-          comment: Joi.string().max(300).trim().description('Free-text comment about the company')
-        }
+        payload: accountValidation.accountUpdatePayload
       },
       response: {
         schema: routeModels.statusModel
@@ -141,11 +140,113 @@ module.exports = [
   },
 
   {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/statements',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getAccountStatements,
+      description: 'Get a list of billing statements',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID')
+        }
+      },
+/*      response: {
+        schema: routeModels.accountModel
+      }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/statements/{statement_id}',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getAccountStatement,
+      description: 'Get a specific billing statement',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID'),
+          statement_id: Joi.number().min(1).required().description('Statement ID')
+        }
+      }
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/statements/{statement_id}/pdf',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getPdfStatement,
+      description: 'Get a billing statement in PDF format',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID'),
+          statement_id: Joi.number().min(1).required().description('Statement ID')
+        }
+      }
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/transactions',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin' ]
+      },
+      handler: account.getAccountTransactions,
+      description: 'Get a list of billing transactions',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID')
+        }
+      },
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
     method: 'DELETE',
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw' ]
       },
       handler: account.deleteAccount,
       description: 'Remove a customer account',
