@@ -37,7 +37,7 @@ var product = require('../lib/chargify.js').Product;
 xdescribe('Chargify webhook', function () {
   it('should activate a test webhook', function (done) {
 
-    request('https://localhost:8000')
+    request('testAPIUrl')
       .post('/webhooks/chargify')
       .set('X-Chargify-Webhook-Id', 'testid')
       .set('X-Chargify-Webhook-Signature-Hmac-Sha-256', '19826d51b9f866b26eda1f154de192593360f8d0bcb63df8a28540a5dcf733f1')

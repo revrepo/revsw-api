@@ -57,17 +57,16 @@ exports.webhookHandler = function (request, reply) {
     return new Promise(function (resolve) {
       var subscription = payload.subscription;
       var customer = subscription.customer;
-      var product = subscription.product;
-      var credit_card = payload.credit_card;
+
       chargify.getBillingPortalLinkAsync(customer.id)
         .then(function (link) {
-          var expires_at = Date.parse(link.expires_at);
+          var expiresAt = Date.parse(link.expires_at);
           users.getAsync({email: customer.email})
             .then(function (user) {
               accounts.getAsync({createdBy: customer.email})
                 .then(function (account) {
                   var company = {
-                    'billing_portal_link': {url: link.url, expires_at: expires_at},
+                    'billing_portal_link': {url: link.url, expires_at: expiresAt},
                     account_id: account.id,
                     subscription_id: subscription.id,
                     subscription_state: subscription.state
@@ -84,7 +83,6 @@ exports.webhookHandler = function (request, reply) {
     return new Promise(function (resolve) {
       var subscription = payload.subscription;
       var customer = subscription.customer;
-      var product = subscription.product;
 
       users.getAsync({email: customer.email})
         .then(function (user) {

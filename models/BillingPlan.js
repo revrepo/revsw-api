@@ -47,7 +47,7 @@ var BillingPlanSchema = new Schema({
   services: [{
     code_name: String,
     description: String,
-    measure_unit: String,
+    measurement_unit: String,
     cost: Number,
     included: Number,
     type: {

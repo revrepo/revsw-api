@@ -86,7 +86,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw', 'admin' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw' ]
       },
       handler: account.updateAccount,
       description: 'Update a customer account',
@@ -141,13 +141,13 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/accounts/{account_id}/invoices',
+    path: '/v1/accounts/{account_id}/statements',
     config: {
       auth: {
         scope: ['admin', 'reseller', 'revadmin' ]
       },
-      handler: account.getAccountInvoices,
-      description: 'Get a list of customer invoices',
+      handler: account.getAccountStatements,
+      description: 'Get a list of billing statements',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -166,13 +166,13 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/accounts/{account_id}/invoices/{invoice_id}',
+    path: '/v1/accounts/{account_id}/statements/{statement_id}',
     config: {
       auth: {
         scope: ['admin', 'reseller', 'revadmin' ]
       },
-      handler: account.getAccountInvoice,
-      description: 'Get a specific statement',
+      handler: account.getAccountStatement,
+      description: 'Get a specific billing statement',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -181,7 +181,7 @@ module.exports = [
       validate: {
         params: {
           account_id: Joi.objectId().required().description('Account ID'),
-          invoice_id: Joi.number().required().description('Invoice ID')
+          statement_id: Joi.string().alphanum().required().description('Statement ID')
         }
       }
       /*      response: {
@@ -192,13 +192,13 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/accounts/{account_id}/invoices/{invoice_id}/pdf',
+    path: '/v1/accounts/{account_id}/statements/{statement_id}/pdf',
     config: {
       auth: {
         scope: ['admin', 'reseller', 'revadmin' ]
       },
       handler: account.getPdfStatement,
-      description: 'Get pdf of a statement',
+      description: 'Get a billing statement in PDF format',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -207,7 +207,7 @@ module.exports = [
       validate: {
         params: {
           account_id: Joi.objectId().required().description('Account ID'),
-          invoice_id: Joi.number().required().description('Invoice ID')
+          statement_id: Joi.string().alphanum().required().description('Statement ID')
         }
       }
       /*      response: {
@@ -224,7 +224,7 @@ module.exports = [
         scope: ['admin', 'reseller', 'revadmin' ]
       },
       handler: account.getAccountTransactions,
-      description: 'Get a list of customer transactions',
+      description: 'Get a list of billing transactions',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -246,7 +246,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw', 'admin' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw' ]
       },
       handler: account.deleteAccount,
       description: 'Remove a customer account',
