@@ -50,6 +50,7 @@ function Account(mongoose, connection, options) {
     'billing_plan': String,
     'created_at'  : {type : Date, default : Date()},
     'updated_at'  : {type : Date, default : Date()}
+    // TODO: add deleted_at and deleted_by fields
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
