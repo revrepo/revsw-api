@@ -181,7 +181,7 @@ module.exports = [
       validate: {
         params: {
           account_id: Joi.objectId().required().description('Account ID'),
-          statement_id: Joi.string().alphanum().required().description('Statement ID')
+          statement_id: Joi.number().min(1).required().description('Statement ID')
         }
       }
       /*      response: {
@@ -207,7 +207,7 @@ module.exports = [
       validate: {
         params: {
           account_id: Joi.objectId().required().description('Account ID'),
-          statement_id: Joi.string().alphanum().required().description('Statement ID')
+          statement_id: Joi.number().min(1).required().description('Statement ID')
         }
       }
       /*      response: {

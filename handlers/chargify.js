@@ -63,7 +63,7 @@ exports.webhookHandler = function (request, reply) {
           var expiresAt = Date.parse(link.expires_at);
           users.getAsync({email: customer.email})
             .then(function (user) {
-              accounts.getAsync({createdBy: customer.email})
+              accounts.getAsync({_id: user.companyId})
                 .then(function (account) {
                   var company = {
                     'billing_portal_link': {url: link.url, expires_at: expiresAt},

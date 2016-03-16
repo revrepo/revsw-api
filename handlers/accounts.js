@@ -157,7 +157,7 @@ exports.getAccountStatements = function (request, reply) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
         ' Account ID: ' + account_id));
      }
-    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -184,7 +184,7 @@ exports.getAccountTransactions = function (request, reply) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
         ' Account ID: ' + account_id));
     }
-    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -213,7 +213,7 @@ exports.getAccountStatement = function (request, reply) {
         ' Account ID: ' + account_id));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -251,7 +251,9 @@ exports.getAccountStatement = function (request, reply) {
       });
       statement.payments = payments;
       statement.transactions = transactions;
-
+      statement.payments_total = payments.reduce(function (sum, p) {
+        return sum + p.amount_in_cents;
+      }, 0);
       var result = publicRecordFields.handle(statement, 'statement');
       renderJSON(request, reply, error, result);
     });
@@ -273,7 +275,7 @@ exports.getPdfStatement = function (request, reply) {
         ' Account ID: ' + account_id));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
