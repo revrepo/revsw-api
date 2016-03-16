@@ -25,7 +25,7 @@ var routeModels = require('../lib/routeModels');
 exports.accountUpdatePayload = {
   companyName: joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
     .trim().description('Company name of newly registered customer account'),
-  comment: joi.string().max(300).trim().description('Free-text comment about the company'),
+  comment: joi.string().allow('').max(300).trim().description('Free-text comment about the company'),
   phone_number: joi.string().description('Phone number').optional(),
   password: joi.string().description('Password').optional(),
   address1: joi.string().description('Address 1').optional(),

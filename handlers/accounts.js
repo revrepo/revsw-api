@@ -421,7 +421,7 @@ exports.deleteAccount = function (request, reply) {
       }
     },
     // Verify that there are no active apps for an account
-    function (cb) {
+    function (account, cb) {
       var getAppQuery = {
         account_id: account_id,
         deleted: { $ne: true }
