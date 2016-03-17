@@ -418,6 +418,8 @@ exports.deleteDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
+    // TODO: add deleted_at and deleted_by fields
+
     logger.info('Calling CDS to delete domain ID: ' + domain_id);
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id,

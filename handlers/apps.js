@@ -280,6 +280,8 @@ exports.deleteApp = function(request, reply) {
     }
     account_id = existing_app.account_id;
 
+    // TODO: add deleted_at and deleted_by fields
+
     logger.info('Calling CDS to delete app ID ' + app_id);
     cds_request({method: 'DELETE', url: config.get('cds_url') + '/v1/apps/' + app_id, headers: authHeader}, function (err, res, body) {
       if (err) {

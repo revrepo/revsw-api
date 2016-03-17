@@ -57,12 +57,15 @@ describe('Clean up', function () {
               .then(function (res) {
                 var ids = [];
                 var accounts = res.body;
+//                console.log('accounts = ' + JSON.stringify(accounts));
                 accounts.forEach(function (account) {
                   if (namePattern.test(account.companyName) ||
                     updatedNamePattern.test(account.companyName)) {
                     ids.push(account.id);
                   }
                 });
+                console.log('Deleting/clearing the following account IDs = ' + JSON.stringify(ids));
+      
                 API.resources.accounts
                   .deleteManyIfExist(ids)
                   .finally(done);
