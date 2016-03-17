@@ -54,7 +54,7 @@ var UserDataProvider = {
    */
   generateOne: function (data) {
     var prefix = data.firstName ? data.firstName + '_' : '';
-    return {
+    var user = {
       email: prefix + 'API_TEST_USER_' + Date.now() + '@revsw.com',
       firstname: data.firstName || 'Super',
       lastname: data.lastName || 'Man',
@@ -69,6 +69,10 @@ var UserDataProvider = {
       role: data.role || 'user',
       theme: 'light'
     };
+    if (data.companyId) {
+      user.companyId = data.companyId;
+    }
+    return user;
   }
 };
 

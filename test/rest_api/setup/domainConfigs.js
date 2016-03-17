@@ -26,8 +26,7 @@ describe('Clean up', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var reseller = config.get('api.users.revAdmin');
-  // var namePattern = new RegExp(DomainConfigDP.prefix);
-  var namePattern = /API-TEST-name-[0-9]{13}/;
+  var namePattern = new RegExp(DomainConfigDP.prefix + '-[0-9]{13}');
 
   before(function (done) {
     done();

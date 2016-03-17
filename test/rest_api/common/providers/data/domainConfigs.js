@@ -48,7 +48,7 @@ var DomainConfigsDataProvider = {
   generateOne: function (accountId, prefix) {
     var _prefix = prefix || this.prefix;
     return {
-      'domain_name': _prefix + '-name-' + Date.now() + '.revsw.net',
+      'domain_name': _prefix + '-' + Date.now() + '.revsw.net',
       'account_id': accountId,
       'origin_host_header': _prefix + '-config.revsw.net',
       'origin_server': _prefix + '-website01.revsw.net',
