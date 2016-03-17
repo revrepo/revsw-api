@@ -84,8 +84,7 @@ exports.getAccountReport = function( request, reply ) {
     to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
   }
 
-  // reports.loadReports( from, to, request.params.account_id, request.query.only_summary, request.query.extended, request.query.bandwidth )
-  reports.loadReports( from, to, account_id, request.query.only_summary, request.query.extended, request.query.bandwidth )
+  reports.loadReports( from, to, account_id, request.query.only_overall, request.query.keep_samples )
     .then( function( response ) {
 
       response = {
