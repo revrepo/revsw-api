@@ -38,6 +38,15 @@ describe('Functional check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
+        API.resources.users
+          .myself()
+          .getOne()
+          .then(function (response) {
+            reseller.id = response.body.user_id;
+          })
+          .catch(done);
+      })
+      .then(function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
@@ -74,7 +83,8 @@ describe('Functional check', function () {
       done();
     });
 
-    xit('should return activity data after creating domain config',
+    xit('[BUG: Activity is not being logged for this case]' +
+      'should return activity data after creating domain config',
       function (done) {
         var startTime = Date.now();
         secondDc = DomainConfigsDP.generateOne(account.id);
@@ -114,7 +124,8 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should return activity data after modifying domain config',
+    xit('[BUG: Activity is not being logged for this case]' +
+      'should return activity data after modifying domain config',
       function (done) {
         var startTime = Date.now();
         API.helpers
@@ -167,7 +178,8 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should allow to delete existing domain config',
+    xit('[BUG: Activity is not being logged for this case]' +
+      'should allow to delete existing domain config',
       function (done) {
         var startTime = Date.now();
         API.helpers
