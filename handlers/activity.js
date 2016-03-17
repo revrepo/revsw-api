@@ -49,6 +49,10 @@ exports.getDetailedAuditInfo = function (request, reply) {
     requestBody['meta.account_id'] = account_id;
   }
 
+  if (!request.query.user_id && !request.query.account_id) {
+    requestBody['meta.user_id'] = user_id;
+  }
+
   async.waterfall([
 
     function (cb) {
@@ -74,8 +78,8 @@ exports.getDetailedAuditInfo = function (request, reply) {
           if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
             return reply(boom.badRequest('Account ID not found'));
           }
-          requestBody['meta.user_id'] = user_id;
-          requestBody['meta.account_id'] = account_id;
+      //    requestBody['meta.user_id'] = user_id;
+      //    requestBody['meta.account_id'] = account_id;
 
           break;
 
@@ -86,7 +90,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
           if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
             return reply(boom.badRequest('Account ID not found'));
           }
-          requestBody['meta.account_id'] = account_id;
+         // requestBody['meta.account_id'] = account_id;
 
           break;
 
@@ -97,7 +101,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
           if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
             return reply(boom.badRequest('Account ID not found'));
           }
-          requestBody['meta.account_id'] = account_id;
+        //  requestBody['meta.account_id'] = account_id;
 
           break;
       }

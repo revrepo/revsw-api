@@ -154,7 +154,6 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    // TODO: Need to create another user from another account
     it('should fail to disable 2FA for an existing user from another account',
       function (done) {
         API.helpers
