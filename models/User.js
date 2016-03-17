@@ -23,6 +23,7 @@
 
 var utils = require('../lib/utilities.js');
 var _ = require('lodash');
+var promise = require('bluebird');
 
 function User(mongoose, connection, options) {
   this.options = options;
@@ -230,7 +231,7 @@ User.prototype = {
 
   list : function (request, callback) {
 
-//    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
+    // console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
 
     this.model.find(function (err, users) {
       if (users) {
@@ -379,7 +380,6 @@ User.prototype = {
     });
   },
 
-
   remove : function (item, callback) {
     var context = this;
     if (item) {
@@ -403,8 +403,30 @@ User.prototype = {
       billing_plan: billingPlanId,
       deleted: false
     }, cb);
-  }
+  },
 
+  //  ---------------------------------
+  // free promise query
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  // returns _promise_ { total: 000, active: 000, deleted: 000 }
+  countUsers: function () {
+    var res = { total: 0, active: 0, deleted: 0 };
+    return promise.all([
+        this.model.count({ $or: [{ deleted : { $exists: false } }, { deleted: false } ] }).exec(),
+        this.model.count({}).exec()
+      ])
+      .then( function( c ) {
+        res.active = c[0];
+        res.total = c[1];
+        res.deleted = res.total - res.active;
+        return res;
+      });
+  }
 };
 
 module.exports = User;
