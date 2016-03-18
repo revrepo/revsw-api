@@ -79,5 +79,6 @@
   },
 
   "notify_admin_by_email_on_user_login": "",
-  "trust_request_xff_header": true
+  "trust_request_xff_header": true,
+  "usage_report_regen_age_ms": 600000
 }

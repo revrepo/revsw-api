@@ -32,6 +32,7 @@ function UsageReport( mongoose, connection, options ) {
     '_id'                       : String,
     'account_id'                : String,
     'report_for_day'            : Date,
+    'created_at'                : Date,
     'domains'                   : this.Schema.Types.Mixed,
     'domains_usage'             : this.Schema.Types.Mixed,
     'traffic_per_billing_zone'  : this.Schema.Types.Mixed
@@ -104,7 +105,26 @@ UsageReport.prototype = {
     where = where || {};
     fields = fields || {};
     return this.model.find(where, fields).exec();
-  }
+  },
+
+  //  ---------------------------------
+  //  returns promise with last report creation data or false
+  //  day is report_for_day value, default today
+  lastCreated : function ( day ) {
+    if ( !day ) {
+      day = new Date();
+      day.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+    }
+    return this.model.find({ report_for_day: day }, { created_at:1,_id:0 })
+      .sort({ created_at: -1 })
+      .limit( 1 )
+      .exec()
+      .then( function( doc ) {
+        return ( doc.length ? doc[0].created_at : false );
+      });
+  },
+
+
 
 };
 
