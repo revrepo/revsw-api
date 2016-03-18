@@ -54,10 +54,19 @@ describe('CRUD check', function () {
           API.helpers
             .authenticateUser(user)
             .then(function () {
-              return API.helpers.users.createOne({
+              if (user.role === 'Rev Admin') {
+                return API.helpers.accounts.createOne();
+              }
+            })
+            .then(function (newAccount) {
+              var newUserData = {
                 firstName: 'Tom',
                 lastName: 'Smith'
-              });
+              }
+              if (user.role === 'Rev Admin') {
+                newUserData.companyId = [newAccount.id];
+              }
+              return API.helpers.users.createOne(newUserData);
             })
             .then(function (createdUser) {
               newUser = createdUser;
@@ -125,7 +134,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should disable 2fa for specific user',
+        it('should disable 2fa for specific user',
           function (done) {
             API.helpers
               .authenticateUser(newUser)
@@ -149,7 +158,6 @@ describe('CRUD check', function () {
                           .then(function (response) {
                             var expMsg = 'Successfully disabled two factor ' +
                               'authentication';
-                            console.log('response.body.message = ' + response.body.message);
                             response.body.message.should.equal(expMsg);
                             done();
                           })

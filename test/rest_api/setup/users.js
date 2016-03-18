@@ -18,15 +18,14 @@
 
 var config = require('config');
 var API = require('./../common/api');
-var DomainConfigDP = require('./../common/providers/data/domainConfigs');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.get('api.request.maxTimeout'));
+  this.timeout(config.api.request.maxTimeout);
 
-  var reseller = config.get('api.users.revAdmin');
-  var namePattern = new RegExp(DomainConfigDP.prefix + '-[0-9]{13}');
+  var revadmin = config.get('api.users.revAdmin');
+  var namePattern = /API_TEST_USER_1/;
 
   before(function (done) {
     done();
@@ -36,7 +35,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('Domain Configs resource', function () {
+  describe('Users resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -46,23 +45,26 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean DomainConfigs created for testing.',
+    it('should clean Users created for testing.',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(revadmin)
           .then(function () {
-            API.resources.domainConfigs
+            API.resources.users
               .getAll()
               .expect(200)
               .then(function (res) {
                 var ids = [];
-                var domainConfigs = res.body;
-                domainConfigs.forEach(function (domainConfig) {
-                  if (namePattern.test(domainConfig.domain_name)) {
-                    ids.push(domainConfig.id);
+                var users = res.body;
+//                console.log('users = ' + JSON.stringify(users));
+                users.forEach(function (user) {
+                  if (namePattern.test(user.email)) {
+                    ids.push(user.user_id);
                   }
                 });
-                API.resources.domainConfigs
+                console.log('Deleting/cleaning the following user IDs = ' + JSON.stringify(ids));
+      
+                API.resources.users
                   .deleteManyIfExist(ids)
                   .finally(done);
               })

@@ -38,6 +38,15 @@ describe('Functional check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
+        API.resources.users
+          .myself()
+          .getOne()
+          .then(function (response) {
+            reseller.id = response.body.user_id;
+          })
+          .catch(done);
+      })
+      .then(function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
@@ -74,7 +83,7 @@ describe('Functional check', function () {
       done();
     });
 
-    xit('should return activity data after creating domain config',
+    it('should return activity data after creating a domain config',
       function (done) {
         var startTime = Date.now();
         secondDc = DomainConfigsDP.generateOne(account.id);
@@ -90,9 +99,11 @@ describe('Functional check', function () {
               .catch(done);
           })
           .then(function () {
+            console.log('secondDc.id = ', secondDc.id);
+            console.log('reseller.id = ', reseller.id);
             API.resources.activity
               .getAll({
-                user_id: reseller.id,
+      //          user_id: reseller.id,
                 from_timestamp: startTime
               })
               .expect(200)
@@ -114,7 +125,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should return activity data after modifying domain config',
+    it('should return activity data after modifying a domain config',
       function (done) {
         var startTime = Date.now();
         API.helpers
@@ -134,18 +145,21 @@ describe('Functional check', function () {
               .catch(done);
           })
           .then(function () {
+            console.log('firstDc.id = ', firstDc.id);
             return API.resources.domainConfigs
               .update(firstDc.id, firstFdc)
               .expect(200)
               .then(function (res) {
-                firstDc.id = res.body.object_id;
+              //  firstDc.id = res.body.object_id;
+                console.log('firstDc.id = ', firstDc.id);
               })
               .catch(done);
           })
           .then(function () {
+            console.log('firstDc.id = ', firstDc.id);
             API.resources.activity
               .getAll({
-                user_id: reseller.id,
+       //         user_id: reseller.id,
                 from_timestamp: startTime
               })
               .expect(200)
@@ -167,7 +181,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should allow to delete existing domain config',
+    it('should return activity data after deleting a domain config',
       function (done) {
         var startTime = Date.now();
         API.helpers
@@ -177,18 +191,19 @@ describe('Functional check', function () {
               .deleteOne(secondDc.id)
               .expect(200)
               .then(function (response) {
-                secondDc.id = response.body.object_id;
+//                secondDc.id = response.body.object_id;
               })
               .catch(done);
           })
           .then(function () {
             API.resources.activity
               .getAll({
-                user_id: reseller.id,
+       //         user_id: reseller.id,
                 from_timestamp: startTime
               })
               .expect(200)
               .then(function (response) {
+                console.log('secondDc.id = ', secondDc.id);
                 var activities = response.body.data;
                 var activity = Utils.searchJsonInArray(activities, {
                   'activity_type': 'delete',

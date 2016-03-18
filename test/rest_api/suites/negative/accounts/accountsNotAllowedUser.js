@@ -139,6 +139,9 @@ describe('Negative check', function () {
             .catch(done);
         });
 
+      // TODO: Now "admin" role is allowed to manipulate his account details:
+      // TODO: list, read, write and even delete - please add proper positive checks
+      // TODO: for the situations
       xit('should return `Forbidden` response when getting all accounts with ' +
         '`admin-role` user.',
         function (done) {
@@ -182,7 +185,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when updating specific account ' +
+      xit('should return `Forbidden` response when updating specific account ' +
         'with `admin-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
@@ -197,7 +200,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when deleting an account with ' +
+      xit('should return `Forbidden` response when deleting an account with ' +
         '`admin-role` user.',
         function (done) {
           API.helpers

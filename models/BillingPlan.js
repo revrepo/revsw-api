@@ -47,9 +47,15 @@ var BillingPlanSchema = new Schema({
   services: [{
     code_name: String,
     description: String,
-    measure_unit: String,
+    measurement_unit: String,
     cost: Number,
-    included: Number
+    included: Number,
+    type: {
+      type: String,
+      enum: ['metered', 'quantity', 'binary'],
+      default: 'quantity'
+    },
+    chargify_id: Number
   }],
   prepay_discounts: [{
     period: Number,

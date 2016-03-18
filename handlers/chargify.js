@@ -34,39 +34,48 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var logger = require('revsw-logger')(config.log_config);
 var Account = require('../models/Account');
 var User = require('../models/User');
+var chargify = require('../lib/chargify').Customer;
 var Promise = require('bluebird');
+
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(users);
+Promise.promisifyAll(chargify);
 
 exports.webhookHandler = function (request, reply) {
   var body = request.payload;
   var payload = request.payload.payload;
 
   var onTest = function () {
-    reply(payload);
+    request.payload.msg = 'Test passed';
+    reply(request.payload);
   };
 
   var onSignupSuccess = function () {
     return new Promise(function (resolve) {
       var subscription = payload.subscription;
       var customer = subscription.customer;
-      var product = subscription.product;
 
-      users.getAsync({email: customer.email})
-        .then(function (user) {
-          accounts.getAsync({createdBy: customer.email})
-            .then(function (account) {
-              var company = {
-                account_id: account.id,
-                subscription_id: subscription.id,
-                subscription_state: subscription.state,
-              };
-              resolve(accounts.updateAsync(company));
+      chargify.getBillingPortalLinkAsync(customer.id)
+        .then(function (link) {
+          var expiresAt = Date.parse(link.expires_at);
+          users.getAsync({email: customer.email})
+            .then(function (user) {
+              accounts.getAsync({_id: user.companyId})
+                .then(function (account) {
+                  var company = {
+                    'billing_portal_link': {url: link.url, expires_at: expiresAt},
+                    account_id: account.id,
+                    subscription_id: subscription.id,
+                    subscription_state: subscription.state
+                  };
+                  resolve(accounts.updateAsync(company));
+                });
             });
         });
+
     });
   };
 
@@ -74,7 +83,6 @@ exports.webhookHandler = function (request, reply) {
     return new Promise(function (resolve) {
       var subscription = payload.subscription;
       var customer = subscription.customer;
-      var product = subscription.product;
 
       users.getAsync({email: customer.email})
         .then(function (user) {

@@ -135,8 +135,9 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should return activity data after deleting an account.',
+    it('should return activity data after deleting an account.',
       function (done) {
+        var testAccountId;
         var newProject = AccountsDP.generateOne('NEW');
         API.helpers
           .authenticateUser(resellerUser)
@@ -150,6 +151,7 @@ describe('Functional check', function () {
           })
           .then(function (objectId) {
             console.log('objectId', objectId);
+            testAccountId = objectId;
             return API.resources.accounts
               .deleteOne(objectId)
               .expect(200)
@@ -165,12 +167,12 @@ describe('Functional check', function () {
                 var activity = Utils.searchJsonInArray(activities, {
                   'activity_type': 'delete',
                   'activity_target': 'account',
-                  'target_id': accountSample.id
+                  'target_id': testAccountId
                 });
                 should.exist(activity);
                 activity.activity_type.should.equal('delete');
                 activity.activity_target.should.equal('account');
-                activity.target_id.should.equal(accountSample.id);
+                activity.target_id.should.equal(testAccountId);
                 done();
               })
               .catch(done);

@@ -25,6 +25,7 @@ var boom = require('boom');
 var AuditLogger = require('../lib/audit');
 var async = require('async');
 var utils           = require('../lib/utilities.js');
+var _ = require('lodash');
 var config      = require('config');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -34,12 +35,15 @@ var logger = require('revsw-logger')(config.log_config);
 
 var Account = require('../models/Account');
 var User = require('../models/User');
+var BillingPlan = require('../models/BillingPlan');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var DomainConfig = require('../models/DomainConfig');
-var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+var Customer = require('../lib/chargify').Customer;
+
+var DomainConfig   = require('../models/DomainConfig');
+var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
@@ -143,23 +147,176 @@ exports.getAccount = function (request, reply) {
   });
 };
 
-exports.updateAccount = function (request, reply) {
+exports.getAccountStatements = function (request, reply) {
+  var account_id = request.params.account_id;
 
-  var updatedAccount = request.payload;
-  updatedAccount.account_id = request.params.account_id;
-  var account_id = updatedAccount.account_id;
-  accounts.get({ _id : account_id }, function (error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id ));
-    }
 
-    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
+        ' Account ID: ' + account_id));
+     }
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
+    if(!account.subscription_id){
+       return reply(boom.badRequest('No subscription registered for account.'));
+    }
+    Customer.getStatements(account.subscription_id, function (error, statements) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to receive statements for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id));
+      }
+      statements = publicRecordFields.handle(statements, 'statements');
+      renderJSON(request, reply, error, statements);
+    });
+  });
+
+};
+
+exports.getAccountTransactions = function (request, reply) {
+  var account_id = request.params.account_id;
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('No subscription registered for account.'));
+    }
+    Customer.getTransactions(account.subscription_id, function (error, transactions) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to receive transactions for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id));
+      }
+      transactions = publicRecordFields.handle(transactions, 'transactions');
+      renderJSON(request, reply, error, transactions);
+    });
+  });
+
+};
+
+exports.getAccountStatement = function (request, reply) {
+  var account_id = request.params.account_id;
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getAccountStatement: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('No subscription registered for account.'));
+    }
+
+    Customer.getStatements(account.subscription_id, function (error, statements) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getAccountStatement: Failed to receive statement for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id +
+          ' Statement ID: ' + request.params.statement_id));
+      }
+
+      var idx = _.findIndex(statements, {id: request.params.statement_id});
+
+      if(idx < 0){
+        return reply(boom.badRequest('Statement ID not found'));
+      }
+
+      var statement = statements[idx];
+
+      var payments = [];
+      var transactions = [];
+      statement.transactions.forEach(function (t) {
+        if(t.transaction_type === 'payment'){
+          payments.push(t);
+        }
+      });
+      statement.transactions.forEach(function (t) {
+        if(t.transaction_type !== 'payment'){
+          transactions.push(t);
+        }
+      });
+      statement.payments = payments;
+      statement.transactions = transactions;
+      statement.payments_total = payments.reduce(function (sum, p) {
+        return sum + p.amount_in_cents;
+      }, 0);
+      var result = publicRecordFields.handle(statement, 'statement');
+      renderJSON(request, reply, error, result);
+    });
+  });
+
+};
+
+exports.getPdfStatement = function (request, reply) {
+  var account_id = request.params.account_id;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Accounts::getPdfStatement: Permission denied for' +
+      ' Account ID: ' + account_id));
+  }
+
+  accounts.get({_id: account_id}, function (error, account) {
+    if(error){
+      return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    if(!account.subscription_id){
+      return reply(boom.badRequest('Accounts::getPdfStatement: No subscription registered for account.' +
+        ' Account ID: ' + account_id));
+    }
+
+    Customer.getStatements(account.subscription_id, function (error, statements) {
+      if(error){
+        return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive statement for subscription' +
+          ' Subscription ID: ' + account.subscription_id +
+          ' Account ID: ' + account_id +
+          ' Statement ID: ' + request.params.statement_id));
+      }
+
+      var idx = _.findIndex(statements, {id: request.params.statement_id});
+      if(idx < 0){
+        return reply(boom.badRequest('Statement ID not found'));
+      }
+      Customer.getPdfStatement(statements[idx].id, function (error, pdf) {
+        if(error){
+          return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive statement for subscription' +
+            ' Subscription ID: ' + account.subscription_id +
+            ' Account ID: ' + account_id +
+            ' Statement ID: ' + request.params.statement_id));
+        }
+        reply(pdf)
+          .type('application/pdf; charset=utf-8');
+      });
+    });
+  });
+
+};
+
+exports.updateAccount = function (request, reply) {
+
+  var updateAccount = function (request, reply) {
     accounts.update(updatedAccount, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update account ID ' + account_id ));
+        return reply(boom.badImplementation('Failed to update the account'));
       }
 
       result = publicRecordFields.handle(result, 'account');
@@ -178,13 +335,52 @@ exports.updateAccount = function (request, reply) {
         account_id       : request.auth.credentials.companyId[0],
         activity_type    : 'modify',
         activity_target  : 'account',
-        target_id        : account_id,
+        target_id        : request.params.account_id,
         target_name      : result.companyName,
         target_object    : result,
         operation_status : 'success'
       });
 
       renderJSON(request, reply, error, statusResponse);
+    });
+  };
+
+  var updatedAccount = request.payload;
+  updatedAccount.account_id = request.params.account_id;
+  var account_id = updatedAccount.account_id;
+  accounts.get({ _id : account_id }, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id));
+    }
+
+    if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    accounts.get({_id: updatedAccount.account_id}, function (error, account) {
+      if (error) {
+        return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
+          ' Account ID: ' + updatedAccount.account_id));
+      }
+      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan)) {
+        BillingPlan.get({_id: updatedAccount.billing_plan}, function (error, plan) {
+          if (error) {
+            return reply(boom.badRequest('Billing plan not found'));
+          }
+          Customer.changeProduct(account.subscription_id, plan.chargify_handle, function (error) {
+            if (error) {
+              return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
+                ' Account ID: ' + updatedAccount.account_id +
+                ' Subscription ID: ' + account.subscription_id +
+                ' Product handle: ' + plan.chargify_handle));
+            }
+            updateAccount(request, reply);
+          });
+        });
+      }
+      else {
+        updateAccount(request, reply);
+      }
     });
   });
 };
@@ -214,11 +410,18 @@ exports.deleteAccount = function (request, reply) {
 
         account = account2;
 
-        cb(error);
+        cb(error, account);
       });
     },
+    function (account, cb) {
+      if(account.subscription_id){
+        Customer.cancelSubscription(account.subscription_id, cb);
+      }else{
+        cb(null, account);
+      }
+    },
     // Verify that there are no active apps for an account
-    function (cb) {
+    function (account, cb) {
       var getAppQuery = {
         account_id: account_id,
         deleted: { $ne: true }
@@ -348,10 +551,9 @@ exports.deleteAccount = function (request, reply) {
       });
 
       renderJSON(request, reply, null, statusResponse);
-    }
-  ], function (err) {
-    if (err) {
-      return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
-    }
-  });
+    }], function (err) {
+        if (err) {
+          return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
+        }
+      });
 };

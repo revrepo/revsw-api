@@ -394,7 +394,7 @@ exports.updateDomainConfig = function(request, reply) {
           account_id       : newDomainJson.account_id,
           activity_type    : action,
           activity_target  : 'domain',
-          target_id        : result.domain_id,
+          target_id        : result._id,
           target_name      : result.domain_name,
           target_object    : newDomainJson,
           operation_status : 'success'
@@ -417,6 +417,8 @@ exports.deleteDomainConfig = function(request, reply) {
     if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
+
+    // TODO: add deleted_at and deleted_by fields
 
     logger.info('Calling CDS to delete domain ID: ' + domain_id);
 
@@ -441,7 +443,7 @@ exports.deleteDomainConfig = function(request, reply) {
         account_id       : result.proxy_config.account_id,
         activity_type    : 'delete',
         activity_target  : 'domain',
-        target_id        : result.domain_id,
+        target_id        : result._id,
         target_name      : result.domain_name,
         target_object    : result.proxy_config,
         operation_status : 'success'

@@ -139,6 +139,7 @@ exports.signup = function(req, reply) {
               ip_address: utils.getAPIUserRealIP(req),
               datetime: Date.now(),
               user_type: 'user',
+              user_name: user.email,
               account_id: result.id,
               activity_type: 'add',
               activity_target: 'account',
@@ -152,11 +153,12 @@ exports.signup = function(req, reply) {
               ip_address: utils.getAPIUserRealIP(req),
               datetime: Date.now(),
               user_type: 'user',
-              account_id: user.companyId,
+              user_name: user.email,
+              account_id: user.companyId[0],
               activity_type: 'add',
               activity_target: 'user',
-              target_id: user.id,
-              target_name: user.name,
+              target_id: user.user_id,
+              target_name: user.email,
               target_object: user,
               operation_status: 'success'
             });
@@ -199,7 +201,7 @@ exports.resetToken = function(req, reply) {
       user_id: user.user_id,
       user_name: user.email,
       user_type: 'user',
-      account_id: result.companyId,
+      account_id: result.companyId[0],
       activity_type: 'modify',
       activity_target: 'user',
       target_id: result.user_id,
@@ -241,7 +243,7 @@ exports.verify = function(req, reply) {
       token: '',
       verified: true
     };
-    var companyId = _.clone(user.companyId);
+    var companyId = _.clone(user.companyId[0]);
     delete user.companyId;
     delete user.password;
     //@todo UPDATE ANYTHING ELSE ?

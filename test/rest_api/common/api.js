@@ -168,8 +168,8 @@ module.exports = {
       }
     },
     users: {
-      createOne: function (name) {
-        var user = UsersDP.generateOne(name);
+      createOne: function (data) {
+        var user = UsersDP.generateOne(data);
         // TODO: this should be changed to the new way to create a resource
         return users
           .createOneAsPrerequisite(user)

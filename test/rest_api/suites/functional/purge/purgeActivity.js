@@ -38,6 +38,15 @@ describe('Functional check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
+        API.resources.users
+          .myself()
+          .getOne()
+          .then(function (response) {
+            reseller.id = response.body.user_id;
+          })
+          .catch(done);
+      })
+      .then(function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
@@ -67,7 +76,7 @@ describe('Functional check', function () {
       .catch(done);
   });
 
-  xdescribe('Purge - Activity resource', function () {
+  describe('Purge - Activity resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -96,7 +105,7 @@ describe('Functional check', function () {
           .then(function () {
             API.resources.activity
               .getAll({
-                user_id: reseller.id,
+//                user_id: reseller.id,
                 from_timestamp: startTime
               })
               .expect(200)
@@ -104,12 +113,12 @@ describe('Functional check', function () {
                 var activities = response.body.data;
                 var activity = Utils.searchJsonInArray(activities, {
                   'activity_type': 'purge',
-                  'activity_target': 'domain',
+                  'activity_target': 'purge',
                   'target_id': purgeData.id // Use domain id?
                 });
                 should.exist(activity);
                 activity.activity_type.should.equal('purge');
-                activity.activity_target.should.equal('domain');
+                activity.activity_target.should.equal('purge');
                 activity.target_id.should.equal(purgeData.id); // Use domain id?
                 done();
               })

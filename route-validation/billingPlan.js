@@ -33,9 +33,11 @@ exports.listOfBillingPlanModels = Joi.array().items({
   services              : Joi.array().items(Joi.object({
     code_name             : Joi.string().description('Name of the service'),
     description           : Joi.string().description('Description of the service'),
-    measure_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
+    measurement_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
     cost                  : Joi.number().description('Cost of the service'),
-    included              : Joi.number().description('Amount included in the service')
+    included              : Joi.number().description('Amount included in the service'),
+    type                 : Joi.string().description('Component type in Chargify'),
+    chargify_id           : Joi.number().description('Services id in Chargify')
   })).description('List of the services of the billing plan'),
 
   prepay_discounts      : Joi.array().items(Joi.object({
@@ -66,9 +68,11 @@ exports.BillingPlanRequestPayload = {
   services              : Joi.array().items({
     code_name             : Joi.string().description('Name of the service'),
     description           : Joi.string().description('Description of the service'),
-    measure_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
+    measurement_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
     cost                  : Joi.number().description('Cost of the service'),
-    included              : Joi.number().description('Amount included in the service')
+    included              : Joi.number().description('Amount included in the service'),
+    type                 : Joi.string().description('Component type in Chargify'),
+    chargify_id           : Joi.number().description('Services id in Chargify')
   }).description('List of the services of the billing plan'),
 
   prepay_discounts      : Joi.array().items({
@@ -95,9 +99,11 @@ exports.BillingPlanModel = Joi.object({
   services              : Joi.array().items(Joi.object({
     code_name             : Joi.string().description('Name of the service'),
     description           : Joi.string().description('Description of the service'),
-    measure_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
+    measurement_unit          : Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
     cost                  : Joi.number().description('Cost of the service'),
-    included              : Joi.number().description('Amount included in the service')
+    included              : Joi.number().description('Amount included in the service'),
+    type                 : Joi.string().description('Component type in Chargify'),
+    chargify_id           : Joi.number().description('Services id in Chargify')
   })).description('List of the services of the billing plan'),
 
   prepay_discounts      : Joi.array().items(Joi.object({

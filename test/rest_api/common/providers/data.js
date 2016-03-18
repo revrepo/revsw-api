@@ -57,7 +57,7 @@ module.exports = {
       services: [{
         code_name: faker.commerce.product(),
         description: faker.lorem.sentence(),
-        measure_unit: faker.finance.currencyCode(),
+        measurement_unit: faker.finance.currencyCode(),
         cost: faker.finance.amount(),
         included: 0
       }],
