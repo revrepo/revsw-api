@@ -252,7 +252,7 @@ exports.updateApp = function(request, reply) {
           account_id      : existing_app.account_id,
           activity_type   : action,
           activity_target : 'app',
-          target_id       : response_json.id,
+          target_id       : app_id,
           target_name     : updatedApp.app_name,
           target_object   : updatedApp,
           operation_status: 'success'
@@ -304,7 +304,7 @@ exports.deleteApp = function(request, reply) {
           account_id      : account_id,
           activity_type   : 'delete',
           activity_target : 'app',
-          target_id       : response_json.id,
+          target_id       : app_id,
           target_name     : existing_app.app_name,
           target_object   : existing_app,
           operation_status: 'success'
