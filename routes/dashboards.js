@@ -62,6 +62,7 @@ module.exports = [{
     },
     validate: {
       options: {
+        // TODO: do we need to statement?
         stripUnknown: true
       },
       payload: {

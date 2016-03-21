@@ -52,6 +52,6 @@
     "shared_key": "zc2F3fSl1nEZHJFDR2g6Xk9o4f40Aawgob4WrHKHDWY"
   },
 
-  "notify_admin_by_email_on_user_login": "ops@revsw.com"
-
+  "notify_admin_by_email_on_user_login": "ops@revsw.com",
+  "usage_report_regen_age_ms": 6000000000000
 }
