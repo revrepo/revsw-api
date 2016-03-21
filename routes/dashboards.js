@@ -53,7 +53,7 @@ module.exports = [{
       scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
     },
     handler: dashboars.createDashboard,
-    description: 'Create a new dashboard ',
+    description: 'Create a new dashboard',
     tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
@@ -68,7 +68,7 @@ module.exports = [{
         title: Joi.string().required().min(1).max(150)
           .trim().description('Dashboard title for screen display'),
         structure: Joi.string().max(50).trim().description('Name type dashboard structure'),
-        rows: Joi.array().description('Dashboard rows content ')
+        rows: Joi.array().description('Dashboard rows content')
       }
     },
     response: {

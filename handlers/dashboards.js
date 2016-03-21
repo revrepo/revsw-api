@@ -30,8 +30,8 @@ var Dashboard = require('../models/Dashboard');
 var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getDashboards = function getDashboards(request, reply) {
-  var user_id = request.auth.credentials.user_id;
-  dashboard.getDashboardsByUseID(user_id, function(error, listOfDashboards) {
+  var userId = request.auth.credentials.user_id;
+  dashboard.getDashboardsByUserID(userId, function(error, listOfDashboards) {
     if (error) {
       return reply(boom.badImplementation('Failed to read dashboards list from the DB'));
     }
@@ -41,14 +41,14 @@ exports.getDashboards = function getDashboards(request, reply) {
 };
 
 exports.getDashboard = function getDashboard(request, reply) {
-  var dashboard_id = request.params.dashboard_id;
+  var dashboardId = request.params.dashboard_id;
 
   dashboard.get({
-    _id: dashboard_id
+    _id: dashboardId
   }, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Dashboard::getDashboard: Failed to get a dashboar' +
-        ' Dashboard ID: ' + dashboard_id));
+        ' Dashboard ID: ' + dashboardId));
     }
 
     if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
@@ -86,13 +86,13 @@ exports.createDashboard = function createDashboard(request, reply) {
 };
 
 exports.deleteDashboard = function(request, reply) {
-  var dashboard_id = request.params.dashboard_id;
+  var dashboardId = request.params.dashboard_id;
   dashboard.get({
-    _id: dashboard_id
+    _id: dashboardId
   }, function(error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Error retrieving Dashboard with id ' + dashboard_id));
+      return reply(boom.badImplementation('Error retrieving Dashboard with id ' + dashboardId));
     }
 
     if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
@@ -100,7 +100,7 @@ exports.deleteDashboard = function(request, reply) {
     }
 
     dashboard.remove({
-      _id: dashboard_id
+      _id: dashboardId
     }, function(error) {
 
       if (error) {
@@ -135,6 +135,7 @@ exports.updateDashboard = function(request, reply) {
     }
 
     updatedData.id = id;
+
     dashboard.update(updatedData, function(error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update Dashboard ' + id));

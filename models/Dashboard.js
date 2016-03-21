@@ -30,7 +30,8 @@ function Dashboard(mongoose, connection, options) {
 
   this.DashboardSchema = new this.Schema({
     user_id: {
-      type: String
+      type: String,
+      index: true
     },
     'title': String,
     'structure': {
@@ -43,7 +44,15 @@ function Dashboard(mongoose, connection, options) {
         autorefresh: ''
       }
     },
-    'rows': []
+    'rows': [],
+    'created_at': {
+      type: Date,
+      default: Date()
+    },
+    'updated_at': {
+      type: Date,
+      default: Date()
+    }
   });
 
   this.model = connection.model('Dashboard', this.DashboardSchema, 'Dashboard');
@@ -78,8 +87,10 @@ Dashboard.prototype = {
     });
   },
 
-  getDashboardsByUseID: function(user_id, callback) {
-    this.model.find({user_id:user_id}, function(err, results) {
+  getDashboardsByUserID: function(user_id, callback) {
+    this.model.find({
+      user_id: user_id
+    }, function(err, results) {
       callback(err, results);
     });
   },
