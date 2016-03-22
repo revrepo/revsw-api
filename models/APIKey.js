@@ -21,6 +21,7 @@
 'use strict';
 //	data access layer
 
+var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 
 function APIKey(mongoose, connection, options) {
@@ -205,11 +206,14 @@ APIKey.prototype = {
   //    [account_id: { total: X, inactive: Y, active: Z },
   //    ...]
   //  }
-  //  if account ID is absent then it returns data for all accounts
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
   accountAPIKeysData: function( account_id ) {
 
-    return this.model.find( ( account_id ? { account_id: account_id } : {} ),
-        { _id: 0, account_id: 1, active: 1 } )
+    var where = account_id ?
+      { account_id: ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
+      {};
+
+    return this.model.find( where, { _id: 0, account_id: 1, active: 1 } )
       .exec()
       .then( function( data ) {
         var dist = {};
