@@ -207,6 +207,7 @@ describe('Rev API /v1/activity call', function() {
           response_json.data[key].should.have.property('activity_type').be.a.String();
           response_json.data[key].should.have.property('activity_target').be.a.String();
           response_json.data[key].should.have.property('target_name').be.a.String();
+          console.log('response_json.data[key].target_id = ' + (response_json.data[key].target_id));
           response_json.data[key].should.have.property('target_id').be.a.String();
           response_json.data[key].should.have.property('operation_status').be.a.String();
           response_json.data[key].should.have.property('target_object').be.a.Object();
