@@ -401,14 +401,17 @@ exports.getFlowReport = function( request, reply ) {
                     offset: ( '' + ( span.end % span.interval ) )
                   },
                   aggs: {
+                    //  "(un)swap incoming and outgoing bandwidth"
                     received_bytes: {
                       sum: {
-                        field: 'requests.received_bytes'
+                        // field: 'requests.received_bytes'
+                        field: 'requests.sent_bytes'
                       }
                     },
                     sent_bytes: {
                       sum: {
-                        field: 'requests.sent_bytes'
+                        // field: 'requests.sent_bytes'
+                        field: 'requests.received_bytes'
                       }
                     },
                     time_spent_ms: {
@@ -587,14 +590,17 @@ exports.getAggFlowReport = function( request, reply ) {
                         offset: ( '' + ( span.end % span.interval ) )
                       },
                       aggs: {
+                        //  "(un)swap incoming and outgoing bandwidth"
                         received_bytes: {
                           sum: {
-                            field: 'requests.received_bytes'
+                            // field: 'requests.received_bytes'
+                            field: 'requests.sent_bytes'
                           }
                         },
                         sent_bytes: {
                           sum: {
-                            field: 'requests.sent_bytes'
+                            // field: 'requests.sent_bytes'
+                            field: 'requests.received_bytes'
                           }
                         }
                       }
@@ -1031,14 +1037,17 @@ exports.getTopGBT = function( request, reply ) {
                     ranges: [{ from: span.start, to: (span.end - 1) }]
                   },
                   aggs: {
+                    //  "(un)swap incoming and outgoing bandwidth"
                     received_bytes: {
                       sum: {
-                        field: 'requests.received_bytes'
+                        // field: 'requests.received_bytes'
+                        field: 'requests.sent_bytes'
                       }
                     },
                     sent_bytes: {
                       sum: {
-                        field: 'requests.sent_bytes'
+                        // field: 'requests.sent_bytes'
+                        field: 'requests.received_bytes'
                       }
                     }
                   }
@@ -1224,12 +1233,15 @@ exports.getDistributions = function( request, reply ) {
       requestBody.aggs.result.aggs.result.aggs.distribution.aggs = {
         received_bytes: {
           sum: {
-            field: 'requests.received_bytes'
+            //  "(un)swap incoming and outgoing bandwidth"
+            // field: 'requests.received_bytes'
+            field: 'requests.sent_bytes'
           }
         },
         sent_bytes: {
           sum: {
-            field: 'requests.sent_bytes'
+            // field: 'requests.sent_bytes'
+            field: 'requests.received_bytes'
           }
         }
       };
@@ -2151,14 +2163,17 @@ exports.getAB4Speed = function( request, reply ) {
                         offset: ( '' + ( span.end % span.interval ) )
                       },
                       aggs: {
+                        //  "(un)swap incoming and outgoing bandwidth"
                         received_bytes: {
                           sum: {
-                            field: 'requests.received_bytes'
+                            // field: 'requests.received_bytes'
+                            field: 'requests.sent_bytes'
                           }
                         },
                         sent_bytes: {
                           sum: {
-                            field: 'requests.sent_bytes'
+                            // field: 'requests.sent_bytes'
+                            field: 'requests.received_bytes'
                           }
                         },
                         time_spent_ms: {
