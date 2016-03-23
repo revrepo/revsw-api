@@ -67,6 +67,7 @@ module.exports = [{
       payload: {
         title: Joi.string().required().min(1).max(150)
           .trim().description('Dashboard title for screen display'),
+        options: Joi.object().description('Options dashboard'),
         structure: Joi.string().max(50).trim().description('Name type dashboard structure'),
         rows: Joi.array().description('Dashboard rows content')
       }
