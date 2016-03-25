@@ -35,7 +35,7 @@ module.exports = [{
     },
     handler: dashboars.getDashboards,
     description: 'Get a list of dashboards',
-    tags: ['api', 'dashboars'],
+//    tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -54,7 +54,7 @@ module.exports = [{
     },
     handler: dashboars.createDashboard,
     description: 'Create a new dashboard',
-    tags: ['api', 'dashboars'],
+//    tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -86,7 +86,7 @@ module.exports = [{
     },
     handler: dashboars.getDashboard,
     description: 'Get a dashboard',
-    tags: ['api'],
+//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -111,7 +111,7 @@ module.exports = [{
     handler: dashboars.updateDashboard,
     description: 'Update a dashboard',
     notes: 'Use this function to update dashboard information',
-    tags: ['api'],
+//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -140,7 +140,7 @@ module.exports = [{
     handler: dashboars.deleteDashboard,
     description: 'Remove a dashboard',
     notes: 'This function should be used  to delete a dashboard',
-    tags: ['api'],
+//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
