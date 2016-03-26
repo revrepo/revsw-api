@@ -176,7 +176,29 @@ Account.prototype = {
     } else {
       callback(utils.buildError('400', 'No account ID passed to remove function'), null);
     }
-  }
+  },
+
+  //  free _promise_ query
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  // returns _promise_ { _id: companyName, _id: companyName, ... }
+  idNameHash: function() {
+    return this.model.find({}, { _id: 1, companyName: 1 } )
+      .exec()
+      .then( function( data ) {
+        var hash  = {};
+        data.forEach( function( item ) {
+          hash[item._id.toString()] = item.companyName;
+        });
+        return hash;
+      });
+  },
+
+
 };
 
 module.exports = Account;

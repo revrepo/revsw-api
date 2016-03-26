@@ -32,6 +32,7 @@ function UsageReport( mongoose, connection, options ) {
     '_id'                       : String,
     'account_id'                : String,
     'report_for_day'            : Date,
+    'created_at'                : Date,
     'domains'                   : this.Schema.Types.Mixed,
     'domains_usage'             : this.Schema.Types.Mixed,
     'traffic_per_billing_zone'  : this.Schema.Types.Mixed
@@ -104,7 +105,58 @@ UsageReport.prototype = {
     where = where || {};
     fields = fields || {};
     return this.model.find(where, fields).exec();
-  }
+  },
+
+  //  ---------------------------------
+  //  returns promise array [{ account_id: '000000000000000000000000', created_at: Sat Mar 19 2016 }, ...]
+  //  day is report_for_day value, default today
+  //  account_id can be either ID(string), an array of IDs or an empty string for all accounts
+  lastCreatedAt : function ( day, account_id ) {
+    if ( !day ) {
+      day = new Date();
+      day.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+    }
+
+    var where = { report_for_day: day };
+    if ( account_id ) {
+      where.account_id = _.isArray( account_id ) ? { $in: account_id } : /*string*/account_id;
+    }
+    return this.model.find( where, { _id: 0, account_id: 1, created_at: 1 })
+      .exec()
+      .then( function( docs ) {
+        if ( docs ) {
+          docs = docs.map( function( doc ) {
+            return doc._doc;
+          });
+          if ( account_id ) {
+            if ( _.isString( account_id ) ) {
+              account_id = [account_id];
+            }
+            if ( docs.length < account_id.length ) {
+              //  some ids not found
+              var not_found = [];
+              account_id.forEach( function( id ) {
+                //  v0.10 doesn't support Array.find
+                var found = _.find( docs, function( doc ) {
+                  return doc.account_id === id;
+                });
+                if ( !found ) {
+                  not_found.push({ account_id: id, created_at: false });
+                }
+              });
+              docs = docs.concat( not_found );
+            }
+          }
+        }
+        return docs;
+      });
+
+    // return this.model.aggregate([
+    //   { $match: match },
+    //   { $group: { _id: '$account_id', minCreated: { $min: '$created_at' } } }
+    // ]).exec();
+  },
+
 
 };
 

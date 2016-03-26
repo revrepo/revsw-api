@@ -73,7 +73,10 @@ for (var i = 0; i < parslen; ++i) {
 
 //  here we go ... -------------------------------------------------------------------------------//
 
-require( '../lib/usageReport.js' ).collectDayReport( ( conf.date || 'now' ), conf.dry/*do not save, return collected data*/ )
+require( '../lib/usageReport.js' ).collectDayReport(
+    ( conf.date || 'now' ),
+    false/*no particular id(s)*/,
+    conf.dry/*do not save, return collected data*/ )
   .then( function( data ) {
     log_( data, 2 );
     console.log( 'done.\n' );
