@@ -105,7 +105,7 @@ module.exports = [
     path: '/v1/billing_plans',
     config: {
       auth: {
-        scope: ['admin_rw']
+        scope: ['admin_rw', 'revadmin_rw', 'revadmin']
       },
       handler: billingPlanHandler.createBillingPlan,
       description: 'Create a new Billing plan in the system',

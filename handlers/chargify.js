@@ -66,10 +66,11 @@ exports.webhookHandler = function (request, reply) {
               accounts.getAsync({_id: user.companyId})
                 .then(function (account) {
                   var company = {
-                    'billing_portal_link': {url: link.url, expires_at: expiresAt},
+                    billing_portal_link: {url: link.url, expires_at: expiresAt},
                     account_id: account.id,
                     subscription_id: subscription.id,
-                    subscription_state: subscription.state
+                    subscription_state: subscription.state,
+                    chargify_id: customer.id
                   };
                   resolve(accounts.updateAsync(company));
                 });

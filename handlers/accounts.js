@@ -127,6 +127,10 @@ exports.createAccount = function (request, reply) {
   });
 };
 
+exports.createBillingProfile = function (request, reply) {
+  var account_id = request.params.account_id;
+};
+
 exports.getAccount = function (request, reply) {
 
   var account_id = request.params.account_id;
