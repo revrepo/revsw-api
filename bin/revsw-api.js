@@ -114,9 +114,9 @@ server.register(require('hapi-auth-jwt'), function (err) {
   });
 });
 
-//server.register(require('hapi-auth-apikey'), function (err) {
-//  server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
-//});
+server.register(require('../lib/hapi-auth-apikey'), function (err) {
+  server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
+});
 
 server.register(require('../lib/chargify-webhook-signature'), function (err) {
   server.auth.strategy('hmac', 'signature');
@@ -141,7 +141,7 @@ server.register([{
 });
 
 server.auth.default({
-  strategies: [ 'basic', 'token' ]
+  strategies: [ 'basic', 'token', 'apikey' ]
 });
 
 //server.route(Routes.routes);

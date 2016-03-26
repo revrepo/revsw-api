@@ -20,8 +20,10 @@
 
 'use strict';
 
-var mongoose = require('mongoose');
+var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
 
+var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
 
 var ApiKey = require('../models/APIKey');
@@ -30,24 +32,53 @@ var Account = require('../models/Account');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 
+var accountId;
+
 exports.validateAPIKey = function (request, key, callback) {
   apiKeys.get({
     key: key
   }, function(error, result) {
 
     if (error) {
+      logger.error('Failed to retrieve DB details for API key ' + key);
       return callback(error, false, result);
     }
 
     if (!result) {
+      logger.warn('Cannot find API ' + key + ' in the database');
       return callback(error, false, result);
     }
 
-    // Users without companyId data should not be able to log in
-    if (!result.companyId) {
+    if (!result.account_id) {
+      logger.error('API key ' + key + ' does not have a proper account_id attribute');
       return callback(error, false, result);
     }
 
-    return callback(error, true, result);
+    if (!result.active) {
+      logger.warn('Trying to use disabled API key ' + key);
+      return callback(error, false, result);
+    }
+
+    accountId = result.account_id;
+
+    accounts.get( { _id: accountId }, function (error, account) {
+      if (error) {
+        logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (API key ' + key + ')');
+        return callback(error, false, result);
+      }
+
+      if (!account) {
+        logger.error('DB inconsitency for API keys: cannot find account ID ' + accountId + ' (API key ' + key + ')');
+        return callback(error, false, result);
+      }
+      
+      result.user_type = 'apikey';
+      result.scope = [ 'apikey' ];
+      if (result.read_only_status === true) {
+        result.scope.push('apikey_rw');
+      }
+
+      return callback(error, true, result);
+    });
   });
 };
