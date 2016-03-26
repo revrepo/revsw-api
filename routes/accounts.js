@@ -80,6 +80,32 @@ module.exports = [
     }
   },
 
+  {
+    method: 'POST',
+    path: '/v1/accounts/{account_id}/billing_profile',
+    config: {
+      auth: {
+        scope: [ 'reseller_rw' , 'revadmin_rw', 'admin_rw' ]
+      },
+      handler: account.createBillingProfile,
+      description: 'Create billing profile',
+      tags: ['api', 'accounts'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required()
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+
 
   {
     method: 'PUT',

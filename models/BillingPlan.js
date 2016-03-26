@@ -154,6 +154,9 @@ BillingPlanSchema.statics = {
     }, function (err, doc) {
       if (doc) {
         var old = _.clone(doc.toJSON());
+        if(old.history){
+          delete old.history;
+        }
         delete item.id;
         for (var attrname in item) {
           doc[attrname] = item[attrname];
