@@ -34,7 +34,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: account.getAccounts,
       description: 'Get a list of customer accounts registered for a customer/reseller',
@@ -56,7 +56,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'reseller_rw' , 'revadmin_rw' ]
+        scope: [ 'reseller_rw' , 'revadmin_rw', 'apikey_rw' ]
       },
       handler: account.createAccount,
       description: 'Create a new customer account in the system',
@@ -80,13 +80,39 @@ module.exports = [
     }
   },
 
+  {
+    method: 'POST',
+    path: '/v1/accounts/{account_id}/billing_profile',
+    config: {
+      auth: {
+        scope: [ 'reseller_rw' , 'revadmin_rw', 'admin_rw' ]
+      },
+      handler: account.createBillingProfile,
+      description: 'Create billing profile',
+      tags: ['api', 'accounts'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required()
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+
 
   {
     method: 'PUT',
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey_rw' ]
       },
       handler: account.updateAccount,
       description: 'Update a customer account',
@@ -118,7 +144,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin' ]
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: account.getAccount,
       description: 'Get details about a customer account',
@@ -144,7 +170,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}/statements',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin' ]
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: account.getAccountStatements,
       description: 'Get a list of billing statements',
@@ -169,7 +195,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}/statements/{statement_id}',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin' ]
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: account.getAccountStatement,
       description: 'Get a specific billing statement',
@@ -195,7 +221,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}/statements/{statement_id}/pdf',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin' ]
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: account.getPdfStatement,
       description: 'Get a billing statement in PDF format',
@@ -221,7 +247,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}/transactions',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin' ]
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: account.getAccountTransactions,
       description: 'Get a list of billing transactions',
@@ -246,7 +272,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey_rw' ]
       },
       handler: account.deleteAccount,
       description: 'Remove a customer account',

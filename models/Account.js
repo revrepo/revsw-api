@@ -45,6 +45,8 @@ function Account(mongoose, connection, options) {
     'phone_number'         : String,
     'comment': {type: String, default: ''},
     'deleted': {type: Boolean, default: false},
+    'chargify_id': {type: String, default: null},
+    'payment_method_configuration_status': {type: Boolean, default: false},
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,

@@ -45,6 +45,8 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
       return callback(error, false, result);
     }
 
+    result.user_type = 'user';
+
     result.scope = [];
 
     result.scope.push(result.role);

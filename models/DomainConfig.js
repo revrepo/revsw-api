@@ -21,7 +21,8 @@
 'use strict';
 //	data access layer
 
-var utils = require('../lib/utilities.js'),
+var _ = require('lodash'),
+  utils = require('../lib/utilities.js'),
   config = require('config'),
   mongoose = require('mongoose');
 
@@ -148,11 +149,16 @@ DomainConfig.prototype = {
   //     }, ....
   //   }
   // }
-  //  if account ID is absent  then it returns data for all accounts
+
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
   accountDomainsData: function( account_id ) {
 
-    return this.model.find( ( account_id ? { account_id: account_id } : {} ),
-      { _id: 0, domain_name: 1, account_id: 1, deleted: 1, 'proxy_config.rev_component_bp.enable_security': 1 } )
+    var where = account_id ?
+      { account_id: ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
+      {};
+
+    return this.model.find( where,
+        { _id: 0, domain_name: 1, account_id: 1, deleted: 1, 'proxy_config.rev_component_bp.enable_security': 1 } )
       .exec()
       .then( function( data ) {
         var map = {};
@@ -179,6 +185,25 @@ DomainConfig.prototype = {
           domain_to_acc_id_map: map,
           account_domains_count: dist
         };
+      });
+  },
+
+  //  returns _promise_ [] with domain names for the given account(s)
+  //  account_id can be either ID(string), an array of IDs or an empty string for all accounts (revadmin)
+  domainsListForAccount: function( account_id ) {
+
+    var where = account_id ?
+      { account_id: ( _.isString( account_id ) ? account_id : { $in: account_id } ) } :
+      {};
+
+    return this.model.find( where, { _id: 0, domain_name: 1 } )
+      .exec()
+      .then( function( data ) {
+        var res = [];
+        data.forEach( function( item ) {
+          res.push(item.domain_name);
+        });
+        return res;
       });
   }
 };
