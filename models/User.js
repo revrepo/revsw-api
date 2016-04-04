@@ -51,8 +51,8 @@ function User(mongoose, connection, options) {
     'status'               : {type : Boolean, default : true},
     'theme'                : {type : String, default : 'light'},
     'token'                : String,
-    'created_at'           : {type : Date, default : Date()},
-    'updated_at'           : {type : Date, default : Date()},
+    'created_at'           : {type : Date, default : Date.now},
+    'updated_at'           : {type : Date, default : Date.now},
     'last_login_at'        : {type : Date, default: null},
     'last_login_from'      : {type : String, default: null},
     // TODO: need to fix the ugly names of the two variables
