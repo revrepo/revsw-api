@@ -16,8 +16,8 @@
  * from Rev Software, Inc.
  */
 
-var PurgeResource = require('./../resources/users');
-var PurgeDP = require('./../providers/data/users');
+var PurgeResource = require('./../resources/purge');
+var PurgeDP = require('./../providers/data/purge');
 var APITestError = require('./../apiTestError');
 
 // # Purge Helper

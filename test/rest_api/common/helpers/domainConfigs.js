@@ -16,8 +16,8 @@
  * from Rev Software, Inc.
  */
 
-var DomainConfigsResource = require('./../resources/users');
-var DomainConfigsDP = require('./../providers/data/users');
+var DomainConfigsResource = require('./../resources/domainConfigs');
+var DomainConfigsDP = require('./../providers/data/domainConfigs');
 var APITestError = require('./../apiTestError');
 
 // # Users Helper
