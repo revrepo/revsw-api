@@ -50,7 +50,7 @@ module.exports = [{
   path: '/v1/dashboards',
   config: {
     auth: {
-      scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+      scope: ['user', 'admin', 'reseller', 'revadmin']
     },
     handler: dashboars.createDashboard,
     description: 'Create a new dashboard',
@@ -106,7 +106,7 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+      scope: ['user', 'admin', 'reseller', 'revadmin']
     },
     handler: dashboars.updateDashboard,
     description: 'Update a dashboard',
@@ -135,7 +135,7 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+      scope: ['user', 'admin', 'reseller', 'revadmin']
     },
     handler: dashboars.deleteDashboard,
     description: 'Remove a dashboard',

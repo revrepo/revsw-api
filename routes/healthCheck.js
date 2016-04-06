@@ -41,5 +41,21 @@ module.exports = [
         }
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/healthcheck',
+    config: {
+      auth: false,
+      handler: healthCheck.healthCheck,
+      description: 'Run a quick system health check ',
+      tags: [],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      }
+    }
   }
 ];

@@ -45,8 +45,8 @@ function APIKey(mongoose, connection, options) {
     },
     'read_only_status': {type: Boolean, default: false},
     'active'          : {type: Boolean, default: true},
-    'created_at'      : {type: Date, default: Date()},
-    'updated_at'      : {type: Date, default: Date()}
+    'created_at'      : {type: Date, default: Date.now},
+    'updated_at'      : {type: Date, default: Date.now}
   });
 
   this.model = connection.model('APIKey', this.APIKeySchema, 'APIKey');
