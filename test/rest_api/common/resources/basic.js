@@ -304,9 +304,11 @@ var BasicResource = function (data) {
       ids.forEach(function (id) {
         deletions.push(me
           .deleteOne(id)
-          .then());
+          .then(function () {
+            console.log('Item deleted:', id);
+          })); // We don't catch any errors as we want them to be propagated
       });
-      return Promise.all(deletions);
+      return Promise.each(deletions);
     };
   }
 
@@ -330,12 +332,14 @@ var BasicResource = function (data) {
       ids.forEach(function (id) {
         deletions.push(me
           .deleteOne(id)
-          .then()
-          .catch(function (err) {
-            // console.log('Item does not exist. Do not do anything.');
-          }));
+          .then(function () {
+            console.log('Item deleted:', id);
+          })
+          .catch(function () {
+            console.log('Do not do anything else as item does not exist:', id);
+          })); // We catch any errors as we don't want them to be propagated
       });
-      return Promise.all(deletions);
+      return Promise.each(deletions);
     };
   }
 
