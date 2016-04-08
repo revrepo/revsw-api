@@ -64,14 +64,11 @@ describe('Clean up', function () {
                   .then(function (res) {
                     var ids = [];
                     var users = res.body;
-                    //console.log('users = ' + JSON.stringify(users));
                     users.forEach(function (user) {
                       if (namePattern.test(user.email)) {
                         ids.push(user.user_id);
                       }
                     });
-                    //console.log('Deleting/cleaning the following user
-                    //  IDs = ' + JSON.stringify(ids));
 
                     API.resources.users
                       .deleteManyIfExist(ids)
