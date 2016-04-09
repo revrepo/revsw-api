@@ -50,10 +50,15 @@ function Account(mongoose, connection, options) {
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
+    'contact_email': String, // TODO: check work
+    'use_contact_info_as_billing_info': {type: Boolean, default: false},
     'billing_info': {
+      'first_name':  String,// TODO: check work
+      'last_name':  String,// TODO: check work
+      'contact_email': String,// TODO: check work
       'address1': String,
       'address2': String,
-      'country': String,
+      'country': {type : String, default : 'US'},
       'state': String,
       'city': String,
       'zipcode': String,
