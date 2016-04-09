@@ -24,53 +24,61 @@ describe('Clean up', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var revadmin = config.get('api.users.revAdmin');
-  var namePattern = /API_TEST_USER_1/;
+  // Defining set of users for which all below tests will be run
+  var users = [
+    config.get('api.users.revAdmin')
+  ];
 
-  before(function (done) {
-    done();
-  });
-
-  after(function (done) {
-    done();
-  });
+  var namePattern = /API_TEST_USER_1|portal-ui-test-email/;
 
   describe('Users resource', function () {
 
-    beforeEach(function (done) {
-      done();
-    });
+    users.forEach(function (user) {
 
-    afterEach(function (done) {
-      done();
-    });
+      describe('With user: ' + user.role, function () {
 
-    it('should clean Users created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(revadmin)
-          .then(function () {
-            API.resources.users
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var users = res.body;
-//                console.log('users = ' + JSON.stringify(users));
-                users.forEach(function (user) {
-                  if (namePattern.test(user.email)) {
-                    ids.push(user.user_id);
-                  }
-                });
-                console.log('Deleting/cleaning the following user IDs = ' + JSON.stringify(ids));
-      
+        before(function (done) {
+          done();
+        });
+
+        after(function (done) {
+          done();
+        });
+
+        beforeEach(function (done) {
+          done();
+        });
+
+        afterEach(function (done) {
+          done();
+        });
+
+        it('should clean-up Users created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.users
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var users = res.body;
+                    users.forEach(function (user) {
+                      if (namePattern.test(user.email)) {
+                        ids.push(user.user_id);
+                      }
+                    });
+
+                    API.resources.users
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

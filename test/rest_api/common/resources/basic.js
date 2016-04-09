@@ -300,13 +300,13 @@ var BasicResource = function (data) {
      */
     _resource.deleteMany = function (ids) {
       var me = this;
-      var deletions = [];
-      ids.forEach(function (id) {
-        deletions.push(me
+      return Promise.each(ids, function (id) { // One promise after other
+        return me
           .deleteOne(id)
-          .then());
+          .then(function () {
+            console.log('Item deleted:', id);
+          }); // We don't catch any errors as we want them to be propagated
       });
-      return Promise.all(deletions);
     };
   }
 
@@ -326,16 +326,21 @@ var BasicResource = function (data) {
      */
     _resource.deleteManyIfExist = function (ids) {
       var me = this;
-      var deletions = [];
-      ids.forEach(function (id) {
-        deletions.push(me
+      return Promise.each(ids, function (id) { // One promise after other
+        return me
           .deleteOne(id)
-          .then()
-          .catch(function (err) {
-            // console.log('Item does not exist. Do not do anything.');
-          }));
+          .then(function (res) {
+            if (res.body.statusCode || res.body.statusCode !== 200) {
+              console.log('Cannot delete item:', id, res.body.message);
+            }
+            else {
+              console.log('Item deleted:', id, res.body);
+            }
+          })
+          .catch(function () {
+            console.log('Do not do anything else as item does not exist:', id);
+          }); // We catch any errors as we don't want them to be propagated
       });
-      return Promise.all(deletions);
     };
   }
 

@@ -74,7 +74,7 @@ exports.validateAPIKey = function (request, key, callback) {
       
       result.user_type = 'apikey';
       result.scope = [ 'apikey' ];
-      if (result.read_only_status === true) {
+      if (result.read_only_status === false) {
         result.scope.push('apikey_rw');
       }
 

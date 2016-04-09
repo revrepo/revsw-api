@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,25 +16,25 @@
  * from Rev Software, Inc.
  */
 
-// # API object
+var PurgeResource = require('./../resources/purge');
+var PurgeDP = require('./../providers/data/purge');
+var APITestError = require('./../apiTestError');
 
-var Session = require('./session');
-var APIHelpers = require('./helpers/api');
-var APIResources = require('./resources/api');
-
-// This allows to overpass SSL certificate check
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-// `API` object that abstracts all functionality from the REST API being tested.
-// Defines all resources and other components needed for testing.
+// # Purge Helper
+// Abstracts common functionality for the related resource.
 module.exports = {
 
-  // Session, will help us to _remember_ which user is currently being used.
-  session: Session,
-
-  // A set of all helpers for the REST API service.
-  helpers: APIHelpers,
-
-  // A set of all resources that the REST API service provides.
-  resources: APIResources
+  createOne: function (domainName) {
+    var purgeData = PurgeDP.generateOne(domainName);
+    return PurgeResource
+      .createOneAsPrerequisite(purgeData)
+      .catch(function (error) {
+        throw new APITestError('Creating Purge Request' , error.response.body,
+          purgeData);
+      })
+      .then(function (res) {
+        purgeData.id = res.body.request_id;
+        return purgeData;
+      });
+  }
 };
