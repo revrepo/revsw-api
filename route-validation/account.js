@@ -27,6 +27,7 @@ exports.accountUpdatePayload = {
     .trim().description('Company name of newly registered customer account'),
   comment: joi.string().allow('').max(300).trim().description('Free-text comment about the company'),
   phone_number: joi.string().description('Phone number').optional(),
+  contact_email: joi.string().description('Contact email').optional(),
   password: joi.string().description('Password').optional(),
   address1: joi.string().description('Address 1').optional(),
   address2: joi.string().description('Address 2').optional(),
@@ -35,4 +36,7 @@ exports.accountUpdatePayload = {
   city: joi.string().description('City').optional(),
   zipcode: joi.string().description('Zip Code').optional(),
   billing_plan: joi.string().description('Billing plan ID'),
+  use_contact_info_as_billing_info: joi.boolean().description('Use contact info as billing info'),
+  billing_info: joi.object().optional().description('Billing information for create Chargify Customer Account')
+
 };
