@@ -127,7 +127,11 @@ module.exports = {
         id: Joi.string().regex(idFormatPattern).required(),
         created_at: Joi.string().regex(dateFormatPattern).required(),
         updated_at: Joi.string().regex(dateFormatPattern).required(),
-        comment: Joi.string().allow('')
+        comment: Joi.string().allow(''),
+        billing_info: Joi.object(),
+        chargify_id: Joi.string().allow(null),
+        subscription_id: Joi.string().allow(null),
+        use_contact_info_as_billing_info: Joi.boolean()
       });
     return accountSchema;
   },
