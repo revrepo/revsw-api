@@ -36,6 +36,7 @@ function Account(mongoose, connection, options) {
     // TODO need to rename to created_by
     'createdBy'   : String,
     'id'          : String,
+
     'address1'             : String,
     'address2'             : String,
     'country'              : {type : String, default : 'US'},
@@ -45,24 +46,27 @@ function Account(mongoose, connection, options) {
     'phone_number'         : String,
     'comment': {type: String, default: ''},
     'deleted': {type: Boolean, default: false},
-    'chargify_id': {type: String, default: null},
+    'billing_id': {type: String, default: null},
     'payment_method_configuration_status': {type: Boolean, default: false},
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
-    'contact_email': String, // TODO: check work
+    'first_name':  String,
+    'last_name':  String,
+    'contact_email': String,
     'use_contact_info_as_billing_info': {type: Boolean, default: false},
     'billing_info': {
-      'first_name':  String,// TODO: check work
-      'last_name':  String,// TODO: check work
-      'contact_email': String,// TODO: check work
+      'first_name':  String,
+      'last_name':  String,
+      'contact_email': String,
       'address1': String,
       'address2': String,
       'country': {type : String, default : 'US'},
       'state': String,
       'city': String,
       'zipcode': String,
-      'masked_card_number': String
+      'masked_card_number': String,
+      'phone_number': String,
     },
     'billing_portal_link': {url: String, expires_at: Date},
     'created_at'  : {type : Date, default : Date.now},
