@@ -96,11 +96,12 @@ exports.signup = function(req, reply) {
       }
     })
     .then(function successFindInternalBullingPlan(internal_data) {
+      _billing_plan = internal_data;
       // NOTE: get current Cahrgify Product Information
       return chargifyProduct
         .getHostedPageAsync(data.billing_plan)
         .then(function(billin_plan_info) {
-          _billing_plan = billin_plan_info;
+          _billing_plan.hosted_page = billin_plan_info.url;
           return billin_plan_info;
         }, function onError(err) {
           throw {
@@ -114,14 +115,20 @@ exports.signup = function(req, reply) {
       var newCompany = {
         companyName: data.company_name,
         createdBy: data.email,
-        firstname: data.firstname,
-        lastname: data.lastname,
+        first_name: data.first_name,
+        last_name: data.last_name,
         contact_email: data.email,
         phone_number: data.phone_number,
-        billing_plan: data.billing_plan,
+        billing_plan: _billing_plan.id,
+        address1: data.address1,
+        address2: data.address2,
+        country: data.country,
+        state: data.state,
+        city: data.city,
+        zipcode: data.zipcode,
         billing_info: {
-          firstname: data.firstname,
-          lastname: data.lastname,
+          first_name: data.first_name,
+          last_name: data.last_name,
           contact_email: data.email,
           phone_number: data.phone_number,
           address1: data.address1,
@@ -152,8 +159,8 @@ exports.signup = function(req, reply) {
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
-        firstname: data.firstname,
-        lastname: data.lastname,
+        firstname: data.first_name,
+        lastname: data.last_name,
         password: data.password,
         email: data.email
       };
@@ -221,7 +228,7 @@ exports.signup = function(req, reply) {
         subject: config.get('user_registration_instruction_subject'),
         text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
           'Please click on the following link, or paste this into your browser to complete the process: \n\n' +
-          _billing_plan.url + '?' + qs.stringify(_customer_chargify) +
+          _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) +
           'If you did not request this, please ignore this email.\n\n' +
           'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
           'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
