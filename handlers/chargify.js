@@ -73,8 +73,8 @@ exports.webhookHandler = function(request, reply) {
   var onSignupSuccess = function(subscription) {
     return new Promise(function(resolve, reject) {
       var _subscription = subscription;
-      var _customer = subscription.customer;
-      var account_id = customer.reference;
+      var _customer = _subscription.customer;
+      var account_id = _customer.reference;
       var _account = {};
 
       accounts.getAsync({
@@ -82,6 +82,7 @@ exports.webhookHandler = function(request, reply) {
         })
         .then(function updateAccount(account) {
           _account = account;
+
           return chargify.getBillingPortalLinkAsync(_customer.id)
             .then(function(link) {
               var expiresAt = Date.parse(link.expires_at);
@@ -95,6 +96,7 @@ exports.webhookHandler = function(request, reply) {
                 subscription_state: _subscription.state,
                 billing_id: _customer.id // NOTE: Billing Id = Chargify Customer Id
               };
+
               return accounts.updateAsync(account);
             });
         })
@@ -110,7 +112,7 @@ exports.webhookHandler = function(request, reply) {
         })
         .then(function verifyAdminUser(adminUser) {
           adminUser.validation.verified = true;
-          return users.updateValidation(adminUser);
+          return users.updateValidationAsync(adminUser);
         })
         .catch(function errorFindAdmin(err) {
           throw new Error('Eror verify Admin User');
@@ -155,7 +157,7 @@ exports.webhookHandler = function(request, reply) {
       onTest();
       break;
     case 'signup_success':
-      onSignupSuccess()
+      onSignupSuccess(payload.subscription)
         .then(function successSignup(res) {
           logger.info('Webhook:signup_success:success');
           reply({
