@@ -26,6 +26,8 @@ exports.accountUpdatePayload = {
   companyName: joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
     .trim().description('Company name of newly registered customer account'),
   comment: joi.string().allow('').max(300).trim().description('Free-text comment about the company'),
+  first_name: joi.string().required().description('First name of contact person'),
+  last_name: joi.string().required().description('Last name of contact person'),
   phone_number: joi.string().description('Phone number').optional(),
   contact_email: joi.string().description('Contact email').optional(),
   password: joi.string().description('Password').optional(),
@@ -37,6 +39,6 @@ exports.accountUpdatePayload = {
   zipcode: joi.string().description('Zip Code').optional(),
   billing_plan: joi.string().description('Billing plan ID'),
   use_contact_info_as_billing_info: joi.boolean().description('Use contact info as billing info'),
-  billing_info: joi.object().optional().description('Billing information for create Chargify Customer Account')
-
+  billing_info: joi.object().optional().description('Billing information for create Chargify Customer Account'),
+  subscription_state: joi.string().description('Subscription state (status)')
 };
