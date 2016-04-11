@@ -22,8 +22,8 @@ var joi = require('joi');
 joi.objectId = require('joi-objectid');
 
 exports.signupPayload = {
-  firstname: joi.string().description('User first name').required(),
-  lastname: joi.string().description('Last name').required(),
+  first_name: joi.string().description('User first name').required(),
+  last_name: joi.string().description('Last name').required(),
   email: joi.string().email().description('Email address').required(),
   company_name: joi.string().description('Company name').optional(),
   phone_number: joi.string().description('Phone number').required(),
