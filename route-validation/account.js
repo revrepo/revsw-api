@@ -26,8 +26,8 @@ exports.accountUpdatePayload = {
   companyName: joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
     .trim().description('Company name of newly registered customer account'),
   comment: joi.string().allow('').max(300).trim().description('Free-text comment about the company'),
-  first_name: joi.string().required().description('First name of contact person'),
-  last_name: joi.string().required().description('Last name of contact person'),
+  first_name: joi.string().optional().description('First name of contact person'),
+  last_name: joi.string().optional().description('Last name of contact person'),
   phone_number: joi.string().description('Phone number').optional(),
   contact_email: joi.string().description('Contact email').optional(),
   password: joi.string().description('Password').optional(),
