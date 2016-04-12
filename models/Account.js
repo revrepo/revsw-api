@@ -146,6 +146,34 @@ Account.prototype = {
     });
   },
 
+  /**
+   * @name  getBySubscriptionId
+   * @description
+   *
+   *  Find Account by Subscription
+   *
+   * @param  {Staring}   subscriptionId
+   * @param  {Function} callback       [description]
+   * @return
+   */
+  getBySubscriptionId : function (subscriptionId, callback) {
+    var  item = {
+      subscription_id: subscriptionId
+    };
+
+    this.model.findOne(item, function (err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.id = doc._id + '';
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.status;
+      }
+      callback(err, doc);
+    });
+  },
+
   update : function (item, callback) {
     // TODO need to switch to use "id" instead of "account_id"
     this.model.findOne({_id : item.account_id}, function (err, doc) {

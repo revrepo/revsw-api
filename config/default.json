@@ -51,6 +51,7 @@
 
   "user_verify_subject" : "RevAPM New User Email Verification Request",
   "user_registration_instruction_subject" : "RevAPM New User Registration",
+  "user_welcome_subject" : "Welcome to RevAPM",
   "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
   "user_verify_token_lifetime" : 86400000,
 
