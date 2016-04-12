@@ -120,9 +120,10 @@ exports.webhookHandler = function(request, reply) {
                 var mailOptions = {
                   to: adminUser.email,
                   subject: config.get('user_welcome_subject'),
-                  text: 'Hello, ' + adminUser.firstname + '\n\n' +
-                    'Now that you\'re all signed up, head over to \n\n' +
-                    'https://' + config.get('user_verify_portal_domain') + '\n\n' +
+                  text: 'Hello ' + adminUser.firstname + ',\n\n' +
+                    'We\'ve completed setting up your new RevAPM account!\n\n' +
+                    'Your are welcome to visit our customer portal at https://' + config.get('user_verify_portal_domain') + '\n' +
+                    'and start managing your configuration!' + '\n\n' +
                     'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
                     'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
                 };
