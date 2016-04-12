@@ -23,6 +23,7 @@
 var mongoose = require('mongoose');
 var boom = require('boom');
 var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
 var jwt = require('jsonwebtoken');
 var speakeasy = require('speakeasy');
 var _ = require('lodash');
@@ -114,10 +115,12 @@ exports.authenticate = function(request, reply) {
   }, function(error, user) {
 
     if (error) {
+      logger.error('Authenticate::authenticate: Failed to retrieve user details for' + ' email: ' + email);
       return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
         ' email: ' + email));
     }
     if (!user) {
+      logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
       return reply(boom.unauthorized());
     } else {
       var passHash = utils.getHash(password);
@@ -127,16 +130,22 @@ exports.authenticate = function(request, reply) {
         var authPassed = true;
 
         if (user.self_registered) {
+          logger.info('Authenticate::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
           accounts.get({
             _id: user.companyId
           }, function(error, account) {
             if (error) {
+              logger.error('Authenticate::authenticate: Failed to find an account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email);
               return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
-                ' User ID: ' + user.id + ' Email: ' + user.email));
+                ' User ID: ' + user.user_id + ' Email: ' + user.email));
             }
-
-            if (account.subscription_id === null || account.subscription_id === '') {
+            // NOTE: Not finished registration.
+            if (account.billing_id === null || account.billing_id === '') {
+              logger.error('Authenticate::authenticate: Account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not have billing ID');
               authPassed = false;
+              return reply(boom.create(418, 'Your registration not finished'));
             }
 
             if (authPassed) {
