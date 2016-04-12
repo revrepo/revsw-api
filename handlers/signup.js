@@ -105,7 +105,7 @@ exports.signup = function(req, reply) {
       // NOTE: get current Cahrgify Product Information
       // NOTE: new specific handler name - it is start with 'billing-plan-'
       return chargifyProduct
-        .getHostedPageAsync('billing-plan-' + data.billing_plan)
+        .getHostedPageAsync(data.billing_plan)
         .then(function(billin_plan_info) {
           _billing_plan.hosted_page = billin_plan_info.url;
           return billin_plan_info;
