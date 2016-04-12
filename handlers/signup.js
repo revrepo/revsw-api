@@ -231,8 +231,9 @@ exports.signup = function(req, reply) {
         to: _newUser.email,
         subject: config.get('user_registration_instruction_subject'),
         text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
-          'Please click on the following link, or paste this into your browser to complete the process: \n\n' +
-          _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) +
+          'Please click on the following link to complete the process: \n\n' +
+          '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">' + _billing_plan.hosted_page + '?reference=' + _newAccount.id +'< /a>'+
+          '\n\n'+
           'If you did not request this, please ignore this email.\n\n' +
           'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
           'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
