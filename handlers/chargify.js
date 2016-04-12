@@ -140,11 +140,8 @@ exports.webhookHandler = function(request, reply) {
                 return;
               });
         })
-        .then(function sendWelcomeEmail() {
-
-        })
         .catch(function errorFindAdmin(err) {
-          throw new Error('Eror verify Admin User');
+          throw new Error('Error verify Admin User');
         })
         .then(function() {
           return resolve();
