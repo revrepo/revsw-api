@@ -163,15 +163,14 @@ exports.webhookHandler = function(request, reply) {
       var _subscription = subscription;
       var _customer = subscription.customer;
       // 1. Find account.subscription_id = subscription.id
-      accounts.getAsync({
-          subscription_id: _subscription.id
-        })
+      accounts.getBySubscriptionIdAsync(_subscription.id)
         .then(function updateAccountSubscriptionState(_account) {
           // NOTE: set updated fields
           _account.subscription_state = _subscription.state;
           resolve(accounts.updateAsync(_account));
         })
-        .catch(function() {
+        .catch(function(err) {
+          logger.error('OnSubscriptionStateChange:error. Subscription with ID=' + _subscription.id + ' not set state "' + _subscription.state + '"');
           throw new Error('Error update Account subscription_state for subscription_id = ' + _subscription.id);
         });
     });

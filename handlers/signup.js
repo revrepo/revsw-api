@@ -94,7 +94,8 @@ exports.signup = function(req, reply) {
     })
     .then(function successCallGetBillingPlan(bp) {
       if (!bp) {
-        throw new Error('Error finde Billing Plan with name ' + data.billing_plan);
+        logger.error('signup::billing_plans: Internal Billing Plan with name ' + data.billing_plan + ' not found.');
+        throw new Error('Error find Billing Plan with name ' + data.billing_plan);
       } else {
         return bp;
       }
@@ -102,12 +103,14 @@ exports.signup = function(req, reply) {
     .then(function successFindInternalBullingPlan(internal_data) {
       _billing_plan = internal_data;
       // NOTE: get current Cahrgify Product Information
+      // NOTE: new specific handler name - it is start with 'billing-plan-'
       return chargifyProduct
-        .getHostedPageAsync(data.billing_plan)
+        .getHostedPageAsync('billing-plan-' + data.billing_plan)
         .then(function(billin_plan_info) {
           _billing_plan.hosted_page = billin_plan_info.url;
           return billin_plan_info;
         }, function onError(err) {
+          logger.error('signup::billing_plans: External Billing Plan information for ' + data.billing_plan + ' not found.');
           throw {
             message: 'Billing Plan \'' + data.billing_plan + '\' not exist',
             statusCode: 404
@@ -230,13 +233,17 @@ exports.signup = function(req, reply) {
       var mailOptions = {
         to: _newUser.email,
         subject: config.get('user_registration_instruction_subject'),
-        text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
-          'Please click on the following link to complete the process: \n\n' +
-          '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">' + _billing_plan.hosted_page + '?reference=' + _newAccount.id +'< /a>'+
-          '\n\n'+
-          'If you did not request this, please ignore this email.\n\n' +
-          'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-          'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+        html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
+          '<p>Hello ' + _newUser.firstname + ',</p><br>' +
+          '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
+          '<p>Please click on ' +
+          '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '"> this link ' +
+          '</a> to complete the process: <br>' +
+          '</p><br/><br/>' +
+          '<p>If you did not request this, please ignore this email.</p>\n\n' +
+          '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
+          '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
+          '</div>'
       };
       // NOTE: when we send email we do not control success or error. We only create log
       mail.sendMail(mailOptions, function(err, data) {
