@@ -73,11 +73,11 @@
 
   "enable_self_registration": true,
 
-  "chargify": {
+  "chargify": { 
     "password" : "x",
-    "domain": "https://revsw-test.chargify.com/",
-    "api_key": "aTDeI27SqBH8NKjrLWLNbU0D9LHuH6aV9Q7RdcqObiA",
-    "shared_key": "zc2F3fSl1nEZHJFDR2g6Xk9o4f40Aawgob4WrHKHDWY"
+    "domain": "https://revapm-test.chargify.com",
+    "api_key": "vuzI2ewfhFF5VnIS5ZMmuSF4viXVRgpRB3KNl2qxE",
+    "shared_key": "KGXNkhdMAEjgosppDso5vm9xWfx5449b0vkfgII2Yug"
   },
 
   "notify_admin_by_email_on_user_login": "nikolai.gerzhan@nalegke.net",
