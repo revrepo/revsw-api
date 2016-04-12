@@ -25,6 +25,7 @@ var renderJSON = require('../lib/renderJSON');
 var mongoose = require('mongoose');
 var boom = require('boom');
 var AuditLogger = require('../lib/audit');
+var mail = require('../lib/mail');
 var async = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -112,7 +113,35 @@ exports.webhookHandler = function(request, reply) {
         })
         .then(function verifyAdminUser(adminUser) {
           adminUser.validation.verified = true;
-          return users.updateValidationAsync(adminUser);
+          return users.updateValidationAsync(adminUser)
+            .then(
+              function sendWelcomeEmail() {
+                var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+                var mailOptions = {
+                  to: adminUser.email,
+                  subject: config.get('user_welcome_subject'),
+                  text: 'Hello, ' + adminUser.firstname + '\n\n' +
+                    'Now that you\'re all signed up, head over to \n\n' +
+                    'https://' + config.get('user_verify_portal_domain') + '\n\n' +
+                    'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
+                    'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+                };
+
+                if (bcc_email !== '') {
+                  mailOptions.bcc = bcc_email;
+                }
+                mail.sendMail(mailOptions, function reportLog(err, data) {
+                  if (err) {
+                    logger.error('SendWelcomeEmail:error');
+                  } else {
+                    logger.info('SendWelcomeEmail:success');
+                  }
+                });
+                return;
+              });
+        })
+        .then(function sendWelcomeEmail() {
+
         })
         .catch(function errorFindAdmin(err) {
           throw new Error('Eror verify Admin User');
