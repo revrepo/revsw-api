@@ -262,7 +262,7 @@ module.exports = [
       description: 'Initialize two factor authentication',
       notes: 'Use the call to get the QR code for Google Authenticator. This call assigns a new secret key to the user. ' +
         'If the secret key already exists, it will be overwritten.',
-      tags: ['api', 'users'],
+//      tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -284,7 +284,7 @@ module.exports = [
       handler: users.enable2fa,
       description: 'Enable two factor authentication for the user',
       notes: 'Use this call to enable two factor authentication for specific user',
-      tags: ['api', 'users'],
+//      tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -311,7 +311,7 @@ module.exports = [
       handler: users.disable2fa,
       description: 'Disable two factor authentication for the user',
       notes: 'Use this call to disable two factor authentication for specific user',
-      tags: ['api', 'users'],
+//      tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

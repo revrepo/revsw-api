@@ -80,6 +80,10 @@ exports.signup = function(req, reply) {
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
+
+  if (!data.company_name) {
+    data.company_name = data.first_name + ' ' + data.last_name + '\'s Company';
+  }
   // TODO:
   if (!config.get('enable_self_registration')) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
@@ -236,7 +240,7 @@ exports.signup = function(req, reply) {
       // NOTE: when we send email we do not control success or error. We only create log
       mail.sendMail(mailOptions, function(err, data) {
         if (err) {
-          logger.err('Signup:SendEmailNewUser:error');
+          logger.error('Signup:SendEmailNewUser:error: ' + JSON.stringify(err));
         }
       });
       return;
@@ -256,7 +260,7 @@ exports.signup = function(req, reply) {
         // NOTE: when we send email we do not control success or error. We only create log
         mail.sendMail(mailOptions, function(err, data) {
           if (err) {
-            logger.err('Signup:sendRevOpsEmailAboutNewSignup:error');
+            logger.error('Signup:sendRevOpsEmailAboutNewSignup:error: ' + JSON.stringify(err));
           } else {
             logger.info('Signup:sendRevOpsEmailAboutNewSignup:success');
           }
