@@ -129,7 +129,7 @@ module.exports = {
         updated_at: Joi.string().regex(dateFormatPattern).required(),
         comment: Joi.string().allow(''),
         billing_info: Joi.object(),
-        chargify_id: Joi.string().allow(null),
+        billing_id: Joi.string().allow(null),
         subscription_id: Joi.string().allow(null),
         use_contact_info_as_billing_info: Joi.boolean()
       });
