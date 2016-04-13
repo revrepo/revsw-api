@@ -519,13 +519,6 @@ exports.deleteAccount = function(request, reply) {
         cb(error, account);
       });
     },
-    function(account, cb) {
-      if (account.subscription_id) {
-        Customer.cancelSubscription(account.subscription_id, cb);
-      } else {
-        cb(null, account);
-      }
-    },
     // Verify that there are no active apps for an account
     function(account, cb) {
       var getAppQuery = {
@@ -564,11 +557,28 @@ exports.deleteAccount = function(request, reply) {
         cb(error);
       });
     },
+    // NOTE: Cancel subscription
+    function(account, cb) {
+      if (account.subscription_id) {
+        Customer.cancelSubscription(account.subscription_id, function(err, data) {
+          if (err) {
+            logger.error('Accoutn::deleteAccount:error ' + JSON.stringify(err));
+            cb(err);
+          } else {
+            logger.info('Accoutn::deleteAccount:  Subscription with ID ' + account.subscription_id + ' was canceled.' + JSON.stringify(data));
+            cb(err, data);
+          }
+        });
+      } else {
+        cb(null, account);
+      }
+    },
     // Mark account as deleted
     function(cb) {
       var deleteAccountQuery = {
         account_id: account_id,
-        deleted: true
+        deleted: true,
+        subscription_id: null // NOTE: Subscription must be canceled defore account will be deleted
       };
 
       accounts.update(deleteAccountQuery, function(error) {
