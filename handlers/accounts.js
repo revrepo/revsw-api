@@ -501,26 +501,8 @@ exports.deleteAccount = function(request, reply) {
   }
 
   async.waterfall([
-
-    // verify that account exists
-    function(cb) {
-      accounts.get({
-        _id: account_id
-      }, function(error, account2) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
-        }
-        if (!account2) {
-          return reply(boom.badRequest('Account ID not found'));
-        }
-
-        account = account2;
-
-        cb(error, account);
-      });
-    },
     // Verify that there are no active apps for an account
-    function(account, cb) {
+    function(cb) {
       var getAppQuery = {
         account_id: account_id,
         deleted: {
@@ -557,6 +539,23 @@ exports.deleteAccount = function(request, reply) {
         cb(error);
       });
     },
+    // verify that account exists
+    function(cb) {
+      accounts.get({
+        _id: account_id
+      }, function(error, account2) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
+        }
+        if (!account2) {
+          return reply(boom.badRequest('Account ID not found'));
+        }
+
+        account = account2;
+
+        cb(error, account);
+      });
+    },
     // NOTE: Cancel subscription
     function(account, cb) {
       if (account.subscription_id) {
@@ -566,11 +565,11 @@ exports.deleteAccount = function(request, reply) {
             cb(err);
           } else {
             logger.info('Accoutn::deleteAccount:  Subscription with ID ' + account.subscription_id + ' was canceled.' + JSON.stringify(data));
-            cb(err, data);
+            cb(err);
           }
         });
       } else {
-        cb(null, account);
+        cb(null);
       }
     },
     // Mark account as deleted
@@ -578,7 +577,7 @@ exports.deleteAccount = function(request, reply) {
       var deleteAccountQuery = {
         account_id: account_id,
         deleted: true,
-        subscription_id: null // NOTE: Subscription must be canceled defore account will be deleted
+        subscription_state: 'canceled'
       };
 
       accounts.update(deleteAccountQuery, function(error) {
@@ -606,15 +605,18 @@ exports.deleteAccount = function(request, reply) {
     function(usersToUpdate, cb) {
       async.eachSeries(usersToUpdate, function(user, callback) {
           var user_id = user.user_id;
-          if (user.companyId.lenght === 1) {
+          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id+ '. Count Companies = '+user.companyId.length +' '+JSON.stringify(user.companyId));
+          if (user.companyId.length === 1) {
             logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
             users.remove({
-              user_id: user.user_id
+              _id: user.user_id
             }, function(error, result) {
               if (error) {
+                logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
                 return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
               }
-              callback(error);
+              logger.info('Removed user ID ' + user_id + ' while removing account ID ' + account_id);
+              callback(error, user);
             });
           } else { /// else just update the user account and delete the account_id from companyId array
             logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
@@ -630,7 +632,7 @@ exports.deleteAccount = function(request, reply) {
               if (error) {
                 return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
               }
-              callback(error);
+              callback(error, user);
             });
           }
         },
