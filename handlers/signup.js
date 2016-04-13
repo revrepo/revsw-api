@@ -50,6 +50,7 @@ Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(chargifyProduct);
 
+// The function is not in use anymore - TODO: delete it
 var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
@@ -227,24 +228,31 @@ exports.signup = function(req, reply) {
         billing_address_2: _newAccount.billing_info.address2,
         billing_city: _newAccount.billing_info.city,
         billing_zip: _newAccount.billing_info.zipcode,
-        billing_country: _newAccount.billing_info.country
+        billing_country: _newAccount.billing_info.country,
+        billing_state: _newAccount.billing_info.state
       };
 
       var mailOptions = {
         to: _newUser.email,
-        subject: config.get('user_registration_instruction_subject'),
+        subject: config.get('user_verify_subject'),
         html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
-          '<p>Hello ' + _newUser.firstname + ',</p><br>' +
+          '<p>Hello ' + _newUser.firstname + ',</p>' +
           '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
           '<p>Please click on ' +
-          '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '"> this link ' +
-          '</a> to complete the process: <br>' +
-          '</p><br/><br/>' +
+          '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
+          '</a> link to complete the process.' +
+          '</p>' +
           '<p>If you did not request this, please ignore this email.</p>\n\n' +
           '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
           '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
           '</div>'
       };
+
+      var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+      if (bcc_email !== '') {
+         mailOptions.bcc = bcc_email;
+      }
+
       // NOTE: when we send email we do not control success or error. We only create log
       mail.sendMail(mailOptions, function(err, data) {
         if (err) {
