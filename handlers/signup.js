@@ -216,51 +216,52 @@ exports.signup = function(req, reply) {
           }
         });
     })
-    .then(function sendEmailForChargifyRegistration() {
-      var _customer_chargify = {
-        first_name: _newUser.firstname,
-        last_name: _newUser.lastname,
-        email: _newUser.email,
-        phone: _newUser.phone_number,
-        reference: _newAccount.id, // NOTE: Chargify`s custoners it is our Accounts
-        organization: _newAccount.companyName,
-        billing_address: _newAccount.billing_info.address1,
-        billing_address_2: _newAccount.billing_info.address2,
-        billing_city: _newAccount.billing_info.city,
-        billing_zip: _newAccount.billing_info.zipcode,
-        billing_country: _newAccount.billing_info.country,
-        billing_state: _newAccount.billing_info.state
-      };
+    .then(
+      function sendEmailForChargifyRegistration() {
+        var _customer_chargify = {
+          first_name: _newUser.firstname,
+          last_name: _newUser.lastname,
+          email: _newUser.email,
+          phone: _newUser.phone_number,
+          reference: _newAccount.id, // NOTE: Chargify`s custoners it is our Accounts
+          organization: _newAccount.companyName,
+          billing_address: _newAccount.billing_info.address1,
+          billing_address_2: _newAccount.billing_info.address2,
+          billing_city: _newAccount.billing_info.city,
+          billing_zip: _newAccount.billing_info.zipcode,
+          billing_country: _newAccount.billing_info.country,
+          billing_state: _newAccount.billing_info.state
+        };
 
-      var mailOptions = {
-        to: _newUser.email,
-        subject: config.get('user_verify_subject'),
-        html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
-          '<p>Hello ' + _newUser.firstname + ',</p>' +
-          '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
-          '<p>Please click on ' +
-          '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
-          '</a> link to complete the process.' +
-          '</p>' +
-          '<p>If you did not request this, please ignore this email.</p>\n\n' +
-          '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
-          '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
-          '</div>'
-      };
+        var mailOptions = {
+          to: _newUser.email,
+          subject: config.get('user_verify_subject'),
+          html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
+            '<p>Hello ' + _newUser.firstname + ',</p>' +
+            '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
+            '<p>Please click on ' +
+            '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
+            '</a> link to complete the process.' +
+            '</p>' +
+            '<p>If you did not request this, please ignore this email.</p>\n\n' +
+            '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
+            '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
+            '</div>'
+        };
 
-      var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
-      if (bcc_email !== '') {
-         mailOptions.bcc = bcc_email;
-      }
-
-      // NOTE: when we send email we do not control success or error. We only create log
-      mail.sendMail(mailOptions, function(err, data) {
-        if (err) {
-          logger.error('Signup:SendEmailNewUser:error: ' + JSON.stringify(err));
+        var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+        if (bcc_email !== '') {
+          mailOptions.bcc = bcc_email;
         }
-      });
-      return;
-    })
+
+        // NOTE: when we send email we do not control success or error. We only create log
+        mail.sendMail(mailOptions, function(err, data) {
+          if (err) {
+            logger.error('Signup:SendEmailNewUser:error: ' + JSON.stringify(err));
+          }
+        });
+        return;
+      })
     // NOTE:  Send to Rev Ops an Email about new signup process
     .then(function sendRevOpsEmailAboutNewSignup() {
       var remoteIP = utils.getAPIUserRealIP(req);
@@ -459,29 +460,46 @@ exports.signup_todo_delete = function(req, reply) {
     });
   });
 };
-
-exports.resetToken = function(req, reply) {
+/**
+ * @name  resendRegistrationEmail
+ * @description
+ *
+ * Resend Email with instruction for finish registration
+ *
+ * Only for not verifed users
+ *
+ * @param  {[type]} req   [description]
+ * @param  {[type]} reply [description]
+ * @return {[type]}       [description]
+ */
+exports.resendRegistrationEmail = function(req, reply) {
   var email = req.params.email;
 
   users.getValidation({
     email: email
   }, function(err, user) {
     if (err) {
+      logger.error('signup::resendRegistrationEmail:error. ' +
+        'Failed to retrieve user details for email ' + email);
       return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
     }
     if (!user) {
-      return reply(boom.badImplementation('No user exists with the email address'));
+      logger.warn('signup::resendRegistrationEmail:not found. ' +
+        'No user exists with the email address ' + email);
+      return reply(boom.notFound('No user exists with the email address'));
     }
     if (user.validation.verified) {
+      logger.warn('signup::resendRegistrationEmail:' +
+        'The email "' + email + '" is already verified. User with ID ' + user.user_id);
       return reply(boom.badRequest('The email is already verified'));
     }
-    var token = utils.generateToken();
-    user.validation = {
-      expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-      token: token
-    };
 
-    var result = publicRecordFields.handle(result, 'user');
+    // TODO: delete - is depricated
+    // var token = utils.generateToken();
+    // user.validation = {
+    //   expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+    //   token: token
+    // };
 
     AuditLogger.store({
       ip_address: utils.getAPIUserRealIP(req),
@@ -489,29 +507,95 @@ exports.resetToken = function(req, reply) {
       user_id: user.user_id,
       user_name: user.email,
       user_type: 'user',
-      account_id: result.companyId[0],
+      account_id: user.companyId[0],
       activity_type: 'modify',
       activity_target: 'user',
-      target_id: result.user_id,
-      target_name: result.email,
-      target_object: result,
+      target_id: user.user_id,
+      target_name: user.email,
+      target_object: user,
       operation_status: 'success'
     });
 
-    var statusResponse = {
-      statusCode: 200,
-      message: 'Successfully sent token to specified email',
-      object_id: result.id
-    };
+    var _account;
+    var _billing_plan;
 
-    users.update(user, function(err, result) {
-      sendVerifyToken(user, token, function(err, res) {
-        renderJSON(req, reply, err, statusResponse);
+    accounts.getAsync({
+        _id: user.companyId
+      })
+      .then(function(account) {
+        _account = account;
+        return billing_plans.getAsync({
+          _id: account.billing_plan
+        });
+      })
+      .then(function(billing_plan) {
+        _billing_plan = billing_plan;
+        return new Promise(function(resolve) {
+          sendEmailForRegistration(user, _account, _billing_plan, resolve);
+        });
+      })
+      .then(function() {
+        var statusResponse = {
+          statusCode: 200,
+          message: 'Successfully sent email to specified email',
+          object_id: user.id
+        };
+        return renderJSON(req, reply, err, statusResponse);
+      })
+      .catch(function(err) {
+        logger.error('resendRegistrationEmail:');
+        reply(boom.notImplemented(err.message || 'Error signup process'));
       });
-    });
+
   });
 };
 
+function sendEmailForRegistration(user, account, billing_plan, cb) {
+  var _customer_chargify = {
+    first_name: user.firstname,
+    last_name: user.lastname,
+    email: user.email,
+    phone: user.phone_number,
+    reference: account.id, // NOTE: Chargify`s custoners it is our Accounts
+    organization: account.companyName,
+    billing_address: account.billing_info.address1,
+    billing_address_2: account.billing_info.address2,
+    billing_city: account.billing_info.city,
+    billing_zip: account.billing_info.zipcode,
+    billing_country: account.billing_info.country,
+    billing_state: account.billing_info.state
+  };
+
+  var mailOptions = {
+    to: user.email,
+    subject: config.get('user_verify_subject'),
+    html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
+      '<p>Hello ' + user.firstname + ',</p>' +
+      '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
+      '<p>Please click on ' +
+      '<a href="' + billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
+      '</a> link to complete the process.' +
+      '</p>' +
+      '<p>If you did not request this, please ignore this email.</p>\n\n' +
+      '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
+      '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
+      '</div>'
+  };
+
+  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+  if (bcc_email !== '') {
+    mailOptions.bcc = bcc_email;
+  }
+
+  // NOTE: when we send email we do not control success or error. We only create log
+  mail.sendMail(mailOptions, function(err, data) {
+    if (err) {
+      logger.error('sendEmailForRegistration:error: ' + JSON.stringify(err));
+    }
+    cb(err, data);
+  });
+}
+// TODO: delete - functionality is depricated
 exports.verify = function(req, reply) {
   var token = req.params.token;
   users.get({
