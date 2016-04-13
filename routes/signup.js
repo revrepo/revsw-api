@@ -52,9 +52,9 @@ module.exports = [
     method : 'GET',
     path   : '/v1/signup/resend/{email}',
     config : {
-      handler     : handler.resetToken,
+      handler     : handler.resendRegistrationEmail,
       auth        : false,
-      description : 'An internal portal call for resend user verification',
+      description : 'An internal portal call for resend user registration email',
 //      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
@@ -63,7 +63,7 @@ module.exports = [
       },
       validate    : {
         params: {
-          email: Joi.string().email().required().description('Email to send verification')
+          email: Joi.string().email().required().description('Email to send registration email')
         }
       },
       response: {
