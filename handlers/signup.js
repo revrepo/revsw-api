@@ -479,14 +479,14 @@ exports.resendRegistrationEmail = function(req, reply) {
     email: email
   }, function(err, user) {
     if (err) {
-      logger.error('signup::resendRegistrationEmail:error' +
+      logger.error('signup::resendRegistrationEmail:error. ' +
         'Failed to retrieve user details for email ' + email);
       return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
     }
     if (!user) {
-      logger.warn('signup::resendRegistrationEmail:' +
+      logger.warn('signup::resendRegistrationEmail:not found. ' +
         'No user exists with the email address ' + email);
-      return reply(boom.badImplementation('No user exists with the email address'));
+      return reply(boom.notFound('No user exists with the email address'));
     }
     if (user.validation.verified) {
       logger.warn('signup::resendRegistrationEmail:' +
