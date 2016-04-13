@@ -19,12 +19,13 @@
 /*jslint node: true */
 
 'use strict';
-var config      = require('config');
-var renderJSON      = require('../lib/renderJSON');
+var config = require('config');
+var renderJSON = require('../lib/renderJSON');
 
 var mongoose = require('mongoose');
 var boom = require('boom');
 var AuditLogger = require('../lib/audit');
+var mail = require('../lib/mail');
 var async = require('async');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -44,84 +45,183 @@ Promise.promisifyAll(accounts);
 Promise.promisifyAll(users);
 Promise.promisifyAll(chargify);
 
-exports.webhookHandler = function (request, reply) {
+/**
+ * @name webhookHandler
+ * @description
+ *
+ * @see  https://docs.chargify.com/webhooks
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return
+ */
+exports.webhookHandler = function(request, reply) {
   var body = request.payload;
   var payload = request.payload.payload;
 
-  var onTest = function () {
+  var onTest = function() {
     request.payload.msg = 'Test passed';
     reply(request.payload);
   };
+  /**
+   * @onSignupSuccess
+   * @description
+   *
+   *
+   * @param  {Object} subscription - object also contains information on the Customer and Product (Chargify)
+   * @return {Promise}
+   */
+  var onSignupSuccess = function(subscription) {
+    return new Promise(function(resolve, reject) {
+      var _subscription = subscription;
+      var _customer = _subscription.customer;
+      var account_id = _customer.reference;
+      var _account = {};
 
-  var onSignupSuccess = function () {
-    return new Promise(function (resolve) {
-      var subscription = payload.subscription;
-      var customer = subscription.customer;
+      accounts.getAsync({
+          _id: account_id
+        })
+        .then(function updateAccount(account) {
+          _account = account;
 
-      chargify.getBillingPortalLinkAsync(customer.id)
-        .then(function (link) {
-          var expiresAt = Date.parse(link.expires_at);
-          users.getAsync({email: customer.email})
-            .then(function (user) {
-              accounts.getAsync({_id: user.companyId})
-                .then(function (account) {
-                  var company = {
-                    billing_portal_link: {url: link.url, expires_at: expiresAt},
-                    account_id: account.id,
-                    subscription_id: subscription.id,
-                    subscription_state: subscription.state,
-                    chargify_id: customer.id
-                  };
-                  resolve(accounts.updateAsync(company));
-                });
+          return chargify.getBillingPortalLinkAsync(_customer.id)
+            .then(function(link) {
+              var expiresAt = Date.parse(link.expires_at);
+              var account = {
+                billing_portal_link: {
+                  url: link.url,
+                  expires_at: expiresAt
+                },
+                account_id: _customer.reference,
+                subscription_id: _subscription.id,
+                subscription_state: _subscription.state,
+                billing_id: _customer.id // NOTE: Billing Id = Chargify Customer Id
+              };
+
+              return accounts.updateAsync(account);
             });
-        });
-
-    });
-  };
-
-  var onSubscriptionStateChange = function () {
-    return new Promise(function (resolve) {
-      var subscription = payload.subscription;
-      var customer = subscription.customer;
-
-      users.getAsync({email: customer.email})
-        .then(function (user) {
-
-          var company = {
-            subscription_state: subscription.state
+        })
+        .catch(function() {
+          throw new Error('Error update Accoutn information');
+        })
+        .then(function findAdminUser() {
+          var account_admin = {
+            role: 'admin',
+            companyId: account_id
           };
+          return users.getValidationAsync(account_admin);
+        })
+        .then(function verifyAdminUser(adminUser) {
+          adminUser.validation.verified = true;
+          return users.updateValidationAsync(adminUser)
+            .then(
+              function sendWelcomeEmail() {
+                var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+                var mailOptions = {
+                  to: adminUser.email,
+                  subject: config.get('user_welcome_subject'),
+                  text: 'Hello ' + adminUser.firstname + ',\n\n' +
+                    'We\'ve completed setting up your new RevAPM account!\n\n' +
+                    'Your are welcome to visit our customer portal at https://' + config.get('user_verify_portal_domain') + '\n' +
+                    'and start managing your configuration!' + '\n\n' +
+                    'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
+                    'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+                };
 
-          resolve(accounts.updateAsync(company));
+                if (bcc_email !== '') {
+                  mailOptions.bcc = bcc_email;
+                }
+                mail.sendMail(mailOptions, function reportLog(err, data) {
+                  if (err) {
+                    logger.error('SendWelcomeEmail:error');
+                  } else {
+                    logger.info('SendWelcomeEmail:success');
+                  }
+                });
+                return;
+              });
+        })
+        .catch(function errorFindAdmin(err) {
+          throw new Error('Error verify Admin User');
+        })
+        .then(function() {
+          return resolve();
         });
     });
   };
-
+  /**
+   * @name  onSubscriptionStateChange
+   * @description
+   *
+   * @param  {Object} subscription - object also contains information on the Customer and Product (Chargify)
+   * @return {Promise}
+   */
+  var onSubscriptionStateChange = function(subscription) {
+    return new Promise(function(resolve) {
+      var _subscription = subscription;
+      var _customer = subscription.customer;
+      // 1. Find account.subscription_id = subscription.id
+      accounts.getBySubscriptionIdAsync(_subscription.id)
+        .then(function updateAccountSubscriptionState(_account) {
+          // NOTE: set updated fields
+          _account.subscription_state = _subscription.state;
+          resolve(accounts.updateAsync(_account));
+        })
+        .catch(function(err) {
+          logger.error('OnSubscriptionStateChange:error. Subscription with ID=' + _subscription.id + ' not set state "' + _subscription.state + '"');
+          throw new Error('Error update Account subscription_state for subscription_id = ' + _subscription.id);
+        });
+    });
+  };
+  /**
+   *  Detected type Changify event:
+   *  - signup_success
+   *
+   */
   switch (body.event) {
     case 'test':
       onTest();
       break;
     case 'signup_success':
-      onSignupSuccess()
-        .then(function (res) {
-          reply({statusCode: 200, message: 'Signup completed'});
+      onSignupSuccess(payload.subscription)
+        .then(function successSignup(res) {
+          logger.info('Webhook:signup_success:success');
+          reply({
+            statusCode: 200,
+            message: 'Signup completed'
+          });
         })
-        .catch(function (err) {
+        .catch(function errorSignup(err) {
           logger.error('webhookHandler::onSignupSuccess :' + err);
+          reply({
+            statusCode: 500,
+            message: 'Error webhook \'signup_success\' '
+          });
         });
       break;
     case 'subscription_state_change':
-      reply();
-      onSubscriptionStateChange()
-        .then(function (res) {
-          reply({statusCode: 200, message: 'Subscription state changed'});
+      onSubscriptionStateChange(payload.subscription)
+        .then(function successSubscriptionStateChange(res) {
+          logger.info('Webhook:subscription_state_change:success');
+          reply({
+            statusCode: 200,
+            message: 'Subscription state changed'
+          });
         })
-        .catch(function (err) {
-          logger.error('onSubscriptionStateChange :' + err);
+        .catch(function errorSubscriptionStateChange(err) {
+          logger.error('Webhook:subscription_state_change:err:' + err);
+          reply({
+            statusCode: 501,
+            message: 'Subscription state not changed'
+          });
         });
       break;
     default:
-      reply();
+      // TODO: delete after finish testing hooks reply(boom.create(418, 'This webhook not emplemetted'));
+      reply({
+        statusCode: 200,
+        message: 'Default'
+      });
   }
 
 };

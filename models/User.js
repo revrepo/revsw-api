@@ -73,7 +73,6 @@ function User(mongoose, connection, options) {
     old_passwords: [String],
 
     validation: {
-
       // TODO: should be "expired_at"
       expiredAt: Date,
       token: String,
@@ -210,7 +209,65 @@ User.prototype = {
       callback(err, doc);
     });
   },
+  /**
+   * @name  updateValidation
+   * @description
+   *
+   * @param  {Object}   item
+   * @param  {Function} callback
+   * @return
+   */
+  updateValidation : function (item, callback) {
+    this.model.findOne({_id : item.user_id}, function (err, doc) {
+      if (doc) {
+        if(!!item.validation && item.validation.verified === true){
+            item.validation = {
+              expiredAt: undefined,
+              token: '',
+              verified: true
+            };
+        }
+        for (var attrname in item) {
+          doc[attrname] = item[attrname];
+        }
+        doc.updated_at = new Date();
+        doc.user_id = doc._id;
 
+        delete doc.__v;
+        delete doc._id;
+        delete doc.id;
+        delete doc.token;
+        delete doc.status;
+        delete doc.old_passwords;
+
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        } else {
+          doc.companyId = [];
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
+        } else {
+          doc.domain = [];
+        }
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.user_id = item._id;
+
+            delete item._id;
+            delete item.__v;
+            delete doc.token;
+            delete doc.status;
+            delete item.old_passwords;
+          }
+          callback(err, item);
+        });
+      }else{
+        callback(err, doc);
+      }
+    });
+  },
   query: function (where, callback) {
     if (!where || typeof (where) !== 'object') {
       callback(new Error('where clause not specified'));
