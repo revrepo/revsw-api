@@ -526,12 +526,12 @@ exports.resendRegistrationEmail = function(req, reply) {
         _account = account;
         return billing_plans.getAsync({
           _id: account.billing_plan
-        })
+        });
       })
       .then(function(billing_plan) {
         _billing_plan = billing_plan;
         return new Promise(function(resolve) {
-          sendEmailForRegistration(user, _account, _billing_plan, resolve)
+          sendEmailForRegistration(user, _account, _billing_plan, resolve);
         });
       })
       .then(function() {
@@ -543,7 +543,7 @@ exports.resendRegistrationEmail = function(req, reply) {
         return renderJSON(req, reply, err, statusResponse);
       })
       .catch(function(err) {
-        logger.error('resendRegistrationEmail:')
+        logger.error('resendRegistrationEmail:');
         reply(boom.notImplemented(err.message || 'Error signup process'));
       });
 
