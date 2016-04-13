@@ -80,7 +80,7 @@
     "shared_key": "KGXNkhdMAEjgosppDso5vm9xWfx5449b0vkfgII2Yug"
   },
 
-  "notify_admin_by_email_on_user_login": "ops@revsw.com",
+  "notify_admin_by_email_on_user_login": "",
   "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
   "trust_request_xff_header": true,
   "usage_report_regen_age_ms": 600000
