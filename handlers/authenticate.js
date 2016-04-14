@@ -179,6 +179,7 @@ exports.authenticate = function(request, reply) {
           }
         }
       } else {
+        logger.warn('User ' + email + ' attempted to log in using a wrong password');
         return reply(boom.unauthorized());
       }
     }

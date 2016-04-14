@@ -291,7 +291,7 @@ exports.createDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
-    if (account.billing_plan) {
+    if (false /* TODO need to restore a check for status of account.billing_plan */ ) {
       isSubscriptionActive(newDomainJson.account_id, function (err, res) {
           if (err) {
             return reply(boom.badImplementation(err));
