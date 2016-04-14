@@ -27,9 +27,14 @@
 // Requiring Joi library to define some Schema objects
 var Joi = require('joi');
 
+var models = require('./../../../../lib/routeModels');
+
 // Defining common variables
 var dateFormatPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 var idFormatPattern = /^([0-9]|[a-f]){24}$/;
+var sdkKeyPattern = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/;
+var minTimestamp = 1111111111111;
+var maxTimestamp = 9999999999999;
 
 // # Data Provider object
 //
@@ -249,8 +254,6 @@ module.exports = {
    * @returns {Object} activity response schema
    */
   getActivityResponse: function () {
-    var minTS = 1111111111111;
-    var maxTS = 9999999999999;
     var activityResponseSchema = Joi.object().keys({
       metadata: Joi.object().keys({
         user_id: Joi.string().regex(idFormatPattern).required(),
@@ -259,11 +262,34 @@ module.exports = {
           Joi.string().regex(idFormatPattern),
           Joi.array().items(Joi.string().regex(idFormatPattern))
         ])*/,
-        start_time: Joi.number().min(minTS).max(maxTS).required(),
-        end_time: Joi.number().min(minTS).max(maxTS).required()
+        start_time: Joi.number().min(minTimestamp).max(maxTimestamp).required(),
+        end_time: Joi.number().min(minTimestamp).max(maxTimestamp).required()
       }),
       data: Joi.array().required()
     });
     return activityResponseSchema;
+  },
+  
+  getApp: function () {
+    return models.AppModel;
+  },
+
+  getAppStatus: function () {
+    return models.AppStatusModel;
+  },
+
+  getCreateAppStatus: function () {
+    return models.NewAppStatusModel;
+  },
+
+  getAppSdkRelease: function () {
+    return Joi.object().keys({
+      iOS: Joi.array().items(Joi.number()),
+      Android: Joi.array().items(Joi.number())
+    });
+  },
+
+  getAppVersion: function () {
+    return models.domainStatusModel;
   }
 };
