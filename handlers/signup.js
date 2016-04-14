@@ -204,7 +204,7 @@ exports.signup = function(req, reply) {
             if (dataError.user.validation.verified === true) {
               throw {
                 statusCode: 406,
-                message: 'User with email ' + newUser.email + ' already exist.'
+                message: 'User with email ' + newUser.email + ' already exists. Please use another email address.'
               };
             }
           } else {
