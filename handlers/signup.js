@@ -95,7 +95,7 @@ exports.signup = function(req, reply) {
     })
     .then(function successCallGetBillingPlan(bp) {
       if (!bp) {
-        logger.error('signup::billing_plans: Internal Billing Plan with name ' + data.billing_plan + ' not found.');
+        logger.error('signup::billing_plans: Internal Billing Plan with name ' + data.billing_plan + ' is not found');
         throw new Error('Error find Billing Plan with name ' + data.billing_plan);
       } else {
         return bp;
@@ -111,9 +111,9 @@ exports.signup = function(req, reply) {
           _billing_plan.hosted_page = billin_plan_info.url;
           return billin_plan_info;
         }, function onError(err) {
-          logger.error('signup::billing_plans: External Billing Plan information for ' + data.billing_plan + ' not found.');
+          logger.error('signup::billing_plans: External Billing Plan information for ' + data.billing_plan + ' is not found.');
           throw {
-            message: 'Billing Plan \'' + data.billing_plan + '\' not exist',
+            message: 'Billing Plan \'' + data.billing_plan + '\' does not exist',
             statusCode: 404
           };
         });

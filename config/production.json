@@ -47,7 +47,7 @@
 
   "chargify": {
     "password" : "x",
-    "domain": "https://revsw.chargify.com/",
+    "domain": "https://revapm.chargify.com/",
     "api_key": "vuzI2ewfhFF5VnIS5ZMmuSF4viXVRgpRB3KNl2qxE",
     "shared_key": "D0Lq9BycfX947dmmdvEUvD39sSiZRcyJLS9sto3eCXM"
   },
