@@ -35,6 +35,7 @@ var qs = require('qs');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
+var sendgrid = require('sendgrid')(config.get('sendgrid_api_key'));
 
 var Account = require('../models/Account');
 var User = require('../models/User');
@@ -49,7 +50,7 @@ Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(chargifyProduct);
-
+/* 
 // The function is not in use anymore - TODO: delete it
 var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
@@ -65,6 +66,7 @@ var sendVerifyToken = function(user, token, cb) {
   mail.sendMail(mailOptions, cb);
 
 };
+*/
 
 /**
  * @name  signup
@@ -343,6 +345,8 @@ exports.signup = function(req, reply) {
   }
 };
 
+/*
+
 // TODO: delete after create new test
 exports.signup_todo_delete = function(req, reply) {
   var data = req.payload;
@@ -460,6 +464,9 @@ exports.signup_todo_delete = function(req, reply) {
     });
   });
 };
+
+*/
+
 /**
  * @name  resendRegistrationEmail
  * @description

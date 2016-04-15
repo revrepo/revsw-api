@@ -23,15 +23,16 @@
 var boom        = require('boom');
 var mongoose    = require('mongoose');
 var async       = require('async');
-var nodemailer  = require('nodemailer');
 var config      = require('config');
 var crypto      = require('crypto');
 var AuditLogger = require('../lib/audit');
+var logger = require('revsw-logger')(config.log_config);
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
 var utils           = require('../lib/utilities.js');
+var mail = require('../lib/mail');
 
 var User = require('../models/User');
 
@@ -94,7 +95,6 @@ exports.forgotPassword = function(request, reply) {
         },
 
         function(token, user, done) {
-          var transport = nodemailer.createTransport();
           var mailOptions = {
             to: user.email,
             from: config.get('password_reset_from_email'),
@@ -106,8 +106,14 @@ exports.forgotPassword = function(request, reply) {
             'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
             'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
           };
-          transport.sendMail(mailOptions, function(err) {
-            renderJSON(request, reply, error, { message: 'An e-mail has been sent to ' + user.email + ' with further instructions' } );
+          logger.info('Sending password reset email to user ' + user.email);
+          mail.sendMail(mailOptions, function(err) {
+            if (err) {
+              return reply(boom.badImplementation('Failed to send password reset email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
+                ', error message: ' + err));
+            } else {
+              renderJSON(request, reply, error, { message: 'An e-mail has been sent to ' + user.email + ' with further instructions' } );
+            }
           });
         }
 
@@ -193,7 +199,6 @@ exports.resetPassword = function(request, reply) {
     },
 
     function(user, done) {
-      var transport = nodemailer.createTransport();
       var mailOptions = {
         to: user.email,
         from: config.get('password_reset_from_email'),
@@ -203,8 +208,14 @@ exports.resetPassword = function(request, reply) {
         'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
         'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
       };
-      transport.sendMail(mailOptions, function(error) {
-        renderJSON(request, reply, error, { message: 'Your password has been changed' } );
+      logger.info('Sending password reset/change confirmation email to user ' + user.email);
+      mail.sendMail(mailOptions, function(err) {
+        if (err) {
+          return reply(boom.badImplementation('Failed to send password reset/change confirmation email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
+            ', error message: ' + err));
+        } else {
+         renderJSON(request, reply, err, { message: 'Your password has been changed' } );
+        }
       });
     }
   ], function(err) {
