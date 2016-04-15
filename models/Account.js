@@ -36,30 +36,41 @@ function Account(mongoose, connection, options) {
     // TODO need to rename to created_by
     'createdBy'   : String,
     'id'          : String,
-    'address1'             : String,
-    'address2'             : String,
-    'country'              : {type : String, default : 'US'},
-    'state'                : String,
-    'city'                 : String,
-    'zipcode'              : String,
-    'phone_number'         : String,
     'comment': {type: String, default: ''},
     'deleted': {type: Boolean, default: false},
+    'billing_id': {type: String, default: null},
+    'payment_method_configuration_status': {type: Boolean, default: false},
     'subscription_id': {type: String, default: null},
     'subscription_state': String,
     'billing_plan': String,
+    'first_name':  String,
+    'last_name':  String,
+    'contact_email': String,
+    'address1': String,
+    'address2': String,
+    'country': {type : String, default : 'US'},
+    'state': String,
+    'city': String,
+    'zipcode': String,
+    'masked_card_number': String,
+    'phone_number': String,
+    'use_contact_info_as_billing_info': {type: Boolean, default: false},
     'billing_info': {
+      'first_name':  String,
+      'last_name':  String,
+      'contact_email': String,
       'address1': String,
       'address2': String,
-      'country': String,
+      'country': {type : String, default : 'US'},
       'state': String,
       'city': String,
       'zipcode': String,
-      'masked_card_number': String
+      'masked_card_number': String,
+      'phone_number': String,
     },
     'billing_portal_link': {url: String, expires_at: Date},
-    'created_at'  : {type : Date, default : Date()},
-    'updated_at'  : {type : Date, default : Date()}
+    'created_at'  : {type : Date, default : Date.now},
+    'updated_at'  : {type : Date, default : Date.now}
     // TODO: add deleted_at and deleted_by fields
   });
 
@@ -119,8 +130,54 @@ Account.prototype = {
     });
   },
 
+  listSubscribers : function (callback) {
+    this.model.find({  subscription_id: { $ne:null }, subscription_state: {$ne: 'canceled' }},function (err, accounts) {
+      if(accounts) {
+        accounts = utils.clone(accounts);
+        for (var i = 0; i < accounts.length; i++) {
+          var current = accounts[i];
+
+          current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
+          delete current._id;
+          delete current.__v;
+          delete current.status;
+        }
+      }
+
+      callback(err, accounts);
+    });
+  },
   get : function (item, callback) {
     item.deleted = { $ne: true };
+
+    this.model.findOne(item, function (err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.id = doc._id + '';
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.status;
+      }
+      callback(err, doc);
+    });
+  },
+
+  /**
+   * @name  getBySubscriptionId
+   * @description
+   *
+   *  Find Account by Subscription
+   *
+   * @param  {Staring}   subscriptionId
+   * @param  {Function} callback       [description]
+   * @return
+   */
+  getBySubscriptionId : function (subscriptionId, callback) {
+    var  item = {
+      subscription_id: subscriptionId
+    };
 
     this.model.findOne(item, function (err, doc) {
       if (doc) {

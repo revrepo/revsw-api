@@ -49,6 +49,8 @@ function UserAuth (request, username, password, callback) {
       return callback(null, false);
     }
 
+    result.user_type = 'user';
+
     result.scope = [];
     result.scope.push(result.role);
     if (!result.access_control_list.readOnly) {

@@ -231,14 +231,19 @@ module.exports = [
             js_choice           : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             origin_http_keepalive_ttl:  Joi.number().integer(),
-            origin_http_keepalive_enabled: Joi.boolean()
+            origin_http_keepalive_enabled: Joi.boolean(),
+            origin_request_headers: Joi.array().items({
+              header_value: Joi.string().required(),
+              header_name: Joi.string().required(),
+              operation: Joi.string().valid('add', 'delete', 'replace').required()
+            }),
           }).required(),
           rev_component_bp : Joi.object({
             enable_quic: Joi.boolean(),
             end_user_response_headers: Joi.array().items({
               header_value: Joi.string().regex(routeModels.httpHeaderValue).required(),
               header_name: Joi.string().regex(routeModels.httpHeaderName).required(),
-              operation: Joi.string().valid('add', 'remove', 'replace').required()
+              operation: Joi.string().valid('add', 'delete', 'replace').required()
             }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),

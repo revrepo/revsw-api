@@ -31,7 +31,7 @@ function PurgeJob(mongoose, connection, options) {
 
   this.PurgeJobSchema = new this.Schema({
     'create_date_time'     : {
-      type : Date, default : Date()
+      type : Date, default : Date.now
     },
     'proxy_fail_count'     : {type : Number, default : 0},
     'proxy_list'           : {type : String, default : ''},

@@ -35,7 +35,7 @@ module.exports = [{
     },
     handler: dashboars.getDashboards,
     description: 'Get a list of dashboards',
-    tags: ['api', 'dashboars'],
+//    tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -50,11 +50,11 @@ module.exports = [{
   path: '/v1/dashboards',
   config: {
     auth: {
-      scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+      scope: ['user', 'admin', 'reseller', 'revadmin']
     },
     handler: dashboars.createDashboard,
     description: 'Create a new dashboard',
-    tags: ['api', 'dashboars'],
+//    tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -68,6 +68,7 @@ module.exports = [{
       payload: {
         title: Joi.string().required().min(1).max(150)
           .trim().description('Dashboard title for screen display'),
+        options: Joi.object().description('Options dashboard'),
         structure: Joi.string().max(50).trim().description('Name type dashboard structure'),
         rows: Joi.array().description('Dashboard rows content')
       }
@@ -85,7 +86,7 @@ module.exports = [{
     },
     handler: dashboars.getDashboard,
     description: 'Get a dashboard',
-    tags: ['api'],
+//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -105,12 +106,12 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+      scope: ['user', 'admin', 'reseller', 'revadmin']
     },
     handler: dashboars.updateDashboard,
     description: 'Update a dashboard',
     notes: 'Use this function to update dashboard information',
-    tags: ['api'],
+//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -134,12 +135,12 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+      scope: ['user', 'admin', 'reseller', 'revadmin']
     },
     handler: dashboars.deleteDashboard,
     description: 'Remove a dashboard',
     notes: 'This function should be used  to delete a dashboard',
-    tags: ['api'],
+//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
