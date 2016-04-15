@@ -57,6 +57,7 @@
     "lodash": "^3.10.1",
     "marked": "0.3.x",
     "merge": "^1.2.0",
+    "moment": "^2.12.0",
     "mongoose": "^4.1.0",
     "mongoose-auto-increment": "^5.0.0",
     "mongoose-merge-plugin": "0.0.5",

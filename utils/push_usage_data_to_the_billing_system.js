@@ -69,13 +69,15 @@ for (var i = 0; i < parslen; ++i) {
 
 billingSytemReport.getListAccountsForReport()
   .then(function(data) {
-    log_('Get list Accounts for send billing info ' + data.length)
-    // data.length = 3;
+    log_('Get list Accounts for send billing info for ' + data.length + ' accounts.');
     return data;
   })
 
 .map(function(item) {
-    //
+    // DOTO: delete after tests
+    // if (item.subscription_id != '12506632') {
+    //   return ''
+    // } else {
     return billingSytemReport.oneBillingReport(item.id /* Account ID*/ , (conf.date || 'now'), false)
       .then(function() {
         return {
@@ -86,8 +88,9 @@ billingSytemReport.getListAccountsForReport()
           billing_plan: item.billing_plan
         }
       });
+    // }
   }, {
-    concurrency: 100
+    concurrency: 100 // TODO: make as parameter ?
   })
   .then(function sucess(data) {
     log_(data, 5);
