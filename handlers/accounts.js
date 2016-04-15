@@ -561,6 +561,7 @@ exports.deleteAccount = function(request, reply) {
       if (account.subscription_id) {
         Customer.cancelSubscription(account.subscription_id, function(err, data) {
           if (err) {
+            // NOTE: can be to get error if try canceled subscription from anothe Cahrgify Site
             logger.error('Accoutn::deleteAccount:error ' + JSON.stringify(err));
             cb(err);
           } else {
@@ -605,7 +606,7 @@ exports.deleteAccount = function(request, reply) {
     function(usersToUpdate, cb) {
       async.eachSeries(usersToUpdate, function(user, callback) {
           var user_id = user.user_id;
-          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id+ '. Count Companies = ' + 
+          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id+ '. Count Companies = ' +
             user.companyId.length +' '+JSON.stringify(user.companyId));
           if (user.companyId.length === 1) {
             logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
