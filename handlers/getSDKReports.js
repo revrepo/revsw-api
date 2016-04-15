@@ -646,9 +646,6 @@ exports.getAggFlowReport = function( request, reply ) {
               received_bytes: 0,
               sent_bytes: 0
             };
-            var code_hits = 0;
-            var code_sent = 0;
-            var code_received = 0;
             var flow = codes[ci].date_histogram.buckets;
             for ( var fi = 0, flen = flow.length; fi < flen; ++fi ) {
               var item = flow[fi];
