@@ -330,11 +330,11 @@ var BasicResource = function (data) {
         return me
           .deleteOne(id)
           .then(function (res) {
-            if (res.body.statusCode || res.body.statusCode !== 200) {
+            if (res.body.statusCode && res.body.statusCode != 200) {
               console.log('Cannot delete item:', id, res.body.message);
             }
             else {
-              console.log('Item deleted:', id, res.body);
+              console.log('Item deleted:', id, res.body.message);
             }
           })
           .catch(function () {
