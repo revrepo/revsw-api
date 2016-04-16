@@ -72,11 +72,11 @@ function User(mongoose, connection, options) {
     },
     old_passwords: [String],
 
-    validation: {
+    'validation': {
       // TODO: should be "expired_at"
-      expiredAt: Date,
-      token: String,
-      verified: {type: Boolean, default: false}
+      'expiredAt': Date,
+      'token': String,
+      'verified': {type: Boolean, default: false}
     },
 
     billing_plan: this.ObjectId,

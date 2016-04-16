@@ -21,7 +21,7 @@
 'use strict';
 //	data access layer
 
-var utils = require('../lib/utilities.js');
+// var utils = require('../lib/utilities.js');
 
 function Location(mongoose, connection, options) {
   this.options = options;

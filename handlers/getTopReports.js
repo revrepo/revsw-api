@@ -95,8 +95,8 @@ var top_reports_ = function( req, reply, domain_name, span ) {
             must: [{
               range: {
                 '@timestamp': {
-                  'gte': span.start,
-                  'lte': span.end
+                  gte: span.start,
+                  lte: span.end
                 }
               }
             }, {
@@ -108,24 +108,41 @@ var top_reports_ = function( req, reply, domain_name, span ) {
         }
       }
     },
-    'size': 0,
-    'aggs': {
-      'results': {
-        'terms': {
-          'field': field,
-          'size': req.query.count || 30,
-          'order': {
-            '_count': 'desc'
+    size: 0,
+    aggs: {
+      results: {
+        terms: {
+          field: field,
+          size: req.query.count || 30,
+          order: {
+            _count: 'desc'
           }
         }
       },
-      'missing_field': {
-        'missing': {
-          'field': field
+      missing_field: {
+        missing: {
+          field: field
         }
       }
     }
   };
+
+  //  add 2 sub-aggregations for country
+  if ( req.query.report_type === 'country' ) {
+    requestBody.aggs.results.aggs = {
+      regions: {
+        terms: {
+          field: 'geoip.region_name',
+          size: 0
+        }
+      },
+      missing_regions: {
+        missing: {
+          field: 'geoip.region_name',
+        }
+      }
+    };
+  }
 
   if (req.query.country) {
     requestBody.query.filtered.filter.bool.must.push({
@@ -148,26 +165,55 @@ var top_reports_ = function( req, reply, domain_name, span ) {
           ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
       }
 
-      var data = [];
-      var missed_total = 0;
-      for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
-        var item = body.aggregations.results.buckets[i];
-        if ( field === 'cache' && item.key !== 'HIT' ) {
-          //  special treatment for cache's MISS and occasional "-" values
-          missed_total += item.doc_count;
-        } else {
-          data.push({
-            key: item.key,
-            count: item.doc_count
+      var data = body.aggregations.results.buckets.map( function( res ) {
+        var item = {
+          key: res.key,
+          count: res.doc_count,
+        };
+        if ( res.regions && res.regions.buckets.length ) {
+          item.regions = res.regions.buckets.map( function( region ) {
+            return {
+              key: region.key,
+              count: region.doc_count,
+            };
           });
         }
-      }
-      if (field === 'cache' && missed_total !== 0) {
+        if ( res.missing_regions && res.missing_regions.doc_count ) {
+          if ( !item.regions ) {
+            item.regions = [];
+          }
+          var region = res.missing_regions;
+          item.regions.push({
+            key: '--',
+            count: region.doc_count,
+          });
+        }
+        return item;
+      });
+
+      if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
+        var res = body.aggregations.missing_field;
         data.push({
-          key: 'MISS',
-          count: missed_total
+          key: '--',
+          count: res.doc_count,
         });
       }
+
+      //  special treatment for cache report type to avoid garbage like "-" or just missing field
+      if ( field === 'cache' ) {
+        data = [{
+          key: 'HIT',
+          count: data.reduce( function( prev, curr ) {
+            return prev + ( curr.key === 'HIT' ? curr.count : 0 );
+          }, 0 )
+        }, {
+          key: 'MISS',
+          count: data.reduce( function( prev, curr ) {
+            return prev + ( curr.key !== 'HIT' ? curr.count : 0 );
+          }, 0 )
+        }];
+      }
+
       var response = {
         metadata: {
           domain_name: domain_name,
