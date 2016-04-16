@@ -33,6 +33,7 @@ describe('Sanity check', function () {
   var users = [
     config.get('api.users.reseller')
   ];
+  var errorResponseSchema = SchemaProvider.getErrorResponse();
 
   users.forEach(function (user) {
 
@@ -78,41 +79,35 @@ describe('Sanity check', function () {
             done();
           });
 
-          it('should return data applying apps schema when getting all apps.',
+          it('should return data applying `error response` schema when ' +
+            'getting all apps.',
             function (done) {
               API.session.reset();
               API.resources.apps
                 .getAll()
                 .expect(401)
                 .then(function (response) {
-                  var apps = response.body;
-                  apps.forEach(function (app) {
-                    Joi.validate(app, SchemaProvider.getApp(), function (err) {
-                      if (err) {
-                        return done(err);
-                      }
-                    });
-                  });
-                  done();
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should return data applying apps schema when getting specific ' +
-            'app.',
+          it('should return data applying `error response` schema when ' +
+            'getting specific app.',
             function (done) {
               API.session.reset();
               API.resources.apps
                 .getOne(testApp.id)
                 .expect(401)
                 .then(function (response) {
-                  var app = response.body;
-                  Joi.validate(app, SchemaProvider.getApp(), done);
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should return data applying `success response` schema when ' +
+          it('should return data applying `error response` schema when ' +
             'creating specific app.',
             function (done) {
               var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
@@ -122,20 +117,12 @@ describe('Sanity check', function () {
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, SchemaProvider.getCreateAppStatus(),
-                    function (error) {
-                      if (error) {
-                        return done(error);
-                      }
-                      API.resources.apps
-                        .deleteOne(data.object_id)
-                        .end(done);
-                    });
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should return data applying `success response` schema when ' +
+          it('should return data applying `error response` schema when ' +
             'updating specific app.',
             function (done) {
               var updatedApp = AppsDP
@@ -146,12 +133,12 @@ describe('Sanity check', function () {
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, SchemaProvider.getSuccessResponse(), done);
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should return data applying `success response` schema when ' +
+          it('should return data applying `error response` schema when ' +
             'deleting an app.',
             function (done) {
               var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
@@ -161,12 +148,13 @@ describe('Sanity check', function () {
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, SchemaProvider.getAppStatus(), done);
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should allow to get all SDK releases',
+          it('should return data applying `error response` schema when ' +
+            'getting all SDK releases',
             function (done) {
               API.session.reset();
               API.resources.apps
@@ -175,13 +163,13 @@ describe('Sanity check', function () {
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, SchemaProvider.getAppSdkRelease(),
-                    done);
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should allow to get config status for specific app',
+          it('should return data applying `error response` schema when ' +
+            'getting config status for specific app',
             function (done) {
               API.session.reset();
               API.resources.apps
@@ -190,12 +178,13 @@ describe('Sanity check', function () {
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, SchemaProvider.getAppVersion(), done);
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
 
-          it('should allow to get all versions for specific app',
+          it('should return data applying `error response` schema when ' +
+            'getting all versions for specific app',
             function (done) {
               API.session.reset();
               API.resources.apps
@@ -203,9 +192,8 @@ describe('Sanity check', function () {
                 .getAll()
                 .expect(401)
                 .then(function (response) {
-                  var versions = response.body;
-                  versions.length.should.be.greaterThan(0);
-                  done();
+                  var data = response.body;
+                  Joi.validate(data, errorResponseSchema, done);
                 })
                 .catch(done);
             });
