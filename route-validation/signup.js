@@ -27,7 +27,7 @@ exports.signupPayload = {
   email: joi.string().email().description('Email address').required(),
   company_name: joi.string().description('Company name').optional(),
   phone_number: joi.string().description('Phone number').required(),
-  password: joi.string().description('Password').required(),
+  password: joi.string().min(8).max(15).description('Password').required(),
   address1: joi.string().description('Address 1').required(),
   address2: joi.string().description('Address 2').optional(),
   country: joi.string().description('Country').required(),
