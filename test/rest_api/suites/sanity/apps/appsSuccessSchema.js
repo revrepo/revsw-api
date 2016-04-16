@@ -218,7 +218,7 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var data = response.body;
-                  Joi.validate(data, SchemaProvider.getAppVersion(), done);
+                  Joi.validate(data, SchemaProvider.getAppConfigStatus(), done);
                 })
                 .catch(done);
             });
@@ -234,8 +234,15 @@ describe('Sanity check', function () {
                     .expect(200);
                 })
                 .then(function (response) {
-                  var versions = response.body;
-                  versions.length.should.be.greaterThan(0);
+                  var apps = response.body;
+                  apps.forEach(function (app) {
+                    Joi.validate(app, SchemaProvider.getAppVersion(),
+                      function (err) {
+                        if (err) {
+                          return done(err);
+                        }
+                      });
+                  });
                   done();
                 })
                 .catch(done);

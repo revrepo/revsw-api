@@ -278,6 +278,10 @@ module.exports = {
     return models.AppStatusModel;
   },
 
+  getAppConfigStatus: function () {
+    return models.domainStatusModel;
+  },
+
   getCreateAppStatus: function () {
     return models.NewAppStatusModel;
   },
@@ -290,6 +294,12 @@ module.exports = {
   },
 
   getAppVersion: function () {
-    return models.domainStatusModel;
+    return Joi.object().keys({
+      app_name: Joi.string(),
+      account_id: Joi.string().regex(idFormatPattern).required(),
+      app_platform: Joi.string().valid('iOS', 'Android'),
+      updated_at: Joi.date(),
+      app_published_version: Joi.number().integer()
+    });
   }
 };
