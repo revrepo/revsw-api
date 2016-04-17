@@ -78,7 +78,6 @@ for (var i = 0; i < parslen; ++i) {
   }
 }
 
-console.log(conf.dry);
 
 billingSytemReport.getListAccountsForReport(conf)
   .then(function chechListAccounts(data) {
