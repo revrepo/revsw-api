@@ -33,14 +33,6 @@ var logger             = require('revsw-logger')(config.log_config);
 var utils              = require('../lib/utilities.js');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
-// TODO: move the function to "utils" module and unify with other permission checking functions
-function permissionAllowed(request, app) {
-  var result = true;
-  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(app.account_id) === -1) {
-    result = false;
-  }
-  return result;
-}
 
 exports.getApps = function(request, reply) {
   logger.info('Calling CDS to get a list of registered apps');
@@ -57,7 +49,7 @@ exports.getApps = function(request, reply) {
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
-          return permissionAllowed(request, app);
+          return utils.checkUserAccessPermission(request, app.account_id);
         });
       }
       renderJSON(request, reply, err, listOfApps);
@@ -77,7 +69,7 @@ exports.getApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get details for app ID ' + app_id);
@@ -110,7 +102,7 @@ exports.getAppVersions = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get a list of configuration versions for app ID ' + app_id);
@@ -141,7 +133,7 @@ exports.getAppConfigStatus = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get configuration status for app ID: ' + app_id);
@@ -165,7 +157,7 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (!permissionAllowed(request, newApp)) {
+  if (!utils.checkUserAccessPermission(request, newApp.account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
   // TODO: need to remove the check for app name uniqueness
@@ -224,10 +216,10 @@ exports.updateApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (updatedApp.account_id && !permissionAllowed(request, updatedApp)) {
+    if (!utils.checkUserAccessPermission(request, updatedApp.account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  request.auth.credentials.email;
@@ -276,7 +268,7 @@ exports.deleteApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
       return reply(boom.badRequest('App ID not found'));
     }
     account_id = existing_app.account_id;

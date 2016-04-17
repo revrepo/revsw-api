@@ -92,8 +92,7 @@ exports.getApiKey = function (request, reply) {
     }
 
     if (result) {
-      // TODO: Need to create a separate function to check API access permissions
-      if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+      if (!utils.checkUserAccessPermission(request, result.account_id)) {
         return reply(boom.badRequest('API key not found'));
       }
 
@@ -112,8 +111,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
-  // TODO: Need to create a separate function to check API access permissions
-  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
+  if (!utils.checkUserAccessPermission(request, newApiKey.account_id)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -209,9 +207,7 @@ exports.updateApiKey = function (request, reply) {
     });
   }
 
-  // TODO: move the functionality to a separate procedure
-  if (request.auth.credentials.role !== 'revadmin' && (updatedApiKey.account_id &&
-    request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1)) {
+  if (!utils.checkUserAccessPermission(request, updatedApiKey.account_id)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -256,8 +252,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    // TODO use a function
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!utils.checkUserAccessPermission(request, result.account_id)) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -350,8 +345,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    // TODO: use a function
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!utils.checkUserAccessPermission(request, result.account_id)) {
       return reply(boom.badRequest('API key not found'));
     }
 
