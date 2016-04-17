@@ -38,7 +38,7 @@ module.exports = [
     path: '/v1/stats/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: getStats.getStats,
       description: 'Get traffic stats for a domain',
@@ -76,7 +76,7 @@ module.exports = [
     path: '/v1/stats/top_objects/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: getTopObjects.getTopObjects,
       description: 'Get a list of top object requests for a domain',
@@ -116,7 +116,7 @@ module.exports = [
     path: '/v1/stats/top/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: getTopReports.getTopReports,
       description: 'Get a list of top traffic properties for a domain',
@@ -148,7 +148,7 @@ module.exports = [
     path: '/v1/stats/lastmile_rtt/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: RTTReports.getRTTReports,
       description: 'Get RTT stats for a domain',
@@ -177,7 +177,7 @@ module.exports = [
     path: '/v1/stats/gbt/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: GBTReports.getGBTReports,
       description: 'Get GBT stats for a domain',
@@ -206,7 +206,7 @@ module.exports = [
     path: '/v1/stats/fbt/average/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: FBTReports.getFBTAverage,
       description: 'Get FBT average stats for a domain',
@@ -236,7 +236,7 @@ module.exports = [
     path: '/v1/stats/fbt/distribution/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: FBTReports.getFBTDistribution,
       description: 'Get FBT distribution for a domain',
@@ -268,7 +268,7 @@ module.exports = [
     path: '/v1/stats/fbt/heatmap/{domain_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: FBTReports.getFBTHeatmap,
       description: 'Get FBT for a domain grouped by countries',
@@ -296,7 +296,7 @@ module.exports = [
     path: '/v1/stats/sdk/app/{app_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAppReport,
       description: 'Get SDK stats for the application',
@@ -324,7 +324,7 @@ module.exports = [
     path: '/v1/stats/sdk/account/{account_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAccountReport,
       description: 'Get SDK stats for the account',
@@ -352,7 +352,7 @@ module.exports = [
     path: '/v1/stats/sdk/dirs',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getDirs,
       description: 'Get SDK lists of possible values for countries, oses, devices and operators for the further filtering',
@@ -378,7 +378,7 @@ module.exports = [
     path: '/v1/stats/sdk/flow',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getFlowReport,
       description: 'Get SDK data flow for an account and optionally application',
@@ -409,7 +409,7 @@ module.exports = [
     path: '/v1/stats/sdk/agg_flow',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAggFlowReport,
       description: 'Get SDK data flow for an account and optionally application, grouped by the given type',
@@ -442,7 +442,7 @@ module.exports = [
     path: '/v1/stats/sdk/top_requests',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getTopRequests,
       description: 'Get hits amount for top traffic properties for an account and optionally application',
@@ -471,7 +471,7 @@ module.exports = [
     path: '/v1/stats/sdk/top_users',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getTopUsers,
       description: 'Get users amount for top traffic properties for an account and optionally application',
@@ -500,7 +500,7 @@ module.exports = [
     path: '/v1/stats/sdk/top_gbt',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getTopGBT,
       description: 'Get data sent for top traffic properties for an account and optionally application',
@@ -529,7 +529,7 @@ module.exports = [
     path: '/v1/stats/sdk/distributions',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getDistributions,
       description: 'Get distributions of top traffic properties for an account and optionally application',
@@ -558,7 +558,7 @@ module.exports = [
     path: '/v1/stats/sdk/top_objects',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getTopObjects,
       description: 'Get list of the top SDK objects for an account and optionally application',
@@ -592,7 +592,7 @@ module.exports = [
     path: '/v1/stats/sdk/top_objects/slowest',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getTopObjectsSlowest,
       description: 'Get list of the slowest SDK objects for an account and optionally application',
@@ -626,7 +626,7 @@ module.exports = [
     path: '/v1/stats/sdk/top_objects/5xx',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getTopObjects5xx,
       description: 'Get list of the SDK objects with 5XX codes, for an account and optionally application',
@@ -658,7 +658,7 @@ module.exports = [
     path: '/v1/stats/sdk/ab/fbt',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAB4FBTAverage,
       description: 'Get SDK FBT min, max, average histograms, separated by destination, for an account and optionally application',
@@ -689,7 +689,7 @@ module.exports = [
     path: '/v1/stats/sdk/ab/fbt_distribution',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAB4FBTDistribution,
       description: 'Get SDK FBT value distribution histogram, separated by destination, for an account and optionally application',
@@ -722,7 +722,7 @@ module.exports = [
     path: '/v1/stats/sdk/ab/errors',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAB4Errors,
       description: 'Get SDK errors graph, separated by destination, for an account and optionally application',
@@ -753,7 +753,7 @@ module.exports = [
     path: '/v1/stats/sdk/ab/speed',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: SDKReports.getAB4Speed,
       description: 'Get SDK requests processing speed data, separated by destination, for an account and optionally application',

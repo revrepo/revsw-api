@@ -34,7 +34,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: account.getAccounts,
       description: 'Get a list of customer accounts registered for a customer/reseller',
@@ -56,7 +56,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'reseller_rw' , 'revadmin_rw', 'apikey_rw' ]
+        scope: [ 'reseller_rw' , 'revadmin_rw', 'apikey', 'apikey_rw' ]
       },
       handler: account.createAccount,
       description: 'Create a new customer account in the system',
@@ -85,7 +85,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}/billing_profile',
     config: {
       auth: {
-        scope: [ 'reseller_rw' , 'revadmin_rw', 'admin_rw' ]
+        scope: [ 'reseller_rw' , 'revadmin_rw', 'admin_rw', 'apikey', 'apikey_rw' ]
       },
       handler: account.createBillingProfile,
       description: 'Create billing profile',
@@ -112,7 +112,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey', 'apikey_rw' ]
       },
       handler: account.updateAccount,
       description: 'Update a customer account',
@@ -144,7 +144,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
+        scope: ['admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: account.getAccount,
       description: 'Get details about a customer account',
@@ -272,7 +272,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}',
     config: {
       auth: {
-        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey_rw' ]
+        scope: [ 'reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey', 'apikey_rw' ]
       },
       handler: account.deleteAccount,
       description: 'Remove a customer account',

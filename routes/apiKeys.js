@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/api_keys',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin']
+        scope: ['admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: apiKey.getApiKeys,
       description: 'Get a list of API keys registered for a company',
@@ -54,7 +54,7 @@ module.exports = [
     path: '/v1/api_keys/{key_id}',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin']
+        scope: ['admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: apiKey.getApiKey,
       description: 'Get API key details',
@@ -81,7 +81,7 @@ module.exports = [
     path: '/v1/api_keys',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: apiKey.createApiKey,
       description: 'Create a new API key in the system',
@@ -109,7 +109,7 @@ module.exports = [
     path: '/v1/api_keys/{key_id}',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: apiKey.updateApiKey,
       description: 'Update a customer API key',
@@ -154,7 +154,7 @@ module.exports = [
     path: '/v1/api_keys/{key_id}/activate',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: apiKey.activateApiKey,
       description: 'Make the API key active',
@@ -181,7 +181,7 @@ module.exports = [
     path: '/v1/api_keys/{key_id}/deactivate',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: apiKey.deactivateApiKey,
       description: 'Make the API key inactive',
@@ -209,7 +209,7 @@ module.exports = [
     path: '/v1/api_keys/{key_id}',
     config: {
       auth: {
-        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: apiKey.deleteApiKey,
       description: 'Remove a customer API key',

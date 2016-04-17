@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/apps',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: app.getApps,
       description: 'Get a list of currently registered mobile applications',
@@ -52,7 +52,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: app.getApp,
       description: 'Get current configuration of a mobile application',
@@ -80,7 +80,7 @@ module.exports = [
     path: '/v1/apps/{app_id}/versions',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: app.getAppVersions,
       description: 'Get a list of previous configurations of a mobile application',
@@ -105,7 +105,7 @@ module.exports = [
     path: '/v1/apps/{app_id}/config_status',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: app.getAppConfigStatus,
       description: 'Get current configuration publishing status of a mobile application',
@@ -130,7 +130,7 @@ module.exports = [
     path: '/v1/apps',
     config: {
       auth: {
-        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: app.addApp,
       description: 'Register a new mobile application configuration',
@@ -157,7 +157,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: app.updateApp,
       description: 'Update the current configuration of a mobile application',
@@ -190,7 +190,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey', 'apikey_rw']
       },
       handler: app.deleteApp,
       description: 'Delete a mobile application configuration',
@@ -216,7 +216,7 @@ module.exports = [
     path: '/v1/apps/sdk_releases',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw']
       },
       handler: app.getSDKReleasedVersions,
       description: 'Get a list of released SDK versions for supported mobile platforms',

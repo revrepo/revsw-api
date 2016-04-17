@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/locations/firstmile',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: locations.getFirstMileLocations,
       description: 'Get a list of Rev first mile locations',
@@ -53,7 +53,7 @@ module.exports = [
     path: '/v1/locations/lastmile',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
       },
       handler: locations.getLastMileLocations,
       description: 'Get a list of Rev last mile locations',
