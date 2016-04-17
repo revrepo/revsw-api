@@ -49,7 +49,7 @@ exports.getApps = function(request, reply) {
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
-          return utils.checkUserAccessPermission(request, app.account_id);
+          return utils.checkUserAccessPermissionToApps(request, app);
         });
       }
       renderJSON(request, reply, err, listOfApps);
@@ -69,7 +69,7 @@ exports.getApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get details for app ID ' + app_id);
@@ -102,7 +102,7 @@ exports.getAppVersions = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get a list of configuration versions for app ID ' + app_id);
@@ -133,7 +133,7 @@ exports.getAppConfigStatus = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get configuration status for app ID: ' + app_id);
@@ -157,7 +157,7 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (!utils.checkUserAccessPermission(request, newApp.account_id)) {
+  if (!utils.checkUserAccessPermissionToApps(request, newApp)) {
     return reply(boom.badRequest('Account ID not found'));
   }
   // TODO: need to remove the check for app name uniqueness
@@ -216,10 +216,10 @@ exports.updateApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermission(request, updatedApp.account_id)) {
+    if (!utils.checkUserAccessPermissionToApps(request, updatedApp)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  request.auth.credentials.email;
@@ -268,7 +268,7 @@ exports.deleteApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermission(request, existing_app.account_id)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     account_id = existing_app.account_id;

@@ -92,7 +92,7 @@ exports.getApiKey = function (request, reply) {
     }
 
     if (result) {
-      if (!utils.checkUserAccessPermission(request, result.account_id)) {
+      if (!utils.checkUserAccessPermissionToAPIKey(request, result)) {
         return reply(boom.badRequest('API key not found'));
       }
 
@@ -111,7 +111,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
-  if (!utils.checkUserAccessPermission(request, newApiKey.account_id)) {
+  if (!utils.checkUserAccessPermissionToAPIKey(request, newApiKey)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -207,7 +207,7 @@ exports.updateApiKey = function (request, reply) {
     });
   }
 
-  if (!utils.checkUserAccessPermission(request, updatedApiKey.account_id)) {
+  if (!utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -252,7 +252,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!utils.checkUserAccessPermission(request, result.account_id)) {
+    if (!utils.checkUserAccessPermissionToAPIKey(request, result)) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -345,7 +345,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!utils.checkUserAccessPermission(request, result.account_id)) {
+    if (!utils.checkUserAccessPermissionToAPIKey(request, result)) {
       return reply(boom.badRequest('API key not found'));
     }
 
