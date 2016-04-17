@@ -50,23 +50,6 @@ Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(chargifyProduct);
-/* 
-// The function is not in use anymore - TODO: delete it
-var sendVerifyToken = function(user, token, cb) {
-  var mailOptions = {
-    to: user.email,
-    subject: config.get('user_verify_subject'),
-    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
-      'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-      'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
-      'If you did not request this, please ignore this email.\n\n' +
-      'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-      'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
-  };
-  mail.sendMail(mailOptions, cb);
-
-};
-*/
 
 /**
  * @name  signup
@@ -80,6 +63,8 @@ var sendVerifyToken = function(user, token, cb) {
  */
 exports.signup = function(req, reply) {
   var data = req.payload;
+  delete data.passwordConfirm;
+
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
@@ -92,8 +77,30 @@ exports.signup = function(req, reply) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
   // NOTE: get internal information about Billing Plan by handler name
-  billing_plans.getAsync({
-      chargify_handle: data.billing_plan
+  users.getAsync({
+      email: data.email
+    })
+    .then(function (user) {
+      if (user) {
+        logger.debug('signup:: User ' + data.email + ' already exists in the DB, record: ' + JSON.stringify(user));
+        if (user.validation && user.validation.verified !== true) {
+          logger.info('signup:: User ' + data.email + ' still needs to complete the registration process');
+          throw {
+            statusCode: 402, //
+            message: 'You account is not verified. Please check your email address at \'' + data.email + '\' to finish the registration process.'
+          };
+        }
+        if ((user.validation && user.validation.verified && user.validation.verified === true) || !user.validation) {
+          logger.info('signup:: User ' + data.email + ' already exists in the system');
+          throw {
+            statusCode: 406,
+            message: 'User with email address ' + data.email + ' already exists. Please use another email address.'
+          };
+        }
+      }
+      return billing_plans.getAsync({
+        chargify_handle: data.billing_plan
+      });
     })
     .then(function successCallGetBillingPlan(bp) {
       if (!bp) {
@@ -199,7 +206,7 @@ exports.signup = function(req, reply) {
             if (dataError.user.validation.verified === false) {
               throw {
                 statusCode: 402, //
-                message: 'You account is not verified. Please check your email address \'' + newUser.email + '\' for finish registration.'
+                message: 'You account is not verified. Please check your email address at \'' + newUser.email + '\' to finish the registration process.'
               };
             }
             //

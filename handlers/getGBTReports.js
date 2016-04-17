@@ -70,19 +70,19 @@ exports.getGBTReports = function(request, reply) {
       }
 
       var requestBody = {
-        'query': {
+        query: {
           filtered: {
             filter: {
-              'bool': {
-                'must': [{
-                  'term': {
-                    'domain': domain_name
+              bool: {
+                must: [{
+                  term: {
+                    domain: domain_name
                   }
                 }, {
-                  'range': {
+                  range: {
                     '@timestamp': {
-                      'gte': span.start,
-                      'lte': span.end
+                      gte: span.start,
+                      lte: span.end
                     }
                   }
                 }]
@@ -90,45 +90,50 @@ exports.getGBTReports = function(request, reply) {
             }
           }
         },
-        'size': 0,
-        'aggs': {
-          'results': {
-            'terms': {
-              'field': field,
-              'size': request.query.count || 30
+        size: 0,
+        aggs: {
+          results: {
+            terms: {
+              field: field,
+              size: request.query.count || 30
             },
-            'aggs': {
-              'sent_bytes': {
-                'sum': {
-                  'field': 's_bytes'
-                }
-              },
-              'received_bytes': {
-                'sum': {
-                  'field': 'r_bytes'
-                }
-              }
+            aggs: {
+              sent_bytes: { sum: { field: 's_bytes' } },
+              received_bytes: { sum: { field: 'r_bytes' } }
             }
           },
-          'missing_field': {
-            'missing': {
-              'field': field
-            },
-            'aggs': {
-              'sent_bytes': {
-                'sum': {
-                  'field': 's_bytes'
-                }
-              },
-              'received_bytes': {
-                'sum': {
-                  'field': 'r_bytes'
-                }
-              }
+          missing_field: {
+            missing: { field: field },
+            aggs: {
+              sent_bytes: { sum: { field: 's_bytes' } },
+              received_bytes: { sum: { field: 'r_bytes' } }
             }
           }
         }
       };
+
+      //  add 2 sub-aggregations for country
+      if ( request.query.report_type === 'country' ) {
+        requestBody.aggs.results.aggs.regions = {
+          terms: {
+            field: 'geoip.region_name',
+            size: 0
+          },
+          aggs: {
+            sent_bytes: { sum: { field: 's_bytes' } },
+            received_bytes: { sum: { field: 'r_bytes' } }
+          }
+        };
+        requestBody.aggs.results.aggs.missing_regions = {
+          missing: {
+            field: 'geoip.region_name',
+          },
+          aggs: {
+            sent_bytes: { sum: { field: 's_bytes' } },
+            received_bytes: { sum: { field: 'r_bytes' } }
+          }
+        };
+      }
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({
@@ -141,23 +146,46 @@ exports.getGBTReports = function(request, reply) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
         }
-        var dataArray = [];
-        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
-          var doc = body.aggregations.results.buckets[i];
-          dataArray.push({
-            key: doc.key,
-            count: doc.doc_count,
-            sent_bytes: doc.sent_bytes.value,
-            received_bytes: doc.received_bytes.value
-          });
-        }
+
+        var dataArray = body.aggregations.results.buckets.map( function( res ) {
+          var item = {
+            key: res.key,
+            count: res.doc_count,
+            sent_bytes: res.sent_bytes.value,
+            received_bytes: res.received_bytes.value
+          };
+          if ( res.regions && res.regions.buckets.length ) {
+            item.regions = res.regions.buckets.map( function( region ) {
+              return {
+                key: region.key,
+                count: region.doc_count,
+                sent_bytes: region.sent_bytes.value,
+                received_bytes: region.received_bytes.value
+              };
+            });
+          }
+          if ( res.missing_regions && res.missing_regions.doc_count ) {
+            if ( !item.regions ) {
+              item.regions = [];
+            }
+            var region = res.missing_regions;
+            item.regions.push({
+              key: '--',
+              count: region.doc_count,
+              sent_bytes: region.sent_bytes.value,
+              received_bytes: region.received_bytes.value
+            });
+          }
+          return item;
+        });
+
         if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
-          doc = body.aggregations.missing_field;
+          var res = body.aggregations.missing_field;
           dataArray.push({
             key: '--',
-            count: doc.doc_count,
-            sent_bytes: doc.sent_bytes.value,
-            received_bytes: doc.received_bytes.value
+            count: res.doc_count,
+            sent_bytes: res.sent_bytes.value,
+            received_bytes: res.received_bytes.value
           });
         }
 

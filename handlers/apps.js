@@ -168,6 +168,7 @@ exports.addApp = function(request, reply) {
   if (!permissionAllowed(request, newApp)) {
     return reply(boom.badRequest('Account ID not found'));
   }
+  // TODO: need to remove the check for app name uniqueness
   apps.get({app_name: newApp.app_name, app_platform: newApp.app_platform, deleted: {$ne: true}}, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app name ' + newApp.app_name));

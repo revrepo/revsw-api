@@ -56,6 +56,10 @@ exports.getUsers = function getUsers(request, reply) {
 exports.createUser = function(request, reply) {
   var newUser = request.payload;
 
+  if (newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+  }
+
   if (newUser.companyId) {
     // TODO: need to move the permissions check to a separate function or use the existing function
     if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
@@ -158,6 +162,11 @@ exports.updateUser = function(request, reply) {
   if (Object.keys(newUser).length === 0) {
     return reply(boom.badRequest('Please specify at least one updated attiribute'));
   }
+
+  if (newUser.role && newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+  }
+
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
   // TODO use an existing access verification function instead of the code
