@@ -31,7 +31,7 @@ module.exports = [
     path: '/v1/usage_reports/web',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin', 'apikey', 'apikey_rw' ]
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: usageReports.getAccountReport,
       description: 'Get Usage Report for an Account(s)',
