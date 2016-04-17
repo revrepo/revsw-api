@@ -22,13 +22,14 @@ var billingSytemReport = require('../lib/billingSytemReport.js');
 //  this is 0.10, console.dir( obj, opts ) doesn't work
 var util = require('util');
 var log_ = function(o, d) {
-    console.log(util.inspect(o, {
-      colors: true,
-      depth: (d || 100),
-      showHidden: true
-    }));
-  }
-  //  CLI -----------------------------
+  console.log(util.inspect(o, {
+    colors: true,
+    depth: (d || 100),
+    showHidden: true
+  }));
+}
+
+//  CLI -----------------------------
 
 var showHelp = function() {
   console.log('\n  Usage Report Generator - a tool to collect usage data and store it to the MongoDB');
@@ -36,6 +37,10 @@ var showHelp = function() {
   console.log('    --date :');
   console.log('        date of the report, for ex. "2015-11-19" or "-3d"');
   console.log('        today assumed if absent');
+  console.log('    -a, --account :');
+  console.log('        account Id');
+  console.log('    --dry-run :');
+  console.log('        show collected data, does not store anything (debug mode)');
   console.log('    -h, --help :');
   console.log('        this message\n\n');
   process.exit(0);
@@ -44,7 +49,9 @@ var showHelp = function() {
 var conf = {},
   pars = process.argv.slice(2),
   parslen = pars.length,
-  curr_par = false;
+  curr_par = false,
+  accountId = null,
+  subscriptionId = null;
 
 for (var i = 0; i < parslen; ++i) {
 
@@ -52,12 +59,18 @@ for (var i = 0; i < parslen; ++i) {
     showHelp();
     return;
   }
-
-  if (pars[i] === '--date') {
+  if (pars[i] === '-a' || pars[i] === '--account') {
+    curr_par = 'accountId';
+  } else if (pars[i] === '-s' || pars[i] === '--subscription') {
+    curr_par = 'subscriptionId';
+  } else if (pars[i] === '--date') {
     curr_par = 'date';
+  } else if (pars[i] === '--dry-run') {
+    conf.dry = true;
   } else if (curr_par) {
     conf[curr_par] = pars[i];
     curr_par = false;
+
   } else {
     console.error('\n    unknown parameter: ' + pars[i]);
     showHelp();
@@ -66,29 +79,23 @@ for (var i = 0; i < parslen; ++i) {
 }
 
 
-
-billingSytemReport.getListAccountsForReport()
-  .then(function(data) {
+billingSytemReport.getListAccountsForReport(conf)
+  .then(function chechListAccounts(data) {
     log_('Get list Accounts for send billing info for ' + data.length + ' accounts.');
     return data;
   })
-
-.map(function(item) {
-    // DOTO: delete after tests
-    // if (item.subscription_id != '12506632') {
-    //   return ''
-    // } else {
-    return billingSytemReport.oneBillingReport(item.id /* Account ID*/ , (conf.date || 'now'), false)
-      .then(function() {
+  .map(function(item) {
+    return billingSytemReport.oneBillingReport((conf.date || 'now'), item.id /* Account ID*/ , conf.dry /*do not save, return collected data*/ )
+      .then(function infoResultReporting() {
         return {
           id: item.id,
+          company_name: item.companyName,
           subscription_id: item.subscription_id,
           contact_email: item.contact_email,
           subscription_state: item.subscription_state,
           billing_plan: item.billing_plan
         }
       });
-    // }
   }, {
     concurrency: 100 // TODO: make as parameter ?
   })

@@ -82,7 +82,7 @@ module.exports = [
             test: Joi.boolean().required().description('Access to the portal TEST section'),
             readOnly: Joi.boolean().required().description('Enable read-only access to the configuration')
           }).required(),
-          role: Joi.string().required().valid('user','admin').description('User role (user/admin)'),
+          role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)')
         }
       },
@@ -129,7 +129,7 @@ module.exports = [
             test: Joi.boolean().description('Access to the portal TEST section'),
             readOnly: Joi.boolean().description('Enable read-only access to the configuration')
           }),
-          role: Joi.string().valid('user','admin').description('User role (user/admin)'),
+          role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)')
         }
       },

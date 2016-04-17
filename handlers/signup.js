@@ -63,6 +63,8 @@ Promise.promisifyAll(chargifyProduct);
  */
 exports.signup = function(req, reply) {
   var data = req.payload;
+  delete data.passwordConfirm;
+
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
