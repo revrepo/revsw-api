@@ -130,8 +130,26 @@ Account.prototype = {
     });
   },
 
-  listSubscribers : function (callback) {
-    this.model.find({  subscription_id: { $ne:null }, subscription_state: {$ne: 'canceled' }},function (err, accounts) {
+  listSubscribers : function (filters, callback) {
+    var filter = {
+          deleted: {
+            $ne: true
+          },
+          subscription_id: {
+            $ne: null
+          },
+          subscription_state: {
+            $ne: 'canceled'
+          }
+        };
+    if(filters.subscription_id){
+      filter.subscription_id = filters.subscription_id;
+    }
+    if(filters.account_id){
+      filter._id = filters.account_id;
+    }
+    console.log('filter ',filters);
+    this.model.find(filter,function (err, accounts) {
       if(accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
