@@ -4,7 +4,7 @@
 #
 # Configure it as the following in /etc/crontab:
 #
-#     # Run daily usage stats collection script
+#     # Run daily job to submit usage reports to Chargify
 #     3 3 * * * root /usr/local/bin/lockrun --lockfile=/var/tmp/submit_billing_report.lockrun -- /opt/revsw-api/utils/submit_chargify_billing_report_for_yesterday.sh
 #
 
