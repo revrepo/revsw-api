@@ -236,6 +236,36 @@ exports.getAccount = function(request, reply) {
   });
 };
 
+/**
+ * @name  getAccountSubscriptionPreview
+ * @description
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
+exports.getAccountSubscriptionPreview = function(request, reply) {
+
+  var account_id = request.params.account_id;
+  var billing_plan_handle = request.params.billing_plan_handle;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
+
+  accounts.get({
+    _id: account_id
+  }, function(error, result) {
+    if (result) {
+      result = publicRecordFields.handle(result, 'account');
+
+      renderJSON(request, reply, error, result);
+    } else {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+  });
+};
+
 exports.getAccountStatements = function(request, reply) {
   var account_id = request.params.account_id;
 
