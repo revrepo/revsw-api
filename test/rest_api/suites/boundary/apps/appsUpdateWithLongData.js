@@ -32,7 +32,7 @@ describe('Boundary check', function () {
   var user = config.get('api.users.reseller');
 
   describe('Apps resource', function () {
-    describe('With `empty` data', function () {
+    describe('With `long` data', function () {
 
       var testAccount;
       var testApp;
@@ -65,7 +65,7 @@ describe('Boundary check', function () {
           .catch(done);
       });
 
-      var getEmptyDataCheckCallBack = function () {
+      var getLongDataCheckCallBack = function () {
         return function (done) {
           var updatedApp = AppsDP.cloneForUpdate(fullTestApp);
           AppsDDHelper
@@ -97,18 +97,18 @@ describe('Boundary check', function () {
         if (!appsSchema.hasOwnProperty(key)) {
           continue;
         }
-        var ddCase = AppsDDHelper.generateEmptyData(key, appsSchema[key]);
+        var ddCase = AppsDDHelper.generateLongData(key, appsSchema[key]);
         var propertyValue = AppsDDHelper.getValueByPath(fullTestApp, key);
         if (ddCase.testValue === undefined || propertyValue === undefined) {
           continue;
         }
         if (ddCase.skipReason) {
           // Setting test as pending as there is a reason (usually a BUG)
-          xit(ddCase.spec, getEmptyDataCheckCallBack(ddCase));
+          xit(ddCase.spec, getLongDataCheckCallBack(ddCase));
         }
         else {
           // Running the test for specific DataDriven case
-          it(ddCase.spec, getEmptyDataCheckCallBack(ddCase));
+          it(ddCase.spec, getLongDataCheckCallBack(ddCase));
         }
       }
     });

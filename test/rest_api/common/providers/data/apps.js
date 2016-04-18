@@ -33,7 +33,7 @@ var AppsDataProvider = {
    * Generates valida data that represents an APP which APPS REST API
    * end points accept.
    *
-   * @param {String} accountId, which will be used in the domain config data.
+   * @param {String} accountId, which will be used in the app data.
    * @param {String} prefix, a prefix value to put in the name
    *
    * @returns {Object} app info with the following schema
@@ -78,30 +78,25 @@ var AppsDataProvider = {
   },
 
   /**
-   * ### DomainConfigsDataProvider.cloneForUpdate()
+   * ### AppsDataProvider.cloneForUpdate()
    *
-   * Clones the given domain config in a new one which does not have a
-   * domain_name nor a cname.
+   * Clones the given app in a new similar one.
    *
-   * @param {Domain Config Object}
+   * @param {Object} app object
    */
-  cloneForUpdate: function (domain) {
-    var newDomain = JSON.parse(JSON.stringify(domain));
-    delete newDomain.domain_name;
-    delete newDomain.cname;
-    return newDomain;
+  cloneForUpdate: function (app) {
+    return JSON.parse(JSON.stringify(app));
   },
 
   DataDrivenHelper: {
 
     /**
-     * ### DomainConfigsDataProvider.setValueByPath()
+     * ### AppsDataProvider.setValueByPath()
      *
-     * @param {Domain Config Object} obj, object in which value is going to
-     * be set
+     * @param {Object} obj, App object in which value is going to be set
      * @param {String} pathString that represents the concatenation of keys and
      * the last key is the one that is going to change
-     * @param {Object} any value that the property accepts
+     * @param {Object} value, any value that the property accepts
      */
     setValueByPath: function (obj, pathString, value) {
       var prop = obj;
@@ -114,13 +109,12 @@ var AppsDataProvider = {
     },
 
     /**
-     * ### DomainConfigsDataProvider.getValueByPath()
+     * ### AppsDataProvider.getValueByPath()
      *
-     * @param {Domain Config Object} obj, object in which value is going to
-     * be set
+     * @param {Object} obj, App object in which value is going to be set
      * @param {String} pathString that represents the concatenation of keys and
      * the last key is the one that for which the value is going to be get
-     * @returns {Onject|Undefined} the value that the key has in the specified
+     * @returns {Object|Undefined} the value that the key has in the specified
      * object, undefined otherwise
      */
     getValueByPath: function (obj, pathString) {
@@ -136,14 +130,15 @@ var AppsDataProvider = {
     },
 
     /**
-     * ### DomainConfigsDataProvider.generateEmptyData()
+     * ### AppsDataProvider.generateEmptyData()
      *
      * Generates empty data for the key and based on the schema-definition
      * provided.
      *
      * @param {String} propertyPath, concatenation of keys
      * @param {String} schemaDef, schema defined by Joi
-     * @returns {
+     * @returns {Object} with the following structur:
+     * {
      *     spec: string,
      *     propertyPath: *,
      *     testValue: {object|undefined}
@@ -167,7 +162,8 @@ var AppsDataProvider = {
         case 'Joi.number().integer().min(0).max(10000)':
           data.testValue = undefined;
           break;
-        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', \'error\', \'critical\')':
+        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', ' +
+        '\'error\', \'critical\')':
           data.testValue = '';
           break;
         case 'Joi.number().integer().min(60).max(604800)':
@@ -176,7 +172,8 @@ var AppsDataProvider = {
         case 'Joi.number().integer().min(60).max(999999999)':
           data.testValue = undefined;
           break;
-        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', \'report_only\', \'off\')':
+        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', ' +
+        '\'report_only\', \'off\')':
           data.testValue = '';
           break;
         case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
@@ -192,11 +189,97 @@ var AppsDataProvider = {
         case 'Joi.array().items(Joi.string().regex(domainRegex))':
           data.testValue = '';
           break;
-        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', \'rmp\'))':
+        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', ' +
+        '\'rmp\'))':
           data.testValue = '';
           break;
         default:
-          console.log('ALERT! In generateFull:: not considered:', schemaDef);
+          console.log('ALERT! In generate data: not considered:', schemaDef);
+          data.testValue = undefined;
+      }
+      return data;
+    },
+
+    /**
+     * ### AppsDataProvider.generateLongData()
+     *
+     * Generates long data for the key and based on the schema-definition
+     * provided.
+     *
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {Object} with the following structure:
+     * {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
+    generateLongData: function (propertyPath, schemaDef) {
+      var longObjectId = 'abcdef01234567890123456789';
+      var longNumber = 98765432109876543210987654321098765432109876543210;
+      var longText = 'LoremipsumdolorsitametconsecteturadipiscingelitPellente' +
+        'squeposuereturpisvelmolestiefeugiatmassaorcilacinianunceumolestiearc' +
+        'umetusatestProinsitametnequeefficiturelementumquamutcondimentumanteQ' +
+        'uisquesedipsumegetsemtempuseleifendinvelligulaNuncmaximusgravidalibe' +
+        'roquisultriciesnuncgravidaeuCrasaeratsitametfeliseuismodplaceratViva' +
+        'musfermentumduisitametsemaccumsansedvariusurnaaliquetIntegernonnunca' +
+        'cmassaconsequatimperdietidinterdummagnaCurabiturdolorexsollicitudinv' +
+        'iverranislegetsodalestempormagnaDuissitameturnaeratMaurisaccumsanleo' +
+        'sedquamlobortisvenenatisNullamimperdietetmagnasedaccumsanDuisposuere' +
+        'posuererisusvitaevolutpatVestibulumbibendumnislhendreritnisipharetra' +
+        'infaucibusnullarhoncusPellentesquepretiumuttellusidpellentesqueAenea' +
+        'nanteaugueultricesuttortorquisconsequatsemperfelis';
+      var data = {
+        spec: 'should return bad request when trying to update apps ' +
+        'with long `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        testValue: undefined
+      };
+      switch (schemaDef) {
+        // STRING values
+        case 'Joi.objectId()':
+          data.testValue = longObjectId;
+          break;
+        case 'Joi.string()':
+          data.testValue = longText;
+          break;
+        case 'Joi.number().integer().min(0).max(10000)':
+          data.testValue = longNumber;
+          break;
+        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', ' +
+        '\'error\', \'critical\')':
+          data.testValue = longText;
+          break;
+        case 'Joi.number().integer().min(60).max(604800)':
+          data.testValue = longNumber;
+          break;
+        case 'Joi.number().integer().min(60).max(999999999)':
+          data.testValue = longNumber;
+          break;
+        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', ' +
+        '\'report_only\', \'off\')':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
+          data.testValue = longText;
+          break;
+        case 'Joi.number().integer().min(1).max(1000)':
+          data.testValue = longNumber;
+          break;
+        case 'Joi.number().integer().min(0).max(100)':
+          data.testValue = longNumber;
+          break;
+        // NUMBER values
+        case 'Joi.array().items(Joi.string().regex(domainRegex))':
+          data.testValue = longText;
+          break;
+        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', ' +
+        '\'rmp\'))':
+          data.testValue = longText;
+          break;
+        default:
+          console.log('ALERT! In generate data: not considered:', schemaDef);
           data.testValue = undefined;
       }
       return data;
