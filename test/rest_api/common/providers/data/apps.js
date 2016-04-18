@@ -153,7 +153,6 @@ var AppsDataProvider = {
         testValue: undefined
       };
       switch (schemaDef) {
-        // STRING values
         case 'Joi.objectId()':
           data.testValue = '';
           break;
@@ -192,7 +191,6 @@ var AppsDataProvider = {
         case 'Joi.number().integer().min(0).max(100)':
           data.testValue = undefined;
           break;
-        // NUMBER values
         case 'Joi.array().items(Joi.string().regex(domainRegex))':
           data.testValue = '';
           break;
@@ -245,7 +243,6 @@ var AppsDataProvider = {
         testValue: undefined
       };
       switch (schemaDef) {
-        // STRING values
         case 'Joi.objectId()':
           data.testValue = longObjectId;
           break;
@@ -284,13 +281,249 @@ var AppsDataProvider = {
         case 'Joi.number().integer().min(0).max(100)':
           data.testValue = longNumber;
           break;
-        // NUMBER values
         case 'Joi.array().items(Joi.string().regex(domainRegex))':
           data.testValue = longText;
           break;
         case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', ' +
         '\'rmp\'))':
           data.testValue = longText;
+          break;
+        default:
+          console.log('ALERT! In generate data: not considered:', schemaDef);
+          data.testValue = undefined;
+      }
+      return data;
+    },
+
+    /**
+     * ### AppsDataProvider.generateBogusData()
+     *
+     * Generates bogus data for the key and based on the schema-definition
+     * provided.
+     *
+     * @param {String} action, could be add, update, etc
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {Object} with the following structure:
+     * {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
+    generateBogusData: function (action, propertyPath, schemaDef) {
+      var bogusObjectId = '!@#$%^&*()_+';
+      var bogusNumber = '!@#$%^&*()_+';
+      var bogusText = '!@#$%^&*()_+';
+      var data = {
+        spec: 'should return bad request when trying to ' + action + ' apps ' +
+        'with bogus `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        testValue: undefined
+      };
+      switch (schemaDef) {
+        case 'Joi.objectId()':
+          data.testValue = bogusObjectId;
+          break;
+        case 'Joi.string()':
+          data.testValue = bogusText;
+          break;
+        case 'Joi.string().valid(\'iOS\', \'Android\')':
+          data.testValue = bogusText;
+          break;
+        case 'Joi.number().integer().min(0).max(10000)':
+          data.testValue = bogusNumber;
+          break;
+        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', ' +
+        '\'error\', \'critical\')':
+          data.testValue = bogusText;
+          break;
+        case 'Joi.number().integer().min(60).max(604800)':
+          data.testValue = bogusNumber;
+          break;
+        case 'Joi.number().integer().min(60).max(999999999)':
+          data.testValue = bogusNumber;
+          break;
+        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', ' +
+        '\'report_only\', \'off\')':
+          data.testValue = bogusText;
+          break;
+        case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
+          data.testValue = bogusText;
+          break;
+        case 'Joi.number().integer().min(20).max(3600)':
+          data.testValue = bogusNumber;
+          break;
+        case 'Joi.number().integer().min(1).max(1000)':
+          data.testValue = bogusNumber;
+          break;
+        case 'Joi.number().integer().min(0).max(100)':
+          data.testValue = bogusNumber;
+          break;
+        case 'Joi.array().items(Joi.string().regex(domainRegex))':
+          data.testValue = bogusText;
+          break;
+        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', ' +
+        '\'rmp\'))':
+          data.testValue = bogusText;
+          break;
+        default:
+          console.log('ALERT! In generate data: not considered:', schemaDef);
+          data.testValue = undefined;
+      }
+      return data;
+    },
+
+    /**
+     * ### AppsDataProvider.generateInvalidData()
+     *
+     * Generates invalid data for the key and based on the schema-definition
+     * provided.
+     *
+     * @param {String} action, could be add, update, etc
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {Object} with the following structure:
+     * {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
+    generateInvalidData: function (action, propertyPath, schemaDef) {
+      var invalidObjectId = '123456789zzzzzz987654321';
+      var invalidNumber = '-9999999999';
+      var invalidText = 'Invalid string';
+      var data = {
+        spec: 'should return bad request when trying to ' + action + ' apps ' +
+        'with invalid `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        testValue: undefined
+      };
+      switch (schemaDef) {
+        case 'Joi.objectId()':
+          data.testValue = invalidObjectId;
+          break;
+        case 'Joi.string()':
+          data.testValue = undefined;
+          break;
+        case 'Joi.string().valid(\'iOS\', \'Android\')':
+          data.testValue = invalidText;
+          break;
+        case 'Joi.number().integer().min(0).max(10000)':
+          data.testValue = invalidNumber;
+          break;
+        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', ' +
+        '\'error\', \'critical\')':
+          data.testValue = invalidText;
+          break;
+        case 'Joi.number().integer().min(60).max(604800)':
+          data.testValue = invalidNumber;
+          break;
+        case 'Joi.number().integer().min(60).max(999999999)':
+          data.testValue = invalidNumber;
+          break;
+        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', ' +
+        '\'report_only\', \'off\')':
+          data.testValue = invalidText;
+          break;
+        case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
+          data.testValue = invalidText;
+          break;
+        case 'Joi.number().integer().min(20).max(3600)':
+          data.testValue = invalidNumber;
+          break;
+        case 'Joi.number().integer().min(1).max(1000)':
+          data.testValue = invalidNumber;
+          break;
+        case 'Joi.number().integer().min(0).max(100)':
+          data.testValue = invalidNumber;
+          break;
+        case 'Joi.array().items(Joi.string().regex(domainRegex))':
+          data.testValue = invalidText;
+          break;
+        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', ' +
+        '\'rmp\'))':
+          data.testValue = invalidText;
+          break;
+        default:
+          console.log('ALERT! In generate data: not considered:', schemaDef);
+          data.testValue = undefined;
+      }
+      return data;
+    },
+
+    /**
+     * ### AppsDataProvider.generateNonExistentData()
+     *
+     * Generates non-existing data for the key and based on the schema-
+     * definition provided.
+     *
+     * @param {String} action, could be add, update, etc
+     * @param {String} propertyPath, concatenation of keys
+     * @param {String} schemaDef, schema defined by Joi
+     * @returns {Object} with the following structure:
+     * {
+     *     spec: string,
+     *     propertyPath: *,
+     *     testValue: {object|undefined}
+     * }
+     */
+    generateNonExistentData: function (action, propertyPath, schemaDef) {
+      var nonExistentId = '123456789abcdef987654321';
+      var nonExistingOption = 'non-existing-option';
+      var nonExistingNumberOption = '99999999999999999999999999999999999999999';
+      var data = {
+        spec: 'should return bad request when trying to ' + action + ' apps ' +
+        'with non-existent `' + propertyPath + '` property value',
+        propertyPath: propertyPath,
+        testValue: undefined
+      };
+      switch (schemaDef) {
+        case 'Joi.objectId()':
+          data.testValue = nonExistentId;
+          break;
+        case 'Joi.string()':
+          data.testValue = undefined;
+          break;
+        case 'Joi.string().valid(\'iOS\', \'Android\')':
+          data.testValue = nonExistingOption;
+          break;
+        case 'Joi.number().integer().min(0).max(10000)':
+          data.testValue = nonExistingNumberOption;
+          break;
+        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', ' +
+        '\'error\', \'critical\')':
+          data.testValue = nonExistingOption;
+          break;
+        case 'Joi.number().integer().min(60).max(604800)':
+          data.testValue = nonExistingNumberOption;
+          break;
+        case 'Joi.number().integer().min(60).max(999999999)':
+          data.testValue = nonExistingNumberOption;
+          break;
+        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', ' +
+        '\'report_only\', \'off\')':
+          data.testValue = nonExistingOption;
+          break;
+        case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
+          data.testValue = nonExistingOption;
+          break;
+        case 'Joi.number().integer().min(20).max(3600)':
+          data.testValue = nonExistingNumberOption;
+          break;
+        case 'Joi.number().integer().min(1).max(1000)':
+          data.testValue = nonExistingNumberOption;
+          break;
+        case 'Joi.number().integer().min(0).max(100)':
+          data.testValue = nonExistingNumberOption;
+          break;
+        case 'Joi.array().items(Joi.string().regex(domainRegex))':
+          data.testValue = undefined;
+          break;
+        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', ' +
+        '\'rmp\'))':
+          data.testValue = nonExistingOption;
           break;
         default:
           console.log('ALERT! In generate data: not considered:', schemaDef);
