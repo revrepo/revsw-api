@@ -179,8 +179,7 @@ exports.signup = function(req, reply) {
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
-        email: data.email,
-        phone_number: _newUser.phone_number,
+        email: data.email
       };
       return createUser(newUser).then(
         function(user) {
@@ -232,7 +231,7 @@ exports.signup = function(req, reply) {
           first_name: _newUser.firstname,
           last_name: _newUser.lastname,
           email: _newUser.email,
-          phone: _newUser.phone_number,
+          phone: _newAccount.phone_number,
           reference: _newAccount.id, // NOTE: Chargify`s custoners it is our Accounts
           organization: _newAccount.companyName,
           billing_address: _newAccount.billing_info.address1,
@@ -570,7 +569,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
     first_name: user.firstname,
     last_name: user.lastname,
     email: user.email,
-    phone: user.phone_number,
+    phone: account.phone_number,
     reference: account.id, // NOTE: Chargify`s custoners it is our Accounts
     organization: account.companyName,
     billing_address: account.billing_info.address1,
