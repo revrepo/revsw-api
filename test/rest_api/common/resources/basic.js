@@ -200,7 +200,7 @@ var BasicResource = function (data) {
      *
      * Creates a new object form the requested type.
      *
-     * @param {object} the supertest-as-promised instance
+     * @param {object} object, the supertest-as-promised instance
      *
      * @param {object} query, will be transformed to a query string
      *
@@ -208,7 +208,7 @@ var BasicResource = function (data) {
      */
     _resource.createOne = function (object, query) {
       var location;
-      if (typeof object === 'string'){
+      if (typeof object === 'string') {
         location = getPath(data, object);
       }
       else {
@@ -231,7 +231,7 @@ var BasicResource = function (data) {
      * objects created). all of this is to make sure application under testing
      * does not become messed up after the testing.
      *
-     * @param {object} the supertest-as-promised instance
+     * @param {object} object, the supertest-as-promised instance
      *
      * @returns {object} the supertest-as-promised instance
      */
@@ -304,7 +304,7 @@ var BasicResource = function (data) {
         return me
           .deleteOne(id)
           .then(function () {
-            console.log('Item deleted:', id);
+            console.log('      > Item deleted:', id);
           }); // We don't catch any errors as we want them to be propagated
       });
     };
@@ -334,7 +334,8 @@ var BasicResource = function (data) {
               console.log('Cannot delete item:', id, res.body.message);
             }
             else {
-              console.log('Item deleted:', id, res.body.message);
+              console.log('      > Item deleted:', id,
+                '(' + res.body.message + ')');
             }
           })
           .catch(function () {
@@ -351,16 +352,17 @@ var BasicResource = function (data) {
      * @returns {object} the supertest-as-promised instance
      */
     _resource.deleteAllPrerequisites = function (done) {
-      return done();/*
-      return this.deleteMany(_cache)
-        .then(function () {
-          // What to do in case a pre-requisite is deleted successfully?
-          return done();
-        })
-        .catch(function () {
-          // What to do in case a pre-requisite is NOT deleted successfully?
-          return done();
-        });*/
+      return done();
+      /*
+       return this.deleteMany(_cache)
+       .then(function () {
+       // What to do in case a pre-requisite is deleted successfully?
+       return done();
+       })
+       .catch(function () {
+       // What to do in case a pre-requisite is NOT deleted successfully?
+       return done();
+       });*/
     };
   }
 
