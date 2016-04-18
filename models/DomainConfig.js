@@ -25,6 +25,7 @@ var _ = require('lodash'),
   utils = require('../lib/utilities.js'),
   config = require('config'),
   mongoose = require('mongoose');
+var logger = require('revsw-logger')(config.log_config);
 
 function DomainConfig(mongoose, connection, options) {
   this.options = options;
@@ -154,32 +155,33 @@ DomainConfig.prototype = {
   accountDomainsData: function( account_id ) {
 
     var where = account_id ?
-      { account_id: ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
+      { 'proxy_config.account_id': ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
       {};
 
     return this.model.find( where,
-        { _id: 0, domain_name: 1, account_id: 1, deleted: 1, 'proxy_config.rev_component_bp.enable_security': 1 } )
+        { _id: 0, domain_name: 1, 'proxy_config.account_id': 1, deleted: 1, 'proxy_config.rev_component_bp.enable_security': 1 } )
       .exec()
       .then( function( data ) {
         var map = {};
         var dist = {};
         data.forEach( function( item ) {
-          map[item.domain_name] = item.account_id.toString();
+          // logger.debug('Processing domain ' + item.domain_name + ', proxy_config = ' + JSON.stringify(item.proxy_config));
+          map[item.domain_name] = item.proxy_config.account_id.toString();
 
-          if ( !dist[item.account_id] ) {
-            dist[item.account_id] = { total: 0, deleted: 0, active: 0, ssl_enabled: 0 };
+          if ( !dist[item.proxy_config.account_id] ) {
+            dist[item.proxy_config.account_id] = { total: 0, deleted: 0, active: 0, ssl_enabled: 0 };
           }
           if ( item.deleted ) {
-            ++dist[item.account_id].deleted;
+            ++dist[item.proxy_config.account_id].deleted;
           } else {
-            ++dist[item.account_id].active;
+            ++dist[item.proxy_config.account_id].active;
           }
           if ( item.proxy_config &&
               item.proxy_config.rev_component_bp &&
               item.proxy_config.rev_component_bp.enable_security ) {
-            ++dist[item.account_id].ssl_enabled;
+            ++dist[item.proxy_config.account_id].ssl_enabled;
           }
-          ++dist[item.account_id].total;
+          ++dist[item.proxy_config.account_id].total;
         });
         return {
           domain_to_acc_id_map: map,
@@ -193,7 +195,7 @@ DomainConfig.prototype = {
   domainsListForAccount: function( account_id ) {
 
     var where = account_id ?
-      { account_id: ( _.isString( account_id ) ? account_id : { $in: account_id } ) } :
+      { 'proxy_config.account_id': ( _.isString( account_id ) ? 'proxy_config.account_id' : { $in: account_id } ) } :
       {};
 
     return this.model.find( where, { _id: 0, domain_name: 1 } )
