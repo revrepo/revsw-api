@@ -486,7 +486,7 @@ exports.updateAccount = function(request, reply) {
         });
       } else {
         if (!account.billing_id || account.billing_id === '' || !account.subscription_id || account.subscription_id === '') {
-          return reply(boom.badRequest('The account in not provisioned in the billing system'));
+          return reply(boom.badRequest('The account in not provisioned in the billing system.'));
         } else {
           updateAccount(request, reply);
         }
