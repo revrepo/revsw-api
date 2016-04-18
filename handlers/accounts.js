@@ -485,7 +485,11 @@ exports.updateAccount = function(request, reply) {
           });
         });
       } else {
-        updateAccount(request, reply);
+        if (!account.billing_id || account.billing_id === '' || !account.subscription_id || account.subscription_id === '') {
+          return reply(boom.badRequest('The account in not provisioned in the billing system.'));
+        } else {
+          updateAccount(request, reply);
+        }
       }
     });
   });
@@ -606,8 +610,8 @@ exports.deleteAccount = function(request, reply) {
     function(usersToUpdate, cb) {
       async.eachSeries(usersToUpdate, function(user, callback) {
           var user_id = user.user_id;
-          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id+ '. Count Companies = ' +
-            user.companyId.length +' '+JSON.stringify(user.companyId));
+          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id + '. Count Companies = ' +
+            user.companyId.length + ' ' + JSON.stringify(user.companyId));
           if (user.companyId.length === 1) {
             logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
             users.remove({
