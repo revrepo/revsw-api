@@ -552,7 +552,7 @@ exports.resendRegistrationEmail = function(req, reply) {
       .then(function() {
         var statusResponse = {
           statusCode: 200,
-          message: 'Successfully sent email to specified email',
+          message: 'Successfully sent a verification message to email address ' + user.email,
           object_id: user.id
         };
         return renderJSON(req, reply, err, statusResponse);

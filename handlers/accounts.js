@@ -180,7 +180,7 @@ exports.createBillingProfile = function(request, reply) {
       //result = publicRecordFields.handle(result, 'account');
       Customer.create(result, function resultCreatingCustomer(error, data) {
         if (error) {
-          return reply(boom.badImplementation('Failed to create billind profile '));
+          return reply(boom.badImplementation('Failed to create a billing profile '));
         }
         // Set billing_id for account
         result.billing_id = data.customer.id;
@@ -467,7 +467,8 @@ exports.updateAccount = function(request, reply) {
         return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
           ' Account ID: ' + updatedAccount.account_id));
       }
-      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan)) {
+      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan) &&
+        account.billing_plan !== null) {
         BillingPlan.get({
           _id: updatedAccount.billing_plan
         }, function(error, plan) {
