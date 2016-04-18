@@ -19,7 +19,7 @@
 require('should-http');
 
 var config = require('config');
-var appsSchema = require('./../../../common/providers/schema/apps.json');
+var appsSchema = require('./../../../common/providers/schema/appsUpdate.json');
 var API = require('./../../../common/api');
 var AppsDP = require('./../../../common/providers/data/apps');
 var AppsDDHelper = AppsDP.DataDrivenHelper;
@@ -32,7 +32,7 @@ describe('Boundary check', function () {
   var user = config.get('api.users.reseller');
 
   describe('Apps resource', function () {
-    describe('With `empty` data', function () {
+    describe('Update with `empty` data', function () {
 
       var testAccount;
       var testApp;
@@ -67,7 +67,7 @@ describe('Boundary check', function () {
 
       var getEmptyDataCheckCallBack = function () {
         return function (done) {
-          var updatedApp = AppsDP.cloneForUpdate(fullTestApp);
+          var updatedApp = AppsDP.clone(fullTestApp);
           AppsDDHelper
             .setValueByPath(updatedApp, ddCase.propertyPath, ddCase.testValue);
           API.helpers
@@ -97,7 +97,8 @@ describe('Boundary check', function () {
         if (!appsSchema.hasOwnProperty(key)) {
           continue;
         }
-        var ddCase = AppsDDHelper.generateEmptyData(key, appsSchema[key]);
+        var ddCase = AppsDDHelper
+          .generateEmptyData('update', key, appsSchema[key]);
         var propertyValue = AppsDDHelper.getValueByPath(fullTestApp, key);
         if (ddCase.testValue === undefined || propertyValue === undefined) {
           continue;

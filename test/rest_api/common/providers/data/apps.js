@@ -78,13 +78,13 @@ var AppsDataProvider = {
   },
 
   /**
-   * ### AppsDataProvider.cloneForUpdate()
+   * ### AppsDataProvider.clone()
    *
    * Clones the given app in a new similar one.
    *
    * @param {Object} app object
    */
-  cloneForUpdate: function (app) {
+  clone: function (app) {
     return JSON.parse(JSON.stringify(app));
   },
 
@@ -135,6 +135,7 @@ var AppsDataProvider = {
      * Generates empty data for the key and based on the schema-definition
      * provided.
      *
+     * @param {String} action, could be add, update, etc
      * @param {String} propertyPath, concatenation of keys
      * @param {String} schemaDef, schema defined by Joi
      * @returns {Object} with the following structur:
@@ -144,9 +145,9 @@ var AppsDataProvider = {
      *     testValue: {object|undefined}
      * }
      */
-    generateEmptyData: function (propertyPath, schemaDef) {
+    generateEmptyData: function (action, propertyPath, schemaDef) {
       var data = {
-        spec: 'should return bad request when trying to update apps ' +
+        spec: 'should return bad request when trying to ' + action + ' apps ' +
         'with empty `' + propertyPath + '` property value',
         propertyPath: propertyPath,
         testValue: undefined
@@ -158,6 +159,9 @@ var AppsDataProvider = {
           break;
         case 'Joi.string()':
           data.testValue = undefined;
+          break;
+        case 'Joi.string().valid(\'iOS\', \'Android\')':
+          data.testValue = '';
           break;
         case 'Joi.number().integer().min(0).max(10000)':
           data.testValue = undefined;
@@ -178,6 +182,9 @@ var AppsDataProvider = {
           break;
         case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
           data.testValue = '';
+          break;
+        case 'Joi.number().integer().min(20).max(3600)':
+          data.testValue = undefined;
           break;
         case 'Joi.number().integer().min(1).max(1000)':
           data.testValue = undefined;
@@ -206,6 +213,7 @@ var AppsDataProvider = {
      * Generates long data for the key and based on the schema-definition
      * provided.
      *
+     * @param {String} action, could be add, update, etc
      * @param {String} propertyPath, concatenation of keys
      * @param {String} schemaDef, schema defined by Joi
      * @returns {Object} with the following structure:
@@ -215,7 +223,7 @@ var AppsDataProvider = {
      *     testValue: {object|undefined}
      * }
      */
-    generateLongData: function (propertyPath, schemaDef) {
+    generateLongData: function (action, propertyPath, schemaDef) {
       var longObjectId = 'abcdef01234567890123456789';
       var longNumber = 98765432109876543210987654321098765432109876543210;
       var longText = 'LoremipsumdolorsitametconsecteturadipiscingelitPellente' +
@@ -231,7 +239,7 @@ var AppsDataProvider = {
         'infaucibusnullarhoncusPellentesquepretiumuttellusidpellentesqueAenea' +
         'nanteaugueultricesuttortorquisconsequatsemperfelis';
       var data = {
-        spec: 'should return bad request when trying to update apps ' +
+        spec: 'should return bad request when trying to ' + action + ' apps ' +
         'with long `' + propertyPath + '` property value',
         propertyPath: propertyPath,
         testValue: undefined
@@ -242,6 +250,9 @@ var AppsDataProvider = {
           data.testValue = longObjectId;
           break;
         case 'Joi.string()':
+          data.testValue = longText;
+          break;
+        case 'Joi.string().valid(\'iOS\', \'Android\')':
           data.testValue = longText;
           break;
         case 'Joi.number().integer().min(0).max(10000)':
@@ -263,6 +274,9 @@ var AppsDataProvider = {
           break;
         case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
           data.testValue = longText;
+          break;
+        case 'Joi.number().integer().min(20).max(3600)':
+          data.testValue = longNumber;
           break;
         case 'Joi.number().integer().min(1).max(1000)':
           data.testValue = longNumber;

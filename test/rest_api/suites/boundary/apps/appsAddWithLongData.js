@@ -19,7 +19,7 @@
 require('should-http');
 
 var config = require('config');
-var appsSchema = require('./../../../common/providers/schema/appsUpdate.json');
+var appsSchema = require('./../../../common/providers/schema/appsAdd.json');
 var API = require('./../../../common/api');
 var AppsDP = require('./../../../common/providers/data/apps');
 var AppsDDHelper = AppsDP.DataDrivenHelper;
@@ -32,11 +32,11 @@ describe('Boundary check', function () {
   var user = config.get('api.users.reseller');
 
   describe('Apps resource', function () {
-    describe('Update with `long` data', function () {
+    describe('Add with `long` data', function () {
 
       var testAccount;
       var testApp;
-      var fullTestApp = AppsDP.generateOneForUpdate(0, 'UPDATED');
+      var fullTestApp = AppsDP.generateOne(0, 'NEW');
 
       before(function (done) {
         API.helpers
@@ -67,14 +67,14 @@ describe('Boundary check', function () {
 
       var getLongDataCheckCallBack = function () {
         return function (done) {
-          var updatedApp = AppsDP.clone(fullTestApp);
+          var clonedApp = AppsDP.clone(fullTestApp);
           AppsDDHelper
-            .setValueByPath(updatedApp, ddCase.propertyPath, ddCase.testValue);
+            .setValueByPath(clonedApp, ddCase.propertyPath, ddCase.testValue);
           API.helpers
             .authenticateUser(user)
             .then(function () {
               API.resources.apps
-                .update(testApp.id, updatedApp)
+                .createOne(clonedApp)
                 .expect(400)
                 .then(function (res) {
                   ddCase.propertyPath.split('.').forEach(function (key) {
@@ -97,8 +97,7 @@ describe('Boundary check', function () {
         if (!appsSchema.hasOwnProperty(key)) {
           continue;
         }
-        var ddCase = AppsDDHelper
-          .generateLongData('update', key, appsSchema[key]);
+        var ddCase = AppsDDHelper.generateLongData('add', key, appsSchema[key]);
         var propertyValue = AppsDDHelper.getValueByPath(fullTestApp, key);
         if (ddCase.testValue === undefined || propertyValue === undefined) {
           continue;
