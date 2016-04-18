@@ -180,7 +180,7 @@ exports.createBillingProfile = function(request, reply) {
       //result = publicRecordFields.handle(result, 'account');
       Customer.create(result, function resultCreatingCustomer(error, data) {
         if (error) {
-          return reply(boom.badImplementation('Failed to create billind profile '));
+          return reply(boom.badImplementation('Failed to create a billing profile '));
         }
         // Set billing_id for account
         result.billing_id = data.customer.id;
@@ -467,7 +467,8 @@ exports.updateAccount = function(request, reply) {
         return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
           ' Account ID: ' + updatedAccount.account_id));
       }
-      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan)) {
+      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan) &&
+        account.billing_plan !== null) {
         BillingPlan.get({
           _id: updatedAccount.billing_plan
         }, function(error, plan) {
@@ -485,7 +486,11 @@ exports.updateAccount = function(request, reply) {
           });
         });
       } else {
-        updateAccount(request, reply);
+        if (!account.billing_id || account.billing_id === '' || !account.subscription_id || account.subscription_id === '') {
+          return reply(boom.badRequest('The account in not provisioned in the billing system.'));
+        } else {
+          updateAccount(request, reply);
+        }
       }
     });
   });
@@ -606,8 +611,8 @@ exports.deleteAccount = function(request, reply) {
     function(usersToUpdate, cb) {
       async.eachSeries(usersToUpdate, function(user, callback) {
           var user_id = user.user_id;
-          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id+ '. Count Companies = ' +
-            user.companyId.length +' '+JSON.stringify(user.companyId));
+          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id + '. Count Companies = ' +
+            user.companyId.length + ' ' + JSON.stringify(user.companyId));
           if (user.companyId.length === 1) {
             logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
             users.remove({

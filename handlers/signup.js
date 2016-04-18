@@ -179,7 +179,8 @@ exports.signup = function(req, reply) {
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
-        email: data.email
+        email: data.email,
+        phone_number: _newUser.phone_number,
       };
       return createUser(newUser).then(
         function(user) {
@@ -551,7 +552,7 @@ exports.resendRegistrationEmail = function(req, reply) {
       .then(function() {
         var statusResponse = {
           statusCode: 200,
-          message: 'Successfully sent email to specified email',
+          message: 'Successfully sent a verification message to email address ' + user.email,
           object_id: user.id
         };
         return renderJSON(req, reply, err, statusResponse);
