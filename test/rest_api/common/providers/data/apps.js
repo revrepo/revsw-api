@@ -158,93 +158,46 @@ var AppsDataProvider = {
       };
       switch (schemaDef) {
         // STRING values
+        case 'Joi.objectId()':
+          data.testValue = '';
+          break;
         case 'Joi.string()':
-          data.testValue = '';
-          break;
-        case 'Joi.string().allow("").required()':
           data.testValue = undefined;
           break;
-        case 'Joi.string().required()':
-          data.testValue = '';
-          break;
-        case 'Joi.string().max(1500).allow("").required()':
+        case 'Joi.number().integer().min(0).max(10000)':
           data.testValue = undefined;
           break;
-        case 'Joi.string().valid("off", "low", "medium", "high").required()':
+        case 'Joi.string().valid(\'debug\', \'info\', \'warning\', \'error\', \'critical\')':
           data.testValue = '';
           break;
-        case 'Joi.string().valid("add", "remove", "replace").required()':
+        case 'Joi.number().integer().min(60).max(604800)':
+          data.testValue = undefined;
+          break;
+        case 'Joi.number().integer().min(60).max(999999999)':
+          data.testValue = undefined;
+          break;
+        case 'Joi.string().valid(\'transfer_and_report\', \'transfer_only\', \'report_only\', \'off\')':
           data.testValue = '';
           break;
-        case 'Joi.string().valid("least", "moderate", "aggressive", ' +
-        '"custom", "adaptive").required()':
+        case 'Joi.string().valid(\'standard\', \'quic\', \'rmp\')':
           data.testValue = '';
           break;
-        case 'Joi.string().valid("off", "detect", "block", "block_all")' +
-        '.required()':
-          data.testValue = '';
+        case 'Joi.number().integer().min(1).max(1000)':
+          data.testValue = undefined;
           break;
-        case 'Joi.string().valid("deny_except", "allow_except").required()':
-          data.testValue = '';
+        case 'Joi.number().integer().min(0).max(100)':
+          data.testValue = undefined;
           break;
         // NUMBER values
-        case 'Joi.number().integer()':
-          data.testValue = undefined;
+        case 'Joi.array().items(Joi.string().regex(domainRegex))':
+          data.testValue = '';
           break;
-        case 'Joi.number().valid(1).required()':
-          data.testValue = undefined;
+        case 'Joi.array().items(Joi.string().valid(\'standard\', \'quic\', \'rmp\'))':
+          data.testValue = '';
           break;
-        case 'Joi.number().integer().required()':
-          data.testValue = undefined;
-          break;
-        // BOOLEAN values
-        case 'Joi.boolean()':
-          data.testValue = undefined;
-          break;
-        case 'Joi.boolean().required()':
-          data.testValue = undefined;
-          break;
-        // OBJECT values
-        case 'Joi.object({})':
-          data.testValue = undefined;
-          break;
-        case 'Joi.object({}).required()':
-          data.testValue = {};
-          break;
-        // ARRAY values
-        case 'Joi.array().items({})':
-          data.testValue = undefined;
-          break;
-        case 'Joi.array().items(Joi.string())':
-          data.testValue = undefined;
-          break;
-        case 'Joi.array().items({}).required()':
-          data.testValue = undefined;
-          break;
-        case 'Joi.array().items(Joi.string()).required()':
-          data.testValue = [''];
-          break;
-        case 'Joi.array().items(Joi.string().required())':
-          data.testValue = [''];
-          break;
-        // OTHER values
         default:
-          if (/Joi\.objectId\(\)\.required\(\)/.test(schemaDef)) {
-            data.testValue = '';
-          }
-          else if (/oi\.string\(\)\.required\(\).allow\(""\)/.test(schemaDef)) {
-            data.testValue = undefined;
-          }
-          else if (/Joi\.string\(\)\.required\(\)/.test(schemaDef)) {
-            data.testValue = '';
-          }
-          else if (/Joi\.string\(\)\.optional\(\)/.test(schemaDef)) {
-            data.testValue = undefined;
-          }
-          else {
-            console.log('ALERT! In generateFull:: not considered:', schemaDef);
-            data.testValue = undefined;
-          }
+          console.log('ALERT! In generateFull:: not considered:', schemaDef);
+          data.testValue = undefined;
       }
       return data;
     }

@@ -43,7 +43,7 @@ describe('Bouday check', function () {
       })
       .then(function (newAccount) {
         testAccount = newAccount;
-        fullTestApp.id = newAccount.id;
+        fullTestApp.account_id = newAccount.id;
         return API.helpers.apps.createOne(testAccount.id);
       })
       .then(function (app) {
@@ -65,7 +65,7 @@ describe('Bouday check', function () {
   describe('Apps resource', function () {
     describe('With `empty` data', function () {
 
-      var getEmptyDataCheckCallBack = function (queryData) {
+      var getEmptyDataCheckCallBack = function () {
         return function (done) {
           var updatedApp = AppsDP.cloneForUpdate(fullTestApp);
           AppsDDHelper
@@ -73,7 +73,7 @@ describe('Bouday check', function () {
           API.helpers
             .authenticateUser(user)
             .then(function () {
-              API.resources.domainConfigs
+              API.resources.apps
                 .update(testApp.id, updatedApp)
                 .expect(400)
                 .then(function (res) {
