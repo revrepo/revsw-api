@@ -79,25 +79,8 @@ describe('Boundary check', function () {
             done();
           });
 
-          xit('should allow to get specific app.',
-            function (done) {
-              API.helpers
-                .authenticateUser(user)
-                .then(function () {
-                  API.resources.apps
-                    .getOne(emptyString)
-                    .expect(200)
-                    .then(function (response) {
-                      var app = response.body;
-                      app.id.should.equal(testApp.id);
-                      done();
-                    })
-                    .catch(done);
-                })
-                .catch(done);
-            });
-
-          it('should allow to delete an app.',
+          it('should return `not found` response when deleting an app with ' +
+            '`empty` app id.',
             function (done) {
               var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
               API.helpers
@@ -118,7 +101,8 @@ describe('Boundary check', function () {
                 .catch(done);
             });
 
-          it('should allow to get config status for specific app',
+          it('should return `bad request` response when getting config ' +
+            'status for specific app with `empty` app id',
             function (done) {
               API.helpers
                 .authenticateUser(user)
@@ -136,7 +120,8 @@ describe('Boundary check', function () {
                 .catch(done);
             });
 
-          it('should allow to get all versions for specific app',
+          it('should return `bad request` response when getting all versions ' +
+            'for specific app with `empty` app id',
             function (done) {
               API.helpers
                 .authenticateUser(user)

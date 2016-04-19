@@ -79,7 +79,8 @@ describe('Boundary check', function () {
             done();
           });
 
-          it('should allow to get specific app.',
+          it('should return `bad request` response when getting specific ' +
+            'app with `long` app id.',
             function (done) {
               API.helpers
                 .authenticateUser(user)
@@ -96,7 +97,8 @@ describe('Boundary check', function () {
                 .catch(done);
             });
 
-          it('should allow to delete an app.',
+          it('should return `bad request` response when deleting an app with ' +
+            '`long` app id.',
             function (done) {
               var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
               API.helpers
@@ -117,7 +119,8 @@ describe('Boundary check', function () {
                 .catch(done);
             });
 
-          it('should allow to get config status for specific app',
+          it('should return `bad request` response when getting config ' +
+            'status for specific app with `long` app id',
             function (done) {
               API.helpers
                 .authenticateUser(user)
@@ -135,7 +138,8 @@ describe('Boundary check', function () {
                 .catch(done);
             });
 
-          it('should allow to get all versions for specific app',
+          it('should return `bad request` response when getting all versions ' +
+            'for specific app with `long` app id',
             function (done) {
               API.helpers
                 .authenticateUser(user)
