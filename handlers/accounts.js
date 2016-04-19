@@ -224,6 +224,10 @@ exports.getAccount = function(request, reply) {
   accounts.get({
     _id: account_id
   }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Accounts::getAccount: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
     if (result) {
       result = publicRecordFields.handle(result, 'account');
       renderJSON(request, reply, error, result);
@@ -253,6 +257,10 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
   accounts.get({
     _id: account_id
   }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Accounts::getAccountSubscriptionPreview: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
     if (result) {
       result = publicRecordFields.handle(result, 'account');
 
@@ -304,10 +312,11 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
           if(err){
             return reply(boom.badRequest('Subscription info error '));
           }else{
-            // NOTE: delete information no used information
+            // NOTE: delete information not for send
             // TODO: model validation
             delete info.subscription.product;
-            delete info.subscription.credit_card;
+            delete info.subscription.credit_card.current_vault;
+            delete info.subscription.credit_card.customer_id;
             delete info.subscription.customer;
             renderJSON(request, reply, error, info);
           }
