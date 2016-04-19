@@ -1,0 +1,5 @@
+{
+  "account_id": "Joi.objectId()",
+  "app_name": "Joi.string()",
+  "app_platform": "Joi.string().valid('iOS', 'Android')"
+}
