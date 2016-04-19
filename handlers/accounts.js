@@ -211,9 +211,6 @@ exports.createBillingProfile = function(request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
   });
-
-
-
 };
 
 exports.getAccount = function(request, reply) {
@@ -275,6 +272,53 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
     }
   });
 };
+
+/**
+ * @name  getAccountSubscriptionSummary
+ * @description
+ *
+ *
+ * @param  {[type]} request
+ * @param  {[type]} reply
+ * @return
+ */
+exports.getAccountSubscriptionSummary = function(request, reply) {
+
+  var account_id = request.params.account_id;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
+
+  accounts.get({
+    _id: account_id
+  }, function(error, result) {
+    if (result) {
+      result = publicRecordFields.handle(result, 'account');
+
+      if(!result.billing_id || !result.subscription_id){
+         return reply(boom.badRequest('Account has no subscription_id'));
+      }
+
+      Customer.getSubscriptionById(result.subscription_id ,function resultGetSubscriptionInfo(err,info){
+          if(err){
+            return reply(boom.badRequest('Subscription info error '));
+          }else{
+            // NOTE: delete information no used information
+            // TODO: model validation
+            delete info.subscription.product;
+            delete info.subscription.credit_card;
+            delete info.subscription.customer;
+            renderJSON(request, reply, error, info);
+          }
+      });
+
+    } else {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+  });
+};
+
 
 exports.getAccountStatements = function(request, reply) {
   var account_id = request.params.account_id;
