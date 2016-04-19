@@ -231,7 +231,7 @@ exports.signup = function(req, reply) {
           first_name: _newUser.firstname,
           last_name: _newUser.lastname,
           email: _newUser.email,
-          phone: _newUser.phone_number,
+          phone: _newAccount.phone_number,
           reference: _newAccount.id, // NOTE: Chargify`s custoners it is our Accounts
           organization: _newAccount.companyName,
           billing_address: _newAccount.billing_info.address1,
@@ -551,7 +551,7 @@ exports.resendRegistrationEmail = function(req, reply) {
       .then(function() {
         var statusResponse = {
           statusCode: 200,
-          message: 'Successfully sent email to specified email',
+          message: 'Successfully sent a verification message to email address ' + user.email,
           object_id: user.id
         };
         return renderJSON(req, reply, err, statusResponse);
@@ -569,7 +569,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
     first_name: user.firstname,
     last_name: user.lastname,
     email: user.email,
-    phone: user.phone_number,
+    phone: account.phone_number,
     reference: account.id, // NOTE: Chargify`s custoners it is our Accounts
     organization: account.companyName,
     billing_address: account.billing_info.address1,
