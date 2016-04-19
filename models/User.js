@@ -47,7 +47,6 @@ function User(mongoose, connection, options) {
     // TODO rename to last_name
     'lastname'             : String,
     'password'             : String,
-    'phone_number'         : {type : String, default : ''} ,
     'role'                 : {type : String, default : 'user'},
     'status'               : {type : Boolean, default : true},
     'theme'                : {type : String, default : 'light'},

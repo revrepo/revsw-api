@@ -139,7 +139,7 @@ exports.createBillingProfile = function(request, reply) {
     if (!updatedAccount.account_id) {
       updatedAccount.account_id = updatedAccount.id;
     }
-    console.log('updateAccountInformation', updatedAccount);
+
     accounts.update(updatedAccount, function(error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update the account'));
@@ -230,6 +230,46 @@ exports.getAccount = function(request, reply) {
     if (result) {
       result = publicRecordFields.handle(result, 'account');
       renderJSON(request, reply, error, result);
+    } else {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+  });
+};
+
+/**
+ * @name  getAccountSubscriptionPreview
+ * @description
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
+exports.getAccountSubscriptionPreview = function(request, reply) {
+
+  var account_id = request.params.account_id;
+  var billing_plan_handle = request.params.billing_plan_handle;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
+
+  accounts.get({
+    _id: account_id
+  }, function(error, result) {
+    if (result) {
+      result = publicRecordFields.handle(result, 'account');
+
+      if(!result.billing_id || !result.subscription_id){
+         return reply(boom.badRequest('Account has no subscription_id'));
+      }
+      Customer.subscriptionPreviewMigrations(result.subscription_id,billing_plan_handle ,function resultGetPreviewSubscription(err,info){
+          if(err){
+            return reply(boom.badRequest('Subscription info error '));
+          }else{
+            renderJSON(request, reply, error, info);
+          }
+      });
+
     } else {
       return reply(boom.badRequest('Account ID not found'));
     }
@@ -467,30 +507,33 @@ exports.updateAccount = function(request, reply) {
         return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
           ' Account ID: ' + updatedAccount.account_id));
       }
-      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan) &&
-        account.billing_plan !== null) {
-        BillingPlan.get({
-          _id: updatedAccount.billing_plan
-        }, function(error, plan) {
-          if (error) {
-            return reply(boom.badRequest('Billing plan not found'));
-          }
-          Customer.changeProduct(account.subscription_id, plan.chargify_handle, function(error) {
-            if (error) {
-              return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
-                ' Account ID: ' + updatedAccount.account_id +
-                ' Subscription ID: ' + account.subscription_id +
-                ' Product handle: ' + plan.chargify_handle));
-            }
-            updateAccount(request, reply);
-          });
-        });
-      } else {
-        if (!account.billing_id || account.billing_id === '' || !account.subscription_id || account.subscription_id === '') {
-          return reply(boom.badRequest('The account in not provisioned in the billing system.'));
+
+      // NOTE: check update billing_plan?
+      if (updatedAccount.billing_plan && (account.billing_plan !== updatedAccount.billing_plan)) {
+        if ((!account.billing_id || account.billing_id === '')  && !account.subscription_id ) {
+          return reply(boom.badRequest('The account in not provisioned in the billing system'));
         } else {
-          updateAccount(request, reply);
+          BillingPlan.get({
+            _id: updatedAccount.billing_plan
+          }, function(error, plan) {
+            if (error) {
+              return reply(boom.badRequest('Billing plan not found'));
+            }
+            Customer.changeProduct(account.subscription_id, plan.chargify_handle, function(error) {
+              if (error) {
+                return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
+                  ' Account ID: ' + updatedAccount.account_id +
+                  ' Subscription ID: ' + account.subscription_id +
+                  ' Product handle: ' + plan.chargify_handle));
+              }
+              updateAccount(request, reply);
+            });
+          });
+
         }
+      } else {
+        // NOTE: update Account information - not billing_plan
+        updateAccount(request, reply);
       }
     });
   });
