@@ -195,7 +195,7 @@ DomainConfig.prototype = {
   domainsListForAccount: function( account_id ) {
 
     var where = account_id ?
-      { 'proxy_config.account_id': ( _.isString( account_id ) ? 'proxy_config.account_id' : { $in: account_id } ) } :
+      { 'proxy_config.account_id': ( _.isString( account_id ) ? account_id : { $in: account_id } ) } :
       {};
 
     return this.model.find( where, { _id: 0, domain_name: 1 } )
@@ -204,6 +204,35 @@ DomainConfig.prototype = {
         var res = [];
         data.forEach( function( item ) {
           res.push(item.domain_name);
+        });
+        return res;
+      });
+  },
+
+  //  returns _promise_ {} with account_ids as keys and [] of domain names as a value
+  //  account_id can be either ID(string) or an array of IDs
+  domainsListForAccountGrouped: function( account_id ) {
+
+    if ( !account_id ) {
+      throw new Error( 'domainsListForAccountGrouped: account_id must be provided' );
+    }
+
+    var where = {
+      'proxy_config.account_id': ( _.isString( account_id ) ? account_id : { $in: account_id } )
+    };
+
+    return this.model.find( where, { _id: 0, 'proxy_config.account_id': 1, domain_name: 1 } )
+      .exec()
+      .then( function( data ) {
+        var res = {};
+        data.forEach( function( item ) {
+          if ( !item.proxy_config || !item.proxy_config.account_id ) {
+            return;
+          }
+          if ( !res[item.proxy_config.account_id] ) {
+            res[item.proxy_config.account_id] = [];
+          }
+          res[item.proxy_config.account_id].push(item.domain_name);
         });
         return res;
       });
