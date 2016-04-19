@@ -42,6 +42,7 @@ module.exports = function (grunt) {
           'suites/**/forgot*.js', // Forgot specs
           'suites/**/activity*.js', // Activity specs
           // Cleaning up env.
+          'setup/apps.js',
           'setup/domainConfigs.js',
           'setup/accounts.js',
           'setup/users.js'
