@@ -292,6 +292,32 @@ module.exports = [
     }
   },
   {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/subscription_summary',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: account.getAccountSubscriptionSummary,
+      description: 'Get Subscription Summary for Account',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID')
+        }
+      },
+      // TODO: add route Model
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+
+  {
     method: 'DELETE',
     path: '/v1/accounts/{account_id}',
     config: {
