@@ -279,8 +279,6 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
 exports.getAccountStatements = function(request, reply) {
   var account_id = request.params.account_id;
 
-
-
   accounts.get({
     _id: account_id
   }, function(error, account) {
@@ -293,7 +291,7 @@ exports.getAccountStatements = function(request, reply) {
     }
 
     if (!account.subscription_id) {
-      return reply(boom.badRequest('No subscription registered for account.'));
+      return reply(boom.badRequest('No subscription registered for the account'));
     }
     Customer.getStatements(account.subscription_id, function(error, statements) {
       if (error) {
