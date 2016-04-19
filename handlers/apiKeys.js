@@ -111,7 +111,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
-  if (!utils.checkUserAccessPermissionToAPIKey(request, newApiKey)) {
+  if (!utils.checkUserAccessPermissionToAccount(request, newApiKey)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
