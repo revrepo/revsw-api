@@ -314,6 +314,7 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
           }else{
             // NOTE: delete information not for send
             // TODO: model validation
+            info.subscription.product_name = info.subscription.product.name;
             delete info.subscription.product;
             delete info.subscription.credit_card.current_vault;
             delete info.subscription.credit_card.customer_id;
