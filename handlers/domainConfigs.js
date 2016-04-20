@@ -221,7 +221,7 @@ exports.createDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
     }
 
-    newDomainJson.created_by = request.auth.credentials.email;
+    newDomainJson.created_by = utils.generateCreatedByField(request);
     if (!newDomainJson.tolerance) {
       newDomainJson.tolerance = '3000';
     }
@@ -321,7 +321,7 @@ exports.createDomainConfig = function(request, reply) {
         if (!result) {
           return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
         }
-        newDomainJson.created_by = request.auth.credentials.email;
+        newDomainJson.created_by = utils.generateCreatedByField(request);
         if (!newDomainJson.tolerance) {
           newDomainJson.tolerance = '3000';
         }

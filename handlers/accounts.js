@@ -73,7 +73,7 @@ exports.getAccounts = function getAccounts(request, reply) {
 exports.createAccount = function(request, reply) {
 
   var newAccount = request.payload;
-  newAccount.createdBy = request.auth.credentials.email || ('API Key ' + request.auth.credentials.id);
+  newAccount.createdBy = utils.generateCreatedByField(request);
 
   accounts.add(newAccount, function(error, result) {
 

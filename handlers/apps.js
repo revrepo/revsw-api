@@ -169,7 +169,7 @@ exports.addApp = function(request, reply) {
       return reply(boom.badRequest('The app name and platform is already registered in the system'));
     }
 
-    newApp.created_by = request.auth.credentials.email;
+    newApp.created_by = utils.generateCreatedByField(request);
     logger.info('Calling CDS to create a new app: ' + JSON.stringify(newApp));
     cds_request({method: 'POST', url: config.get('cds_url') + '/v1/apps', body: JSON.stringify(newApp), headers: authHeader}, function (err, res, body) {
       if (err) {

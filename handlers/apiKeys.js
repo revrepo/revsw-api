@@ -106,7 +106,7 @@ exports.getApiKey = function (request, reply) {
 
 exports.createApiKey = function(request, reply) {
   var newApiKey = request.payload;
-  newApiKey.created_by = request.auth.credentials.email;
+  newApiKey.created_by = utils.generateCreatedByField(request);
   var newKey = uuid();
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
