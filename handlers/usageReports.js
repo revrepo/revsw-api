@@ -102,8 +102,10 @@ exports.getAccountReport = function( request, reply ) {
       reply( response ).type( 'application/json; charset=utf-8' );
     })
     .catch( function( err ) {
-      logger.error( err );
-      return reply( boom.badImplementation( err.toString() + ': account ID ' +
-        request.params.account_id + ', span from ' + from.toUTCString() + ', to ' + to.toUTCString() ) );
+      var msg = err.toString() + ': account ID ' + request.params.account_id +
+        ', span from ' + (new Date(from)).toUTCString() +
+        ', to ' + (new Date(to)).toUTCString();
+      logger.error( 'getAccountReport error: ' + msg );
+      return reply( boom.badImplementation( msg ) );
     });
 };

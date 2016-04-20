@@ -314,6 +314,7 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
           }else{
             // NOTE: delete information not for send
             // TODO: model validation
+            info.subscription.product_name = info.subscription.product.name;
             delete info.subscription.product;
             delete info.subscription.credit_card.current_vault;
             delete info.subscription.credit_card.customer_id;
@@ -332,8 +333,6 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
 exports.getAccountStatements = function(request, reply) {
   var account_id = request.params.account_id;
 
-
-
   accounts.get({
     _id: account_id
   }, function(error, account) {
@@ -346,7 +345,7 @@ exports.getAccountStatements = function(request, reply) {
     }
 
     if (!account.subscription_id) {
-      return reply(boom.badRequest('No subscription registered for account.'));
+      return reply(boom.badRequest('No subscription registered for the account'));
     }
     Customer.getStatements(account.subscription_id, function(error, statements) {
       if (error) {
