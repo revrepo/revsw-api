@@ -151,6 +151,7 @@ exports.createBillingProfile = function(request, reply) {
       AuditLogger.store({
         activity_type: 'modify',
         activity_target: 'account',
+        target_id: request.params.account_id,
         target_name: result.companyName,
         target_object: result,
         operation_status: 'success'
@@ -418,6 +419,7 @@ exports.updateAccount = function(request, reply) {
       AuditLogger.store({
         activity_type: 'modify',
         activity_target: 'account',
+        target_id: request.params.account_id,
         target_name: result.companyName,
         target_object: result,
         operation_status: 'success'
