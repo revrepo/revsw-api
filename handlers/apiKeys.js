@@ -150,11 +150,6 @@ exports.createApiKey = function(request, reply) {
           };
 
           AuditLogger.store({
-            ip_address      : utils.getAPIUserRealIP(request),
-            datetime        : Date.now(),
-            user_id         : request.auth.credentials.user_id,
-            user_name       : request.auth.credentials.email,
-            user_type       : 'user',
             account_id      : newApiKey.account_id,
             activity_type   : 'add',
             activity_target : 'apikey',
@@ -162,7 +157,7 @@ exports.createApiKey = function(request, reply) {
             target_name     : result.key_name,
             target_object   : result,
             operation_status: 'success'
-          });
+          }, request);
 
           renderJSON(request, reply, error, statusResponse);
         }
@@ -189,11 +184,6 @@ exports.updateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
         account_id       : updatedApiKey.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
@@ -201,7 +191,7 @@ exports.updateApiKey = function (request, reply) {
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -269,11 +259,6 @@ exports.activateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
         account_id       : result.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
@@ -281,7 +266,7 @@ exports.activateApiKey = function (request, reply) {
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
       renderJSON(request, reply, error, statusResponse);
     });
   });
@@ -316,11 +301,6 @@ exports.deactivateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
         account_id       : result.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
@@ -328,7 +308,7 @@ exports.deactivateApiKey = function (request, reply) {
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -363,11 +343,6 @@ exports.deleteApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
         account_id       : result.account_id,
         activity_type    : 'delete',
         activity_target  : 'apikey',
@@ -375,7 +350,7 @@ exports.deleteApiKey = function (request, reply) {
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });

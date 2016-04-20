@@ -75,20 +75,13 @@ exports.createBillingPlan = function (request, reply) {
         };
 
         AuditLogger.store({
-          ip_address: utils.getAPIUserRealIP(request),
-          datetime: Date.now(),
-          user_id: request.auth.credentials.user_id,
-          user_name: request.auth.credentials.email,
-          user_type: 'user',
-          account_id: request.auth.credentials.user_id,
-//          domain_id        : request.auth.credentials.domain,
           activity_type: 'add',
           activity_target: 'billing_plan',
           target_id: result.id,
           target_name: result.name,
           target_object: result,
           operation_status: 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       }
@@ -144,19 +137,13 @@ exports.updateBillingPlan = function (request, reply) {
       // TODO: Update all current subscribed users
 
       AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(request),
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.user_id,
         activity_type: 'modify',
         activity_target: 'billing_plan',
         target_id: result.id,
         target_name: result.name,
         target_object: result,
         operation_status: 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -196,19 +183,13 @@ exports.delete = function (request, reply) {
         result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
         AuditLogger.store({
-          ip_address: utils.getAPIUserRealIP(request),
-          datetime: Date.now(),
-          user_id: request.auth.credentials.user_id,
-          user_name: request.auth.credentials.email,
-          user_type: 'user',
-          account_id: request.auth.credentials.user_id || '',
           activity_type: 'delete',
           activity_target: 'billing_plan',
           target_id: result.id,
           target_name: result.name,
           target_object: result,
           operation_status: 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       });

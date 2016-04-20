@@ -183,11 +183,6 @@ exports.addApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         newApp.id = response_json.id;
         AuditLogger.store({
-          ip_address      : utils.getAPIUserRealIP(request),
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
           account_id      : newApp.account_id,
           activity_type   : 'add',
           activity_target : 'app',
@@ -195,7 +190,7 @@ exports.addApp = function(request, reply) {
           target_name     : newApp.app_name,
           target_object   : newApp,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -237,11 +232,6 @@ exports.updateApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         updatedApp.id = app_id;
         AuditLogger.store({
-          ip_address      : utils.getAPIUserRealIP(request),
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
           account_id      : existing_app.account_id,
           activity_type   : action,
           activity_target : 'app',
@@ -249,7 +239,7 @@ exports.updateApp = function(request, reply) {
           target_name     : updatedApp.app_name,
           target_object   : updatedApp,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -289,11 +279,6 @@ exports.deleteApp = function(request, reply) {
         existing_app = publicRecordFields.handle(existing_app, 'apps');
 
         AuditLogger.store({
-          ip_address      : utils.getAPIUserRealIP(request),
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
           account_id      : account_id,
           activity_type   : 'delete',
           activity_target : 'app',
@@ -301,7 +286,7 @@ exports.deleteApp = function(request, reply) {
           target_name     : existing_app.app_name,
           target_object   : existing_app,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));

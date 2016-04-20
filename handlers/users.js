@@ -100,11 +100,6 @@ exports.createUser = function(request, reply) {
         result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'user',
@@ -112,7 +107,7 @@ exports.createUser = function(request, reply) {
           target_name      : result.email,
           target_object    : result,
           operation_status : 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       });
@@ -196,11 +191,6 @@ exports.updateUser = function(request, reply) {
         result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : account_id,
           activity_type    : 'modify',
           activity_target  : 'user',
@@ -208,7 +198,7 @@ exports.updateUser = function(request, reply) {
           target_name      : result.email,
           target_object    : result,
           operation_status : 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       } else {
@@ -249,11 +239,6 @@ exports.updateUserPassword = function(request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address       : utils.getAPIUserRealIP(request),
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
             account_id       : account_id,
             activity_type    : 'modify',
             activity_target  : 'user',
@@ -261,7 +246,7 @@ exports.updateUserPassword = function(request, reply) {
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
-          });
+          }, request);
 
           renderJSON(request, reply, error, statusResponse);
         } else {
@@ -345,11 +330,6 @@ exports.init2fa = function (request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address       : utils.getAPIUserRealIP(request),
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
             account_id       : account_id,
             activity_type    : 'modify',
             activity_target  : 'user',
@@ -357,7 +337,7 @@ exports.init2fa = function (request, reply) {
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
-          });
+          }, request);
 
           renderJSON(request, reply, error, secretKey);
         } else {
@@ -393,11 +373,6 @@ exports.enable2fa = function (request, reply) {
               result = publicRecordFields.handle(result, 'user');
 
               AuditLogger.store({
-                ip_address       : utils.getAPIUserRealIP(request),
-                datetime         : Date.now(),
-                user_id          : request.auth.credentials.user_id,
-                user_name        : request.auth.credentials.email,
-                user_type        : 'user',
                 account_id       : account_id,
                 activity_type    : 'modify',
                 activity_target  : 'user',
@@ -405,7 +380,7 @@ exports.enable2fa = function (request, reply) {
                 target_name      : result.email,
                 target_object    : result,
                 operation_status : 'success'
-              });
+              }, request);
 
               renderJSON(request, reply, error, statusResponse);
             } else {
@@ -454,11 +429,6 @@ exports.disable2fa = function (request, reply) {
         result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : account_id,
           activity_type    : 'modify',
           activity_target  : 'user',
@@ -466,7 +436,7 @@ exports.disable2fa = function (request, reply) {
           target_name      : result.email,
           target_object    : result,
           operation_status : 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       } else {
