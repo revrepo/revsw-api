@@ -40,7 +40,8 @@
   "jwt_private_key" : "2c83899336891b6cfa571449f098c3fca7d4e2ef96e7",
   "available_sdk_release_versions": {
     "iOS": [ 1 ],
-    "Android": [ 1 ]
+    "Android": [ 1 ],
+    "Windows_Mobile": [ 1 ]
   },
 
   "enable_self_registration": true,
