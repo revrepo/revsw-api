@@ -54,7 +54,7 @@ describe('Functional check', function () {
             })
             .then(function (newAccount) {
               testAccount = newAccount;
-              return API.helpers.apps.createOne(secondTestAccount.id);
+              return API.helpers.apps.createOne(testAccount.id);
             })
             .then(function (app) {
               testApp = app;
@@ -225,8 +225,8 @@ describe('Functional check', function () {
                   .then(function (response) {
                     var updatedApp = response.body;
                     updatedApp.statusCode.should.equal(200);
-                    updatedApp.message.should.equal('The application record ' +
-                      'has been successfully updated');
+                    updatedApp.message.should.equal('The configuration ' +
+                      'has been successfully verified');
                     done();
                   })
                   .catch(done);

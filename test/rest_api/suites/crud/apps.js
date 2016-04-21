@@ -200,6 +200,7 @@ describe('CRUD check', function () {
                     var sdkReleases = response.body;
                     sdkReleases.iOS.should.not.be.undefined();
                     sdkReleases.Android.should.not.be.undefined();
+                    sdkReleases.Windows_Mobile.should.not.be.undefined();
                     done();
                   })
                   .catch(done);

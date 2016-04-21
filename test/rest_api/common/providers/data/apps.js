@@ -159,7 +159,7 @@ var AppsDataProvider = {
         case 'Joi.string()':
           data.testValue = undefined;
           break;
-        case 'Joi.string().valid(\'iOS\', \'Android\')':
+        case 'Joi.string().valid(\'iOS\', \'Android\', \'Windows_Mobile\')':
           data.testValue = '';
           break;
         case 'Joi.number().integer().min(0).max(10000)':
@@ -249,7 +249,7 @@ var AppsDataProvider = {
         case 'Joi.string()':
           data.testValue = longText;
           break;
-        case 'Joi.string().valid(\'iOS\', \'Android\')':
+        case 'Joi.string().valid(\'iOS\', \'Android\', \'Windows_Mobile\')':
           data.testValue = longText;
           break;
         case 'Joi.number().integer().min(0).max(10000)':
@@ -328,7 +328,7 @@ var AppsDataProvider = {
         case 'Joi.string()':
           data.testValue = bogusText;
           break;
-        case 'Joi.string().valid(\'iOS\', \'Android\')':
+        case 'Joi.string().valid(\'iOS\', \'Android\', \'Windows_Mobile\')':
           data.testValue = bogusText;
           break;
         case 'Joi.number().integer().min(0).max(10000)':
@@ -407,7 +407,7 @@ var AppsDataProvider = {
         case 'Joi.string()':
           data.testValue = undefined;
           break;
-        case 'Joi.string().valid(\'iOS\', \'Android\')':
+        case 'Joi.string().valid(\'iOS\', \'Android\', \'Windows_Mobile\')':
           data.testValue = invalidText;
           break;
         case 'Joi.number().integer().min(0).max(10000)':
@@ -486,7 +486,7 @@ var AppsDataProvider = {
         case 'Joi.string()':
           data.testValue = undefined;
           break;
-        case 'Joi.string().valid(\'iOS\', \'Android\')':
+        case 'Joi.string().valid(\'iOS\', \'Android\', \'Windows_Mobile\')':
           data.testValue = nonExistingOption;
           break;
         case 'Joi.number().integer().min(0).max(10000)':

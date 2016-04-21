@@ -68,7 +68,8 @@
 
   "available_sdk_release_versions": {
     "iOS": [ 1, 2, 4 ],
-    "Android": [ 1, 4, 5 ]
+    "Android": [ 1, 4, 5 ],
+    "Windows_Mobile": [ 1, 2, 5 ]
   },
 
   "enable_self_registration": true,

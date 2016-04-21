@@ -152,7 +152,7 @@ module.exports = {
       .keys({
         id: Joi.string().regex(idFormatPattern).required(),
         app_name: Joi.string().required(),
-        os: Joi.string().valid('iOS', 'Android').required(),
+        os: Joi.string().valid('iOS', 'Android', 'Windows_Mobile').required(),
         configs: Joi.array().items(Joi.object({
           sdk_release_version: Joi.number().integer(),
           logging_level: Joi.string().valid('debug', 'info', 'warning', 'error', 'critical'),
@@ -289,7 +289,8 @@ module.exports = {
   getAppSdkRelease: function () {
     return Joi.object().keys({
       iOS: Joi.array().items(Joi.number()),
-      Android: Joi.array().items(Joi.number())
+      Android: Joi.array().items(Joi.number()),
+      Windows_Mobile: Joi.array().items(Joi.number())
     });
   },
 
@@ -297,7 +298,7 @@ module.exports = {
     return Joi.object().keys({
       app_name: Joi.string(),
       account_id: Joi.string().regex(idFormatPattern).required(),
-      app_platform: Joi.string().valid('iOS', 'Android'),
+      app_platform: Joi.string().valid('iOS', 'Android', 'Windows_Mobile'),
       updated_at: Joi.date(),
       app_published_version: Joi.number().integer()
     });
