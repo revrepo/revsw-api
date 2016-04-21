@@ -49,6 +49,11 @@ exports.validateAPIKey = function (request, key, callback) {
       return callback(error, false, result);
     }
 
+    if (!result.active) {
+      logger.warn('API key ' + key + ' is deactivated');
+      return callback(error, false, result);
+    }
+
     if (!result.account_id) {
       logger.error('API key ' + key + ' does not have a proper account_id attribute');
       return callback(error, false, result);
