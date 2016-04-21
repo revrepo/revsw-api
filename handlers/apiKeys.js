@@ -91,10 +91,7 @@ exports.getApiKey = function (request, reply) {
       return reply(boom.badImplementation('Failed to get API key ID ' + id));
     }
 
-    if (result) {
-      if (!utils.checkUserAccessPermissionToAPIKey(request, result)) {
-        return reply(boom.badRequest('API key not found'));
-      }
+    if (result && utils.checkUserAccessPermissionToAPIKey(request, result)) {
 
       result = publicRecordFields.handle(result, 'apiKeys');
       renderJSON(request, reply, error, result);
