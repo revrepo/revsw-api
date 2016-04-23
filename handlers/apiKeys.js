@@ -194,7 +194,7 @@ exports.updateApiKey = function (request, reply) {
     });
   }
 
-  if (!utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
+  if (!updatedApiKey.account_id || !utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -239,7 +239,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -322,7 +322,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
       return reply(boom.badRequest('API key not found'));
     }
 
