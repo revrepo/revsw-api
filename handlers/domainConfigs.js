@@ -221,7 +221,7 @@ exports.createDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
     }
 
-    newDomainJson.created_by = request.auth.credentials.email;
+    newDomainJson.created_by = utils.generateCreatedByField(request);
     if (!newDomainJson.tolerance) {
       newDomainJson.tolerance = '3000';
     }
@@ -261,11 +261,6 @@ exports.createDomainConfig = function(request, reply) {
           object_id: response_json._id
         };
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'domain',
@@ -273,7 +268,7 @@ exports.createDomainConfig = function(request, reply) {
           target_name      : originalDomainJson.domain_name,
           target_object    : originalDomainJson,
           operation_status : 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, err, response);
       });
@@ -326,7 +321,7 @@ exports.createDomainConfig = function(request, reply) {
         if (!result) {
           return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
         }
-        newDomainJson.created_by = request.auth.credentials.email;
+        newDomainJson.created_by = utils.generateCreatedByField(request);
         if (!newDomainJson.tolerance) {
           newDomainJson.tolerance = '3000';
         }
@@ -386,11 +381,6 @@ exports.updateDomainConfig = function(request, reply) {
       }
       if (action !== '') {
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : newDomainJson.account_id,
           activity_type    : action,
           activity_target  : 'domain',
@@ -398,7 +388,7 @@ exports.updateDomainConfig = function(request, reply) {
           target_name      : result.domain_name,
           target_object    : newDomainJson,
           operation_status : 'success'
-        });
+        }, request);
       }
       renderJSON(request, reply, err, response);
     });
@@ -435,11 +425,6 @@ exports.deleteDomainConfig = function(request, reply) {
       }
 
       AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
         account_id       : result.proxy_config.account_id,
         activity_type    : 'delete',
         activity_target  : 'domain',
@@ -447,7 +432,7 @@ exports.deleteDomainConfig = function(request, reply) {
         target_name      : result.domain_name,
         target_object    : result.proxy_config,
         operation_status : 'success'
-      });
+      }, request);
       var response = response_json;
       renderJSON(request, reply, err, response);
     });

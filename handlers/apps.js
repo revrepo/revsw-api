@@ -33,14 +33,6 @@ var logger             = require('revsw-logger')(config.log_config);
 var utils              = require('../lib/utilities.js');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
-// TODO: move the function to "utils" module and unify with other permission checking functions
-function permissionAllowed(request, app) {
-  var result = true;
-  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(app.account_id) === -1) {
-    result = false;
-  }
-  return result;
-}
 
 exports.getApps = function(request, reply) {
   logger.info('Calling CDS to get a list of registered apps');
@@ -57,7 +49,7 @@ exports.getApps = function(request, reply) {
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
-          return permissionAllowed(request, app);
+          return utils.checkUserAccessPermissionToApps(request, app);
         });
       }
       renderJSON(request, reply, err, listOfApps);
@@ -77,7 +69,7 @@ exports.getApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get details for app ID ' + app_id);
@@ -110,7 +102,7 @@ exports.getAppVersions = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get a list of configuration versions for app ID ' + app_id);
@@ -141,7 +133,7 @@ exports.getAppConfigStatus = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get configuration status for app ID: ' + app_id);
@@ -165,7 +157,7 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (!permissionAllowed(request, newApp)) {
+  if (!utils.checkUserAccessPermissionToApps(request, newApp)) {
     return reply(boom.badRequest('Account ID not found'));
   }
   // TODO: need to remove the check for app name uniqueness
@@ -177,7 +169,7 @@ exports.addApp = function(request, reply) {
       return reply(boom.badRequest('The app name and platform is already registered in the system'));
     }
 
-    newApp.created_by = request.auth.credentials.email;
+    newApp.created_by = utils.generateCreatedByField(request);
     logger.info('Calling CDS to create a new app: ' + JSON.stringify(newApp));
     cds_request({method: 'POST', url: config.get('cds_url') + '/v1/apps', body: JSON.stringify(newApp), headers: authHeader}, function (err, res, body) {
       if (err) {
@@ -191,11 +183,6 @@ exports.addApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         newApp.id = response_json.id;
         AuditLogger.store({
-          ip_address      : utils.getAPIUserRealIP(request),
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
           account_id      : newApp.account_id,
           activity_type   : 'add',
           activity_target : 'app',
@@ -203,7 +190,7 @@ exports.addApp = function(request, reply) {
           target_name     : newApp.app_name,
           target_object   : newApp,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -224,10 +211,10 @@ exports.updateApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (updatedApp.account_id && !permissionAllowed(request, updatedApp)) {
+    if (!utils.checkUserAccessPermissionToApps(request, updatedApp)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  request.auth.credentials.email;
@@ -245,11 +232,6 @@ exports.updateApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         updatedApp.id = app_id;
         AuditLogger.store({
-          ip_address      : utils.getAPIUserRealIP(request),
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
           account_id      : existing_app.account_id,
           activity_type   : action,
           activity_target : 'app',
@@ -257,7 +239,7 @@ exports.updateApp = function(request, reply) {
           target_name     : updatedApp.app_name,
           target_object   : updatedApp,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -276,7 +258,7 @@ exports.deleteApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     account_id = existing_app.account_id;
@@ -297,11 +279,6 @@ exports.deleteApp = function(request, reply) {
         existing_app = publicRecordFields.handle(existing_app, 'apps');
 
         AuditLogger.store({
-          ip_address      : utils.getAPIUserRealIP(request),
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
           account_id      : account_id,
           activity_type   : 'delete',
           activity_target : 'app',
@@ -309,7 +286,7 @@ exports.deleteApp = function(request, reply) {
           target_name     : existing_app.app_name,
           target_object   : existing_app,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
