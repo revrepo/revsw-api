@@ -304,6 +304,7 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
             // NOTE: delete information not for send
             // TODO: model validation
             info.subscription.product_name = info.subscription.product.name;
+            info.subscription.billing_portal_link= result.billing_portal_link;
             delete info.subscription.product;
             delete info.subscription.credit_card.current_vault;
             delete info.subscription.credit_card.customer_id;
