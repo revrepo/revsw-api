@@ -312,6 +312,7 @@ describe('Rev API Admin User', function() {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
+    'comment': '',
     'companyId': [
       '55b6ff6a7957012304a49d04'
     ],
@@ -334,6 +335,7 @@ describe('Rev API Admin User', function() {
   var updatedUserJson = {
     'firstname': 'Updated API QA User',
     'lastname': 'Updated With Admin Perm',
+    'comment': '',
     'companyId': [
       '55b6ff6a7957012304a49d04'
     ],
