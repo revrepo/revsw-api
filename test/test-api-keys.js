@@ -146,7 +146,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw,apikey_rw');
         done();
       });
   });
@@ -199,7 +199,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin,apikey');
         done();
       });
   });
@@ -265,7 +265,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin,reseller,revadmin,apikey');
         done();
       });
   });
@@ -352,7 +352,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw,apikey_rw');
         done();
       });
   });
@@ -468,7 +468,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw,apikey_rw');
         done();
       });
   });
@@ -536,7 +536,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw,apikey_rw');
         done();
       });
   });
@@ -620,7 +620,7 @@ describe('Rev API keys', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(403);
         response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw');
+        response_json.message.should.be.equal('Insufficient scope, expected any of: admin_rw,reseller_rw,revadmin_rw,apikey_rw');
         done();
       });
   });
@@ -692,97 +692,4 @@ describe('Rev API keys', function() {
       });
   });
 
-
-
-  // NEW POSITIVE TESTS FOR 200
-  it('should load accounts', function(done) {
-    request(testAPIUrl)
-      .get('/v1/accounts')
-      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
-      .expect(200)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        done();
-      });
-  });
-
-  it('should create new accounts', function(done) {
-    var newAccountJson = {
-      companyName: 'API QA Account',
-      comment: 'API QA Account comment'
-    };
-
-    request(testAPIUrl)
-      .post('/v1/accounts')
-      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
-      .send(newAccountJson)
-      .expect(200)
-      .end(function(err) {
-        if (err) {
-          throw err;
-        }
-        done();
-      });
-  });
-
-  it('should create billing profile for account', function(done) {
-    request(testAPIUrl)
-      .post('/v1/accounts/' + '5714b4c4fce0aa6415edd855' + '/billing_profile')
-      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
-      .expect(200)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        done();
-      });
-  });
-
-  it('should update accounts', function(done) {
-    var updateAccountJson = {
-      companyName: 'API QA Account updated',
-      comment: '',
-      first_name: 'Vano',
-      last_name: 'Khuroshvili',
-      phone_number: '995577320836',
-      contact_email: 'vano.khuroshvili@gmail.com',
-      address1: 'Tbilisi 1',
-      address2: 'Tbilisi 2',
-      country: 'Georgia',
-      state: 'Tbilisi',
-      city: 'Tbilisi',
-      zipcode: '01170',
-      billing_plan: '56eaee8cd254ddc814509f51',
-      use_contact_info_as_billing_info: true,
-      billing_info: {},
-      subscription_state: 'active'
-    };
-
-    request(testAPIUrl)
-      .put('/v1/accounts/5714b4c4fce0aa6415edd855')
-      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
-      .send(updateAccountJson)
-      .expect(200)
-      .end(function(err) {
-        if (err) {
-          throw err;
-        }
-        done();
-      });
-  });
-
-  it('should fetch account with id', function(done) {
-    request(testAPIUrl)
-      .get('/v1/accounts/' + myCompanyId)
-      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
-      .expect(200)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        done();
-      });
-  });
 });
