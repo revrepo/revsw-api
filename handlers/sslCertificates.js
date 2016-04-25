@@ -240,9 +240,11 @@ exports.deleteSSLCertificate = function(request, reply) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
 
+    var deleted_by = utils.generateCreatedByField(request);
+
     logger.info('Calling CDS to delete SSL certificate ID ' + sslCertId);
 
-    cds_request( { url: config.get('cds_url') + '/v1/ssl_certs/' + sslCertId,
+    cds_request( { url: config.get('cds_url') + '/v1/ssl_certs/' + sslCertId + '?deleted_by="' + deleted_by + '"',
       method: 'DELETE',
       headers: authHeader,
     }, function (err, res, body) {
