@@ -83,7 +83,8 @@ module.exports = [
             readOnly: Joi.boolean().required().description('Enable read-only access to the configuration')
           }).required(),
           role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
-          theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)')
+          theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
         }
       },
       response: {
@@ -130,7 +131,8 @@ module.exports = [
             readOnly: Joi.boolean().description('Enable read-only access to the configuration')
           }),
           role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
-          theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)')
+          theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
         }
       },
       response: {
