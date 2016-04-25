@@ -194,6 +194,7 @@ module.exports = [
         },
         payload : {
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
+          comment                : Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the domain'),
           origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
             .description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.alternatives().try([

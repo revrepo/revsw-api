@@ -170,6 +170,7 @@ exports.getDomainConfig = function(request, reply) {
           response.tolerance = '3000';
         }
       }
+      response.comment = result.comment; // NOTE: extend information from CDS
       renderJSON(request, reply, err, response);
     });
   });
@@ -206,7 +207,6 @@ exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
-
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
@@ -354,13 +354,15 @@ exports.updateDomainConfig = function(request, reply) {
     }
 
     logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
-
+    var _comment = newDomainJson.comment || '';
+    delete newDomainJson.comment; // NOTE: clean newDomainJson for send to CDS
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
       method: 'PUT',
       headers: authHeader,
       body: JSON.stringify({
        updated_by: request.auth.credentials.email,
-       proxy_config: newDomainJson 
+       proxy_config: newDomainJson,
+       comment: _comment//NOTE: re-base value for CDS
       })
     }, function (err, res, body) {
       if (err) {
@@ -371,7 +373,6 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
-
       var action = '';
       if (request.query.options && request.query.options === 'publish') {
         action = 'publish';
@@ -402,7 +403,6 @@ exports.deleteDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    
     if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
