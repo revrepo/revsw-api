@@ -160,7 +160,8 @@ module.exports = [
             Joi.string().regex(routeModels.ipAddressRegex)
           ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
-          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)')
+          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          comment: Joi.string().max(300).description('Comment')
         }
       },
       response    : {
