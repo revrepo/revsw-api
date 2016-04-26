@@ -170,7 +170,10 @@ exports.getDomainConfig = function(request, reply) {
           response.tolerance = '3000';
         }
       }
-      response.comment = result.comment; // NOTE: extend information from CDS
+      if (response_json.comment) {
+        response.comment = response_json.comment;
+      }
+
       renderJSON(request, reply, err, response);
     });
   });

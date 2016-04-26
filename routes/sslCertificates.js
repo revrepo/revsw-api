@@ -58,10 +58,7 @@ module.exports = [
       validate: {
         params: {
           ssl_cert_id: Joi.objectId().required().description('SSL certificate ID')
-        },
-        query: {
-          version: Joi.number().integer().description('Configuration version number (request 0 for latest)')
-        },
+        }
       },
       plugins: {
         'hapi-swagger': {
