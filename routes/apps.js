@@ -140,7 +140,7 @@ module.exports = [
           account_id: Joi.objectId().required().description('Account ID the new app should be associated with'),
           app_name: Joi.string().max(50).required().description('Name of the mobile application'),
           app_platform: Joi.string().required().valid('iOS', 'Android', 'Windows_Mobile').description('Name of the mobile application platform'),
-          comment: Joi.string().max(300).description('Commet')
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       plugins: {
@@ -174,7 +174,7 @@ module.exports = [
           app_name: Joi.string().max(50).description('Name of the mobile application'),
           account_id: Joi.objectId().description('Account ID'),
           configs: Joi.array().required().items(routeModels.AppConfigModel),
-          comment: Joi.string().max(300).description('Comment')
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       plugins: {
