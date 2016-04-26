@@ -109,7 +109,7 @@ module.exports = [
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           public_ssl_cert: Joi.string().min(1).max(10000).required().description('Public SSL certificate in PEM format'),
           private_ssl_key: Joi.string().min(1).max(10000).required().description('Private SSL key in PEM format'),
-          private_ssl_key_passphrase: Joi.string().min(1).max(130).description('Password for the private SSL key'),
+          private_ssl_key_passphrase: Joi.string().allow('').min(1).max(130).description('Password for the private SSL key'),
           chain_ssl_cert: Joi.string().min(1).max(10000).description('Optional SSL chain certificates in PEM format'),
         }
       },
@@ -149,7 +149,7 @@ module.exports = [
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           public_ssl_cert: Joi.string().min(1).max(10000).required().description('Public SSL certificate in PEM format'),
           private_ssl_key: Joi.string().min(1).max(10000).required().description('Private SSL key in PEM format'),
-          private_ssl_key_passphrase: Joi.string().min(1).max(130).description('Password for the private SSL key'),
+          private_ssl_key_passphrase: Joi.string().allow('').min(1).max(130).description('Password for the private SSL key'),
           chain_ssl_cert: Joi.string().min(1).max(10000).description('Optional SSL chain certificates in PEM format'),
         }
       },
