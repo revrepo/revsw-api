@@ -173,6 +173,12 @@ exports.getDomainConfig = function(request, reply) {
       if (response_json.comment) {
         response.comment = response_json.comment;
       }
+      response.enable_ssl = response_json.enable_ssl;
+      response.ssl_conf_profile = response_json.ssl_conf_profile;
+      response.ssl_cert_id = response_json.ssl_cert_id;
+      response.ssl_protocols = response_json.ssl_protocols;
+      response.ssl_ciphers = response_json.ssl_ciphers;
+      response.ssl_prefer_server_ciphers = response_json.ssl_prefer_server_ciphers;
 
       renderJSON(request, reply, err, response);
     });
@@ -356,17 +362,37 @@ exports.updateDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
-    logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
     var _comment = newDomainJson.comment || '';
-    delete newDomainJson.comment; // NOTE: clean newDomainJson for send to CDS
+    delete newDomainJson.comment;
+    var _enable_ssl = newDomainJson.enable_ssl || true;
+    delete newDomainJson.enable_ssl;
+    var _ssl_conf_profile = newDomainJson.ssl_conf_profile || '';
+    delete newDomainJson.ssl_conf_profile;
+    var _ssl_cert_id = newDomainJson.ssl_cert_id || '';
+    delete newDomainJson.ssl_cert_id;
+    var _ssl_protocols = newDomainJson.ssl_protocols || '';
+    delete newDomainJson.ssl_protocols;
+    var _ssl_ciphers = newDomainJson.ssl_ciphers || '';
+    delete newDomainJson.ssl_ciphers;
+    var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers || true;
+    delete newDomainJson.ssl_prefer_server_ciphers;
+    var newDomainJson2 = {
+      updated_by: request.auth.credentials.email,
+      proxy_config: newDomainJson,
+      comment: _comment,
+      enable_ssl: _enable_ssl,
+      ssl_conf_profile: _ssl_conf_profile,
+      ssl_cert_id: _ssl_cert_id,
+      ssl_protocols: _ssl_protocols,
+      ssl_ciphers: _ssl_ciphers,
+      ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers
+    };
+    logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag + ', request body: ' +
+      JSON.stringify(newDomainJson2));
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
       method: 'PUT',
       headers: authHeader,
-      body: JSON.stringify({
-       updated_by: request.auth.credentials.email,
-       proxy_config: newDomainJson,
-       comment: _comment//NOTE: re-base value for CDS
-      })
+      body: JSON.stringify(newDomainJson2)
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domain_id));
