@@ -152,6 +152,8 @@ exports.createSSLCertificate = function(request, reply) {
       return reply(boom.badImplementation(response_json.message));
     } else if (res.statusCode === 200) {
       newSSLCert2.id = response_json.id;
+      newSSLCert2.private_ssl_key = '<Hidden for security reasons>';
+      newSSLCert2.private_ssl_key_passphrase = '<Hidden for security reasons>';
       AuditLogger.store({
         account_id      : newSSLCert.account_id,
         activity_type   : 'add',
@@ -211,13 +213,15 @@ exports.updateSSLCertificate = function(request, reply) {
         action = 'modify';
       }
       var result2 = publicRecordFields.handle(newSSLCert, 'sslCertificate');
+      result2.private_ssl_key = '<Hidden for security reasons>';
+      result2.private_ssl_key_passphrase = '<Hidden for security reasons>';
       if (action !== '') {
         AuditLogger.store({
           account_id       : newSSLCert.account_id,
           activity_type    : action,
           activity_target  : 'sslcert',
           target_id        : sslCertId,
-          target_name      : result.cert_name,
+          target_name      : result2.cert_name,
           target_object    : result2,
           operation_status : 'success'
         }, request);
@@ -257,12 +261,14 @@ exports.deleteSSLCertificate = function(request, reply) {
       }
 
       var result2 = publicRecordFields.handle(result, 'sslCertificate');
+      result2.private_ssl_key = '<Hidden for security reasons>';
+      result2.private_ssl_key_passphrase = '<Hidden for security reasons>';
 
       AuditLogger.store({
         account_id       : result.account_id,
         activity_type    : 'delete',
         activity_target  : 'sslcert',
-        target_id        : result.id,
+        target_id        : sslCertId,
         target_name      : result.cert_name,
         target_object    : result2,
         operation_status : 'success'
