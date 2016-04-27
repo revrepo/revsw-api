@@ -26,6 +26,7 @@ describe('Clean up', function () {
 
   var reseller = config.get('api.users.revAdmin');
   var namePattern = /API_TEST_APP_[0-9]{13}/;
+  var namePattern2 = /[0-9]{13}/;
 
   before(function (done) {
     done();
@@ -57,7 +58,8 @@ describe('Clean up', function () {
                 var ids = [];
                 var apps = res.body;
                 apps.forEach(function (app) {
-                  if (namePattern.test(app.app_name)) {
+                  if (namePattern.test(app.app_name) ||
+                      namePattern2.test(app.app_name)) {
                     ids.push(app.id);
                   }
                 });

@@ -77,6 +77,12 @@
         "password": "revswqa1"
       }
     },
+    "mobileApps": {
+      "platforms": {
+        "ios": "iOS",
+        "android": "Android"
+      }
+    },
     "stats": {
       "elastic": "testsjc20-es01.revsw.net:9200",
       "elastic_url": "testsjc20-esurl01.revsw.net:9200",
