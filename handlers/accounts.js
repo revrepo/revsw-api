@@ -73,7 +73,7 @@ exports.getAccounts = function getAccounts(request, reply) {
 exports.createAccount = function(request, reply) {
 
   var newAccount = request.payload;
-  newAccount.createdBy = request.auth.credentials.email;
+  newAccount.createdBy = utils.generateCreatedByField(request);
 
   accounts.add(newAccount, function(error, result) {
 
@@ -92,19 +92,14 @@ exports.createAccount = function(request, reply) {
       };
 
       AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(request),
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.companyId[0],
+        user_name: newAccount.createdBy,
         activity_type: 'add',
         activity_target: 'account',
         target_id: result.id,
         target_name: result.companyName,
         target_object: result,
         operation_status: 'success'
-      });
+      }, request);
 
       // Update the user who created the new company account with details of the new account ID
       var updatedUser = {
@@ -154,19 +149,13 @@ exports.createBillingProfile = function(request, reply) {
       // };
 
       AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(request),
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.companyId[0],
         activity_type: 'modify',
         activity_target: 'account',
         target_id: request.params.account_id,
         target_name: result.companyName,
         target_object: result,
         operation_status: 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -315,6 +304,7 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
             // NOTE: delete information not for send
             // TODO: model validation
             info.subscription.product_name = info.subscription.product.name;
+            info.subscription.billing_portal_link= result.billing_portal_link;
             delete info.subscription.product;
             delete info.subscription.credit_card.current_vault;
             delete info.subscription.credit_card.customer_id;
@@ -520,19 +510,13 @@ exports.updateAccount = function(request, reply) {
       };
 
       AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(request),
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.companyId[0],
         activity_type: 'modify',
         activity_target: 'account',
         target_id: request.params.account_id,
         target_name: result.companyName,
         target_object: result,
         operation_status: 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -765,19 +749,13 @@ exports.deleteAccount = function(request, reply) {
       account = publicRecordFields.handle(account, 'account');
 
       AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(request),
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.companyId[0],
         activity_type: 'delete',
         activity_target: 'account',
         target_id: account.id,
         target_name: account.companyName,
         target_object: account,
         operation_status: 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, null, statusResponse);
     }

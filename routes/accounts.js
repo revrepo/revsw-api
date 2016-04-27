@@ -34,7 +34,7 @@ module.exports = [
     path: '/v1/accounts',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: account.getAccounts,
       description: 'Get a list of customer accounts registered for a customer/reseller',
@@ -85,7 +85,7 @@ module.exports = [
     path: '/v1/accounts/{account_id}/billing_profile',
     config: {
       auth: {
-        scope: [ 'reseller_rw' , 'revadmin_rw', 'admin_rw' ]
+        scope: [ 'reseller_rw' , 'revadmin_rw', 'admin_rw', 'apikey_rw' ]
       },
       handler: account.createBillingProfile,
       description: 'Create billing profile',

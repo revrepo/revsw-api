@@ -32,7 +32,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfigs,
       description : 'Get a list of domains registered for a customer',
@@ -54,7 +54,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfig,
       description : 'Get basic domain configuration',
@@ -81,7 +81,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}/versions',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfigVersions,
       description : 'Get a list of domain configuration versions',
@@ -108,7 +108,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}/config_status',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfigStatus,
       description : 'Get the publishing status of a domain configuration',
@@ -135,7 +135,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler     : domainConfigsHandlers.createDomainConfig,
       description : 'Create a new domain configuration',
@@ -160,7 +160,8 @@ module.exports = [
             Joi.string().regex(routeModels.ipAddressRegex)
           ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
-          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)')
+          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       response    : {
@@ -174,7 +175,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler     : domainConfigsHandlers.updateDomainConfig,
       description : 'Update detailed domain configuration',
@@ -194,6 +195,7 @@ module.exports = [
         },
         payload : {
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
+          comment                : Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the domain'),
           origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
             .description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.alternatives().try([
@@ -222,6 +224,12 @@ module.exports = [
           }),
           proxy_timeout: Joi.number().integer(),
           domain_wildcard_alias: Joi.string().max(150),
+          enable_ssl: Joi.boolean(),
+          ssl_conf_profile: Joi.objectId().allow(''),
+          ssl_protocols: Joi.string().allow(''),
+          ssl_ciphers: Joi.string().allow(''),
+          ssl_prefer_server_ciphers: Joi.boolean(),
+          ssl_cert_id: Joi.objectId().allow(''),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -345,7 +353,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler     : domainConfigsHandlers.deleteDomainConfig,
       description : 'Delete a domain',

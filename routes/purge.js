@@ -34,7 +34,7 @@ module.exports = [
     path: '/v1/purge',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw' ]
       },
       handler: purges.purgeObject,
       description: 'Purge objects cached on Rev edge servers',
@@ -70,7 +70,7 @@ module.exports = [
     path: '/v1/purge/{request_id}',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey' ]
       },
       handler: purges.getPurgeJobStatus,
       description: 'Get the status of a previously submitted purge request',

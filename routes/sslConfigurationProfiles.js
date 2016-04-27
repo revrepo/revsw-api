@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,38 +22,26 @@
 
 var Joi = require('joi');
 
-var usageReports = require('../handlers/usageReports');
+var sslConfigurationProfileHandlers = require('../handlers/sslConfigurationProfile');
+
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
   {
     method: 'GET',
-    path: '/v1/usage_reports/web',
+    path: '/v1/ssl_conf_profiles',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: usageReports.getAccountReport,
-      description: 'Get Usage Report for an Account(s)',
+      handler: sslConfigurationProfileHandlers.listSSLConfigurationProfiles,
+      description: 'List avilable SSL configuration profiles',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
         }
-      },
-      validate: {
-        params: {},
-        query: {
-          account_id: Joi.objectId().default('').description('Account ID, optional'),
-          from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
-          to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
-          only_overall: Joi.boolean().default(true).description('Report should contain only overall summary, default true'),
-          keep_samples: Joi.boolean().default(false).description('Report should contain 5min interval traffic data, default false'),
-        }
       }
     }
-  },
-
-
-
+  }
 ];

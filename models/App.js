@@ -73,7 +73,8 @@ function App(mongoose, connection, options) {
     configs: [configSchema],
     app_published_version: {type: Number, default: 0},
     last_app_published_version: {type: Number, default: 0},
-    previous_app_values: [{}]
+    previous_app_values: [{}],
+    comment: {type: String, default: ''},
   });
 
   this.model = connection.model('App', this.AppSchema, 'App');

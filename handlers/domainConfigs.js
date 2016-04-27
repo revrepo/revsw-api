@@ -21,7 +21,6 @@
 
 var mongoose    = require('mongoose');
 var boom        = require('boom');
-var uuid        = require('node-uuid');
 var AuditLogger = require('../lib/audit');
 var config      = require('config');
 var cds_request = require('request');
@@ -171,6 +170,16 @@ exports.getDomainConfig = function(request, reply) {
           response.tolerance = '3000';
         }
       }
+      if (response_json.comment) {
+        response.comment = response_json.comment;
+      }
+      response.enable_ssl = response_json.enable_ssl;
+      response.ssl_conf_profile = response_json.ssl_conf_profile;
+      response.ssl_cert_id = response_json.ssl_cert_id;
+      response.ssl_protocols = response_json.ssl_protocols;
+      response.ssl_ciphers = response_json.ssl_ciphers;
+      response.ssl_prefer_server_ciphers = response_json.ssl_prefer_server_ciphers;
+
       renderJSON(request, reply, err, response);
     });
   });
@@ -207,7 +216,6 @@ exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
-
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
@@ -221,7 +229,7 @@ exports.createDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
     }
 
-    newDomainJson.created_by = request.auth.credentials.email;
+    newDomainJson.created_by = utils.generateCreatedByField(request);
     if (!newDomainJson.tolerance) {
       newDomainJson.tolerance = '3000';
     }
@@ -261,11 +269,6 @@ exports.createDomainConfig = function(request, reply) {
           object_id: response_json._id
         };
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'domain',
@@ -273,7 +276,7 @@ exports.createDomainConfig = function(request, reply) {
           target_name      : originalDomainJson.domain_name,
           target_object    : originalDomainJson,
           operation_status : 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, err, response);
       });
@@ -326,7 +329,7 @@ exports.createDomainConfig = function(request, reply) {
         if (!result) {
           return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
         }
-        newDomainJson.created_by = request.auth.credentials.email;
+        newDomainJson.created_by = utils.generateCreatedByField(request);
         if (!newDomainJson.tolerance) {
           newDomainJson.tolerance = '3000';
         }
@@ -359,15 +362,37 @@ exports.updateDomainConfig = function(request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
-    logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
-
+    var _comment = newDomainJson.comment || '';
+    delete newDomainJson.comment;
+    var _enable_ssl = newDomainJson.enable_ssl || true;
+    delete newDomainJson.enable_ssl;
+    var _ssl_conf_profile = newDomainJson.ssl_conf_profile || '';
+    delete newDomainJson.ssl_conf_profile;
+    var _ssl_cert_id = newDomainJson.ssl_cert_id || '';
+    delete newDomainJson.ssl_cert_id;
+    var _ssl_protocols = newDomainJson.ssl_protocols || '';
+    delete newDomainJson.ssl_protocols;
+    var _ssl_ciphers = newDomainJson.ssl_ciphers || '';
+    delete newDomainJson.ssl_ciphers;
+    var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers || true;
+    delete newDomainJson.ssl_prefer_server_ciphers;
+    var newDomainJson2 = {
+      updated_by: request.auth.credentials.email,
+      proxy_config: newDomainJson,
+      comment: _comment,
+      enable_ssl: _enable_ssl,
+      ssl_conf_profile: _ssl_conf_profile,
+      ssl_cert_id: _ssl_cert_id,
+      ssl_protocols: _ssl_protocols,
+      ssl_ciphers: _ssl_ciphers,
+      ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers
+    };
+    logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag + ', request body: ' +
+      JSON.stringify(newDomainJson2));
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
       method: 'PUT',
       headers: authHeader,
-      body: JSON.stringify({
-       updated_by: request.auth.credentials.email,
-       proxy_config: newDomainJson 
-      })
+      body: JSON.stringify(newDomainJson2)
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domain_id));
@@ -377,7 +402,6 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
-
       var action = '';
       if (request.query.options && request.query.options === 'publish') {
         action = 'publish';
@@ -386,11 +410,6 @@ exports.updateDomainConfig = function(request, reply) {
       }
       if (action !== '') {
         AuditLogger.store({
-          ip_address       : utils.getAPIUserRealIP(request),
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
           account_id       : newDomainJson.account_id,
           activity_type    : action,
           activity_target  : 'domain',
@@ -398,7 +417,7 @@ exports.updateDomainConfig = function(request, reply) {
           target_name      : result.domain_name,
           target_object    : newDomainJson,
           operation_status : 'success'
-        });
+        }, request);
       }
       renderJSON(request, reply, err, response);
     });
@@ -413,7 +432,6 @@ exports.deleteDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    
     if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
@@ -435,11 +453,6 @@ exports.deleteDomainConfig = function(request, reply) {
       }
 
       AuditLogger.store({
-        ip_address       : utils.getAPIUserRealIP(request),
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
         account_id       : result.proxy_config.account_id,
         activity_type    : 'delete',
         activity_target  : 'domain',
@@ -447,7 +460,7 @@ exports.deleteDomainConfig = function(request, reply) {
         target_name      : result.domain_name,
         target_object    : result.proxy_config,
         operation_status : 'success'
-      });
+      }, request);
       var response = response_json;
       renderJSON(request, reply, err, response);
     });
