@@ -18,6 +18,8 @@
 
 /*jslint node: true */
 
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 'use strict';
 var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
