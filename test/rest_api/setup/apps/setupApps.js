@@ -18,17 +18,17 @@
 
 var config = require('config');
 var API = require('./../../common/api');
+var Constants = require('./../../common/constants');
 
 describe('Setup', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var revAdmin = config.get('api.users.revAdmin');
   var users = [
-    revAdmin,
-    config.get('api.users.reseller')/*,
-    config.get('api.users.admin')*/
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
   ];
   var platforms = [
     config.get('api.mobileApps.platforms.ios'),
@@ -56,15 +56,29 @@ describe('Setup', function () {
                 API.helpers
                   .authenticateUser(user)
                   .then(function () {
+                    if (user.role === Constants.API.USERS.ROLES.ADMIN) {
+                      return API.resources.users
+                        .myself()
+                        .getOne();
+                    }
                     return API.helpers.accounts.createOne();
                   })
-                  .then(function (account) {
+                  .then(function (response) {
+
                     var appsNeeded = [];
                     var prefix = buildPrefix(user, platform);
+                    var accountId;
 
-                    for (var i = 10; i < 12; i++) {
+                    if (user.role === Constants.API.USERS.ROLES.ADMIN) {
+                      accountId = response.body.companyId[0];
+                    }
+                    else {
+                      accountId = response.id;
+                    }
+
+                    for (var i = 10; i < 40; i++) {
                       appsNeeded.push({
-                        account_id: account.id,
+                        account_id: accountId,
                         app_name: prefix + i,
                         app_platform: platform
                       });
