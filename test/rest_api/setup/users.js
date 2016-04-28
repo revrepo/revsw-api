@@ -29,7 +29,7 @@ describe('Clean up', function () {
     config.get('api.users.revAdmin')
   ];
 
-  var namePattern = /API_TEST_USER_1|portal-ui-test-email/;
+  var namePattern = /API_TEST_USER_1|portal-ui-test-email|api-qa-user-14|test-user-14/;
 
   describe('Users resource', function () {
 
