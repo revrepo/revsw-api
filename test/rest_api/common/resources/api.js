@@ -31,6 +31,7 @@ var LocationsResource = require('./locations');
 var PurgeResource = require('./purge');
 var SdkConfigsResource = require('./sdkConfigs');
 var StatsResource = require('./stats');
+var StatsSDKResource = require('./stats-sdk');
 var TwoFAResource = require('./2fa');
 var UsersResource = require('./users');
 
@@ -49,6 +50,7 @@ module.exports = {
   purge: PurgeResource,
   sdkConfigs: SdkConfigsResource,
   stats: StatsResource,
+  stats_sdk: StatsSDKResource,
   twoFA: TwoFAResource,
   users: UsersResource
 };
