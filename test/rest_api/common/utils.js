@@ -147,7 +147,23 @@ var Utils = {
       }
     }
     delete prop[path[i]];
-  }
+  },
+
+  //  Object.assign polyfill, rudimentary, no checks
+  assign: ( Object.assign ? Object.assign : function (target) {
+    var dst = Object(target);
+    for (var i = 1, len = arguments.length; i < len; ++i) {
+      var src = arguments[i];
+      if (src !== undefined) {
+        for (var key in src) {
+          if (src.hasOwnProperty(key)) {
+            dst[key] = src[key];
+          }
+        }
+      }
+    }
+    return dst;
+  })
 };
 
 module.exports = Utils;

@@ -18,7 +18,8 @@
     "test": "cd test/rest_api/; NODE_ENV=qa grunt mochaTest",
     "test-local": "cd test/rest_api/; grunt mochaTest",
     "smoke": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/**/*.js",
-    "smoke-stats": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/stats.js"
+    "smoke-stats": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/stats.js",
+    "smoke-stats-sdk": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/stats-sdk.js"
   },
   "dependencies": {
     "bcrypt": "~0.8.3",
