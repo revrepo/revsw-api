@@ -81,8 +81,8 @@ function User(mongoose, connection, options) {
 
     billing_plan: this.ObjectId,
 
-    deleted: { type: Boolean, default: false }
-
+    deleted: { type: Boolean, default: false },
+    comment: { type: String, default: ''},
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');

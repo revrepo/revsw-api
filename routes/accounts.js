@@ -266,6 +266,56 @@ module.exports = [
        }*/
     }
   },
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/subscription_preview/{billing_plan_handle}',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: account.getAccountSubscriptionPreview,
+      description: 'Get preview migration information ',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID'),
+          billing_plan_handle: Joi.string().required().description('Billing plan handle name')
+        }
+      },
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
+  {
+    method: 'GET',
+    path: '/v1/accounts/{account_id}/subscription_summary',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: account.getAccountSubscriptionSummary,
+      description: 'Get Subscription Summary for Account',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          account_id: Joi.objectId().required().description('Account ID')
+        }
+      },
+      // TODO: add route Model
+      /*      response: {
+       schema: routeModels.accountModel
+       }*/
+    }
+  },
 
   {
     method: 'DELETE',

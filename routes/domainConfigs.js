@@ -160,7 +160,8 @@ module.exports = [
             Joi.string().regex(routeModels.ipAddressRegex)
           ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
-          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)')
+          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       response    : {
@@ -194,6 +195,7 @@ module.exports = [
         },
         payload : {
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
+          comment                : Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the domain'),
           origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
             .description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.alternatives().try([
@@ -222,6 +224,12 @@ module.exports = [
           }),
           proxy_timeout: Joi.number().integer(),
           domain_wildcard_alias: Joi.string().max(150),
+          enable_ssl: Joi.boolean(),
+          ssl_conf_profile: Joi.objectId().allow(''),
+          ssl_protocols: Joi.string().allow(''),
+          ssl_ciphers: Joi.string().allow(''),
+          ssl_prefer_server_ciphers: Joi.boolean(),
+          ssl_cert_id: Joi.objectId().allow(''),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),

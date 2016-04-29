@@ -298,7 +298,8 @@ exports.deleteApp = function(request, reply) {
 exports.getSDKReleasedVersions = function(request, reply) {
   var response = {
     iOS: config.get('available_sdk_release_versions.iOS'),
-    Android: config.get('available_sdk_release_versions.Android')
+    Android: config.get('available_sdk_release_versions.Android'),
+    Windows_Mobile: config.get('available_sdk_release_versions.Windows_Mobile')
   };
   renderJSON(request, reply, null, response);
 };

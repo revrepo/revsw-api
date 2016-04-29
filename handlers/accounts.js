@@ -134,7 +134,7 @@ exports.createBillingProfile = function(request, reply) {
     if (!updatedAccount.account_id) {
       updatedAccount.account_id = updatedAccount.id;
     }
-    console.log('updateAccountInformation', updatedAccount);
+
     accounts.update(updatedAccount, function(error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to update the account'));
@@ -169,7 +169,7 @@ exports.createBillingProfile = function(request, reply) {
       //result = publicRecordFields.handle(result, 'account');
       Customer.create(result, function resultCreatingCustomer(error, data) {
         if (error) {
-          return reply(boom.badImplementation('Failed to create billind profile '));
+          return reply(boom.badImplementation('Failed to create a billing profile '));
         }
         // Set billing_id for account
         result.billing_id = data.customer.id;
@@ -200,9 +200,6 @@ exports.createBillingProfile = function(request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
   });
-
-
-
 };
 
 exports.getAccount = function(request, reply) {
@@ -216,6 +213,10 @@ exports.getAccount = function(request, reply) {
   accounts.get({
     _id: account_id
   }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Accounts::getAccount: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
     if (result) {
       result = publicRecordFields.handle(result, 'account');
       renderJSON(request, reply, error, result);
@@ -225,10 +226,102 @@ exports.getAccount = function(request, reply) {
   });
 };
 
-exports.getAccountStatements = function(request, reply) {
+/**
+ * @name  getAccountSubscriptionPreview
+ * @description
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
+exports.getAccountSubscriptionPreview = function(request, reply) {
+
+  var account_id = request.params.account_id;
+  var billing_plan_handle = request.params.billing_plan_handle;
+
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
+
+  accounts.get({
+    _id: account_id
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Accounts::getAccountSubscriptionPreview: Failed to get an account' +
+        ' Account ID: ' + account_id));
+    }
+    if (result) {
+      result = publicRecordFields.handle(result, 'account');
+
+      if(!result.billing_id || !result.subscription_id){
+         return reply(boom.badRequest('Account has no subscription_id'));
+      }
+      Customer.subscriptionPreviewMigrations(result.subscription_id,billing_plan_handle ,function resultGetPreviewSubscription(err,info){
+          if(err){
+            return reply(boom.badRequest('Subscription info error '));
+          }else{
+            renderJSON(request, reply, error, info);
+          }
+      });
+
+    } else {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+  });
+};
+
+/**
+ * @name  getAccountSubscriptionSummary
+ * @description
+ *
+ *
+ * @param  {[type]} request
+ * @param  {[type]} reply
+ * @return
+ */
+exports.getAccountSubscriptionSummary = function(request, reply) {
+
   var account_id = request.params.account_id;
 
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
 
+  accounts.get({
+    _id: account_id
+  }, function(error, result) {
+    if (result) {
+      result = publicRecordFields.handle(result, 'account');
+
+      if(!result.billing_id || !result.subscription_id){
+         return reply(boom.badRequest('Account has no subscription_id'));
+      }
+
+      Customer.getSubscriptionById(result.subscription_id ,function resultGetSubscriptionInfo(err,info){
+          if(err){
+            return reply(boom.badRequest('Subscription info error '));
+          }else{
+            // NOTE: delete information not for send
+            // TODO: model validation
+            info.subscription.product_name = info.subscription.product.name;
+            info.subscription.billing_portal_link= result.billing_portal_link;
+            delete info.subscription.product;
+            delete info.subscription.credit_card.current_vault;
+            delete info.subscription.credit_card.customer_id;
+            delete info.subscription.customer;
+            renderJSON(request, reply, error, info);
+          }
+      });
+
+    } else {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+  });
+};
+
+
+exports.getAccountStatements = function(request, reply) {
+  var account_id = request.params.account_id;
 
   accounts.get({
     _id: account_id
@@ -242,7 +335,7 @@ exports.getAccountStatements = function(request, reply) {
     }
 
     if (!account.subscription_id) {
-      return reply(boom.badRequest('No subscription registered for account.'));
+      return reply(boom.badRequest('No subscription registered for the account'));
     }
     Customer.getStatements(account.subscription_id, function(error, statements) {
       if (error) {
@@ -450,24 +543,32 @@ exports.updateAccount = function(request, reply) {
         return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
           ' Account ID: ' + updatedAccount.account_id));
       }
-      if (updatedAccount.billing_plan && account.subscription_id && (account.billing_plan !== updatedAccount.billing_plan)) {
-        BillingPlan.get({
-          _id: updatedAccount.billing_plan
-        }, function(error, plan) {
-          if (error) {
-            return reply(boom.badRequest('Billing plan not found'));
-          }
-          Customer.changeProduct(account.subscription_id, plan.chargify_handle, function(error) {
+
+      // NOTE: check update billing_plan?
+      if (updatedAccount.billing_plan && (account.billing_plan !== updatedAccount.billing_plan)) {
+        if ((!account.billing_id || account.billing_id === '')  && !account.subscription_id ) {
+          return reply(boom.badRequest('The account in not provisioned in the billing system'));
+        } else {
+          BillingPlan.get({
+            _id: updatedAccount.billing_plan
+          }, function(error, plan) {
             if (error) {
-              return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
-                ' Account ID: ' + updatedAccount.account_id +
-                ' Subscription ID: ' + account.subscription_id +
-                ' Product handle: ' + plan.chargify_handle));
+              return reply(boom.badRequest('Billing plan not found'));
             }
-            updateAccount(request, reply);
+            Customer.changeProduct(account.subscription_id, plan.chargify_handle, function(error) {
+              if (error) {
+                return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
+                  ' Account ID: ' + updatedAccount.account_id +
+                  ' Subscription ID: ' + account.subscription_id +
+                  ' Product handle: ' + plan.chargify_handle));
+              }
+              updateAccount(request, reply);
+            });
           });
-        });
+
+        }
       } else {
+        // NOTE: update Account information - not billing_plan
         updateAccount(request, reply);
       }
     });
@@ -589,8 +690,8 @@ exports.deleteAccount = function(request, reply) {
     function(usersToUpdate, cb) {
       async.eachSeries(usersToUpdate, function(user, callback) {
           var user_id = user.user_id;
-          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id+ '. Count Companies = ' +
-            user.companyId.length +' '+JSON.stringify(user.companyId));
+          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id + '. Count Companies = ' +
+            user.companyId.length + ' ' + JSON.stringify(user.companyId));
           if (user.companyId.length === 1) {
             logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
             users.remove({

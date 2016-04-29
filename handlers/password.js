@@ -34,8 +34,10 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var utils           = require('../lib/utilities.js');
 var mail = require('../lib/mail');
 
+var Account = require('../models/Account');
 var User = require('../models/User');
 
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 //
@@ -44,17 +46,8 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 exports.forgotPassword = function(request, reply) {
 
   var email = request.payload.email;
-  users.get({
-    email: email
-  }, function(error, user) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
-    }
-    if (user) {
-      if (  user.role && user.role === 'revadmin' ) {
-        return reply(boom.badRequest('No account with that email address exists'));
-      }
 
+  function passwordChange(error,user){
       async.waterfall([
         function(done) {
           crypto.randomBytes(20, function(err, buf) {
@@ -122,6 +115,44 @@ exports.forgotPassword = function(request, reply) {
           return reply(boom.badImplementation('Failed to execute password reset procedure for email ' + email));
         }
       });
+  }
+
+  // Start work-flow
+  users.get({
+    email: email
+  }, function(error, user) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
+    }
+    if (user) {
+      if (  user.role && user.role === 'revadmin' ) {
+        return reply(boom.badRequest('No account with that email address exists'));
+      }
+
+      if (user.self_registered) {
+          logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          accounts.get({
+            _id: user.companyId
+          }, function(error, account) {
+            if (error) {
+              logger.error('forgotPassword::authenticate: Failed to find an account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email);
+              return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email));
+            }
+            // NOTE: Not finished registration.
+            if (account.billing_id === null || account.billing_id === '') {
+              logger.error('forgotPassword::authenticate: Account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not have billing ID');
+
+              return reply(boom.create(418, 'Your registration not finished'));
+            }
+            passwordChange(error,user);
+          });
+        }else{
+            passwordChange(error,user);
+
+        }
 
     } else {
       return reply(boom.badRequest('No account with that email address exists'));
