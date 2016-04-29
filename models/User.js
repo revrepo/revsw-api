@@ -316,8 +316,10 @@ User.prototype = {
             users[i].companyId = [];
           }
 
+          var companyId = utils.getAccountID(request);
+
           // skip users which do not belong to the company
-          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
+          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, companyId)) {
             users[i].user_id = users[i]._id;
             users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;

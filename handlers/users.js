@@ -62,7 +62,7 @@ exports.createUser = function(request, reply) {
 
   if (newUser.companyId) {
     // TODO: need to move the permissions check to a separate function or use the existing function
-    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
+    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request))) {
       return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
     }
   } else if (request.auth.credentials.companyId.length !== 0) {
@@ -165,7 +165,7 @@ exports.updateUser = function(request, reply) {
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
   // TODO use an existing access verification function instead of the code
-  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId))) {
+  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
     return reply(boom.badRequest('The new companyId is not found'));
   }
 
