@@ -104,7 +104,7 @@ exports.createAccount = function(request, reply) {
       // Update the user who created the new company account with details of the new account ID
       var updatedUser = {
         user_id: request.auth.credentials.user_id,
-        companyId: request.auth.credentials.companyId
+        companyId: utils.getAccountID(request)
       };
       if (request.auth.credentials.role !== 'revadmin') {
         updatedUser.companyId.push(result.id);

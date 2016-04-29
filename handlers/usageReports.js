@@ -53,7 +53,7 @@ var checkAccountAccessPermissions_ = function( request ) {
     return account_id;
   }
 
-  if ( creds.companyId.indexOf( account_id ) !== -1 ) {
+  if (utils.getAccountID(request).indexOf( account_id ) !== -1) {
     return account_id;
   }
 

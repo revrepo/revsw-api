@@ -15,7 +15,7 @@ var qaUserWithRevAdminPermPassword = '12345678';
 
 describe('Rev API keys', function() {
 
-  this.timeout(10000);
+  this.timeout(20000);
 
   var myCompanyId = '55b6ff6a7957012304a49d04';
   var myDomains = [];
@@ -692,4 +692,709 @@ describe('Rev API keys', function() {
       });
   });
 
+
+  // POSITIVE TESTS
+  var createdKeyID;
+  var createdApiKey;
+  var forUpdatesApiKeyID;
+  var purgeRequestID;
+  var createdUserID;
+  var createdAccountID;
+  var createdAppID;
+  var createdDomainID;
+  var firstMileID = '55a56fa6476c10c329a90741';
+  var createdROKeyID;
+  var createdROKey;
+
+  it('should create an API key for next tests with revadmin role', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys')
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .send({account_id: myCompanyId})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        response_json.message.should.be.equal('Successfully created new API key');
+        createdKeyID = response_json.object_id;
+        createdApiKey = response_json.key;
+        done();
+      });
+  });
+
+  it('should load accounts', function(done) {
+    request(testAPIUrl)
+      .get('/v1/accounts')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should create new account', function(done) {
+    var newAccountJson = {
+      companyName: 'API QA Account - ' + Date.now(),
+      comment: 'API QA Account comment'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/accounts')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(newAccountJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        createdAccountID = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should update account with id - ' + myCompanyId, function(done) {
+    var updateAccountJson = {
+      companyName: 'API QA Account updated',
+      comment: '',
+      first_name: 'Vano',
+      last_name: 'Khuroshvili',
+      phone_number: '995577320836',
+      contact_email: 'vano.khuroshvili@gmail.com',
+      address1: 'Tbilisi 1',
+      address2: 'Tbilisi 2',
+      country: 'Georgia',
+      state: 'Tbilisi',
+      city: 'Tbilisi',
+      zipcode: '01170',
+      billing_plan: '56eaee8cd254ddc814509f51',
+      use_contact_info_as_billing_info: true,
+      billing_info: {},
+      subscription_state: 'active'
+    };
+
+    request(testAPIUrl)
+      .put('/v1/accounts/' + myCompanyId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(updateAccountJson)
+      .expect(200, done);
+  });
+
+  it('should load account with id - ' + myCompanyId, function(done) {
+    request(testAPIUrl)
+      .get('/v1/accounts/' + myCompanyId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load api keys', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load api key with id', function(done) {
+    request(testAPIUrl)
+      .get('/v1/api_keys/' + createdKeyID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should create api key for account - ' + myCompanyId, function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send({account_id: myCompanyId})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        forUpdatesApiKeyID = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should update api key', function(done) {
+    var updateKeyJson = {
+      key_name : 'auth with api key',
+      account_id : myCompanyId,
+      domains : [],
+      allowed_ops : {
+        read_config : true,
+        modify_config : true,
+        delete_config : true,
+        purge : true,
+        reports : true,
+        admin : true
+      },
+      read_only_status : false,
+      active : true
+    };
+
+    request(testAPIUrl)
+      .put('/v1/api_keys/' + createdKeyID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(updateKeyJson)
+      .expect(200, done);
+  });
+
+  it('should activate api key ', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/' + forUpdatesApiKeyID + '/activate')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should deactivate api key ', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys/' + forUpdatesApiKeyID + '/deactivate')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should delete api key ', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/' + forUpdatesApiKeyID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load apps', function(done) {
+    request(testAPIUrl)
+      .get('/v1/apps')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should create app', function(done) {
+    var createAppJson = {
+      account_id : myCompanyId,
+      app_name : 'App created with api key auth - ' + Date.now(),
+      app_platform : 'iOS'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/apps')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(createAppJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        createdAppID = response_json.id;
+        done();
+      });
+  });
+
+  it('should load app with id', function(done) {
+    request(testAPIUrl)
+      .get('/v1/apps/' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load app version with id', function(done) {
+    request(testAPIUrl)
+      .get('/v1/apps/' + createdAppID + '/versions')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load app configs with id', function(done) {
+    request(testAPIUrl)
+      .get('/v1/apps/' + createdAppID + '/config_status')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should update app with id', function(done) {
+    var updateAppJson =  {
+      app_name : 'update app name - ' + Date.now(),
+      account_id : myCompanyId,
+      configs : [{
+        sdk_release_version : 99,
+        logging_level : 'info'
+      }]
+    };
+
+    request(testAPIUrl)
+      .put('/v1/apps/' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(updateAppJson)
+      .expect(200, done);
+  });
+
+  it('should load app sdk releases', function(done) {
+    request(testAPIUrl)
+      .get('/v1/apps/sdk_releases')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load locations firstmile', function(done) {
+    request(testAPIUrl)
+      .get('/v1/locations/firstmile')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+
+        if(response_json.length){
+          firstMileID = response_json[0].id;
+        }
+
+        done();
+      });
+  });
+
+  it('should load locations lastmile', function(done) {
+    request(testAPIUrl)
+      .get('/v1/locations/lastmile')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should purge domain - ' + testDomain, function(done) {
+    var purgeJson = {
+      domainName : testDomain,
+      purges : [{
+        url: {
+          is_wildcard : true,
+          expression : '12'
+        }
+      }]
+  };
+
+    request(testAPIUrl)
+      .post('/v1/purge')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(purgeJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        purgeRequestID = response_json.request_id;
+        done();
+      });
+  });
+
+  it('should load purge request status', function(done) {
+    request(testAPIUrl)
+      .get('/v1/purge/' + purgeRequestID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load web usage', function(done) {
+    request(testAPIUrl)
+      .get('/v1/usage_reports/web?account_id=' + myCompanyId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load users', function(done) {
+    request(testAPIUrl)
+      .get('/v1/users')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should create user', function(done) {
+    var createUserJson = {
+      email: 'test-user-' + Date.now() + '@unittest.com',
+      firstname: 'Test',
+      lastname: 'User',
+      password: 'psw123456',
+      companyId: [myCompanyId],
+      domain: [testDomain],
+      two_factor_auth_enabled: false,
+      access_control_list: {
+        dashBoard: true,
+        reports: true,
+        configure: true,
+        test: true,
+        readOnly: true
+      },
+      role: 'user',
+      theme: 'light'
+    };
+
+    request(testAPIUrl)
+      .post('/v1/users')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(createUserJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        createdUserID = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should update user', function(done) {
+    var udapteUserJson = {
+      firstname: 'Updated Test',
+      lastname: 'Update User',
+      password: 'psw1234567',
+      companyId: [myCompanyId],
+      domain: [testDomain],
+      two_factor_auth_enabled: false,
+      access_control_list: {
+        dashBoard: true,
+        reports: true,
+        configure: true,
+        test: true,
+        readOnly: true
+      },
+      role: 'user',
+      theme: 'light'
+    };
+
+    request(testAPIUrl)
+      .put('/v1/users/' + createdUserID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(udapteUserJson)
+      .expect(200,done);
+  });
+
+  it('should load user with id', function(done) {
+    request(testAPIUrl)
+      .get('/v1/users/' + createdUserID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load activities', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity?user_id=' + createdUserID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should delete user with id', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/users/' + createdUserID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load top objects stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/top_objects/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load top traffic stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/top/' + testDomainId + '?report_type=device')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load RTT stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/lastmile_rtt/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load GBT stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/gbt/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load FBT average stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/fbt/average/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load FBT distribution stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/fbt/distribution/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load FBT heatmap stats for domain', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/fbt/heatmap/' + testDomainId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK stats for application', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/app/' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK stats for the account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/account/' + myCompanyId)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK stats for the dirs', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/dirs?app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK data flow for account or app', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/flow?app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK grouped data flow for account or app', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/agg_flow?report_type=status_code&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load hits amount for top traffic properties for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/top_requests?report_type=country&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load users amount for top traffic properties for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/top_users?report_type=country&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load data sent for top traffic properties for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/top_gbt?report_type=country&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load distributions of top traffic properties for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/distributions?report_type=destination&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load list of the top SDK objects for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/top_objects?report_type=failed&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load list of the slowest SDK objects for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/top_objects/slowest?report_type=full&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load list of the SDK objects with 5XX codes, for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/top_objects/5xx?network=Cellular&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load  SDK FBT min, max, average histograms, separated by destination, for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/ab/fbt?network=WiFi&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load  SDK FBT value distribution histogram, separated by destination, for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/ab/fbt_distribution?network=WiFi&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK errors graph, separated by destination, for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/ab/errors?network=WiFi&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load SDK requests processing speed data, separated by destination, for an account', function(done) {
+    request(testAPIUrl)
+      .get('/v1/stats/sdk/ab/speed?network=WiFi&app_id=' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should delete app with id', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/apps/' + createdAppID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load domains', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domain_configs')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should create domain config', function(done) {
+    var dmnName = 'mydomain' + Date.now() + '.com';
+
+    var createDomainJson = {
+      domain_name : dmnName,
+      account_id : myCompanyId,
+      origin_host_header : dmnName,
+      origin_server : dmnName,
+      origin_server_location_id : firstMileID
+    };
+
+    request(testAPIUrl)
+      .post('/v1/domain_configs')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .send(createDomainJson)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        createdDomainID = response_json.object_id;
+        done();
+      });
+  });
+
+  it('should load domain with id', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domain_configs/' + createdDomainID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load domain versions', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domain_configs/' + createdDomainID + '/versions')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should load domain config status', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domain_configs/' + createdDomainID + '/config_status')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+
+  // NEGATIVE TESTS
+
+  it('should create an API key for access permissions tests', function(done) {
+    request(testAPIUrl)
+      .post('/v1/api_keys')
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .send({account_id: createdAccountID})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        createdROKeyID = response_json.object_id;
+        createdROKey = response_json.key;
+        done();
+      });
+  });
+
+  it('should update api key and set read only permission', function(done) {
+    var updateKeyJson = {
+      key_name : 'auth with api key',
+      account_id : createdAccountID,
+      domains : [],
+      allowed_ops : {
+        read_config : true,
+        modify_config : true,
+        delete_config : true,
+        purge : true,
+        reports : true,
+        admin : true
+      },
+      read_only_status : true,
+      active : true
+    };
+
+    request(testAPIUrl)
+      .put('/v1/api_keys/' + createdROKeyID)
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .send(updateKeyJson)
+      .expect(200, done);
+  });
+
+  it('should fail with empty key', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domain_configs')
+      .set('Authorization', 'X-API-KEY ' + '')
+      .expect(401, done);
+  });
+
+  it('should fail with wrong key', function(done) {
+    request(testAPIUrl)
+      .get('/v1/domain_configs')
+      .set('Authorization', 'X-API-KEY ' + createdApiKey + 'make-it-wrong')
+      .expect(401, done);
+  });
+
+  it('should fail with key from another account', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/domain_configs/' + createdDomainID)
+      .set('Authorization', 'X-API-KEY ' + '571561119d12edc422fd4931')
+      .expect(401, done);
+  });
+
+  it('should fail with key which has not RW permissions', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/domain_configs/' + createdDomainID)
+      .set('Authorization', 'X-API-KEY ' + createdROKey)
+      .expect(403, done);
+  });
+
+  it('should delete domain with id', function(done) {
+    request(testAPIUrl)
+      .delete('/v1/domain_configs/' + createdDomainID)
+      .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
 });
