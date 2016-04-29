@@ -281,7 +281,7 @@ exports.deactivateApiKey = function (request, reply) {
     }
 
     // TODO: use a function
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (request.auth.credentials.role !== 'revadmin' && utils.getAccountID(request).indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 

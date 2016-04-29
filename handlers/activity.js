@@ -40,7 +40,12 @@ exports.getDetailedAuditInfo = function (request, reply) {
   var end_time;
 
   var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
-  var account_id = request.query.account_id ? request.query.account_id : request.auth.credentials.companyId[0];
+  var account_id;
+  if(request.auth.credentials.user_type === 'user'){
+    account_id =  request.query.account_id ? request.query.account_id : request.auth.credentials.companyId[0];
+  } else {
+    account_id = utils.getAccountID(request, true);
+  }
 
   if (request.query.user_id) {
     requestBody['meta.user_id'] = user_id;
