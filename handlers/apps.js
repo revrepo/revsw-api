@@ -217,7 +217,7 @@ exports.updateApp = function(request, reply) {
     if (!utils.checkUserAccessPermissionToApps(request, updatedApp)) {
       return reply(boom.badRequest('Account ID not found'));
     }
-    updatedApp.updated_by =  request.auth.credentials.email;
+    updatedApp.updated_by =  utils.generateCreatedByField(request);
     logger.info('Calling CDS to update app ID ' + app_id + ' with new configuration: ' + JSON.stringify(updatedApp));
     cds_request({method: 'PUT', url: config.get('cds_url') + '/v1/apps/' + app_id + optionsFlag, body: JSON.stringify(updatedApp), headers: authHeader},
       function (err, res, body) {
