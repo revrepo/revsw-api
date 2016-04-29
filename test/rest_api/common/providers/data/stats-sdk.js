@@ -22,117 +22,74 @@
 var Utils = require('./../../../common/utils');
 
 var assg = Utils.assign;
-var now = Date.now();
-var from_2 = {from_timestamp: ( now - 7200000/*2hrs in ms*/ )};
-var from_6 = {from_timestamp: ( now - 21600000/*6hrs in ms*/ )};
-var from_24 = {from_timestamp: ( now - 86400000/*day in ms*/ )};
-var to_now = {to_timestamp: now};
-var to_12 = {to_timestamp: ( now - 43200000/*half day in ms*/ )};
 
 // Defines some methods to generate valid and common domain-configs stats/sdk test data.
 var StatsSDKDataProvider = {
 
   DataDrivenHelper: {
 
-    getAppAccQueryParams: function () {
-
+    timestamps_: function() {
+      var now = Date.now();
       return [
-        {},
-        assg({}, from_2 ),
-        assg({}, from_24 ),
-        assg({}, from_24, to_12 ),
-        {report_type: 'hits'},
-        assg({report_type: 'hits'}, to_now),
-        {report_type: 'devices'}
+        {from_timestamp: ( now - 21600000/*6*/ )},
+        {from_timestamp: ( now - 21600000/*6*/ ),
+          to_timestamp: ( now - 7200000/*2*/ )},
+        {from_timestamp: ( now - 86400000/*24*/ )},
+        {from_timestamp: ( now - 86400000/*24*/ ),
+          to_timestamp: ( now - 43200000/*12*/ )}
       ];
+    },
+
+    getAppAccQueryParams: function () {
+      return Utils.combineQueries(
+        this.timestamps_(),
+        [{report_type: 'devices'},{report_type: 'hits'}]
+      );
     },
 
     getDirsQueryParams: function ( account_id, app_id ) {
-
-      return [
-        {account_id: account_id},
-        assg({account_id: account_id}, from_2),
-        assg({account_id: account_id}, from_24, to_12 ),
-        assg({account_id: account_id}, to_now ),
-        {app_id: app_id},
-        assg({app_id: app_id}, from_2),
-        assg({app_id: app_id}, from_24, to_12 ),
-        assg({app_id: app_id}, to_now )
-      ];
+      return Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: account_id},{app_id: app_id}]
+      );
     },
 
     getFlowQueryParams: function ( account_id, app_id ) {
-      return [
-        {account_id: account_id},
-        assg({account_id: account_id}, from_2),
-        assg({account_id: account_id}, from_24, to_12 ),
-        assg({account_id: account_id}, to_now ),
-        assg({account_id: account_id, device: 'Sony', os: 'Android'}, from_2),
-        assg({account_id: account_id, country: 'US', operator: 'AOL'}, from_2),
-        assg({account_id: account_id, os: 'Android', country: 'US'}, from_6),
-        assg({account_id: account_id, operator: 'AOL', network: 'WiFi'}, from_6),
-        {app_id: app_id},
-        assg({app_id: app_id}, from_2),
-        assg({app_id: app_id}, from_24, to_12 ),
-        assg({app_id: app_id}, to_now ),
-        assg({app_id: app_id, device: 'Sony', os: 'Android'}, from_2),
-        assg({app_id: app_id, country: 'US', operator: 'AOL'}, from_2),
-        assg({app_id: app_id, os: 'Android', country: 'US'}, from_6),
-        assg({app_id: app_id, operator: 'AOL', network: 'WiFi'}, from_6),
-      ];
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: account_id},{app_id: app_id}],
+        [{device: 'Sony'},{device: 'Lenovo'}],
+        [{country:'US'},{country:'CN'},{country:'GB'}],
+        [{operator:'AOL'}],
+        [{network:'WiFi'},{network:'Cellular'}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 30;
+      return pars;
     },
 
     getAggFlowQueryParams: function ( account_id, app_id ) {
-      var pars = this.getFlowQueryParams( account_id, app_id );
-      var report_types = ['status_code', 'destination', 'transport', 'status', 'cache'];
-      pars.forEach( function( par, idx ) {
-        par.report_type = report_types[idx % 5];
-      });
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: account_id},{app_id: app_id}],
+        [{device: 'Sony'},{device: 'Lenovo'}],
+        [{country:'US'},{country:'GB'}],
+        [{operator:'AOL'}],
+        [{network:'WiFi'},{network:'Cellular'}],
+        [{report_type:'status_code'},{report_type:'destination'},{report_type:'transport'},{report_type:'status'},{report_type:'cache'}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 60;
       return pars;
     },
 
     getTopsQueryParams: function ( account_id, app_id ) {
-      report_type = ['country', 'os', 'device', 'operator', 'network']
-      return [
-        {account_id: account_id, report_type: 'device'},
-        assg({account_id: account_id, report_type: 'country'}, from_2),
-        assg({account_id: account_id, report_type: 'os'}, from_24, to_12 ),
-        assg({account_id: account_id, report_type: 'device'}, to_now ),
-        assg({account_id: account_id, report_type: 'operator'}, from_2),
-        assg({account_id: account_id, report_type: 'network'}, from_2),
-        assg({account_id: account_id, report_type: 'operator'}, from_6),
-        assg({account_id: account_id, report_type: 'network'}, from_6),
-        {app_id: app_id, report_type: 'device'},
-        assg({app_id: app_id, report_type: 'country'}, from_2),
-        assg({app_id: app_id, report_type: 'os'}, from_24, to_12 ),
-        assg({app_id: app_id, report_type: 'device'}, to_now ),
-        assg({app_id: app_id, report_type: 'operator'}, from_2),
-        assg({app_id: app_id, report_type: 'network'}, from_2),
-        assg({app_id: app_id, report_type: 'operator'}, from_6),
-        assg({app_id: app_id, report_type: 'network'}, from_6),
-      ];
+      return Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: account_id},{app_id: app_id}],
+        [{report_type:'country'},{report_type:'os'},{report_type:'device'},{report_type:'operator'},{report_type: 'network'}]
+      );
     },
-
-    getCombinedQueryParams__: function () {
-      ['Samsung', 'Sony', 'Lenovo'].forEach( function( device ) {
-        ['Android','iOS'].forEach( function( os ) {
-          ['US', 'UK', 'CN', 'FR'].forEach( function( country ) {
-            ['AOL', 'United Assholes'].forEach( function( operator ) {
-              ['Cellular', 'WiFi'].forEach( function( network ) {
-                combinations.push({
-                  device: device,
-                  os: os,
-                  country: country,
-                  operator: operator,
-                  network: network
-                });
-              });
-            });
-          });
-        });
-      });
-      return combinations;
-    }
 
   }
 };
