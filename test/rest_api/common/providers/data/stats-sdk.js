@@ -21,8 +21,6 @@
 // Requiring some used resources
 var Utils = require('./../../../common/utils');
 
-var assg = Utils.assign;
-
 // Defines some methods to generate valid and common domain-configs stats/sdk test data.
 var StatsSDKDataProvider = {
 
@@ -31,12 +29,11 @@ var StatsSDKDataProvider = {
     timestamps_: function() {
       var now = Date.now();
       return [
+        {/*default timestamps*/},
         {from_timestamp: ( now - 21600000/*6*/ )},
-        {from_timestamp: ( now - 21600000/*6*/ ),
-          to_timestamp: ( now - 7200000/*2*/ )},
-        {from_timestamp: ( now - 86400000/*24*/ )},
-        {from_timestamp: ( now - 86400000/*24*/ ),
-          to_timestamp: ( now - 43200000/*12*/ )}
+        {from_timestamp: ( now - 21600000/*6*/ ), to_timestamp: ( now - 7200000/*2*/ )},
+        {from_timestamp: ( now - 86000000/*little less than 24 hrs*/ )},
+        {from_timestamp: ( now - 86400000/*24*/ ), to_timestamp: ( now - 43200000/*12*/ )}
       ];
     },
 
@@ -47,31 +44,31 @@ var StatsSDKDataProvider = {
       );
     },
 
-    getDirsQueryParams: function ( account_id, app_id ) {
+    getDirsQueryParams: function () {
       return Utils.combineQueries(
         this.timestamps_(),
-        [{account_id: account_id},{app_id: app_id}]
+        [{account_id: true},{app_id: true}]
       );
     },
 
-    getFlowQueryParams: function ( account_id, app_id ) {
+    getFlowQueryParams: function () {
       var pars = Utils.combineQueries(
         this.timestamps_(),
-        [{account_id: account_id},{app_id: app_id}],
+        [{account_id: true},{app_id: true}],
         [{device: 'Sony'},{device: 'Lenovo'}],
         [{country:'US'},{country:'CN'},{country:'GB'}],
         [{operator:'AOL'}],
         [{network:'WiFi'},{network:'Cellular'}]
       );
       Utils.shuffleArray( pars );
-      pars.length = 30;
+      pars.length = 50;
       return pars;
     },
 
-    getAggFlowQueryParams: function ( account_id, app_id ) {
+    getAggFlowQueryParams: function () {
       var pars = Utils.combineQueries(
         this.timestamps_(),
-        [{account_id: account_id},{app_id: app_id}],
+        [{account_id: true},{app_id: true}],
         [{device: 'Sony'},{device: 'Lenovo'}],
         [{country:'US'},{country:'GB'}],
         [{operator:'AOL'}],
@@ -79,17 +76,109 @@ var StatsSDKDataProvider = {
         [{report_type:'status_code'},{report_type:'destination'},{report_type:'transport'},{report_type:'status'},{report_type:'cache'}]
       );
       Utils.shuffleArray( pars );
-      pars.length = 60;
+      pars.length = 100;
       return pars;
     },
 
-    getTopsQueryParams: function ( account_id, app_id ) {
+    getTopsQueryParams: function () {
       return Utils.combineQueries(
         this.timestamps_(),
-        [{account_id: account_id},{app_id: app_id}],
+        [{account_id: true},{app_id: true}],
         [{report_type:'country'},{report_type:'os'},{report_type:'device'},{report_type:'operator'},{report_type: 'network'}]
       );
     },
+
+    getDistributionsQueryParams: function () {
+      return Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: true},{app_id: true}],
+        [{count: 10},{count: 50},{}],
+        [{report_type:'destination'},{report_type:'transport'},{report_type:'status'},{report_type:'cache'},{report_type: 'domain'},{report_type: 'status_code'}]
+      );
+    },
+
+    getTopObjectsQueryParams: function () {
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: true},{app_id: true}],
+        [{count:13},{count:77},{}],
+        [{os:'Android'},{}],
+        [{device:'Sony'},{device:'Lenovo'},{}],
+        [{country:'US'},{country:'GB'},{}],
+        [{operator:'AOL'},{}],
+        [{network:'WiFi'},{network:'Cellular'},{}],
+        [{report_type:'failed'},{report_type:'cache_missed'},{report_type:'not_found'}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 100;
+      return pars;
+    },
+
+    getTopObjectsSlowestQueryParams: function () {
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: true},{app_id: true}],
+        [{count:13},{count:77},{}],
+        [{os:'Android'},{}],
+        [{device:'Sony'},{device:'Lenovo'},{}],
+        [{country:'US'},{country:'GB'},{}],
+        [{operator:'AOL'},{}],
+        [{network:'WiFi'},{network:'Cellular'},{}],
+        [{report_type:'full'},{report_type:'first_byte'}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 100;
+      return pars;
+    },
+
+    getTopObjects5xxQueryParams: function () {
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: true},{app_id: true}],
+        [{count:13},{count:77},{}],
+        [{os:'Android'},{}],
+        [{device:'Sony'},{device:'Lenovo'},{}],
+        [{country:'US'},{country:'GB'},{}],
+        [{operator:'AOL'},{}],
+        [{network:'WiFi'},{network:'Cellular'},{}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 100;
+      return pars;
+    },
+
+    getABQueryParams: function () {
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: true},{app_id: true}],
+        [{os:'Android'},{}],
+        [{device:'Sony'},{device:'Lenovo'},{}],
+        [{country:'US'},{country:'GB'},{}],
+        [{operator:'AOL'},{}],
+        [{network:'WiFi'},{network:'Cellular'},{}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 100;
+      return pars;
+    },
+
+    getABFBTDistributionQueryParams: function () {
+      var pars = Utils.combineQueries(
+        this.timestamps_(),
+        [{account_id: true},{app_id: true}],
+        [{interval_ms:200},{interval_ms:500},{}],
+        [{limit_ms:8000},{limit_ms:4000},{}],
+        [{os:'Android'},{}],
+        [{device:'Sony'},{device:'Lenovo'},{}],
+        [{country:'US'},{country:'GB'},{}],
+        [{operator:'AOL'},{}],
+        [{network:'WiFi'},{network:'Cellular'},{}]
+      );
+      Utils.shuffleArray( pars );
+      pars.length = 100;
+      return pars;
+    },
+
 
   }
 };

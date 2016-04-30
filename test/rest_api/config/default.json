@@ -40,9 +40,7 @@
       "reseller": {
         "email": "api_qa_user_with_reseller_perm@revsw.com",
         "password": "password1",
-        "role": "Reseller",
-        "account_id": "55b706a57957012304a49d0b",
-        "app_id": "5702cbff2e98405912def4b1"
+        "role": "Reseller"
       },
       "secondReseller": {
         "email": "api_qa_user_2_with_reseller_perm@revsw.com",

@@ -102,7 +102,7 @@ App.prototype = {
     });
   },
   getAccountID: function(app_id, callback) {
-    this.model.findOne({deleted: 0, _id: app_id}, {_id: 0, account_id: 1}, function(err, doc) {
+    this.model.findOne({deleted: false, _id: app_id}, {_id: 0, account_id: 1}, function(err, doc) {
       if (doc) {
         doc = doc.account_id;
       }
@@ -203,8 +203,7 @@ App.prototype = {
         });
         return dist;
       });
-  },
-
+  }
 
 };
 
