@@ -364,7 +364,7 @@ exports.updateDomainConfig = function(request, reply) {
 
     var _comment = newDomainJson.comment || '';
     delete newDomainJson.comment;
-    var _enable_ssl = newDomainJson.enable_ssl || true;
+    var _enable_ssl = newDomainJson.enable_ssl;
     delete newDomainJson.enable_ssl;
     var _ssl_conf_profile = newDomainJson.ssl_conf_profile || '';
     delete newDomainJson.ssl_conf_profile;
@@ -374,7 +374,7 @@ exports.updateDomainConfig = function(request, reply) {
     delete newDomainJson.ssl_protocols;
     var _ssl_ciphers = newDomainJson.ssl_ciphers || '';
     delete newDomainJson.ssl_ciphers;
-    var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers || true;
+    var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers;
     delete newDomainJson.ssl_prefer_server_ciphers;
     var newDomainJson2 = {
       updated_by: request.auth.credentials.email,
