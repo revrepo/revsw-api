@@ -84,8 +84,69 @@ var resourceConfig = {
       methods: [
         Methods.READ_ALL
       ]
+    }, {
+      name: 'distributions',
+      idKey: '',
+      path: '/distributions',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'top_objects',
+      idKey: '',
+      path: '/top_objects',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'top_objects_slowest',
+      idKey: '',
+      path: '/top_objects/slowest',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'top_objects_5xx',
+      idKey: '',
+      path: '/top_objects/5xx',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'ab_fbt',
+      idKey: '',
+      path: '/ab/fbt',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'ab_fbt_distribution',
+      idKey: '',
+      path: '/ab/fbt_distribution',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'ab_errors',
+      idKey: '',
+      path: '/ab/errors',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }, {
+      name: 'ab_speed',
+      idKey: '',
+      path: '/ab/speed',
+      methods: [
+        Methods.READ_ALL
+      ]
     }]
 };
+
+
+
+
+
 
 // Creating new instance of BaseResource which is going to represent the API
 module.exports = new BaseResource(resourceConfig);
