@@ -243,38 +243,47 @@ exports.deleteSSLCertificate = function(request, reply) {
     if (!result || !utils.checkUserAccessPermissionToSSLCertificate(request,result)) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
-
-    var deleted_by = utils.generateCreatedByField(request);
-
-    logger.info('Calling CDS to delete SSL certificate ID ' + sslCertId);
-
-    cds_request( { url: config.get('cds_url') + '/v1/ssl_certs/' + sslCertId + '?deleted_by="' + deleted_by + '"',
-      method: 'DELETE',
-      headers: authHeader,
-    }, function (err, res, body) {
-      if (err) {
-        return reply(boom.badImplementation('Failed to send a CDS command to delete SSL certificate ID ' + sslCertId));
+  
+    domainConfigs.query( { 'ssl_cert_id': sslCertId, deleted: false }, function(error,res) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to validate that certificate ' + sslCertId + ' is not in use by a domain configuration'));
       }
-      var response_json = JSON.parse(body);
-      if (res.statusCode === 400) {
-        return reply(boom.badRequest(response_json.message));
+      if (res && res.length > 0) {
+        return reply(boom.badRequest('The SSL certificate is in use by active domain(s) - please update the domain(s) before removing the SSL certificate'));
       }
 
-      var result2 = publicRecordFields.handle(result, 'sslCertificate');
-      result2.private_ssl_key = '<Hidden for security reasons>';
-      result2.private_ssl_key_passphrase = '<Hidden for security reasons>';
+      var deleted_by = utils.generateCreatedByField(request);
 
-      AuditLogger.store({
-        account_id       : result.account_id,
-        activity_type    : 'delete',
-        activity_target  : 'sslcert',
-        target_id        : sslCertId,
-        target_name      : result.cert_name,
-        target_object    : result2,
-        operation_status : 'success'
-      }, request);
-      var response = response_json;
-      renderJSON(request, reply, err, response);
+      logger.info('Calling CDS to delete SSL certificate ID ' + sslCertId);
+  
+      cds_request( { url: config.get('cds_url') + '/v1/ssl_certs/' + sslCertId + '?deleted_by="' + deleted_by + '"',
+        method: 'DELETE',
+        headers: authHeader,
+      }, function (err, res, body) {
+        if (err) {
+          return reply(boom.badImplementation('Failed to send a CDS command to delete SSL certificate ID ' + sslCertId));
+        }
+        var response_json = JSON.parse(body);
+        if (res.statusCode === 400) {
+          return reply(boom.badRequest(response_json.message));
+        }
+
+        var result2 = publicRecordFields.handle(result, 'sslCertificate');
+        result2.private_ssl_key = '<Hidden for security reasons>';
+        result2.private_ssl_key_passphrase = '<Hidden for security reasons>';
+
+        AuditLogger.store({
+          account_id       : result.account_id,
+          activity_type    : 'delete',
+          activity_target  : 'sslcert',
+          target_id        : sslCertId,
+          target_name      : result.cert_name,
+          target_object    : result2,
+          operation_status : 'success'
+        }, request);
+        var response = response_json;
+        renderJSON(request, reply, err, response);
+      });
     });
   });
 };
