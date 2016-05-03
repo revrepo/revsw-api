@@ -45,11 +45,8 @@ describe('StatsSDK Functional check:', function () {
   var user = config.get('api.users.reseller'),
     account_id,
     application,
-    testdata = StatsAPIDDHelper.getTestData(),
-    estimated = StatsAPIDDHelper.getEstimatedData(),
     test_data_portions = 4,
     total_requests = test_data_portions * testdata.requests.length;
-
 
   //  ---------------------------------
   before(function (done) {
