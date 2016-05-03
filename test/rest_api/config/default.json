@@ -95,5 +95,12 @@
         }
       }
     }
+  },
+  "stats_api": {
+    "server": "https://testsjc20-statsapi01.revsw.net:443",
+    "version": "v1",
+    "index_prefix": "sdkstats-",
+    "key_server_poll_interval": 12000,
+    "queue_clear_timeout": 10000
   }
 }

@@ -218,6 +218,35 @@ var Utils = {
     };
 
     return arr;
+  },
+
+  /**
+   * create tty colored string
+   *
+   * @param {string} - name of color, see code
+   * @param {string} - string to output
+   * @returns {string} - painted
+   */
+  colored: function ( color, str ) {
+    var colors = {
+      Black: 30,
+      Red: 31,
+      Green: 32,
+      Brown: 33,
+      Blue: 34,
+      Purple: 35,
+      Cyan: 36,
+      LightGray: 37,
+      DarkGray: 90,
+      LightRed: 91,
+      LightGreen: 92,
+      Yellow: 93,
+      LightBlue: 94,
+      LightPurple: 95,
+      LightCyan: 96,
+      White: 97
+    };
+    return '\u001b[' + colors[color] + 'm' + str + '\u001b[0m';
   }
 };
 
