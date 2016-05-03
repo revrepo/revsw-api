@@ -185,6 +185,7 @@ describe('Rev API /v1/activity call', function() {
   });
 
   it('Should return user detailed activity log (with account_id)', function(done) {
+    this.timeout(30000);
 
     request(testAPIUrl)
       .get('/v1/activity')
