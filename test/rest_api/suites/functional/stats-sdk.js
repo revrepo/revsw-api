@@ -17,7 +17,7 @@
  */
 
 require('should-http');
-// var parallel = require('mocha.parallel');
+var parallel = require('mocha.parallel');
 
 var config = require('config');
 var API = require('./../../common/api');
@@ -35,7 +35,7 @@ var ok_prefix = '    ' + Utils.colored( 'LightBlue', '•' ) + ' ';
 
 //  ----------------------------------------------------------------------------------------------//
 
-describe('Functional check:', function () {
+describe('StatsSDK Functional check:', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   // this.timeout(10000);
@@ -119,163 +119,69 @@ describe('Functional check:', function () {
       .catch(done);
   });
 
-
   //  ---------------------------------
-  // it( 'Application', function( done ) {
-  //   setTimeout( done, 1000 );
-  // } );
+  var testOne_ = function( method, query, multiply, checker ) {
 
+    return function( done ) {
+      var now = Date.now();
+      query.from_timestamp = now - 5400000;
+      query.to_timestamp = now + 1800000;
+      var id = method === 'app' ? application.id : account_id;
+      API.helpers
+        .authenticateUser(user)
+        .then(function () {
+          return API.resources.stats_sdk[method]()
+            .getOne(id,query)
+            .expect(200)
+            .then( function( data ) {
+              checker( query, data.body, multiply );
+              done();
+            });
+        })
+        .catch(done);
+    };
+  };
 
-  //  ---------------------------------
-  it( 'StatsSDK/Application/Hits', function( done ) {
+  var testAll_ = function( method, query, multiply, checker ) {
 
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .app()
-          .getOne(application.id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'hits'
-          })
-          .expect(200)
-          .then( function( data ) {
-            // console.log( data.body );
-            data.body.data.hits.should.be.equal( test_data_portions );
-            done();
-          });
-      })
-      .catch(done);
+    return function( done ) {
+      var now = Date.now();
+      query.from_timestamp = now - 5400000;
+      query.to_timestamp = now + 1800000;
+      query.app_id = application.id;
+      API.helpers
+        .authenticateUser(user)
+        .then(function () {
+          return API.resources.stats_sdk[method]()
+            .getAll(query)
+            .expect(200)
+            .then( function( data ) {
+              checker( query, data.body, multiply );
+              done();
+            });
+        })
+        .catch(done);
+    };
+  };
+
+  parallel( 'Application/Account', function() {
+
+    it( 'Application/Hits', testOne_( 'app', { report_type: 'hits' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Application/Devices', testOne_( 'app', { report_type: 'devices' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Account/Hits', testOne_( 'account', { report_type: 'hits' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Account/Devices', testOne_( 'account', { report_type: 'devices' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Dirs', testAll_( 'dirs', {}, test_data_portions, StatsAPIDDHelper.checkDirsQuery() ) );
 
   });
 
-  //  ---------------------------------
-  it( 'StatsSDK/Application/Devices', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .app()
-          .getOne(application.id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'devices'
-          })
-          .expect(200)
-          .then( function( data ) {
-            data.body.data.hits.should.be.equal( test_data_portions );
-            data.body.data.devices_num.should.be.equal( 1 );
-            done();
-          });
-      })
-      .catch(done);
-
+  parallel( 'Flows', function() {
+    it( 'Flow', testAll_( 'flow', {}, test_data_portions, StatsAPIDDHelper.checkFlowQuery() ) );
+    it( 'Aggregated Flow, status_code', testAll_( 'agg_flow', { report_type: 'status_code' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, destination', testAll_( 'agg_flow', { report_type: 'destination' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, transport', testAll_( 'agg_flow', { report_type: 'transport' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, status', testAll_( 'agg_flow', { report_type: 'status' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, cache', testAll_( 'agg_flow', { report_type: 'cache' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
   });
-
-  //  ---------------------------------
-  it( 'StatsSDK/Account/Hits', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .account()
-          .getOne(account_id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'hits'
-          })
-          .expect(200)
-          .then( function( data ) {
-            data.body.data.hits.should.be.equal( test_data_portions );
-            done();
-          });
-      })
-      .catch(done);
-  });
-
-  //  ---------------------------------
-  it( 'StatsSDK/Account/Devices', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .account()
-          .getOne(account_id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'devices'
-          })
-          .expect(200)
-          .then( function( data ) {
-            data.body.data.hits.should.be.equal( test_data_portions );
-            data.body.data.devices_num.should.be.equal( 1 );
-            done();
-          });
-      })
-      .catch(done);
-  });
-
-  // //  ---------------------------------
-  // it( 'StatsSDK/Dirs', function( done ) {
-
-  //   var now = Date.now();
-  //   API.helpers
-  //     .authenticateUser(user)
-  //     .then(function () {
-  //       return API.resources.stats_sdk
-  //         .dirs()
-  //         .getAll({
-  //           app_id: application.id,
-  //           from_timestamp: ( now - 5400000 ),
-  //           to_timestamp: ( now + 1800000 )
-  //         })
-  //         .expect(200)
-  //         .then( function( data ) {
-  //           console.log( data.body );
-  //           done();
-  //         });
-  //     })
-  //     .catch(done);
-  // });
-
-  //  ---------------------------------
-  it( 'StatsSDK/Flow', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .flow()
-          .getAll({
-            app_id: application.id,
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 )
-          })
-          .expect(200)
-          .then( function( data ) {
-            // console.log( data.body );
-            data.body.metadata.total_hits.should.be.equal( test_data_portions * estimated.total_hits );
-            data.body.metadata.total_sent.should.be.equal( test_data_portions * estimated.total_sent );
-            data.body.metadata.total_received.should.be.equal( test_data_portions * estimated.total_received );
-            data.body.metadata.total_spent_ms.should.be.equal( test_data_portions * estimated.total_spent_ms );
-            done();
-          });
-      })
-      .catch(done);
-
-  });
-
-
-
 
 
 
