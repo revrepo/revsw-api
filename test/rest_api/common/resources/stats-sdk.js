@@ -25,7 +25,7 @@ var Methods = Constants.API.METHODS;
 
 var resourceConfig = {
   name: 'stats_sdk',
-  idKey: '',
+  idKey: null,
   path: '/stats/sdk',
   methods: [],
   nestedResources: [{
@@ -44,98 +44,98 @@ var resourceConfig = {
       ]
     }, {
       name: 'dirs',
-      idKey: '',
+      idKey: null,
       path: '/dirs',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'flow',
-      idKey: '',
+      idKey: null,
       path: '/flow',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'agg_flow',
-      idKey: '',
+      idKey: null,
       path: '/agg_flow',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'top_requests',
-      idKey: '',
+      idKey: null,
       path: '/top_requests',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'top_users',
-      idKey: '',
+      idKey: null,
       path: '/top_users',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'top_gbt',
-      idKey: '',
+      idKey: null,
       path: '/top_gbt',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'distributions',
-      idKey: '',
+      idKey: null,
       path: '/distributions',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'top_objects',
-      idKey: '',
+      idKey: null,
       path: '/top_objects',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'top_objects_slowest',
-      idKey: '',
+      idKey: null,
       path: '/top_objects/slowest',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'top_objects_5xx',
-      idKey: '',
+      idKey: null,
       path: '/top_objects/5xx',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'ab_fbt',
-      idKey: '',
+      idKey: null,
       path: '/ab/fbt',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'ab_fbt_distribution',
-      idKey: '',
+      idKey: null,
       path: '/ab/fbt_distribution',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'ab_errors',
-      idKey: '',
+      idKey: null,
       path: '/ab/errors',
       methods: [
         Methods.READ_ALL
       ]
     }, {
       name: 'ab_speed',
-      idKey: '',
+      idKey: null,
       path: '/ab/speed',
       methods: [
         Methods.READ_ALL
