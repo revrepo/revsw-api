@@ -130,6 +130,72 @@ module.exports = {
         });
     },
 
+    //  checkers ------------------------
+
+    checkAppAccQuery: function() {
+      return function( query, response, multiply ) {
+        if ( query.report_type === 'hits' ) {
+          response.data.hits.should.be.equal( multiply );
+        } else {
+          response.data.hits.should.be.equal( multiply );
+          response.data.devices_num.should.be.equal( 1 );
+        }
+      }
+    },
+
+    checkDirsQuery: function() {
+      return function( query, response, multiply ) {
+        response.data.devices.length.should.be.equal( 1 );
+        response.data.operators.length.should.be.equal( 1 );
+        response.data.oses.length.should.be.equal( 1 );
+        response.data.devices[0].should.be.equal( 'iPhone 4S' );
+        response.data.operators[0].should.be.equal( 'AT&T' );
+        response.data.oses[0].should.be.equal( '9.2' );
+      }
+    },
+
+    checkFlowQuery: function() {
+      return function( query, response, multiply ) {
+        response.metadata.total_hits.should.be.equal( multiply * estimated_data_.total_hits );
+        response.metadata.total_sent.should.be.equal( multiply * estimated_data_.total_sent );
+        response.metadata.total_received.should.be.equal( multiply * estimated_data_.total_received );
+        response.metadata.total_spent_ms.should.be.equal( multiply * estimated_data_.total_spent_ms );
+      }
+    },
+
+    checkAggFlowQuery: function() {
+      return function( query, response, multiply ) {
+
+        estimated_data_.aggs = {};
+        var fields = {
+          status_code: { field: 'status_code', keys: {} },
+          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'RevAPM' } },
+          transport: { field: 'edge_transport', keys: { 'standard': 'Standard', 'quic': 'QUIC' } },
+          status: { field: 'success_status', keys: { '0': 'Error', '1': 'Success' } },
+          cache: { field: 'x-rev-cache', keys: { 'HIT': 'HIT', 'MISS': 'MISS' } }
+        };
+
+        test_data_.requests.forEach( function( item ) {
+          var key = item[fields[query.report_type].field];
+          key = fields[query.report_type].keys[key] || key;
+          if ( !estimated_data_.aggs[key] ) {
+            estimated_data_.aggs[key] = {
+              hits: 0,
+              received_bytes: 0,
+              sent_bytes: 0
+            };
+          }
+          estimated_data_.aggs[key].hits++;
+          estimated_data_.aggs[key].received_bytes += item.sent_bytes;
+          estimated_data_.aggs[key].sent_bytes += item.received_bytes;
+        });
+        response.data.forEach( function( item ) {
+          item.hits.should.be.equal( multiply * estimated_data_.aggs[item.key].hits )
+          item.received_bytes.should.be.equal( multiply * estimated_data_.aggs[item.key].received_bytes )
+          item.sent_bytes.should.be.equal( multiply * estimated_data_.aggs[item.key].sent_bytes )
+        });
+      }
+    },
 
   }
 };
