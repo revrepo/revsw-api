@@ -105,7 +105,8 @@ exports.authenticate = function(request, reply) {
   if (request.payload.oneTimePassword) {
     oneTimePassword = request.payload.oneTimePassword;
   }
-  users.get({
+  // NOTE: get user data with validation information
+  users.getValidation({
     email: email
   }, function(error, user) {
 
@@ -126,6 +127,13 @@ exports.authenticate = function(request, reply) {
 
         if (user.self_registered) {
           logger.info('Authenticate::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          // NOTE: User not verify
+          if (user.validation === undefined  || user.validation.verified===false) {
+              logger.error('Authenticate::authenticate: User with ' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
+              authPassed = false;
+              return reply(boom.create(418, 'Your registration not finished'));
+          }
           accounts.get({
             _id: user.companyId
           }, function(error, account) {

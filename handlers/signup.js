@@ -767,18 +767,17 @@ exports.resendRegistrationEmail = function(req, reply) {
  */
 exports.verify = function(req, reply) {
   var token = req.params.token;
+
   if (!config.get('enable_simplified_signup_process')) {
     return reply(boom.badRequest('User verification is temporary disabled'));
   }
-  // return reply(boom.badImplementation('TEST'))
-  users.get({
 
+  users.get({
     'validation.token': token,
     'validation.expiredAt': {
       $gt: Date.now()
     }
   }, function(error, user) {
-    console.log('user', user);
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve validation token/user details for token ' + token));
     }
@@ -792,6 +791,8 @@ exports.verify = function(req, reply) {
       verified: true
     };
     var companyId = _.clone(user.companyId[0]);
+    var _password = _.clone(user.password);
+    // NOTE: delete not updated fields
     delete user.companyId;
     delete user.password;
     //@todo UPDATE ANYTHING ELSE ?
@@ -808,18 +809,12 @@ exports.verify = function(req, reply) {
           return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
             ' User ID: ' + user.id + ' Email: ' + user.email));
         }
-
-        // billing_plans.get({
-        //   _id: account.billing_plan
-        // }, function(err, bp) {
-        //   if (error) {
-        //     return reply(boom.badImplementation('Signup::verify: Failed to find a billing plan associated with account provided' +
-        //       ' Account ID: ' + account.id + ' CreatedBy: ' + account.createdBy));
-        //   }
+        var _user_id =  _.clone(user.user_id);
         var fields = _.merge(user, account);
-        fields.hosted_page = ''; // bp.hosted_page; // TODO:delete - depricated
+        fields.hosted_page = ''; // TODO:delete - depricated
+        // NOTE: send token for auto login after verify
+        fields.token = utils.generateJWT({user_id:_user_id,password:_password});
         result = publicRecordFields.handle(fields, 'verify');
-        console.log('--result for send ', result);
         AuditLogger.store({
           ip_address: utils.getAPIUserRealIP(req),
           datetime: Date.now(),
@@ -836,7 +831,6 @@ exports.verify = function(req, reply) {
         });
 
         renderJSON(req, reply, error, result);
-        // });
       });
     });
   });
