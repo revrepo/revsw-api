@@ -170,7 +170,6 @@ describe('Smoke check', function () {
     });
   });
 
-
   //  ---------------------------------
   parallel('StatsSDK/Flow resource,', function () {
 
@@ -522,6 +521,8 @@ describe('Smoke check', function () {
       });
   });
 
+/*
+*/
 
 
 });
