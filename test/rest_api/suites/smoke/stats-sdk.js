@@ -168,9 +168,7 @@ describe('Smoke check', function () {
       it(getCommonSpecDescription(queryParams),
         getSpecCallback(queryParams));
     });
-
   });
-
 
   //  ---------------------------------
   parallel('StatsSDK/Flow resource,', function () {
@@ -523,6 +521,8 @@ describe('Smoke check', function () {
       });
   });
 
+/*
+*/
 
 
 });

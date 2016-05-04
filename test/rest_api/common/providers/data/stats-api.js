@@ -26,6 +26,7 @@ var config = require('config');
 var promise = require('bluebird');
 var request = promise.promisify(require('request'));
 var elastic = require('elasticsearch');
+var url = require('url');
 
 var Utils = require('./../../../common/utils');
 
@@ -67,6 +68,7 @@ module.exports = {
         item.start_ts += notch;
         item.end_ts += notch;
         item.first_byte_ts += notch;
+        item.domain = url.parse( ( item.url || '' ) ).hostname || '';
         estimated_data_.total_sent += item.received_bytes;
         estimated_data_.total_received += item.sent_bytes;  //  yes, intentionaly
         estimated_data_.total_spent_ms += ( item.end_ts > item.start_ts ? item.end_ts - item.start_ts : 0 );
@@ -130,17 +132,265 @@ module.exports = {
         });
     },
 
+    //  checkers ------------------------
 
+    //  debug
+    logResponse: function() {
+      return function( query, response, multiply ) {
+        console.log( response.data );
+      }
+    },
+
+    checkAppAccQuery: function() {
+      return function( query, response, multiply ) {
+        if ( query.report_type === 'hits' ) {
+          response.data.hits.should.be.equal( multiply );
+        } else {
+          response.data.hits.should.be.equal( multiply );
+          response.data.devices_num.should.be.equal( 1 );
+        }
+      }
+    },
+
+    checkDirsQuery: function() {
+      return function( query, response, multiply ) {
+        response.data.devices.length.should.be.equal( 1 );
+        response.data.operators.length.should.be.equal( 1 );
+        response.data.oses.length.should.be.equal( 1 );
+        response.data.devices[0].should.be.equal( 'iPhone 4S' );
+        response.data.operators[0].should.be.equal( 'AT&T' );
+        response.data.oses[0].should.be.equal( '9.2' );
+      }
+    },
+
+    checkFlowQuery: function() {
+      return function( query, response, multiply ) {
+        response.metadata.total_hits.should.be.equal( multiply * estimated_data_.total_hits );
+        response.metadata.total_sent.should.be.equal( multiply * estimated_data_.total_sent );
+        response.metadata.total_received.should.be.equal( multiply * estimated_data_.total_received );
+        response.metadata.total_spent_ms.should.be.equal( multiply * estimated_data_.total_spent_ms );
+      }
+    },
+
+    checkAggFlowQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        var fields = {
+          status_code: { field: 'status_code', keys: {} },
+          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'RevAPM' } },
+          transport: { field: 'edge_transport', keys: { 'standard': 'Standard', 'quic': 'QUIC' } },
+          status: { field: 'success_status', keys: { '0': 'Error', '1': 'Success' } },
+          cache: { field: 'x-rev-cache', keys: { 'HIT': 'HIT', 'MISS': 'MISS' } }
+        };
+
+        test_data_.requests.forEach( function( item ) {
+          var key = item[fields[query.report_type].field];
+          key = fields[query.report_type].keys[key] || key;
+          if ( !aggs[key] ) {
+            aggs[key] = {
+              hits: 0,
+              received_bytes: 0,
+              sent_bytes: 0
+            };
+          }
+          aggs[key].hits++;
+          aggs[key].received_bytes += item.sent_bytes;
+          aggs[key].sent_bytes += item.received_bytes;
+        });
+        response.data.forEach( function( item ) {
+          item.hits.should.be.equal( multiply * aggs[item.key].hits );
+          item.received_bytes.should.be.equal( multiply * aggs[item.key].received_bytes );
+          item.sent_bytes.should.be.equal( multiply * aggs[item.key].sent_bytes );
+        });
+      }
+    },
+
+    checkTopsQuery: function( count ) {
+      return function( query, response, multiply ) {
+        var fields = {
+          country: ['geoip','country_code2'],
+          os: ['device','os'],
+          device: ['device','model'],
+          operator: ['carrier','net_operator'],
+          network: ['carrier','signal_type']
+        };
+        var key = test_data_[fields[query.report_type][0]][fields[query.report_type][1]];
+        count = count || multiply * test_data_.requests.length;
+        response.data.length.should.be.equal( 1 );
+        response.data[0].key.should.be.equal( key );
+        response.data[0].count.should.be.equal( count );
+      }
+    },
+
+    checkTopGBTQuery: function() {
+      return function( query, response, multiply ) {
+        var fields = {
+          country: ['geoip','country_code2'],
+          os: ['device','os'],
+          device: ['device','model'],
+          operator: ['carrier','net_operator'],
+          network: ['carrier','signal_type']
+        };
+        var key = test_data_[fields[query.report_type][0]][fields[query.report_type][1]];
+        response.data.length.should.be.equal( 1 );
+        response.data[0].key.should.be.equal( key );
+        response.data[0].count.should.be.equal( multiply * test_data_.requests.length );
+        response.data[0].received_bytes.should.be.equal( multiply * estimated_data_.total_received );
+        response.data[0].sent_bytes.should.be.equal( multiply * estimated_data_.total_sent );
+      }
+    },
+
+    checkDistributionQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        var fields = {
+          status_code: { field: 'status_code', keys: {} },
+          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'RevAPM' } },
+          transport: { field: 'edge_transport', keys: { 'standard': 'Standard', 'quic': 'QUIC' } },
+          status: { field: 'success_status', keys: { '0': 'Error', '1': 'Success' } },
+          cache: { field: 'x-rev-cache', keys: { 'HIT': 'HIT', 'MISS': 'MISS' } },
+          domain: { field: 'domain', keys: {} }
+        };
+
+        test_data_.requests.forEach( function( item ) {
+          var key = item[fields[query.report_type].field];
+          key = fields[query.report_type].keys[key] || key;
+          if ( !aggs[key] ) {
+            aggs[key] = {
+              count: 0,
+              received_bytes: 0,
+              sent_bytes: 0
+            };
+          }
+          aggs[key].count++;
+          aggs[key].received_bytes += item.sent_bytes;
+          aggs[key].sent_bytes += item.received_bytes;
+        });
+        response.data.forEach( function( item ) {
+          item.count.should.be.equal( multiply * aggs[item.key].count );
+          if ( query.report_type === 'status_code' ) {
+            item.received_bytes.should.be.equal( 0 );
+            item.sent_bytes.should.be.equal( 0 );
+          } else {
+            item.received_bytes.should.be.equal( multiply * aggs[item.key].received_bytes );
+            item.sent_bytes.should.be.equal( multiply * aggs[item.key].sent_bytes );
+          }
+        });
+      }
+    },
+
+    checkTopObjectQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        var fields = {
+          failed: { field: 'success_status', val: 0 },
+          cache_missed: { field: 'x-rev-cache', val: 'MISS' },
+          not_found: { field: 'status_code', val: 404 }
+        };
+
+        test_data_.requests.forEach( function( item ) {
+          if ( !query.report_type ||
+               item[fields[query.report_type].field] === fields[query.report_type].val ) {
+            if ( !aggs[item.url] ) {
+              aggs[item.url] = { count: 0 };
+            }
+            aggs[item.url].count++;
+          }
+        });
+        response.data.forEach( function( item ) {
+          item.count.should.be.equal( multiply * aggs[item.key].count );
+        });
+      }
+    },
+
+    checkTopObjectSlowestQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        var fields = {
+          full: 'end_ts',
+          first_byte: 'first_byte_ts'
+        };
+
+        test_data_.requests.forEach( function( item ) {
+          if ( !aggs[item.url] ) {
+            aggs[item.url] = { count: 0, val: 0 };
+          }
+          aggs[item.url].count++;
+          var val = item[fields[query.report_type]];
+          aggs[item.url].val += ( val > item.start_ts ? val - item.start_ts : 0 );
+        });
+
+        response.data.forEach( function( item ) {
+          item.count.should.be.equal( multiply * aggs[item.key].count );
+          item.val.should.be.equal( Math.round( aggs[item.key].val / aggs[item.key].count ) );
+        });
+      }
+    },
+
+    checkTopObject5xxQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        test_data_.requests.forEach( function( item ) {
+          if ( item.status_code >= 500 ) {
+            if ( !aggs[item.status_code] ) {
+              aggs[item.status_code] = { count: 0 };
+            }
+            aggs[item.status_code].count++;
+          }
+        });
+
+        response.data.forEach( function( item ) {
+          item.count.should.be.equal( multiply * aggs[item.key].count );
+        });
+      }
+    },
+
+    checkABQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        test_data_.requests.forEach( function( item ) {
+          if ( !aggs[item.destination] ) {
+            aggs[item.destination] = { count: 0 };
+          }
+          aggs[item.destination].count++;
+        });
+
+        response.data.forEach( function( item ) {
+          item.count.should.be.equal( multiply * aggs[item.key].count );
+        });
+
+      }
+    },
+
+    checkABErrorsQuery: function() {
+      return function( query, response, multiply ) {
+
+        var aggs = {};
+        test_data_.requests.forEach( function( item ) {
+          if ( item.success_status === 0 ) {  //  { 'requests.success_status': 0 }
+            if ( !aggs[item.destination] ) {
+              aggs[item.destination] = { count: 0 };
+            }
+            aggs[item.destination].count++;
+          }
+        });
+
+        response.data.forEach( function( item ) {
+          item.count.should.be.equal( multiply * aggs[item.key].count );
+        });
+      }
+    },
   }
 };
 
 //  test data ------------------------------------------------------------------------------------//
 var ip_ = '8.8.8.8',
-  geo_ = {
-    country_code2: 'US',
-    region_name: 'CA',
-    city_name: 'Mountain View'
-  },
   idx_, client_, client_url_,
   application_id,
   estimated_data_ = {};
@@ -299,7 +549,13 @@ var test_data_ = {
     cpu_sub: '0',
     cpu_freq: '_',
     imsi: '_',
-    manufacture: 'Apple'
+    manufacture: 'Apple',
+    model: 'iPhone 4S'
+  },
+  geoip: {
+    country_code2: 'US',
+    region_name: 'CA',
+    city_name: 'Mountain View'
   },
   requests: [{
     end_ts: 1453424149123,

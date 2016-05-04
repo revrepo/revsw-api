@@ -6,6 +6,14 @@ module.exports = {
       READ_ONE: 'read-one',
       UPDATE: 'update',
       DELETE: 'delete'
+    },
+    USERS: {
+      ROLES: {
+        REV_ADMIN: 'Rev Admin',
+        RESELLER: 'Reseller',
+        ADMIN: 'Admin',
+        USER: 'Normal User'
+      }
     }
   }
 }

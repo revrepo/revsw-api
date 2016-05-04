@@ -17,7 +17,7 @@
  */
 
 require('should-http');
-// var parallel = require('mocha.parallel');
+var parallel = require('mocha.parallel');
 
 var config = require('config');
 var API = require('./../../common/api');
@@ -35,7 +35,7 @@ var ok_prefix = '    ' + Utils.colored( 'LightBlue', '•' ) + ' ';
 
 //  ----------------------------------------------------------------------------------------------//
 
-describe('Functional check:', function () {
+describe('StatsSDK Functional check:', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   // this.timeout(10000);
@@ -45,11 +45,7 @@ describe('Functional check:', function () {
   var user = config.get('api.users.reseller'),
     account_id,
     application,
-    testdata = StatsAPIDDHelper.getTestData(),
-    estimated = StatsAPIDDHelper.getEstimatedData(),
-    test_data_portions = 4,
-    total_requests = test_data_portions * testdata.requests.length;
-
+    test_data_portions = 4;
 
   //  ---------------------------------
   before(function (done) {
@@ -119,163 +115,116 @@ describe('Functional check:', function () {
       .catch(done);
   });
 
-
   //  ---------------------------------
-  // it( 'Application', function( done ) {
-  //   setTimeout( done, 1000 );
-  // } );
+  var testOne_ = function( method, query, multiply, checker ) {
 
+    return function( done ) {
+      var now = Date.now();
+      query.from_timestamp = now - 5400000;
+      query.to_timestamp = now + 1800000;
+      var id = method === 'app' ? application.id : account_id;
+      API.helpers
+        .authenticateUser(user)
+        .then(function () {
+          return API.resources.stats_sdk[method]()
+            .getOne(id,query)
+            .expect(200)
+            .then( function( data ) {
+              checker( query, data.body, multiply );
+              done();
+            });
+        })
+        .catch(done);
+    };
+  };
 
-  //  ---------------------------------
-  it( 'StatsSDK/Application/Hits', function( done ) {
+  var testAll_ = function( method, query, multiply, checker ) {
 
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .app()
-          .getOne(application.id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'hits'
-          })
-          .expect(200)
-          .then( function( data ) {
-            // console.log( data.body );
-            data.body.data.hits.should.be.equal( test_data_portions );
-            done();
-          });
-      })
-      .catch(done);
+    return function( done ) {
+      var now = Date.now();
+      query.from_timestamp = now - 5400000;
+      query.to_timestamp = now + 1800000;
+      query.app_id = application.id;
+      API.helpers
+        .authenticateUser(user)
+        .then(function () {
+          return API.resources.stats_sdk[method]()
+            .getAll(query)
+            .expect(200)
+            .then( function( data ) {
+              checker( query, data.body, multiply );
+              done();
+            });
+        })
+        .catch(done);
+    };
+  };
+
+  parallel( 'Application/Account', function() {
+    it( 'Application/Hits', testOne_( 'app', { report_type: 'hits' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Application/Devices', testOne_( 'app', { report_type: 'devices' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Account/Hits', testOne_( 'account', { report_type: 'hits' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Account/Devices', testOne_( 'account', { report_type: 'devices' }, test_data_portions, StatsAPIDDHelper.checkAppAccQuery() ) );
+    it( 'Dirs', testAll_( 'dirs', {}, test_data_portions, StatsAPIDDHelper.checkDirsQuery() ) );
 
   });
 
-  //  ---------------------------------
-  it( 'StatsSDK/Application/Devices', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .app()
-          .getOne(application.id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'devices'
-          })
-          .expect(200)
-          .then( function( data ) {
-            data.body.data.hits.should.be.equal( test_data_portions );
-            data.body.data.devices_num.should.be.equal( 1 );
-            done();
-          });
-      })
-      .catch(done);
-
+  parallel( 'Flows', function() {
+    it( 'Flow', testAll_( 'flow', {}, test_data_portions, StatsAPIDDHelper.checkFlowQuery() ) );
+    it( 'Aggregated Flow, status_code', testAll_( 'agg_flow', { report_type: 'status_code' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, destination', testAll_( 'agg_flow', { report_type: 'destination' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, transport', testAll_( 'agg_flow', { report_type: 'transport' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, status', testAll_( 'agg_flow', { report_type: 'status' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
+    it( 'Aggregated Flow, cache', testAll_( 'agg_flow', { report_type: 'cache' }, test_data_portions, StatsAPIDDHelper.checkAggFlowQuery() ) );
   });
 
-  //  ---------------------------------
-  it( 'StatsSDK/Account/Hits', function( done ) {
+  parallel( 'Tops', function() {
+    it( 'Top Requests, country', testAll_( 'top_requests', { report_type: 'country' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery() ) );
+    it( 'Top Requests, os', testAll_( 'top_requests', { report_type: 'os' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery() ) );
+    it( 'Top Requests, device', testAll_( 'top_requests', { report_type: 'device' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery() ) );
+    it( 'Top Requests, operator', testAll_( 'top_requests', { report_type: 'operator' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery() ) );
+    it( 'Top Requests, network', testAll_( 'top_requests', { report_type: 'network' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery() ) );
 
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .account()
-          .getOne(account_id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'hits'
-          })
-          .expect(200)
-          .then( function( data ) {
-            data.body.data.hits.should.be.equal( test_data_portions );
-            done();
-          });
-      })
-      .catch(done);
+    it( 'Top Users, country', testAll_( 'top_users', { report_type: 'country' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery(1) ) );
+    it( 'Top Users, os', testAll_( 'top_users', { report_type: 'os' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery(1) ) );
+    it( 'Top Users, device', testAll_( 'top_users', { report_type: 'device' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery(1) ) );
+    it( 'Top Users, operator', testAll_( 'top_users', { report_type: 'operator' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery(1) ) );
+    it( 'Top Users, network', testAll_( 'top_users', { report_type: 'network' }, test_data_portions, StatsAPIDDHelper.checkTopsQuery(1) ) );
+
+    it( 'Top GBT, country', testAll_( 'top_gbt', { report_type: 'country' }, test_data_portions, StatsAPIDDHelper.checkTopGBTQuery() ) );
+    it( 'Top GBT, os', testAll_( 'top_gbt', { report_type: 'os' }, test_data_portions, StatsAPIDDHelper.checkTopGBTQuery() ) );
+    it( 'Top GBT, device', testAll_( 'top_gbt', { report_type: 'device' }, test_data_portions, StatsAPIDDHelper.checkTopGBTQuery() ) );
+    it( 'Top GBT, operator', testAll_( 'top_gbt', { report_type: 'operator' }, test_data_portions, StatsAPIDDHelper.checkTopGBTQuery() ) );
+    it( 'Top GBT, network', testAll_( 'top_gbt', { report_type: 'network' }, test_data_portions, StatsAPIDDHelper.checkTopGBTQuery() ) );
   });
 
-  //  ---------------------------------
-  it( 'StatsSDK/Account/Devices', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .account()
-          .getOne(account_id, {
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 ),
-            report_type: 'devices'
-          })
-          .expect(200)
-          .then( function( data ) {
-            data.body.data.hits.should.be.equal( test_data_portions );
-            data.body.data.devices_num.should.be.equal( 1 );
-            done();
-          });
-      })
-      .catch(done);
+  parallel( 'Distributions', function() {
+    it( 'Distribution, destination', testAll_( 'distributions', { report_type: 'destination' }, test_data_portions, StatsAPIDDHelper.checkDistributionQuery() ) );
+    it( 'Distribution, transport', testAll_( 'distributions', { report_type: 'transport' }, test_data_portions, StatsAPIDDHelper.checkDistributionQuery() ) );
+    it( 'Distribution, status', testAll_( 'distributions', { report_type: 'status' }, test_data_portions, StatsAPIDDHelper.checkDistributionQuery() ) );
+    it( 'Distribution, cache', testAll_( 'distributions', { report_type: 'cache' }, test_data_portions, StatsAPIDDHelper.checkDistributionQuery() ) );
+    it( 'Distribution, domain', testAll_( 'distributions', { report_type: 'domain' }, test_data_portions, StatsAPIDDHelper.checkDistributionQuery() ) );
+    it( 'Distribution, status_code', testAll_( 'distributions', { report_type: 'status_code' }, test_data_portions, StatsAPIDDHelper.checkDistributionQuery() ) );
   });
 
-  // //  ---------------------------------
-  // it( 'StatsSDK/Dirs', function( done ) {
+  parallel( 'Top Objects', function() {
+    it( 'Top Objects', testAll_( 'top_objects', {}, test_data_portions, StatsAPIDDHelper.checkTopObjectQuery() ) );
+    it( 'Top Objects, failed', testAll_( 'top_objects', { report_type: 'failed' }, test_data_portions, StatsAPIDDHelper.checkTopObjectQuery() ) );
+    it( 'Top Objects, cache_missed', testAll_( 'top_objects', { report_type: 'cache_missed' }, test_data_portions, StatsAPIDDHelper.checkTopObjectQuery() ) );
+    it( 'Top Objects, not_found', testAll_( 'top_objects', { report_type: 'not_found' }, test_data_portions, StatsAPIDDHelper.checkTopObjectQuery() ) );
 
-  //   var now = Date.now();
-  //   API.helpers
-  //     .authenticateUser(user)
-  //     .then(function () {
-  //       return API.resources.stats_sdk
-  //         .dirs()
-  //         .getAll({
-  //           app_id: application.id,
-  //           from_timestamp: ( now - 5400000 ),
-  //           to_timestamp: ( now + 1800000 )
-  //         })
-  //         .expect(200)
-  //         .then( function( data ) {
-  //           console.log( data.body );
-  //           done();
-  //         });
-  //     })
-  //     .catch(done);
-  // });
+    it( 'Top Objects/Slowest, full', testAll_( 'top_objects_slowest', { report_type: 'full' }, test_data_portions, StatsAPIDDHelper.checkTopObjectSlowestQuery() ) );
+    it( 'Top Objects/Slowest, first_byte', testAll_( 'top_objects_slowest', { report_type: 'first_byte' }, test_data_portions, StatsAPIDDHelper.checkTopObjectSlowestQuery() ) );
 
-  //  ---------------------------------
-  it( 'StatsSDK/Flow', function( done ) {
-
-    var now = Date.now();
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.resources.stats_sdk
-          .flow()
-          .getAll({
-            app_id: application.id,
-            from_timestamp: ( now - 5400000 ),
-            to_timestamp: ( now + 1800000 )
-          })
-          .expect(200)
-          .then( function( data ) {
-            // console.log( data.body );
-            data.body.metadata.total_hits.should.be.equal( test_data_portions * estimated.total_hits );
-            data.body.metadata.total_sent.should.be.equal( test_data_portions * estimated.total_sent );
-            data.body.metadata.total_received.should.be.equal( test_data_portions * estimated.total_received );
-            data.body.metadata.total_spent_ms.should.be.equal( test_data_portions * estimated.total_spent_ms );
-            done();
-          });
-      })
-      .catch(done);
-
+    it( 'Top Objects/5xx', testAll_( 'top_objects_5xx', {}, test_data_portions, StatsAPIDDHelper.checkTopObject5xxQuery() ) );
   });
 
-
-
+  parallel( 'ABs', function() {
+    it( 'AB FBT', testAll_( 'ab_fbt', {}, test_data_portions, StatsAPIDDHelper.checkABQuery() ) );
+    it( 'AB FBT Distribution', testAll_( 'ab_fbt_distribution', {}, test_data_portions, StatsAPIDDHelper.checkABQuery() ) );
+    it( 'AB Errors', testAll_( 'ab_errors', {}, test_data_portions, StatsAPIDDHelper.checkABErrorsQuery() ) );
+    it( 'AB Speed', testAll_( 'ab_speed', {}, test_data_portions, StatsAPIDDHelper.checkABQuery() ) );
+  });
 
 
 

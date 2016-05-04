@@ -242,6 +242,40 @@ var BasicResource = function (data) {
     };
   }
 
+  if (_contains(data.methods, Methods.CREATE)) {
+    /**
+     * ### BasicResource.createManyIfNotExist()
+     *
+     * Sends the CREATE request to the API in order to create specified objects.
+     * All requests are run one after other using promises.
+     *
+     * NOTE: If item to create already exists. It won't propagate the error.
+     *
+     * @param {Array} items, list/array of the items of the objects to create
+     *
+     * @returns {Object} a promise instance
+     */
+    _resource.createManyIfNotExist = function (items) {
+      var me = this;
+      return Promise.each(items, function (item) { // One promise after other
+        return me
+          .createOne(item)
+          .then(function (res) {
+            if (res.body.statusCode && parseInt(res.body.statusCode) !== 200) {
+              console.log('      > Cannot create item:', item,
+                res.body.message);
+            }
+            else {
+              console.log('      > Item created: (' + res.body.message + ')');
+            }
+          })
+          .catch(function (err) {
+            console.log('      > Cannot create item:', item, err);
+          }); // We catch any errors as we don't want them to be propagated
+      });
+    };
+  }
+
   if (_contains(data.methods, Methods.UPDATE)) {
     /**
      * ### BasicResource.update()
@@ -313,7 +347,7 @@ var BasicResource = function (data) {
      * ### BasicResource.deleteManyIfExist()
      *
      * Sends the DELETE request to the API in order to delete specified objects
-     * with given IDs. All request are run in parallel using promises.
+     * with given IDs. All requests are run run one after other using promises.
      *
      * NOTE: Items will be delete only if they exist. If not, it won't do
      * anything.
@@ -328,7 +362,7 @@ var BasicResource = function (data) {
         return me
           .deleteOne(id)
           .then(function (res) {
-            if (res.body.statusCode && res.body.statusCode != 200) {
+            if (res.body.statusCode && parseInt(res.body.statusCode) !== 200) {
               console.log('Cannot delete item:', id, res.body.message);
             }
             else {
