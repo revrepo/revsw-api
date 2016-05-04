@@ -362,13 +362,14 @@ var BasicResource = function (data) {
         return me
           .deleteOne(id)
           .then(function (res) {
+            var msg;
             if (res.body.statusCode && parseInt(res.body.statusCode) !== 200) {
-              console.log('Cannot delete item:', id, res.body.message);
+              msg = '      > Cannot delete item:';
             }
             else {
-              console.log('      > Item deleted:', id,
-                '(' + res.body.message + ')');
+              msg = '      > Item deleted:';
             }
+            console.log(msg, id, '(' + res.body.message + ')');
           })
           .catch(function () {
             console.log('Do not do anything else as item does not exist:', id);
