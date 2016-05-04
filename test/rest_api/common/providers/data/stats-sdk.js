@@ -55,13 +55,13 @@ var StatsSDKDataProvider = {
       var pars = Utils.combineQueries(
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
-        [{device: 'Sony'},{device: 'Lenovo'}],
-        [{country:'US'},{country:'CN'},{country:'GB'}],
+        [{device: 'Sony'},{}],
+        [{country:'US'},{}],
         [{operator:'AOL'}],
-        [{network:'WiFi'},{network:'Cellular'}]
+        [{network:'WiFi'},{}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 50;
+      // Utils.shuffleArray( pars );
+      // pars.length = 50;
       return pars;
     },
 
@@ -69,14 +69,14 @@ var StatsSDKDataProvider = {
       var pars = Utils.combineQueries(
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
-        [{device: 'Sony'},{device: 'Lenovo'}],
-        [{country:'US'},{country:'GB'}],
+        [{device: 'Sony'}],
+        [{country:'US'},{}],
         [{operator:'AOL'}],
-        [{network:'WiFi'},{network:'Cellular'}],
+        [{network:'WiFi'}],
         [{report_type:'status_code'},{report_type:'destination'},{report_type:'transport'},{report_type:'status'},{report_type:'cache'}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 100;
+      // Utils.shuffleArray( pars );
+      // pars.length = 100;
       return pars;
     },
 
@@ -101,16 +101,16 @@ var StatsSDKDataProvider = {
       var pars = Utils.combineQueries(
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
-        [{count:13},{count:77},{}],
-        [{os:'Android'},{}],
-        [{device:'Sony'},{device:'Lenovo'},{}],
-        [{country:'US'},{country:'GB'},{}],
-        [{operator:'AOL'},{}],
-        [{network:'WiFi'},{network:'Cellular'},{}],
+        [{count:41},{}],
+        [{os:'Android'}],
+        [{device:'Sony'}],
+        [{country:'US'}],
+        [{operator:'AOL'}],
+        [{network:'WiFi'},{}],
         [{report_type:'failed'},{report_type:'cache_missed'},{report_type:'not_found'}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 100;
+      // Utils.shuffleArray( pars );
+      // pars.length = 100;
       return pars;
     },
 
@@ -118,16 +118,16 @@ var StatsSDKDataProvider = {
       var pars = Utils.combineQueries(
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
-        [{count:13},{count:77},{}],
-        [{os:'Android'},{}],
-        [{device:'Sony'},{device:'Lenovo'},{}],
-        [{country:'US'},{country:'GB'},{}],
-        [{operator:'AOL'},{}],
-        [{network:'WiFi'},{network:'Cellular'},{}],
+        [{count:29},{}],
+        [{os:'Android'}],
+        [{device:'Sony'}],
+        [{country:'US'}],
+        [{operator:'AOL'}],
+        [{network:'WiFi'},{}],
         [{report_type:'full'},{report_type:'first_byte'}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 100;
+      // Utils.shuffleArray( pars );
+      // pars.length = 100;
       return pars;
     },
 
@@ -135,15 +135,15 @@ var StatsSDKDataProvider = {
       var pars = Utils.combineQueries(
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
-        [{count:13},{count:77},{}],
-        [{os:'Android'},{}],
-        [{device:'Sony'},{device:'Lenovo'},{}],
-        [{country:'US'},{country:'GB'},{}],
-        [{operator:'AOL'},{}],
-        [{network:'WiFi'},{network:'Cellular'},{}]
+        [{count:13},{}],
+        [{os:'Android'}],
+        [{device:'Sony'}],
+        [{country:'US'},{}],
+        [{operator:'AOL'}],
+        [{network:'WiFi'},{}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 100;
+      // Utils.shuffleArray( pars );
+      // pars.length = 100;
       return pars;
     },
 
@@ -152,13 +152,13 @@ var StatsSDKDataProvider = {
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
         [{os:'Android'},{}],
-        [{device:'Sony'},{device:'Lenovo'},{}],
-        [{country:'US'},{country:'GB'},{}],
-        [{operator:'AOL'},{}],
-        [{network:'WiFi'},{network:'Cellular'},{}]
+        [{device:'Lenovo'},{}],
+        [{country:'GB'},{}],
+        [{operator:'AOL'}],
+        [{network:'WiFi'}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 100;
+      // Utils.shuffleArray( pars );
+      // pars.length = 100;
       return pars;
     },
 
@@ -166,16 +166,16 @@ var StatsSDKDataProvider = {
       var pars = Utils.combineQueries(
         this.timestamps_(),
         [{account_id: true},{app_id: true}],
-        [{interval_ms:200},{interval_ms:500},{}],
-        [{limit_ms:8000},{limit_ms:4000},{}],
-        [{os:'Android'},{}],
-        [{device:'Sony'},{device:'Lenovo'},{}],
-        [{country:'US'},{country:'GB'},{}],
+        [{interval_ms:200}],
+        [{limit_ms:8000},{}],
+        [{os:'Android'}],
+        [{device:'Lenovo'}],
+        [{country:'US'}],
         [{operator:'AOL'},{}],
-        [{network:'WiFi'},{network:'Cellular'},{}]
+        [{network:'Cellular'},{}]
       );
-      Utils.shuffleArray( pars );
-      pars.length = 100;
+      // Utils.shuffleArray( pars );
+      // pars.length = 100;
       return pars;
     },
 

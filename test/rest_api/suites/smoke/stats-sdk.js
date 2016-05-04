@@ -168,7 +168,6 @@ describe('Smoke check', function () {
       it(getCommonSpecDescription(queryParams),
         getSpecCallback(queryParams));
     });
-
   });
 
 
