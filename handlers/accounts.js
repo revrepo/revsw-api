@@ -306,8 +306,10 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
             info.subscription.product_name = info.subscription.product.name;
             info.subscription.billing_portal_link= result.billing_portal_link;
             delete info.subscription.product;
-            delete info.subscription.credit_card.current_vault;
-            delete info.subscription.credit_card.customer_id;
+            if(!!info.subscription.credit_card){
+              delete info.subscription.credit_card.current_vault;
+              delete info.subscription.credit_card.customer_id;
+            }
             delete info.subscription.customer;
             renderJSON(request, reply, error, info);
           }

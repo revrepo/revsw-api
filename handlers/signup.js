@@ -25,6 +25,7 @@ var AuditLogger = require('../lib/audit');
 var utils = require('../lib/utilities');
 var mail = require('../lib/mail');
 var chargifyProduct = require('../lib/chargify').Product;
+var chargifyCustomer = require('../lib/chargify').Customer;
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var _ = require('lodash');
@@ -50,7 +51,71 @@ Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(chargifyProduct);
+Promise.promisifyAll(chargifyCustomer);
 
+var sendVerifyToken = function(user, token, cb) {
+  var mailOptions = {
+    to: user.email,
+    subject: config.get('user_verify_subject'),
+    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
+      'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+      'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
+      'If you did not request this, please ignore this email.\n\n' +
+      'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
+      'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+  };
+  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+  if (bcc_email !== '') {
+    mailOptions.bcc = bcc_email;
+  }
+  mail.sendMail(mailOptions, cb);
+};
+
+function sendEmailForRegistration(user, account, billing_plan, cb) {
+  var _customer_chargify = {
+    first_name: user.firstname,
+    last_name: user.lastname,
+    email: user.email,
+    phone: account.phone_number,
+    reference: account.id, // NOTE: Chargify`s custoners it is our Accounts
+    organization: account.companyName,
+    billing_address: account.billing_info.address1,
+    billing_address_2: account.billing_info.address2,
+    billing_city: account.billing_info.city,
+    billing_zip: account.billing_info.zipcode,
+    billing_country: account.billing_info.country,
+    billing_state: account.billing_info.state
+  };
+
+  var mailOptions = {
+    to: user.email,
+    subject: config.get('user_verify_subject'),
+    html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
+      '<p>Hello ' + user.firstname + ',</p>' +
+      '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
+      '<p>Please click on ' +
+      '<a href="' + billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
+      '</a> link to complete the process.' +
+      '</p>' +
+      '<p>If you did not request this, please ignore this email.</p>\n\n' +
+      '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
+      '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
+      '</div>'
+  };
+
+  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+  if (bcc_email !== '') {
+    mailOptions.bcc = bcc_email;
+  }
+
+  // NOTE: when we send email we do not control success or error. We only create log
+  mail.sendMail(mailOptions, function(err, data) {
+    if (err) {
+      logger.error('sendEmailForRegistration:error: ' + JSON.stringify(err));
+    }
+    cb(err, data);
+  });
+}
 /**
  * @name  signup
  * @description
@@ -80,7 +145,7 @@ exports.signup = function(req, reply) {
   users.getAsync({
       email: data.email
     })
-    .then(function (user) {
+    .then(function userValidation(user) {
       if (user) {
         logger.debug('signup:: User ' + data.email + ' already exists in the DB, record: ' + JSON.stringify(user));
         if (user.validation && user.validation.verified !== true) {
@@ -113,7 +178,6 @@ exports.signup = function(req, reply) {
     .then(function successFindInternalBullingPlan(internal_data) {
       _billing_plan = internal_data;
       // NOTE: get current Cahrgify Product Information
-      // NOTE: new specific handler name - it is start with 'billing-plan-'
       return chargifyProduct
         .getHostedPageAsync(data.billing_plan)
         .then(function(billin_plan_info) {
@@ -309,170 +373,275 @@ exports.signup = function(req, reply) {
       reply(boom.notImplemented(err.message || 'Error signup process'));
     });
 
-  /**
-   * @name  createUser
-   * @description
-   *
-   * @param  {String} email - the user's data for registration
-   * @return {Promise}
-   */
-  function createUser(newUser) {
-    return new Promise(function(resolve, reject) {
-      users.getValidation({
-        email: newUser.email
-      }, function(err, user) {
-        if (err) {
-          reject(err);
-        }
-        if (!!user) {
-          reject({
-            user: user
-          });
-        } else {
-          // TODO: start
-          var token = utils.generateToken();
-          newUser.self_registered = true;
-          newUser.validation = {
-            expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-            token: token,
-            verified: false
-          };
-          users.addAsync(newUser)
-            .then(
-              function(user) {
-                resolve(user);
-              },
-              function(err) {
-                reject(err);
-              }
-            );
-        }
-      });
-    });
-  }
 };
 
-/*
 
-// TODO: delete after create new test
-exports.signup_todo_delete = function(req, reply) {
-  var data = req.payload;
-  if (!config.get('enable_self_registration')) {
-    return reply(boom.badRequest('User self-registration is temporary disabled'));
-  }
-
-  // Check user email address
-  users.get({
-    email: data.email
-  }, function(err, user) {
-    if (err) {
-      return reply(boom.badImplementation('Failed to fetch user details for email ' + data.email));
-    }
-
-    if (user) {
-      // TODO: not sure that we use 'deleted' attribute
-      if (user.deleted) {
-        return reply(boom.badRequest('User has delete flag'));
+/**
+ * @name  createUser
+ * @description
+ *
+ * @param  {String} email - the user's data for registration
+ * @return {Promise}
+ */
+function createUser(newUser) {
+  return new Promise(function(resolve, reject) {
+    users.getValidation({
+      email: newUser.email
+    }, function(err, user) {
+      if (err) {
+        reject(err);
       }
-      return reply(boom.badRequest('This email address already exists in the system'));
-    }
-
-    if (!data.company_name) {
-      data.company_name = data.firstname + ' ' + data.lastname + '\'s Company';
-    }
-    var newUser = {
-      firstname: data.firstname,
-      lastname: data.lastname,
-      password: data.password,
-      role: 'admin',
-      email: data.email
-    };
-
-    var newCompany = {
-      companyName: data.company_name,
-      createdBy: data.email,
-      address1: data.address1,
-      address2: data.address2,
-      country: data.country,
-      state: data.state,
-      city: data.city,
-      zipcode: data.zipcode,
-      phone_number: data.phone_number,
-      billing_plan: data.billing_plan
-    };
-
-    accounts.add(newCompany, function(error, result) {
-
-      if (error || !result) {
-        return reply(boom.badImplementation('Failed to add new account ' + newCompany.companyName));
-      }
-
-      result = publicRecordFields.handle(result, 'account');
-
-      if (result) {
-        newUser.companyId = result.id;
+      if (!!user) {
+        reject({
+          user: user
+        });
+      } else {
+        // TODO: start
         var token = utils.generateToken();
         newUser.self_registered = true;
         newUser.validation = {
           expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-          token: token
+          token: token,
+          verified: false
         };
-        // All ok
-        users.add(newUser, function(err, user) {
-          if (err || !user) {
-            // TODO: we must destroy the newCompany (the new Account)
-            return reply(boom.badImplementation('Could not create new user ' + JSON.stringify(newUser)));
-          }
-
-          var statusResponse;
-          if (user) {
-            statusResponse = {
-              statusCode: 200,
-              message: 'Successfully created new user',
-              object_id: user.id
-            };
-
-            user = publicRecordFields.handle(user, 'user');
-
-            AuditLogger.store({
-              ip_address: utils.getAPIUserRealIP(req),
-              datetime: Date.now(),
-              user_type: 'user',
-              user_name: user.email,
-              account_id: result.id,
-              activity_type: 'add',
-              activity_target: 'account',
-              target_id: result.id,
-              target_name: result.companyName,
-              target_object: result,
-              operation_status: 'success'
-            });
-
-            AuditLogger.store({
-              ip_address: utils.getAPIUserRealIP(req),
-              datetime: Date.now(),
-              user_type: 'user',
-              user_name: user.email,
-              account_id: user.companyId[0],
-              activity_type: 'add',
-              activity_target: 'user',
-              target_id: user.user_id,
-              target_name: user.email,
-              target_object: user,
-              operation_status: 'success'
-            });
-
-            sendVerifyToken(user, token, function(err, res) {
-              renderJSON(req, reply, err, statusResponse);
-            });
-          }
-        });
+        users.addAsync(newUser)
+          .then(
+            function(user) {
+              resolve(user);
+            },
+            function(err) {
+              reject(err);
+            }
+          );
       }
     });
   });
+}
+
+/**
+ * @name  signup2
+ * @description
+ *  Simple signup process
+ * @param  {[type]} req   [description]
+ * @param  {[type]} reply [description]
+ * @return {[type]}       [description]
+ */
+exports.signup2 = function(req, reply) {
+  var data = req.payload;
+  var _billing_plan = {};
+  var _newAccount = {};
+  var _newUser = {};
+
+  if (!config.get('enable_self_registration')) {
+    return reply(boom.badRequest('User self-registration is temporary disabled'));
+  }
+  if (!config.get('enable_simplified_signup_process')) {
+    return reply(boom.badRequest('Simple user self-registration is temporary disabled'));
+  }
+
+  // 1. Check existing user
+  users.getAsync({
+      email: data.email
+    }).then(function userValidation(user) {
+      if (user) {
+        logger.debug('signup2:: User ' + data.email + ' already exists in the DB, record: ' + JSON.stringify(user));
+        if (user.validation && user.validation.verified !== true) {
+          logger.info('signup2:: User ' + data.email + ' still needs to complete the registration process');
+          throw {
+            statusCode: 402, //
+            message: 'You account is not verified. Please check your email address at \'' + data.email + '\' to finish the registration process.'
+          };
+        }
+        if ((user.validation && user.validation.verified && user.validation.verified === true) || !user.validation) {
+          logger.info('signup2:: User ' + data.email + ' already exists in the system');
+          throw {
+            statusCode: 406,
+            message: 'User with email address ' + data.email + ' already exists. Please use another email address.'
+          };
+        }
+      }
+      return billing_plans.getAsync({
+        chargify_handle: data.billing_plan
+      });
+    })
+    // NOTE: check exist Billing Plan
+    .then(function successCallGetBillingPlan(bp) {
+      if (!bp) {
+        logger.error('signup2::billing_plans: Internal Billing Plan with name ' + data.billing_plan + ' is not found');
+        throw new Error('Error find Billing Plan with name ' + data.billing_plan);
+      } else {
+        return bp;
+      }
+    })
+    .then(function successFindInternalBullingPlan(internal_data) {
+      _billing_plan = internal_data;
+      // NOTE: get current Cahrgify Product Information
+      return chargifyProduct
+        .getHostedPageAsync(data.billing_plan)
+        .then(function(billin_plan_info) {
+          _billing_plan.hosted_page = billin_plan_info.url;
+          return billin_plan_info;
+        }, function onError(err) {
+          logger.error('signup::billing_plans: External Billing Plan information for ' + data.billing_plan + ' is not found.');
+          throw {
+            message: 'Billing Plan \'' + data.billing_plan + '\' does not exist',
+            statusCode: 404
+          };
+        });
+    })
+    // NOTE: create new Account
+    .then(function createNewAccount() {
+      var newCompany = {
+        companyName: data.company_name || data.first_name + ' ' + data.last_name,
+        createdBy: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        contact_email: data.email,
+        phone_number: data.phone_number,
+        billing_plan: _billing_plan.id,
+        address1: data.address1 || '',
+        address2: data.address2 || '',
+        country: data.country || '',
+        state: data.state || '',
+        city: data.city || '',
+        zipcode: data.zipcode || '',
+        billing_info: {
+          first_name: data.first_name,
+          last_name: data.last_name,
+          contact_email: data.email,
+          phone_number: data.phone_number,
+          address1: data.address1 || '',
+          address2: data.address2 || '',
+          country: data.country || '',
+          state: data.state || '',
+          city: data.city || '',
+          zipcode: data.zipcode || ''
+        }
+      };
+      return accounts.addAsync(newCompany);
+    })
+    // NOTE:  create new Admin User
+    .then(function createNewAdminUser(account) {
+      _newAccount = publicRecordFields.handle(account, 'account');
+      AuditLogger.store({
+        ip_address: utils.getAPIUserRealIP(req),
+        datetime: Date.now(),
+        user_type: 'user',
+        user_name: data.email,
+        account_id: _newAccount.id,
+        activity_type: 'add',
+        activity_target: 'account',
+        target_id: _newAccount.id,
+        target_name: _newAccount.companyName,
+        target_object: _newAccount,
+        operation_status: 'success'
+      });
+      var newUser = {
+        companyId: _newAccount.id,
+        role: 'admin',
+        firstname: data.first_name,
+        lastname: data.last_name,
+        password: data.password,
+        email: data.email
+      };
+      return createUser(newUser).then(
+        function(user) {
+          _newUser = user;
+          AuditLogger.store({
+            ip_address: utils.getAPIUserRealIP(req),
+            datetime: Date.now(),
+            user_type: 'user',
+            user_name: user.email,
+            account_id: user.companyId[0],
+            activity_type: 'add',
+            activity_target: 'user',
+            target_id: user.user_id,
+            target_name: user.email,
+            target_object: user,
+            operation_status: 'success'
+          });
+          return user;
+        },
+        function onErrorCreateUser(dataError) {
+          //NOTE:  user  not created
+          if (!!dataError.user && !!dataError.user.validation) {
+            // NOTE: User not verify
+            if (dataError.user.validation.verified === false) {
+              throw {
+                statusCode: 402, //
+                message: 'You account is not verified. Please check your email address at \'' + newUser.email + '\' to finish the registration process.'
+              };
+            }
+            //
+            if (dataError.user.validation.verified === true) {
+              throw {
+                statusCode: 406,
+                message: 'User with email ' + newUser.email + ' already exists. Please use another email address.'
+              };
+            }
+          } else {
+            // TODO: add more detais about error
+            throw {
+              statusCode: 403,
+              message: 'User can not be created.'
+            };
+          }
+        });
+    })
+    .then(function createChargifyAccount() {
+      return new Promise(function(resolve, reject) {
+        chargifyCustomer.createBySubscription(_newAccount, data.billing_plan, function(err, data) {
+
+          if (err) {
+            reject(err);
+            // TODO: delete created Account and User
+            users.removeAsync(_newUser); // TODO: add logger
+          } else {
+            resolve(data);
+            // NOTE: Update Account - set billing_id and subscription information
+            var _subscription = data.subscription;
+            var _customer = _subscription.customer;
+            var account = {
+              account_id: _customer.reference,
+              subscription_id: _subscription.id,
+              subscription_state: _subscription.state,
+              billing_id: _customer.id // NOTE: Billing Id = Chargify Customer Id
+            };
+            accounts.updateAsync(account).then(function(acc) {
+              // TODO: add logger result update Account
+            });
+          }
+        });
+      });
+    })
+    //- Send a confirmation link by email
+    .then(function sendEmailForVerifySimpleRegistration() {
+      return new Promise(function(resolve, reject) {
+        sendVerifyToken(_newUser, _newUser.validation.token, function(err, res) {
+          // renderJSON(req, reply, err, statusResponse);
+          if (err) {
+            // TODO: add logger send email
+          }
+          resolve();
+        });
+      });
+    })
+    // NOTE: Replay results signup request
+    .then(function replySuccessSignUp() {
+      var statusResponse = {
+        statusCode: 201,
+        message: 'Successfully created new user',
+        object_id: _newUser.user_id
+      };
+      reply(statusResponse);
+    })
+    .catch(function replyErrorSignUp(err) {
+      // TODO: detect status code
+      reply(boom.notImplemented(err.message || 'Error signup process'));
+    });
 };
 
-*/
+
 
 /**
  * @name  resendRegistrationEmail
@@ -544,8 +713,30 @@ exports.resendRegistrationEmail = function(req, reply) {
       })
       .then(function(billing_plan) {
         _billing_plan = billing_plan;
-        return new Promise(function(resolve) {
-          sendEmailForRegistration(user, _account, _billing_plan, resolve);
+        return new Promise(function(resolve, reject) {
+          // NOTE:
+          if (config.get('enable_simplified_signup_process')) {
+            var token = utils.generateToken();
+            user.validation = {
+              expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+              token: token
+            };
+            // NOTE: delete not updated fields
+            delete user.password;
+            delete user.companyId;
+            users.update(user, function(err, result) {
+              if (err) {
+                reject(err);
+              } else {
+                sendVerifyToken(result, token, function sendVerifyTokenResult(err, data) {
+                  // TODO: add logger and send  email to admin
+                });
+                resolve(result);
+              }
+            });
+          } else {
+            sendEmailForRegistration(user, _account, _billing_plan, resolve);
+          }
         });
       })
       .then(function() {
@@ -564,66 +755,37 @@ exports.resendRegistrationEmail = function(req, reply) {
   });
 };
 
-function sendEmailForRegistration(user, account, billing_plan, cb) {
-  var _customer_chargify = {
-    first_name: user.firstname,
-    last_name: user.lastname,
-    email: user.email,
-    phone: account.phone_number,
-    reference: account.id, // NOTE: Chargify`s custoners it is our Accounts
-    organization: account.companyName,
-    billing_address: account.billing_info.address1,
-    billing_address_2: account.billing_info.address2,
-    billing_city: account.billing_info.city,
-    billing_zip: account.billing_info.zipcode,
-    billing_country: account.billing_info.country,
-    billing_state: account.billing_info.state
-  };
-
-  var mailOptions = {
-    to: user.email,
-    subject: config.get('user_verify_subject'),
-    html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
-      '<p>Hello ' + user.firstname + ',</p>' +
-      '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
-      '<p>Please click on ' +
-      '<a href="' + billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
-      '</a> link to complete the process.' +
-      '</p>' +
-      '<p>If you did not request this, please ignore this email.</p>\n\n' +
-      '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
-      '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
-      '</div>'
-  };
-
-  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
-  if (bcc_email !== '') {
-    mailOptions.bcc = bcc_email;
-  }
-
-  // NOTE: when we send email we do not control success or error. We only create log
-  mail.sendMail(mailOptions, function(err, data) {
-    if (err) {
-      logger.error('sendEmailForRegistration:error: ' + JSON.stringify(err));
-    }
-    cb(err, data);
-  });
-}
-// TODO: delete - functionality is depricated
+/**
+ * @name verify
+ * @description
+ *
+ *
+ *
+ * @param  {[type]} req   [description]
+ * @param  {[type]} reply [description]
+ * @return {[type]}       [description]
+ */
 exports.verify = function(req, reply) {
   var token = req.params.token;
+  if (!config.get('enable_simplified_signup_process')) {
+    return reply(boom.badRequest('User verification is temporary disabled'));
+  }
+  // return reply(boom.badImplementation('TEST'))
   users.get({
+
     'validation.token': token,
     'validation.expiredAt': {
       $gt: Date.now()
     }
   }, function(error, user) {
+    console.log('user', user);
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve validation token/user details for token ' + token));
     }
     if (!user) {
       return reply(boom.badRequest('The validation token is invalid or has expired'));
     }
+
     user.validation = {
       expiredAt: undefined,
       token: '',
@@ -633,47 +795,48 @@ exports.verify = function(req, reply) {
     delete user.companyId;
     delete user.password;
     //@todo UPDATE ANYTHING ELSE ?
-
-    users.update(user, function(error, result) {
+    accounts.get({
+      _id: companyId
+    }, function(err, account) {
       if (error) {
-        return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
+        return reply(boom.badImplementation('Signup::verify:Failed to find an account associated with user' +
           ' User ID: ' + user.id + ' Email: ' + user.email));
       }
-      accounts.get({
-        _id: companyId
-      }, function(err, account) {
+      // Account exist - can update user information
+      users.update(user, function(error, result) {
         if (error) {
-          return reply(boom.badImplementation('Signup::verify:Failed to find an account associated with user' +
+          return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
             ' User ID: ' + user.id + ' Email: ' + user.email));
         }
-        billing_plans.get({
-          _id: account.billing_plan
-        }, function(err, bp) {
-          if (error) {
-            return reply(boom.badImplementation('Signup::verify: Failed to find a billing plan associated with account provided' +
-              ' Account ID: ' + account.id + ' CreatedBy: ' + account.createdBy));
-          }
-          var fields = _.merge(user, account);
-          fields.hosted_page = bp.hosted_page;
-          result = publicRecordFields.handle(fields, 'verify');
 
-          AuditLogger.store({
-            ip_address: utils.getAPIUserRealIP(req),
-            datetime: Date.now(),
-            user_id: user.user_id,
-            user_name: user.email,
-            user_type: 'user',
-            account_id: companyId,
-            activity_type: 'modify',
-            activity_target: 'user',
-            target_id: result.user_id,
-            target_name: result.email,
-            target_object: result,
-            operation_status: 'success'
-          });
-
-          renderJSON(req, reply, error, result);
+        // billing_plans.get({
+        //   _id: account.billing_plan
+        // }, function(err, bp) {
+        //   if (error) {
+        //     return reply(boom.badImplementation('Signup::verify: Failed to find a billing plan associated with account provided' +
+        //       ' Account ID: ' + account.id + ' CreatedBy: ' + account.createdBy));
+        //   }
+        var fields = _.merge(user, account);
+        fields.hosted_page = ''; // bp.hosted_page; // TODO:delete - depricated
+        result = publicRecordFields.handle(fields, 'verify');
+        console.log('--result for send ', result);
+        AuditLogger.store({
+          ip_address: utils.getAPIUserRealIP(req),
+          datetime: Date.now(),
+          user_id: user.user_id,
+          user_name: user.email,
+          user_type: 'user',
+          account_id: companyId,
+          activity_type: 'modify',
+          activity_target: 'user',
+          target_id: result.user_id,
+          target_name: result.email,
+          target_object: result,
+          operation_status: 'success'
         });
+
+        renderJSON(req, reply, error, result);
+        // });
       });
     });
   });
