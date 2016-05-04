@@ -29,8 +29,10 @@ describe('CRUD check', function () {
 
   // Defining set of users for which all below tests will be run
   var users = [
-    //config.get('api.users.revAdmin'),
-    config.get('api.users.reseller')
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
   ];
 
   users.forEach(function (user) {
@@ -46,6 +48,19 @@ describe('CRUD check', function () {
           API.helpers
             .authenticateUser(user)
             .then(function () {
+              if (user === config.get('api.users.admin') ||
+                user === config.get('api.users.user')) {
+                return API.resources.users
+                  .myself()
+                  .getOne()
+                  .expect(200)
+                  .then(function (res) {
+                    return {
+                      'id': res.body.companyId[0]
+                    };
+                  })
+                  .catch(done);
+              }
               return API.helpers.accounts.createOne();
             })
             .then(function (newAccount) {
