@@ -118,7 +118,7 @@ exports.forgotPassword = function(request, reply) {
   }
 
   // Start work-flow
-  users.get({
+  users.getValidation({
     email: email
   }, function(error, user) {
     if (error) {
@@ -131,6 +131,12 @@ exports.forgotPassword = function(request, reply) {
 
       if (user.self_registered) {
           logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          // NOTE: User not verify
+          if (user.validation === undefined  || user.validation.verified===false) {
+              logger.error('forgotPassword::authenticate: User with ' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
+              return reply(boom.create(418, 'Your registration not finished'));
+          }
           accounts.get({
             _id: user.companyId
           }, function(error, account) {

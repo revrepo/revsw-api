@@ -41,14 +41,9 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var onAuthPassed = function(user, request, reply, error) {
-  var token = jwt.sign({
-    user_id: user.user_id,
-    password: user.password
-  }, config.get('jwt_private_key'), {
-    expiresInMinutes: config.get('jwt_token_lifetime_minutes')
-  });
-
+  var token = utils.generateJWT(user);
   var statusResponse;
+
   statusResponse = {
     statusCode: 200,
     message: 'Enjoy your token',
@@ -110,7 +105,8 @@ exports.authenticate = function(request, reply) {
   if (request.payload.oneTimePassword) {
     oneTimePassword = request.payload.oneTimePassword;
   }
-  users.get({
+  // NOTE: get user data with validation information
+  users.getValidation({
     email: email
   }, function(error, user) {
 
@@ -131,6 +127,13 @@ exports.authenticate = function(request, reply) {
 
         if (user.self_registered) {
           logger.info('Authenticate::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          // NOTE: User not verify
+          if (user.validation === undefined  || user.validation.verified===false) {
+              logger.error('Authenticate::authenticate: User with ' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
+              authPassed = false;
+              return reply(boom.create(418, 'Your registration not finished'));
+          }
           accounts.get({
             _id: user.companyId
           }, function(error, account) {

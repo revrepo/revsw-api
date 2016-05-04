@@ -37,3 +37,20 @@ exports.signupPayload = {
   zipcode: joi.string().min(1).max(30).trim().description('Zip Code').required(),
   billing_plan: joi.string().min(1).max(150).trim().description('Billing plan ID').required()
 };
+
+exports.signupShortPayload = {
+  first_name: joi.string().min(1).max(150).trim().description('User first name').required(),
+  last_name: joi.string().min(1).max(150).trim().description('Last name').required(),
+  email: joi.string().email().description('Email address').required(),
+  // company_name: joi.string().min(1).max(150).allow('').trim().description('Company name').optional(),
+  // phone_number: joi.string().min(1).max(30).trim().description('Phone number').required(),
+  password: joi.string().min(8).max(15).description('Password').required(),
+  // passwordConfirm: joi.string().min(8).max(15).description('Password confirmation').required(),
+  // address1: joi.string().min(1).max(150).trim().description('Address 1').required(),
+  // address2: joi.string().min(1).max(150).allow('').trim().description('Address 2').optional(),
+  country: joi.string().optional().min(1).max(150).trim().description('Country').required(),
+  // state: joi.string().min(1).max(150).trim().description('State').required(),
+  // city: joi.string().min(1).max(150).trim().description('City').required(),
+  // zipcode: joi.string().min(1).max(30).trim().description('Zip Code').required(),
+  billing_plan: joi.string().min(1).max(150).trim().description('Billing plan ID').required()
+};
