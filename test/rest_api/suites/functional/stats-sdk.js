@@ -45,8 +45,7 @@ describe('StatsSDK Functional check:', function () {
   var user = config.get('api.users.reseller'),
     account_id,
     application,
-    test_data_portions = 4,
-    total_requests = test_data_portions * testdata.requests.length;
+    test_data_portions = 4;
 
   //  ---------------------------------
   before(function (done) {
