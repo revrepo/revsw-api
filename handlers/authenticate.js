@@ -41,14 +41,9 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var onAuthPassed = function(user, request, reply, error) {
-  var token = jwt.sign({
-    user_id: user.user_id,
-    password: user.password
-  }, config.get('jwt_private_key'), {
-    expiresInMinutes: config.get('jwt_token_lifetime_minutes')
-  });
-
+  var token = utils.generateJWT(user);
   var statusResponse;
+
   statusResponse = {
     statusCode: 200,
     message: 'Enjoy your token',
