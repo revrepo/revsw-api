@@ -147,6 +147,106 @@ var Utils = {
       }
     }
     delete prop[path[i]];
+  },
+
+  /**
+   * Object.assign polyfill, rudimentary, no checks
+   *
+   * @params {Object, Object[, Object, ...]} - Objects to merge, first one is a target
+   * @returns {Object} - target
+   */
+  assign: ( Object.assign ? Object.assign : function (target) {
+    var dst = Object(target);
+    for (var i = 1, len = arguments.length; i < len; ++i) {
+      var src = arguments[i];
+      if (src !== undefined) {
+        for (var key in src) {
+          if (src.hasOwnProperty(key)) {
+            dst[key] = src[key];
+          }
+        }
+      }
+    }
+    return dst;
+  }),
+
+  /**
+   * combine queries objects
+   *
+   * gets arrays with possible @param values, like
+   *   [{a:1},{a:2}], [{b:'one'}, {b:'two'}], [{c:4,d:5},{c:7,d:9}]
+   * @returns all param values combinations
+   *   [{ a: 1, b: 'one', c: 4, d: 5 },
+   *    { a: 2, b: 'one', c: 4, d: 5 },
+   *    { a: 1, b: 'two', c: 4, d: 5 },
+   *    { a: 2, b: 'two', c: 4, d: 5 },
+   *    { a: 1, b: 'one', c: 7, d: 9 },
+   *    { a: 2, b: 'one', c: 7, d: 9 },
+   *    { a: 1, b: 'two', c: 7, d: 9 },
+   *    { a: 2, b: 'two', c: 7, d: 9 }]
+   */
+  combineQueries: function () {
+    var dst = [],
+      dst_len = 1,
+      alen = arguments.length, i, ai;
+    for (i = 0; i < alen; ++i) {
+      dst_len *= arguments[i].length;
+    }
+    for (i = 0; i < dst_len; ++i) {
+      var item = {},
+        idx = i;
+      for (ai = 0; ai < alen; ++ai) {
+        this.assign( item, arguments[ai][idx % arguments[ai].length] );
+        idx = Math.floor( idx / arguments[ai].length );
+      }
+      dst.push( item );
+    }
+
+    return dst;
+  },
+
+  /**
+   * guess
+   *
+   * @param {Array} - array to shuffle
+   * @returns {Array} - input, shuffled
+   */
+  shuffleArray: function ( arr ) {
+    var i = arr.length;
+    while ( i-- ) {
+      arr.push( arr.splice( Math.floor( Math.random() * ( i + 1 ) ), 1 )[0] );
+    };
+
+    return arr;
+  },
+
+  /**
+   * create tty colored string
+   *
+   * @param {string} - name of color, see code
+   * @param {string} - string to output
+   * @returns {string} - painted
+   */
+  colored: function ( color, str ) {
+    var colors = {
+      Black: 30,
+      Red: 31,
+      Green: 32,
+      Brown: 33,
+      Blue: 34,
+      Purple: 35,
+      Cyan: 36,
+      LightGray: 37,
+      DarkGray: 90,
+      LightRed: 91,
+      LightGreen: 92,
+      Yellow: 93,
+      LightBlue: 94,
+      LightPurple: 95,
+      LightCyan: 96,
+      White: 97
+    };
+    return '\u001b[' + colors[color] + 'm' + str + '\u001b[0m';
   }
 };
 

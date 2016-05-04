@@ -40,10 +40,14 @@ var _contains = function (list, element) {
 
 // #### Helper function getRequest
 //
-// Create an instance of super-test request which already has the reference
-// to the REST API HOST to point.
+//  Create an instance of super-test request which already has the reference
+//  to the REST API HOST to point.
+//  Also, the optional `data` argument may contain host and version data to override
+//  the config's parameters
 var getRequest = function () {
-  return request(getBaseUrl());
+  var host = config.get('api.host');
+  var apiVersion = config.get('api.version');
+  return request( (host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion) );
 };
 
 // #### Helper function setUserToRequest
@@ -82,12 +86,6 @@ var getPath = function (data, ids) {
   path = path.replace(/\/\{.+\}/, '');
   //console.log('        >>> Resource PATH:', path);
   return path;
-};
-
-var getBaseUrl = function () {
-  var host = config.get('api.host');
-  var apiVersion = config.get('api.version');
-  return host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion;
 };
 
 var getResourceBuilder = function (nestedResource, path, parentIdKey) {

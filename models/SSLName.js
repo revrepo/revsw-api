@@ -28,14 +28,15 @@ var _ = require('lodash'),
 var logger = require('revsw-logger')(config.log_config);
 
 
-function SSLCertificate(mongoose, connection, options) {
+function SSLName(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
   this.ObjectId = this.Schema.ObjectId;
 
-  this.SSLCertificateSchema = new this.Schema({
-    'cert_name': {type: String, required: true},
-    'cert_type': {type: String, required: true},
+  this.SSLNameSchema = new this.Schema({
+    'ssl_name': {type: String, required: true},
+    'verification_method': {type: String, required: true},
+    'verification_object': {type: String, required: true},
     'account_id': {type: this.ObjectId, required: true},
     'updated_at': {type: Date, default: Date.now},
     'created_at': {type: Date, default: Date.now},
@@ -43,34 +44,29 @@ function SSLCertificate(mongoose, connection, options) {
     'deleted': {type: Boolean, default: false},
     'deleted_at': {type: Date},
     'deleted_by': {type: String},
-    'operation': {type: String},
-    'published_ssl_config_version': {type: Number, default: 0},
-    'last_published_ssl_config_version': {type: Number, default: 0},
     'comment': {type: String, default: ''},
-    'public_ssl_cert': {type: String, required: true},
-    'private_ssl_key': {type: String, required: true},
-    'private_ssl_key_passphrase': {type: String},
-    'chain_ssl_cert': {type: String, required: true},
-    'expires_at': {type: Date},
-    'domains': {type: String},
-    'previous_ssl_cert_configs': [{}],
   });
 
-  this.model = connection.model('SSLCertificate', this.SSLCertificateSchema, 'SSLCertificate');
+  this.model = connection.model('SSLName', this.SSLNameSchema, 'SSLName');
 }
 
 
 mongoose.set('debug', config.get('mongoose_debug_logging'));
 
 
-SSLCertificate.prototype = {
+SSLName.prototype = {
 
   get: function (item, callback) {
-    this.model.findOne({_id: item, deleted: { $ne: true}}, function (err, _doc) {
+    this.model.findOne({_id: item}, function (err, _doc) {
       if (err) {
         callback(err);
       }
       var doc = utils.clone(_doc);
+      if (doc) {
+        delete doc.__v;
+        doc.id = doc._id;
+        delete doc._id;
+      }
       callback(null, doc);
     });
   },
@@ -111,6 +107,41 @@ SSLCertificate.prototype = {
     fields = fields || {};
     return this.model.find(where, fields).exec();
   },
+
+  update: function (item, callback) {
+    this.model.findOne({_id: item.id}, function (err, doc) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      if (doc===null || item==null) {
+        callback(null, null);
+        return;
+      }
+      doc = _.assign(doc, item);
+      if (doc===null) {
+        console.log('wtf!');
+        return;
+      }
+      doc.updated_at = new Date();
+      doc.save(function (err, res) {
+        if (err) {
+          throw err;
+        }
+        callback(null, res);
+      });
+    });
+  },
+
+  remove: function (item, callback) {
+    this.model.remove({_id: item._id}, function (err, doc) {
+      if (err) {
+        callback(err);
+      }
+      callback(null, doc);
+    });
+  },
+
 };
 
-module.exports = SSLCertificate;
+module.exports = SSLName;

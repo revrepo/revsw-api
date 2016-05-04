@@ -33,7 +33,6 @@ var mongoConnection = require('../lib/mongoConnections');
 var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
-
 //  ---------------------------------
 // TODO Need to move the function to "utils" module
 var checkAppAccessPermissions_ = function( request, reply, callback ) {
@@ -52,18 +51,21 @@ var checkAppAccessPermissions_ = function( request, reply, callback ) {
 
   //  account(company)
   if ( account_id &&
-      creds.companyId.indexOf( account_id ) === -1 ) {
+      utils.getAccountID(request).indexOf( account_id ) === -1 ) {
       //  user's companyId array must contain requested account ID
     return reply(boom.badRequest( 'Account ID not found' ));
   }
 
   //  app
   if ( app_id ) {
+    //  get account ID which the _application_ belongs to
     apps.getAccountID( app_id, function( err, acc_id ) {
       if ( err ) {
         return reply( boom.badImplementation( err ) );
       }
-      if ( creds.companyId.indexOf( acc_id ) === -1 ) {
+
+      //  user's companyId array must contain this account ID
+      if ( utils.getAccountID(request).indexOf( acc_id ) === -1 ) {
         return reply(boom.badRequest( 'Application ID not found' ));
       }
       callback();
@@ -72,6 +74,7 @@ var checkAppAccessPermissions_ = function( request, reply, callback ) {
     callback();
   }
 };
+
 
 //  ----------------------------------------------------------------------------------------------//
 
