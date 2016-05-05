@@ -36,7 +36,6 @@ describe('UsageReport Functional check:', function () {
     user = config.get('api.usage_report.user'),
     account_id = config.get('api.usage_report.account_id'),
     domain = config.get('api.usage_report.domain_name'),
-    ystrdy = ( new Date( Date.now() - 86400000 ) ).toISOString().slice(0,10),
     estimated = UsageDP.countEstimations(),
     test_data_timespan = 12 * 3600,
     report;
@@ -50,8 +49,8 @@ describe('UsageReport Functional check:', function () {
       .then(function () {
         API.resources.usage_report
           .getAll({
-            from: ystrdy,
-            to: ystrdy,
+            from: ( ( new Date( Date.now() - 172800000 ) ).toISOString().slice(0,10) /*before yesterday*/),
+            to: ( ( new Date( Date.now() - 86400000 ) ).toISOString().slice(0,10) /*yesterday inclusive*/),
             account_id: account_id
           })
           .expect(200)
