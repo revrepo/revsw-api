@@ -245,6 +245,24 @@ DataProvider.prototype.autoSpan = function () {
   }
 };
 
+/**
+ * Stats DataProvider.countEstimations()
+ * pre-count total values for traffic and hits
+ */
+DataProvider.prototype.countEstimations = function () {
+  var est = { total_hits: 1 };
+  _.forEach( this.options.keys, function( val, key ) {
+    est.total_hits *= val.length;
+  });
+  est.hits = {};
+  _.forEach( this.options.keys, function( val, key ) {
+    est.hits[key] = est.total_hits / val.length;
+  });
+  est.received_bytes = this.options.template.r_bytes * est.total_hits;
+  est.sent_bytes = this.options.template.s_bytes * est.total_hits;
+  return est;
+};
+
 
 //  data generators ------------------------------------------------------------------------------//
 

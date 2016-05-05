@@ -100,6 +100,16 @@
           "name": "www.google-test.com"
         }
       }
+    },
+    "usage_report": {
+      "user": {
+        "email": "victor@revsw.com",
+        "password": "123qweasd",
+        "role": "Admin"
+      },
+      "account_id": "5588869fbde7a0d00338ce8f",
+      "domain_id": "56558390b6eb546a6732ab4f",
+      "domain_name": "www.google-test.com"
     }
   },
   "stats_api": {

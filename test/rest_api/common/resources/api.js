@@ -34,6 +34,7 @@ var StatsResource = require('./stats');
 var StatsSDKResource = require('./stats-sdk');
 var TwoFAResource = require('./2fa');
 var UsersResource = require('./users');
+var UsageReportResource = require('./usage-report');
 
 // Set of all resources that the REST API service provides..
 module.exports = {
@@ -52,5 +53,6 @@ module.exports = {
   stats: StatsResource,
   stats_sdk: StatsSDKResource,
   twoFA: TwoFAResource,
-  users: UsersResource
+  users: UsersResource,
+  usage_report: UsageReportResource
 };
