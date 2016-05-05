@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+# This script sets up the enviornment for the project, must be placed in the top most directory of the project
+#
+
+export PROJECT_NAME="globalsign"
+export PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export PYTHONPATH=$PROJECT_DIR:$PROJECT_DIR/lib/python2.7/site-packages
+export PATH=$PROJECT_DIR/bin:$PATH
+export PS1='\[\e[1;31m\]$PROJECT_NAME\[\e[0m\] \u@\h:\w\$ '
+

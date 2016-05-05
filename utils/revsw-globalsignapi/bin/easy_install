@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ -z "$PROJECT_NAME" ] || [ -z "$PROJECT_DIR" ]; then
+	echo "Please source the project activate script before running easy_install"
+	exit 1
+fi
+
+/usr/bin/easy_install --prefix $PROJECT_DIR $*
