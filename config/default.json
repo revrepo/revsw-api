@@ -73,7 +73,8 @@
   },
 
   "enable_self_registration": true,
-
+  "enable_simplified_signup_process": true,
+  
   "chargify": { 
     "password" : "x",
     "domain": "https://revapm-test.chargify.com",
