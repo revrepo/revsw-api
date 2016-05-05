@@ -253,17 +253,44 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
     if (result) {
       result = publicRecordFields.handle(result, 'account');
 
-      if(!result.billing_id || !result.subscription_id){
-         return reply(boom.badRequest('Account has no subscription_id'));
+      if (!result.billing_id || !result.subscription_id) {
+        return reply(boom.badRequest('Account has no subscription_id'));
       }
-      Customer.subscriptionPreviewMigrations(result.subscription_id,billing_plan_handle ,function resultGetPreviewSubscription(err,info){
-          if(err){
-            return reply(boom.badRequest('Subscription info error '));
-          }else{
-            renderJSON(request, reply, error, info);
-          }
+      // NOTE: make call data from Chargify
+      async.series([
+        // NOTE: get Preview Migrations
+        function getSubscriptionPreviewMigrations(cb) {
+          Customer.subscriptionPreviewMigrations(result.subscription_id, billing_plan_handle, function resultGetPreviewSubscription(err, info) {
+            if (err) {
+              cb(err);
+            } else {
+              cb(err, info);
+            }
+          });
+        },
+        // NOTE: make check exists credit_card
+        function getCreditCardInfo(cb) {
+          Customer.getSubscription(result.subscription_id, function(err, info) {
+            if (err) {
+              cb(err);
+            } else {
+              if (!!info.subscription.credit_card) {
+                cb(err, info.subscription.credit_card);
+              } else {
+                cb(null, null);
+              }
+            }
+          });
+        }
+      ], function(error, results) {
+        if (error) {
+          return reply(boom.badRequest('Subscription info error '));
+        } else {
+          // NOTE: return info for migration
+          results[0].credit_card = (!!results[1] ? true : false);
+          renderJSON(request, reply, error, results[0]);
+        }
       });
-
     } else {
       return reply(boom.badRequest('Account ID not found'));
     }
@@ -293,26 +320,26 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
     if (result) {
       result = publicRecordFields.handle(result, 'account');
 
-      if(!result.billing_id || !result.subscription_id){
-         return reply(boom.badRequest('Account has no subscription_id'));
+      if (!result.billing_id || !result.subscription_id) {
+        return reply(boom.badRequest('Account has no subscription_id'));
       }
 
-      Customer.getSubscriptionById(result.subscription_id ,function resultGetSubscriptionInfo(err,info){
-          if(err){
-            return reply(boom.badRequest('Subscription info error '));
-          }else{
-            // NOTE: delete information not for send
-            // TODO: model validation
-            info.subscription.product_name = info.subscription.product.name;
-            info.subscription.billing_portal_link= result.billing_portal_link;
-            delete info.subscription.product;
-            if(!!info.subscription.credit_card){
-              delete info.subscription.credit_card.current_vault;
-              delete info.subscription.credit_card.customer_id;
-            }
-            delete info.subscription.customer;
-            renderJSON(request, reply, error, info);
+      Customer.getSubscriptionById(result.subscription_id, function resultGetSubscriptionInfo(err, info) {
+        if (err) {
+          return reply(boom.badRequest('Subscription info error '));
+        } else {
+          // NOTE: delete information not for send
+          // TODO: model validation
+          info.subscription.product_name = info.subscription.product.name;
+          info.subscription.billing_portal_link = result.billing_portal_link;
+          delete info.subscription.product;
+          if (!!info.subscription.credit_card) {
+            delete info.subscription.credit_card.current_vault;
+            delete info.subscription.credit_card.customer_id;
           }
+          delete info.subscription.customer;
+          renderJSON(request, reply, error, info);
+        }
       });
 
     } else {
@@ -548,7 +575,7 @@ exports.updateAccount = function(request, reply) {
 
       // NOTE: check update billing_plan?
       if (updatedAccount.billing_plan && (account.billing_plan !== updatedAccount.billing_plan)) {
-        if ((!account.billing_id || account.billing_id === '')  && !account.subscription_id ) {
+        if ((!account.billing_id || account.billing_id === '') && !account.subscription_id) {
           return reply(boom.badRequest('The account in not provisioned in the billing system'));
         } else {
           BillingPlan.get({
