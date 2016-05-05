@@ -809,11 +809,14 @@ exports.verify = function(req, reply) {
           return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
             ' User ID: ' + user.id + ' Email: ' + user.email));
         }
-        var _user_id =  _.clone(user.user_id);
+        var _user_id = _.clone(user.user_id);
         var fields = _.merge(user, account);
         fields.hosted_page = ''; // TODO:delete - depricated
         // NOTE: send token for auto login after verify
-        fields.token = utils.generateJWT({user_id:_user_id,password:_password});
+        fields.token = utils.generateJWT({
+          user_id: _user_id,
+          password: _password
+        });
         result = publicRecordFields.handle(fields, 'verify');
         AuditLogger.store({
           ip_address: utils.getAPIUserRealIP(req),
