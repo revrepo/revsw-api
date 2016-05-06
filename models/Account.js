@@ -75,6 +75,12 @@ function Account(mongoose, connection, options) {
     'deleted_by': String,
     'deleted_at'  : {type : Date, default : null},
     'cancellation_message': {type: String, default: null},
+        // Self register section
+    'self_registered': {
+        type: Boolean,
+        default: false
+    },
+
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');

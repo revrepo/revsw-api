@@ -336,7 +336,8 @@ module.exports = [
       validate: {
         params: {
           account_id: Joi.objectId().required().description('Account ID to delete')
-        }
+        },
+        payload: accountValidation.accountDeletePayload
       },
       response: {
         schema: routeModels.statusModel
