@@ -136,7 +136,9 @@ module.exports = {
         billing_info: Joi.object(),
         billing_id: Joi.string().allow(null),
         subscription_id: Joi.string().allow(null),
-        use_contact_info_as_billing_info: Joi.boolean()
+        use_contact_info_as_billing_info: Joi.boolean(),
+        self_registered: Joi.boolean(),
+        valid_payment_method_configured: Joi.boolean()
       });
     return accountSchema;
   },
