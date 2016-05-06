@@ -71,7 +71,7 @@ module.exports = [
         payload: {
           companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
             .trim().description('Company name of newly registered customer account'),
-          comment: Joi.string().max(300).trim().description('Free-text comment about the company')
+          comment: Joi.string().max(300).trim().allow('').description('Free-text comment about the company')
         }
       },
       response: {
