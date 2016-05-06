@@ -220,9 +220,27 @@ exports.getAccount = function(request, reply) {
       return reply(boom.badImplementation('Accounts::getAccount: Failed to get an account' +
         ' Account ID: ' + account_id));
     }
+
     if (result) {
-      result = publicRecordFields.handle(result, 'account');
-      renderJSON(request, reply, error, result);
+      // NOTE: get information about payment method
+      result.valid_payment_method_configured = false;
+      if (result.subscription_id) {
+        Customer.getSubscriptionById(result.subscription_id, function resultGetSubscriptionInfo(err, info) {
+          if (err) {
+            return reply(boom.badRequest('Get Subscription Payment Method error '));
+          } else {
+            // NOTE: add information about payment method
+            if (!!info.subscription.credit_card) {
+              result.valid_payment_method_configured = true;
+            }
+            result = publicRecordFields.handle(result, 'account');
+            renderJSON(request, reply, error, result);
+          }
+        });
+      } else {
+        result = publicRecordFields.handle(result, 'account');
+        renderJSON(request, reply, error, result);
+      }
     } else {
       return reply(boom.badRequest('Account ID not found'));
     }
@@ -849,18 +867,17 @@ exports.deleteAccount = function(request, reply) {
         });
       },
       // Send an email to Rev ops team notifying about the closed account
-      function sendRevOpsEmailAboutCloseAccount() {
+      function sendRevOpsEmailAboutCloseAccount(cb) {
         var remoteIP = utils.getAPIUserRealIP(request);
         var email = config.get('notify_admin_by_email_on_user_self_registration');
         if (email !== '') {
           var mailOptions = {
             to: email,
             // TODO: add more text
-            subject: 'Portal close account  "' + account.companyName +'"',
-            text:
-              'RevAPM close account  "' + account.companyName +'"' +' with ID ' + account_id +
+            subject: 'Portal close account  "' + account.companyName + '"',
+            text: 'RevAPM close account  "' + account.companyName + '"' + ' with ID ' + account_id +
               '\n\nRemote IP address: ' + remoteIP +
-              '\n Delete By : ' + _deleted_by  +
+              '\n Delete By : ' + _deleted_by +
               '\nCompany Name: ' + account.companyName
           };
           // NOTE: when we send email we do not control success or error. We only create log
@@ -874,6 +891,7 @@ exports.deleteAccount = function(request, reply) {
         } else {
           logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
         }
+        cb(null);
       },
       // Log results and finish request
       function loggerDeleteAccount(cb) {
