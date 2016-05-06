@@ -31,7 +31,7 @@ exports.accountUpdatePayload = {
   phone_number: joi.string().min(1).max(30).trim().description('Phone number').optional(),
   contact_email: joi.string().email().description('Contact email').optional(),
   address1: joi.string().min(1).max(150).trim().description('Address 1').optional(),
-  address2: joi.string().min(1).max(150).trim().description('Address 2').optional(),
+  address2: joi.string().min(1).max(150).trim().description('Address 2').optional().allow(''),
   country: joi.string().min(1).max(150).trim().description('Country').optional(),
   state: joi.string().min(1).max(150).trim().description('State').optional(),
   city: joi.string().min(1).max(150).trim().description('City').optional(),
@@ -41,4 +41,8 @@ exports.accountUpdatePayload = {
   use_contact_info_as_billing_info: joi.boolean().description('Use contact info as billing info'),
   billing_info: joi.object().optional().description('Billing information for create Chargify Customer Account'),
   subscription_state: joi.string().min(1).max(30).trim().description('Subscription state (status)')
+};
+
+exports.accountDeletePayload = {
+  cancellation_message: joi.string().optional().allow(null).trim().allow('').max(300).description('Free-text comment about reason delete the account'),
 };
