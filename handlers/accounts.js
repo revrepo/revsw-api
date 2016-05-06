@@ -869,7 +869,7 @@ exports.deleteAccount = function(request, reply) {
       // Send an email to Rev ops team notifying about the closed account
       function sendRevOpsEmailAboutCloseAccount(cb) {
         var remoteIP = utils.getAPIUserRealIP(request);
-        var email = config.get('notify_admin_by_email_on_user_self_registration');
+        var email = config.get('notify_admin_by_email_on_account_cancellation');
         if (email !== '') {
           var mailOptions = {
             to: email,
@@ -920,7 +920,4 @@ exports.deleteAccount = function(request, reply) {
       }
     });
   }
-
-
-
 };
