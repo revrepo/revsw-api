@@ -874,11 +874,11 @@ exports.deleteAccount = function(request, reply) {
           var mailOptions = {
             to: email,
             // TODO: add more text
-            subject: 'Portal close account  "' + account.companyName + '"',
-            text: 'RevAPM close account  "' + account.companyName + '"' + ' with ID ' + account_id +
-              '\n\nRemote IP address: ' + remoteIP +
-              '\n Delete By : ' + _deleted_by +
-              '\nCompany Name: ' + account.companyName
+            subject: 'RevAPM Account Cancellation Note for account "' + account.companyName + '"',
+            text: 'Account Name: "' + account.companyName + '"' + ', account ID ' + account_id +
+              '\n\nRemote IP Address: ' + remoteIP +
+              '\nDeleted By : ' + _deleted_by +
+              '\nCancellation Note: ' + _cancellation_message
           };
           // NOTE: when we send email we do not control success or error. We only create log
           mail.sendMail(mailOptions, function(err, data) {
