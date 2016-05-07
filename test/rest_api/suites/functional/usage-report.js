@@ -94,21 +94,21 @@ describe('UsageReport Functional check:', function () {
     report = report.domains_usage[domain];
   });
 
-  it( 'UsageReport contains correct total hits amount', function () {
+  it.skip( 'UsageReport contains correct total hits amount', function () {
     report.count.should.be.equal( estimated.total_hits );
   });
 
-  it( 'UsageReport contains correct cache hits amount', function () {
+  it.skip( 'UsageReport contains correct cache hits amount', function () {
     report.cache_hits.MISS.should.be.equal( estimated.hits.cache_code );
     report.cache_hits.HIT.should.be.equal( estimated.hits.cache_code );
   });
 
-  it( 'UsageReport contains correct port hits amount', function () {
+  it.skip( 'UsageReport contains correct port hits amount', function () {
     report.port_hits['80'].should.be.equal( estimated.hits.protocol );
     report.port_hits['443'].should.be.equal( estimated.hits.protocol );
   });
 
-  it( 'UsageReport contains correct traffic values', function () {
+  it.skip( 'UsageReport contains correct traffic values', function () {
     report.received_bytes.should.be.equal( estimated.received_bytes );
     report.sent_bytes.should.be.equal( estimated.sent_bytes );
   });
