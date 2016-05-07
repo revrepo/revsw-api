@@ -24,7 +24,7 @@
   "cert_path": "./config/ssl_certs/server.crt",
   "portal_url": "https://iad02-portal01.revsw.net",
   "elasticsearch_url": "iad02-es01.revsw.net:9200",
-  "elasticsearch_fullurl_url": "lga02-esurl01.revsw.net:9200",
+  "elasticsearch_fullurl_url": "iad02-esurl01.revsw.net:9200",
   "cds_url": "https://cds.revdn.net:9000",
   "cds_api_token": "kh3i45y98yfksdfkasgfjhgssrq35sf",
   "portal_mongo": {
