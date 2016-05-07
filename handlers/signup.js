@@ -218,7 +218,8 @@ exports.signup = function(req, reply) {
           state: data.state,
           city: data.city,
           zipcode: data.zipcode
-        }
+        },
+        self_registered: true
       };
       return accounts.addAsync(newCompany);
     })
@@ -516,7 +517,8 @@ exports.signup2 = function(req, reply) {
           state: data.state || '',
           city: data.city || '',
           zipcode: data.zipcode || ''
-        }
+        },
+        self_registered: true
       };
       return accounts.addAsync(newCompany);
     })

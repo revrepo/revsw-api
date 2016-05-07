@@ -52,9 +52,11 @@ module.exports = [
     method: 'GET',
     path: '/v1/billing_plans/{id}',
     config: {
-      auth: {
-        scope: ['admin_rw']
-      },
+      auth: false,
+      //TODO: check bisness logick
+      // {
+      //   scope: ['admin_rw']
+      // },
       handler: billingPlanHandler.get,
       description: 'Get Billing Plan details',
       notes: 'Use this function to get details of an Billing plan',

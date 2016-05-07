@@ -179,6 +179,7 @@ exports.getDomainConfig = function(request, reply) {
       response.ssl_protocols = response_json.ssl_protocols;
       response.ssl_ciphers = response_json.ssl_ciphers;
       response.ssl_prefer_server_ciphers = response_json.ssl_prefer_server_ciphers;
+      response.btt_key = response_json.btt_key;
 
       renderJSON(request, reply, err, response);
     });
@@ -206,6 +207,7 @@ exports.getDomainConfigVersions = function(request, reply) {
       if ( res.statusCode === 400 ) {
         return reply(boom.badRequest(response_json.message));
       }
+      // TODO: add here the same ssl/btt transformations as we do a simple GET above
       var response = response_json;
       renderJSON(request, reply, err, response);
     });
@@ -376,6 +378,9 @@ exports.updateDomainConfig = function(request, reply) {
     delete newDomainJson.ssl_ciphers;
     var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers;
     delete newDomainJson.ssl_prefer_server_ciphers;
+    var _btt_key = newDomainJson.btt_key || '';
+    delete newDomainJson.btt_key;
+
     var newDomainJson2 = {
       updated_by: request.auth.credentials.email,
       proxy_config: newDomainJson,
@@ -385,7 +390,8 @@ exports.updateDomainConfig = function(request, reply) {
       ssl_cert_id: _ssl_cert_id,
       ssl_protocols: _ssl_protocols,
       ssl_ciphers: _ssl_ciphers,
-      ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers
+      ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers,
+      btt_key: _btt_key
     };
     logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag + ', request body: ' +
       JSON.stringify(newDomainJson2));
