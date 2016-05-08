@@ -57,7 +57,8 @@ var DomainConfigsResponseSP = {
         last_published_domain_version: Joi.number(),
         origin_host_header: Joi.string().required(),
         origin_server: Joi.string().required(),
-        cname: Joi.string().required()
+        cname: Joi.string().required(),
+        btt_key: Joi.string().allow('')
       });
   },
 

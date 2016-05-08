@@ -25,6 +25,8 @@ var boom = require('boom');
 var AuditLogger = require('../lib/audit');
 var async = require('async');
 var utils = require('../lib/utilities.js');
+var mail = require('../lib/mail');
+var moment = require('moment');
 var _ = require('lodash');
 var config = require('config');
 
@@ -50,6 +52,7 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 var ApiKey = require('../models/APIKey');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
+
 
 exports.getAccounts = function getAccounts(request, reply) {
 
@@ -217,9 +220,27 @@ exports.getAccount = function(request, reply) {
       return reply(boom.badImplementation('Accounts::getAccount: Failed to get an account' +
         ' Account ID: ' + account_id));
     }
+
     if (result) {
-      result = publicRecordFields.handle(result, 'account');
-      renderJSON(request, reply, error, result);
+      // NOTE: get information about payment method
+      result.valid_payment_method_configured = false;
+      if (result.subscription_id) {
+        Customer.getSubscriptionById(result.subscription_id, function resultGetSubscriptionInfo(err, info) {
+          if (err) {
+            return reply(boom.badRequest('Get Subscription Payment Method error '));
+          } else {
+            // NOTE: add information about payment method
+            if (!!info.subscription.credit_card) {
+              result.valid_payment_method_configured = true;
+            }
+            result = publicRecordFields.handle(result, 'account');
+            renderJSON(request, reply, error, result);
+          }
+        });
+      } else {
+        result = publicRecordFields.handle(result, 'account');
+        renderJSON(request, reply, error, result);
+      }
     } else {
       return reply(boom.badRequest('Account ID not found'));
     }
@@ -253,17 +274,44 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
     if (result) {
       result = publicRecordFields.handle(result, 'account');
 
-      if(!result.billing_id || !result.subscription_id){
-         return reply(boom.badRequest('Account has no subscription_id'));
+      if (!result.billing_id || !result.subscription_id) {
+        return reply(boom.badRequest('Account has no subscription_id'));
       }
-      Customer.subscriptionPreviewMigrations(result.subscription_id,billing_plan_handle ,function resultGetPreviewSubscription(err,info){
-          if(err){
-            return reply(boom.badRequest('Subscription info error '));
-          }else{
-            renderJSON(request, reply, error, info);
-          }
+      // NOTE: make call data from Chargify
+      async.series([
+        // NOTE: get Preview Migrations
+        function getSubscriptionPreviewMigrations(cb) {
+          Customer.subscriptionPreviewMigrations(result.subscription_id, billing_plan_handle, function resultGetPreviewSubscription(err, info) {
+            if (err) {
+              cb(err);
+            } else {
+              cb(err, info);
+            }
+          });
+        },
+        // NOTE: make check exists credit_card
+        function getCreditCardInfo(cb) {
+          Customer.getSubscription(result.subscription_id, function(err, info) {
+            if (err) {
+              cb(err);
+            } else {
+              if (!!info.subscription.credit_card) {
+                cb(err, info.subscription.credit_card);
+              } else {
+                cb(null, null);
+              }
+            }
+          });
+        }
+      ], function(error, results) {
+        if (error) {
+          return reply(boom.badRequest('Subscription info error '));
+        } else {
+          // NOTE: return info for migration
+          results[0].credit_card = (!!results[1] ? true : false);
+          renderJSON(request, reply, error, results[0]);
+        }
       });
-
     } else {
       return reply(boom.badRequest('Account ID not found'));
     }
@@ -293,24 +341,26 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
     if (result) {
       result = publicRecordFields.handle(result, 'account');
 
-      if(!result.billing_id || !result.subscription_id){
-         return reply(boom.badRequest('Account has no subscription_id'));
+      if (!result.billing_id || !result.subscription_id) {
+        return reply(boom.badRequest('Account has no subscription_id'));
       }
 
-      Customer.getSubscriptionById(result.subscription_id ,function resultGetSubscriptionInfo(err,info){
-          if(err){
-            return reply(boom.badRequest('Subscription info error '));
-          }else{
-            // NOTE: delete information not for send
-            // TODO: model validation
-            info.subscription.product_name = info.subscription.product.name;
-            info.subscription.billing_portal_link= result.billing_portal_link;
-            delete info.subscription.product;
+      Customer.getSubscriptionById(result.subscription_id, function resultGetSubscriptionInfo(err, info) {
+        if (err) {
+          return reply(boom.badRequest('Subscription info error '));
+        } else {
+          // NOTE: delete information not for send
+          // TODO: model validation
+          info.subscription.product_name = info.subscription.product.name;
+          info.subscription.billing_portal_link = result.billing_portal_link;
+          delete info.subscription.product;
+          if (!!info.subscription.credit_card) {
             delete info.subscription.credit_card.current_vault;
             delete info.subscription.credit_card.customer_id;
-            delete info.subscription.customer;
-            renderJSON(request, reply, error, info);
           }
+          delete info.subscription.customer;
+          renderJSON(request, reply, error, info);
+        }
       });
 
     } else {
@@ -546,7 +596,7 @@ exports.updateAccount = function(request, reply) {
 
       // NOTE: check update billing_plan?
       if (updatedAccount.billing_plan && (account.billing_plan !== updatedAccount.billing_plan)) {
-        if ((!account.billing_id || account.billing_id === '')  && !account.subscription_id ) {
+        if ((!account.billing_id || account.billing_id === '') && !account.subscription_id) {
           return reply(boom.badRequest('The account in not provisioned in the billing system'));
         } else {
           BillingPlan.get({
@@ -574,194 +624,300 @@ exports.updateAccount = function(request, reply) {
     });
   });
 };
-
+/**
+ * @name deleteAccount
+ * @description
+ *   Delete Account
+ * @param  {[type]} request
+ * @param  {[type]} reply
+ * @return
+ */
 exports.deleteAccount = function(request, reply) {
 
   var account_id = request.params.account_id;
   var account;
+  var _payload = request.payload;
+  var _cancellation_message = _payload.cancellation_message || 'not provided';
 
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
+  var _deleted_by = utils.generateCreatedByField(request);
+  var _cancellation_message_for_chargify = 'Cancel by customer on ' + moment().toISOString() +
+    '(UTC),  user (' + _deleted_by + '), cancellation node (' + _cancellation_message + ')';
 
-  async.waterfall([
-    // Verify that there are no active apps for an account
-    function(cb) {
-      var getAppQuery = {
-        account_id: account_id,
-        deleted: {
-          $ne: true
-        }
-      };
+  // NOTE:  detect role for different roles use differet work-flow
+  // 1. Work-flow for users with role Admin and call with apikey - in safe mode
+  // 2. Work-flow for users with roles RevAdmin or Resseler - in hard mode (auto delete all related apps, domains and APIkeys)
 
-      apps.get(getAppQuery, function(error, existing_app) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to verify that there are no active apps for account ID ' + account_id));
-        }
-
-        if (existing_app) {
-          return reply(boom.badRequest('There are active apps for the account - please remove the apps before removing the account'));
-        }
-
-        cb(error);
-      });
-    },
-    // verify that there are no active domains for an account
-    function(cb) {
-      domainConfigs.query({
-        'proxy_config.account_id': account_id,
-        deleted: {
-          $ne: true
-        }
-      }, function(error, domains) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to verify that there are no active domains for account ID ' + account_id));
-        }
-        if (domains.length > 0) {
-          return reply(boom.badRequest('There are active domains registered for the account - please remove the domains before removing the account'));
-        }
-        cb(error);
-      });
-    },
-    // verify that account exists
-    function(cb) {
-      accounts.get({
-        _id: account_id
-      }, function(error, account2) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
-        }
-        if (!account2) {
-          return reply(boom.badRequest('Account ID not found'));
-        }
-
-        account = account2;
-
-        cb(error, account);
-      });
-    },
-    // NOTE: Cancel subscription
-    function(account, cb) {
-      if (account.subscription_id) {
-        Customer.cancelSubscription(account.subscription_id, function(err, data) {
-          if (err) {
-            // NOTE: can be to get error if try canceled subscription from anothe Cahrgify Site
-            logger.error('Accoutn::deleteAccount:error ' + JSON.stringify(err));
-            cb(err);
-          } else {
-            logger.info('Accoutn::deleteAccount:  Subscription with ID ' + account.subscription_id + ' was canceled.' + JSON.stringify(data));
-            cb(err);
-          }
-        });
-      } else {
-        cb(null);
+  switch (request.auth.credentials.user_type) {
+    case 'user':
+      var role = request.auth.credentials.role;
+      if (role === 'revadmin' || role === 'reseller') {
+        // TODO: need delete Account in hard mode - method not finished -> deleteAccountInHardMode();
+        deleteAccountInSafeMode();
       }
-    },
-    // Mark account as deleted
-    function(cb) {
-      var deleteAccountQuery = {
-        account_id: account_id,
-        deleted: true,
-        subscription_state: 'canceled'
-      };
+      if (role === 'admin') {
+        deleteAccountInSafeMode();
+      }
+      break;
+    case 'apikey':
+      deleteAccountInSafeMode();
+      break;
+    default:
+      logger.error('Account::deleteAccount: Missing or wrong "user_type" attribute in "request" object ' + JSON.stringify(request.auth.credentials));
+      return reply(boom.badImplementation('Failed to delete Account with account ID ' + account_id));
+      // break;
+  }
 
-      accounts.update(deleteAccountQuery, function(error) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id));
-        }
-        cb(error);
-      });
-    },
-    // Drop the deleted account_id from companyId of all users which are managing the account
-    function(cb) {
-      users.listAll(request, function(error, usersToUpdate) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to retrieve from the DB a list of all users'));
-        }
-        for (var i = 0; i < usersToUpdate.length; i++) {
-          if (usersToUpdate[i].companyId.indexOf(account_id) === -1) {
-            usersToUpdate.splice(i, 1);
-            i--;
-          }
-        }
-        cb(error, usersToUpdate);
-      });
-    },
-    function(usersToUpdate, cb) {
-      async.eachSeries(usersToUpdate, function(user, callback) {
-          var user_id = user.user_id;
-          logger.info('User with ID ' + user_id + ' while removing account ID ' + account_id + '. Count Companies = ' +
-            user.companyId.length + ' ' + JSON.stringify(user.companyId));
-          if (user.companyId.length === 1) {
-            logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
-            users.remove({
-              _id: user.user_id
-            }, function(error, result) {
-              if (error) {
-                logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
-                return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
-              }
-              logger.info('Removed user ID ' + user_id + ' while removing account ID ' + account_id);
-              callback(error, user);
-            });
-          } else { /// else just update the user account and delete the account_id from companyId array
-            logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
-            var indexToDelete = user.companyId.indexOf(account_id);
-            logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + account_id + ', user.companyId = ' + user.companyId);
-            user.companyId.splice(indexToDelete, 1);
-            var updatedUser = {
-              user_id: user_id,
-              companyId: user.companyId
-            };
+  /**
+   * @name  deleteAccountInHardMode
+   * @description
+   *
+   * Delete Account in Hard Mode
+   * !!! NOT IMPLEMENTED
+   *
+   * @return
+   */
+  function deleteAccountInHardMode() {
 
-            users.update(updatedUser, function(error, result) {
-              if (error) {
-                return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
-              }
-              callback(error, user);
-            });
+    async.waterfall([
+      // TODO:  Automatically delete all active Apps
+      // function deleteActiveApps(cb) {
+      // cb()
+      // },
+      //
+      // TODO: Automatically delete all API keys belonging to the account ID
+      // function removeAccountsApiKeys(cb) {
+      // cb()
+      // },
+      function loggerDeleteAccount(cb) {
+        cb(true);
+      }
+    ], function(err) {
+      if (err) {
+        // TODO: add logger
+        return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
+      }
+    });
+  }
+  /**
+   * @name  deleteAccountInSafeMode
+   * @description
+   *
+   * Delete Account in Safly mode
+   *
+   * @return {[type]} [description]
+   */
+  function deleteAccountInSafeMode() {
+    async.waterfall([
+      // Verify that there are no active apps for an account
+      function checkActiveApps(cb) {
+        var getAppQuery = {
+          account_id: account_id,
+          deleted: {
+            $ne: true
           }
-        },
-        function(error) {
+        };
+
+        apps.get(getAppQuery, function(error, existing_app) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to verify that there are no active apps for account ID ' + account_id));
+          }
+
+          if (existing_app) {
+            return reply(boom.badRequest('There are active apps for the account - please remove the apps before removing the account'));
+          }
           cb(error);
         });
-    },
-    // Automatically delete all API keys belonging to the account ID
-    function(cb) {
-      apiKeys.removeMany({
-        account_id: account_id
-      }, function(error) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
+      },
+      // verify that there are no active domains for an account
+      function(cb) {
+        domainConfigs.query({
+          'proxy_config.account_id': account_id,
+          deleted: {
+            $ne: true
+          }
+        }, function(error, domains) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to verify that there are no active domains for account ID ' + account_id));
+          }
+          if (domains.length > 0) {
+            return reply(boom.badRequest('There are active domains registered for the account - please remove the domains before removing the account'));
+          }
+          cb(error);
+        });
+      },
+      // verify that account exists
+      function getAccountData(cb) {
+        accounts.get({
+          _id: account_id
+        }, function(error, account2) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
+          }
+          if (!account2) {
+            return reply(boom.badRequest('Account ID not found'));
+          }
+
+          account = account2;
+
+          cb(error, account);
+        });
+      },
+      // NOTE: Cancel subscription
+      function cancellAccountSubscription(account, cb) {
+        if (account.subscription_id && (account.subscription_state !== 'canceled')) {
+          Customer.cancelSubscription(account.subscription_id, _cancellation_message_for_chargify, function(err, data) {
+            if (err) {
+              // NOTE: can be to get error if try canceled subscription from anothe Cahrgify Site trialing
+              logger.error('Accoutn::deleteAccount:error on cancellAccountSubscription ' + JSON.stringify(err));
+              cb(err);
+            } else {
+              logger.info('Accoutn::deleteAccount:  Subscription with ID ' + account.subscription_id + ' was canceled.' + JSON.stringify(data));
+              cb(err);
+            }
+          });
+        } else {
+          cb(null);
         }
+      },
+      // Automatically delete all API keys belonging to the account ID
+      function removeAccountsApiKeys(cb) {
+        apiKeys.removeMany({
+          account_id: account_id
+        }, function(error) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
+          }
+          cb();
+        });
+      },
+      // Drop the deleted account_id from companyId of all users which are managing the account
+      function getAccountUsersForDelete(cb) {
+        users.listAll(request, function(error, usersToUpdate) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to retrieve from the DB a list of all users'));
+          }
+          for (var i = 0; i < usersToUpdate.length; i++) {
+            if (usersToUpdate[i].companyId.indexOf(account_id) === -1) {
+              usersToUpdate.splice(i, 1);
+              i--;
+            }
+          }
+          cb(error, usersToUpdate);
+        });
+      },
+      function dropAccountUsers(usersToUpdate, cb) {
+        async.eachSeries(usersToUpdate, function(user, callback) {
+            var user_id = user.user_id;
+            var _role = user.role;
+            logger.info('User with ID ' + user_id + 'and role "' + _role + '"  while removing account ID ' + account_id + '. Count Companies = ' +
+              user.companyId.length + ' ' + JSON.stringify(user.companyId));
+            if (user.companyId.length === 1) {
+              logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
+              users.remove({
+                _id: user.user_id
+              }, function(error, result) {
+                if (error) {
+                  logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
+                  return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                }
+                logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
+                callback(error, user);
+              });
+            } else { /// else just update the user account and delete the account_id from companyId array
+              logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
+              var indexToDelete = user.companyId.indexOf(account_id);
+              logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + account_id + ', user.companyId = ' + user.companyId);
+              user.companyId.splice(indexToDelete, 1);
+              var updatedUser = {
+                user_id: user_id,
+                companyId: user.companyId
+              };
 
-        cb();
-      });
-    },
-    // Log results and finish request
-    function(cb) {
-      var statusResponse;
-      statusResponse = {
-        statusCode: 200,
-        message: 'Successfully deleted the account'
-      };
+              users.update(updatedUser, function(error, result) {
+                if (error) {
+                  return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                }
+                callback(error, user);
+              });
+            }
+          },
+          function(error) {
+            cb(error);
+          });
+      },
+      // Mark account as deleted
+      function markAccountAsDeleted(cb) {
+        var deleteAccountQuery = {
+          account_id: account_id,
+          deleted: true,
+          subscription_state: 'canceled',
+          deleted_by: _deleted_by,
+          deleted_at: new Date(),
+          cancellation_message: _cancellation_message,
+        };
 
-      account = publicRecordFields.handle(account, 'account');
+        accounts.update(deleteAccountQuery, function(error) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id));
+          }
+          cb(error);
+        });
+      },
+      // Send an email to Rev ops team notifying about the closed account
+      function sendRevOpsEmailAboutCloseAccount(cb) {
+        var remoteIP = utils.getAPIUserRealIP(request);
+        var email = config.get('notify_admin_by_email_on_account_cancellation');
+        if (email !== '') {
+          var mailOptions = {
+            to: email,
+            // TODO: add more text
+            subject: 'RevAPM Account Cancellation Note for account "' + account.companyName + '"',
+            text: 'Account Name: "' + account.companyName + '"' + ', account ID ' + account_id +
+              '\n\nRemote IP Address: ' + remoteIP +
+              '\nDeleted By : ' + _deleted_by +
+              '\nCancellation Note: ' + _cancellation_message
+          };
+          // NOTE: when we send email we do not control success or error. We only create log
+          mail.sendMail(mailOptions, function(err, data) {
+            if (err) {
+              logger.error('deleteAccount:sendRevOpsEmailAboutCloseAccount:error: ' + JSON.stringify(err));
+            } else {
+              logger.info('deleteAccount:sendRevOpsEmailAboutCloseAccount:success');
+            }
+          });
+        } else {
+          logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
+        }
+        cb(null);
+      },
+      // Log results and finish request
+      function loggerDeleteAccount(cb) {
+        var statusResponse;
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully deleted the account'
+        };
 
-      AuditLogger.store({
-        activity_type: 'delete',
-        activity_target: 'account',
-        target_id: account.id,
-        target_name: account.companyName,
-        target_object: account,
-        operation_status: 'success'
-      }, request);
+        account = publicRecordFields.handle(account, 'account');
 
-      renderJSON(request, reply, null, statusResponse);
-    }
-  ], function(err) {
-    if (err) {
-      return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
-    }
-  });
+        AuditLogger.store({
+          activity_type: 'delete',
+          activity_target: 'account',
+          target_id: account.id,
+          target_name: account.companyName,
+          target_object: account,
+          operation_status: 'success'
+        }, request);
+
+        renderJSON(request, reply, null, statusResponse);
+      }
+    ], function(err) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
+      }
+    });
+  }
 };

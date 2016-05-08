@@ -100,6 +100,11 @@
           "name": "www.google-test.com"
         }
       }
+    },
+    "usage_report": {
+      "account_id": "55b6ff6a7957012304a49d04",
+      "domain_id": "56558390b6eb546a6732ab4f",
+      "domain_name": "www.google-test.com"
     }
   },
   "stats_api": {

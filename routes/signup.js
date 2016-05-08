@@ -47,7 +47,27 @@ module.exports = [
       }
     }
   },
-
+  {
+    method : 'POST',
+    path   : '/v1/signup2',
+    config : {
+      handler     : handler.signup2,
+      auth        : false,
+      description : 'An internal portal call for user signup (short)',
+//      tags        : ['api', 'web'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        payload : signupValidation.signupShortPayload
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
   {
     method : 'GET',
     path   : '/v1/signup/resend/{email}',

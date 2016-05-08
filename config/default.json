@@ -56,11 +56,11 @@
   "user_verify_token_lifetime" : 86400000,
 
   "password_reset_token_lifespan": 3600000,     // 1 hour
-  "password_reset_from_email" : "RevAPM Support <support@revapm.com>",
   "password_reset_email_subject": "RevAPM Customer Portal Password Reset",
   "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
   "password_reset_confirmation_email_subject": "Your RevAPM Customer Portal password has been changed",
   "support_email" : "support@revapm.com",
+  "support_name" : "RevAPM Support Team",
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
   "jwt_token_lifetime_minutes": 1440,   // 24 hours
@@ -73,7 +73,8 @@
   },
 
   "enable_self_registration": true,
-
+  "enable_simplified_signup_process": true,
+  
   "chargify": { 
     "password" : "x",
     "domain": "https://revapm-test.chargify.com",
@@ -82,6 +83,7 @@
   },
 
   "notify_admin_by_email_on_user_login": "",
+  "notify_admin_by_email_on_account_cancellation": "",
   "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
   "trust_request_xff_header": true,
   "usage_report_regen_age_ms": 600000,

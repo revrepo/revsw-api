@@ -230,6 +230,7 @@ module.exports = [
           ssl_ciphers: Joi.string().allow(''),
           ssl_prefer_server_ciphers: Joi.boolean(),
           ssl_cert_id: Joi.objectId().allow(''),
+          btt_key: Joi.string().max(32).allow(''),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),

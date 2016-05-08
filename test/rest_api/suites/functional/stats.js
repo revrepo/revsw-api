@@ -24,7 +24,7 @@ var should = require('should-http');
 var promise = require('bluebird');
 var config = require('config');
 
-var normalUser = config.get('api.users.user');
+var user = config.get('api.users.admin');
 var domains = config.get('api.stats.domains');
 
 describe('Functional check.', function () {
@@ -33,7 +33,7 @@ describe('Functional check.', function () {
 
   before(function (done) {
     API.helpers
-      .authenticateUser(normalUser)
+      .authenticateUser(user)
       .then(done)
       .catch(done);
   });

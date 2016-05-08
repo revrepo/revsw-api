@@ -90,7 +90,6 @@ exports.forgotPassword = function(request, reply) {
         function(token, user, done) {
           var mailOptions = {
             to: user.email,
-            from: config.get('password_reset_from_email'),
             subject: config.get('password_reset_email_subject'),
             text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
@@ -118,7 +117,7 @@ exports.forgotPassword = function(request, reply) {
   }
 
   // Start work-flow
-  users.get({
+  users.getValidation({
     email: email
   }, function(error, user) {
     if (error) {
@@ -131,6 +130,12 @@ exports.forgotPassword = function(request, reply) {
 
       if (user.self_registered) {
           logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          // NOTE: User not verify
+          if (user.validation === undefined  || user.validation.verified===false) {
+              logger.error('forgotPassword::authenticate: User with ' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
+              return reply(boom.create(418, 'Your registration not finished'));
+          }
           accounts.get({
             _id: user.companyId
           }, function(error, account) {
@@ -232,7 +237,6 @@ exports.resetPassword = function(request, reply) {
     function(user, done) {
       var mailOptions = {
         to: user.email,
-        from: config.get('password_reset_from_email'),
         subject: config.get('password_reset_confirmation_email_subject'),
         text: 'Hello,\n\n' +
         'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n\n' +

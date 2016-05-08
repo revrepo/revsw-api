@@ -70,8 +70,17 @@ function Account(mongoose, connection, options) {
     },
     'billing_portal_link': {url: String, expires_at: Date},
     'created_at'  : {type : Date, default : Date.now},
-    'updated_at'  : {type : Date, default : Date.now}
+    'updated_at'  : {type : Date, default : Date.now},
     // TODO: add deleted_at and deleted_by fields
+    'deleted_by': String,
+    'deleted_at'  : {type : Date, default : null},
+    'cancellation_message': {type: String, default: null},
+        // Self register section
+    'self_registered': {
+        type: Boolean,
+        default: false
+    },
+
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
