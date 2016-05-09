@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -18,13 +18,18 @@
 
 // # Accounts Resource object
 
-// Requiring config and `BaseResource`
-var config = require('config');
+// Requiring `BaseResource`
 var BasicResource = require('./basic');
+// Requiring constants
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
+// Keys
 var accountIdKey = 'accountId';
+var statementKey = 'statementId';
+var billingPlanHandleKey = 'billingPlanHandleId';
+
+// Config for resource
 var resourceConfig = {
   idKey: accountIdKey,
   name: 'accounts',
@@ -35,6 +40,59 @@ var resourceConfig = {
     Methods.READ_ONE,
     Methods.UPDATE,
     Methods.DELETE
+  ],
+  nestedResources: [
+    {
+      idKey: null,
+      name: 'billingProfile',
+      path: '/billing_profile',
+      methods: [
+        Methods.CREATE
+      ]
+    },
+    {
+      idKey: statementKey,
+      name: 'statements',
+      path: '/statements/{' + statementKey + '}',
+      methods: [
+        Methods.READ_ALL,
+        Methods.READ_ONE
+      ],
+      nestedResources: [
+        {
+          idKey: null,
+          name: 'pdf',
+          path: '/pdf',
+          methods: [
+            Methods.READ_ALL
+          ]
+        }
+      ]
+    },
+    {
+      idKey: null,
+      name: 'transactions',
+      path: '/transactions',
+      methods: [
+        Methods.READ_ALL
+      ]
+    },
+    {
+      idKey: billingPlanHandleKey,
+      name: 'subscriptionPreview',
+      path: '/subscription_preview/{' + billingPlanHandleKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: null,
+      name: 'subscriptionSummary',
+      path: '/subscription_summary',
+      methods: [
+        Methods.READ_ALL
+      ]
+    }
   ]
 };
 
