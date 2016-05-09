@@ -24,8 +24,11 @@ var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var emailKey = 'accountId';
-var tokenKey = 'accountId';
+// Keys
+var emailKey = 'emailId';
+var tokenKey = 'tokenId';
+
+// Config for resource
 var resourceConfig = {
   idKey: null,
   name: 'sign-up',
