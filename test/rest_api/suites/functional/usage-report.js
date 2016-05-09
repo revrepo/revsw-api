@@ -33,7 +33,7 @@ describe('UsageReport Functional check:', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var point = '    • ',
-    user = config.get('api.usage_report.user'),
+    user = config.get('api.users.admin'),
     account_id = config.get('api.usage_report.account_id'),
     domain = config.get('api.usage_report.domain_name'),
     estimated = UsageDP.countEstimations(),
