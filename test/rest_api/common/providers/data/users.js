@@ -16,6 +16,10 @@
  * from Rev Software, Inc.
  */
 
+var faker = require('faker');
+
+var APITestError = require('./../../apiTestError');
+
 // # User Data Provider object
 //
 // Defines some methods to generate valid and common user test data.
@@ -28,7 +32,7 @@ var UserDataProvider = {
   prefix: 'API-TEST',
 
   /**
-   * ### UserDataProvider.generateUser()
+   * ### UserDataProvider.generateOne()
    *
    * Generates valid data that represents a user and the user REST API
    * end points accept.
@@ -74,23 +78,40 @@ var UserDataProvider = {
     return user;
   },
 
-  generateOneToSignUp: function () {
-    return {
-      first_name: 'joi.string().min(1).max(150).trim().description(\'User first name\').required()',
-      last_name: 'joi.string().min(1).max(150).trim().description(\'Last name\').required()',
-      email: 'joi.string().email().description(\'Email address\').required()',
-      company_name: 'joi.string().min(1).max(150).allow(\'\').trim().description(\'Company name\').optional()',
-      phone_number: 'joi.string().min(1).max(30).trim().description(\'Phone number\').required()',
-      password: 'joi.string().min(8).max(15).description(\'Password\').required()',
-      passwordConfirm: 'joi.string().min(8).max(15).description(\'Password confirmation\').required()',
-      address1: 'joi.string().min(1).max(150).trim().description(\'Address 1\').required()',
-      address2: 'joi.string().min(1).max(150).allow(\'\').trim().description(\'Address 2\').optional()',
-      country: 'joi.string().min(1).max(150).trim().description(\'Country\').required()',
-      state: 'joi.string().min(1).max(150).trim().description(\'State\').required()',
-      city: 'joi.string().min(1).max(150).trim().description(\'City\').required()',
-      zipcode: 'joi.string().min(1).max(30).trim().description(\'Zip Code\').required()',
-      billing_plan: 'joi.string().min(1).max(150).trim().description(\'Billing plan ID\').required()'
+  /**
+   * ### UserDataProvider.generateOneToSignUp()
+   *
+   * Generates valid data that represents a user (the sign-up REST API
+   * end-point accepts) that is going to be registered.
+   *
+   * @param {String} billingPlanId, user information to use
+   * @returns {Object} user data.
+   */
+  generateOneToSignUp: function (billingPlanId) {
+    if (!billingPlanId) {
+      return new APITestError('Billing Plan ID required to generate user data');
+    }
+    var firstName = faker.name.firstName();
+    var lastName = faker.name.lastName();
+    var user = {
+      first_name: firstName,
+      last_name: lastName,
+      email: [firstName, lastName, Date.now() + '@az921.com']
+        .join('-')
+        .toLowerCase(),
+      company_name: faker.company.companyName(),
+      phone_number: faker.phone.phoneNumber(),
+      password: 'password1',
+      passwordConfirm: 'password1',
+      address1: faker.address.streetAddress(),
+      address2: faker.address.secondaryAddress(),
+      country: faker.address.country(),
+      state: faker.address.state(),
+      city: faker.address.city(),
+      zipcode: faker.address.zipCode(),
+      billing_plan: billingPlanId
     };
+    return user;
   }
 };
 

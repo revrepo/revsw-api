@@ -68,9 +68,32 @@ describe('Smoke check', function () {
   describe('Sign Up resource', function () {
     it('should ...',
       function (done) {
-        var newUser = UsersDP.generateOneToSignUp();
+        var billingPlanId = '';
+        var newUser = UsersDP.generateOneToSignUp(billingPlanId);
         API.resources.signUp
           .createOne(newUser)
+          .expect(200)
+          .end(done)
+          .catch(done);
+      });
+
+    xit('should ...',
+      function (done) {
+        var email = '';
+        API.resources.signUp
+          .resend()
+          .getOne(email)
+          .expect(200)
+          .end(done)
+          .catch(done);
+      });
+
+    xit('should ...',
+      function (done) {
+        var token = '';
+        API.resources.signUp
+          .verify()
+          .createOne(token)
           .expect(200)
           .end(done)
           .catch(done);
