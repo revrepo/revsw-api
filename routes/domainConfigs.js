@@ -323,7 +323,7 @@ module.exports = [
             custom_vcl: Joi.object({
               enabled: Joi.boolean().required(),
               backends: Joi.array().items({
-                vcl: Joi.string().max(300).required(),
+                vcl: Joi.string().max(3000).required(),
                 dynamic: Joi.boolean().required(),
                 port: Joi.number().integer().required(),
                 host: Joi.alternatives().try([Joi.string().uri(),Joi.string().regex(routeModels.domainRegex)]).required(),
