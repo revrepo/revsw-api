@@ -47,6 +47,12 @@ var Customer = require('../lib/chargify').Customer;
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
+var LogShippingJob = require('../models/LogShippingJob');
+var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnectionPortal());
+
+var Dashboard = require('../models/Dashboard');
+var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
+
 var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
@@ -815,16 +821,26 @@ exports.deleteAccount = function(request, reply) {
             logger.info('User with ID ' + user_id + 'and role "' + _role + '"  while removing account ID ' + account_id + '. Count Companies = ' +
               user.companyId.length + ' ' + JSON.stringify(user.companyId));
             if (user.companyId.length === 1) {
-              logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
-              users.remove({
-                _id: user.user_id
-              }, function(error, result) {
+              // NOTE: delete user's dashboards
+              logger.info('Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
+              dashboard.remove({
+                user_id: user_id
+              }, function(error) {
                 if (error) {
-                  logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
-                  return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                  return reply(boom.badImplementation('Error removing the dashboards'));
+                } else {
+                  // NOTE: delete user if all his dashboards deleted
+                  users.remove({
+                    _id: user.user_id
+                  }, function(error, result) {
+                    if (error) {
+                      logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
+                      return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                    }
+                    logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
+                    callback(error, user);
+                  });
                 }
-                logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
-                callback(error, user);
               });
             } else { /// else just update the user account and delete the account_id from companyId array
               logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
