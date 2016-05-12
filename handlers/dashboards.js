@@ -25,7 +25,7 @@ var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
-
+var handlersLib = require('./lib.js');
 var Dashboard = require('../models/Dashboard');
 var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
 
@@ -63,9 +63,9 @@ exports.getDashboard = function getDashboard(request, reply) {
 
 exports.createDashboard = function createDashboard(request, reply) {
   var newDashboard = request.payload;
-  newDashboard.user_id = request.auth.credentials.user_id;
+  var user_id = request.auth.credentials.user_id;
 
-  dashboard.add(newDashboard, function(error, result) {
+  handlersLib.createUserDashboard(user_id,newDashboard, function(error, result) {
     if (error || !result) {
       return reply(boom.badImplementation('Failed to add new dashboard ' + newDashboard.title));
     }

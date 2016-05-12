@@ -23,6 +23,7 @@ var boom = require('boom');
 var async = require('async');
 var AuditLogger = require('../lib/audit');
 var utils = require('../lib/utilities');
+var handlersLib = require('./lib.js');
 var mail = require('../lib/mail');
 var chargifyProduct = require('../lib/chargify').Product;
 var chargifyCustomer = require('../lib/chargify').Customer;
@@ -408,6 +409,14 @@ function createUser(newUser) {
         users.addAsync(newUser)
           .then(
             function(user) {
+              // Each created user need to have Dashboard
+              handlersLib.createUserDashboard(user.user_id, null, function(err) {
+                if (err) {
+                  logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
+                } else {
+                  logger.info('Signup:createUser:success add default dashboard for User with id ' + user.user_id);
+                }
+              });
               resolve(user);
             },
             function(err) {
@@ -761,7 +770,8 @@ exports.resendRegistrationEmail = function(req, reply) {
  * @name verify
  * @description
  *
- *
+ *  Verify token from registred user
+ *  - return auth token (save last time login details)
  *
  * @param  {[type]} req   [description]
  * @param  {[type]} reply [description]
@@ -769,7 +779,7 @@ exports.resendRegistrationEmail = function(req, reply) {
  */
 exports.verify = function(req, reply) {
   var token = req.params.token;
-
+  var remoteIP = utils.getAPIUserRealIP(req);
   if (!config.get('enable_simplified_signup_process')) {
     return reply(boom.badRequest('User verification is temporary disabled'));
   }
@@ -806,6 +816,8 @@ exports.verify = function(req, reply) {
           ' User ID: ' + user.id + ' Email: ' + user.email));
       }
       // Account exist - can update user information
+      user.last_login_from = remoteIP; // NOTE: save information about success login user (auto-login after verify)
+      user.last_login_at = new Date();
       users.update(user, function(error, result) {
         if (error) {
           return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
@@ -820,21 +832,36 @@ exports.verify = function(req, reply) {
           password: _password
         });
         result = publicRecordFields.handle(fields, 'verify');
+        // NOTE: user verify and auto-login
         AuditLogger.store({
-          ip_address: utils.getAPIUserRealIP(req),
+          ip_address: remoteIP,
           datetime: Date.now(),
           user_id: user.user_id,
           user_name: user.email,
           user_type: 'user',
           account_id: companyId,
-          activity_type: 'modify',
+          activity_type: 'login', //'modify',
           activity_target: 'user',
           target_id: result.user_id,
           target_name: result.email,
-          target_object: result,
+          target_object: publicRecordFields.handle(fields, 'user'),
           operation_status: 'success'
         });
+        // TODO: rebase to handlers/lib.js
+        var email = config.get('notify_admin_by_email_on_user_login');
+        if (email !== '') {
+          var mailOptions = {
+            to: email,
+            subject: 'Portal login event for user ' + user.email,
+            text: 'RevAPM login event for user ' + user.email +
+              '\n\nRemote IP address: ' + remoteIP +
+              '\nRole: ' + user.role
+          };
+          // Default not critecle action
+          mail.sendMail(mailOptions, function(err) {
 
+          });
+        }
         renderJSON(req, reply, error, result);
       });
     });
