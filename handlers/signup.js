@@ -31,6 +31,8 @@ var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var _ = require('lodash');
 
+var emailService = require('../services/email.js');
+
 var Promise = require('bluebird');
 var url = require('url');
 var qs = require('qs');
@@ -847,21 +849,13 @@ exports.verify = function(req, reply) {
           target_object: publicRecordFields.handle(fields, 'user'),
           operation_status: 'success'
         });
-        // TODO: rebase to handlers/lib.js
-        var email = config.get('notify_admin_by_email_on_user_login');
-        if (email !== '') {
-          var mailOptions = {
-            to: email,
-            subject: 'Portal login event for user ' + user.email,
-            text: 'RevAPM login event for user ' + user.email +
-              '\n\nRemote IP address: ' + remoteIP +
-              '\nRole: ' + user.role
-          };
-          // Default not critecle action
-          mail.sendMail(mailOptions, function(err) {
+        emailService.sendEmailAboutUserLogin({
+          user:  publicRecordFields.handle(fields, 'user'),
+          remoteIP: remoteIP
+        },function(){
+           logger.info('signup:verify::sendEmailAboutUserLogin:');
+        });
 
-          });
-        }
         renderJSON(req, reply, error, result);
       });
     });

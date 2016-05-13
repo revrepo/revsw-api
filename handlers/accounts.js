@@ -60,6 +60,9 @@ var ApiKey = require('../models/APIKey');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
 
+var logShippingJobsService = require('../services/logShippingJobs.js');
+var emailService = require('../services/email.js');
+
 exports.getAccounts = function getAccounts(request, reply) {
 
   accounts.list(function(error, listOfAccounts) {
@@ -799,6 +802,17 @@ exports.deleteAccount = function(request, reply) {
           cb();
         });
       },
+      // NOTE: Auto Delete Log Shipping Jobs
+      function autoRemoveLogShippingJobs(cb) {
+        logShippingJobsService.deleteJobsWithAccountId(account_id, function(err, data) {
+          if (err) {
+            logger.error('Error remove All Log Shipping Jobs while removing account ID ' + account_id);
+            return reply(boom.badImplementation('Failed to delete Log Shipping Jobs for account ID ' + account_id));
+          }
+          logger.info('Removed All Log Shipping Jobs while removing account ID ' + account_id);
+          cb();
+        });
+      },
       // Drop the deleted account_id from companyId of all users which are managing the account
       function getAccountUsersForDelete(cb) {
         users.listAll(request, function(error, usersToUpdate) {
@@ -884,29 +898,20 @@ exports.deleteAccount = function(request, reply) {
       },
       // Send an email to Rev ops team notifying about the closed account
       function sendRevOpsEmailAboutCloseAccount(cb) {
-        var remoteIP = utils.getAPIUserRealIP(request);
-        var email = config.get('notify_admin_by_email_on_account_cancellation');
-        if (email !== '') {
-          var mailOptions = {
-            to: email,
-            // TODO: add more text
-            subject: 'RevAPM Account Cancellation Note for account "' + account.companyName + '"',
-            text: 'Account Name: "' + account.companyName + '"' + ', account ID ' + account_id +
-              '\n\nRemote IP Address: ' + remoteIP +
-              '\nDeleted By : ' + _deleted_by +
-              '\nCancellation Note: ' + _cancellation_message
-          };
-          // NOTE: when we send email we do not control success or error. We only create log
-          mail.sendMail(mailOptions, function(err, data) {
-            if (err) {
-              logger.error('deleteAccount:sendRevOpsEmailAboutCloseAccount:error: ' + JSON.stringify(err));
-            } else {
-              logger.info('deleteAccount:sendRevOpsEmailAboutCloseAccount:success');
-            }
-          });
-        } else {
-          logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
-        }
+        logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
+        emailService.sendRevOpsEmailAboutCloseAccount({
+          remoteIP: utils.getAPIUserRealIP(request),
+          account_id: account_id,
+          companyName: account.companyName,
+          deleted_by: _deleted_by,
+          cancellation_message: _cancellation_message
+        }, function(err, data) {
+          if (err) {
+            logger.error('deleteAccount:sendRevOpsEmailAboutCloseAccount:error: ' + JSON.stringify(err));
+          } else {
+            logger.info('deleteAccount:sendRevOpsEmailAboutCloseAccount:success');
+          }
+        });
         cb(null);
       },
       // Log results and finish request

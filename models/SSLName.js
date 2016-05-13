@@ -134,14 +134,25 @@ SSLName.prototype = {
   },
 
   remove: function (item, callback) {
-    this.model.remove({_id: item._id}, function (err, doc) {
-      if (err) {
-        callback(err);
-      }
-      callback(null, doc);
-    });
+    var context = this;
+    if (item) {
+      this.get(item, function (err, data) {
+        if (data) {
+          context.model.remove(item, function (err) {
+            callback(err, null);
+          });
+        } else {
+          callback(true, null);
+        }
+      });
+    } else {
+      callback(utils.buildError('400', 'No object passed to remove function'), null);
+    }
   },
 
+  removeMany: function (data, callback) {
+    this.model.remove(data, callback);
+  },
 };
 
 module.exports = SSLName;
