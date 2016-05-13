@@ -35,7 +35,7 @@ var SSLCertificate = require('../models/SSLCertificate');
 var sslCertificates = new SSLCertificate(mongoose, mongoConnection.getConnectionPortal());
 
 /**
- * @name deletePrivetSSLCertificatesWithAccountId
+ * @name deletePrivateSSLCertificatesWithAccountId
  * @description
  *
  * @param  {[type]}   accountId [description]
@@ -43,15 +43,16 @@ var sslCertificates = new SSLCertificate(mongoose, mongoConnection.getConnection
  * @param  {Function} cb        [description]
  * @return {[type]}             [description]
  */
-exports.deletePrivetSSLCertificatesWithAccountId = function(accountId, options, cb) {
-  var getPrivetSSLCertificatesQuery = {
+exports.deletePrivateSSLCertificatesWithAccountId = function(accountId, options, cb) {
+  var getPrivateSSLCertificatesQuery = {
     account_id: accountId,
     cert_type: 'private',
     deleted: {
       $ne: true
     }
   };
-  sslCertificates.query(getPrivetSSLCertificatesQuery, function(error, results) {
+
+  sslCertificates.query(getPrivateSSLCertificatesQuery, function(error, results) {
     if (error) {
       cb(error);
     } else {
@@ -60,7 +61,8 @@ exports.deletePrivetSSLCertificatesWithAccountId = function(accountId, options, 
         // TODO: update all records with
         _.forEach(results,function(item) {
           callCDS.push(function (callback) {
-            callback(null, item);
+            //
+            callback(null, item.id);
           });
         });
         // console.log(callCDS);
@@ -74,4 +76,4 @@ exports.deletePrivetSSLCertificatesWithAccountId = function(accountId, options, 
       }
     }
   });
-}
+};
