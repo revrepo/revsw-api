@@ -23,7 +23,6 @@ var boom = require('boom');
 var async = require('async');
 var AuditLogger = require('../lib/audit');
 var utils = require('../lib/utilities');
-var handlersLib = require('./lib.js');
 var mail = require('../lib/mail');
 var chargifyProduct = require('../lib/chargify').Product;
 var chargifyCustomer = require('../lib/chargify').Customer;
@@ -32,6 +31,7 @@ var logger = require('revsw-logger')(config.log_config);
 var _ = require('lodash');
 
 var emailService = require('../services/email.js');
+var dashboardService = require('../services/dashboards.js');
 
 var Promise = require('bluebird');
 var url = require('url');
@@ -412,7 +412,7 @@ function createUser(newUser) {
           .then(
             function(user) {
               // Each created user need to have Dashboard
-              handlersLib.createUserDashboard(user.user_id, null, function(err) {
+              dashboardService.createUserDashboard(user.user_id, null, function(err) {
                 if (err) {
                   logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
                 } else {
