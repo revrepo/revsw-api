@@ -81,6 +81,7 @@ cp -rf  $WORKSPACE/models  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/routes  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/route-validation  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/node_modules  $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/services  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/config/*.json  $foldername/opt/$PackageName/config/
 cp -rf  $WORKSPACE/config/dev_ssl_certs  $foldername/opt/$PackageName/config/
 cp -rf  $WORKSPACE/config/version.txt  $foldername/opt/$PackageName/config
