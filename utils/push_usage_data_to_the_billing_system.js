@@ -18,7 +18,7 @@
 'use strict';
 
 var promise = require('bluebird');
-var billingSytemReport = require('../lib/billingSytemReport.js');
+var billingSystemReport = require('../lib/billingSystemReport.js');
 //  this is 0.10, console.dir( obj, opts ) doesn't work
 var util = require('util');
 var log_ = function(o, d) {
@@ -27,7 +27,7 @@ var log_ = function(o, d) {
     depth: (d || 100),
     showHidden: true
   }));
-}
+};
 
 //  CLI -----------------------------
 
@@ -79,13 +79,13 @@ for (var i = 0; i < parslen; ++i) {
 }
 
 
-billingSytemReport.getListAccountsForReport(conf)
+billingSystemReport.getListAccountsForReport(conf)
   .then(function chechListAccounts(data) {
     log_('Get list Accounts for send billing info for ' + data.length + ' accounts.');
     return data;
   })
   .map(function(item) {
-    return billingSytemReport.oneBillingReport((conf.date || 'now'), item.id /* Account ID*/ , conf.dry /*do not save, return collected data*/ )
+    return billingSystemReport.oneBillingReport((conf.date || 'now'), item.id /* Account ID*/ , conf.dry /*do not save, return collected data*/ )
       .then(function infoResultReporting() {
         return {
           id: item.id,
@@ -94,7 +94,7 @@ billingSytemReport.getListAccountsForReport(conf)
           contact_email: item.contact_email,
           subscription_state: item.subscription_state,
           billing_plan: item.billing_plan
-        }
+        };
       });
   }, {
     concurrency: 100 // TODO: make as parameter ?

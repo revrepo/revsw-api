@@ -26,7 +26,7 @@ var promise = require('bluebird');
 var util = require('util');
 var log_ = function( o, d ) {
   console.log( util.inspect( o, { colors: true, depth: (d || 100), showHidden: true } ) );
-}
+};
 
 
 
