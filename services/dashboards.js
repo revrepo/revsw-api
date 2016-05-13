@@ -64,7 +64,27 @@ exports.createUserDashboard = function(user_id, newDashboardOptions, cb) {
       logger.error('createUserDashboard::Failed to add new dashboard ' + newDashboard.title);
       cb(error);
     } else {
-      logger.info('createUserDashboard::Failed to add new dashboard ' + newDashboard.title);
+      logger.info('createUserDashboard::Success added new dashboard ' + newDashboard.title);
+      cb(null, result);
+    }
+  });
+};
+
+/**
+ * [deleteUserDashboards description]
+ * @param  {[type]}   user_id [description]
+ * @param  {Function} cb      [description]
+ * @return {[type]}           [description]
+ */
+exports.deleteDashboardsWithUserId = function(user_id, cb) {
+  dashboard.remove({
+    user_id: user_id
+  }, function(error, ) {
+    if (error) {
+      logger.error('deleteUserDashboards::Failed to delete dashboards user with Id' + user_id);
+      cb(error);
+    } else {
+      logger.info('deleteUserDashboards::Success deleted dashboards user with Id ' + user_id);
       cb(null, result);
     }
   });

@@ -59,7 +59,7 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 var ApiKey = require('../models/APIKey');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
-
+var dashboardService = require('../services/dashboards.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
 var emailService = require('../services/email.js');
 
@@ -837,9 +837,7 @@ exports.deleteAccount = function(request, reply) {
             if (user.companyId.length === 1) {
               // NOTE: delete user's dashboards
               logger.info('Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
-              dashboard.remove({
-                user_id: user_id
-              }, function(error) {
+              dashboardService.deleteDashboardsWithUserId(user_id, function(error) {
                 if (error) {
                   return reply(boom.badImplementation('Error removing the dashboards'));
                 } else {
