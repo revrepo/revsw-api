@@ -25,6 +25,8 @@ var UsersDP = require('./../../common/providers/data/users');
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
+  var revAdmin = config.get('api.users.revAdmin');
+
   // Generating new `user` data in order to use later in our tests.
   //var userSample = DataProvider.generateUser();
   // Retrieving information about specific user that later we will use for
@@ -66,18 +68,26 @@ describe('Smoke check', function () {
   //});
 
   describe('Sign Up resource', function () {
-    it('should ...',
+
+    it('should return success response when signing up user',
       function (done) {
-        var billingPlanId = '';
-        var newUser = UsersDP.generateOneToSignUp(billingPlanId);
-        API.resources.signUp
-          .createOne(newUser)
-          .expect(200)
-          .end(done)
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            return API.helpers.billingPlans.getRandomOne();
+          })
+          .then(function (bPlan) {
+            API.session.reset();
+            var newUser = UsersDP.generateOneToSignUp(bPlan.chargify_handle);
+            API.resources.signUp
+              .createOne(newUser)
+              .expect(200)
+              .end(done);
+          })
           .catch(done);
       });
 
-    xit('should ...',
+    xit('should return success response when resending confirmation email',
       function (done) {
         var email = '';
         API.resources.signUp
@@ -88,7 +98,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should ...',
+    xit('should return success response when verifying user',
       function (done) {
         var token = '';
         API.resources.signUp

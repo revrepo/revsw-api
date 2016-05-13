@@ -26,6 +26,7 @@ var AuthenticateRes = require('./../resources/authenticate');
 // Required Helpers to attach to main API helper object
 var AccountsHelper = require('./accounts');
 var AppsHelper = require('./apps');
+var BillingPlansHelper = require('./billingPlans');
 var DomainConfigsHelper = require('./domainConfigs');
 var PurgeHelper = require('./purge');
 var UsersHelper = require('./users');
@@ -35,6 +36,7 @@ module.exports = {
 
   accounts: AccountsHelper,
   apps: AppsHelper,
+  billingPlans: BillingPlansHelper,
   domainConfigs: DomainConfigsHelper,
   purge: PurgeHelper,
   users: UsersHelper,

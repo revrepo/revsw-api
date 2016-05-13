@@ -84,12 +84,12 @@ var UserDataProvider = {
    * Generates valid data that represents a user (the sign-up REST API
    * end-point accepts) that is going to be registered.
    *
-   * @param {String} billingPlanId, user information to use
+   * @param {String} billingPlan, billing plan info to use
    * @returns {Object} user data.
    */
-  generateOneToSignUp: function (billingPlanId) {
-    if (!billingPlanId) {
-      return new APITestError('Billing Plan ID required to generate user data');
+  generateOneToSignUp: function (billingPlan) {
+    if (!billingPlan) {
+      billingPlan = 'billing-plan-gold';
     }
     var firstName = faker.name.firstName();
     var lastName = faker.name.lastName();
@@ -109,7 +109,7 @@ var UserDataProvider = {
       state: faker.address.state(),
       city: faker.address.city(),
       zipcode: faker.address.zipCode(),
-      billing_plan: billingPlanId
+      billing_plan: billingPlan
     };
     return user;
   }
