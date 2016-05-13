@@ -49,9 +49,14 @@ var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
 exports.createUserDashboard = function(user_id, newDashboardOptions, cb) {
   var _defaultDashboard = {
     title: 'My Dashboard',
+    structure: '6-6',
     rows: [{
       columns: [{
-        styleClass: 'col-md-12',
+        styleClass: 'col-md-6',
+        widgets: []
+      },
+      {
+        styleClass: 'col-md-6',
         widgets: []
       }]
     }]
