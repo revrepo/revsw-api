@@ -32,38 +32,6 @@ var sslCertificates = require('../services/sslCertificates.js');
 var emailService = require('../services/email.js');
 module.exports = [{
     method: 'GET',
-    path: '/v1/ddd',
-    config: {
-      auth: false,
-      handler: function(req, reply) {
-        var accountId = "57346f258980f1a0793d2095";//"57346f258980f1a0793d2095"
-
-        // logShippingJobsService.deleteJobsWithAccountId(accountId, _cb)
-        // sslCertificates.deletePrivetSSLCertificatesWithAccountId(accountId,{}, _cb);
-        emailService.sendRevOpsEmailAboutCloseAccount({remoteIP:'127.0.0.1'},_cb)
-        function _cb(err, data) {
-          if (err) {
-            reply(err);
-          } else {
-            reply(data);
-          }
-
-        }
-      },
-      // description: 'Get a list of customer accounts registered for a customer/reseller',
-      // notes: 'Use this function to get a list of customer accounts register on your reseller account',
-      // tags: ['api', 'accounts'],
-      // plugins: {
-      //   'hapi-swagger': {
-      //     responseMessages: routeModels.standardHTTPErrors
-      //   }
-      // },
-      // response: {
-      //   schema: routeModels.listOfAccountsModel
-      // }
-    }
-  }, {
-    method: 'GET',
     path: '/v1/accounts',
     config: {
       auth: {
