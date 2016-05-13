@@ -68,6 +68,7 @@ gulp.task('watch', ['serve'], function() {
     './models/**/*.js',
     './routes/**/*.js',
     './handlers/**/*.js',
+    './services/**/*.js',
     './config/**/*.json'
   ], [], [
     'reload',
@@ -84,6 +85,7 @@ gulp.task('lint', [], function (cb) {
     './bin/**/*.js',
     './lib/**/*.js',
     './handlers/**/*.js',
+    './services/**/*.js',
     './models/**/*.js',
     './routes/**/*.js',
   ])

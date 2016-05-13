@@ -30,7 +30,7 @@ var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
-var mail = require('../lib/mail');
+var emailService = require('../services/email.js');
 
 var User = require('../models/User');
 var Account = require('../models/Account');
@@ -78,23 +78,15 @@ var onAuthPassed = function(user, request, reply, error) {
       operation_status: 'success'
     });
 
-    var email = config.get('notify_admin_by_email_on_user_login');
-    if (email !== '') {
-      var mailOptions = {
-        to: email,
-        subject: 'Portal login event for user ' + user.email,
-        text: 'RevAPM login event for user ' + user.email +
-          '\n\nRemote IP address: ' + remoteIP +
-          '\nRole: ' + user.role
-      };
+    emailService.sendEmailAboutUserLogin({
+      user: publicRecordFields.handle(result, 'user'),
+      remoteIP: remoteIP
+    }, function() {
+      logger.info('authenticate:onAuthPassed::sendEmailAboutUserLogin:');
+    });
 
-      mail.sendMail(mailOptions, function() {
-        renderJSON(request, reply, error, statusResponse);
-      });
+    renderJSON(request, reply, error, statusResponse);
 
-    } else {
-      renderJSON(request, reply, error, statusResponse);
-    }
   });
 };
 
@@ -128,11 +120,11 @@ exports.authenticate = function(request, reply) {
         if (user.self_registered) {
           logger.info('Authenticate::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
           // NOTE: User not verify
-          if (user.validation === undefined  || user.validation.verified===false) {
-              logger.error('Authenticate::authenticate: User with ' +
-                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
-              authPassed = false;
-              return reply(boom.create(418, 'Your registration not finished'));
+          if (user.validation === undefined || user.validation.verified === false) {
+            logger.error('Authenticate::authenticate: User with ' +
+              ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
+            authPassed = false;
+            return reply(boom.create(418, 'Your registration not finished'));
           }
           accounts.get({
             _id: user.companyId

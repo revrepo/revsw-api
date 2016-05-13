@@ -30,6 +30,9 @@ var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var _ = require('lodash');
 
+var emailService = require('../services/email.js');
+var dashboardService = require('../services/dashboards.js');
+
 var Promise = require('bluebird');
 var url = require('url');
 var qs = require('qs');
@@ -408,6 +411,14 @@ function createUser(newUser) {
         users.addAsync(newUser)
           .then(
             function(user) {
+              // Each created user need to have Dashboard
+              dashboardService.createUserDashboard(user.user_id, null, function(err) {
+                if (err) {
+                  logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
+                } else {
+                  logger.info('Signup:createUser:success add default dashboard for User with id ' + user.user_id);
+                }
+              });
               resolve(user);
             },
             function(err) {
@@ -761,7 +772,8 @@ exports.resendRegistrationEmail = function(req, reply) {
  * @name verify
  * @description
  *
- *
+ *  Verify token from registred user
+ *  - return auth token (save last time login details)
  *
  * @param  {[type]} req   [description]
  * @param  {[type]} reply [description]
@@ -769,7 +781,7 @@ exports.resendRegistrationEmail = function(req, reply) {
  */
 exports.verify = function(req, reply) {
   var token = req.params.token;
-
+  var remoteIP = utils.getAPIUserRealIP(req);
   if (!config.get('enable_simplified_signup_process')) {
     return reply(boom.badRequest('User verification is temporary disabled'));
   }
@@ -806,6 +818,8 @@ exports.verify = function(req, reply) {
           ' User ID: ' + user.id + ' Email: ' + user.email));
       }
       // Account exist - can update user information
+      user.last_login_from = remoteIP; // NOTE: save information about success login user (auto-login after verify)
+      user.last_login_at = new Date();
       users.update(user, function(error, result) {
         if (error) {
           return reply(boom.badImplementation('Signup::verify: Failed to update user details.' +
@@ -820,19 +834,26 @@ exports.verify = function(req, reply) {
           password: _password
         });
         result = publicRecordFields.handle(fields, 'verify');
+        // NOTE: user verify and auto-login
         AuditLogger.store({
-          ip_address: utils.getAPIUserRealIP(req),
+          ip_address: remoteIP,
           datetime: Date.now(),
           user_id: user.user_id,
           user_name: user.email,
           user_type: 'user',
           account_id: companyId,
-          activity_type: 'modify',
+          activity_type: 'login', //'modify',
           activity_target: 'user',
           target_id: result.user_id,
           target_name: result.email,
-          target_object: result,
+          target_object: publicRecordFields.handle(fields, 'user'),
           operation_status: 'success'
+        });
+        emailService.sendEmailAboutUserLogin({
+          user:  publicRecordFields.handle(fields, 'user'),
+          remoteIP: remoteIP
+        },function(){
+           logger.info('signup:verify::sendEmailAboutUserLogin:');
         });
 
         renderJSON(req, reply, error, result);
