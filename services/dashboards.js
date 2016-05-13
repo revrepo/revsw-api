@@ -79,7 +79,7 @@ exports.createUserDashboard = function(user_id, newDashboardOptions, cb) {
 exports.deleteDashboardsWithUserId = function(user_id, cb) {
   dashboard.remove({
     user_id: user_id
-  }, function(error, ) {
+  }, function(error, result) {
     if (error) {
       logger.error('deleteUserDashboards::Failed to delete dashboards user with Id' + user_id);
       cb(error);
