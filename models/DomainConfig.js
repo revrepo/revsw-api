@@ -176,11 +176,13 @@ DomainConfig.prototype = {
           } else {
             ++dist[item.proxy_config.account_id].active;
           }
-          if ( item.proxy_config &&
-              item.proxy_config.rev_component_bp &&
-              item.proxy_config.rev_component_bp.enable_security ) {
-            ++dist[item.proxy_config.account_id].ssl_enabled;
-          }
+
+          // TODO temporarily disabling the collection of SSL data - later the data should be take from ssl_names
+//          if ( item.proxy_config &&
+//              item.proxy_config.rev_component_bp &&
+//              item.proxy_config.rev_component_bp.enable_security ) {
+//            ++dist[item.proxy_config.account_id].ssl_enabled;
+//          }
           ++dist[item.proxy_config.account_id].total;
         });
         return {
