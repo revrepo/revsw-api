@@ -27,6 +27,7 @@ var speakeasy   = require('speakeasy');
 var config      = require('config');
 
 var utils           = require('../lib/utilities.js');
+var dashboardService = require('../services/dashboards.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
@@ -108,7 +109,14 @@ exports.createUser = function(request, reply) {
           target_object    : result,
           operation_status : 'success'
         }, request);
-
+        // NOTE: create default dashboard for new user
+        dashboardService.createUserDashboard(result.user_id, null, function(err) {
+          if (err) {
+            logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
+          } else {
+            logger.info('Signup:createUser:success add default dashboard for User with id ' + result.user_id);
+          }
+        });
         renderJSON(request, reply, error, statusResponse);
       });
     }

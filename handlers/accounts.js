@@ -47,12 +47,21 @@ var Customer = require('../lib/chargify').Customer;
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
+var LogShippingJob = require('../models/LogShippingJob');
+var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnectionPortal());
+
+var Dashboard = require('../models/Dashboard');
+var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
+
 var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 var ApiKey = require('../models/APIKey');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
+var dashboardService = require('../services/dashboards.js');
+var logShippingJobsService = require('../services/logShippingJobs.js');
+var emailService = require('../services/email.js');
 
 exports.getAccounts = function getAccounts(request, reply) {
 
@@ -793,6 +802,17 @@ exports.deleteAccount = function(request, reply) {
           cb();
         });
       },
+      // NOTE: Auto Delete Log Shipping Jobs
+      function autoRemoveLogShippingJobs(cb) {
+        logShippingJobsService.deleteJobsWithAccountId(account_id, function(err, data) {
+          if (err) {
+            logger.error('Error remove All Log Shipping Jobs while removing account ID ' + account_id);
+            return reply(boom.badImplementation('Failed to delete Log Shipping Jobs for account ID ' + account_id));
+          }
+          logger.info('Removed All Log Shipping Jobs while removing account ID ' + account_id);
+          cb();
+        });
+      },
       // Drop the deleted account_id from companyId of all users which are managing the account
       function getAccountUsersForDelete(cb) {
         users.listAll(request, function(error, usersToUpdate) {
@@ -815,16 +835,25 @@ exports.deleteAccount = function(request, reply) {
             logger.info('User with ID ' + user_id + 'and role "' + _role + '"  while removing account ID ' + account_id + '. Count Companies = ' +
               user.companyId.length + ' ' + JSON.stringify(user.companyId));
             if (user.companyId.length === 1) {
-              logger.warn('Removing user ID ' + user_id + ' while removing account ID ' + account_id);
-              users.remove({
-                _id: user.user_id
-              }, function(error, result) {
+              // NOTE: delete user's dashboards
+              // TODO: nee to move the code to a separate function and also call it from user removal handler
+              logger.info('Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
+              dashboardService.deleteDashboardsWithUserId(user_id, function(error) {
                 if (error) {
-                  logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
-                  return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                  return reply(boom.badImplementation('Error removing the dashboards'));
+                } else {
+                  // NOTE: delete user if all his dashboards deleted
+                  users.remove({
+                    _id: user.user_id
+                  }, function(error, result) {
+                    if (error) {
+                      logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
+                      return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                    }
+                    logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
+                    callback(error, user);
+                  });
                 }
-                logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
-                callback(error, user);
               });
             } else { /// else just update the user account and delete the account_id from companyId array
               logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
@@ -868,29 +897,20 @@ exports.deleteAccount = function(request, reply) {
       },
       // Send an email to Rev ops team notifying about the closed account
       function sendRevOpsEmailAboutCloseAccount(cb) {
-        var remoteIP = utils.getAPIUserRealIP(request);
-        var email = config.get('notify_admin_by_email_on_account_cancellation');
-        if (email !== '') {
-          var mailOptions = {
-            to: email,
-            // TODO: add more text
-            subject: 'RevAPM Account Cancellation Note for account "' + account.companyName + '"',
-            text: 'Account Name: "' + account.companyName + '"' + ', account ID ' + account_id +
-              '\n\nRemote IP Address: ' + remoteIP +
-              '\nDeleted By : ' + _deleted_by +
-              '\nCancellation Note: ' + _cancellation_message
-          };
-          // NOTE: when we send email we do not control success or error. We only create log
-          mail.sendMail(mailOptions, function(err, data) {
-            if (err) {
-              logger.error('deleteAccount:sendRevOpsEmailAboutCloseAccount:error: ' + JSON.stringify(err));
-            } else {
-              logger.info('deleteAccount:sendRevOpsEmailAboutCloseAccount:success');
-            }
-          });
-        } else {
-          logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
-        }
+        logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
+        emailService.sendRevOpsEmailAboutCloseAccount({
+          remoteIP: utils.getAPIUserRealIP(request),
+          account_id: account_id,
+          companyName: account.companyName,
+          deleted_by: _deleted_by,
+          cancellation_message: _cancellation_message
+        }, function(err, data) {
+          if (err) {
+            logger.error('deleteAccount:sendRevOpsEmailAboutCloseAccount:error: ' + JSON.stringify(err));
+          } else {
+            logger.info('deleteAccount:sendRevOpsEmailAboutCloseAccount:success');
+          }
+        });
         cb(null);
       },
       // Log results and finish request

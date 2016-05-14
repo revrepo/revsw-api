@@ -135,6 +135,25 @@ Dashboard.prototype = {
       callback(utils.buildError('400', 'No dashboard ID passed to remove function'), null);
     }
   },
+
+  query: function (where, callback) {
+    if (!where || typeof (where) !== 'object') {
+      callback(new Error('where clause not specified'));
+    }
+    this.model.find(where, function (err, doc) {
+      if (err) {
+        callback(err);
+      }
+      if (doc) {
+        doc = utils.clone(doc).map(function (r) {
+          delete r.__v;
+          return r;
+        });
+      }
+      callback(null, doc);
+    });
+  },
+
 };
 
 module.exports = Dashboard;
