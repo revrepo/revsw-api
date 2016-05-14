@@ -96,7 +96,7 @@ var UserDataProvider = {
     var user = {
       first_name: firstName,
       last_name: lastName,
-      email: [firstName, lastName, Date.now() + '@az921.com']
+      email: [firstName, lastName, Date.now() + '@mailinator.com']
         .join('-')
         .toLowerCase(),
       company_name: faker.company.companyName(),

@@ -34,30 +34,18 @@ describe('Smoke check', function () {
 
   //var resellerUser = config.get('api.users.reseller');
 
-  //before(function (done) {
-  //  API.helpers
-  //    .authenticateUser(resellerUser)
-  //    .then(function () {
-  //      API.resources.users
-  //        .createOneAsPrerequisite(userSample)
-  //        .then(function (response) {
-  //          userSample.id = response.body.object_id;
-  //          userSample.name = userSample.email;
-  //
-  //          return API.resources.authenticate.createOne({
-  //            email: userSample.email,
-  //            password: userSample.password
-  //          });
-  //        })
-  //        .then(function (response) {
-  //          userSample.token = response.body.token;
-  //          done();
-  //        })
-  //        .catch(done);
-  //    })
-  //    .catch(done);
-  //});
-  //
+  var testUser;
+
+  before(function (done) {
+
+    API.helpers.signUp.createOne()
+      .then(function (user) {
+        testUser = user;
+        done();
+      })
+      .catch(done);
+  });
+
   //after(function (done) {
   //  API.helpers
   //    .authenticateUser(resellerUser)
@@ -69,7 +57,7 @@ describe('Smoke check', function () {
 
   describe('Sign Up resource', function () {
 
-    it('should return success response when signing up user',
+    xit('should return success response when signing up user',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -89,23 +77,25 @@ describe('Smoke check', function () {
 
     xit('should return success response when resending confirmation email',
       function (done) {
-        var email = '';
         API.resources.signUp
           .resend()
-          .getOne(email)
+          .getOne(testUser.email)
           .expect(200)
-          .end(done)
-          .catch(done);
+          .end(done);
       });
 
-    xit('should return success response when verifying user',
+    it('should return success response when verifying user',
       function (done) {
-        var token = '';
-        API.resources.signUp
-          .verify()
-          .createOne(token)
-          .expect(200)
-          .end(done)
+        API.helpers
+          .authenticateUser(testUser)
+          .then(function () {
+            console.log('testUser', testUser);
+            API.resources.signUp
+              .verify()
+              .getOne('123')
+              .expect(200)
+              .end(done);
+          })
           .catch(done);
       });
   });
