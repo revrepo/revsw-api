@@ -31,8 +31,8 @@ var tokenKey = 'tokenId';
 // Config for resource
 var resourceConfig = {
   idKey: null,
-  name: 'sign-up',
-  path: '/signup',
+  name: 'signUp',
+  path: '/signup2',
   methods: [
     Methods.CREATE
   ],
@@ -40,7 +40,8 @@ var resourceConfig = {
     {
       idKey: emailKey,
       name: 'resend',
-      path: '/resend/{' + emailKey + '}',
+      path: '/signup/resend/{' + emailKey + '}',
+      isAbsolutePath: true,
       methods: [
         Methods.READ_ONE
       ]
@@ -48,7 +49,8 @@ var resourceConfig = {
     {
       idKey: tokenKey,
       name: 'verify',
-      path: '/verify/{' + tokenKey+ '}',
+      path: '/signup/verify/{' + tokenKey+ '}',
+      isAbsolutePath: true,
       methods: [
         Methods.READ_ONE
       ]

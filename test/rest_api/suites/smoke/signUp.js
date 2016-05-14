@@ -57,7 +57,7 @@ describe('Smoke check', function () {
 
   describe('Sign Up resource', function () {
 
-    xit('should return success response when signing up user',
+    it('should return success response when signing up user',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -75,7 +75,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return success response when resending confirmation email',
+    it('should return success response when resending confirmation email',
       function (done) {
         API.resources.signUp
           .resend()
@@ -84,7 +84,8 @@ describe('Smoke check', function () {
           .end(done);
       });
 
-    it('should return success response when verifying user',
+    // TODO: Waiting for TOKEN for mailinator
+    xit('should return success response when verifying user',
       function (done) {
         API.helpers
           .authenticateUser(testUser)
@@ -92,7 +93,7 @@ describe('Smoke check', function () {
             console.log('testUser', testUser);
             API.resources.signUp
               .verify()
-              .getOne('123')
+              .getOne('token goes here')
               .expect(200)
               .end(done);
           })

@@ -18,8 +18,6 @@
 
 var faker = require('faker');
 
-var APITestError = require('./../../apiTestError');
-
 // # User Data Provider object
 //
 // Defines some methods to generate valid and common user test data.
@@ -99,16 +97,17 @@ var UserDataProvider = {
       email: [firstName, lastName, Date.now() + '@mailinator.com']
         .join('-')
         .toLowerCase(),
-      company_name: faker.company.companyName(),
-      phone_number: faker.phone.phoneNumber(),
+      // TODO: Commenting out below lines as the are not required for /signup2
+      //company_name: faker.company.companyName(),
+      //phone_number: faker.phone.phoneNumber(),
       password: 'password1',
-      passwordConfirm: 'password1',
-      address1: faker.address.streetAddress(),
-      address2: faker.address.secondaryAddress(),
+      //passwordConfirm: 'password1',
+      //address1: faker.address.streetAddress(),
+      //address2: faker.address.secondaryAddress(),
       country: faker.address.country(),
-      state: faker.address.state(),
-      city: faker.address.city(),
-      zipcode: faker.address.zipCode(),
+      //state: faker.address.state(),
+      //city: faker.address.city(),
+      //zipcode: faker.address.zipCode(),
       billing_plan: billingPlan
     };
     return user;

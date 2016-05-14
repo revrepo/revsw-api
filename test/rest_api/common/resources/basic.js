@@ -97,8 +97,10 @@ var getResourceBuilder = function (nestedResource, path, parentIdKey) {
   // Return resource build which depends on
   return function (id) {
     var resource = JSON.parse(JSON.stringify(baseResource));
-    // Path = parent-resource-path + nested-resource-path
-    resource.path = getPath(data, id) + resource.path;
+    if (resource.isAbsolutePath === false) {
+      // Path = parent-resource-path + nested-resource-path
+      resource.path = getPath(data, id) + resource.path;
+    }
     return new BasicResource(resource);
   };
 };

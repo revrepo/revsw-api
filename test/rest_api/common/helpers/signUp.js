@@ -24,6 +24,12 @@ var APITestError = require('./../apiTestError');
 // Abstracts common functionality for the related resource.
 module.exports = {
 
+  /**
+   * SignUpHelper.createOne()
+   *
+   * Creates a registration for a auto generated user data.
+   * @returns {Object} user data which was registered
+   */
   createOne: function () {
     var user = UsersDP.generateOneToSignUp();
     return SignUpResource
