@@ -339,7 +339,7 @@ exports.init2fa = function (request, reply) {
 
           AuditLogger.store({
             account_id       : account_id,
-            activity_type    : 'modify',
+            activity_type    : 'init2fa',
             activity_target  : 'user',
             target_id        : result.user_id,
             target_name      : result.email,
@@ -382,7 +382,7 @@ exports.enable2fa = function (request, reply) {
 
               AuditLogger.store({
                 account_id       : account_id,
-                activity_type    : 'modify',
+                activity_type    : 'enable2fa',
                 activity_target  : 'user',
                 target_id        : user.user_id,
                 target_name      : result.email,
@@ -438,7 +438,7 @@ exports.disable2fa = function (request, reply) {
 
         AuditLogger.store({
           account_id       : account_id,
-          activity_type    : 'modify',
+          activity_type    : 'disable2fa',
           activity_target  : 'user',
           target_id        : user.user_id,
           target_name      : result.email,

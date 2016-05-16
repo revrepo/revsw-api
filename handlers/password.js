@@ -65,24 +65,6 @@ exports.forgotPassword = function(request, reply) {
             if (error) {
               return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user.user_id));
             }
-
-            result = publicRecordFields.handle(result, 'users');
-
-            AuditLogger.store({
-              ip_address       : utils.getAPIUserRealIP(request),
-              datetime         : Date.now(),
-              user_id          : result.user_id,
-              user_name        : result.email,
-              user_type        : 'user',
-              account_id       : result.companyId[0],
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : result.user_id,
-              target_name      : result.email,
-              target_object    : result,
-              operation_status : 'success'
-            });
-
             done(error, token, user);
           });
         },
@@ -221,7 +203,7 @@ exports.resetPassword = function(request, reply) {
             user_name        : user.email,
             user_type        : 'user',
             account_id       : result.companyId[0],
-            activity_type    : 'modify',
+            activity_type    : 'resetpassword',
             activity_target  : 'user',
             target_id        : result.user_id,
             target_name      : result.email,

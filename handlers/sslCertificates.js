@@ -175,6 +175,7 @@ exports.updateSSLCertificate = function(request, reply) {
   var newSSLCert = request.payload;
   var sslCertId = request.params.ssl_cert_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
+//   return reply(boom.badImplementation('Failed to retrieve details for SSL certificate ID ' + sslCertId));
 
   sslCertificates.get(sslCertId, function (error, result) {
     if (error) {
