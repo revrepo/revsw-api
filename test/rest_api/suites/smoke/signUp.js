@@ -21,23 +21,15 @@ var config = require('config');
 
 var API = require('./../../common/api');
 var UsersDP = require('./../../common/providers/data/users');
+var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
+  var testUser;
   var revAdmin = config.get('api.users.revAdmin');
 
-  // Generating new `user` data in order to use later in our tests.
-  //var userSample = DataProvider.generateUser();
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-
-  //var resellerUser = config.get('api.users.reseller');
-
-  var testUser;
-
-  before(function (done) {
-
+  beforeEach(function (done) {
     API.helpers.signUp.createOne()
       .then(function (user) {
         testUser = user;
@@ -46,14 +38,9 @@ describe('Smoke check', function () {
       .catch(done);
   });
 
-  //after(function (done) {
-  //  API.helpers
-  //    .authenticateUser(resellerUser)
-  //    .then(function () {
-  //      API.resources.users.deleteAllPrerequisites(done);
-  //    })
-  //    .catch(done);
-  //});
+  afterEach(function (done) {
+    done();
+  });
 
   describe('Sign Up resource', function () {
 
@@ -84,16 +71,14 @@ describe('Smoke check', function () {
           .end(done);
       });
 
-    // TODO: Waiting for TOKEN for mailinator
-    xit('should return success response when verifying user',
+    it('should return success response when verifying just signed-up user',
       function (done) {
-        API.helpers
-          .authenticateUser(testUser)
-          .then(function () {
-            console.log('testUser', testUser);
+        MailinatorHelper
+          .getVerificationToken(testUser.email)
+          .then(function (token) {
             API.resources.signUp
               .verify()
-              .getOne('token goes here')
+              .getOne(token)
               .expect(200)
               .end(done);
           })
