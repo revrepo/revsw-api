@@ -68,5 +68,21 @@ module.exports = {
             throw new APITestError('Creating Full Account', err.body, account);
           });
       });
+  },
+
+  /**
+   * Gets the first statement for the given account id.
+   *
+   * @param {String} accountId
+   * @returns {Promise} which will return the first statement from the account
+   */
+  getFirstStatement: function (accountId) {
+    return AccountsResource
+      .statements(accountId)
+      .getAll()
+      .expect(200)
+      .then(function (res) {
+        return res.body[0];
+      });
   }
 };

@@ -41,5 +41,19 @@ module.exports = {
         user.id = res.body.object_id;
         return user;
       });
+  },
+
+  /**
+   * SignUpHelper.verify()
+   *
+   * Verifies user registration given a Token key.
+   *
+   * @param {String} token
+   * @returns {Promise} which will return response data of the verification.
+   */
+  verify: function (token) {
+    return SignUpResource
+      .verify()
+      .getOne(token);
   }
 };
