@@ -20,8 +20,6 @@
 var config = require('config');
 
 var API = require('./../../common/api');
-var UsersDP = require('./../../common/providers/data/users');
-var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
@@ -51,7 +49,7 @@ describe('Smoke check', function () {
     done();
   });
 
-  describe('Sign Up resource', function () {
+  describe('Accounts / Billing Statements resource', function () {
 
     it('should return success response when creating Billing profile',
       function (done) {
