@@ -97,11 +97,72 @@ describe('Smoke check', function () {
           })
           .catch(done);
       });
+
+    it('should return success response when getting specific Billing ' +
+      'statement in PDF format',
+      function (done) {
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            return API.helpers.accounts.getFirstStatement(accountId);
+          })
+          .then(function (statement) {
+            API.resources.accounts
+              .statements(accountId)
+              .pdf(statement.id)
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return success response when getting all Billing transactions',
+      function (done) {
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            API.resources.accounts
+              .transactions(accountId)
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return success response when getting preview migration ' +
+      'information',
+      function (done) {
+        var billingPlanHandle = 'billing-plan-gold';
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            API.resources.accounts
+              .subscriptionPreview(accountId)
+              .getOne(billingPlanHandle)
+              .expect(200)
+              .then(function (res) {
+                console.log(666666, res.body);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return success response when getting subscription summary',
+      function (done) {
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            API.resources.accounts
+              .subscriptionSummary(accountId)
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
   });
 });
-
-
-//should return success response when getting specific Billing statement in PDF format
-//should return success response when getting all Billing transactions
-//should return success response when getting preview migration information
-//should return success response when getting subscription summary
