@@ -113,5 +113,10 @@
     "index_prefix": "sdkstats-",
     "key_server_poll_interval": 12000,
     "queue_clear_timeout": 10000
+  },
+  "mailinator": {
+    "api": {
+      "token": "6ee7081dedc04b5ba7b259ec7ca34faa"
+    }
   }
 }

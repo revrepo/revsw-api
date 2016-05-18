@@ -24,17 +24,49 @@ var APITestError = require('./../apiTestError');
 // Abstracts common functionality for the related resource.
 module.exports = {
 
+  /**
+   * Creates a new account.
+   *
+   * @returns {Object} account data
+   */
   createOne: function () {
     var account = AccountsDP.generateOne();
     return AccountsResource
       .createOneAsPrerequisite(account)
-      .catch(function(error){
-        throw new APITestError('Creating Account' , error.response.body,
+      .catch(function (error) {
+        throw new APITestError('Creating Account', error.response.body,
           account);
       })
       .then(function (res) {
         account.id = res.body.object_id;
         return account;
+      });
+  },
+
+  /**
+   * Creates new account and the updates it in order to get a full/complete
+   * account (with most of all required data).
+   *
+   * @returns {Object} account data
+   */
+  createCompleteOne: function () {
+    return this
+      .createOne()
+      .then(function (account) {
+        var completeAccount = AccountsDP.generateCompleteOne(account);
+        return AccountsResource
+          .update(completeAccount.id, completeAccount)
+          .then(function (res) {
+            if (res.body.statusCode !== 200) {
+              throw new APITestError('Creating Full Account',
+                res.body.statusCode,
+                account);
+            }
+            return completeAccount;
+          })
+          .catch(function (err) {
+            throw new APITestError('Creating Full Account', err.body, account);
+          });
       });
   }
 };
