@@ -140,11 +140,7 @@ describe('Smoke check', function () {
               .subscriptionPreview(accountId)
               .getOne(billingPlanHandle)
               .expect(200)
-              .then(function (res) {
-                console.log(666666, res.body);
-                done();
-              })
-              .catch(done);
+              .end(done);
           })
           .catch(done);
       });
