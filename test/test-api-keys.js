@@ -1403,6 +1403,13 @@ describe('Rev API keys', function() {
       .expect(200, done);
   });
 
+  it('should delete test API key  ID' + createdKeyID, function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/' + createdKeyID)
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .expect(200, done);
+  });
+
   it('should delete customer account with id ' + createdAccountID, function(done) {
     request(testAPIUrl)
       .delete('/v1/accounts/' + createdAccountID)
