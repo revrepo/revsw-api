@@ -26,8 +26,7 @@ var SSLCertDataProvider = require('./../../common/providers/data/sslCerts');
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Generating new `user` data in order to use later in our tests.
-  //var userSample = SSLCertDataProvider.generateOne();
+  // Shared variables
   var sslCert;
   var accountId;
 
@@ -60,7 +59,7 @@ describe('Smoke check', function () {
 
   describe('SSL Certs resource', function () {
 
-    it('should return a response when getting all SSL certs.',
+    it('should return a success response when getting all SSL certs.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -68,16 +67,12 @@ describe('Smoke check', function () {
             API.resources.sslCerts
               .getAll()
               .expect(200)
-              .then(function (res) {
-                //console.log(res.body);
-                done();
-              })
-              .catch(done);
+              .end(done);
           })
           .catch(done);
       });
 
-    it('should return a response when getting specific SSL cert.',
+    it('should return a success response when getting specific SSL cert.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -85,26 +80,21 @@ describe('Smoke check', function () {
             API.resources.sslCerts
               .getOne(sslCert.id)
               .expect(200)
-              .then(function (res) {
-                //console.log(res.body);
-                done();
-              })
-              .catch(done);
+              .end(done);
           })
           .catch(done);
       });
 
-    it('should return a response when creating specific SSL cert.',
+    it('should return a success response when creating specific SSL cert.',
       function (done) {
-        var newSSLCert = SSLCertDataProvider.generateOne(accountId);
+        var certificate = SSLCertDataProvider.generateOne(accountId);
         API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslCerts
-              .createOne(newSSLCert)
+              .createOne(certificate)
               .expect(200)
               .then(function (response) {
-                //console.log(response.body);
                 API.resources.sslCerts
                   .deleteOne(response.body.id)
                   .end(done);
@@ -114,7 +104,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a response when updating specific SSL cert.',
+    it('should return a success response when updating specific SSL cert.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -122,22 +112,19 @@ describe('Smoke check', function () {
             return API.helpers.sslCerts.createOne();
           })
           .then(function (certificate) {
-            var certificateId = certificate.id
+            var certificateId = certificate.id;
             certificate.cert_name += 'UPDATED';
-            delete certificate.id
+            delete certificate.id;
+
             API.resources.sslCerts
               .update(certificateId, certificate)
               .expect(200)
-              .then(function (res) {
-                //console.log(res.body);
-                done();
-              })
-              .catch(done);
+              .end(done);
           })
           .catch(done);
       });
 
-    it('should return a response when deleting a SSL cert.',
+    it('should return a success response when deleting a SSL cert.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -148,16 +135,13 @@ describe('Smoke check', function () {
             API.resources.sslCerts
               .deleteOne(certificate.id)
               .expect(200)
-              .then(function (res) {
-                //console.log(res.body);
-                done();
-              })
-              .catch(done);
+              .end(done);
           })
           .catch(done);
       });
 
-    it('should return a response when getting config-status of a SSL cert.',
+    it('should return a success response when getting config-status of a ' +
+      'SSL cert.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -166,11 +150,7 @@ describe('Smoke check', function () {
               .configStatus(sslCert.id)
               .getAll()
               .expect(200)
-              .then(function (res) {
-                //console.log(res.body);
-                done();
-              })
-              .catch(done);
+              .end(done);
           })
           .catch(done);
       });
