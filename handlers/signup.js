@@ -541,6 +541,7 @@ exports.signup2 = function(req, reply) {
       AuditLogger.store({
         ip_address: utils.getAPIUserRealIP(req),
         datetime: Date.now(),
+        // TODO: missing user_id
         user_type: 'user',
         user_name: data.email,
         account_id: _newAccount.id,
@@ -567,6 +568,7 @@ exports.signup2 = function(req, reply) {
           AuditLogger.store({
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
+            // TODO: missing user_id
             user_type: 'user',
             user_name: user.email,
             account_id: user.companyId[0],
