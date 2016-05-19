@@ -536,13 +536,15 @@ exports.signup2 = function(req, reply) {
     // NOTE:  create new Admin User
     .then(function createNewAdminUser(account) {
       _newAccount = publicRecordFields.handle(account, 'account');
+      // TODO: bug - user_id is not specified. We probably need to add the audit record after
+      // creating the user and learning his ID
       AuditLogger.store({
         ip_address: utils.getAPIUserRealIP(req),
         datetime: Date.now(),
         user_type: 'user',
         user_name: data.email,
         account_id: _newAccount.id,
-        activity_type: 'add',
+        activity_type: 'signup',
         activity_target: 'account',
         target_id: _newAccount.id,
         target_name: _newAccount.companyName,
@@ -560,13 +562,15 @@ exports.signup2 = function(req, reply) {
       return createUser(newUser).then(
         function(user) {
           _newUser = user;
+          // TODO: user_id is not specified - we need to read the value from newUser response
+          // also, the user object does not consist the whole user object - just a short status
           AuditLogger.store({
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
             user_type: 'user',
             user_name: user.email,
             account_id: user.companyId[0],
-            activity_type: 'add',
+            activity_type: 'signup',
             activity_target: 'user',
             target_id: user.user_id,
             target_name: user.email,
