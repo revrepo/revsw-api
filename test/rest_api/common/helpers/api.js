@@ -32,6 +32,8 @@ var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
 var UsersHelper = require('./users');
 
+var MailinatorHelper = require('./../../common/helpers/external/mailinator');
+
 // Abstracts common functionality for the API.
 module.exports = {
 
@@ -64,7 +66,7 @@ module.exports = {
         user.token = response.body.token;
         Session.setCurrentUser(user);
       })
-      .catch(function(error){
+      .catch(function (error) {
         throw new Error('Authenticating user', error.response.body, user);
       });
   },
@@ -89,6 +91,28 @@ module.exports = {
       .then(function (response) {
         user.token = response.body.token;
         Session.setCurrentUser(user);
+      });
+  },
+
+  /**
+   * Signs up a user and the verifies it.
+   *
+   * @returns {Promise} which will return a user object
+   */
+  signUpAndVerifyUser: function () {
+    var testUser;
+    var me = this;
+    return me.signUp
+      .createOne()
+      .then(function (user) {
+        testUser = user;
+        return MailinatorHelper.getVerificationToken(user.email);
+      })
+      .then(function (token) {
+        return me.signUp.verify(token);
+      })
+      .then(function () {
+        return testUser;
       });
   }
 };
