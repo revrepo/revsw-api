@@ -836,6 +836,7 @@ exports.deleteAccount = function(request, reply) {
               user.companyId.length + ' ' + JSON.stringify(user.companyId));
             if (user.companyId.length === 1) {
               // NOTE: delete user's dashboards
+              // TODO: nee to move the code to a separate function and also call it from user removal handler
               logger.info('Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
               dashboardService.deleteDashboardsWithUserId(user_id, function(error) {
                 if (error) {

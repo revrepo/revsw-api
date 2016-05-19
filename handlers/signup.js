@@ -818,6 +818,7 @@ exports.verify = function(req, reply) {
           ' User ID: ' + user.id + ' Email: ' + user.email));
       }
       // Account exist - can update user information
+      // TODO: duplicated code - need to move it to a separate function and call it from authenticate handler too
       user.last_login_from = remoteIP; // NOTE: save information about success login user (auto-login after verify)
       user.last_login_at = new Date();
       users.update(user, function(error, result) {
