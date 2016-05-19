@@ -228,19 +228,7 @@ exports.signup = function(req, reply) {
     })
     .then(function createNewAdminUser(account) {
       _newAccount = publicRecordFields.handle(account, 'account');
-      AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(req),
-        datetime: Date.now(),
-        user_type: 'user',
-        user_name: data.email,
-        account_id: _newAccount.id,
-        activity_type: 'add',
-        activity_target: 'account',
-        target_id: _newAccount.id,
-        target_name: _newAccount.companyName,
-        target_object: _newAccount,
-        operation_status: 'success'
-      });
+
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
@@ -252,6 +240,22 @@ exports.signup = function(req, reply) {
       return createUser(newUser).then(
         function(user) {
           _newUser = user;
+
+          AuditLogger.store({
+            ip_address: utils.getAPIUserRealIP(req),
+            datetime: Date.now(),
+            user_type: 'user',
+            user_name: data.email,
+            account_id: _newAccount.id,
+            activity_type: 'add',
+            activity_target: 'account',
+            target_id: _newAccount.id,
+            target_name: _newAccount.companyName,
+            target_object: _newAccount,
+            operation_status: 'success',
+            user_id: user.user_id
+          });
+
           AuditLogger.store({
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
@@ -263,7 +267,8 @@ exports.signup = function(req, reply) {
             target_id: user.user_id,
             target_name: user.email,
             target_object: user,
-            operation_status: 'success'
+            operation_status: 'success',
+            user_id: user.user_id
           });
           return user;
         },
@@ -400,7 +405,6 @@ function createUser(newUser) {
           user: user
         });
       } else {
-        // TODO: start
         var token = utils.generateToken();
         newUser.self_registered = true;
         newUser.validation = {
@@ -536,22 +540,6 @@ exports.signup2 = function(req, reply) {
     // NOTE:  create new Admin User
     .then(function createNewAdminUser(account) {
       _newAccount = publicRecordFields.handle(account, 'account');
-      // TODO: bug - user_id is not specified. We probably need to add the audit record after
-      // creating the user and learning his ID
-      AuditLogger.store({
-        ip_address: utils.getAPIUserRealIP(req),
-        datetime: Date.now(),
-        // TODO: missing user_id
-        user_type: 'user',
-        user_name: data.email,
-        account_id: _newAccount.id,
-        activity_type: 'signup',
-        activity_target: 'account',
-        target_id: _newAccount.id,
-        target_name: _newAccount.companyName,
-        target_object: _newAccount,
-        operation_status: 'success'
-      });
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
@@ -563,12 +551,25 @@ exports.signup2 = function(req, reply) {
       return createUser(newUser).then(
         function(user) {
           _newUser = user;
+          AuditLogger.store({
+            ip_address: utils.getAPIUserRealIP(req),
+            datetime: Date.now(),
+            user_type: 'user',
+            user_name: data.email,
+            account_id: _newAccount.id,
+            activity_type: 'signup',
+            activity_target: 'account',
+            target_id: _newAccount.id,
+            target_name: _newAccount.companyName,
+            target_object: _newAccount,
+            operation_status: 'success',
+            user_id: user.user_id
+          });
           // TODO: user_id is not specified - we need to read the value from newUser response
           // also, the user object does not consist the whole user object - just a short status
           AuditLogger.store({
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
-            // TODO: missing user_id
             user_type: 'user',
             user_name: user.email,
             account_id: user.companyId[0],
@@ -577,7 +578,8 @@ exports.signup2 = function(req, reply) {
             target_id: user.user_id,
             target_name: user.email,
             target_object: user,
-            operation_status: 'success'
+            operation_status: 'success',
+            user_id: user.user_id
           });
           return user;
         },
@@ -696,13 +698,6 @@ exports.resendRegistrationEmail = function(req, reply) {
       return reply(boom.badRequest('The email is already verified'));
     }
 
-    // TODO: delete - is depricated
-    // var token = utils.generateToken();
-    // user.validation = {
-    //   expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-    //   token: token
-    // };
-
     AuditLogger.store({
       ip_address: utils.getAPIUserRealIP(req),
       datetime: Date.now(),
@@ -733,7 +728,7 @@ exports.resendRegistrationEmail = function(req, reply) {
       .then(function(billing_plan) {
         _billing_plan = billing_plan;
         return new Promise(function(resolve, reject) {
-          // NOTE:
+          // NOTE: Choose two different type registration
           if (config.get('enable_simplified_signup_process')) {
             var token = utils.generateToken();
             user.validation = {
@@ -748,7 +743,12 @@ exports.resendRegistrationEmail = function(req, reply) {
                 reject(err);
               } else {
                 sendVerifyToken(result, token, function sendVerifyTokenResult(err, data) {
-                  // TODO: add logger and send  email to admin
+                  // TODO: send  email to admin?
+                  if (err) {
+                    logger.error('resendRegistrationEmail::sendVerifyToken:error');
+                  } else {
+                    logger.info('resendRegistrationEmail::sendVerifyToken:success');
+                  }
                 });
                 resolve(result);
               }
@@ -767,7 +767,7 @@ exports.resendRegistrationEmail = function(req, reply) {
         return renderJSON(req, reply, err, statusResponse);
       })
       .catch(function(err) {
-        logger.error('resendRegistrationEmail:');
+        logger.error('resendRegistrationEmail:' + JSON.stringify(err));
         reply(boom.notImplemented(err.message || 'Error signup process'));
       });
 
@@ -857,10 +857,10 @@ exports.verify = function(req, reply) {
           operation_status: 'success'
         });
         emailService.sendEmailAboutUserLogin({
-          user:  publicRecordFields.handle(fields, 'user'),
+          user: publicRecordFields.handle(fields, 'user'),
           remoteIP: remoteIP
-        },function(){
-           logger.info('signup:verify::sendEmailAboutUserLogin:');
+        }, function() {
+          logger.info('signup:verify::sendEmailAboutUserLogin:');
         });
 
         renderJSON(req, reply, error, result);
