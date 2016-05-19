@@ -266,7 +266,7 @@ exports.signup = function(req, reply) {
             activity_target: 'user',
             target_id: user.user_id,
             target_name: user.email,
-            target_object: user,
+            target_object: publicRecordFields.handle(user, 'user'),
             operation_status: 'success',
             user_id: user.user_id
           });
@@ -577,7 +577,7 @@ exports.signup2 = function(req, reply) {
             activity_target: 'user',
             target_id: user.user_id,
             target_name: user.email,
-            target_object: user,
+            target_object: publicRecordFields.handle(user, 'user'),
             operation_status: 'success',
             user_id: user.user_id
           });
@@ -709,7 +709,7 @@ exports.resendRegistrationEmail = function(req, reply) {
       activity_target: 'user',
       target_id: user.user_id,
       target_name: user.email,
-      target_object: user,
+      target_object: publicRecordFields.handle(user, 'user'),
       operation_status: 'success'
     });
 
