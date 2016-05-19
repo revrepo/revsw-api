@@ -25,8 +25,7 @@ describe('Clean up', function () {
   this.timeout(config.api.request.maxTimeout);
 
   var reseller = config.get('api.users.revAdmin');
-  var namePattern = /API_TEST_COMPANY_[0-9]{13}/;
-  var updatedNamePattern = /UPDATED_API_TEST_COMPANY_[0-9]{13}]/;
+  var pattern = /[0-9]{13}/;
 
   before(function (done) {
     done();
@@ -58,8 +57,8 @@ describe('Clean up', function () {
                 var ids = [];
                 var accounts = res.body;
                 accounts.forEach(function (account) {
-                  if (namePattern.test(account.companyName) ||
-                    updatedNamePattern.test(account.companyName)) {
+                  if (pattern.test(account.companyName) ||
+                    pattern.test(account.createdBy)) {
                     ids.push(account.id);
                   }
                 });

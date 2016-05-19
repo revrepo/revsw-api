@@ -554,10 +554,11 @@ exports.signup2 = function(req, reply) {
           AuditLogger.store({
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
+        // TODO: missing user_id
             user_type: 'user',
             user_name: data.email,
             account_id: _newAccount.id,
-            activity_type: 'add',
+        activity_type: 'signup',
             activity_target: 'account',
             target_id: _newAccount.id,
             target_name: _newAccount.companyName,
@@ -565,13 +566,16 @@ exports.signup2 = function(req, reply) {
             operation_status: 'success',
             user_id: user.user_id
           });
+          // TODO: user_id is not specified - we need to read the value from newUser response
+          // also, the user object does not consist the whole user object - just a short status
           AuditLogger.store({
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
+            // TODO: missing user_id
             user_type: 'user',
             user_name: user.email,
             account_id: user.companyId[0],
-            activity_type: 'add',
+            activity_type: 'signup',
             activity_target: 'user',
             target_id: user.user_id,
             target_name: user.email,

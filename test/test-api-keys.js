@@ -31,9 +31,11 @@ describe('Rev API keys', function() {
   var testUser = 'api-qa-user-' + Date.now() + '@revsw.com';
   var testUserId;
   var testPassword = 'password1';
-  var createdAPIKeyId;
+  var createdAPIKeyId = '';
   var testDomain = 'qa-api-test-proxy-nginx-custom-commands.revsw.net';
   var testDomainId;
+  var testCompanyName = 'API QA Account for API Keys - ' + Date.now();
+  var createdAccountID;
 
   var newUserJson = {
     'firstname': 'API QA User',
@@ -699,7 +701,6 @@ describe('Rev API keys', function() {
   var forUpdatesApiKeyID;
   var purgeRequestID;
   var createdUserID;
-  var createdAccountID;
   var createdAppID;
   var createdDomainID;
   var firstMileID = '55a56fa6476c10c329a90741';
@@ -733,7 +734,7 @@ describe('Rev API keys', function() {
 
   it('should create new account', function(done) {
     var newAccountJson = {
-      companyName: 'API QA Account - ' + Date.now(),
+      companyName: testCompanyName,
       comment: 'API QA Account comment'
     };
 
@@ -747,14 +748,18 @@ describe('Rev API keys', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
+        console.log(response_json);
         createdAccountID = response_json.object_id;
+        createdAccountID.should.be.a.String();
         done();
       });
   });
-
-  it('should update account with id - ' + myCompanyId, function(done) {
+  
+  // TODO: need to figure out how to handle account management via API key.
+  // TODO: 
+  xit('should update account with id - ' + createdAccountID, function(done) {
     var updateAccountJson = {
-      companyName: 'API QA Account updated',
+      companyName: testCompanyName + ' UPDATED',
       comment: '',
       first_name: 'Vano',
       last_name: 'Khuroshvili',
@@ -773,15 +778,15 @@ describe('Rev API keys', function() {
     };
 
     request(testAPIUrl)
-      .put('/v1/accounts/' + myCompanyId)
+      .put('/v1/accounts/' + createdAccountID)
       .set('Authorization', 'X-API-KEY ' + createdApiKey)
       .send(updateAccountJson)
       .expect(200, done);
   });
 
-  it('should load account with id - ' + myCompanyId, function(done) {
+  xit('should load account with id - ' + createdAccountID, function(done) {
     request(testAPIUrl)
-      .get('/v1/accounts/' + myCompanyId)
+      .get('/v1/accounts/' + createdAccountID)
       .set('Authorization', 'X-API-KEY ' + createdApiKey)
       .expect(200, done);
   });
@@ -1395,6 +1400,20 @@ describe('Rev API keys', function() {
     request(testAPIUrl)
       .delete('/v1/domain_configs/' + createdDomainID)
       .set('Authorization', 'X-API-KEY ' + createdApiKey)
+      .expect(200, done);
+  });
+
+  it('should delete test API key  ID' + createdKeyID, function(done) {
+    request(testAPIUrl)
+      .delete('/v1/api_keys/' + createdKeyID)
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
+      .expect(200, done);
+  });
+
+  it('should delete customer account with id ' + createdAccountID, function(done) {
+    request(testAPIUrl)
+      .delete('/v1/accounts/' + createdAccountID)
+      .auth(qaUserWithRevAdminPerm, qaUserWithRevAdminPermPassword)
       .expect(200, done);
   });
 });

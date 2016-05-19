@@ -29,7 +29,8 @@ describe('Clean up', function () {
     config.get('api.users.revAdmin')
   ];
 
-  var namePattern = /API_TEST_USER_1|portal-ui-test-email|api-qa-user-14|test-user-14/;
+  var namePattern = /portal-ui-test-email|api-qa-user-14|test-user-14/;
+  var secondNamePattern = /API_TEST_USER_1|[0-9]{13}/;
 
   describe('Users resource', function () {
 
@@ -65,7 +66,8 @@ describe('Clean up', function () {
                     var ids = [];
                     var users = res.body;
                     users.forEach(function (user) {
-                      if (namePattern.test(user.email)) {
+                      if (namePattern.test(user.email) ||
+                        secondNamePattern.test(user.email)) {
                         ids.push(user.user_id);
                       }
                     });

@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Accounts Resource object
+// # Sign Up Resource object
 
 // Requiring `BaseResource`
 var BasicResource = require('./basic');
@@ -25,77 +25,39 @@ var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
 // Keys
-var accountIdKey = 'accountId';
-var statementKey = 'statementId';
-var billingPlanHandleKey = 'billingPlanHandleId';
+var emailKey = 'emailId';
+var tokenKey = 'tokenId';
 
 // Config for resource
 var resourceConfig = {
-  idKey: accountIdKey,
-  name: 'accounts',
-  path: '/accounts/{' + accountIdKey + '}',
+  idKey: null,
+  name: 'signUp',
+  path: '/signup2',
   methods: [
-    Methods.CREATE,
-    Methods.READ_ALL,
-    Methods.READ_ONE,
-    Methods.UPDATE,
-    Methods.DELETE
+    Methods.CREATE
   ],
   nestedResources: [
     {
-      idKey: null,
-      name: 'billingProfile',
-      path: '/billing_profile',
-      methods: [
-        Methods.CREATE
-      ]
-    },
-    {
-      idKey: statementKey,
-      name: 'statements',
-      path: '/statements/{' + statementKey + '}',
-      methods: [
-        Methods.READ_ALL,
-        Methods.READ_ONE
-      ],
-      nestedResources: [
-        {
-          idKey: null,
-          name: 'pdf',
-          path: '/pdf',
-          methods: [
-            Methods.READ_ALL
-          ]
-        }
-      ]
-    },
-    {
-      idKey: null,
-      name: 'transactions',
-      path: '/transactions',
-      methods: [
-        Methods.READ_ALL
-      ]
-    },
-    {
-      idKey: billingPlanHandleKey,
-      name: 'subscriptionPreview',
-      path: '/subscription_preview/{' + billingPlanHandleKey + '}',
+      idKey: emailKey,
+      name: 'resend',
+      path: '/signup/resend/{' + emailKey + '}',
+      isAbsolutePath: true,
       methods: [
         Methods.READ_ONE
       ]
     },
     {
-      idKey: null,
-      name: 'subscriptionSummary',
-      path: '/subscription_summary',
+      idKey: tokenKey,
+      name: 'verify',
+      path: '/signup/verify/{' + tokenKey+ '}',
+      isAbsolutePath: true,
       methods: [
-        Methods.READ_ALL
+        Methods.READ_ONE
       ]
     }
   ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `accounts resource`
+// `sign-up resource`
 module.exports = new BasicResource(resourceConfig);
