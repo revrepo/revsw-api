@@ -851,7 +851,7 @@ exports.verify = function(req, reply) {
           account_id: companyId,
           activity_type: 'login', //'modify',
           activity_target: 'user',
-          target_id: result.user_id,
+          target_id: user.user_id,
           target_name: result.email,
           target_object: publicRecordFields.handle(fields, 'user'),
           operation_status: 'success'
