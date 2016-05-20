@@ -29,35 +29,35 @@ var logger = require('revsw-logger')(config.log_config);
 var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
 
-var LogShippingJob = require('../models/LogShippingJob');
-var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnectionPortal());
+var apiKey = require('../models/APIKey');
+var apiKeys = new apiKey(mongoose, mongoConnection.getConnectionPortal());
 
 /**
- * @name  deleteJobsWithAccountId
+ * @name  deleteAPIKeysWithAccountId
  * @description
  *
- *   Delete Log Shipping Job with Account Id
+ *   Delete API Keys with Account Id
  *
  * @param  {[type]}   accountId [description]
  * @param  {Function} cb        [description]
  * @return {[type]}             [description]
  */
-exports.deleteJobsWithAccountId = function(accountId, cb) {
-  logger.info('deleteJobsWithAccountId:Accotin Id' + accountId);
+exports.deleteAPIKeysWithAccountId = function(accountId, cb) {
+  logger.info('deleteAPIKeysWithAccountId: Accotin Id ' + accountId);
 
-  logShippingJobs.query({
+  apiKeys.query({
     account_id: accountId
   }, function(err, data) {
     if (!err) {
       if (data.length >= 0) {
         async.eachSeries(data, function(item, cb_item) {
-          logShippingJobs.remove({
+          apiKeys.remove({
             _id: item._id
           }, function(err) {
             if (err) {
-              logger.error('deleteJobsWithAccountId:error: job id ' + item._id + '(' + JSON.stringify(err) + ')');
+              logger.error('deleteAPIKeysWithAccountId:error: API Key id ' + item._id + '(' + JSON.stringify(err) + ')');
             } else {
-              logger.info('deleteJobsWithAccountId:succes job id ' + item._id);
+              logger.info('deleteAPIKeysWithAccountId:succes API Key ' + item._id);
             }
             cb_item(!!err);
           });
@@ -68,7 +68,7 @@ exports.deleteJobsWithAccountId = function(accountId, cb) {
         cb(null);
       }
     } else {
-      logger.error('deleteJobsWithAccountId:error' + JSON.stringify(err));
+      logger.error('deleteAPIKeysWithAccountId:error' + JSON.stringify(err));
       cb(err);
     }
   });
