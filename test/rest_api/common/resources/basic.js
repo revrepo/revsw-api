@@ -365,7 +365,9 @@ var BasicResource = function (data) {
           .deleteOne(id)
           .then(function (res) {
             var msg;
-            if (res.body.statusCode && parseInt(res.body.statusCode) !== 200) {
+            if (res.body.statusCode &&
+              parseInt(res.body.statusCode) < 200 &&
+              parseInt(res.body.statusCode) >= 300) {
               msg = '      > Cannot delete item:';
             }
             else {
