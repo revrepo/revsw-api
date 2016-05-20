@@ -31,7 +31,28 @@ var Hapi = require('hapi'),
   UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
   validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
-  User = require('../models/User');
+  User = require('../models/User'),
+  os = require('os'),
+  mail = require('../lib/mail');
+
+var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
+if (notifyEmail !== '') {
+  process.on('uncaughtException', function (er) {
+    console.error(er.stack);
+    mail.sendMail({
+      from: 'eng@revsw.com',
+      to: notifyEmail,
+      subject: process.env.NODE_ENV + ':' + os.hostname() + ' ' + er.message,
+      text: er.stack 
+    }, function (er, data) {
+      if (er) {
+         console.error(er);
+      }
+      process.exit(1);
+    });
+  });
+}
+
 
 var server = new Hapi.Server();
 

@@ -33,7 +33,6 @@ var logger             = require('revsw-logger')(config.log_config);
 var utils              = require('../lib/utilities.js');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
-
 exports.getApps = function(request, reply) {
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
