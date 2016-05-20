@@ -18,7 +18,7 @@
 
 var faker = require('faker');
 
-// # SSL Cert Data Provider object
+// # SSL Certificates Data Provider object
 //
 // Defines some methods to generate valid and common SSL cert. test data.
 // With common we mean it does not have anything special on it.

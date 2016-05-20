@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # SSL Certs Resource object
+// # SSL Certificates Resource object
 
 // Requiring config and `BaseResource`
 var BaseResource = require('./basic');
@@ -49,5 +49,5 @@ var resourceConfig = {
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `SSL certs resource`
+// `SSL Certificates resource`
 module.exports = new BaseResource(resourceConfig);

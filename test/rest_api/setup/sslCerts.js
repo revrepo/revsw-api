@@ -49,11 +49,6 @@ describe('Clean up', function () {
       function (done) {
         API.helpers
           .authenticateUser(user)
-          //.then(function () {
-          //  API.resources.sslCerts
-          //    .getAll()
-          //    .expect(200)
-          //})
           .then(function () {
             API.resources.sslCerts
               .getAll()

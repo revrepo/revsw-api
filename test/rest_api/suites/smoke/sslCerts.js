@@ -57,7 +57,7 @@ describe('Smoke check', function () {
       .catch(done);
   });
 
-  describe('SSL Certs resource', function () {
+  describe('SSL Certificates resource', function () {
 
     it('should return a success response when getting all SSL certs.',
       function (done) {

@@ -21,7 +21,7 @@ var SSLCertDP = require('./../providers/data/sslCerts');
 var AccountsHelper = require('./../helpers/accounts');
 var APITestError = require('./../apiTestError');
 
-// # SSL Certs Helper
+// # SSL Certificates Helper
 // Abstracts common functionality for the related resource.
 var SSLCertsHelper = {
 
