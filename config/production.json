@@ -19,14 +19,14 @@
     "https_port": 443 
   },
   "enforce_2fa_for_revadmin_role": true,
-  "master_password": "23a3ca5ff05d4f15631872d635539761",
+  "master_password": "the_correct_value_is_in_local_json",
   "key_path": "./config/ssl_certs/server.key",
   "cert_path": "./config/ssl_certs/server.crt",
   "portal_url": "https://iad02-portal01.revsw.net",
   "elasticsearch_url": "iad02-es05.revsw.net:9200",
   "elasticsearch_fullurl_url": "iad02-esurl01.revsw.net:9200",
   "cds_url": "https://cds.revdn.net:9000",
-  "cds_api_token": "kh3i45y98yfksdfkasgfjhgssrq35sf",
+  "cds_api_token": "the_correct_value_is_in_local_json",
   "portal_mongo": {
     "connect_string": "mongodb://IAD02-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
   },
@@ -37,7 +37,7 @@
   "password_reset_portal_domain": "portal.revapm.net",
   "user_verify_portal_domain" : "portal.revapm.net",
 
-  "jwt_private_key" : "2c83899336891b6cfa571449f098c3fca7d4e2ef96e7",
+  "jwt_private_key" : "the_correct_value_is_in_local_json",
   "available_sdk_release_versions": {
     "iOS": [ 1 ],
     "Android": [ 1 ],
@@ -47,10 +47,9 @@
   "enable_self_registration": true,
 
   "chargify": {
-    "password" : "x",
-    "domain": "https://revapm.chargify.com/",
-    "api_key": "vuzI2ewfhFF5VnIS5ZMmuSF4viXVRgpRB3KNl2qxE",
-    "shared_key": "D0Lq9BycfX947dmmdvEUvD39sSiZRcyJLS9sto3eCXM"
+    "domain": "the_correct_value_is_in_local_json",
+    "api_key": "the_correct_value_is_in_local_json",
+    "shared_key": "the_correct_value_is_in_local_json"
   },
 
   "notify_admin_by_email_on_user_login": "ops@revsw.com",
