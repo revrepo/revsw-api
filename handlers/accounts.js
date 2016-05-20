@@ -59,8 +59,10 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 var ApiKey = require('../models/APIKey');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
+var apiKeysService = require('../services/APIKeys.js');
 var dashboardService = require('../services/dashboards.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
+
 var emailService = require('../services/email.js');
 
 exports.getAccounts = function getAccounts(request, reply) {
@@ -793,10 +795,11 @@ exports.deleteAccount = function(request, reply) {
       },
       // Automatically delete all API keys belonging to the account ID
       function removeAccountsApiKeys(cb) {
-        apiKeys.removeMany({
+        apiKeysService.deleteAPIKeysWithAccountId({
           account_id: account_id
         }, function(error) {
           if (error) {
+             logger.error('Error remove All API keys while removing account ID ' + account_id);
             return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
           }
           cb();
