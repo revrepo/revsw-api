@@ -43,7 +43,7 @@ var apiKeys = new apiKey(mongoose, mongoConnection.getConnectionPortal());
  * @return {[type]}             [description]
  */
 exports.deleteAPIKeysWithAccountId = function(accountId, cb) {
-  logger.info('deleteAPIKeysWithAccountId: Accotin Id ' + accountId);
+  logger.info('deleteAPIKeysWithAccountId: Account Id ' + accountId);
 
   apiKeys.query({
     account_id: accountId

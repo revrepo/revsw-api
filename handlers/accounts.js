@@ -795,9 +795,7 @@ exports.deleteAccount = function(request, reply) {
       },
       // Automatically delete all API keys belonging to the account ID
       function removeAccountsApiKeys(cb) {
-        apiKeysService.deleteAPIKeysWithAccountId({
-          account_id: account_id
-        }, function(error) {
+        apiKeysService.deleteAPIKeysWithAccountId(account_id, function(error) {
           if (error) {
              logger.error('Error remove All API keys while removing account ID ' + account_id);
             return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
