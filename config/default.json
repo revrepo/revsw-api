@@ -74,13 +74,12 @@
 
   "enable_self_registration": true,
   "enable_simplified_signup_process": true,
-  
-  "chargify": { 
-    "password" : "x",
-    "domain": "https://revapm-test.chargify.com",
-    "api_key": "vuzI2ewfhFF5VnIS5ZMmuSF4viXVRgpRB3KNl2qxE",
-    "shared_key": "KGXNkhdMAEjgosppDso5vm9xWfx5449b0vkfgII2Yug"
-  },
+
+  "chargify": {
+    "domain": "the_correct_value_is_in_local_json",
+    "api_key": "the_correct_value_is_in_local_json",
+    "shared_key": "the_correct_value_is_in_local_json"
+  },  
 
   "notify_admin_by_email_on_user_login": "",
   "notify_admin_by_email_on_account_cancellation": "",
@@ -88,5 +87,6 @@
   "trust_request_xff_header": true,
   "usage_report_regen_age_ms": 600000,
 
-  "sendgrid_api_key": "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"
+  "sendgrid_api_key": "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",
+  "notify_developers_by_email_about_uncaught_exceptions": "victor@revsw.com"
 }

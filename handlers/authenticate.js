@@ -107,76 +107,84 @@ exports.authenticate = function(request, reply) {
       return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
         ' email: ' + email));
     }
+
     if (!user) {
       logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
       return reply(boom.unauthorized());
     } else {
+      var authPassed = false;
+      /**
+       * @name  sendResultChecks
+       * @description
+       *
+       * @param  {Boolean} authPassed
+       * @return
+       */
+      var sendResultChecks = function sendResultChecks(authPassed) {
+        if (authPassed) {
+          onAuthPassed(user, request, reply, error);
+        } else {
+          return reply(boom.unauthorized());
+        }
+      };
       var passHash = utils.getHash(password);
-
       if (passHash === user.password || passHash === config.get('master_password')) {
-
-        var authPassed = true;
-
-        if (user.self_registered) {
-          logger.info('Authenticate::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
-          // NOTE: User not verify
-          if (user.validation === undefined || user.validation.verified === false) {
-            logger.error('Authenticate::authenticate: User with ' +
-              ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
-            authPassed = false;
-            return reply(boom.create(418, 'Your registration not finished'));
-          }
-          accounts.get({
-            _id: user.companyId
-          }, function(error, account) {
-            if (error) {
-              logger.error('Authenticate::authenticate: Failed to find an account associated with user' +
-                ' User ID: ' + user.user_id + ' Email: ' + user.email);
-              return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
-                ' User ID: ' + user.user_id + ' Email: ' + user.email));
-            }
-            // NOTE: Not finished registration.
-            if (account.billing_id === null || account.billing_id === '') {
-              logger.error('Authenticate::authenticate: Account associated with user' +
-                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not have billing ID');
+        // First check 2FA
+        if (user.two_factor_auth_enabled || (user.role === 'revadmin' && config.get('enforce_2fa_for_revadmin_role') === true)) {
+          if (oneTimePassword) {
+            if (user.two_factor_auth_secret_base32) {
+              var generatedOneTimePassword = speakeasy.time({
+                key: user.two_factor_auth_secret_base32,
+                encoding: 'base32'
+              });
+              authPassed = oneTimePassword === generatedOneTimePassword;
+            } else {
               authPassed = false;
+            }
+            sendResultChecks(authPassed);
+          } else {
+            return reply(boom.forbidden());
+          }
+        } else {
+          // If no enabled 2FA
+          authPassed = true;
+          if (user.self_registered) {
+            logger.info('Authenticate::authenticate: User whith Id: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+            // NOTE: For Self Registered User
+
+            if (user.self_registered && (user.validation === undefined || user.validation.verified === false)) {
+              logger.error('Authenticate::authenticate: Self Registered User with ' +
+                '  Id: ' + user.user_id + ' Email: ' + user.email + ' not verify');
               return reply(boom.create(418, 'Your registration not finished'));
             }
-
-            if (authPassed) {
-              onAuthPassed(user, request, reply, error);
-            } else {
-              return reply(boom.unauthorized());
-            }
-          });
-        } else {
-          if (user.two_factor_auth_enabled || (user.role === 'revadmin' && config.get('enforce_2fa_for_revadmin_role') === true)) {
-            authPassed = false;
-            if (oneTimePassword) {
-              if (user.two_factor_auth_secret_base32) {
-                var generatedOneTimePassword = speakeasy.time({
-                  key: user.two_factor_auth_secret_base32,
-                  encoding: 'base32'
-                });
-                authPassed = oneTimePassword === generatedOneTimePassword;
-              } else {
-                authPassed = false;
+            accounts.get({
+              _id: user.companyId
+            }, function(error, account) {
+              if (error) {
+                logger.error('Authenticate::authenticate: Failed to find an account associated with user' +
+                  ' User ID: ' + user.user_id + ' Email: ' + user.email);
+                return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
+                  ' User ID: ' + user.user_id + ' Email: ' + user.email));
               }
-            } else {
-              return reply(boom.forbidden());
-            }
-          }
-
-          if (authPassed) {
-            onAuthPassed(user, request, reply, error);
+              // NOTE: Not finished registration.
+              if (user.self_registered && (account.billing_id === null || account.billing_id === '')) {
+                logger.error('Authenticate::authenticate: Account associated with Self Registered  User with ' +
+                  ' Id: ' + user.user_id + ' Email: ' + user.email + ' not have billing ID');
+                return reply(boom.create(418, 'Your registration not finished'));
+              }
+              // NOTE: Call for all self registred users after all checks
+              sendResultChecks(authPassed);
+            });
           } else {
-            return reply(boom.unauthorized());
+            // NOTE: Call for all not self registred users
+            sendResultChecks(authPassed);
           }
         }
       } else {
         logger.warn('User ' + email + ' attempted to log in using a wrong password');
         return reply(boom.unauthorized());
       }
+
     }
   });
 };
