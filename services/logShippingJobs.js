@@ -22,7 +22,7 @@
 
 var _ = require('lodash');
 var utils = require('../lib/utilities.js');
-
+var async = require('async');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
@@ -36,7 +36,7 @@ var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnection
  * @name  deleteJobsWithAccountId
  * @description
  *
- *   Delete Log Shipping Job Account
+ *   Delete Log Shipping Job with Account Id
  *
  * @param  {[type]}   accountId [description]
  * @param  {Function} cb        [description]
@@ -44,14 +44,29 @@ var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnection
  */
 exports.deleteJobsWithAccountId = function(accountId, cb) {
   logger.info('deleteJobsWithAccountId:Accotin Id' + accountId);
-  logShippingJobs.query({
+
+  logShippingJobs.queryP({
     account_id: accountId
   }, function(err, data) {
     if (!err) {
-      logShippingJobs.removeMany(data, function(err, meta) {
-        logger.info('deleteJobsWithAccountId:succes' + JSON.stringify(err));
-        cb(err, data);// NOTE: back list delete object
-      });
+      if (data.length >= 0) {
+        async.eachSeries(data, function(item, cb_item) {
+          logShippingJobs.remove({
+            _id: item._id
+          }, function(err) {
+            if (err) {
+              logger.error('deleteJobsWithAccountId:error: job id ' + item._id + '(' + JSON.stringify(err) + ')');
+            } else {
+              logger.info('deleteJobsWithAccountId:succes job id ' + item._id);
+            }
+            cb_item(!!err);
+          });
+        }, function(err) {
+          cb(err);
+        });
+      } else {
+        cb(null);
+      }
     } else {
       logger.error('deleteJobsWithAccountId:error' + JSON.stringify(err));
       cb(err);
