@@ -30,6 +30,7 @@ var BillingPlansHelper = require('./billingPlans');
 var DomainConfigsHelper = require('./domainConfigs');
 var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
+var SSLCertsHelper = require('./sslCerts');
 var UsersHelper = require('./users');
 
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
@@ -43,6 +44,7 @@ module.exports = {
   domainConfigs: DomainConfigsHelper,
   purge: PurgeHelper,
   signUp: SignUpHelper,
+  sslCerts: SSLCertsHelper,
   users: UsersHelper,
 
   /**
