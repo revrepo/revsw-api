@@ -35,6 +35,8 @@ var Hapi = require('hapi'),
   os = require('os'),
   mail = require('../lib/mail');
 
+  require('./../lib/boomOverriding.js');
+
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {
   process.on('uncaughtException', function (er) {
@@ -43,7 +45,7 @@ if (notifyEmail !== '') {
       from: 'eng@revsw.com',
       to: notifyEmail,
       subject: process.env.NODE_ENV + ':' + os.hostname() + ' ' + er.message,
-      text: er.stack 
+      text: er.stack
     }, function (er, data) {
       if (er) {
          console.error(er);
