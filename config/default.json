@@ -88,6 +88,6 @@
   "usage_report_regen_age_ms": 600000,
 
   "sendgrid_api_key": "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",
-  "notify_developers_by_email_about_uncaught_exceptions": "victor@revsw.com",
-  "notify_developers_by_email_about_bad_implementation": "victor@revsw.com"
+  "notify_developers_by_email_about_uncaught_exceptions": "eng@revsw.com",
+  "notify_developers_by_email_about_bad_implementation": "eng@revsw.com"
 }
