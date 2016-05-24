@@ -37,7 +37,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('API KEys resource', function () {
+  describe('API Keys resource', function () {
 
     beforeEach(function (done) {
       done();
