@@ -50,24 +50,29 @@ describe('Clean up', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            API.resources.apiKeys
+            return API.resources.apiKeys
               .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var apiKeys = res.body;
-                apiKeys.forEach(function (key) {
-                  if (namePattern.test(key.created_by)) {
-                    ids.push(key.id);
-                  }
-                });
-                API.resources.apiKeys
-                  .deleteManyIfExist(ids)
-                  .finally(done);
-              })
-              .catch(done);
+              .expect(200);
+          })
+          .then(function (res) {
+            var apiKeys = res.body;
+            var ids = [];
+            apiKeys.forEach(function (key) {
+              if (namePattern.test(key.created_by)) {
+                ids.push(key.id);
+              }
+            });
+            return ids;
+          })
+          .then(function (ids) {
+            API.resources.apiKeys
+              .deleteManyIfExist(ids)
+              .finally(done);
           })
           .catch(done);
-      });
+      })
+      .catch(done);
   });
 });
+})
+;
