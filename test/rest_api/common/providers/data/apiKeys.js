@@ -16,8 +16,6 @@
  * from Rev Software, Inc.
  */
 
-var faker = require('faker');
-
 // # API Keys Data Provider object
 //
 // Defines some methods to generate valid and common API key. test data.

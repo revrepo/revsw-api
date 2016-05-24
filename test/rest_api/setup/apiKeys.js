@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+var Promise = require('bluebird');
+
 var config = require('config');
 var API = require('./../common/api');
 
@@ -56,18 +58,24 @@ describe('Clean up', function () {
           })
           .then(function (res) {
             var apiKeys = res.body;
-            var ids = [];
-            apiKeys.forEach(function (key) {
-              if (namePattern.test(key.created_by)) {
-                ids.push(key.id);
-              }
-            });
-            return ids;
-          })
-          .then(function (ids) {
-            API.resources.apiKeys
-              .deleteManyIfExist(ids)
-              .finally(done);
+            var idsForApiKeysToDelete = [];
+            return Promise
+              .each(apiKeys, function (apiKey) { // One promise after other
+                return API.resources.accounts
+                  .getOne(apiKey.account_id)
+                  .then(function (res) {
+                    var account = res.body;
+                    if (namePattern.test(account.companyName) ||
+                      namePattern.test(account.contact_email)) {
+                      idsForApiKeysToDelete.push(apiKey.id);
+                    }
+                  });
+              })
+              .then(function () {
+                API.resources.apiKeys
+                  .deleteManyIfExist(idsForApiKeysToDelete)
+                  .finally(done);
+              });
           })
           .catch(done);
       });
