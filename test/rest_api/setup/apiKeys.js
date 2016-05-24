@@ -70,9 +70,6 @@ describe('Clean up', function () {
               .finally(done);
           })
           .catch(done);
-      })
-      .catch(done);
+      });
   });
 });
-})
-;
