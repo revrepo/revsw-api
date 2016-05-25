@@ -35,7 +35,7 @@ var Hapi = require('hapi'),
   os = require('os'),
   mail = require('../lib/mail');
 
-  require('./../lib/boomOverriding.js');
+require('./../lib/boomOverriding.js');
 
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {
