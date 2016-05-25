@@ -21,6 +21,7 @@
 // Requiring all resources to apply/attach to main `API` object.
 var AccountsResource = require('./accounts');
 var ActivityResource = require('./activity');
+var APIKeysResource = require('./apiKeys');
 var AppsResource = require('./apps');
 var AuthenticateResource = require('./authenticate');
 var BillingPlansResource = require('./billingPlans');
@@ -43,6 +44,7 @@ module.exports = {
 
   accounts: AccountsResource,
   activity: ActivityResource,
+  apiKeys: APIKeysResource,
   apps: AppsResource,
   authenticate: AuthenticateResource,
   billingPlans: BillingPlansResource,
