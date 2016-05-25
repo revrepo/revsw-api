@@ -59,7 +59,7 @@ describe('Smoke check', function () {
 
   describe('API Keys resource', function () {
 
-    it('should return a success response when getting all API Keys.',
+    xit('should return a success response when getting all API Keys.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -72,7 +72,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when getting specific API Keys.',
+    xit('should return a success response when getting specific API Key.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -85,7 +85,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when creating specific API Key.',
+    xit('should return a success response when creating specific API Key.',
       function (done) {
         var newApiKey = APIKeyDataProvider.generateOne(accountId);
         API.helpers
@@ -113,18 +113,17 @@ describe('Smoke check', function () {
           })
           .then(function (key) {
             var apiKeyId = key.id;
-            key.cert_name += 'UPDATED';
-            delete key.id;
-
+            var updatedKey = APIKeyDataProvider
+              .generateCompleteOne(key.account_id);
             API.resources.apiKeys
-              .update(apiKeyId, key)
+              .update(apiKeyId, updatedKey)
               .expect(200)
               .end(done);
           })
           .catch(done);
       });
 
-    it('should return a success response when deleting a API Key.',
+    xit('should return a success response when deleting a API Key.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -140,7 +139,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    //it('should return a success response when getting config-status of a ' +
+    //xit('should return a success response when getting config-status of a ' +
     //  'API Key.',
     //  function (done) {
     //    API.helpers
