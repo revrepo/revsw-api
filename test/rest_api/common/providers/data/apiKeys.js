@@ -46,6 +46,31 @@ var APIKeyDataProvider = {
     };
   },
 
+  /**
+   * ### APIKeyDataProvider.generateCompleteOne()
+   *
+   * Generates valid data that represents a complete API Key and the REST API
+   * end points accept.
+   *
+   * @param {String} accountId, account ID
+   * @returns {Object} API Key info with the following schema
+   *
+   *    {
+   *      account_id: String,
+   *      key_name: String,
+   *      domains: Array,
+   *      allowed_ops: {
+   *        read_config: Boolean,
+   *        modify_config: Boolean,
+   *        delete_config: Boolean,
+   *        purge: Boolean,
+   *        reports: Boolean,
+   *        admin: Boolean
+   *      },
+   *      read_only_status: Boolean,
+   *      active: Boolean
+   *    }
+   */
   generateCompleteOne: function (accountId) {
     var prefix = Date.now();
     return {

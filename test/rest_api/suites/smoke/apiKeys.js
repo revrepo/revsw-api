@@ -59,7 +59,7 @@ describe('Smoke check', function () {
 
   describe('API Keys resource', function () {
 
-    xit('should return a success response when getting all API Keys.',
+    it('should return a success response when getting all API Keys.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -72,7 +72,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return a success response when getting specific API Key.',
+    it('should return a success response when getting specific API Key.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -85,7 +85,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return a success response when creating specific API Key.',
+    it('should return a success response when creating specific API Key.',
       function (done) {
         var newApiKey = APIKeyDataProvider.generateOne(accountId);
         API.helpers
@@ -104,7 +104,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when updating specific AI Key.',
+    it('should return a success response when updating specific API Key.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -123,7 +123,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return a success response when deleting a API Key.',
+    it('should return a success response when deleting an API Key.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -139,20 +139,33 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    //xit('should return a success response when getting config-status of a ' +
-    //  'API Key.',
-    //  function (done) {
-    //    API.helpers
-    //      .authenticateUser(user)
-    //      .then(function () {
-    //        API.resources.apiKeys
-    //          .configStatus(apiKey.id)
-    //          .getAll()
-    //          .expect(200)
-    //          .end(done);
-    //      })
-    //      .catch(done);
-    //  });
+    it('should return a success response when activating an API Key.',
+      function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            API.resources.apiKeys
+              .activate(apiKey.id)
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when deactivating an API Key.',
+      function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            API.resources.apiKeys
+              .deactivate(apiKey.id)
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
   });
 });
 
