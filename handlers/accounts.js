@@ -467,7 +467,7 @@ exports.getAccountStatement = function(request, reply) {
         return reply(boom.badImplementation('Accounts::getAccountStatement: Failed to receive statement for subscription' +
           ' Subscription ID: ' + account.subscription_id +
           ' Account ID: ' + account_id +
-          ' Statement ID: ' + request.params.statement_i, errord));
+          ' Statement ID: ' + request.params.statement_id, error));
       }
 
       var idx = _.findIndex(statements, {
