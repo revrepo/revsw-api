@@ -183,7 +183,7 @@ exports.createBillingProfile = function(request, reply) {
       //result = publicRecordFields.handle(result, 'account');
       Customer.create(result, function resultCreatingCustomer(error, data) {
         if (error) {
-          return reply(boom.badImplementation('Failed to create a billing profile '));
+          return reply(boom.badImplementation('Failed to create a billing profile ', error));
         }
         // Set billing_id for account
         result.billing_id = data.customer.id;
@@ -198,15 +198,9 @@ exports.createBillingProfile = function(request, reply) {
         //   // };
         // })
         // result = publicRecordFields.handle(result, 'account');
-
-        // TODO : save new information
-
         //data.message = 'Successfully create billing profile for the account'
         // renderJSON(request, reply, error, data);
         data = publicRecordFields.handle(result, 'account');
-
-        // renderJSON(request, reply, error, data);
-        // reply(data);
         updateAccountInformation(result, request, reply);
       });
 
@@ -216,6 +210,15 @@ exports.createBillingProfile = function(request, reply) {
   });
 };
 
+/**
+ * @name getAccount
+ * @description
+ *
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.getAccount = function(request, reply) {
 
   var account_id = request.params.account_id;
@@ -229,7 +232,7 @@ exports.getAccount = function(request, reply) {
   }, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getAccount: Failed to get an account' +
-        ' Account ID: ' + account_id));
+        ' Account ID: ' + account_id, error));
     }
 
     if (result) {
@@ -280,7 +283,7 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
   }, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getAccountSubscriptionPreview: Failed to get an account' +
-        ' Account ID: ' + account_id));
+        ' Account ID: ' + account_id, error));
     }
     if (result) {
       result = publicRecordFields.handle(result, 'account');
@@ -341,7 +344,6 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
 exports.getAccountSubscriptionSummary = function(request, reply) {
 
   var account_id = request.params.account_id;
-
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
@@ -361,13 +363,14 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
           return reply(boom.badRequest('Subscription info error '));
         } else {
           // NOTE: delete information not for send
-          // TODO: model validation
           info.subscription.product_name = info.subscription.product.name;
           info.subscription.billing_portal_link = result.billing_portal_link;
           delete info.subscription.product;
           if (!!info.subscription.credit_card) {
             delete info.subscription.credit_card.current_vault;
             delete info.subscription.credit_card.customer_id;
+          } else {
+            info.subscription.credit_card = false;
           }
           delete info.subscription.customer;
           renderJSON(request, reply, error, info);
@@ -389,7 +392,7 @@ exports.getAccountStatements = function(request, reply) {
   }, function(error, account) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
-        ' Account ID: ' + account_id));
+        ' Account ID: ' + account_id, error));
     }
     if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
@@ -402,7 +405,7 @@ exports.getAccountStatements = function(request, reply) {
       if (error) {
         return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to receive statements for subscription' +
           ' Subscription ID: ' + account.subscription_id +
-          ' Account ID: ' + account_id));
+          ' Account ID: ' + account_id, error));
       }
       statements = publicRecordFields.handle(statements, 'statements');
       renderJSON(request, reply, error, statements);
@@ -418,7 +421,7 @@ exports.getAccountTransactions = function(request, reply) {
   }, function(error, account) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
-        ' Account ID: ' + account_id));
+        ' Account ID: ' + account_id, error));
     }
     if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
@@ -431,7 +434,7 @@ exports.getAccountTransactions = function(request, reply) {
       if (error) {
         return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to receive transactions for subscription' +
           ' Subscription ID: ' + account.subscription_id +
-          ' Account ID: ' + account_id));
+          ' Account ID: ' + account_id, error));
       }
       transactions = publicRecordFields.handle(transactions, 'transactions');
       renderJSON(request, reply, error, transactions);
@@ -448,7 +451,7 @@ exports.getAccountStatement = function(request, reply) {
   }, function(error, account) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getAccountStatement: Failed to get an account' +
-        ' Account ID: ' + account_id));
+        ' Account ID: ' + account_id, error));
     }
 
     if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -464,7 +467,7 @@ exports.getAccountStatement = function(request, reply) {
         return reply(boom.badImplementation('Accounts::getAccountStatement: Failed to receive statement for subscription' +
           ' Subscription ID: ' + account.subscription_id +
           ' Account ID: ' + account_id +
-          ' Statement ID: ' + request.params.statement_id));
+          ' Statement ID: ' + request.params.statement_i, errord));
       }
 
       var idx = _.findIndex(statements, {
@@ -514,7 +517,7 @@ exports.getPdfStatement = function(request, reply) {
   }, function(error, account) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to get an account' +
-        ' Account ID: ' + account_id));
+        ' Account ID: ' + account_id, error));
     }
 
     if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -531,7 +534,7 @@ exports.getPdfStatement = function(request, reply) {
         return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive statement for subscription' +
           ' Subscription ID: ' + account.subscription_id +
           ' Account ID: ' + account_id +
-          ' Statement ID: ' + request.params.statement_id));
+          ' Statement ID: ' + request.params.statement_id, error));
       }
 
       var idx = _.findIndex(statements, {
@@ -545,7 +548,7 @@ exports.getPdfStatement = function(request, reply) {
           return reply(boom.badImplementation('Accounts::getPdfStatement: Failed to receive statement for subscription' +
             ' Subscription ID: ' + account.subscription_id +
             ' Account ID: ' + account_id +
-            ' Statement ID: ' + request.params.statement_id));
+            ' Statement ID: ' + request.params.statement_id, error));
         }
         reply(pdf)
           .type('application/pdf; charset=utf-8');
@@ -560,7 +563,7 @@ exports.updateAccount = function(request, reply) {
   var updateAccount = function(request, reply) {
     accounts.update(updatedAccount, function(error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update the account'));
+        return reply(boom.badImplementation('Failed to update the account', error));
       }
 
       result = publicRecordFields.handle(result, 'account');
@@ -590,7 +593,7 @@ exports.updateAccount = function(request, reply) {
     _id: account_id
   }, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id));
+      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
     }
 
     if (!result || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -602,7 +605,7 @@ exports.updateAccount = function(request, reply) {
     }, function(error, account) {
       if (error) {
         return reply(boom.badImplementation('Accounts::updateAccount: failed to get an account' +
-          ' Account ID: ' + updatedAccount.account_id));
+          ' Account ID: ' + updatedAccount.account_id, error));
       }
 
       // NOTE: check update billing_plan?
@@ -677,7 +680,7 @@ exports.deleteAccount = function(request, reply) {
       break;
     default:
       logger.error('Account::deleteAccount: Missing or wrong "user_type" attribute in "request" object ' + JSON.stringify(request.auth.credentials));
-      return reply(boom.badImplementation('Failed to delete Account with account ID ' + account_id));
+      return reply(boom.badImplementation('Failed to delete Account with account ID ' + account_id, JSON.stringify(request.auth.credentials)));
       // break;
   }
 
@@ -707,8 +710,8 @@ exports.deleteAccount = function(request, reply) {
       }
     ], function(err) {
       if (err) {
-        // TODO: add logger
-        return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
+        logger.error('Account::deleteAccountInHardMode:  ' + JSON.stringify(request.auth.credentials));
+        return reply(boom.badImplementation('Failed to delete account ID ' + account_id, err));
       }
     });
   }
@@ -797,7 +800,7 @@ exports.deleteAccount = function(request, reply) {
       function removeAccountsApiKeys(cb) {
         apiKeysService.deleteAPIKeysWithAccountId(account_id, function(error) {
           if (error) {
-             logger.error('Error remove All API keys while removing account ID ' + account_id);
+            logger.error('Error remove All API keys while removing account ID ' + account_id);
             return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
           }
           cb();
@@ -837,8 +840,7 @@ exports.deleteAccount = function(request, reply) {
               user.companyId.length + ' ' + JSON.stringify(user.companyId));
             if (user.companyId.length === 1) {
               // NOTE: delete user's dashboards
-              // TODO: nee to move the code to a separate function and also call it from user removal handler
-              logger.info('Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
+              logger.info('Accounts:dropAccountUsers:Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
               dashboardService.deleteDashboardsWithUserId(user_id, function(error) {
                 if (error) {
                   return reply(boom.badImplementation('Error removing the dashboards'));
@@ -848,8 +850,8 @@ exports.deleteAccount = function(request, reply) {
                     _id: user.user_id
                   }, function(error, result) {
                     if (error) {
-                      logger.warn('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
-                      return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                      logger.warn('Accounts:dropAccountUsers:Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
+                      return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id, error));
                     }
                     logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
                     callback(error, user);
@@ -868,7 +870,7 @@ exports.deleteAccount = function(request, reply) {
 
               users.update(updatedUser, function(error, result) {
                 if (error) {
-                  return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id));
+                  return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id, error));
                 }
                 callback(error, user);
               });
@@ -891,7 +893,7 @@ exports.deleteAccount = function(request, reply) {
 
         accounts.update(deleteAccountQuery, function(error) {
           if (error) {
-            return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id));
+            return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id, error));
           }
           cb(error);
         });
