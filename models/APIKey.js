@@ -21,6 +21,7 @@
 'use strict';
 //	data access layer
 
+var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 
 function APIKey(mongoose, connection, options) {
@@ -44,8 +45,8 @@ function APIKey(mongoose, connection, options) {
     },
     'read_only_status': {type: Boolean, default: false},
     'active'          : {type: Boolean, default: true},
-    'created_at'      : {type: Date, default: Date()},
-    'updated_at'      : {type: Date, default: Date()}
+    'created_at'      : {type: Date, default: Date.now},
+    'updated_at'      : {type: Date, default: Date.now}
   });
 
   this.model = connection.model('APIKey', this.APIKeySchema, 'APIKey');
@@ -85,9 +86,10 @@ APIKey.prototype = {
   list: function (request, callback) {
     this.model.find(function (err, api_keys) {
       if (api_keys) {
+        // TODO need to move the accesss control stuff out of the database model
         var keys = utils.clone(api_keys);
         for (var i = 0; i < keys.length; i++) {
-          if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(keys[i].account_id) !== -1) {
+          if (request.auth.credentials.role === 'revadmin' || utils.getAccountID(request).indexOf(keys[i].account_id) !== -1) {
             keys[i].id = keys[i]._id + '';
             delete keys[i]._id;
             delete keys[i].__v;
@@ -187,7 +189,66 @@ APIKey.prototype = {
     } else {
       callback(utils.buildError('400', 'No API key passed to remove function'), null);
     }
-  }
+  },
+
+  removeMany: function (data, callback) {
+    this.model.remove(data, callback);
+  },
+
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  query: function (where, callback) {
+    if (!where || typeof (where) !== 'object') {
+      callback(new Error('where clause not specified'));
+    }
+    this.model.find(where, function (err, doc) {
+      if (err) {
+        callback(err);
+      }
+      if (doc) {
+        doc = utils.clone(doc).map(function (r) {
+          delete r.__v;
+          return r;
+        });
+      }
+      callback(null, doc);
+    });
+  },
+  //  returns _promise_ {
+  //    account_id: { total: X, inactive: Y, active: Z },
+  //    [account_id: { total: X, inactive: Y, active: Z },
+  //    ...]
+  //  }
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  accountAPIKeysData: function( account_id ) {
+
+    var where = account_id ?
+      { account_id: ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
+      {};
+
+    return this.model.find( where, { _id: 0, account_id: 1, active: 1 } )
+      .exec()
+      .then( function( data ) {
+        var dist = {};
+        data.forEach( function( item ) {
+          if ( !dist[item.account_id] ) {
+            dist[item.account_id] = { total: 0, inactive: 0, active: 0 };
+          }
+          if ( item.active ) {
+            ++dist[item.account_id].active;
+          } else {
+            ++dist[item.account_id].inactive;
+          }
+          ++dist[item.account_id].total;
+        });
+        return dist;
+      });
+  },
+
 };
 
 module.exports = APIKey;

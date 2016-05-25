@@ -1,6 +1,6 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <title>RevAPM Platform API Documentation</title>
 
@@ -34,102 +34,200 @@
                     log("Loaded SwaggerUI")
                     $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
                 },
-                    onFailure: function(data) {
+                onFailure: function(data) {
                     log("Unable to Load SwaggerUI");
-            },
+                },
                 docExpansion: "list"
             });
-
-    var updateAuth = function() {
-      var auth = "Basic " + btoa($('#input_user')[0].value + ":" + $('#input_pass')[0].value);
-      window.authorizations.add("key", new ApiKeyAuthorization("Authorization", auth, "header"));
-    //  swaggerUi.api.clientAuthorizations.add("basic", new SwaggerClient.ApiKeyAuthorization("Authorization", auth, "header"));
-    //  console.log('Changed auth parameters');
-    };
-
-    $('#input_user').change(updateAuth);
-    $('#input_pass').change(updateAuth);
-
             window.swaggerUi.load();
         });
-    </script>
 
+        var apiUrl = window.location.protocol + '//' + window.location.host + '/v1';
+
+        function onAuthTypeChange() {
+            var type = $('#authType').val();
+
+            switch (type){
+                case '1':
+                    $('#authApiKey').hide();
+                    $('#authUserPass').show();
+                    $('#input_api_key').val('');
+                break;
+                case '2':
+                    $('#authUserPass').hide();
+                    $('#authApiKey').show();
+                    $('#input_user').val('');
+                    $('#input_pass').val('');
+                break;
+            }
+        }
+
+        function authenticate(){
+            var type = $('#authType').val();
+
+            window.authorizations.remove('token');
+            window.authorizations.remove('apiKey');
+
+            switch (type){
+                case '1':
+                    authUserPassword();
+                break;
+                case '2':
+                    authApiKey();
+                break;
+            }
+        }
+
+        function authUserPassword(){
+            var data = {
+                email: $('#input_user').val(),
+                password: $('#input_pass').val()
+            };
+
+            if($('#input_otp').val()){
+                data.oneTimePassword = $('#input_otp').val();
+            }
+
+            $.post(apiUrl + '/authenticate', data).done(function(response) {
+                var token = 'Bearer ' + response.token;
+                window.authorizations.add('token', new ApiKeyAuthorization("Authorization", token, "header"));
+                showMessage('Authenticated OK', 'green');
+            }).error(function(err){
+                switch(err.status){
+                    case 401:
+                        showMessage('Authentication Failed!', 'red');
+                    break;
+                    case 403:
+                        $('#otp').css('display', 'block');
+                    break;
+                }
+            });
+
+            $('#input_otp').val('');
+        }
+
+        function authApiKey(){
+            var key = 'X-API-KEY ' + $('#input_api_key').val();
+
+            $.ajax({
+                type: 'GET',
+                url: apiUrl + '/accounts',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', key);
+                },
+                success: function (response){
+                    window.authorizations.add('apiKey', new ApiKeyAuthorization("Authorization", key, "header"));
+                    showMessage('Authenticated OK', 'green');
+                },
+                error: function(error){
+                    showMessage('Authentication Failed!', 'red');
+                }
+            });
+        }
+
+        function showMessage(message, color){
+            $('#message').css('display', 'block');
+            $('#message').css('color', color);
+            $('#message').html(message);
+            setTimeout(function(){ $('#message').css('display', 'none');}, 3000);
+
+            $('#otp').css('display', 'none');
+        }
+    </script>
 
     <style>
         /* for custom page remove swaggers api info section */
         #api_info{
             display: none;
         }
-    </style>    
+    </style>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-68856309-7', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</head>
+<body>
+<div class="wrapper">
+    <div id='header'>
+        <div class="swagger-ui-wrap">
+            <font color="white">
+                Authenticate via
+                <select id="authType" class="parameter" style="font-size: 15px;" onchange="onAuthTypeChange()">
+                    <option value="1">Username/Password</option>
+                    <option value="2">API Key</option>
+                </select>
+            </font>
+            <form id="api_selector" style="margin: -1px 0 0 0; width: 485px;">
+                <div id='authUserPass'>
+                    <div class='input'><input placeholder="user" id="input_user" name="user" type="text" size="10"/></div>
+                    <div class='input'><input placeholder="pass" id="input_pass" name="pass" type="password" size="10"/></div>
+                </div>
+                <div class='input' id='authApiKey' style="display: none">
+                    <input placeholder="api key" id="input_api_key" name="api_key" type="text" size="30" style="width: 345px;"/>
+                </div>
+
+                <button type="button" onclick="authenticate()" style="font-size: 17px;">Authenticate</button>
+            </form>
+            <div id="otp" style="margin-left: 332px; display: none">
+                <font color="white">
+                    Enter One Time Password:
+                    <div class='input' style="display: inline-block"><input placeholder="one time pass" id="input_otp" name="otp" type="password" size="10" style="font-size: 0.9em; padding: 3px;"/></div>
+                </font>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="message" style="text-align: center; display: none"></div>
+
+    <!--
+            <header>
+                {{#if hapiSwagger.info.title}}
+                    <h1 class="home-link"><a href="/">{{hapiSwagger.info.title}}</a></h1>
+                {{else}}
+                    <h1 class="home-link"><a href="/">{{{title}}}</a></h1>
+                {{/if}}
+            </header>
+    -->
+
+    {{#if hapiSwagger.info.description}}
+    <p>{{hapiSwagger.info.description}}</p>
+    {{/if}}
+
+    <section id="readme">
+        {{{markdown}}}
+    </section>
+
+    <section id="swagger">
+        <h1 class="entry-title api-title">API</h1>
+        <div id="message-bar" class="swagger-ui-wrap"></div>
+        <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 
 
+    </section>
 
-
-
-  </head>
-  <body>
-
-
-
-
-    <div class="wrapper">
-
-<div id='header'>
-  <div class="swagger-ui-wrap">
-    <font color="white">Login using RevAPM Portal credentials for API testing</font>
-    <form id='api_selector'>
-      <div class='input'><input placeholder="user" id="input_user" name="user" type="text" size="10"/></div>    
-      <div class='input'><input placeholder="pass" id="input_pass" name="pass" type="password" size="10"/></div>
-    </form>
-
-  </div>
+    {{#if hapiSwagger.info.license}}
+    <section id="license">
+        License:
+        {{#if hapiSwagger.info.licenseUrl}}<a href="{{hapiSwagger.info.licenseUrl}}">{{/if}}
+        {{hapiSwagger.info.license}}
+        {{#if hapiSwagger.info.licenseUrl}}</a>{{/if}}
+    </section>
+    {{/if}}
+    <!--
+            <section id="readme">
+                <h1 class="entry-title">Documentation</h1>
+                {{{markdown}}}
+            </section>
+    -->
 </div>
-
-
-<!--
-        <header>
-            {{#if hapiSwagger.info.title}}
-                <h1 class="home-link"><a href="/">{{hapiSwagger.info.title}}</a></h1>
-            {{else}}
-                <h1 class="home-link"><a href="/">{{{title}}}</a></h1>
-            {{/if}}
-        </header>
--->
-
-        {{#if hapiSwagger.info.description}}
-            <p>{{hapiSwagger.info.description}}</p>
-        {{/if}}
-
-        <section id="readme">
-            {{{markdown}}}
-        </section>
-
-
-
-        <section id="swagger">
-            <h1 class="entry-title api-title">API</h1>
-            <div id="message-bar" class="swagger-ui-wrap"></div>
-            <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
-
-
-        </section>
-
-
-        {{#if hapiSwagger.info.license}}
-            <section id="license">
-                License: 
-                {{#if hapiSwagger.info.licenseUrl}}<a href="{{hapiSwagger.info.licenseUrl}}">{{/if}}
-                    {{hapiSwagger.info.license}}
-                {{#if hapiSwagger.info.licenseUrl}}</a>{{/if}}
-             </section>
-        {{/if}}
-<!--
-        <section id="readme">
-            <h1 class="entry-title">Documentation</h1>
-            {{{markdown}}}
-        </section>
--->
-     </div>
-
-  </body>
+</body>
 </html>

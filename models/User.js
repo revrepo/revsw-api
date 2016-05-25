@@ -23,6 +23,7 @@
 
 var utils = require('../lib/utilities.js');
 var _ = require('lodash');
+var promise = require('bluebird');
 
 function User(mongoose, connection, options) {
   this.options = options;
@@ -37,18 +38,25 @@ function User(mongoose, connection, options) {
       test      : {type : Boolean, default : true},
       readOnly  : {type : Boolean, default : false}
     },
+    // TODO need to rename to account_id
     'companyId'            : String,
     'domain'               : String,
     'email'                : String,
+     // TODO rename to first_name
     'firstname'            : String,
+    // TODO rename to last_name
     'lastname'             : String,
     'password'             : String,
     'role'                 : {type : String, default : 'user'},
     'status'               : {type : Boolean, default : true},
     'theme'                : {type : String, default : 'light'},
     'token'                : String,
-    'created_at'           : {type : Date, default : Date()},
-    'updated_at'           : {type : Date, default : Date()},
+    'created_at'           : {type : Date, default : Date.now},
+    'updated_at'           : {type : Date, default : Date.now},
+    'last_login_at'        : {type : Date, default: null},
+    'last_login_from'      : {type : String, default: null},
+    // TODO: need to fix the ugly names of the two variables
+    // should be reset_password_token and reset_password_expires
     'resetPasswordToken'   : String,
     'resetPasswordExpires' : Number,
     'two_factor_auth_enabled': {type: Boolean, default: false},
@@ -64,15 +72,17 @@ function User(mongoose, connection, options) {
     },
     old_passwords: [String],
 
-    validation: {
-      expiredAt: Date,
-      token: String
+    'validation': {
+      // TODO: should be "expired_at"
+      'expiredAt': Date,
+      'token': String,
+      'verified': {type: Boolean, default: false}
     },
 
     billing_plan: this.ObjectId,
 
-    deleted: { type: Boolean, default: false }
-
+    deleted: { type: Boolean, default: false },
+    comment: { type: String, default: ''},
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
@@ -115,6 +125,8 @@ User.prototype = {
 
         doc = utils.clone(doc);
         doc.user_id = doc._id;
+
+        // TODO: need to move all the "delete" operations to a separate function (and call it from all User methods)
 
         delete doc.__v;
         delete doc._id;
@@ -168,6 +180,94 @@ User.prototype = {
     });
   },
 
+  getValidation : function (item, callback) {
+    this.model.findOne(item, function (err, doc) {
+      if (doc) {
+
+        doc = utils.clone(doc);
+        doc.user_id = doc._id;
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.id;
+        delete doc.token;
+        delete doc.status;
+        delete doc.old_passwords;
+
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        } else {
+          doc.companyId = [];
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
+        } else {
+          doc.domain = [];
+        }
+
+      }
+      callback(err, doc);
+    });
+  },
+  /**
+   * @name  updateValidation
+   * @description
+   *
+   * @param  {Object}   item
+   * @param  {Function} callback
+   * @return
+   */
+  updateValidation : function (item, callback) {
+    this.model.findOne({_id : item.user_id}, function (err, doc) {
+      if (doc) {
+        if(!!item.validation && item.validation.verified === true){
+            item.validation = {
+              expiredAt: undefined,
+              token: '',
+              verified: true
+            };
+        }
+        for (var attrname in item) {
+          doc[attrname] = item[attrname];
+        }
+        doc.updated_at = new Date();
+        doc.user_id = doc._id;
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.id;
+        delete doc.token;
+        delete doc.status;
+        delete doc.old_passwords;
+
+        if (doc.companyId) {
+          doc.companyId = doc.companyId.split(',');
+        } else {
+          doc.companyId = [];
+        }
+        if (doc.domain) {
+          doc.domain = doc.domain.split(',');
+        } else {
+          doc.domain = [];
+        }
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.user_id = item._id;
+
+            delete item._id;
+            delete item.__v;
+            delete doc.token;
+            delete doc.status;
+            delete item.old_passwords;
+          }
+          callback(err, item);
+        });
+      }else{
+        callback(err, doc);
+      }
+    });
+  },
   query: function (where, callback) {
     if (!where || typeof (where) !== 'object') {
       callback(new Error('where clause not specified'));
@@ -188,13 +288,15 @@ User.prototype = {
 
   list : function (request, callback) {
 
-//    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
+    // console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
 
     this.model.find(function (err, users) {
       if (users) {
 
         users = utils.clone(users);
         for (var i = 0; i < users.length; i++) {
+
+          // TODO need to move the access control stuff out of the method
 
           // remove from the resulting array users without companyId property (most likely RevAdmin/system users)
           if (request.auth.credentials.role !== 'revadmin' && (!users[i].companyId)) {
@@ -214,8 +316,10 @@ User.prototype = {
             users[i].companyId = [];
           }
 
+          var companyId = utils.getAccountID(request);
+
           // skip users which do not belong to the company
-          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, request.auth.credentials.companyId)) {
+          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, companyId)) {
             users[i].user_id = users[i]._id;
             users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
             delete users[i]._id;
@@ -308,6 +412,33 @@ User.prototype = {
     });
   },
 
+  updateLastLoginAt : function (item, callback) {
+    var context = this;
+    this.model.findOne({_id : item.user_id}, function (err, doc) {
+      //     console.log('Inside update: doc = ', doc);
+      if (doc) {
+
+        doc.last_login_at = new Date();
+        doc.last_login_from = item.last_login_from;
+
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.user_id = item._id;
+
+            delete item._id;
+            delete item.__v;
+            delete item.validation;
+            delete item.old_passwords;
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
+    });
+  },
+
   remove : function (item, callback) {
     var context = this;
     if (item) {
@@ -331,8 +462,31 @@ User.prototype = {
       billing_plan: billingPlanId,
       deleted: false
     }, cb);
-  }
+  },
 
+  //  ---------------------------------
+  // free promise query
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  // returns _promise_ { total: 000, active: 000, deleted: 000 }
+  countUsers: function () {
+    var res = { total: 0, active: 0, deleted: 0 };
+    return promise.all([
+        this.model.count({ $or: [{ deleted : { $exists: false } }, { deleted: false } ] }).exec(),
+        this.model.count({}).exec()
+      ])
+      .then( function( c ) {
+        res.active = c[0];
+        res.total = c[1];
+        res.deleted = res.total - res.active;
+        return res;
+      });
+  }
 };
 
 module.exports = User;
+

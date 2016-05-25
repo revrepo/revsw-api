@@ -21,12 +21,13 @@
 
 var mongoose    = require('mongoose');
 var boom        = require('boom');
-var uuid        = require('node-uuid');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var config      = require('config');
 var cds_request = require('request');
 var utils           = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
+var Promise = require('bluebird');
+var _ = require('lodash');
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -34,19 +35,50 @@ var publicRecordFields = require('../lib/publicRecordFields');
 
 var DomainConfig   = require('../models/DomainConfig');
 var ServerGroup         = require('../models/ServerGroup');
+var Account = require('../models/Account');
 
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var billing_plans = require('../models/BillingPlan');
+var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
-function checkDomainAccessPermission(request, domain) {
-  if (request.auth.credentials.role === 'user' && request.auth.credentials.domain.indexOf(domain.name) === -1) {
-     return false;
-  } else if ((request.auth.credentials.role === 'admin' || request.auth.credentials.role === 'reseller') &&
-    request.auth.credentials.companyId.indexOf(domain.account_id) === -1) {
-    return false;
-  }  
-  return true;
-}
+var checkDomainsLimit = function (companyId, callback) {
+   accounts.get({_id: companyId}, function (err, account) {
+     if (err) {
+       return callback('DomainConfigs::checkDomainsList: Failed to find an account with ID' +
+         'Account ID: ' + companyId, null);
+     }
+     billing_plans.get({_id: account.billing_plan}, function (err, bp) {
+       if (err) {
+         return callback('DomainConfigs::checkDomainsList:  Failed to find a billing plan associated with account provided' +
+           ' Account ID: ' + companyId + ' CreatedBy: ' + account.createdBy, null);
+       }
+       var serviceIndex = _.findIndex(bp.services, {code_name: 'domain'});
+       domainConfigs.model.count({account_id: companyId}, function (err, count) {
+         if(err){
+           return callback('DomainConfigs::checkDomainsList: Could not count domains for account' +
+             ' Account ID: ' + companyId + ' CreatedBy: ' + account.createdBy, null);
+         }
+         if(serviceIndex<0){
+           return callback('DomainConfigs::checkDomainsList: Could not find a \'domain\' service within billing plan' +
+             ' Billing Plan ID: ' + bp.id, null);
+         }
+         return callback(null, bp.services[serviceIndex].included - count);
+       });
+     });
+   });
+};
+
+var isSubscriptionActive = function (companyId, callback) {
+  accounts.get({_id: companyId}, function (err, account) {
+    if (err) {
+      return callback('DomainConfigs::isSubscriptionActive: Failed to find an account with ID' +
+        'Account ID: ' + companyId, null);
+    }
+    return account.subscription_state !== 'active' ? callback(false, null) : callback(true, null);
+  });
+};
 
 exports.getDomainConfigStatus = function(request, reply) {
 
@@ -55,18 +87,12 @@ exports.getDomainConfigStatus = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrive configuration details for domain ID ' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/config_status',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      }
+      headers: authHeader
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration status for domain ' + domain_id));
@@ -85,9 +111,7 @@ exports.getDomainConfigStatus = function(request, reply) {
 exports.getDomainConfigs = function(request, reply) {
 
   cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
-    headers: {
-      Authorization: 'Bearer ' + config.get('cds_api_token')
-    }
+    headers: authHeader
   }, function (err, res, body) {
     if (err) {
       return reply(boom.badImplementation('Failed to get from CDS a list of domains'));
@@ -101,7 +125,7 @@ exports.getDomainConfigs = function(request, reply) {
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
-        if (checkDomainAccessPermission(request,response_json[i])) {
+        if (utils.checkUserAccessPermissionToDomain(request,response_json[i])) {
           response.push(response_json[i]);
         }
       }
@@ -120,10 +144,7 @@ exports.getDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -133,9 +154,7 @@ exports.getDomainConfig = function(request, reply) {
 
     logger.info('Calling CDS to get configuration for domain ID: ' + domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration for domain ID: ' + domain_id));
@@ -151,6 +170,17 @@ exports.getDomainConfig = function(request, reply) {
           response.tolerance = '3000';
         }
       }
+      if (response_json.comment) {
+        response.comment = response_json.comment;
+      }
+      response.enable_ssl = response_json.enable_ssl;
+      response.ssl_conf_profile = response_json.ssl_conf_profile;
+      response.ssl_cert_id = response_json.ssl_cert_id;
+      response.ssl_protocols = response_json.ssl_protocols;
+      response.ssl_ciphers = response_json.ssl_ciphers;
+      response.ssl_prefer_server_ciphers = response_json.ssl_prefer_server_ciphers;
+      response.btt_key = response_json.btt_key;
+
       renderJSON(request, reply, err, response);
     });
   });
@@ -162,18 +192,13 @@ exports.getDomainConfigVersions = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
     logger.info('Calling CDS to get configuration versions for domain ID: ', domain_id);
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/versions',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration for domain ID: ' + domain_id));
@@ -182,6 +207,7 @@ exports.getDomainConfigVersions = function(request, reply) {
       if ( res.statusCode === 400 ) {
         return reply(boom.badRequest(response_json.message));
       }
+      // TODO: add here the same ssl/btt transformations as we do a simple GET above
       var response = response_json;
       renderJSON(request, reply, err, response);
     });
@@ -191,16 +217,12 @@ exports.getDomainConfigVersions = function(request, reply) {
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
-
-  if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
+  var account_id = newDomainJson.account_id;
+  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
-  serverGroups.get({
-    _id : newDomainJson.origin_server_location_id,
-    serverType : 'public',
-    groupType  : 'CO'
-  }, function (error, result) {
+  var createDomain = function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID' + newDomainJson.origin_server_location_id));
     }
@@ -208,7 +230,8 @@ exports.createDomainConfig = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
     }
-    newDomainJson.created_by = request.auth.credentials.email;
+
+    newDomainJson.created_by = utils.generateCreatedByField(request);
     if (!newDomainJson.tolerance) {
       newDomainJson.tolerance = '3000';
     }
@@ -228,9 +251,7 @@ exports.createDomainConfig = function(request, reply) {
       logger.info('Calling CDS to create new domain ' + JSON.stringify(newDomainJson));
       cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
         method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + config.get('cds_api_token')
-        },
+        headers: authHeader,
         body: JSON.stringify(newDomainJson)
       }, function (err, res, body) {
         if (err) {
@@ -244,29 +265,84 @@ exports.createDomainConfig = function(request, reply) {
           return renderJSON(request, reply, err, response_json);
         }
 
-        var response = {  
+        var response = {
           statusCode: 200,
           message: 'Successfully created new domain configuration',
           object_id: response_json._id
         };
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'domain',
           target_id        : response.object_id,
           target_name      : originalDomainJson.domain_name,
           target_object    : originalDomainJson,
           operation_status : 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, err, response);
       });
     });
+  };
+
+
+  accounts.get({_id: account_id}, function (err, account) {
+    if(err) {
+      return reply(boom.badImplementation('DomainConfigs::checkDomainsList: Failed to find an account with ID ' +
+        newDomainJson.account_id));
+    }
+
+    if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    if (false /* TODO need to restore a check for status of account.billing_plan */ ) {
+      isSubscriptionActive(newDomainJson.account_id, function (err, res) {
+          if (err) {
+            return reply(boom.badImplementation(err));
+          }
+          if (!res) {
+            return reply(boom.forbidden(account.companyName + ' subscription is not active'));
+          }
+          checkDomainsLimit(request.auth.credentials.companyId, function (err, diff) {
+            if (err) {
+              return reply(boom.badImplementation(err));
+            }
+            if (diff <= 0) {
+              return reply(boom.forbidden('Billing plan service limit reached'));
+            }
+            serverGroups.get({
+              _id : newDomainJson.origin_server_location_id,
+              serverType : 'public',
+              groupType  : 'CO'
+            }, createDomain);
+          });
+        });
+    } else {
+      serverGroups.get({
+        _id : newDomainJson.origin_server_location_id,
+        serverType : 'public',
+        groupType  : 'CO'
+      }, function (error, result) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID ' + newDomainJson.origin_server_location_id));
+        }
+
+        if (!result) {
+          return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
+        }
+        newDomainJson.created_by = utils.generateCreatedByField(request);
+        if (!newDomainJson.tolerance) {
+          newDomainJson.tolerance = '3000';
+        }
+
+        domainConfigs.query({
+          domain_name : newDomainJson.domain_name,
+          deleted: { $ne: true }
+        }, createDomain);
+      });
+    }
+
   });
 };
 
@@ -276,33 +352,53 @@ exports.updateDomainConfig = function(request, reply) {
   var domain_id = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
-  if (request.auth.credentials.role !== 'revadmin' && newDomainJson.account_id &&
-    request.auth.credentials.companyId.indexOf(newDomainJson.account_id) === -1) {
-    return reply(boom.badRequest('Account ID not found'));
-  }
-
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domain_id));
     }
-    if (!result) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-    if (!checkDomainAccessPermission(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag);
+    if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
 
+    var _comment = newDomainJson.comment || '';
+    delete newDomainJson.comment;
+    var _enable_ssl = newDomainJson.enable_ssl;
+    delete newDomainJson.enable_ssl;
+    var _ssl_conf_profile = newDomainJson.ssl_conf_profile || '';
+    delete newDomainJson.ssl_conf_profile;
+    var _ssl_cert_id = newDomainJson.ssl_cert_id || '';
+    delete newDomainJson.ssl_cert_id;
+    var _ssl_protocols = newDomainJson.ssl_protocols || '';
+    delete newDomainJson.ssl_protocols;
+    var _ssl_ciphers = newDomainJson.ssl_ciphers || '';
+    delete newDomainJson.ssl_ciphers;
+    var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers;
+    delete newDomainJson.ssl_prefer_server_ciphers;
+    var _btt_key = newDomainJson.btt_key || '';
+    delete newDomainJson.btt_key;
+
+    var newDomainJson2 = {
+      updated_by: request.auth.credentials.email,
+      proxy_config: newDomainJson,
+      comment: _comment,
+      enable_ssl: _enable_ssl,
+      ssl_conf_profile: _ssl_conf_profile,
+      ssl_cert_id: _ssl_cert_id,
+      ssl_protocols: _ssl_protocols,
+      ssl_ciphers: _ssl_ciphers,
+      ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers,
+      btt_key: _btt_key
+    };
+    logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag + ', request body: ' +
+      JSON.stringify(newDomainJson2));
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
       method: 'PUT',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
-      body: JSON.stringify({
-       updated_by: request.auth.credentials.email,
-       proxy_config: newDomainJson 
-      })
+      headers: authHeader,
+      body: JSON.stringify(newDomainJson2)
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domain_id));
@@ -312,7 +408,6 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest(response_json.message));
       }
       var response = response_json;
-
       var action = '';
       if (request.query.options && request.query.options === 'publish') {
         action = 'publish';
@@ -321,25 +416,18 @@ exports.updateDomainConfig = function(request, reply) {
       }
       if (action !== '') {
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
+          account_id       : newDomainJson.account_id,
           activity_type    : action,
           activity_target  : 'domain',
-          target_id        : result.domain_id,
+          target_id        : result._id,
           target_name      : result.domain_name,
           target_object    : newDomainJson,
           operation_status : 'success'
-        });
+        }, request);
       }
-
       renderJSON(request, reply, err, response);
     });
   });
-
 };
 
 exports.deleteDomainConfig = function(request, reply) {
@@ -350,20 +438,17 @@ exports.deleteDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result) {
+    if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
-    if (!checkDomainAccessPermission(request,result)) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
+
+    // TODO: add deleted_at and deleted_by fields
 
     logger.info('Calling CDS to delete domain ID: ' + domain_id);
 
     cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id,
       method: 'DELETE',
-      headers: {
-        Authorization: 'Bearer ' + config.get('cds_api_token')
-      },
+      headers: authHeader,
     }, function (err, res, body) {
       if (err) {
         return reply(boom.badImplementation('Failed to send a CDS command to delete domain ID ' + domain_id));
@@ -374,22 +459,16 @@ exports.deleteDomainConfig = function(request, reply) {
       }
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : result.proxy_config.account_id,
         activity_type    : 'delete',
         activity_target  : 'domain',
-        target_id        : result.domain_id,
+        target_id        : result._id,
         target_name      : result.domain_name,
         target_object    : result.proxy_config,
         operation_status : 'success'
-      });
+      }, request);
       var response = response_json;
       renderJSON(request, reply, err, response);
     });
   });
-
 };

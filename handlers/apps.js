@@ -24,23 +24,16 @@ var boom               = require('boom');
 var config             = require('config');
 var cds_request        = require('request');
 var renderJSON         = require('../lib/renderJSON');
-var AuditLogger        = require('revsw-audit');
+var AuditLogger        = require('../lib/audit');
 var publicRecordFields = require('../lib/publicRecordFields');
 var mongoConnection    = require('../lib/mongoConnections');
 var App                = require('../models/App');
 var apps               = new App(mongoose, mongoConnection.getConnectionPortal());
-var logger = require('revsw-logger')(config.log_config);
-
-function permissionAllowed(request, app) {
-  var result = true;
-  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(app.account_id) === -1) {
-    result = false;
-  }
-  return result;
-}
+var logger             = require('revsw-logger')(config.log_config);
+var utils              = require('../lib/utilities.js');
+var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
 exports.getApps = function(request, reply) {
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
@@ -55,7 +48,7 @@ exports.getApps = function(request, reply) {
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
-          return permissionAllowed(request, app);
+          return utils.checkUserAccessPermissionToApps(request, app);
         });
       }
       renderJSON(request, reply, err, listOfApps);
@@ -67,7 +60,6 @@ exports.getApps = function(request, reply) {
 
 exports.getApp = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   var version = (request.query.version) ? '?version=' + request.query.version : '';
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
@@ -76,7 +68,7 @@ exports.getApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get details for app ID ' + app_id);
@@ -85,6 +77,7 @@ exports.getApp = function(request, reply) {
         return reply(boom.badImplementation('Failed to get the mobile app from the CDS for App ID ' + app_id));
       }
       var response_json = JSON.parse(body);
+      // TODO: Need to move the CDS status verification code to a separate function (instead of repeating it in many handlers)
       if (res.statusCode === 400) {
         return reply(boom.badRequest(response_json.message));
       } else if (res.statusCode === 500) {
@@ -101,7 +94,6 @@ exports.getApp = function(request, reply) {
 
 exports.getAppVersions = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -109,7 +101,7 @@ exports.getAppVersions = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get a list of configuration versions for app ID ' + app_id);
@@ -133,7 +125,6 @@ exports.getAppVersions = function(request, reply) {
 
 exports.getAppConfigStatus = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -141,7 +132,7 @@ exports.getAppConfigStatus = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get configuration status for app ID: ' + app_id);
@@ -165,10 +156,10 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (!permissionAllowed(request, newApp)) {
+  if (!utils.checkUserAccessPermissionToApps(request, newApp)) {
     return reply(boom.badRequest('Account ID not found'));
   }
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  // TODO: need to remove the check for app name uniqueness
   apps.get({app_name: newApp.app_name, app_platform: newApp.app_platform, deleted: {$ne: true}}, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app name ' + newApp.app_name));
@@ -177,7 +168,7 @@ exports.addApp = function(request, reply) {
       return reply(boom.badRequest('The app name and platform is already registered in the system'));
     }
 
-    newApp.created_by = request.auth.credentials.email;
+    newApp.created_by = utils.generateCreatedByField(request);
     logger.info('Calling CDS to create a new app: ' + JSON.stringify(newApp));
     cds_request({method: 'POST', url: config.get('cds_url') + '/v1/apps', body: JSON.stringify(newApp), headers: authHeader}, function (err, res, body) {
       if (err) {
@@ -191,19 +182,14 @@ exports.addApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         newApp.id = response_json.id;
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
-          account_id      : request.auth.credentials.companyId,
+          account_id      : newApp.account_id,
           activity_type   : 'add',
           activity_target : 'app',
           target_id       : response_json.id,
           target_name     : newApp.app_name,
           target_object   : newApp,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -215,7 +201,6 @@ exports.addApp = function(request, reply) {
 exports.updateApp = function(request, reply) {
   var app_id = request.params.app_id;
   var updatedApp = request.payload;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
   var action = (optionsFlag === '?options=publish') ? 'publish' : 'modify';
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
@@ -225,13 +210,13 @@ exports.updateApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (updatedApp.account_id && !permissionAllowed(request, updatedApp)) {
+    if (!utils.checkUserAccessPermissionToApps(request, updatedApp)) {
       return reply(boom.badRequest('Account ID not found'));
     }
-    updatedApp.updated_by =  request.auth.credentials.email;
+    updatedApp.updated_by =  utils.generateCreatedByField(request);
     logger.info('Calling CDS to update app ID ' + app_id + ' with new configuration: ' + JSON.stringify(updatedApp));
     cds_request({method: 'PUT', url: config.get('cds_url') + '/v1/apps/' + app_id + optionsFlag, body: JSON.stringify(updatedApp), headers: authHeader},
       function (err, res, body) {
@@ -246,19 +231,14 @@ exports.updateApp = function(request, reply) {
       } else if (res.statusCode === 200) {
         updatedApp.id = app_id;
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
-          account_id      : request.auth.credentials.companyId,
+          account_id      : existing_app.account_id,
           activity_type   : action,
           activity_target : 'app',
-          target_id       : response_json.id,
+          target_id       : app_id,
           target_name     : updatedApp.app_name,
           target_object   : updatedApp,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -269,7 +249,7 @@ exports.updateApp = function(request, reply) {
 
 exports.deleteApp = function(request, reply) {
   var app_id = request.params.app_id;
-  var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+  var account_id;
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
@@ -277,9 +257,13 @@ exports.deleteApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionAllowed(request, existing_app)) {
+    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
       return reply(boom.badRequest('App ID not found'));
     }
+    account_id = existing_app.account_id;
+
+    // TODO: add deleted_at and deleted_by fields
+
     logger.info('Calling CDS to delete app ID ' + app_id);
     cds_request({method: 'DELETE', url: config.get('cds_url') + '/v1/apps/' + app_id, headers: authHeader}, function (err, res, body) {
       if (err) {
@@ -292,20 +276,16 @@ exports.deleteApp = function(request, reply) {
         return reply(boom.badImplementation(response_json.message));
       } else if (res.statusCode === 200) {
         existing_app = publicRecordFields.handle(existing_app, 'apps');
+
         AuditLogger.store({
-          ip_address      : request.info.remoteAddress,
-          datetime        : Date.now(),
-          user_id         : request.auth.credentials.user_id,
-          user_name       : request.auth.credentials.email,
-          user_type       : 'user',
-          account_id      : request.auth.credentials.companyId,
+          account_id      : account_id,
           activity_type   : 'delete',
           activity_target : 'app',
-          target_id       : response_json.id,
+          target_id       : app_id,
           target_name     : existing_app.app_name,
           target_object   : existing_app,
           operation_status: 'success'
-        });
+        }, request);
         renderJSON(request, reply, err, response_json);
       } else {
         return reply(boom.create(res.statusCode, res.message));
@@ -317,7 +297,8 @@ exports.deleteApp = function(request, reply) {
 exports.getSDKReleasedVersions = function(request, reply) {
   var response = {
     iOS: config.get('available_sdk_release_versions.iOS'),
-    Android: config.get('available_sdk_release_versions.Android')
+    Android: config.get('available_sdk_release_versions.Android'),
+    Windows_Mobile: config.get('available_sdk_release_versions.Windows_Mobile')
   };
   renderJSON(request, reply, null, response);
 };

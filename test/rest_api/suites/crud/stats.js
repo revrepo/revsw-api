@@ -30,234 +30,250 @@ describe('CRUD check.', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var account;
-  var domainConfig;
-  var reseller = config.get('api.users.reseller');
+  // Defining set of users for which all below tests will be run
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        return API.helpers.accounts.createOne();
-      })
-      .then(function (newAccount) {
-        account = newAccount;
-        return API.helpers.domainConfigs.createOne(account.id);
-      })
-      .then(function (newDomainConfig) {
-        domainConfig = newDomainConfig;
-      })
-      .then(done)
-      .catch(done);
-  });
+  users.forEach(function (user) {
 
-  after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        return API.resources.domainConfigs.deleteOne(domainConfig.id);
-      })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
-  });
+    var account;
+    var domainConfig;
 
-  parallel('Stats resource,', function () {
+    describe('With user: ' + user.role, function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return domain-stat data when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
-
-    var getSpecCallback = function (queryData) {
-      return function (done) {
+      before(function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.stats
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .then(function (res) {
-                var metadata = res.body.metadata;
-                metadata.domain_name.should.be.equal(domainConfig.domain_name);
-                metadata.domain_id.should.be.equal(domainConfig.id);
-                done();
-              })
-              .catch(done);
+            return API.helpers.accounts.createOne();
           })
+          .then(function (newAccount) {
+            account = newAccount;
+            return API.helpers.domainConfigs.createOne(account.id);
+          })
+          .then(function (newDomainConfig) {
+            domainConfig = newDomainConfig;
+          })
+          .then(done)
           .catch(done);
-      };
-    };
-
-    StatsDDHelper
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
       });
 
-    //StatsDDHelper
-    //  .getCombinedQueryParams()
-    //  .forEach(function (queryParams) {
-    //    var specDescription = getSpecDescription(queryParams);
-    //    var specCallback = getSpecCallback(queryParams);
-    //    /** Running spec with a set of combined query params */
-    //    it(specDescription, specCallback);
-    //  });
-  });
-
-  parallel('GBT: Stats resource,', function () {
-
-    var getSpecDescription = function (queryData) {
-      return 'should return domain-stat data when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
-
-    var getSpecCallback = function (queryData) {
-      return function (done) {
+      after(function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.stats
-              .gbt()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .then(function (res) {
-                var metadata = res.body.metadata;
-                metadata.domain_name.should.be.equal(domainConfig.domain_name);
-                metadata.domain_id.should.be.equal(domainConfig.id);
-                done();
-              })
-              .catch(done);
+            return API.resources.domainConfigs.deleteOne(domainConfig.id);
+          })
+          .then(function () {
+            return API.resources.accounts.deleteAllPrerequisites(done);
           })
           .catch(done);
-      };
-    };
-
-    StatsDDHelper.gbt
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
       });
-  });
 
-  parallel('Last Mile RTT: Stats resource,', function () {
+      parallel('Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return domain-stat data when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .lastMileRtt()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .then(function (res) {
-                var metadata = res.body.metadata;
-                metadata.domain_name.should.be.equal(domainConfig.domain_name);
-                metadata.domain_id.should.be.equal(domainConfig.id);
-                done();
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name);
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      };
-    };
+          };
+        };
 
-    StatsDDHelper.lastMileRtt
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+
+        //StatsDDHelper
+        //  .getCombinedQueryParams()
+        //  .forEach(function (queryParams) {
+        //    var specDescription = getSpecDescription(queryParams);
+        //    var specCallback = getSpecCallback(queryParams);
+        //    /** Running spec with a set of combined query params */
+        //    it(specDescription, specCallback);
+        //  });
       });
-  });
 
-  parallel('TOP: Stats resource,', function () {
+      parallel('GBT: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return domain-stat data when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .top()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .then(function (res) {
-                var metadata = res.body.metadata;
-                metadata.domain_name.should.be.equal(domainConfig.domain_name);
-                metadata.domain_id.should.be.equal(domainConfig.id);
-                done();
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .gbt()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name);
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      };
-    };
+          };
+        };
 
-    StatsDDHelper.top
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.gbt
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('TOP Objects: Stats resource,', function () {
+      parallel('Last Mile RTT: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return domain-stat data when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .topObjects()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .then(function (res) {
-                var metadata = res.body.metadata;
-                metadata.domain_name.should.be.equal(domainConfig.domain_name);
-                metadata.domain_id.should.be.equal(domainConfig.id);
-                done();
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .lastMileRtt()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name);
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      };
-    };
+          };
+        };
 
-    StatsDDHelper.topObjects
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.lastMileRtt
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
+
+      parallel('TOP: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .top()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name);
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.top
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+
+      parallel('TOP Objects: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .topObjects()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name);
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.topObjects
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+    });
   });
 });

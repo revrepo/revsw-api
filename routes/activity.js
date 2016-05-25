@@ -22,7 +22,7 @@
 
 var Joi = require('joi');
 
-var auditInfo = require('../handlers/auditInfo');
+var auditInfo = require('../handlers/activity');
 
 var routeModels = require('../lib/routeModels');
 
@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/activity',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: auditInfo.getDetailedAuditInfo,
       description: 'Detailed audit reports',
@@ -44,11 +44,10 @@ module.exports = [
       },
       validate: {
         query: {
-          user_id: Joi.string().description('User ID'),
-          domain_id: Joi.string().description('Domain ID'),
-          company_id: Joi.string().description('Company ID'),
-          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          user_id: Joi.objectId().description('User ID'),
+          account_id: Joi.objectId().description('Account ID'),
+          from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
+          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
         }
       }
     }
@@ -62,7 +61,7 @@ module.exports = [
       },
       handler: auditInfo.getSummaryAuditInfo,
       description: 'Summary audit reports',
-      tags: ['api'],
+      tags: [],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -70,11 +69,10 @@ module.exports = [
       },
       validate: {
         query: {
-          user_id: Joi.string().description('User ID'),
-          domain_id: Joi.string().description('Domain ID'),
-          company_id: Joi.string().description('Company ID'),
-          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          user_id: Joi.objectId().description('User ID'),
+          account_id: Joi.objectId().description('Account ID'),
+          from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
+          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
         }
       }
     }

@@ -23,17 +23,21 @@
 var boom        = require('boom');
 var mongoose    = require('mongoose');
 var async       = require('async');
-var nodemailer  = require('nodemailer');
 var config      = require('config');
 var crypto      = require('crypto');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
+var logger = require('revsw-logger')(config.log_config);
 
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
+var utils           = require('../lib/utilities.js');
+var mail = require('../lib/mail');
 
+var Account = require('../models/Account');
 var User = require('../models/User');
 
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 //
@@ -42,17 +46,8 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 exports.forgotPassword = function(request, reply) {
 
   var email = request.payload.email;
-  users.get({
-    email: email
-  }, function(error, user) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
-    }
-    if (user) {
-      if (  user.role && user.role === 'revadmin' ) {
-        return reply(boom.badRequest('No account with that email address exists'));
-      }
 
+  function passwordChange(error,user){
       async.waterfall([
         function(done) {
           crypto.randomBytes(20, function(err, buf) {
@@ -64,40 +59,19 @@ exports.forgotPassword = function(request, reply) {
         function(token, done) {
           delete user.password;
           user.resetPasswordToken   = token;
-          user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan'); // 1 hour
+          user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan');
 
           users.update(user, function(error, result) {
             if (error) {
-              return reply(boom.badImplementation('Failed to retrieve user details'));
+              return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user.user_id));
             }
-
-            result = publicRecordFields.handle(result, 'users');
-
-            AuditLogger.store({
-              ip_address        : request.info.remoteAddress,
-              datetime         : Date.now(),
-              user_id          : result.id,
-              user_name        : result.email,
-              user_type        : 'user',
-              account_id       : result.companyId,
-//              domain_id        : result.domain,
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : result.user_id,
-              target_name      : result.email,
-              target_object    : result,
-              operation_status : 'success'
-            });
-
             done(error, token, user);
           });
         },
 
         function(token, user, done) {
-          var transport = nodemailer.createTransport();
           var mailOptions = {
             to: user.email,
-            from: config.get('password_reset_from_email'),
             subject: config.get('password_reset_email_subject'),
             text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
@@ -106,16 +80,66 @@ exports.forgotPassword = function(request, reply) {
             'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
             'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
           };
-          transport.sendMail(mailOptions, function(err) {
-            renderJSON(request, reply, error, { message: 'An e-mail has been sent to ' + user.email + ' with further instructions' } );
+          logger.info('Sending password reset email to user ' + user.email);
+          mail.sendMail(mailOptions, function(err) {
+            if (err) {
+              return reply(boom.badImplementation('Failed to send password reset email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
+                ', error message: ' + err));
+            } else {
+              renderJSON(request, reply, error, { message: 'An e-mail has been sent to ' + user.email + ' with further instructions' } );
+            }
           });
         }
 
       ], function(err) {
         if (err) {
-          return reply(boom.badImplementation('Failed to execute password reset procedure'));
+          return reply(boom.badImplementation('Failed to execute password reset procedure for email ' + email));
         }
       });
+  }
+
+  // Start work-flow
+  users.getValidation({
+    email: email
+  }, function(error, user) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve user details for email ' + email));
+    }
+    if (user) {
+      if (  user.role && user.role === 'revadmin' ) {
+        return reply(boom.badRequest('No account with that email address exists'));
+      }
+
+      if (user.self_registered) {
+          logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          // NOTE: User not verify
+          if (user.validation === undefined  || user.validation.verified===false) {
+              logger.error('forgotPassword::authenticate: User with ' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not verify');
+              return reply(boom.create(418, 'Your registration not finished'));
+          }
+          accounts.get({
+            _id: user.companyId
+          }, function(error, account) {
+            if (error) {
+              logger.error('forgotPassword::authenticate: Failed to find an account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email);
+              return reply(boom.badImplementation('Authenticate::authenticate: Failed to find an account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email));
+            }
+            // NOTE: Not finished registration.
+            if (account.billing_id === null || account.billing_id === '') {
+              logger.error('forgotPassword::authenticate: Account associated with user' +
+                ' User ID: ' + user.user_id + ' Email: ' + user.email + ' not have billing ID');
+
+              return reply(boom.create(418, 'Your registration not finished'));
+            }
+            passwordChange(error,user);
+          });
+        }else{
+            passwordChange(error,user);
+
+        }
 
     } else {
       return reply(boom.badRequest('No account with that email address exists'));
@@ -132,7 +156,7 @@ exports.checkPasswordResetToken = function(request, reply) {
     resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() }
   }, function(error, user) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve token/user details'));
+      return reply(boom.badImplementation('Failed to retrieve token/user details for token ' + token));
     }
     if (!user) {
       return reply(boom.badRequest('The password reset token is invalid or has expired'));
@@ -154,31 +178,32 @@ exports.resetPassword = function(request, reply) {
         resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() }
       }, function(error, user) {
         if (error) {
-          return reply(boom.badImplementation('Failed to retrieve token/user details'));
+          return reply(boom.badImplementation('Failed to retrieve token/user details for token ' + token));
         }
         if (!user) {
           return reply(boom.badRequest('The password reset token is invalid or has expired'));
         }
+
+        // TODO: need to move the password encyption function from user.update to a higher level
         user.password             = newPassword;
         user.resetPasswordToken   = undefined;
         user.resetPasswordExpires = undefined;
 
         users.update( user, function(error, result) {
           if (error) {
-            return reply(boom.badImplementation('Failed to update user details with new password'));
+            return reply(boom.badImplementation('Failed to update user ' + user.email + ' with new password'));
           }
 
           result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
-            ip_address        : request.info.remoteAddress,
+            ip_address       : utils.getAPIUserRealIP(request),
             datetime         : Date.now(),
             user_id          : user.user_id,
             user_name        : user.email,
             user_type        : 'user',
-            account_id       : result.companyId,
-//            domain_id        : result.domain,
-            activity_type    : 'modify',
+            account_id       : result.companyId[0],
+            activity_type    : 'resetpassword',
             activity_target  : 'user',
             target_id        : result.user_id,
             target_name      : result.email,
@@ -192,18 +217,22 @@ exports.resetPassword = function(request, reply) {
     },
 
     function(user, done) {
-      var transport = nodemailer.createTransport();
       var mailOptions = {
         to: user.email,
-        from: config.get('password_reset_from_email'),
         subject: config.get('password_reset_confirmation_email_subject'),
         text: 'Hello,\n\n' +
         'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n\n' +
         'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
         'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
       };
-      transport.sendMail(mailOptions, function(error) {
-        renderJSON(request, reply, error, { message: 'Your password has been changed' } );
+      logger.info('Sending password reset/change confirmation email to user ' + user.email);
+      mail.sendMail(mailOptions, function(err) {
+        if (err) {
+          return reply(boom.badImplementation('Failed to send password reset/change confirmation email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
+            ', error message: ' + err));
+        } else {
+         renderJSON(request, reply, err, { message: 'Your password has been changed' } );
+        }
       });
     }
   ], function(err) {

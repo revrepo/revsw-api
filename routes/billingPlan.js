@@ -36,15 +36,15 @@ module.exports = [
       handler: billingPlanHandler.list,
       description: 'Get a list of Billing Plans registered in system',
       notes: 'Use this function to get a list of Billing Plans registered in system',
-      tags: ['api', 'web'],
+//      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: {
+/*      response: {
         schema: routeValidation.listOfBillingPlanModels
-      }
+      }*/
     }
   },
 
@@ -52,13 +52,15 @@ module.exports = [
     method: 'GET',
     path: '/v1/billing_plans/{id}',
     config: {
-      auth: {
-        scope: ['admin_rw']
-      },
+      auth: false,
+      //TODO: check bisness logick
+      // {
+      //   scope: ['admin_rw']
+      // },
       handler: billingPlanHandler.get,
       description: 'Get Billing Plan details',
       notes: 'Use this function to get details of an Billing plan',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -69,9 +71,34 @@ module.exports = [
           id: Joi.objectId().required().description('ID of the Billing plan')
         }
       },
-      response: {
+/*      response: {
         schema: routeValidation.BillingPlanModel
-      }
+      }*/
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/billing_plans/{id}/hosted_page',
+    config: {
+      auth: false,
+      handler: billingPlanHandler.getHostedPage,
+      description: 'Get Billing Plan Hosted Signup Page',
+      notes: 'Use this function to get a signup page for a Billing plan',
+//      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          id: Joi.objectId().required().description('ID of the Billing plan')
+        }
+      },
+      /*      response: {
+       schema: routeValidation.BillingPlanModel
+       }*/
     }
   },
 
@@ -80,12 +107,12 @@ module.exports = [
     path: '/v1/billing_plans',
     config: {
       auth: {
-        scope: ['admin_rw']
+        scope: ['admin_rw', 'revadmin_rw', 'revadmin']
       },
-      handler: billingPlanHandler.create,
+      handler: billingPlanHandler.createBillingPlan,
       description: 'Create a new Billing plan in the system',
       notes: 'Use the call to create a new Billing plan in system.',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -107,10 +134,10 @@ module.exports = [
       auth: {
         scope: ['admin_rw']
       },
-      handler: billingPlanHandler.update,
+      handler: billingPlanHandler.updateBillingPlan,
       description: 'Update a Billing plan',
       notes: 'Use this function to update Billing plan details',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -118,7 +145,7 @@ module.exports = [
       },
       validate: {
         options: {
-          stripUnknown: true
+          stripUnknown: false
         },
         params: {
           id: Joi.string().required().description('ID of the Billing plan to be updated')
@@ -141,7 +168,7 @@ module.exports = [
       handler: billingPlanHandler.delete,
       description: 'Remove a billing plan',
       notes: 'This function should be used by a admin to delete an Billing plan',
-      tags: ['api'],
+//      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

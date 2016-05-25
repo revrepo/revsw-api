@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/apps',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: app.getApps,
       description: 'Get a list of currently registered mobile applications',
@@ -52,7 +52,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: app.getApp,
       description: 'Get current configuration of a mobile application',
@@ -62,7 +62,7 @@ module.exports = [
           app_id: Joi.objectId().required().description('Unique application ID')
         },
         query: {
-          version: Joi.number().integer().description('Configuration version number (request 0 for latest)')
+          version: Joi.number().integer().min(0).max(10000).description('Configuration version number (request 0 for latest)')
         },
       },
       plugins: {
@@ -80,7 +80,7 @@ module.exports = [
     path: '/v1/apps/{app_id}/versions',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: app.getAppVersions,
       description: 'Get a list of previous configurations of a mobile application',
@@ -105,7 +105,7 @@ module.exports = [
     path: '/v1/apps/{app_id}/config_status',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: app.getAppConfigStatus,
       description: 'Get current configuration publishing status of a mobile application',
@@ -130,7 +130,7 @@ module.exports = [
     path: '/v1/apps',
     config: {
       auth: {
-        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: app.addApp,
       description: 'Register a new mobile application configuration',
@@ -139,7 +139,8 @@ module.exports = [
         payload: {
           account_id: Joi.objectId().required().description('Account ID the new app should be associated with'),
           app_name: Joi.string().max(50).required().description('Name of the mobile application'),
-          app_platform: Joi.string().required().valid('iOS', 'Android').description('Name of the mobile application platform')
+          app_platform: Joi.string().required().valid('iOS', 'Android', 'Windows_Mobile').description('Name of the mobile application platform'),
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       plugins: {
@@ -157,7 +158,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: app.updateApp,
       description: 'Update the current configuration of a mobile application',
@@ -172,7 +173,8 @@ module.exports = [
         payload: {
           app_name: Joi.string().max(50).description('Name of the mobile application'),
           account_id: Joi.objectId().description('Account ID'),
-          configs: Joi.array().required().items(routeModels.AppConfigModel)
+          configs: Joi.array().required().items(routeModels.AppConfigModel),
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       plugins: {
@@ -190,7 +192,7 @@ module.exports = [
     path: '/v1/apps/{app_id}',
     config: {
       auth: {
-        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: app.deleteApp,
       description: 'Delete a mobile application configuration',
@@ -216,7 +218,7 @@ module.exports = [
     path: '/v1/apps/sdk_releases',
     config: {
       auth: {
-        scope: ['user', 'admin', 'reseller', 'revadmin']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: app.getSDKReleasedVersions,
       description: 'Get a list of released SDK versions for supported mobile platforms',

@@ -49,20 +49,7 @@ exports.getFBTAverage = function( request, reply ) {
         return reply( boom.badRequest( span.error ) );
       }
 
-      var domain_name = result.domain_name,
-        delta = span.end - span.start,
-        interval;
-
-      if ( delta <= 3 * 3600000 ) {
-        interval = 5 * 60000; // 5 minutes
-      } else if ( delta <= 2 * 24 * 3600000 ) {
-        interval = 30 * 60000; // 30 minutes
-      } else if ( delta <= 8 * 24 * 3600000 ) {
-        interval = 3 * 3600000; // 3 hours
-      } else {
-        interval = 12 * 3600000; // 12 hours
-      }
-
+      var domain_name = result.domain_name;
       var requestBody = {
         size: 0,
         query: {
@@ -90,13 +77,13 @@ exports.getFBTAverage = function( request, reply ) {
           results: {
             date_histogram: {
               field: '@timestamp',
-              interval: ( '' + interval ),
+              interval: ( '' + span.interval ),
               min_doc_count: 0,
               extended_bounds : {
                 min: span.start,
                 max: ( span.end - 1 )
               },
-              offset: ( '' + ( span.end % interval ) )
+              offset: ( '' + ( span.end % span.interval ) )
             },
             aggs: {
               avg_fbt: {
@@ -117,7 +104,7 @@ exports.getFBTAverage = function( request, reply ) {
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
           ignoreUnavailable: true,
-          timeout: 120000,
+          timeout: config.get('elasticsearch_timeout_ms'),
           body: requestBody
         } )
         .then( function( body ) {
@@ -139,7 +126,7 @@ exports.getFBTAverage = function( request, reply ) {
               end_timestamp: span.end,
               end_datetime: new Date( span.end ),
               total_hits: body.hits.total,
-              interval_sec: interval / 1000,
+              interval_sec: span.interval / 1000,
               data_points_count: body.aggregations.results.buckets.length
             },
             data: dataArray
@@ -147,10 +134,10 @@ exports.getFBTAverage = function( request, reply ) {
           renderJSON( request, reply, error, response );
         }, function( error ) {
           logger.error(error);
-          return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+          return reply( boom.badImplementation( 'Failed to retrieve data from ES for domain ' + domain_name ) );
         } );
     } else {
-      return reply( boom.badRequest( 'Domain not found' ) );
+      return reply( boom.badRequest( 'Domain ID not found' ) );
     }
   } );
 };
@@ -223,7 +210,7 @@ exports.getFBTDistribution = function( request, reply ) {
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
           ignoreUnavailable: true,
-          timeout: 120000,
+          timeout: config.get('elasticsearch_timeout_ms'),
           body: requestBody
         } )
         .then( function( body ) {
@@ -253,10 +240,10 @@ exports.getFBTDistribution = function( request, reply ) {
           renderJSON( request, reply, error, response );
         }, function( error ) {
           logger.error(error);
-          return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
+          return reply( boom.badImplementation( 'Failed to retrieve data from ES data for domain ' + domain_name ) );
         } );
     } else {
-      return reply( boom.badRequest( 'Domain not found' ) );
+      return reply( boom.badRequest( 'Domain ID not found' ) );
     }
   } );
 };
@@ -280,25 +267,25 @@ exports.getFBTHeatmap = function(request, reply) {
       }
 
       var requestBody = {
-        'query': {
+        query: {
           filtered: {
             filter: {
-              'bool': {
-                'must': [{
-                  'term': {
-                    'domain': domain_name
+              bool: {
+                must: [{
+                  term: {
+                    domain: domain_name
                   }
                 }, {
-                  'range': {
-                    'FBT_mu': {
-                      'gte': 0
+                  range: {
+                    FBT_mu: {
+                      gte: 0
                     }
                   }
                 }, {
-                  'range': {
+                  range: {
                     '@timestamp': {
-                      'gte': span.start,
-                      'lte': span.end
+                      gte: span.start,
+                      lte: span.end
                     }
                   }
                 }]
@@ -306,51 +293,48 @@ exports.getFBTHeatmap = function(request, reply) {
             }
           }
         },
-        'size': 0,
-        'aggs': {
-          'results': {
-            'terms': {
-              'field': 'geoip.country_code2',
-              'size': request.query.count || 30
+        size: 0,
+        aggs: {
+          countries: {
+            terms: {
+              field: 'geoip.country_code2',
+              size: request.query.count || 30
             },
-            'aggs': {
-              'fbt_avg': {
-                'avg': {
-                  'field': 'FBT_mu'
+            aggs: {
+              fbt_avg: { avg: { field: 'FBT_mu' } },
+              fbt_min: { min: { field: 'FBT_mu' } },
+              fbt_max: { max: { field: 'FBT_mu' } },
+              regions: {
+                terms: {
+                  field: 'geoip.region_name',
+                  size: 0
+                },
+                aggs: {
+                  fbt_avg: { avg: { field: 'FBT_mu' } },
+                  fbt_min: { min: { field: 'FBT_mu' } },
+                  fbt_max: { max: { field: 'FBT_mu' } }
                 }
               },
-              'fbt_min': {
-                'min': {
-                  'field': 'FBT_mu'
-                }
-              },
-              'fbt_max': {
-                'max': {
-                  'field': 'FBT_mu'
+              missing_regions: {
+                missing: {
+                  field: 'geoip.region_name',
+                },
+                aggs: {
+                  fbt_avg: { avg: { field: 'FBT_mu' } },
+                  fbt_min: { min: { field: 'FBT_mu' } },
+                  fbt_max: { max: { field: 'FBT_mu' } }
                 }
               }
             }
           },
-          'missing_field': {
-            'missing': {
-              'field': 'geoip.country_code2',
+          missing_countries: {
+            missing: {
+              field: 'geoip.country_code2',
             },
-            'aggs': {
-              'fbt_avg': {
-                'avg': {
-                  'field': 'FBT_mu'
-                }
-              },
-              'fbt_min': {
-                'min': {
-                  'field': 'FBT_mu'
-                }
-              },
-              'fbt_max': {
-                'max': {
-                  'field': 'FBT_mu'
-                }
-              }
+            aggs: {
+              fbt_avg: { avg: { field: 'FBT_mu' } },
+              fbt_min: { min: { field: 'FBT_mu' } },
+              fbt_max: { max: { field: 'FBT_mu' } }
             }
           }
         }
@@ -360,32 +344,55 @@ exports.getFBTHeatmap = function(request, reply) {
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
         }
-        var dataArray = [];
-        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
-          var doc = body.aggregations.results.buckets[i];
-          dataArray.push({
-            key: doc.key,
-            count: doc.doc_count,
-            fbt_avg_ms: Math.round( doc.fbt_avg.value / 1000 ),
-            fbt_min_ms: Math.round( doc.fbt_min.value / 1000 ),
-            fbt_max_ms: Math.round( doc.fbt_max.value / 1000 )
-          });
-        }
-        if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
-          doc = body.aggregations.missing_field;
+        var dataArray = body.aggregations.countries.buckets.map( function( country ) {
+          var item = {
+            key: country.key,
+            count: country.doc_count,
+            fbt_avg_ms: Math.round( country.fbt_avg.value / 1000 ),
+            fbt_min_ms: Math.round( country.fbt_min.value / 1000 ),
+            fbt_max_ms: Math.round( country.fbt_max.value / 1000 ),
+            regions: []
+          };
+          if ( country.regions && country.regions.buckets.length ) {
+            item.regions = country.regions.buckets.map( function( region ) {
+              return {
+                key: region.key,
+                count: region.doc_count,
+                fbt_avg_ms: Math.round( region.fbt_avg.value / 1000 ),
+                fbt_min_ms: Math.round( region.fbt_min.value / 1000 ),
+                fbt_max_ms: Math.round( region.fbt_max.value / 1000 )
+              };
+            });
+          }
+          if ( country.missing_regions && country.missing_regions.doc_count ) {
+            var region = country.missing_regions;
+            item.regions.push({
+              key: '--',
+              count: region.doc_count,
+              fbt_avg_ms: Math.round( region.fbt_avg.value / 1000 ),
+              fbt_min_ms: Math.round( region.fbt_min.value / 1000 ),
+              fbt_max_ms: Math.round( region.fbt_max.value / 1000 )
+            });
+          }
+          return item;
+        });
+
+        if ( body.aggregations.missing_countries && body.aggregations.missing_countries.doc_count ) {
+          var country = body.aggregations.missing_countries;
           dataArray.push({
             key: '--',
-            count: doc.doc_count,
-            fbt_avg_ms: Math.round( doc.fbt_avg.value / 1000 ),
-            fbt_min_ms: Math.round( doc.fbt_min.value / 1000 ),
-            fbt_max_ms: Math.round( doc.fbt_max.value / 1000 )
+            count: country.doc_count,
+            fbt_avg_ms: Math.round( country.fbt_avg.value / 1000 ),
+            fbt_min_ms: Math.round( country.fbt_min.value / 1000 ),
+            fbt_max_ms: Math.round( country.fbt_max.value / 1000 ),
+            regions: []
           });
         }
 
@@ -398,17 +405,17 @@ exports.getFBTHeatmap = function(request, reply) {
             end_timestamp: span.end,
             end_datetime: new Date(span.end),
             total_hits: body.hits.total,
-            data_points_count: body.aggregations.results.buckets.length
+            data_points_count: body.aggregations.countries.buckets.length
           },
           data: dataArray
         };
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domain_name));
       });
     } else {
-      return reply(boom.badRequest('Domain not found'));
+      return reply(boom.badRequest('Domain ID not found'));
     }
   });
 };

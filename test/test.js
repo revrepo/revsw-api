@@ -312,6 +312,7 @@ describe('Rev API Admin User', function() {
     'firstname': 'API QA User',
     'lastname': 'With Admin Perm',
     'email': 'deleteme111@revsw.com',
+    'comment': '',
     'companyId': [
       '55b6ff6a7957012304a49d04'
     ],
@@ -334,6 +335,7 @@ describe('Rev API Admin User', function() {
   var updatedUserJson = {
     'firstname': 'Updated API QA User',
     'lastname': 'Updated With Admin Perm',
+    'comment': '',
     'companyId': [
       '55b6ff6a7957012304a49d04'
     ],
@@ -353,19 +355,18 @@ describe('Rev API Admin User', function() {
     }
   };
 
-  it('should be denied access to /v1/accounts functions', function(done) {
+  it('should get from /v1/accounts just one account', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
-      .expect(403)
+      .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
-        res.statusCode.should.be.equal(403);
+        res.statusCode.should.be.equal(200);
         var response_json = JSON.parse(res.text);
-        response_json.error.should.be.equal('Forbidden');
-        response_json.message.should.startWith('Insufficient scope');
+        response_json.length.should.be.equal(1);
         done();
       });
   });
@@ -442,7 +443,7 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(400);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('User not found');
+        response_json.message.should.be.equal('User ID not found');
         done();
       });
   });
@@ -469,6 +470,7 @@ describe('Rev API Admin User', function() {
     newUserJson.email = testUser;
     newUserJson.companyId = myCompanyId;
     newUserJson.domain = myDomains;
+    // console.log('newUserJson = ', newUserJson);
     request(testAPIUrl)
       .post('/v1/users')
       .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
@@ -497,6 +499,7 @@ describe('Rev API Admin User', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
+        // console.log('response_json = ', response_json);
         var last_obj      = response_json.data[0];
         last_obj.target_id.should.be.equal(testUserId);
         last_obj.activity_type.should.be.equal('add');
@@ -536,6 +539,8 @@ describe('Rev API Admin User', function() {
         var verifyUserJson = response_json;
         delete verifyUserJson.created_at;
         delete verifyUserJson.updated_at;
+        delete verifyUserJson.last_login_at;
+        delete verifyUserJson.last_login_from;
         delete verifyUserJson.user_id;
         delete newUserJson.password;
         verifyUserJson.should.be.eql(newUserJson);
@@ -721,6 +726,8 @@ describe('Rev API Admin User', function() {
         var verifyUserJson = response_json;
         delete verifyUserJson.created_at;
         delete verifyUserJson.updated_at;
+        delete verifyUserJson.last_login_at;
+        delete verifyUserJson.last_login_from;
         delete verifyUserJson.user_id;
         delete newUserJson.password;
         for (var attrname in newUserJson) {
@@ -802,6 +809,8 @@ describe('Rev API Admin User', function() {
         var verifyUserJson = response_json;
         delete verifyUserJson.created_at;
         delete verifyUserJson.updated_at;
+        delete verifyUserJson.last_login_at;
+        delete verifyUserJson.last_login_from;
         delete verifyUserJson.user_id;
         delete verifyUserJson.email;
         delete updatedUserJson.password;

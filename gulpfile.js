@@ -68,6 +68,7 @@ gulp.task('watch', ['serve'], function() {
     './models/**/*.js',
     './routes/**/*.js',
     './handlers/**/*.js',
+    './services/**/*.js',
     './config/**/*.json'
   ], [], [
     'reload',
@@ -82,7 +83,11 @@ gulp.task('reload', ['lint'], function (cb) {
 gulp.task('lint', [], function (cb) {
   return gulp.src([
     './bin/**/*.js',
-    './lib/**/*.js'
+    './lib/**/*.js',
+    './handlers/**/*.js',
+    './services/**/*.js',
+    './models/**/*.js',
+    './routes/**/*.js',
   ])
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));

@@ -33,7 +33,7 @@ module.exports = [
       handler     : handler.signup,
       auth        : false,
       description : 'An internal portal call for user signup',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
@@ -47,15 +47,35 @@ module.exports = [
       }
     }
   },
-
+  {
+    method : 'POST',
+    path   : '/v1/signup2',
+    config : {
+      handler     : handler.signup2,
+      auth        : false,
+      description : 'An internal portal call for user signup (short)',
+//      tags        : ['api', 'web'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        payload : signupValidation.signupShortPayload
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
   {
     method : 'GET',
     path   : '/v1/signup/resend/{email}',
     config : {
-      handler     : handler.resetToken,
+      handler     : handler.resendRegistrationEmail,
       auth        : false,
-      description : 'An internal portal call for resend user verification',
-      tags        : ['api', 'web'],
+      description : 'An internal portal call for resend user registration email',
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
@@ -63,7 +83,7 @@ module.exports = [
       },
       validate    : {
         params: {
-          tokemailen: Joi.string().email().required().description('Email to send verification')
+          email: Joi.string().email().required().description('Email to send registration email')
         }
       },
       response: {
@@ -79,7 +99,7 @@ module.exports = [
       handler     : handler.verify,
       auth        : false,
       description : 'An internal portal call for user verification',
-      tags        : ['api', 'web'],
+//      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
@@ -91,7 +111,7 @@ module.exports = [
         }
       },
       response: {
-        schema: routeModels.statusModel
+        schema: routeModels.contactInfoModel
       }
     }
   }

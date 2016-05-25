@@ -40,10 +40,14 @@ var _contains = function (list, element) {
 
 // #### Helper function getRequest
 //
-// Create an instance of super-test request which already has the reference
-// to the REST API HOST to point.
+//  Create an instance of super-test request which already has the reference
+//  to the REST API HOST to point.
+//  Also, the optional `data` argument may contain host and version data to override
+//  the config's parameters
 var getRequest = function () {
-  return request(getBaseUrl());
+  var host = config.get('api.host');
+  var apiVersion = config.get('api.version');
+  return request( (host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion) );
 };
 
 // #### Helper function setUserToRequest
@@ -84,12 +88,6 @@ var getPath = function (data, ids) {
   return path;
 };
 
-var getBaseUrl = function () {
-  var host = config.get('api.host');
-  var apiVersion = config.get('api.version');
-  return host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion;
-};
-
 var getResourceBuilder = function (nestedResource, path, parentIdKey) {
   var baseResource = nestedResource;
   var data = {
@@ -99,8 +97,10 @@ var getResourceBuilder = function (nestedResource, path, parentIdKey) {
   // Return resource build which depends on
   return function (id) {
     var resource = JSON.parse(JSON.stringify(baseResource));
-    // Path = parent-resource-path + nested-resource-path
-    resource.path = getPath(data, id) + resource.path;
+    if (!resource.isAbsolutePath) {
+      // Path = parent-resource-path + nested-resource-path
+      resource.path = getPath(data, id) + resource.path;
+    }
     return new BasicResource(resource);
   };
 };
@@ -200,7 +200,7 @@ var BasicResource = function (data) {
      *
      * Creates a new object form the requested type.
      *
-     * @param {object} the supertest-as-promised instance
+     * @param {object} object, the supertest-as-promised instance
      *
      * @param {object} query, will be transformed to a query string
      *
@@ -208,7 +208,7 @@ var BasicResource = function (data) {
      */
     _resource.createOne = function (object, query) {
       var location;
-      if (typeof object === 'string'){
+      if (typeof object === 'string') {
         location = getPath(data, object);
       }
       else {
@@ -231,7 +231,7 @@ var BasicResource = function (data) {
      * objects created). all of this is to make sure application under testing
      * does not become messed up after the testing.
      *
-     * @param {object} the supertest-as-promised instance
+     * @param {object} object, the supertest-as-promised instance
      *
      * @returns {object} the supertest-as-promised instance
      */
@@ -241,6 +241,40 @@ var BasicResource = function (data) {
           _cache.push(res.body.object_id);
           return res;
         });
+    };
+  }
+
+  if (_contains(data.methods, Methods.CREATE)) {
+    /**
+     * ### BasicResource.createManyIfNotExist()
+     *
+     * Sends the CREATE request to the API in order to create specified objects.
+     * All requests are run one after other using promises.
+     *
+     * NOTE: If item to create already exists. It won't propagate the error.
+     *
+     * @param {Array} items, list/array of the items of the objects to create
+     *
+     * @returns {Object} a promise instance
+     */
+    _resource.createManyIfNotExist = function (items) {
+      var me = this;
+      return Promise.each(items, function (item) { // One promise after other
+        return me
+          .createOne(item)
+          .then(function (res) {
+            if (res.body.statusCode && parseInt(res.body.statusCode) !== 200) {
+              console.log('      > Cannot create item:', item,
+                res.body.message);
+            }
+            else {
+              console.log('      > Item created: (' + res.body.message + ')');
+            }
+          })
+          .catch(function (err) {
+            console.log('      > Cannot create item:', item, err);
+          }); // We catch any errors as we don't want them to be propagated
+      });
     };
   }
 
@@ -300,13 +334,13 @@ var BasicResource = function (data) {
      */
     _resource.deleteMany = function (ids) {
       var me = this;
-      var deletions = [];
-      ids.forEach(function (id) {
-        deletions.push(me
+      return Promise.each(ids, function (id) { // One promise after other
+        return me
           .deleteOne(id)
-          .then());
+          .then(function () {
+            console.log('      > Item deleted:', id);
+          }); // We don't catch any errors as we want them to be propagated
       });
-      return Promise.all(deletions);
     };
   }
 
@@ -315,7 +349,7 @@ var BasicResource = function (data) {
      * ### BasicResource.deleteManyIfExist()
      *
      * Sends the DELETE request to the API in order to delete specified objects
-     * with given IDs. All request are run in parallel using promises.
+     * with given IDs. All requests are run run one after other using promises.
      *
      * NOTE: Items will be delete only if they exist. If not, it won't do
      * anything.
@@ -326,16 +360,25 @@ var BasicResource = function (data) {
      */
     _resource.deleteManyIfExist = function (ids) {
       var me = this;
-      var deletions = [];
-      ids.forEach(function (id) {
-        deletions.push(me
+      return Promise.each(ids, function (id) { // One promise after other
+        return me
           .deleteOne(id)
-          .then()
-          .catch(function (err) {
-            // console.log('Item does not exist. Do not do anything.');
-          }));
+          .then(function (res) {
+            var msg;
+            if (res.body.statusCode &&
+              (parseInt(res.body.statusCode) < 200 ||
+              parseInt(res.body.statusCode) >= 300)) {
+              msg = '      > Cannot delete item:';
+            }
+            else {
+              msg = '      > Item deleted:';
+            }
+            console.log(msg, id, '(' + res.body.message + ')');
+          })
+          .catch(function () {
+            console.log('Do not do anything else as item does not exist:', id);
+          }); // We catch any errors as we don't want them to be propagated
       });
-      return Promise.all(deletions);
     };
   }
 
@@ -346,16 +389,17 @@ var BasicResource = function (data) {
      * @returns {object} the supertest-as-promised instance
      */
     _resource.deleteAllPrerequisites = function (done) {
-      return done();/*
-      return this.deleteMany(_cache)
-        .then(function () {
-          // What to do in case a pre-requisite is deleted successfully?
-          return done();
-        })
-        .catch(function () {
-          // What to do in case a pre-requisite is NOT deleted successfully?
-          return done();
-        });*/
+      return done();
+      /*
+       return this.deleteMany(_cache)
+       .then(function () {
+       // What to do in case a pre-requisite is deleted successfully?
+       return done();
+       })
+       .catch(function () {
+       // What to do in case a pre-requisite is NOT deleted successfully?
+       return done();
+       });*/
     };
   }
 

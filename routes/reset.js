@@ -34,7 +34,7 @@ module.exports = [
       handler: password.checkPasswordResetToken,
       auth: false,
       description: 'An internal portal call to check the validity of a password reset token',
-      tags: ['api', 'web'],
+//      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -55,7 +55,7 @@ module.exports = [
       handler: password.resetPassword,
       auth: false,
       description: 'An internal portal call to reset password for a user',
-      tags: ['api', 'web'],
+//      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

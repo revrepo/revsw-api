@@ -22,35 +22,23 @@
 
 var boom        = require('boom');
 var mongoose    = require('mongoose');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var speakeasy   = require('speakeasy');
+var config      = require('config');
 
 var utils           = require('../lib/utilities.js');
+var dashboardService = require('../services/dashboards.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
+var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var privateUserProfileFields = [
-  'password',
-  'resetPasswordToken',
-  'resetPasswordExpires',
-  'two_factor_auth_secret_base32'
-];
-
-function removePrivateFields(obj) {
-  for (var i in privateUserProfileFields) {
-    if (obj[privateUserProfileFields[i]]) {
-      delete obj[privateUserProfileFields[i]];
-    }
-  }
-  return obj;
-}
-
 exports.getUsers = function getUsers(request, reply) {
+  // TODO: move the user list filtering from the user DB model to this function
   users.list(request, function(error, listOfUsers) {
     if (error || !listOfUsers) {
       return reply(boom.badImplementation('Failed to get a list of users'));
@@ -69,17 +57,22 @@ exports.getUsers = function getUsers(request, reply) {
 exports.createUser = function(request, reply) {
   var newUser = request.payload;
 
-  if (newUser.companyId) {
-    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId)) {
-      return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
-    }
-  } else {
-    newUser.companyId = request.auth.credentials.companyId;
+  if (newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
   }
 
-//  if (!newUser.domain) {
-//    newUser.domain = request.auth.credentials.domain;
-//  }
+  if (newUser.companyId) {
+    // TODO: need to move the permissions check to a separate function or use the existing function
+    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request))) {
+      return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
+    }
+  } else if (request.auth.credentials.companyId.length !== 0) {
+    newUser.companyId = request.auth.credentials.companyId;
+  } else {
+    return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
+  }
+
+  var account_id = newUser.companyId[0];
 
   // TODO: Add a check for domains
 
@@ -89,6 +82,7 @@ exports.createUser = function(request, reply) {
   }, function(error, result) {
     // got results so the email is in use
     if (result) {
+      // TODO fix the error message text
       return reply(boom.badRequest('The email address is already used by another user'));
 
     } else {
@@ -107,21 +101,22 @@ exports.createUser = function(request, reply) {
         result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
-          ip_address        : request.info.remoteAddress,
-          datetime         : Date.now(),
-          user_id          : request.auth.credentials.user_id,
-          user_name        : request.auth.credentials.email,
-          user_type        : 'user',
-          account_id       : request.auth.credentials.companyId,
-//          domain_id        : request.auth.credentials.domain,
+          account_id       : account_id,
           activity_type    : 'add',
           activity_target  : 'user',
           target_id        : result.user_id,
           target_name      : result.email,
           target_object    : result,
           operation_status : 'success'
+        }, request);
+        // NOTE: create default dashboard for new user
+        dashboardService.createUserDashboard(result.user_id, null, function(err) {
+          if (err) {
+            logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
+          } else {
+            logger.info('Signup:createUser:success add default dashboard for User with id ' + result.user_id);
+          }
         });
-
         renderJSON(request, reply, error, statusResponse);
       });
     }
@@ -135,23 +130,13 @@ exports.getUser = function(request, reply) {
     _id: user_id
   }, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for user ID ' + user_id));
     }
-    if (result) {
-      if (  request.auth.credentials.role !== 'reseller' && result.role === 'reseller' ) {
-        return reply(boom.badRequest('User not found'));
-      }
-
-      if (request.auth.credentials.role === 'revadmin' || (result.companyId && utils.areOverlappingArrays(result.companyId, request.auth.credentials.companyId))) {
-
-        result = publicRecordFields.handle(result, 'user');
-
-        renderJSON(request, reply, error, result);
-      } else {
-        return reply(boom.badRequest('User not found'));
-      }
+    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+      return reply(boom.badRequest('User ID not found'));
     } else {
-      return reply(boom.badRequest('User not found'));
+      result = publicRecordFields.handle(result, 'user');
+      renderJSON(request, reply, error, result);
     }
   });
 };
@@ -163,14 +148,14 @@ exports.getMyUser = function(request, reply) {
     _id: user_id
   }, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
     if (result) {
       result = publicRecordFields.handle(result, 'user');
 
       renderJSON(request, reply, error, result);
     } else {
-      return reply(boom.badRequest('User not found'));
+      return reply(boom.badRequest('User ID not found'));
     }
   });
 };
@@ -180,55 +165,54 @@ exports.updateUser = function(request, reply) {
   if (Object.keys(newUser).length === 0) {
     return reply(boom.badRequest('Please specify at least one updated attiribute'));
   }
+
+  if (newUser.role && newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+  }
+
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
-  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, request.auth.credentials.companyId))) {
+  // TODO use an existing access verification function instead of the code
+  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
     return reply(boom.badRequest('The new companyId is not found'));
   }
+
   users.get({
     _id: user_id
   }, function(error, result) {
-    if (result) {
-      if (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId)) {
-        return reply(boom.badRequest('User not found'));
-      }
-      if ( request.auth.credentials.role !== 'reseller' && result.role === 'reseller' ) {
-        return reply(boom.badRequest('User not found'));
-      }
-      users.update(newUser, function(error, result) {
-        if (!error) {
-          var statusResponse;
-          statusResponse = {
-            statusCode: 200,
-            message: 'Successfully updated the user'
-          };
-
-          result = publicRecordFields.handle(result, 'user');
-
-          AuditLogger.store({
-            ip_address        : request.info.remoteAddress,
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
-            activity_type    : 'modify',
-            activity_target  : 'user',
-            target_id        : result.user_id,
-            target_name      : result.email,
-            target_object    : result,
-            operation_status : 'success'
-          });
-
-          renderJSON(request, reply, error, statusResponse);
-        } else {
-          return reply(boom.badRequest('User not found'));
-        }
-      });
-    } else {
-      return reply(boom.badRequest('User not found'));
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
+    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+      return reply(boom.badRequest('User ID not found'));
+    }
+    var account_id = result.companyId[0];
+
+    users.update(newUser, function(error, result) {
+      if (!error) {
+        var statusResponse;
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully updated the user'
+        };
+
+        result = publicRecordFields.handle(result, 'user');
+
+        AuditLogger.store({
+          account_id       : account_id,
+          activity_type    : 'modify',
+          activity_target  : 'user',
+          target_id        : result.user_id,
+          target_name      : result.email,
+          target_object    : result,
+          operation_status : 'success'
+        }, request);
+
+        renderJSON(request, reply, error, statusResponse);
+      } else {
+        return reply(boom.badImplementation('Failed to update details for user with ID ' + user_id));
+      }
+    });
   });
 };
 
@@ -243,6 +227,7 @@ exports.updateUserPassword = function(request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      var account_id = user.companyId[0];
       var currPassHash = utils.getHash(currentPassword);
       if ( currPassHash !== user.password ) {
         return reply(boom.badRequest('The current user password is not correct'));
@@ -262,28 +247,22 @@ exports.updateUserPassword = function(request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address        : request.info.remoteAddress,
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
+            account_id       : account_id,
             activity_type    : 'modify',
             activity_target  : 'user',
             target_id        : result.user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
-          });
+          }, request);
 
           renderJSON(request, reply, error, statusResponse);
         } else {
-          return reply(boom.badImplementation('Failed to update user details'));
+          return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
         }
       });
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
   });
 };
@@ -298,50 +277,48 @@ exports.deleteUser = function(request, reply) {
   users.get({
     _id: user_id
   }, function(error, result) {
-    if (result) {
-
-      if (request.auth.credentials.role !== 'revadmin' && (!utils.areOverlappingArrays(request.auth.credentials.companyId, result.companyId))) {
-        return reply(boom.badRequest('User not found'));
-      }
-
-      result = publicRecordFields.handle(result, 'user');
-
-      var auditRecord = {
-            ip_address        : request.info.remoteAddress,
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
-            activity_type    : 'delete',
-            activity_target  : 'user',
-            target_id        : result.user_id,
-            target_name      : result.email,
-            target_object    : result,
-            operation_status : 'success'
-          };
-
-      users.remove({
-        _id: user_id
-      }, function(error, result) {
-        if (!error) {
-          var statusResponse;
-          statusResponse = {
-            statusCode: 200,
-            message: 'Successfully deleted the user'
-          };
-
-          AuditLogger.store(auditRecord);
-
-          renderJSON(request, reply, error, statusResponse);
-        } else {
-          return reply(boom.badRequest('User not found'));
-        }
-      });
-    } else {
-      return reply(boom.badRequest('User not found'));
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
+    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+      return reply(boom.badRequest('User ID not found'));
+    }
+    var account_id = result.companyId[0];
+
+    result = publicRecordFields.handle(result, 'user');
+
+    var auditRecord = {
+      ip_address       : utils.getAPIUserRealIP(request),
+      datetime         : Date.now(),
+      user_id          : request.auth.credentials.user_id,
+      user_name        : request.auth.credentials.email,
+      user_type        : 'user',
+      account_id       : account_id,
+      activity_type    : 'delete',
+      activity_target  : 'user',
+      target_id        : result.user_id,
+      target_name      : result.email,
+      target_object    : result,
+      operation_status : 'success'
+    };
+
+    users.remove({
+      _id: user_id
+    }, function(error, result) {
+      if (!error) {
+        var statusResponse;
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully deleted the user'
+        };
+
+        AuditLogger.store(auditRecord);
+
+        renderJSON(request, reply, error, statusResponse);
+      } else {
+        return reply(boom.badImplementation('Failed to delete user ID ' + user_id));
+      }
+    });
   });
 };
 
@@ -351,6 +328,7 @@ exports.init2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      var account_id = user.companyId[0];
       var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true});
       user.two_factor_auth_secret_base32 = secretKey.base32;
       delete user.password;
@@ -360,28 +338,22 @@ exports.init2fa = function (request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            ip_address        : request.info.remoteAddress,
-            datetime         : Date.now(),
-            user_id          : request.auth.credentials.user_id,
-            user_name        : request.auth.credentials.email,
-            user_type        : 'user',
-            account_id       : request.auth.credentials.companyId,
-//            domain_id        : request.auth.credentials.domain,
-            activity_type    : 'modify',
+            account_id       : account_id,
+            activity_type    : 'init2fa',
             activity_target  : 'user',
             target_id        : result.user_id,
             target_name      : result.email,
             target_object    : result,
             operation_status : 'success'
-          });
+          }, request);
 
           renderJSON(request, reply, error, secretKey);
         } else {
-          return reply(boom.badImplementation('Failed to update user details'));
+          return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
         }
       });
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
   });
 };
@@ -393,6 +365,7 @@ exports.enable2fa = function (request, reply) {
     _id: user_id
   }, function(error, user) {
     if (user) {
+      var account_id = user.companyId[0];
       if (user.two_factor_auth_secret_base32) {
         var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
         if (generatedOneTimePassword === oneTimePassword) {
@@ -408,24 +381,18 @@ exports.enable2fa = function (request, reply) {
               result = publicRecordFields.handle(result, 'user');
 
               AuditLogger.store({
-                ip_address        : request.info.remoteAddress,
-                datetime         : Date.now(),
-                user_id          : request.auth.credentials.user_id,
-                user_name        : request.auth.credentials.email,
-                user_type        : 'user',
-                account_id       : request.auth.credentials.companyId,
-//                domain_id        : request.auth.credentials.domain,
-                activity_type    : 'modify',
+                account_id       : account_id,
+                activity_type    : 'enable2fa',
                 activity_target  : 'user',
                 target_id        : user.user_id,
                 target_name      : result.email,
                 target_object    : result,
                 operation_status : 'success'
-              });
+              }, request);
 
               renderJSON(request, reply, error, statusResponse);
             } else {
-              return reply(boom.badImplementation('Failed to update user details'));
+              return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
             }
           });
         } else {
@@ -435,65 +402,54 @@ exports.enable2fa = function (request, reply) {
         return reply(boom.badRequest('Must call init first'));
       }
     } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
   });
 };
 
 exports.disable2fa = function (request, reply) {
   var password = request.payload.password;
-  if (request.params.user_id) {
-    var user_id = request.params.user_id;
-    if (request.auth.credentials.role !== 'revadmin' && ((user_id !== request.auth.credentials.user_id) &&
-      (request.auth.credentials.role !== 'admin'))) {
-      return reply(boom.badRequest('User not found'));
-    }
-  } else {
-    user_id = request.auth.credentials.user_id;
-  }
+  var user_id = request.params.user_id ? request.params.user_id : request.auth.credentials.user_id;
+
   users.get({
     _id: user_id
   }, function(error, user) {
-    if (user) {
-      if (request.auth.credentials.role === 'revadmin' || (user.companyId &&
-        utils.areOverlappingArrays(user.companyId, request.auth.credentials.companyId))) {
-        user.two_factor_auth_enabled = false;
-        delete user.password;
-        users.update(user, function(error, result) {
-          if (!error) {
-            var statusResponse = {
-              statusCode: 200,
-              message: 'Successfully disabled two factor authentication'
-            };
-
-            result = publicRecordFields.handle(result, 'user');
-
-            AuditLogger.store({
-              ip_address        : request.info.remoteAddress,
-              datetime         : Date.now(),
-              user_id          : request.auth.credentials.user_id,
-              user_name        : request.auth.credentials.email,
-              user_type        : 'user',
-              account_id       : request.auth.credentials.companyId,
-//              domain_id        : request.auth.credentials.domain,
-              activity_type    : 'modify',
-              activity_target  : 'user',
-              target_id        : user.user_id,
-              target_name      : result.email,
-              target_object    : result,
-              operation_status : 'success'
-            });
-
-            renderJSON(request, reply, error, statusResponse);
-          } else {
-            return reply(boom.badImplementation('Failed to update user details'));
-          }
-        });
-      } else {
-        return reply(boom.badImplementation('User not found'));
-      }
-    } else {
-      return reply(boom.badImplementation('Failed to retrieve user details'));
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
+
+    // console.log('user = ', JSON.stringify(user));
+
+    if (!user || !utils.checkUserAccessPermissionToUser(request, user)) {
+      return reply(boom.badRequest('User ID not found'));
+    }
+
+    var account_id = user.companyId[0];
+    user.two_factor_auth_enabled = false;
+    delete user.password;
+    users.update(user, function(error, result) {
+      if (!error) {
+        var statusResponse = {
+          statusCode: 200,
+          message: 'Successfully disabled two factor authentication'
+        };
+
+        result = publicRecordFields.handle(result, 'user');
+
+        AuditLogger.store({
+          account_id       : account_id,
+          activity_type    : 'disable2fa',
+          activity_target  : 'user',
+          target_id        : user.user_id,
+          target_name      : result.email,
+          target_object    : result,
+          operation_status : 'success'
+        }, request);
+
+        renderJSON(request, reply, error, statusResponse);
+      } else {
+        return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
+      }
+    });
   });
 };

@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+var faker = require('faker');
+
 // # Accounts Data Provider object
 //
 // Defines some methods to generate valid and common account test data. With
@@ -44,6 +46,36 @@ var AccountsDataProvider = {
   generateOne: function (prefix) {
     return {
       companyName: (prefix ? prefix + '_' : '' ) + this.prefix + Date.now()
+    };
+  },
+
+  /**
+   * Generates valida data that represents a full/complete account which
+   * accounts REST API end points accept.
+   *
+   * @param {Object} account with at least id and company name data
+   * @returns {Object} account info
+   */
+  generateCompleteOne: function (account) {
+    var firstName = faker.name.firstName();
+    var lastName = faker.name.lastName();
+    return {
+      id: account.id,
+      companyName: account.companyName,
+      first_name: firstName,
+      last_name: lastName,
+      phone_number: faker.phone.phoneNumber(),
+      contact_email: [firstName, lastName, Date.now() + '@mailinator.com']
+        .join('-')
+        .toLowerCase(),
+      address1: faker.address.streetAddress(),
+      address2: faker.address.secondaryAddress(),
+      country: faker.address.country(),
+      state: faker.address.state(),
+      city: faker.address.city(),
+      zipcode: faker.address.zipCode(),
+      use_contact_info_as_billing_info: true,
+      billing_info: {}
     };
   }
 };

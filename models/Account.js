@@ -30,12 +30,57 @@ function Account(mongoose, connection, options) {
   this.mongoose = mongoose;
 
   this.AccountSchema = new this.Schema({
+    // TODO need to rename to account_name
     'companyName' : String,
     'status'      : {type : Boolean, default : true},
+    // TODO need to rename to created_by
     'createdBy'   : String,
     'id'          : String,
-    'created_at'  : {type : Date, default : Date()},
-    'updated_at'  : {type : Date, default : Date()}
+    'comment': {type: String, default: ''},
+    'deleted': {type: Boolean, default: false},
+    'billing_id': {type: String, default: null},
+    'payment_method_configuration_status': {type: Boolean, default: false},
+    'subscription_id': {type: String, default: null},
+    'subscription_state': String,
+    'billing_plan': String,
+    'first_name':  String,
+    'last_name':  String,
+    'contact_email': String,
+    'address1': String,
+    'address2': String,
+    'country': {type : String, default : 'US'},
+    'state': String,
+    'city': String,
+    'zipcode': String,
+    'masked_card_number': String,
+    'phone_number': String,
+    'use_contact_info_as_billing_info': {type: Boolean, default: false},
+    'billing_info': {
+      'first_name':  String,
+      'last_name':  String,
+      'contact_email': String,
+      'address1': String,
+      'address2': String,
+      'country': {type : String, default : 'US'},
+      'state': String,
+      'city': String,
+      'zipcode': String,
+      'masked_card_number': String,
+      'phone_number': String,
+    },
+    'billing_portal_link': {url: String, expires_at: Date},
+    'created_at'  : {type : Date, default : Date.now},
+    'updated_at'  : {type : Date, default : Date.now},
+    // TODO: add deleted_at and deleted_by fields
+    'deleted_by': String,
+    'deleted_at'  : {type : Date, default : null},
+    'cancellation_message': {type: String, default: null},
+        // Self register section
+    'self_registered': {
+        type: Boolean,
+        default: false
+    },
+
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
@@ -59,25 +104,18 @@ Account.prototype = {
     });
   },
 
-  list : function (request, callback) {
-
-//    console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
-
-    this.model.find(function (err, accounts) {
-      if (accounts) {
+  list : function (callback) {
+    this.model.find({ deleted: { $ne: true } },function (err, accounts) {
+      if(accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
-          if (request.auth.credentials.role === 'revadmin' || request.auth.credentials.companyId.indexOf(accounts[i]._id) !== -1) {
-            accounts[i].id = accounts[i]._id + '';
-            delete accounts[i]._id;
-            delete accounts[i].__v;
-            delete accounts[i].status;
-          } else {
+          var current = accounts[i];
 
-//            console.log('Removing accounts array record # ', i);
-            accounts.splice(i, 1);
-            i--;
-          }
+          current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
+          delete current._id;
+          delete current.__v;
+          delete current.status;
         }
       }
 
@@ -101,7 +139,73 @@ Account.prototype = {
     });
   },
 
+  listSubscribers : function (filters, callback) {
+    var filter = {
+          deleted: {
+            $ne: true
+          },
+          subscription_id: {
+            $ne: null
+          },
+          subscription_state: {
+            $ne: 'canceled'
+          }
+        };
+    if(filters.subscription_id){
+      filter.subscription_id = filters.subscription_id;
+    }
+    if(filters.account_id){
+      filter._id = filters.account_id;
+    }
+    console.log('filter ',filters);
+    this.model.find(filter,function (err, accounts) {
+      if(accounts) {
+        accounts = utils.clone(accounts);
+        for (var i = 0; i < accounts.length; i++) {
+          var current = accounts[i];
+
+          current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
+          delete current._id;
+          delete current.__v;
+          delete current.status;
+        }
+      }
+
+      callback(err, accounts);
+    });
+  },
   get : function (item, callback) {
+    item.deleted = { $ne: true };
+
+    this.model.findOne(item, function (err, doc) {
+      if (doc) {
+        doc = utils.clone(doc);
+        doc.id = doc._id + '';
+
+        delete doc.__v;
+        delete doc._id;
+        delete doc.status;
+      }
+      callback(err, doc);
+    });
+  },
+
+  /**
+   * @name  getBySubscriptionId
+   * @description
+   *
+   *  Find Account by Subscription
+   *
+   * @param  {Staring}   subscriptionId
+   * @param  {Function} callback       [description]
+   * @return
+   */
+  getBySubscriptionId : function (subscriptionId, callback) {
+    var  item = {
+      subscription_id: subscriptionId
+    };
+
     this.model.findOne(item, function (err, doc) {
       if (doc) {
         doc = utils.clone(doc);
@@ -116,6 +220,7 @@ Account.prototype = {
   },
 
   update : function (item, callback) {
+    // TODO need to switch to use "id" instead of "account_id"
     this.model.findOne({_id : item.account_id}, function (err, doc) {
       if (doc) {
 
@@ -123,8 +228,6 @@ Account.prototype = {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
-
-//        console.log('Inside update: updated doc = ', doc);
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
@@ -155,7 +258,29 @@ Account.prototype = {
     } else {
       callback(utils.buildError('400', 'No account ID passed to remove function'), null);
     }
-  }
+  },
+
+  //  free _promise_ query
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  // returns _promise_ { _id: companyName, _id: companyName, ... }
+  idNameHash: function() {
+    return this.model.find({}, { _id: 1, companyName: 1 } )
+      .exec()
+      .then( function( data ) {
+        var hash  = {};
+        data.forEach( function( item ) {
+          hash[item._id.toString()] = item.companyName;
+        });
+        return hash;
+      });
+  },
+
+
 };
 
 module.exports = Account;

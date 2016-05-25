@@ -21,7 +21,7 @@
 'use strict';
 //	data access layer
 
-var utils = require('../lib/utilities.js');
+// var utils = require('../lib/utilities.js');
 
 function Location(mongoose, connection, options) {
   this.options = options;
@@ -59,7 +59,32 @@ Location.prototype = {
     this.model.find({ status: 'online', visibility: 'public' }, function (err, results) {
       callback(err, results);
     });
+  },
+
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  //  returns _promise_ {
+  //    'IAD02': 'North America',
+  //    'HKG03': 'Asia',
+  //    ...
+  //  }
+  code2BillingZoneMapping: function() {
+
+    return this.model.find( {}, { _id: 0, site_code_name: 1, billing_zone: 1 } )
+      .exec()
+      .then( function( data ) {
+        var map = {};
+        data.forEach( function( item ) {
+          map[item.site_code_name] = item.billing_zone;
+        });
+        return map;
+      });
   }
+
 
 };
 

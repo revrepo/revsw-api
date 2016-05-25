@@ -21,6 +21,7 @@
 'use strict';
 //	data access layer
 
+var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
@@ -33,9 +34,11 @@ function App(mongoose, connection, options) {
 
   var configSchema = mongoose.Schema({
     sdk_release_version: {type: Number},
+    // TODO add allowed logging levels
     logging_level: String, // (“debug”, “info”, “warning”, “error” or “critical”)
     configuration_refresh_interval_sec: {type: Number},
     configuration_stale_timeout_sec: {type: Number},
+    // TODO add allowed operation modes
     operation_mode: String, // (“transfer_and_report”, “transfer_only”, “report_only” or “off”)
     allowed_transport_protocols: [String],
     initial_transport_protocol: String,
@@ -54,13 +57,14 @@ function App(mongoose, connection, options) {
   this.AppSchema = new this.Schema({
     app_name: String,
     account_id: String,
+    // TODO add allowed app platforms
     app_platform: String, // (“iOS” or “Android”)
     deleted: {type: Boolean, default: false},
     deleted_at: {type: Date},
     deleted_by: String,
     sdk_key: String,
-    created_at: {type: Date, default: Date()},
-    updated_at: {type: Date, default: Date()},
+    created_at: {type: Date, default: Date.now},
+    updated_at: {type: Date, default: Date.now},
     updated_by: String,
     serial_id: {type: Number},
     sdk_configuration_api_service: String,
@@ -69,7 +73,8 @@ function App(mongoose, connection, options) {
     configs: [configSchema],
     app_published_version: {type: Number, default: 0},
     last_app_published_version: {type: Number, default: 0},
-    previous_app_values: [{}]
+    previous_app_values: [{}],
+    comment: {type: String, default: ''},
   });
 
   this.model = connection.model('App', this.AppSchema, 'App');
@@ -97,7 +102,7 @@ App.prototype = {
     });
   },
   getAccountID: function(app_id, callback) {
-    this.model.findOne({deleted: 0, _id: app_id}, {_id: 0, account_id: 1}, function(err, doc) {
+    this.model.findOne({deleted: false, _id: app_id}, {_id: 0, account_id: 1}, function(err, doc) {
       if (doc) {
         doc = doc.account_id;
       }
@@ -161,6 +166,45 @@ App.prototype = {
       }
     });
   },
+
+  queryP: function (where, fields) {
+    where = where || {};
+    fields = fields || {};
+    return this.model.find(where, fields).exec();
+  },
+
+  // returns _promise_ {
+  //    account_id: { total: X, deleted: Y, active: Z },
+  //    [account_id: { total: X, deleted: Y, active: Z },
+  //    ...]
+  //  }
+
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  accountAppsData: function( account_id ) {
+
+    var where = account_id ?
+      { account_id: ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
+      {};
+
+    return this.model.find( where, { _id: 0, account_id: 1, deleted: 1 } )
+      .exec(/*mf mongoose*/)
+      .then( function( data ) {
+        var dist = {};
+        data.forEach( function( item ) {
+          if ( !dist[item.account_id] ) {
+            dist[item.account_id] = { total: 0, deleted: 0, active: 0 };
+          }
+          if ( item.deleted ) {
+            ++dist[item.account_id].deleted;
+          } else {
+            ++dist[item.account_id].active;
+          }
+          ++dist[item.account_id].total;
+        });
+        return dist;
+      });
+  }
+
 };
 
 module.exports = App;

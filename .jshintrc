@@ -4,12 +4,14 @@
   "eqeqeq": true,
   "freeze": true,
   "indent": 2,
-  "newcap": true,
+  "newcap": false,
   "quotmark": "single",
-  "maxdepth": 5,
+  "maxdepth": 6,
   "maxstatements": 38,
   "maxlen": 170,
   "eqnull": true,
   "funcscope": true,
-  "node": true
+  "node": true,
+  // "unused": true,
+  "undef": true
 }

@@ -72,6 +72,7 @@ cp -rp $WORKSPACE/scripts/logrotate_revsw-api $foldername/etc/logrotate.d/revsw-
 
 mkdir -p $foldername/opt/$PackageName/config
 mkdir -p $foldername/opt/$PackageName/docs
+mkdir -p $foldername/opt/$PackageName/utils
 
 cp -rf  $WORKSPACE/bin  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/lib  $foldername/opt/$PackageName/
@@ -80,6 +81,7 @@ cp -rf  $WORKSPACE/models  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/routes  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/route-validation  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/node_modules  $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/services  $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/config/*.json  $foldername/opt/$PackageName/config/
 cp -rf  $WORKSPACE/config/dev_ssl_certs  $foldername/opt/$PackageName/config/
 cp -rf  $WORKSPACE/config/version.txt  $foldername/opt/$PackageName/config
@@ -87,6 +89,7 @@ cp -rf  $WORKSPACE/package.json $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/templates $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/public $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/docs/revsw-api.txt $foldername/opt/$PackageName/docs/
+cp -rf  $WORKSPACE/utils $foldername/opt/$PackageName/
 
 mkdir -p $foldername/opt/$PackageName/log
 

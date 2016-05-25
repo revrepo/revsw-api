@@ -22,7 +22,7 @@
 
 var mongoose = require('mongoose');
 var boom = require('boom');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var uuid = require('node-uuid');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -33,6 +33,7 @@ var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
 var Account = require('../models/Account');
 var DomainConfig = require('../models/DomainConfig');
+var utils = require('../lib/utilities.js');
 
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
@@ -49,6 +50,8 @@ function verifyDomainOwnership(companyId, domainList, callback) {
   function checkDomain(_i, l) {
     domainConfigs.get(domainList[_i], function(error, result) {
       j++;
+
+      // TODO: Need to use a centralized domain permissions check function from "utils" module
       if (!error && result) {
         if (!result.account_id || result.account_id !== companyId) {
           wrongDomains.push(domainList[_i]);
@@ -74,6 +77,7 @@ function verifyDomainOwnership(companyId, domainList, callback) {
 }
 
 exports.getApiKeys = function(request, reply) {
+  // TODO: Need to move the access check function from ".list" to this function
   apiKeys.list(request, function (error, listOfApiKeys) {
     listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
     renderJSON(request, reply, error, listOfApiKeys);
@@ -87,11 +91,7 @@ exports.getApiKey = function (request, reply) {
       return reply(boom.badImplementation('Failed to get API key ID ' + id));
     }
 
-    if (result) {
-
-      if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
-        return reply(boom.badRequest('API key not found'));
-      }
+    if (result && utils.checkUserAccessPermissionToAPIKey(request, result)) {
 
       result = publicRecordFields.handle(result, 'apiKeys');
       renderJSON(request, reply, error, result);
@@ -103,11 +103,12 @@ exports.getApiKey = function (request, reply) {
 
 exports.createApiKey = function(request, reply) {
   var newApiKey = request.payload;
-  newApiKey.created_by = request.auth.credentials.email;
-  newApiKey.key = uuid();
+  newApiKey.created_by = utils.generateCreatedByField(request);
+  var newKey = uuid();
+  newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
-  if (request.auth.credentials.role !== 'revadmin' &&  request.auth.credentials.companyId.indexOf(newApiKey.account_id) === -1) {
+  if (!newApiKey.account_id || !utils.checkUserAccessPermissionToAccount(request, newApiKey.account_id)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -122,7 +123,7 @@ exports.createApiKey = function(request, reply) {
       key: newApiKey.key
     }, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to verify new API key ' + newApiKey.key));
+        return reply(boom.badImplementation('Failed to verify new API key ' + newKey));
       }
       if (result) {
         return reply(boom.badRequest('The API key is already registered in the system'));
@@ -130,7 +131,7 @@ exports.createApiKey = function(request, reply) {
 
       apiKeys.add(newApiKey, function (error, result) {
         if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new API key ' + newApiKey.key));
+          return reply(boom.badImplementation('Failed to add new API key ' + newKey));
         }
 
         var statusResponse;
@@ -141,24 +142,19 @@ exports.createApiKey = function(request, reply) {
           statusResponse = {
             statusCode: 200,
             message   : 'Successfully created new API key',
-            key       : result.key,
+            key       : newKey,
             object_id : result.id
           };
 
           AuditLogger.store({
-            ip_address      : request.info.remoteAddress,
-            datetime        : Date.now(),
-            user_id         : request.auth.credentials.user_id,
-            user_name       : request.auth.credentials.email,
-            user_type       : 'user',
-            account_id      : request.auth.credentials.companyId,
+            account_id      : newApiKey.account_id,
             activity_type   : 'add',
             activity_target : 'apikey',
             target_id       : result.id,
             target_name     : result.key_name,
             target_object   : result,
             operation_status: 'success'
-          });
+          }, request);
 
           renderJSON(request, reply, error, statusResponse);
         }
@@ -174,7 +170,7 @@ exports.updateApiKey = function (request, reply) {
   function doUpdate() {
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update API key ' + id));
+        return reply(boom.badImplementation('Failed to update API key ID ' + id));
       }
 
       var statusResponse = {
@@ -185,26 +181,20 @@ exports.updateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : updatedApiKey.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
         target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
   }
 
-  if (request.auth.credentials.role !== 'revadmin' && (updatedApiKey.account_id &&
-    request.auth.credentials.companyId.indexOf(updatedApiKey.account_id) === -1)) {
+  if (!updatedApiKey.account_id || !utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -249,7 +239,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -266,19 +256,14 @@ exports.activateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : result.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
         target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
       renderJSON(request, reply, error, statusResponse);
     });
   });
@@ -295,7 +280,8 @@ exports.deactivateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    // TODO: use a function
+    if (request.auth.credentials.role !== 'revadmin' && utils.getAccountID(request).indexOf(result.account_id) === -1) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -312,19 +298,14 @@ exports.deactivateApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : result.account_id,
         activity_type    : 'modify',
         activity_target  : 'apikey',
         target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -341,7 +322,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (request.auth.credentials.role !== 'revadmin' && request.auth.credentials.companyId.indexOf(result.account_id) === -1) {
+    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -359,19 +340,14 @@ exports.deleteApiKey = function (request, reply) {
       result = publicRecordFields.handle(result, 'apiKeys');
 
       AuditLogger.store({
-        ip_address       : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : result.account_id,
         activity_type    : 'delete',
         activity_target  : 'apikey',
         target_id        : result.id,
         target_name      : result.key_name,
         target_object    : result,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });

@@ -86,24 +86,6 @@ describe('Rev API Reseller User', function() {
       });
   });
 
-  it('should fail to create a new account with the same name', function(done) {
-    request(testAPIUrl)
-      .post('/v1/accounts')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
-      .send(newAccountJson)
-      .expect(400)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        res.statusCode.should.be.equal(400);
-        var response_json = JSON.parse(res.text);
-        response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('The company name is already registered in the system');
-        done();
-      });
-  });
-
 
   it('should fail to create a new account with empty JSON request', function(done) {
     request(testAPIUrl)
@@ -204,24 +186,6 @@ describe('Rev API Reseller User', function() {
       });
   });
 
-  it('should fail to update an account with existing company name "API QA Reseller Company"', function(done) {
-    var testCompanyName = 'API QA Reseller Company';
-    newAccountJson = { companyName: testCompanyName };
-    request(testAPIUrl)
-      .put('/v1/accounts/' + testCompanyID)
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
-      .send(newAccountJson)
-      .expect(400)
-      .end(function(err, res) {
-        if (err) {
-          throw err;
-        }
-        var response_json = JSON.parse(res.text);
-        response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('The company name is already registered in the system');
-        done();
-      });
-  });
 
   it('should delete an account', function(done) {
     request(testAPIUrl)
@@ -268,7 +232,7 @@ describe('Rev API Reseller User', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('Account not found');
+        response_json.message.should.be.equal('Account ID not found');
         done();
       });
   });
@@ -284,7 +248,7 @@ describe('Rev API Reseller User', function() {
         }
         var response_json = JSON.parse(res.text);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('Account not found');
+        response_json.message.should.be.equal('Account ID not found');
         done();
       });
   });

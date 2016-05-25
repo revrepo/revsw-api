@@ -23,7 +23,7 @@
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var boom = require('boom');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var uuid = require('node-uuid');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -32,6 +32,8 @@ var publicRecordFields = require('../lib/publicRecordFields');
 
 var User = require('../models/User');
 var BillingPlan = require('../models/BillingPlan');
+var Chargify = require('../lib/chargify');
+var utils = require('../lib/utilities.js');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
@@ -42,7 +44,7 @@ exports.list = function (request, reply) {
   });
 };
 
-exports.create = function (request, reply) {
+exports.createBillingPlan = function (request, reply) {
   var requestPayload = request.payload;
 
   BillingPlan.get({
@@ -73,20 +75,13 @@ exports.create = function (request, reply) {
         };
 
         AuditLogger.store({
-          ip_address: request.info.remoteAddress,
-          datetime: Date.now(),
-          user_id: request.auth.credentials.user_id,
-          user_name: request.auth.credentials.email,
-          user_type: 'user',
-          account_id: request.auth.credentials.user_id,
-//          domain_id        : request.auth.credentials.domain,
           activity_type: 'add',
           activity_target: 'billing_plan',
           target_id: result.id,
           target_name: result.name,
           target_object: result,
           operation_status: 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       }
@@ -112,7 +107,7 @@ exports.get = function (request, reply) {
 };
 
 
-exports.update = function (request, reply) {
+exports.updateBillingPlan = function (request, reply) {
   var updatedData = request.payload;
   var id = request.params.id;
 
@@ -142,19 +137,13 @@ exports.update = function (request, reply) {
       // TODO: Update all current subscribed users
 
       AuditLogger.store({
-        ip_address: request.info.remoteAddress,
-        datetime: Date.now(),
-        user_id: request.auth.credentials.user_id,
-        user_name: request.auth.credentials.email,
-        user_type: 'user',
-        account_id: request.auth.credentials.user_id,
         activity_type: 'modify',
         activity_target: 'billing_plan',
         target_id: result.id,
         target_name: result.name,
         target_object: result,
         operation_status: 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     });
@@ -194,23 +183,38 @@ exports.delete = function (request, reply) {
         result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
 
         AuditLogger.store({
-          ip_address: request.info.remoteAddress,
-          datetime: Date.now(),
-          user_id: request.auth.credentials.user_id,
-          user_name: request.auth.credentials.email,
-          user_type: 'user',
-          account_id: request.auth.credentials.user_id || '',
           activity_type: 'delete',
           activity_target: 'billing_plan',
           target_id: result.id,
           target_name: result.name,
           target_object: result,
           operation_status: 'success'
-        });
+        }, request);
 
         renderJSON(request, reply, error, statusResponse);
       });
 
+    });
+  });
+};
+
+exports.getHostedPage = function (request, reply) {
+  var id = request.params.id;
+  BillingPlan.get({_id: id}, function (error, res) {
+    if (error){
+      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id));
+    }
+    Chargify.Product.getHostedPage(res.chargify_handle, function (error, result) {
+      if (error) {
+        return reply(boom.badImplementation());
+      }
+
+      var response = {
+        statusCode: 200,
+        body: result
+      };
+
+      renderJSON(request, reply, error, result);
     });
   });
 };

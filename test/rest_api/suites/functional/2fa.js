@@ -62,8 +62,7 @@ describe('Functional check', function () {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
-          // TODO: this should be changed to the new way to create a resource
-          return API.resources.users.user.deleteAllPrerequisites(done);
+          return API.resources.users.deleteAllPrerequisites(done);
         })
         .catch(done);
     });
@@ -140,7 +139,7 @@ describe('Functional check', function () {
                           .createOne(user.id)
                           .expect(400)
                           .then(function (response) {
-                            var expMsg = 'User not found';
+                            var expMsg = 'User ID not found';
                             response.body.message.should.equal(expMsg);
                             done();
                           })
@@ -155,7 +154,6 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    // TODO: Need to create another user from another account
     it('should fail to disable 2FA for an existing user from another account',
       function (done) {
         API.helpers
@@ -181,7 +179,7 @@ describe('Functional check', function () {
                           .createOne(user.id)
                           .expect(400)
                           .then(function (response) {
-                            var expMsg = 'User not found';
+                            var expMsg = 'User ID not found';
                             response.body.message.should.equal(expMsg);
                             done();
                           })

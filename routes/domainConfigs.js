@@ -32,7 +32,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfigs,
       description : 'Get a list of domains registered for a customer',
@@ -54,7 +54,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfig,
       description : 'Get basic domain configuration',
@@ -81,7 +81,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}/versions',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfigVersions,
       description : 'Get a list of domain configuration versions',
@@ -108,7 +108,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}/config_status',
     config : {
       auth        : {
-        scope : ['user', 'admin', 'reseller', 'revadmin']
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler     : domainConfigsHandlers.getDomainConfigStatus,
       description : 'Get the publishing status of a domain configuration',
@@ -135,7 +135,7 @@ module.exports = [
     path   : '/v1/domain_configs',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler     : domainConfigsHandlers.createDomainConfig,
       description : 'Create a new domain configuration',
@@ -160,7 +160,8 @@ module.exports = [
             Joi.string().regex(routeModels.ipAddressRegex)
           ]).required().description('Origin server host name or IP address'),
           origin_server_location_id : Joi.objectId().required().description('The ID of origin server location'),
-          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)')
+          tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
       response    : {
@@ -174,7 +175,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler     : domainConfigsHandlers.updateDomainConfig,
       description : 'Update detailed domain configuration',
@@ -194,6 +195,7 @@ module.exports = [
         },
         payload : {
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be assiciated with'),
+          comment                : Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the domain'),
           origin_host_header     : Joi.string().required().allow('').regex(routeModels.domainRegex)
             .description('"Host" header value used when accessing the origin server'),
           origin_server          : Joi.alternatives().try([
@@ -205,9 +207,9 @@ module.exports = [
           config_command_options: Joi.string().allow('').max(150),
           tolerance              : Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
-            '3rd_party_root_rewrite_domains': Joi.string().allow('').max(500).required(),
-            '3rd_party_runtime_domains': Joi.string().allow('').max(500).required(),
-            '3rd_party_urls': Joi.string().allow('').max(500).required(),
+            '3rd_party_root_rewrite_domains': Joi.string().allow('').max(1500).required(),
+            '3rd_party_runtime_domains': Joi.string().allow('').max(1500).required(),
+            '3rd_party_urls': Joi.string().allow('').max(1500).required(),
             enable_3rd_party_rewrite: Joi.boolean().required(),
             enable_3rd_party_root_rewrite: Joi.boolean().required(),
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
@@ -222,6 +224,13 @@ module.exports = [
           }),
           proxy_timeout: Joi.number().integer(),
           domain_wildcard_alias: Joi.string().max(150),
+          enable_ssl: Joi.boolean(),
+          ssl_conf_profile: Joi.objectId().allow(''),
+          ssl_protocols: Joi.string().allow(''),
+          ssl_ciphers: Joi.string().allow(''),
+          ssl_prefer_server_ciphers: Joi.boolean(),
+          ssl_cert_id: Joi.objectId().allow(''),
+          btt_key: Joi.string().max(32).allow(''),
           rev_component_co : Joi.object({
             enable_rum          : Joi.boolean().required(),
             enable_optimization : Joi.boolean().required(),
@@ -231,14 +240,19 @@ module.exports = [
             js_choice           : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             css_choice          : Joi.string().valid('off', 'low', 'medium', 'high').required(),
             origin_http_keepalive_ttl:  Joi.number().integer(),
-            origin_http_keepalive_enabled: Joi.boolean()
+            origin_http_keepalive_enabled: Joi.boolean(),
+            origin_request_headers: Joi.array().items({
+              header_value: Joi.string().required(),
+              header_name: Joi.string().required(),
+              operation: Joi.string().valid('add', 'delete', 'replace').required()
+            }),
           }).required(),
           rev_component_bp : Joi.object({
             enable_quic: Joi.boolean(),
             end_user_response_headers: Joi.array().items({
               header_value: Joi.string().regex(routeModels.httpHeaderValue).required(),
               header_name: Joi.string().regex(routeModels.httpHeaderName).required(),
-              operation: Joi.string().valid('add', 'remove', 'replace').required()
+              operation: Joi.string().valid('add', 'delete', 'replace').required()
             }),
             enable_cache           : Joi.boolean().required(),
             block_crawlers         : Joi.boolean().required(),
@@ -309,7 +323,7 @@ module.exports = [
             custom_vcl: Joi.object({
               enabled: Joi.boolean().required(),
               backends: Joi.array().items({
-                vcl: Joi.string().max(300).required(),
+                vcl: Joi.string().max(3000).required(),
                 dynamic: Joi.boolean().required(),
                 port: Joi.number().integer().required(),
                 host: Joi.alternatives().try([Joi.string().uri(),Joi.string().regex(routeModels.domainRegex)]).required(),
@@ -340,7 +354,7 @@ module.exports = [
     path   : '/v1/domain_configs/{domain_id}',
     config : {
       auth        : {
-        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw']
+        scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler     : domainConfigsHandlers.deleteDomainConfig,
       description : 'Delete a domain',

@@ -31,6 +31,8 @@ var BillingPlanSchema = new Schema({
 
   name: String,
   description: String,
+  chargify_handle: String,
+  hosted_page: String,
 
   type: {
     type: String,
@@ -43,10 +45,17 @@ var BillingPlanSchema = new Schema({
   },
   services: [{
     code_name: String,
+    chargify_component_id: String,
     description: String,
-    measure_unit: String,
+    measurement_unit: String,
     cost: Number,
-    included: Number
+    included: Number,
+    type: {
+      type: String,
+      enum: ['metered', 'quantity', 'binary'],
+      default: 'quantity'
+    },
+    billing_id: Number
   }],
   prepay_discounts: [{
     period: Number,
@@ -145,6 +154,9 @@ BillingPlanSchema.statics = {
     }, function (err, doc) {
       if (doc) {
         var old = _.clone(doc.toJSON());
+        if(old.history){
+          delete old.history;
+        }
         delete item.id;
         for (var attrname in item) {
           doc[attrname] = item[attrname];

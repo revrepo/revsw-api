@@ -70,25 +70,25 @@ exports.getRTTReports = function(request, reply) {
       }
 
       var requestBody = {
-        'query': {
+        query: {
           filtered: {
             filter: {
-              'bool': {
-                'must': [{
-                  'term': {
-                    'domain': domain_name
+              bool: {
+                must: [{
+                  term: {
+                    domain: domain_name
                   }
                 }, {
-                  'range': {
-                    'lm_rtt': {
-                      'gt': 1000
+                  range: {
+                    lm_rtt: {
+                      gt: 1000
                     }
                   }
                 }, {
-                  'range': {
+                  range: {
                     '@timestamp': {
-                      'gte': span.start,
-                      'lte': span.end
+                      gte: span.start,
+                      lte: span.end
                     }
                   }
                 }]
@@ -96,86 +96,109 @@ exports.getRTTReports = function(request, reply) {
             }
           }
         },
-        'size': 0,
-        'aggs': {
-          'results': {
-            'terms': {
-              'field': field,
-              'size': request.query.count || 30
+        size: 0,
+        aggs: {
+          results: {
+            terms: {
+              field: field,
+              size: request.query.count || 30
             },
-            'aggs': {
-              'rtt_avg': {
-                'avg': {
-                  'field': 'lm_rtt'
-                }
-              },
-              'rtt_min': {
-                'min': {
-                  'field': 'lm_rtt'
-                }
-              },
-              'rtt_max': {
-                'max': {
-                  'field': 'lm_rtt'
-                }
-              }
+            aggs: {
+              rtt_avg: { avg: { field: 'lm_rtt' } },
+              rtt_min: { min: { field: 'lm_rtt' } },
+              rtt_max: { max: { field: 'lm_rtt' } }
             }
           },
-          'missing_field': {
-            'missing': {
-              'field': field
-            },
-            'aggs': {
-              'rtt_avg': {
-                'avg': {
-                  'field': 'lm_rtt'
-                }
-              },
-              'rtt_min': {
-                'min': {
-                  'field': 'lm_rtt'
-                }
-              },
-              'rtt_max': {
-                'max': {
-                  'field': 'lm_rtt'
-                }
-              }
+          missing_field: {
+            missing: { field: field },
+            aggs: {
+              rtt_avg: { avg: { field: 'lm_rtt' } },
+              rtt_min: { min: { field: 'lm_rtt' } },
+              rtt_max: { max: { field: 'lm_rtt' } }
             }
           }
         }
       };
 
+      //  add 2 sub-aggregations for country
+      if ( request.query.report_type === 'country' ) {
+        requestBody.aggs.results.aggs.regions = {
+          terms: {
+            field: 'geoip.region_name',
+            size: 0
+          },
+          aggs: {
+            rtt_avg: { avg: { field: 'lm_rtt' } },
+            rtt_min: { min: { field: 'lm_rtt' } },
+            rtt_max: { max: { field: 'lm_rtt' } }
+          }
+        };
+        requestBody.aggs.results.aggs.missing_regions = {
+          missing: {
+            field: 'geoip.region_name',
+          },
+          aggs: {
+            rtt_avg: { avg: { field: 'lm_rtt' } },
+            rtt_min: { min: { field: 'lm_rtt' } },
+            rtt_max: { max: { field: 'lm_rtt' } }
+          }
+        };
+      }
+
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
-        timeout: 120000,
+        timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
         }
-        var dataArray = [];
-        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
-          var doc = body.aggregations.results.buckets[i];
-          dataArray.push({
-            key: doc.key,
-            count: doc.doc_count,
-            lm_rtt_avg_ms: Math.round( doc.rtt_avg.value / 1000 ),
-            lm_rtt_min_ms: Math.round( doc.rtt_min.value / 1000 ),
-            lm_rtt_max_ms: Math.round( doc.rtt_max.value / 1000 )
-          });
-        }
+        var dataArray = body.aggregations.results.buckets.map( function( res ) {
+          var item = {
+            key: res.key,
+            count: res.doc_count,
+            lm_rtt_avg_ms: Math.round( res.rtt_avg.value / 1000 ),
+            lm_rtt_min_ms: Math.round( res.rtt_min.value / 1000 ),
+            lm_rtt_max_ms: Math.round( res.rtt_max.value / 1000 )
+          };
+          if ( res.regions && res.regions.buckets.length ) {
+            item.regions = res.regions.buckets.map( function( region ) {
+              return {
+                key: region.key,
+                count: region.doc_count,
+                lm_rtt_avg_ms: Math.round( region.rtt_avg.value / 1000 ),
+                lm_rtt_min_ms: Math.round( region.rtt_min.value / 1000 ),
+                lm_rtt_max_ms: Math.round( region.rtt_max.value / 1000 )
+              };
+            });
+          }
+          if ( res.missing_regions && res.missing_regions.doc_count ) {
+            if ( !item.regions ) {
+              item.regions = [];
+            }
+            var region = res.missing_regions;
+            item.regions.push({
+              key: '--',
+              count: region.doc_count,
+              lm_rtt_avg_ms: Math.round( region.rtt_avg.value / 1000 ),
+              lm_rtt_min_ms: Math.round( region.rtt_min.value / 1000 ),
+              lm_rtt_max_ms: Math.round( region.rtt_max.value / 1000 )
+            });
+          }
+          return item;
+        });
+
         if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
-          doc = body.aggregations.missing_field;
+          var res = body.aggregations.missing_field;
           dataArray.push({
             key: '--',
-            count: doc.doc_count,
-            lm_rtt_avg_ms: Math.round( doc.rtt_avg.value / 1000 ),
-            lm_rtt_min_ms: Math.round( doc.rtt_min.value / 1000 ),
-            lm_rtt_max_ms: Math.round( doc.rtt_max.value / 1000 )
+            count: res.doc_count,
+            lm_rtt_avg_ms: Math.round( res.rtt_avg.value / 1000 ),
+            lm_rtt_min_ms: Math.round( res.rtt_min.value / 1000 ),
+            lm_rtt_max_ms: Math.round( res.rtt_max.value / 1000 )
           });
         }
 
@@ -196,10 +219,10 @@ exports.getRTTReports = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domain_name));
       });
     } else {
-      return reply(boom.badRequest('Domain not found'));
+      return reply(boom.badRequest('Domain ID not found'));
     }
   });
 };

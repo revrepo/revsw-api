@@ -22,7 +22,7 @@
 var mongoose    = require('mongoose');
 var boom        = require('boom');
 var uuid        = require('node-uuid');
-var AuditLogger = require('revsw-audit');
+var AuditLogger = require('../lib/audit');
 var config      = require('config');
 var cds_request = require('request');
 var utils           = require('../lib/utilities.js');
@@ -43,6 +43,7 @@ var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 //
 exports.purgeObject = function(request, reply) {
   var domain = request.payload.domainName;
+  var account_id;
 
   domainConfigs.query({
     domain_name : domain
@@ -52,14 +53,12 @@ exports.purgeObject = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrive domain details for domain name ' + domain));
     }
 
-    if (!result[0]) {
+    if (!result[0] || !utils.checkUserAccessPermissionToDomain(request,result[0])) {
       return reply(boom.badRequest('Domain not found'));
     }
     result = result[0];
 
-    if (!utils.checkUserAccessPermissionToDomain(request,result)) {
-      return reply(boom.badRequest('Domain not found'));
-    }
+    account_id = result.proxy_config.account_id;
 
     var newPurgeJob = {};
     newPurgeJob.request_json = request.payload;
@@ -86,19 +85,14 @@ exports.purgeObject = function(request, reply) {
       newPurgeJob = publicRecordFields.handle(newPurgeJob, 'purge');
 
       AuditLogger.store({
-        ip_address        : request.info.remoteAddress,
-        datetime         : Date.now(),
-        user_id          : request.auth.credentials.user_id,
-        user_name        : request.auth.credentials.email,
-        user_type        : 'user',
-        account_id       : request.auth.credentials.companyId,
+        account_id       : account_id,
         activity_type    : 'purge',
         activity_target  : 'purge',
         target_id        : newPurgeJob.req_id,
         target_name      : newPurgeJob.req_domain,
         target_object    : newPurgeJob,
         operation_status : 'success'
-      });
+      }, request);
 
       renderJSON(request, reply, error, purgeStatusResponse);
     });

@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/users',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: users.getUsers,
       description: 'Get a list of registered users',
@@ -54,7 +54,7 @@ module.exports = [
     path: '/v1/users',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw' ]
       },
       handler: users.createUser,
       description: 'Create a new user in the system',
@@ -82,8 +82,9 @@ module.exports = [
             test: Joi.boolean().required().description('Access to the portal TEST section'),
             readOnly: Joi.boolean().required().description('Enable read-only access to the configuration')
           }).required(),
-          role: Joi.string().required().valid('user','admin').description('User role (user/admin)'),
-          theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)')
+          role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
+          theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
         }
       },
       response: {
@@ -97,7 +98,7 @@ module.exports = [
     path: '/v1/users/{user_id}',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw' ]
       },
       handler: users.updateUser,
       description: 'Update a user profile',
@@ -129,8 +130,9 @@ module.exports = [
             test: Joi.boolean().description('Access to the portal TEST section'),
             readOnly: Joi.boolean().description('Enable read-only access to the configuration')
           }),
-          role: Joi.string().valid('user','admin').description('User role (user/admin)'),
-          theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)')
+          role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
+          theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
         }
       },
       response: {
@@ -149,7 +151,7 @@ module.exports = [
         }
       },
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: users.getMyUser,
       description: 'Get your user profile',
@@ -171,7 +173,7 @@ module.exports = [
     path: '/v1/users/password/{user_id}',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey_rw' ]
       },
       handler: users.updateUserPassword,
       description: 'Update a user\'s password',
@@ -202,7 +204,7 @@ module.exports = [
     path: '/v1/users/{user_id}',
     config: {
       auth: {
-        scope: [ 'admin', 'reseller', 'revadmin' ]
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: users.getUser,
       description: 'Get a user profile',
@@ -229,7 +231,7 @@ module.exports = [
     path: '/v1/users/{user_id}',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw' ]
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw' ]
       },
       handler: users.deleteUser,
       description: 'Delete a user',
@@ -262,7 +264,7 @@ module.exports = [
       description: 'Initialize two factor authentication',
       notes: 'Use the call to get the QR code for Google Authenticator. This call assigns a new secret key to the user. ' +
         'If the secret key already exists, it will be overwritten.',
-      tags: ['api', 'users'],
+//      tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -284,7 +286,7 @@ module.exports = [
       handler: users.enable2fa,
       description: 'Enable two factor authentication for the user',
       notes: 'Use this call to enable two factor authentication for specific user',
-      tags: ['api', 'users'],
+//      tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -311,7 +313,7 @@ module.exports = [
       handler: users.disable2fa,
       description: 'Disable two factor authentication for the user',
       notes: 'Use this call to disable two factor authentication for specific user',
-      tags: ['api', 'users'],
+//      tags: ['api', 'users'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

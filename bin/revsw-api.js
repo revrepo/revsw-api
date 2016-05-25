@@ -18,18 +18,43 @@
 
 /*jslint node: true */
 
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 'use strict';
 var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
   jwt = require('jsonwebtoken'),
   Fs = require('fs'),
   config = require('config'),
-  AuditLogger = require('revsw-audit'),
+  AuditLogger = require('../lib/audit'),
   Pack = require('../package'),
   UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
   validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
-  User = require('../models/User');
+  User = require('../models/User'),
+  os = require('os'),
+  mail = require('../lib/mail');
+
+require('./../lib/boomOverriding.js');
+
+var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
+if (notifyEmail !== '') {
+  process.on('uncaughtException', function (er) {
+    console.error(er.stack);
+    mail.sendMail({
+      from: 'eng@revsw.com',
+      to: notifyEmail,
+      subject: process.env.NODE_ENV + ':' + os.hostname() + ' ' + er.message,
+      text: er.stack
+    }, function (er, data) {
+      if (er) {
+         console.error(er);
+      }
+      process.exit(1);
+    });
+  });
+}
+
 
 var server = new Hapi.Server();
 
@@ -114,8 +139,12 @@ server.register(require('hapi-auth-jwt'), function (err) {
   });
 });
 
-server.register(require('hapi-auth-apikey'), function (err) {
+server.register(require('../lib/hapi-auth-apikey'), function (err) {
   server.auth.strategy('apikey', 'apikey', {validateFunc: validateAPIKey});
+});
+
+server.register(require('../lib/chargify-webhook-signature'), function (err) {
+  server.auth.strategy('hmac', 'signature');
 });
 
 // adds swagger self documentation plugin
@@ -137,7 +166,7 @@ server.register([{
 });
 
 server.auth.default({
-  strategies: [ 'basic', 'token' ]
+  strategies: [ 'basic', 'token', 'apikey' ]
 });
 
 //server.route(Routes.routes);
