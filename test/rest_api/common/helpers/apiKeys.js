@@ -45,7 +45,7 @@ var APIKeysHelper = {
               apiKey);
           })
           .then(function (respose) {
-            apiKey.id = respose.body.id;
+            apiKey.id = respose.body.object_id;
             return apiKey;
           });
       });

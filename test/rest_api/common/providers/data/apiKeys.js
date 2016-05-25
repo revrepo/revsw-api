@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+var faker = require('faker');
+
 // # API Keys Data Provider object
 //
 // Defines some methods to generate valid and common API key. test data.
@@ -41,6 +43,25 @@ var APIKeyDataProvider = {
   generateOne: function (accountId) {
     return {
       account_id: accountId
+    };
+  },
+
+  generateCompleteOne: function (accountId) {
+    var prefix = Date.now();
+    return {
+      account_id: accountId,
+      key_name: prefix + ': ' + faker.lorem.words()[0],
+      domains: [],
+      allowed_ops: {
+        read_config: true,
+        modify_config: true,
+        delete_config: true,
+        purge: true,
+        reports: true,
+        admin: true
+      },
+      read_only_status: true,
+      active: true
     };
   }
 };
