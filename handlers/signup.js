@@ -612,11 +612,9 @@ exports.signup2 = function(req, reply) {
     .then(function createChargifyAccount() {
       return new Promise(function(resolve, reject) {
         chargifyCustomer.createBySubscription(_newAccount, data.billing_plan, function(err, data) {
-
           if (err) {
+            logger.error('createChargifyAccount:createBySubscription:error ' + JSON.stringify(err));
             reject(err);
-            // TODO: delete created Account and User
-            users.removeAsync(_newUser); // TODO: add logger
           } else {
             resolve(data);
             // NOTE: Update Account - set billing_id and subscription information
@@ -639,7 +637,6 @@ exports.signup2 = function(req, reply) {
     .then(function sendEmailForVerifySimpleRegistration() {
       return new Promise(function(resolve, reject) {
         sendVerifyToken(_newUser, _newUser.validation.token, function(err, res) {
-          // renderJSON(req, reply, err, statusResponse);
           if (err) {
             // TODO: add logger send email
           }
@@ -657,8 +654,11 @@ exports.signup2 = function(req, reply) {
       reply(statusResponse);
     })
     .catch(function replyErrorSignUp(err) {
-      // TODO: detect status code
-      reply(boom.notImplemented(err.message || 'Error signup process'));
+      if (err.statusCode === 406) {
+        reply(boom.notImplemented(err.message || 'Error signup process', err));
+      } else {
+        reply(boom.badImplementation(err.message || 'Error signup process', err));
+      }
     });
 };
 
