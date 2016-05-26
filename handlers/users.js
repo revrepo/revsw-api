@@ -57,9 +57,9 @@ exports.getUsers = function getUsers(request, reply) {
 exports.createUser = function(request, reply) {
   var newUser = request.payload;
 
-  if (newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
-    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
-  }
+//  if (newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
+//    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+//  }
 
   if (newUser.companyId) {
     // TODO: need to move the permissions check to a separate function or use the existing function
@@ -166,8 +166,9 @@ exports.updateUser = function(request, reply) {
     return reply(boom.badRequest('Please specify at least one updated attiribute'));
   }
 
-  if (newUser.role && newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
-    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+  if (newUser.role && newUser.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
+    request.auth.credentials.role !== 'reseller')) {
+    return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
   }
 
   var user_id = request.params.user_id;
