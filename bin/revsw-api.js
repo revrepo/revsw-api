@@ -21,6 +21,7 @@
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 'use strict';
+
 var Hapi = require('hapi'),
   Swagger = require('hapi-swagger'),
   jwt = require('jsonwebtoken'),
@@ -33,9 +34,8 @@ var Hapi = require('hapi'),
   validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
   User = require('../models/User'),
   os = require('os'),
+  boom  = require('boom'),
   mail = require('../lib/mail');
-
-require('./../lib/boomOverriding.js');
 
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {
@@ -57,6 +57,7 @@ if (notifyEmail !== '') {
 
 
 var server = new Hapi.Server();
+
 
 
 AuditLogger.init(
@@ -213,6 +214,33 @@ server.register(require('hapi-forward'), function (err) {
   if (err) {
     console.error('Failed to load a plugin:', err);
   }
+});
+
+
+server.ext('onPreResponse', function(request, reply) {
+  var response = request.response;
+  if (response.output.statusCode === 500) {
+    var notifyEmailBadImplementation = config.get('notify_developers_by_email_about_bad_implementation');
+    if (notifyEmailBadImplementation !== '') {
+      // use Boom function
+      var err = boom.internal(response.message, response, 500);
+      mail.sendMail({
+        from: 'eng@revsw.com',
+        to: notifyEmailBadImplementation,
+        subject: '[HAPI Internal Error] ' + process.env.NODE_ENV + ':' + os.hostname() + ' ' + err.message,
+        text: JSON.stringify(err) +
+          '\n\n' + err.stack +
+          '\n\n AUTH : ' + JSON.stringify(request.auth) +
+          '\n\n METHOD : ' + JSON.stringify(request.method) +
+          '\n\n PATH : ' + JSON.stringify(request.path)
+      }, function(er, data) {
+        if (er) {
+          console.error(er);
+        }
+      });
+    }
+  }
+  return reply.continue();
 });
 
 server.register({
