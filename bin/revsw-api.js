@@ -61,6 +61,7 @@ if (notifyEmail !== '') {
 var server = new Hapi.Server();
 
 
+
 AuditLogger.init(
   {
     mongodb : {
@@ -224,12 +225,16 @@ server.ext('onPreResponse', function(request, reply) {
     var notifyEmailBadImplementation = config.get('notify_developers_by_email_about_bad_implementation');
     if (notifyEmailBadImplementation !== '') {
       // use Boom function
-      var err = boom.internal(response.message,response,500);
+      var err = boom.internal(response.message, response, 500);
       mail.sendMail({
         from: 'eng@revsw.com',
         to: notifyEmailBadImplementation,
         subject: '[HAPI Internal Error] ' + process.env.NODE_ENV + ':' + os.hostname() + ' ' + err.message,
-        text: JSON.stringify(err) + '\n\n' + err.stack + '\n\n AUTH : ' + JSON.stringify(request.auth) + '\n\n METHOD : ' + JSON.stringify(request.method) + '\n\n PATH : ' + JSON.stringify(request.path)
+        text: JSON.stringify(err) +
+          '\n\n' + err.stack +
+          '\n\n AUTH : ' + JSON.stringify(request.auth) +
+          '\n\n METHOD : ' + JSON.stringify(request.method) +
+          '\n\n PATH : ' + JSON.stringify(request.path)
       }, function(er, data) {
         if (er) {
           console.error(er);
