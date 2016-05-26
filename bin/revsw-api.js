@@ -219,7 +219,7 @@ server.register(require('hapi-forward'), function (err) {
 
 server.ext('onPreResponse', function(request, reply) {
   var response = request.response;
-  if (response.output.statusCode === 500) {
+  if (response.isBoom === true && response.output.statusCode === 500) {
     var notifyEmailBadImplementation = config.get('notify_developers_by_email_about_bad_implementation');
     if (notifyEmailBadImplementation !== '') {
       // use Boom function
