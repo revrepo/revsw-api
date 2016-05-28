@@ -139,6 +139,8 @@ exports.createAccount = function(request, reply) {
  * @name  createBillingProfile
  * @description
  *
+ *    Create Chargify Customer
+ *
  * @param  {[type]} request [description]
  * @param  {[type]} reply   [description]
  * @return {[type]}         [description]
@@ -186,20 +188,26 @@ exports.createBillingProfile = function(request, reply) {
   accounts.get({
     _id: account_id
   }, function(error, result) {
+    if(error){
+       return reply(boom.badImplementation('Failed to get account with Id '+ account_id, error));
+    }
     if (result) {
-      // Validation data for create Billing Profile
       result = publicRecordFields.handle(result, 'account');
-      Customer.create(result, function resultCreatingCustomer(error, data) {
-        if (error) {
-          if (!!error.error && error.error.name === 'ValidationError') {
-            return reply(boom.badRequest('The customer account is not configured with all required contact/billing details', error));
+      if (result.billing_id === null || result.billing_id === undefined || result.billing_id === ''){
+        Customer.create(result, function resultCreatingCustomer(error, data) {
+          if (error) {
+            if (!!error.error && error.error.name === 'ValidationError') {
+              return reply(boom.badRequest('The customer account is not configured with all required contact/billing details', error));
+            }
+            return reply(boom.badImplementation('Failed to create a billing profile', error));
           }
-          return reply(boom.badImplementation('Failed to create a billing profile', error));
-        }
-        // Set billing_id for account
-        result.billing_id = data.customer.id;
-        updateAccountInformation(result, request, reply);
-      });
+          // Set billing_id for account
+          result.billing_id = data.customer.id;
+          updateAccountInformation(result, request, reply);
+        });
+      }else{
+        return renderJSON(request, reply, error, result);
+      }
 
     } else {
       return reply(boom.badRequest('Account ID not found', account_id));
