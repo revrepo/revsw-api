@@ -56,7 +56,7 @@ exports.deletePrivateSSLCertificatesWithAccountId = function(accountId, options,
       $ne: true
     }
   };
-  var deleted_by = options.deleted_by
+  var deleted_by = options.deleted_by;
   sslCertificates.query(getPrivateSSLCertificatesQuery, function(error, results) {
     if (error) {
       cb(error);
@@ -67,8 +67,8 @@ exports.deletePrivateSSLCertificatesWithAccountId = function(accountId, options,
           callCDS.push(function(cb) {
             return (function(item, cb) {
               return deleteSSLCertificateCDS(item, cb);
-            })(item, cb)
-          })
+            })(item, cb);
+          });
         });
         // NOTE: async call CDS for delete SSL Certificate
         async.parallel(callCDS, function(err, data) {
