@@ -62,7 +62,7 @@ var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var apiKeysService = require('../services/APIKeys.js');
 var dashboardService = require('../services/dashboards.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
-
+var sslCertificatesService = require('../services/sslCertificates.js');
 var emailService = require('../services/email.js');
 
 exports.getAccounts = function getAccounts(request, reply) {
@@ -813,6 +813,17 @@ exports.deleteAccount = function(request, reply) {
           cb(null);
         }
       },
+      // Automatically delete All Private SSL Certificates
+      function(cb) {
+        sslCertificatesService.deletePrivateSSLCertificatesWithAccountId(account_id, {deleted_by : _deleted_by},function(error, data) {
+            if (error) {
+              logger.error('Accounts::deleteAccount:Error remove Private SSL Certificates while removing account ID ' + account_id);
+              return reply(boom.badImplementation('Failed to delete Private SSL Certificates for account ID ' + account_id,error));
+            }
+            logger.info('Removed All Private SSL Certificates while removing account ID ' + account_id);
+            cb();
+          });
+      },
       // Automatically delete all API keys belonging to the account ID
       function removeAccountsApiKeys(cb) {
         apiKeysService.deleteAPIKeysWithAccountId(account_id, function(error) {
@@ -820,6 +831,7 @@ exports.deleteAccount = function(request, reply) {
             logger.error('Error remove All API keys while removing account ID ' + account_id);
             return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
           }
+          logger.info('Removed All API keys while removing account ID ' + account_id);
           cb();
         });
       },

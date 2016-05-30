@@ -34,6 +34,11 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var SSLCertificate = require('../models/SSLCertificate');
 var sslCertificates = new SSLCertificate(mongoose, mongoConnection.getConnectionPortal());
 
+var cds_request = require('request');
+
+var authHeader = {
+  Authorization: 'Bearer ' + config.get('cds_api_token')
+};
 /**
  * @name deletePrivateSSLCertificatesWithAccountId
  * @description
@@ -51,24 +56,23 @@ exports.deletePrivateSSLCertificatesWithAccountId = function(accountId, options,
       $ne: true
     }
   };
-
+  var deleted_by = options.deleted_by
   sslCertificates.query(getPrivateSSLCertificatesQuery, function(error, results) {
     if (error) {
       cb(error);
     } else {
       if (results) {
         var callCDS = [];
-        // TODO: update all records with
-        _.forEach(results,function(item) {
-          callCDS.push(function (callback) {
-            //
-            callback(null, item.id);
-          });
+        _.forEach(results, function(item) {
+          callCDS.push(function(cb) {
+            return (function(item, cb) {
+              return deleteSSLCertificateCDS(item, cb);
+            })(item, cb)
+          })
         });
-        // console.log(callCDS);
-        async.parallel(callCDS, function(err,data) {
-          // console.log('----',err,data)
-          cb(null, data);
+        // NOTE: async call CDS for delete SSL Certificate
+        async.parallel(callCDS, function(err, data) {
+          cb(err, data);
         });
 
       } else {
@@ -76,4 +80,36 @@ exports.deletePrivateSSLCertificatesWithAccountId = function(accountId, options,
       }
     }
   });
+
+  /**
+   * @name deleteSSLCertificateCDS
+   * @description
+   *
+   * @param  {[type]}   data     [description]
+   * @param  {Function} callback [description]
+   * @return {[type]}            [description]
+   */
+  function deleteSSLCertificateCDS(data, callback) {
+    var sslCertId = data._id;
+    logger.info('Calling CDS to delete SSL certificate ID ' + sslCertId + ' deleted_by ' + deleted_by);
+
+    cds_request({
+      url: config.get('cds_url') + '/v1/ssl_certs/' + sslCertId + '?deleted_by="' + deleted_by + '"',
+      method: 'DELETE',
+      headers: authHeader,
+    }, function(err, res, body) {
+      if (err) {
+        logger.error('Failed to send a CDS command to delete SSL certificate ID ' + sslCertId);
+        callback(err);
+      } else {
+        var response_json = JSON.parse(body);
+        if (res.statusCode === 400) {
+          return callback(true, null);
+        } else {
+          callback(null, data._id);
+        }
+      }
+
+    });
+  }
 };
