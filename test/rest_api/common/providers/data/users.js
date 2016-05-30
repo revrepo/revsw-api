@@ -94,7 +94,7 @@ var UserDataProvider = {
     var user = {
       first_name: firstName,
       last_name: lastName,
-      email: [firstName, lastName, Date.now() + '@mailinator.com']
+      email: [firstName, Date.now() + '@mailinator.com']
         .join('-')
         .toLowerCase(),
       // TODO: Commenting out below lines as the are not required for /signup2
