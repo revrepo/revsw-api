@@ -36,10 +36,13 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var DomainConfig   = require('../models/DomainConfig');
 var ServerGroup         = require('../models/ServerGroup');
 var Account = require('../models/Account');
+var User = require('../models/User');
 
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var users = new User(mongoose, mongoConnection.getConnectionPortal());
+
 var billing_plans = require('../models/BillingPlan');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
@@ -216,6 +219,7 @@ exports.getDomainConfigVersions = function(request, reply) {
 
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
+  var user_id = request.auth.credentials.user_id;
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -264,23 +268,50 @@ exports.createDomainConfig = function(request, reply) {
         if (res.statusCode !== 200) {
           return renderJSON(request, reply, err, response_json);
         }
+        // NOTE: Update user permissions for domains
+        users.getById( user_id, function(error, res) {
+          if (error) {
+            logger.error('createDomainConfig:Error get user created domain configuration ' + JSON.stringify(error));
+          }
+          if (res.role === 'user') {
+            res.domain.push(originalDomainJson.domain_name);
+            var updateInfo = {
+              user_id: user_id,
+              domain: res.domain
+            };
+            users.update(updateInfo, function(err, data) {
+              if (err) {
+                logger.error('createDomainConfig:Error update user domain list' + JSON.stringify(err));
+              } else {
+                logger.info('createDomainConfig:Success update user domain list' + JSON.stringify(err));
+              }
+              responseSuccessMessage();
+            });
+          } else {
+            responseSuccessMessage();
+          }
+        });
 
-        var response = {
-          statusCode: 200,
-          message: 'Successfully created new domain configuration',
-          object_id: response_json._id
-        };
-        AuditLogger.store({
-          account_id       : account_id,
-          activity_type    : 'add',
-          activity_target  : 'domain',
-          target_id        : response.object_id,
-          target_name      : originalDomainJson.domain_name,
-          target_object    : originalDomainJson,
-          operation_status : 'success'
-        }, request);
 
-        renderJSON(request, reply, err, response);
+        function responseSuccessMessage() {
+            var response = {
+              statusCode: 200,
+              message: 'Successfully created new domain configuration',
+              object_id: response_json._id
+            };
+
+            AuditLogger.store({
+              account_id: account_id,
+              activity_type: 'add',
+              activity_target: 'domain',
+              target_id: response.object_id,
+              target_name: originalDomainJson.domain_name,
+              target_object: originalDomainJson,
+              operation_status: 'success'
+            }, request);
+
+            renderJSON(request, reply, err, response);
+        }
       });
     });
   };
