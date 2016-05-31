@@ -219,7 +219,6 @@ exports.getDomainConfigVersions = function(request, reply) {
 
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
-  var user_type = request.auth.credentials.user_type;
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -269,30 +268,26 @@ exports.createDomainConfig = function(request, reply) {
           return renderJSON(request, reply, err, response_json);
         }
         // NOTE: Update user permissions for domains
-        if(user_type === 'user'){
+         if(request.auth.credentials.user_type === 'user' && request.auth.credentials.role === 'user'){
           var user_id = request.auth.credentials.user_id;
-          users.getById( user_id, function(error, res) {
-            if (error) {
-              logger.error('createDomainConfig:Error get user created domain configuration ' + JSON.stringify(error));
-            }
-            if (res.role === 'user') {
-              res.domain.push(originalDomainJson.domain_name);
-              var updateInfo = {
+          var domains = request.auth.credentials.domain;
+          domains.push(originalDomainJson.domain_name);
+          var updateInfo = {
                 user_id: user_id,
-                domain: res.domain
-              };
-              users.update(updateInfo, function(err, data) {
-                if (err) {
-                  logger.error('createDomainConfig:Error update user domain list' + JSON.stringify(err));
-                } else {
-                  logger.info('createDomainConfig:Success update user domain list' + JSON.stringify(err));
-                }
-                responseSuccessMessage();
-              });
+                domain: domains
+          };
+          users.update(updateInfo, function(err, data) {
+            if (err) {
+              logger.error('createDomainConfig:Error update user domain list' + JSON.stringify(err));
             } else {
-              responseSuccessMessage();
+              logger.info('createDomainConfig:Success update user domain list' + JSON.stringify(err));
             }
+            // NOTE: response after update user
+            responseSuccessMessage();
           });
+        } else {
+            // NOTE: response for API and users not with role 'user'
+            responseSuccessMessage();
         }
 
         function responseSuccessMessage() {
