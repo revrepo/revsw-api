@@ -37,7 +37,7 @@ exports.getApps = function(request, reply) {
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
-      return reply(boom.badImplementation('Failed to get list of mobile apps from the CDS'));
+      return reply(boom.badImplementation('Failed to get list of mobile apps from the CDS', err));
     }
     var response_json = JSON.parse(body);
     if (res.statusCode === 400) {
@@ -249,10 +249,12 @@ exports.updateApp = function(request, reply) {
 
 exports.deleteApp = function(request, reply) {
   var app_id = request.params.app_id;
+  var _deleted_by = utils.generateCreatedByField(request);
+  var options = '?deleted_by='+_deleted_by;
   var account_id;
   apps.get({_id: app_id, deleted: {$ne: true}}, function (error, existing_app) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id));
+      return reply(boom.badImplementation('Failed to retrieve app details for app ID ' + app_id, error));
     }
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
@@ -262,21 +264,18 @@ exports.deleteApp = function(request, reply) {
     }
     account_id = existing_app.account_id;
 
-    // TODO: add deleted_at and deleted_by fields
-
-    logger.info('Calling CDS to delete app ID ' + app_id);
-    cds_request({method: 'DELETE', url: config.get('cds_url') + '/v1/apps/' + app_id, headers: authHeader}, function (err, res, body) {
+    logger.info('Calling CDS to delete app ID ' + app_id + ' and option deleted_by '+ _deleted_by );
+    cds_request({method: 'DELETE', url: config.get('cds_url') + '/v1/apps/' + app_id + options, headers: authHeader}, function (err, res, body) {
       if (err) {
-        return reply(boom.badImplementation('CDS failed to delete the mobile app with App ID ' + app_id));
+        return reply(boom.badImplementation('CDS failed to delete the mobile app with App ID ' + app_id, err));
       }
       var response_json = JSON.parse(body);
       if (res.statusCode === 400) {
         return reply(boom.badRequest(response_json.message));
       } else if (res.statusCode === 500) {
-        return reply(boom.badImplementation(response_json.message));
+        return reply(boom.badImplementation(response_json.message, res));
       } else if (res.statusCode === 200) {
         existing_app = publicRecordFields.handle(existing_app, 'apps');
-
         AuditLogger.store({
           account_id      : account_id,
           activity_type   : 'delete',
