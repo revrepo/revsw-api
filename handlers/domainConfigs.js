@@ -219,7 +219,6 @@ exports.getDomainConfigVersions = function(request, reply) {
 
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
-  var user_type = request.auth.credentials.user_type;
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -269,7 +268,7 @@ exports.createDomainConfig = function(request, reply) {
           return renderJSON(request, reply, err, response_json);
         }
         // NOTE: Update user permissions for domains
-         if(user_type === 'user' && request.auth.credentials.role === 'user'){
+         if(request.auth.credentials.user_type === 'user' && request.auth.credentials.role === 'user'){
           var user_id = request.auth.credentials.user_id;
           var domains = request.auth.credentials.domain;
           domains.push(originalDomainJson.domain_name);
@@ -283,7 +282,7 @@ exports.createDomainConfig = function(request, reply) {
             } else {
               logger.info('createDomainConfig:Success update user domain list' + JSON.stringify(err));
             }
-            // NOTE: response after updat user
+            // NOTE: response after update user
             responseSuccessMessage();
           });
         } else {
