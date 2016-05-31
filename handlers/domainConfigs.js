@@ -219,6 +219,7 @@ exports.getDomainConfigVersions = function(request, reply) {
 
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
+  var user_id = request.auth.credentials.user_id;
   var originalDomainJson = newDomainJson;
   var account_id = newDomainJson.account_id;
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
@@ -268,16 +269,17 @@ exports.createDomainConfig = function(request, reply) {
           return renderJSON(request, reply, err, response_json);
         }
         // NOTE: Update user permissions for domains
-        users.get({
-          email: newDomainJson.created_by
-        }, function(error, res) {
+        users.getById( user_id, function(error, res) {
           if (error) {
             logger.error('createDomainConfig:Error get user created domain configuration ' + JSON.stringify(error));
           }
           if (res.role === 'user') {
             res.domain.push(originalDomainJson.domain_name);
-            var _user = publicRecordFields.handle(res, 'user');
-            users.update(_user, function(err, data) {
+            var updateInfo = {
+              user_id: user_id,
+              domain: res.domain
+            };
+            users.update(updateInfo, function(err, data) {
               if (err) {
                 logger.error('createDomainConfig:Error update user domain list' + JSON.stringify(err));
               } else {
