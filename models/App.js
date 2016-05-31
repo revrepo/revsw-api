@@ -60,7 +60,7 @@ function App(mongoose, connection, options) {
     // TODO add allowed app platforms
     app_platform: String, // (“iOS” or “Android”)
     deleted: {type: Boolean, default: false},
-    deleted_at: {type: Date},
+    deleted_at: {type: Date, default : null},
     deleted_by: String,
     sdk_key: String,
     created_at: {type: Date, default: Date.now},
