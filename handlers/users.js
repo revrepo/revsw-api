@@ -62,8 +62,7 @@ exports.createUser = function(request, reply) {
 //  }
 
   if (newUser.companyId) {
-    // TODO: need to move the permissions check to a separate function or use the existing function
-    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request))) {
+    if (utils.checkUserAccessPermissionToAddNewUser(request,newUser) ) {
       return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
     }
   } else if (request.auth.credentials.companyId.length !== 0) {
