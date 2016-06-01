@@ -459,22 +459,21 @@ exports.updateDomainConfig = function(request, reply) {
 };
 
 exports.deleteDomainConfig = function(request, reply) {
-
   var domain_id = request.params.domain_id;
+  var _deleted_by = utils.generateCreatedByField(request);
+  var options = '?deleted_by='+_deleted_by;
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id, error));
     }
     if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    // TODO: add deleted_at and deleted_by fields
+    logger.info('Calling CDS to delete domain ID: ' + domain_id + ' and option deleted_by '+ _deleted_by);
 
-    logger.info('Calling CDS to delete domain ID: ' + domain_id);
-
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id,
+    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + options,
       method: 'DELETE',
       headers: authHeader,
     }, function (err, res, body) {
