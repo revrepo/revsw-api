@@ -70,7 +70,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_name_id}/approvers',
+    path: '/v1/ssl_names/{ssl_order_id}/{ssl_name_id}/approvers',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -80,7 +80,8 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID')
+          ssl_order_id: Joi.string().required().description('SSL order ID'),
+          ssl_name_id: Joi.string().required().description('SSL name ID')
         }
       },
       plugins: {

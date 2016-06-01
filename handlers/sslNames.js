@@ -19,35 +19,37 @@
 /*jslint node: true */
 'use strict';
 
-var mongoose    = require('mongoose');
-var boom        = require('boom');
+var mongoose = require('mongoose');
+var boom = require('boom');
 var AuditLogger = require('../lib/audit');
-var config      = require('config');
+var config = require('config');
 var cds_request = require('request');
-var utils           = require('../lib/utilities.js');
+var utils = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
 var Promise = require('bluebird');
 var _ = require('lodash');
 
-var renderJSON      = require('../lib/renderJSON');
+var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
+var GlobalSign = require('../lib/globalsignapi');
 
 var Account = require('../models/Account');
 var SSLName = require('../models/SSLName');
 
+var globalSignApi = new GlobalSign();
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var sslNames = new SSLName(mongoose, mongoConnection.getConnectionPortal());
 
-exports.listSSLNames = function(request, reply) {
+exports.listSSLNames = function (request, reply) {
   sslNames.list(function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names'));
     }
 
     var response = [];
-    for (var i=0; i < result.length; i++) {
-      if (utils.checkUserAccessPermissionToSSLName(request,result[i])) {
+    for (var i = 0; i < result.length; i++) {
+      if (utils.checkUserAccessPermissionToSSLName(request, result[i])) {
         response.push(result[i]);
       }
     }
@@ -56,7 +58,7 @@ exports.listSSLNames = function(request, reply) {
   });
 };
 
-exports.getSSLName = function(request, reply) {
+exports.getSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
 
@@ -64,7 +66,7 @@ exports.getSSLName = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
@@ -73,55 +75,74 @@ exports.getSSLName = function(request, reply) {
   });
 };
 
-exports.getSSLNameApprovers = function(request, reply) {
-
-  var domain = request.params.domain_name;
+exports.getSSLNameApprovers = function (request, reply) {
+  var San = request.params.ssl_name_id;
+  var Order_ID = request.params.ssl_order_id;
+  globalSignApi.getStatus(Order_ID, function (err, data) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(data.output.message);
+      var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
+      console.log(fqdn);
+      globalSignApi.getApproveList(Order_ID, San, fqdn, function (err, data) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(data.output.message);
+          //return data.output.message.Response.Approvers[0];
+          var response = data.output.message.Response.Approvers[0];
+          renderJSON(request, reply, err, response);
+        }
+      });
+    }
+  });
 
 };
 
-exports.addSSLName = function(request, reply) {
+exports.addSSLName = function (request, reply) {
 
   var newSSLName = request.payload;
 
-  if (!utils.checkUserAccessPermissionToSSLName(request,newSSLName)) {
+  if (!utils.checkUserAccessPermissionToSSLName(request, newSSLName)) {
     return reply(boom.badRequest('SSL name ID not found'));
   }
 
   newSSLName.created_by = utils.generateCreatedByField(request);
 
-/*
+  /*
 
-  logShippingJobs.add(newLogJob, function (error, result) {
-    if (error || !result) {
-      return reply(boom.badImplementation('Failed to store in the DB new log shipping job ' + JSON.stringify(newLogJob)));
-    }
+   logShippingJobs.add(newLogJob, function (error, result) {
+   if (error || !result) {
+   return reply(boom.badImplementation('Failed to store in the DB new log shipping job ' + JSON.stringify(newLogJob)));
+   }
 
-    var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-    result2.destination_key = '<Hidden for security reasons>';
-    result2.destination_password = '<Hidden for security reasons>';
+   var result2 = publicRecordFields.handle(result, 'LogShippingJob');
+   result2.destination_key = '<Hidden for security reasons>';
+   result2.destination_password = '<Hidden for security reasons>';
 
-    AuditLogger.store({
-      account_id       : result.account_id,
-      activity_type    : 'add',
-      activity_target  : 'logshippingjob',
-      target_id        : result.id,
-      target_name      : result.job_name,
-      target_object    : result2,
-      operation_status : 'success'
-    }, request);
+   AuditLogger.store({
+   account_id       : result.account_id,
+   activity_type    : 'add',
+   activity_target  : 'logshippingjob',
+   target_id        : result.id,
+   target_name      : result.job_name,
+   target_object    : result2,
+   operation_status : 'success'
+   }, request);
 
-    var statusResponse = {
-      statusCode: 200,
-      message: 'Successfully created a new log shipping job',
-      object_id: result.id
-    };
+   var statusResponse = {
+   statusCode: 200,
+   message: 'Successfully created a new log shipping job',
+   object_id: result.id
+   };
 
-    renderJSON(request, reply, error, statusResponse);
-*/
+   renderJSON(request, reply, error, statusResponse);
+   */
 
 };
 
-exports.verifySSLName = function(request, reply) {
+exports.verifySSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
 
@@ -131,46 +152,46 @@ exports.verifySSLName = function(request, reply) {
     }
 
     // TODO add a permissions check for new account_id
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
-/*
+    /*
 
-    newLogJob.updated_by = utils.generateCreatedByField(request);
+     newLogJob.updated_by = utils.generateCreatedByField(request);
 
-    logShippingJobs.update(newLogJob, function (error, result) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to update the DB for log shipping job ID ' + logJobId));
-      }
+     logShippingJobs.update(newLogJob, function (error, result) {
+     if (error) {
+     return reply(boom.badImplementation('Failed to update the DB for log shipping job ID ' + logJobId));
+     }
 
-      var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-      result2.destination_key = '<Hidden for security reasons>';
-      result2.destination_password = '<Hidden for security reasons>';
+     var result2 = publicRecordFields.handle(result, 'LogShippingJob');
+     result2.destination_key = '<Hidden for security reasons>';
+     result2.destination_password = '<Hidden for security reasons>';
 
-      AuditLogger.store({
-        account_id       : result.account_id,
-        activity_type    : 'modify',
-        activity_target  : 'logshippingjob',
-        target_id        : logJobId,
-        target_name      : result.job_name,
-        target_object    : result2,
-        operation_status : 'success'
-      }, request);
+     AuditLogger.store({
+     account_id       : result.account_id,
+     activity_type    : 'modify',
+     activity_target  : 'logshippingjob',
+     target_id        : logJobId,
+     target_name      : result.job_name,
+     target_object    : result2,
+     operation_status : 'success'
+     }, request);
 
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully updated the log shipping job'
-      };
+     var statusResponse = {
+     statusCode: 200,
+     message: 'Successfully updated the log shipping job'
+     };
 
-      renderJSON(request, reply, error, statusResponse);
-    });
-*/
+     renderJSON(request, reply, error, statusResponse);
+     });
+     */
 
   });
 };
 
-exports.deleteSSLName = function(request, reply) {
+exports.deleteSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
 
@@ -178,40 +199,40 @@ exports.deleteSSLName = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
     }
-    
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request,result)) {
+
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
-/*
-  
-    logShippingJobs.remove({ _id: logJobId}, function (error, item) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to delete from the DB log shipping job ID ' + logJobId));
-      }
+    /*
 
-      var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-      result2.destination_key = '<Hidden for security reasons>';
-      result2.destination_password = '<Hidden for security reasons>';
+     logShippingJobs.remove({ _id: logJobId}, function (error, item) {
+     if (error) {
+     return reply(boom.badImplementation('Failed to delete from the DB log shipping job ID ' + logJobId));
+     }
 
-      AuditLogger.store({
-        account_id       : result.account_id,
-        activity_type    : 'delete',
-        activity_target  : 'logshippingjob',
-        target_id        : logJobId,
-        target_name      : result.job_name,
-        target_object    : result2,
-        operation_status : 'success'
-      }, request);
+     var result2 = publicRecordFields.handle(result, 'LogShippingJob');
+     result2.destination_key = '<Hidden for security reasons>';
+     result2.destination_password = '<Hidden for security reasons>';
 
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully deleted the log shipping job'
-      };
+     AuditLogger.store({
+     account_id       : result.account_id,
+     activity_type    : 'delete',
+     activity_target  : 'logshippingjob',
+     target_id        : logJobId,
+     target_name      : result.job_name,
+     target_object    : result2,
+     operation_status : 'success'
+     }, request);
 
-      renderJSON(request, reply, error, statusResponse);
-    });
-*/
+     var statusResponse = {
+     statusCode: 200,
+     message: 'Successfully deleted the log shipping job'
+     };
+
+     renderJSON(request, reply, error, statusResponse);
+     });
+     */
 
   });
 };
