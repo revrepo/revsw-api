@@ -49,7 +49,7 @@ module.exports = [
       },
       validate: {
         payload: {
-          domainName: Joi.string().regex(routeModels.domainRegex).required().description('Domain name to purge objects for'),
+          domainName: Joi.string().lowercase().regex(routeModels.domainRegex).required().description('Domain name to purge objects for'),
           purges: Joi.array().items({
             url: Joi.object({
               is_wildcard: Joi.boolean().required()
