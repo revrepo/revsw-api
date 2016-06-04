@@ -34,7 +34,6 @@ describe('Smoke check', function () {
 
   users.forEach(function (user) {
 
-    var testAccount;
     var testBillingPlan;
 
     describe('With user: ' + user.role, function () {
@@ -45,10 +44,6 @@ describe('Smoke check', function () {
           API.helpers
             .authenticateUser(user)
             .then(function () {
-              //  return API.helpers.accounts.createOne();
-              //})
-              //.then(function (newAccount) {
-              //  testAccount = newAccount;
               return API.helpers.billingPlans.createOne();
             })
             .then(function (billingPlan) {
@@ -116,7 +111,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: Privileges. Need a proper user.
+        // TODO: Privileges. Need a proper user (admin_rw).
         xit('should return a response when updating an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
@@ -125,7 +120,8 @@ describe('Smoke check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.billingPlans.createOneAsPrerequisite(newBillingPlan);
+                return API.resources.billingPlans
+                  .createOneAsPrerequisite(newBillingPlan);
               })
               .then(function (response) {
                 API.resources.billingPlans
@@ -136,14 +132,15 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: Privileges. Need a proper user.
-        xit('should return a response when deleting an billing plan.',
+        // TODO: Privileges. Need a proper user (admin_rw).
+        it('should return a response when deleting an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.billingPlans.createOneAsPrerequisite(newBillingPlan);
+                return API.resources.billingPlans
+                  .createOneAsPrerequisite(newBillingPlan);
               })
               .then(function (response) {
                 API.resources.billingPlans
