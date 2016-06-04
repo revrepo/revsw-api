@@ -71,7 +71,7 @@ describe('UsageReport Functional check:', function () {
         found = report[i];
         break;
       }
-    };
+    }
     report = found;
     report.should.be.ok();
   });

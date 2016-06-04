@@ -259,11 +259,11 @@ module.exports = {
     var activityResponseSchema = Joi.object().keys({
       metadata: Joi.object().keys({
         user_id: Joi.string().regex(idFormatPattern).required(),
-        account_id: Joi.string().regex(idFormatPattern)
+        account_id: Joi.string().regex(idFormatPattern),
         /*.allow([
           Joi.string().regex(idFormatPattern),
           Joi.array().items(Joi.string().regex(idFormatPattern))
-        ])*/,
+        ])*/
         start_time: Joi.number().min(minTimestamp).max(maxTimestamp).required(),
         end_time: Joi.number().min(minTimestamp).max(maxTimestamp).required()
       }),
