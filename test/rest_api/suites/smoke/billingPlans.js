@@ -91,7 +91,8 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a response when creating an billing plan.',
+        // TODO: Not needed to test yet. Also, admin_rw user is required
+        xit('should return a response when creating an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
             API.helpers
@@ -111,7 +112,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: Privileges. Need a proper user (admin_rw).
+        // TODO: Not needed to test yet. Also, admin_rw user is required
         xit('should return a response when updating an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
@@ -132,7 +133,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: Privileges. Need a proper user (admin_rw).
+        // TODO: Not needed to test yet. Also, admin_rw user is required
         xit('should return a response when deleting an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
@@ -151,7 +152,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: Bug, getting 500 status code
+        // TODO: Bug?, getting 500 status code
         xit('should return a response when getting hosted page data',
           function (done) {
             API.helpers

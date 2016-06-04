@@ -92,7 +92,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a response when creating an dashboard.',
+        it('should return a response when creating a dashboard.',
           function (done) {
             var newDashboard = DashboardsDP.generateOne();
             API.helpers
@@ -112,7 +112,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a response when updating an dashboard.',
+        it('should return a response when updating a dashboard.',
           function (done) {
             var newDashboard = DashboardsDP.generateOne();
             var updatedDashboard = DashboardsDP
@@ -132,7 +132,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a response when deleting an dashboard.',
+        it('should return a response when deleting a dashboard.',
           function (done) {
             var newDashboard = DashboardsDP.generateOne();
             API.helpers
