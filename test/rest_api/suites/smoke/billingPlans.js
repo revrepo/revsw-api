@@ -133,7 +133,7 @@ describe('Smoke check', function () {
           });
 
         // TODO: Privileges. Need a proper user (admin_rw).
-        it('should return a response when deleting an billing plan.',
+        xit('should return a response when deleting an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
             API.helpers
