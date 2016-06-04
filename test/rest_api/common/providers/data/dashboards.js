@@ -55,6 +55,11 @@ var DashboardDataProvider = {
     };
   },
 
+  generateOneForUpdate: function (dashboard) {
+    dashboard.title = 'UPDATED ' + dashboard.title;
+    return dashboard;
+  },
+
   /**
    * ### DashboardDataProvider.generateCompleteOne()
    *

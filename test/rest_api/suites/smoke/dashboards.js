@@ -115,42 +115,44 @@ describe('Smoke check', function () {
               })
               .catch(done);
           });
-        //
-        //it('should return a response when updating an dashboard.',
-        //  function (done) {
-        //    var newDashboard = DashboardsDP.generateOne(testAccount.id, 'NEW');
-        //    var updatedDashboard = DashboardsDP
-        //      .generateOneForUpdate(testAccount.id, 'UPDATED');
-        //    API.helpers
-        //      .authenticateUser(user)
-        //      .then(function () {
-        //        return API.resources.dashboards.createOneAsPrerequisite(newDashboard);
-        //      })
-        //      .then(function (response) {
-        //        API.resources.dashboards
-        //          .update(response.body.id, updatedDashboard)
-        //          .expect(200)
-        //          .end(done);
-        //      })
-        //      .catch(done);
-        //  });
-        //
-        //it('should return a response when deleting an dashboard.',
-        //  function (done) {
-        //    var newDashboard = DashboardsDP.generateOne(testAccount.id, 'NEW');
-        //    API.helpers
-        //      .authenticateUser(user)
-        //      .then(function () {
-        //        return API.resources.dashboards.createOneAsPrerequisite(newDashboard);
-        //      })
-        //      .then(function (response) {
-        //        API.resources.dashboards
-        //          .deleteOne(response.body.id)
-        //          .expect(200)
-        //          .end(done);
-        //      })
-        //      .catch(done);
-        //  });
+
+        it('should return a response when updating an dashboard.',
+          function (done) {
+            var newDashboard = DashboardsDP.generateOne();
+            var updatedDashboard = DashboardsDP
+              .generateOneForUpdate(newDashboard);
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.dashboards
+                  .createOneAsPrerequisite(newDashboard);
+              })
+              .then(function (response) {
+                API.resources.dashboards
+                  .update(response.body.object_id, updatedDashboard)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return a response when deleting an dashboard.',
+          function (done) {
+            var newDashboard = DashboardsDP.generateOne();
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.dashboards
+                  .createOneAsPrerequisite(newDashboard);
+              })
+              .then(function (response) {
+                API.resources.dashboards
+                  .deleteOne(response.body.object_id)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
     });
   });
