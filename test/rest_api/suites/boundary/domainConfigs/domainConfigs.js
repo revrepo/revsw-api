@@ -62,10 +62,10 @@ describe('Boundary check', function () {
     it('should return `Bad Request` when trying to `create` domain config ' +
       'with `long` name.',
       function (done) {
-        var longDomainName = 'LongDomainNameLongDomainNameLongDomainNameLong' +
-          'DomainNameLongDomainNameLongDomainNameLongDomainNameLongDomainName' +
-          'LongDomainNameLongDomainNameLongDomainNameLongDomainNameLongDomain' +
-          'NameLongDomainNameLongDomainNameLongDomainNameLongDomainName';
+        var longDomainName = 'longdomainnamelongdomainnamelongdomainnamelong' +
+          'domainnamelongdomainnamelongdomainnamelongdomainnamelongdomainname' +
+          'longdomainnamelongdomainnamelongdomainnamelongdomainnameLongDomain' +
+          'Namelongdomainnamelongdomainnamelongdomainnamelongdomainname';
         var expectedMsg = 'child "domain_name" fails because ["domain_name" ' +
           'with value "' + longDomainName + '" fails to match the required ' +
           'pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-z' +
