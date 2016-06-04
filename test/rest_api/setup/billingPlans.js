@@ -45,7 +45,8 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean Billing Plans created for testing.',
+    // TODO: Need to run this script as 'admin_rw' user
+    xit('should clean Billing Plans created for testing.',
       function (done) {
         API.helpers
           .authenticateUser(reseller)
@@ -57,7 +58,7 @@ describe('Clean up', function () {
                 var ids = [];
                 var billingPlans = res.body;
                 billingPlans.forEach(function (billingPlan) {
-                  if (namePattern.test(billingPlan.title)) {
+                  if (namePattern.test(billingPlan.name)) {
                     ids.push(billingPlan.id);
                   }
                 });
