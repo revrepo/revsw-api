@@ -20,7 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-//var DashboardsDP = require('./../../common/providers/data/dashboards');
+var DashboardsDP = require('./../../common/providers/data/dashboards');
 
 describe('Smoke check', function () {
 
@@ -34,38 +34,33 @@ describe('Smoke check', function () {
 
   users.forEach(function (user) {
 
-    var testAccount;
+    //var testAccount;
     var testDashboard;
 
     describe('With user: ' + user.role, function () {
 
       describe('Dashboards resource', function () {
 
-        //before(function (done) {
-        //  API.helpers
-        //    .authenticateUser(user)
-        //    .then(function () {
-        //      return API.helpers.accounts.createOne();
-        //    })
-        //    .then(function (newAccount) {
-        //      testAccount = newAccount;
-        //      return API.helpers.dashboards.createOne(testAccount.id);
-        //    })
-        //    .then(function (dashboard) {
-        //      testDashboard = dashboard;
-        //    })
-        //    .then(done)
-        //    .catch(done);
-        //});
-        //
-        //after(function (done) {
-        //  API.helpers
-        //    .authenticateUser(user)
-        //    .then(function () {
-        //      API.resources.dashboards.deleteAllPrerequisites(done);
-        //    })
-        //    .catch(done);
-        //});
+        before(function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+            //  return API.helpers.accounts.createOne();
+            //})
+            //.then(function (newAccount) {
+            //  testAccount = newAccount;
+              return API.helpers.dashboards.createOne();
+            })
+            .then(function (dashboard) {
+              testDashboard = dashboard;
+            })
+            .then(done)
+            .catch(done);
+        });
+
+        after(function (done) {
+          done();
+        });
 
         beforeEach(function (done) {
           done();
@@ -83,43 +78,43 @@ describe('Smoke check', function () {
                 API.resources.dashboards
                   .getAll()
                   .expect(200)
-                  .done(done);
+                  .end(done);
               })
               .catch(done);
           });
 
-        //it('should return a response when getting specific dashboard.',
-        //  function (done) {
-        //    API.helpers
-        //      .authenticateUser(user)
-        //      .then(function () {
-        //        API.resources.dashboards
-        //          .getOne(testDashboard.id)
-        //          .expect(200)
-        //          .end(done);
-        //      })
-        //      .catch(done);
-        //  });
-        //
-        //it('should return a response when creating an dashboard.',
-        //  function (done) {
-        //    var newDashboard = DashboardsDP.generateOne(testAccount.id, 'NEW');
-        //    API.helpers
-        //      .authenticateUser(user)
-        //      .then(function () {
-        //        API.resources.dashboards
-        //          .createOne(newDashboard)
-        //          .expect(200)
-        //          .then(function (response) {
-        //            // Delete dashboard
-        //            API.resources.dashboards
-        //              .deleteOne(response.body.object_id)
-        //              .end(done);
-        //          })
-        //          .catch(done);
-        //      })
-        //      .catch(done);
-        //  });
+        it('should return a response when getting specific dashboard.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.dashboards
+                  .getOne(testDashboard.id)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return a response when creating an dashboard.',
+          function (done) {
+            var newDashboard = DashboardsDP.generateOne();
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.dashboards
+                  .createOne(newDashboard)
+                  .expect(200)
+                  .then(function (response) {
+                    // Delete dashboard
+                    API.resources.dashboards
+                      .deleteOne(response.body.object_id)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
         //
         //it('should return a response when updating an dashboard.',
         //  function (done) {

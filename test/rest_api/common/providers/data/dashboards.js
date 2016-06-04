@@ -33,14 +33,18 @@ var DashboardDataProvider = {
    * Generates valid data that represents a Dashboard which the REST API
    * end points accept.
    *
-   * @param {String} accountId, account ID
    * @returns {Object} Dashboard info with the following schema
    *
    *    {
-   *       account_id: String
+   *      title: string,
+   *      options: {
+   *        stripUnknown: boolean
+   *      },
+   *      structure: string
+   *      rows: array
    *    }
    */
-  generateOne: function (accountId) {
+  generateOne: function () {
     return {
       title: 'API QA: ' + Date.now(),
       options: {
