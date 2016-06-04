@@ -38,7 +38,8 @@ module.exports = {
           dashboard);
       })
       .then(function (res) {
-        dashboard.id = res.body.id;
+        console.log(123, res.body);
+        dashboard.id = res.body.object_id;
         return dashboard;
       });
   }
