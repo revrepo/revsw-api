@@ -161,7 +161,6 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         if (err) {
           throw err;
         }
-        var response_json = JSON.parse(res.text); //@TODO why?
         done();
       });
   });
@@ -175,7 +174,6 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         if (err) {
           throw err;
         }
-        var response_json = JSON.parse(res.text); //@TODO why?
         done();
       });
   });
@@ -189,7 +187,6 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         if (err) {
           throw err;
         }
-        var response_json = JSON.parse(res.text); //@TODO why?
         done();
       });
   });
