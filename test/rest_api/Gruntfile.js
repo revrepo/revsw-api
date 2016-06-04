@@ -31,21 +31,33 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [
-          'suites/**/account*.js', // Accounts specs
-          'suites/**/*omainConfig*.js', // DomainConfigs specs
-          'suites/**/stat*.js', // Stats specs
-          'suites/**/purge*.js', // Purge specs
-          'suites/**/2fa*.js', // 2fa specs
-          'suites/**/countries*.js', // Countries specs
-          'suites/**/locations*.js', // Locations specs
-          'suites/**/authenticate*.js', // Authenticate specs
-          'suites/**/forgot*.js', // Forgot specs
-          'suites/**/activity*.js', // Activity specs
-          'suites/**/apps*.js', // Apps specs
-          'suites/**/usage*.js', // Usage Reports specs
+          'suites/**/2fa*.js',
+          'suites/**/account*.js',
+          'suites/**/activity*.js',
+          'suites/**/apiKey*.js',
+          'suites/**/app*.js',
+          'suites/**/authenticate*.js',
+          'suites/**/billingPlan*.js',
+          'suites/**/billingStatement*.js',
+          'suites/**/countr*.js',
+          'suites/**/dashboard*.js',
+          'suites/**/*omainConfig*.js',
+          'suites/**/forgot*.js',
+          'suites/**/location*.js',
+          'suites/**/purge*.js',
+          'suites/**/signUp*.js',
+          'suites/**/sslCert*.js',
+          'suites/**/stat*.js',
+          'suites/**/stats-sdk*.js',
+          'suites/**/user*.js',
+          'suites/**/zenDeskArticle*.js',
           // Cleaning up env.
+          'setup/apiKeys.js',
           'setup/apps.js',
+          'setup/billingPlans.js',
+          'setup/dashboards.js',
           'setup/domainConfigs.js',
+          'setup/sslCerts.js',
           'setup/accounts.js',
           'setup/users.js'
         ]
