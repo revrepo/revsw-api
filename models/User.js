@@ -40,7 +40,7 @@ function User(mongoose, connection, options) {
     },
     // TODO need to rename to account_id
     'companyId'            : String,
-    'domain'               : String,
+    'domain'               : {type: String, lowercase: true},
     'email'                : String,
      // TODO rename to first_name
     'firstname'            : String,
@@ -97,7 +97,7 @@ User.prototype = {
     item.password = hash;
 
     if (utils.isArray(item.domain)) {
-      item.domain = item.domain.join(',');
+      item.domain = item.domain.join(',').toLowerCase();
     }
 
     if (utils.isArray(item.companyId)) {
@@ -142,7 +142,7 @@ User.prototype = {
           doc.companyId = [];
         }
         if (doc.domain) {
-          doc.domain = doc.domain.split(',');
+          doc.domain = doc.domain.toLowerCase().split(',');
         } else {
           doc.domain = [];
         }
@@ -170,7 +170,7 @@ User.prototype = {
           doc.companyId = doc.companyId.split(',');
         }
         if (doc.domain) {
-          doc.domain = doc.domain.split(',');
+          doc.domain = doc.domain.toLowerCase().split(',');
         } else {
           doc.domain = [];
         }
@@ -200,7 +200,7 @@ User.prototype = {
           doc.companyId = [];
         }
         if (doc.domain) {
-          doc.domain = doc.domain.split(',');
+          doc.domain = doc.domain.toLowerCase().split(',');
         } else {
           doc.domain = [];
         }
@@ -246,7 +246,7 @@ User.prototype = {
           doc.companyId = [];
         }
         if (doc.domain) {
-          doc.domain = doc.domain.split(',');
+          doc.domain = doc.domain.toLowerCase().split(',');
         } else {
           doc.domain = [];
         }
@@ -328,7 +328,7 @@ User.prototype = {
             delete users[i].old_passwords;
 
             if (users[i].domain && users[i].domain !== '') {
-              users[i].domain = users[i].domain.split(',');
+              users[i].domain = users[i].domain.toLowerCase().split(',');
             } else {
               users[i].domain = [];
             }
@@ -359,7 +359,7 @@ User.prototype = {
           delete users[i].old_passwords;
 
           if (users[i].domain && users[i].domain !== '') {
-            users[i].domain = users[i].domain.split(',');
+            users[i].domain = users[i].domain.toLowerCase().split(',');
           } else {
             users[i].domain = [];
           }
@@ -376,7 +376,7 @@ User.prototype = {
       if (doc) {
 
         if (utils.isArray(item.domain)) {
-          item.domain = item.domain.join(',');
+          item.domain = item.domain.join(',').toLowerCase();
         }
 
         if (utils.isArray(item.companyId)) {
