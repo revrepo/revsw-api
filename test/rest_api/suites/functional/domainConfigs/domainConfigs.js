@@ -365,7 +365,7 @@ describe('Domain configs functional test', function () {
               .getOne(firstDc.id)
               .expect(200)
               .then(function (response) {
-                response.body.domain_name.should.equal(firstDc.domain_name);
+                response.body.domain_name.should.equal(firstDc.domain_name.toLowerCase());
                 done();
               })
               .catch(done);
@@ -384,7 +384,7 @@ describe('Domain configs functional test', function () {
               .then(function (response) {
                 response.body.forEach(function (domain) {
                   if (domain.id === firstDc.id) {
-                    domain.domain_name.should.equal(firstDc.domain_name);
+                    domain.domain_name.should.equal(firstDc.domain_name.toLowerCase());
                   }
                 });
                 done();
@@ -441,7 +441,7 @@ describe('Domain configs functional test', function () {
               .getOne(firstDc.id)
               .expect(200)
               .then(function (response) {
-                response.body.domain_name.should.equal(firstDc.domain_name);
+                response.body.domain_name.should.equal(firstDc.domain_name.toLowerCase());
                 done();
               })
               .catch(done);
