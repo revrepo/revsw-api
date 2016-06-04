@@ -45,10 +45,6 @@ describe('Smoke check', function () {
           API.helpers
             .authenticateUser(user)
             .then(function () {
-            //  return API.helpers.accounts.createOne();
-            //})
-            //.then(function (newAccount) {
-            //  testAccount = newAccount;
               return API.helpers.dashboards.createOne();
             })
             .then(function (dashboard) {

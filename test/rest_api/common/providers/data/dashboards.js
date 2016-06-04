@@ -55,53 +55,25 @@ var DashboardDataProvider = {
     };
   },
 
+  /**
+   * ### DashboardDataProvider.generateOneForUpdate()
+   *
+   * Updates a given dashboard object for editing pupouses
+   *
+   * @param dashboard
+   * @returns
+   *    {
+   *      title: string,
+   *      options: {
+   *        stripUnknown: boolean
+   *      },
+   *      structure: string
+   *      rows: array
+   *    }
+   */
   generateOneForUpdate: function (dashboard) {
     dashboard.title = 'UPDATED ' + dashboard.title;
     return dashboard;
-  },
-
-  /**
-   * ### DashboardDataProvider.generateCompleteOne()
-   *
-   * Generates valid data that represents a complete Dashboard which the
-   * REST API end points accept.
-   *
-   * @param {String} accountId, account ID
-   * @returns {Object} Dashboard info with the following schema
-   *
-   *    {
-   *      account_id: String,
-   *      key_name: String,
-   *      domains: Array,
-   *      allowed_ops: {
-   *        read_config: Boolean,
-   *        modify_config: Boolean,
-   *        delete_config: Boolean,
-   *        purge: Boolean,
-   *        reports: Boolean,
-   *        admin: Boolean
-   *      },
-   *      read_only_status: Boolean,
-   *      active: Boolean
-   *    }
-   */
-  generateCompleteOne: function (accountId) {
-    var prefix = Date.now();
-    return {
-      account_id: accountId,
-      key_name: prefix + ': ' + faker.lorem.words()[0],
-      domains: [],
-      allowed_ops: {
-        read_config: true,
-        modify_config: true,
-        delete_config: true,
-        purge: true,
-        reports: true,
-        admin: true
-      },
-      read_only_status: true,
-      active: true
-    };
   }
 };
 
