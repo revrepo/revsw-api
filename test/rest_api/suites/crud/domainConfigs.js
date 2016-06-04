@@ -96,7 +96,7 @@ describe('CRUD check', function () {
                     domainConfigs.length.should.be.greaterThanOrEqual(1);
                     for (var i = 0, len = domainConfigs.length; i < len; i++) {
                       var domainConfigName = domainConfigs[i].domain_name;
-                      if (domainConfigName === firstDc.domain_name) {
+                      if (domainConfigName === firstDc.domain_name.toLowerCase()) {
                         isDomainConfigInTheList = true;
                         break;
                       }
@@ -120,7 +120,7 @@ describe('CRUD check', function () {
                   .then(function (response) {
                     firstFdc = response.body;
                     firstFdc.account_id.should.equal(account.id);
-                    firstFdc.domain_name.should.equal(firstDc.domain_name);
+                    firstFdc.domain_name.should.equal(firstDc.domain_name.toLowerCase());
                     done();
                   })
                   .catch(done);
@@ -202,7 +202,7 @@ describe('CRUD check', function () {
                   .then(function (response) {
                     var firstVer = response.body[0];
                     firstVer.id.should.equal(secondDc.id);
-                    firstVer.domain_name.should.equal(secondDc.domain_name);
+                    firstVer.domain_name.should.equal(secondDc.domain_name.toLowerCase());
                     firstVer.origin_server.should.equal(secondDc.origin_server);
                     firstVer.origin_host_header.should
                       .equal(secondDc.origin_host_header);

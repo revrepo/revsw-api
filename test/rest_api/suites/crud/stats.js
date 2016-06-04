@@ -90,7 +90,7 @@ describe('CRUD check.', function () {
                   .then(function (res) {
                     var metadata = res.body.metadata;
                     metadata.domain_name.should.be
-                      .equal(domainConfig.domain_name);
+                      .equal(domainConfig.domain_name.toLowerCase());
                     metadata.domain_id.should.be.equal(domainConfig.id);
                     done();
                   })
@@ -138,7 +138,7 @@ describe('CRUD check.', function () {
                   .then(function (res) {
                     var metadata = res.body.metadata;
                     metadata.domain_name.should.be
-                      .equal(domainConfig.domain_name);
+                      .equal(domainConfig.domain_name.toLowerCase());
                     metadata.domain_id.should.be.equal(domainConfig.id);
                     done();
                   })
@@ -177,7 +177,7 @@ describe('CRUD check.', function () {
                   .then(function (res) {
                     var metadata = res.body.metadata;
                     metadata.domain_name.should.be
-                      .equal(domainConfig.domain_name);
+                      .equal(domainConfig.domain_name.toLowerCase());
                     metadata.domain_id.should.be.equal(domainConfig.id);
                     done();
                   })
@@ -216,7 +216,7 @@ describe('CRUD check.', function () {
                   .then(function (res) {
                     var metadata = res.body.metadata;
                     metadata.domain_name.should.be
-                      .equal(domainConfig.domain_name);
+                      .equal(domainConfig.domain_name.toLowerCase());
                     metadata.domain_id.should.be.equal(domainConfig.id);
                     done();
                   })
@@ -255,7 +255,7 @@ describe('CRUD check.', function () {
                   .then(function (res) {
                     var metadata = res.body.metadata;
                     metadata.domain_name.should.be
-                      .equal(domainConfig.domain_name);
+                      .equal(domainConfig.domain_name.toLowerCase());
                     metadata.domain_id.should.be.equal(domainConfig.id);
                     done();
                   })
