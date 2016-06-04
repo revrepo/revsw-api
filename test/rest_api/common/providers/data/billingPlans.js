@@ -45,13 +45,21 @@ var BillingPlanDataProvider = {
    *    }
    */
   generateOne: function () {
+    var now = Date.now();
     return {
-      title: 'API QA: ' + Date.now(),
-      options: {
-        stripUnknown: true
-      },
-      structure: faker.lorem.words()[0],
-      rows: []
+      name: 'API QA: ' + now,
+      description: faker.lorem.sentence(),
+      type: 'private',
+      monthly_fee: 100,
+      chargify_handle: 'API-QA-' + now,
+      hosted_page: faker.lorem.words()[0],
+      services: [],
+      prepay_discounts: [{
+        period: 1,
+        discount: 2
+      }],
+      commitment_discounts: [],
+      order: 1
     };
   },
 
@@ -72,7 +80,7 @@ var BillingPlanDataProvider = {
    *    }
    */
   generateOneForUpdate: function (billingPlan) {
-    billingPlan.title = 'UPDATED ' + billingPlan.title;
+    billingPlan.name = 'UPDATED ' + billingPlan.name;
     return billingPlan;
   }
 };
