@@ -27,7 +27,7 @@ var speakeasy = require('speakeasy');
 // depending on your test needs.
 var TwoFADP = {
 
-  prefix: 'API-TEST',
+  prefix: 'api-test',
 
   generateOneTimePassword: function (base32Key) {
     var encoding = 'base32';

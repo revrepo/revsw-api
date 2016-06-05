@@ -215,7 +215,7 @@ var Utils = {
     var i = arr.length;
     while ( i-- ) {
       arr.push( arr.splice( Math.floor( Math.random() * ( i + 1 ) ), 1 )[0] );
-    };
+    }
 
     return arr;
   },
