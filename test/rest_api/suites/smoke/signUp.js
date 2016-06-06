@@ -44,7 +44,7 @@ describe('Smoke check', function () {
 
   describe('Sign Up resource', function () {
 
-    it('should return success response when signing up user',
+    it('should return 500 response when signing up user using non-existing billing plan',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -56,7 +56,7 @@ describe('Smoke check', function () {
             var newUser = UsersDP.generateOneToSignUp(bPlan.chargify_handle);
             API.resources.signUp
               .createOne(newUser)
-              .expect(200)
+              .expect(500)
               .end(done);
           })
           .catch(done);

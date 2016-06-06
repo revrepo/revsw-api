@@ -283,7 +283,7 @@ describe('Rev API', function() {
 
         var response_json = JSON.parse(res.text);
         response_json.id.should.be.equal(testDomainId);
-        response_json.name.should.be.equal(testDomain);
+        response_json.name.should.be.equal(testDomain.toLowerCase());
         done();
       });
   });
@@ -1046,7 +1046,7 @@ describe('Rev API Admin User', function() {
         delete response_json.updated_at;
         response_json.created_at.should.be.a.String();
         delete response_json.created_at;
-        response_json.cname.should.be.equal(newDomainName + '.revdn.net');
+        response_json.cname.should.be.equal(newDomainName.toLowerCase() + '.revdn.net');
         delete response_json.cname;
         response_json.should.be.eql(newDomainJson);
         done();
@@ -1176,7 +1176,7 @@ describe('Rev API Admin User', function() {
         delete response_json.updated_at;
         response_json.created_at.should.be.a.String();
         delete response_json.created_at;
-        response_json.cname.should.be.equal(newDomainName + '.revdn.net');
+        response_json.cname.should.be.equal(newDomainName.toLowerCase() + '.revdn.net');
         delete response_json.cname;
         response_json.should.be.eql(newDomainJson);
         done();

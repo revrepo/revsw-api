@@ -35,7 +35,7 @@ var APITestError = function (message, error, data) {
   //console.log('*** API Test ERROR ***');
   //console.log('ERROR received', error);
   //console.log('*** API Test ERROR ***');
-}
+};
 
 // Inherit from Error
 APITestError.prototype = Object.create(Error.prototype);

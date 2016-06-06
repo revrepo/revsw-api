@@ -150,7 +150,7 @@ module.exports = [
       validate    : {
         payload : {
           // TODO: Enforce strict domain names (not string())
-          domain_name                   : Joi.string().regex(routeModels.domainRegex)
+          domain_name                   : Joi.string().lowercase().regex(routeModels.domainRegex)
             .required().description('The name of the new domain to be registered in the system'),
           account_id             : Joi.objectId().required().description('Account ID of the account the domain should be created for'),
           origin_host_header     : Joi.string().regex(routeModels.domainRegex).required()
@@ -215,7 +215,7 @@ module.exports = [
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
           }).required(),
           enable_origin_health_probe: Joi.boolean(),
-          domain_aliases: Joi.array().items(Joi.string().regex(routeModels.domainRegex)),
+          domain_aliases: Joi.array().items(Joi.string().lowercase().regex(routeModels.domainRegex)),
           origin_health_probe: Joi.object({
             HTTP_REQUEST: Joi.string().required().max(150),
             PROBE_TIMEOUT: Joi.number().integer().required(),
@@ -223,7 +223,7 @@ module.exports = [
             HTTP_STATUS: Joi.number().integer().required()
           }),
           proxy_timeout: Joi.number().integer(),
-          domain_wildcard_alias: Joi.string().max(150),
+          domain_wildcard_alias: Joi.string().lowercase().max(150),
           enable_ssl: Joi.boolean(),
           ssl_conf_profile: Joi.objectId().allow(''),
           ssl_protocols: Joi.string().allow(''),

@@ -62,10 +62,10 @@ describe('Boundary check', function () {
     it('should return `Bad Request` when trying to `create` domain config ' +
       'with `long` name.',
       function (done) {
-        var longDomainName = 'LongDomainNameLongDomainNameLongDomainNameLong' +
-          'DomainNameLongDomainNameLongDomainNameLongDomainNameLongDomainName' +
-          'LongDomainNameLongDomainNameLongDomainNameLongDomainNameLongDomain' +
-          'NameLongDomainNameLongDomainNameLongDomainNameLongDomainName';
+        var longDomainName = 'longdomainnamelongdomainnamelongdomainnamelong' +
+          'domainnamelongdomainnamelongdomainnamelongdomainnamelongdomainname' +
+          'longdomainnamelongdomainnamelongdomainnamelongdomainnamelongdomain' +
+          'namelongdomainnamelongdomainnamelongdomainnamelongdomainname';
         var expectedMsg = 'child "domain_name" fails because ["domain_name" ' +
           'with value "' + longDomainName + '" fails to match the required ' +
           'pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-z' +
@@ -140,10 +140,10 @@ describe('Boundary check', function () {
     it('should return `Bad Request` when trying to `create` domain config ' +
       'with `long` origin server.',
       function (done) {
-        var longOriginServer = 'LongOriginServerLongOriginServerLongOrigin' +
+        var longOriginServer = ('LongOriginServerLongOriginServerLongOrigin' +
           'ServerLongOriginServerLongOriginServerLongOriginServerLongOrigin' +
           'ServerLongOriginServerLongOriginServerLongOriginServerLongOrigin' +
-          'ServerLongOriginServerLongOriginServer';
+          'ServerLongOriginServerLongOriginServer').toLowerCase();
         var expectedMsg = 'child "origin_server" fails because ["origin_server" with value "' +
           longOriginServer + '" fails to match the required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]' +
           '{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/, "origin_server" with value "' + longOriginServer +

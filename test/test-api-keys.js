@@ -91,7 +91,7 @@ describe('Rev API keys', function() {
           response_json[i].account_id.should.be.a.String();
           response_json[i].domain_name.should.be.a.String();
           response_json[i].id.should.be.a.String();
-          if (response_json[i].domain_name === testDomain) {
+          if (response_json[i].domain_name === testDomain.toLowerCase()) {
             testDomainId = response_json[i].id;
           }
         }
@@ -754,9 +754,9 @@ describe('Rev API keys', function() {
         done();
       });
   });
-  
+
   // TODO: need to figure out how to handle account management via API key.
-  // TODO: 
+  // TODO:
   xit('should update account with id - ' + createdAccountID, function(done) {
     var updateAccountJson = {
       companyName: testCompanyName + ' UPDATED',

@@ -73,7 +73,7 @@ module.exports = [
           lastname: Joi.string().required().max(30).description('Last name'),
           password: Joi.string().min(8).max(15).required().description('Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
-          domain: Joi.array().items( Joi.string().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
+          domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
           access_control_list: Joi.object( {
             dashBoard: Joi.boolean().required().default(true).description('Access to the portal Dashboard section'),
@@ -121,7 +121,7 @@ module.exports = [
           lastname: Joi.string().max(30).description('Last name'),
           password: Joi.string().min(8).max(15).description('New Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
-          domain: Joi.array().items( Joi.string().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
+          domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
           access_control_list: Joi.object( {
             dashBoard: Joi.boolean().default(true).description('Access to the portal Dashboard section'),

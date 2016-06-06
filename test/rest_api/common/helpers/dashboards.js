@@ -16,40 +16,22 @@
  * from Rev Software, Inc.
  */
 
-var BillingPlansResource = require('./../resources/billingPlans');
+var DashboardsResource = require('./../resources/dashboards');
+var DashboardsDP = require('./../providers/data/dashboards');
 var APITestError = require('./../apiTestError');
-var BillingPlansDP = require('./../providers/data/billingPlans');
 
-// # Billing Plans Helper
+// # Dashboards Helper
 // Abstracts common functionality for the related resource.
 module.exports = {
 
   /**
-   * Gets random billing plan object
-   *
-   * @returns {Promise}
-   */
-  getRandomOne: function () {
-    return BillingPlansResource
-      .getAll()
-      .then(function (res) {
-        var billingPlans = res.body;
-        var randomIndex = parseInt(Math.random() * billingPlans.length);
-        return billingPlans[randomIndex];
-      })
-      .catch(function (error) {
-        throw new APITestError('Getting billing plans', error.response.body);
-      });
-  },
-
-  /**
-   * Creates a new Billing Plan.
+   * Creates a new dashboard.
    *
    * @returns {Object} Promise, with the new dashboard object created
    */
   createOne: function () {
-    var dashboard = BillingPlansDP.generateOne();
-    return BillingPlansResource
+    var dashboard = DashboardsDP.generateOne();
+    return DashboardsResource
       .createOneAsPrerequisite(dashboard)
       .catch(function (error) {
         throw new APITestError('Creating Dashboard', error.response.body,

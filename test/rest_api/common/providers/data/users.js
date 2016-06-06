@@ -27,7 +27,7 @@ var faker = require('faker');
 // depending on your test needs.
 var UserDataProvider = {
 
-  prefix: 'API-TEST',
+  prefix: 'api-test',
 
   /**
    * ### UserDataProvider.generateOne()

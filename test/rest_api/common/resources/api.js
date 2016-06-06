@@ -26,6 +26,7 @@ var AppsResource = require('./apps');
 var AuthenticateResource = require('./authenticate');
 var BillingPlansResource = require('./billingPlans');
 var CountriesResource = require('./countries');
+var Dashboards = require('./dashboards');
 var DomainConfigsResource = require('./domainConfigs');
 var ForgotResource = require('./forgot');
 var LocationsResource = require('./locations');
@@ -49,6 +50,7 @@ module.exports = {
   authenticate: AuthenticateResource,
   billingPlans: BillingPlansResource,
   countries: CountriesResource,
+  dashboards: Dashboards,
   domainConfigs: DomainConfigsResource,
   forgot: ForgotResource,
   locations: LocationsResource,
