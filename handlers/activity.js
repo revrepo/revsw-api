@@ -111,7 +111,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
           break;
       }
 
-      var span = utils.query2SpanNoRound( request.query, 30 * 24 /*def start in hrs*/, 24 * 31 /*allowed period - month*/ );
+      var span = utils.query2Span( request.query, 30 * 24 /*def start in hrs*/, 24 * 31 /*allowed period - month*/, false);
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
@@ -211,7 +211,7 @@ exports.getSummaryAuditInfo = function (request, reply) {
       }
       requestBody['meta.user_id'] = request.auth.credentials.user_id;
 
-      var span = utils.query2SpanNoRound( request.query, 30 * 24 /*def start in hrs*/, 24 * 31 /*allowed period - month*/ );
+      var span = utils.query2Span( request.query, 30 * 24 /*def start in hrs*/, 24 * 31 /*allowed period - month*/, false );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
