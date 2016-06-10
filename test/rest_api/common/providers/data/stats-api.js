@@ -455,10 +455,12 @@ var get_es_count_ = function() {
   return promise.all([
     client_.count({
       index: idx_,
+      ignoreUnavailable: true,  //  indices may be not yet created
       body: { query: { filtered: { filter: { term: { app_id: application_id } } } } }
     }),
     client_url_.count({
       index: idx_,
+      ignoreUnavailable: true,
       body: { query: { filtered: { filter: { term: { app_id: application_id } } } } }
     })
   ]);
