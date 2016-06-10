@@ -157,21 +157,6 @@ describe('Smoke check', function () {
               })
               .catch(done);
           });
-
-        // TODO: Bug?, getting 500 status code
-        xit('should return a response when getting hosted page data',
-          function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.billingPlans
-                  .hostedPage(testBillingPlan.id)
-                  .getAll()
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
       });
     });
   });
