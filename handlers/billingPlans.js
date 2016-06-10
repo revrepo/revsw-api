@@ -197,24 +197,3 @@ exports.delete = function (request, reply) {
     });
   });
 };
-
-exports.getHostedPage = function (request, reply) {
-  var id = request.params.id;
-  BillingPlan.get({_id: id}, function (error, res) {
-    if (error){
-      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id));
-    }
-    Chargify.Product.getHostedPage(res.chargify_handle, function (error, result) {
-      if (error) {
-        return reply(boom.badImplementation('Error retrieving hosted page from Chargify ',error));
-      }
-
-      var response = {
-        statusCode: 200,
-        body: result
-      };
-
-      renderJSON(request, reply, error, result);
-    });
-  });
-};

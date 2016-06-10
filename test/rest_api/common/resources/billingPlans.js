@@ -36,16 +36,7 @@ var resourceConfig = {
     Methods.UPDATE,
     Methods.DELETE
   ],
-  nestedResources: [
-    {
-      idKey: null,
-      name: 'hostedPage',
-      path: '/hosted_page',
-      methods: [
-        Methods.READ_ALL
-      ]
-    }
-  ]
+  nestedResources: []
 };
 
 // Creating new instance of BaseResource which is going to represent the API
