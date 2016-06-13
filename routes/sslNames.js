@@ -47,24 +47,6 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/certs',
-    config: {
-      auth: {
-        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
-      },
-      handler: sslNameHandlers.getSSLCerts,
-      description: 'List of configured SSL certs',
-      tags: ['api'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      }
-    }
-  },
-
-  {
-    method: 'GET',
     path: '/v1/ssl_names/{account_id}/{ssl_name_id}',
     config: {
       auth: {
@@ -89,7 +71,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{account_id}/{ssl_name_id}/approvers',
+    path: '/v1/ssl_names/{ssl_name_id}/approvers',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -99,7 +81,6 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
           ssl_name_id: Joi.string().required().description('SSL name ID')
         }
       },
