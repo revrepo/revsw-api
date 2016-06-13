@@ -36,10 +36,13 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var DomainConfig   = require('../models/DomainConfig');
 var ServerGroup         = require('../models/ServerGroup');
 var Account = require('../models/Account');
+var User = require('../models/User');
 
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var users = new User(mongoose, mongoConnection.getConnectionPortal());
+
 var billing_plans = require('../models/BillingPlan');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
@@ -264,23 +267,48 @@ exports.createDomainConfig = function(request, reply) {
         if (res.statusCode !== 200) {
           return renderJSON(request, reply, err, response_json);
         }
+        // NOTE: Update user permissions for domains
+         if(request.auth.credentials.user_type === 'user' && request.auth.credentials.role === 'user'){
+          var user_id = request.auth.credentials.user_id;
+          var domains = request.auth.credentials.domain;
+          domains.push(originalDomainJson.domain_name);
+          var updateInfo = {
+                user_id: user_id,
+                domain: domains
+          };
+          users.update(updateInfo, function(err, data) {
+            if (err) {
+              logger.error('createDomainConfig:Error update user domain list' + JSON.stringify(err));
+            } else {
+              logger.info('createDomainConfig:Success update user domain list' + JSON.stringify(err));
+            }
+            // NOTE: response after update user
+            responseSuccessMessage();
+          });
+        } else {
+            // NOTE: response for API and users not with role 'user'
+            responseSuccessMessage();
+        }
 
-        var response = {
-          statusCode: 200,
-          message: 'Successfully created new domain configuration',
-          object_id: response_json._id
-        };
-        AuditLogger.store({
-          account_id       : account_id,
-          activity_type    : 'add',
-          activity_target  : 'domain',
-          target_id        : response.object_id,
-          target_name      : originalDomainJson.domain_name,
-          target_object    : originalDomainJson,
-          operation_status : 'success'
-        }, request);
+        function responseSuccessMessage() {
+            var response = {
+              statusCode: 200,
+              message: 'Successfully created new domain configuration',
+              object_id: response_json._id
+            };
 
-        renderJSON(request, reply, err, response);
+            AuditLogger.store({
+              account_id: account_id,
+              activity_type: 'add',
+              activity_target: 'domain',
+              target_id: response.object_id,
+              target_name: originalDomainJson.domain_name,
+              target_object: originalDomainJson,
+              operation_status: 'success'
+            }, request);
+
+            renderJSON(request, reply, err, response);
+        }
       });
     });
   };
@@ -431,22 +459,21 @@ exports.updateDomainConfig = function(request, reply) {
 };
 
 exports.deleteDomainConfig = function(request, reply) {
-
   var domain_id = request.params.domain_id;
+  var _deleted_by = utils.generateCreatedByField(request);
+  var options = '?deleted_by='+_deleted_by;
 
   domainConfigs.get(domain_id, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id, error));
     }
     if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    // TODO: add deleted_at and deleted_by fields
+    logger.info('Calling CDS to delete domain ID: ' + domain_id + ' and option deleted_by '+ _deleted_by);
 
-    logger.info('Calling CDS to delete domain ID: ' + domain_id);
-
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id,
+    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + options,
       method: 'DELETE',
       headers: authHeader,
     }, function (err, res, body) {

@@ -41,7 +41,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -58,7 +58,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -75,7 +75,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -120,7 +120,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -137,7 +137,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -154,7 +154,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -171,7 +171,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -188,7 +188,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -205,7 +205,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -222,7 +222,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -239,7 +239,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -256,7 +256,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -273,7 +273,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });
@@ -290,7 +290,7 @@ describe('Rev stats top API', function() {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.metadata.domain_name.should.be.equal(testDomain);
+        response_json.metadata.domain_name.should.be.equal(testDomain.toLowerCase());
         response_json.metadata.domain_id.should.be.equal(testDomainId);
         done();
       });

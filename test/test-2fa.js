@@ -40,7 +40,7 @@ describe('Rev API 2FA', function() {
 //    testUser = 'api-qa-user-1444983698019@revsw.com',
 //    testUserId = '5620b39268a3f1483b990e1c',
     testPassword = 'password1',
-    newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
+    newDomainName = 'delete-me-api-qa-name-' + Date.now() + '.revsw.net',
     newDomainId,
     createDomainIds,
     testUserProfile = {};

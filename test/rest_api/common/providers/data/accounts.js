@@ -65,7 +65,7 @@ var AccountsDataProvider = {
       first_name: firstName,
       last_name: lastName,
       phone_number: faker.phone.phoneNumber(),
-      contact_email: [firstName, lastName, Date.now() + '@mailinator.com']
+      contact_email: [firstName, Date.now() + '@mailinator.com']
         .join('-')
         .toLowerCase(),
       address1: faker.address.streetAddress(),

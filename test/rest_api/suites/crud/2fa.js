@@ -62,7 +62,7 @@ describe('CRUD check', function () {
               var newUserData = {
                 firstName: 'Tom',
                 lastName: 'Smith'
-              }
+              };
               if (user.role === 'Rev Admin') {
                 newUserData.companyId = [newAccount.id];
               }
