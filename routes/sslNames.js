@@ -35,7 +35,7 @@ module.exports = [
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: sslNameHandlers.listSSLNames,
-      description: 'List a list of configured SSL names',
+      description: 'List of configured SSL names',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -47,7 +47,25 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_name_id}',
+    path: '/v1/ssl_names/certs',
+    config: {
+      auth: {
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: sslNameHandlers.getSSLCerts,
+      description: 'List of configured SSL certs',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/ssl_names/{account_id}/{ssl_name_id}',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -57,7 +75,8 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID')
+          account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
+          ssl_name_id: Joi.string().required().description('SSL name ID')
         }
       },
       plugins: {
@@ -70,7 +89,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_order_id}/{ssl_name_id}/approvers',
+    path: '/v1/ssl_names/{account_id}/{ssl_name_id}/approvers',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -80,7 +99,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_order_id: Joi.string().required().description('SSL order ID'),
+          account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
           ssl_name_id: Joi.string().required().description('SSL name ID')
         }
       },
@@ -106,9 +125,10 @@ module.exports = [
         payload : {
           account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
           ssl_name: Joi.string().min(1).max(150).required().description('SSL domain name'),
-          comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
+          //comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           verification_method: Joi.string().valid('email','url','dns').required().description('Domain control verification method'),
-          verification_email: Joi.string().email().description('Email address to use for email-based domain control verification method')
+          verification_email: Joi.string().allow('').email().description('Email address to use for email-based domain control verification method'),
+          verification_wildcard: Joi.string().allow('').valid('true', 'false').description('Wildcard domain')
         }
       },
       plugins: {
@@ -125,7 +145,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_name_id}/verify',
+    path: '/v1/ssl_names/{account_id}/{ssl_name_id}/verify',
     config: {
       auth: {
         scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -135,7 +155,8 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID'),
+          account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
+          ssl_name_id: Joi.string().required().description('SSL name ID'),
         },
       },
       plugins: {
@@ -149,7 +170,7 @@ module.exports = [
 
   {
     method: 'DELETE',
-    path: '/v1/ssl_names/{ssl_name_id}',
+    path: '/v1/ssl_names/{account_id}/{ssl_name_id}',
     config: {
       auth: {
         scope : ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -159,7 +180,8 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID'),
+          account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
+          ssl_name_id: Joi.string().required().description('SSL name ID'),
         }
       },
       plugins: {

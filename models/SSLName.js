@@ -34,17 +34,25 @@ function SSLName(mongoose, connection, options) {
   this.ObjectId = this.Schema.ObjectId;
 
   this.SSLNameSchema = new this.Schema({
-    'ssl_name': {type: String, required: true},
-    'verification_method': {type: String, required: true},
-    'verification_object': {type: String, required: true},
     'account_id': {type: this.ObjectId, required: true},
-    'updated_at': {type: Date, default: Date.now},
+    'ssl_name': {type: String, required: true, lowercase: true, unique: true},
     'created_at': {type: Date, default: Date.now},
     'created_by': {type: String},
+    'deployed': {type: Boolean, default: false},
+    'deployed_at': {type: Date},
+    'deployed_by': {type: String},
     'deleted': {type: Boolean, default: false},
     'deleted_at': {type: Date},
     'deleted_by': {type: String},
+    'updated_at': {type: Date, default: Date.now},
+    'updated_by': {type: String},
+    'verified': {type: Boolean, default: false},
+    'verified_at': {type: Date},
+    'verified_by': {type: String},
+    'verification_method': {type: String, required: true},
+    'verification_object': {type: String, required: false},
     'comment': {type: String, default: ''},
+    'approvers': {type: String}
   });
 
   this.model = connection.model('SSLName', this.SSLNameSchema, 'SSLName');
@@ -56,8 +64,41 @@ mongoose.set('debug', config.get('mongoose_debug_logging'));
 
 SSLName.prototype = {
 
+  add : function (item, callback) {
+
+    new this.model(item).save(function (err, item) {
+      if (err) {
+        callback(err);
+      }
+      if (callback) {
+        var item = utils.clone(item);
+        item.ssl_name_id = item._id;
+
+        delete item.__v;
+        delete item._id;
+
+        callback(err, item);
+      }
+    });
+  },
+
   get: function (item, callback) {
     this.model.findOne({_id: item}, function (err, _doc) {
+      if (err) {
+        callback(err);
+      }
+      var doc = utils.clone(_doc);
+      if (doc) {
+        delete doc.__v;
+        doc.id = doc._id;
+        delete doc._id;
+      }
+      callback(null, doc);
+    });
+  },
+
+  getbyname: function (item, callback) {
+    this.model.findOne({ssl_name: item}, function (err, _doc) {
       if (err) {
         callback(err);
       }
