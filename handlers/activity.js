@@ -111,34 +111,17 @@ exports.getDetailedAuditInfo = function (request, reply) {
           break;
       }
 
-      // TODO: use function utils.query2Span() instead of the following timestamp checks
-      if ( request.query.from_timestamp ) {
-        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
-        if ( ! start_time ) {
-          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
-        }
-      } else {
-        start_time = Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
+      var span = utils.query2Span( request.query, 30 * 24 /*def start in hrs*/, 24 * 31 /*allowed period - month*/, false);
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
       }
-
-      if ( request.query.to_timestamp ) {
-        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
-        if ( ! end_time ) {
-          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
-        }
-      } else {
-        end_time = request.query.to_timestamp || Date.now();
-      }
-
-      if (start_time >= end_time) {
-        return reply(boom.badRequest('The period end timestamp cannot be less or equal of the period start timestamp'));
-      }
+      start_time = span.start;
+      end_time = span.end;
 
       requestBody['meta.datetime'] = {
         '$gte' : start_time,
         '$lte' : end_time
       };
-
       // TODO: Need to add proper indexes for the audit collection
       auditevents.detailed(requestBody, function (error, data) {
         var result = {
@@ -228,27 +211,12 @@ exports.getSummaryAuditInfo = function (request, reply) {
       }
       requestBody['meta.user_id'] = request.auth.credentials.user_id;
 
-      if ( request.query.from_timestamp ) {
-        start_time = utils.convertDateToTimestamp(request.query.from_timestamp);
-        if ( ! start_time ) {
-          return reply(boom.badRequest('Cannot parse the from_timestamp value'));
-        }
-      } else {
-        start_time = Date.now() - (30 * 24 * 3600 * 1000); // 1 month back
+      var span = utils.query2Span( request.query, 30 * 24 /*def start in hrs*/, 24 * 31 /*allowed period - month*/, false );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
       }
-
-      if ( request.query.to_timestamp ) {
-        end_time = utils.convertDateToTimestamp(request.query.to_timestamp);
-        if ( ! end_time ) {
-          return reply(boom.badRequest('Cannot parse the to_timestamp value'));
-        }
-      } else {
-        end_time = request.query.to_timestamp || Date.now();
-      }
-
-      if (start_time >= end_time) {
-        return reply(boom.badRequest('Period end timestamp cannot be less or equal period start timestamp'));
-      }
+      start_time = span.start;
+      end_time = span.end;
 
       requestBody['meta.datetime'] = {
         '$gte' : start_time,

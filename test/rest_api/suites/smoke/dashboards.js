@@ -20,10 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var BillingPlansDP = require('./../../common/providers/data/billingPlans');
-
-// TODO Disabling billing plan tests for now. We need to remove the plan creation
-// functions and check for four existing plans (Developer/Bronze/Silver/Gold) only
+var DashboardsDP = require('./../../common/providers/data/dashboards');
 
 describe('Smoke check', function () {
 
@@ -32,30 +29,29 @@ describe('Smoke check', function () {
 
   // Defining set of users for which all below tests will be run
   var users = [
-    config.get('api.users.revAdmin')
+    config.get('api.users.reseller')
   ];
 
   users.forEach(function (user) {
 
-    var testBillingPlan;
+    //var testAccount;
+    var testDashboard;
 
     describe('With user: ' + user.role, function () {
 
-      describe('Billing Plans resource', function () {
+      describe('Dashboards resource', function () {
 
         before(function (done) {
-/*          API.helpers
+          API.helpers
             .authenticateUser(user)
             .then(function () {
-              return API.helpers.billingPlans.createOne();
+              return API.helpers.dashboards.createOne();
             })
-            .then(function (billingPlan) {
-              testBillingPlan = billingPlan;
+            .then(function (dashboard) {
+              testDashboard = dashboard;
             })
             .then(done)
             .catch(done);
-*/
-          done();
         });
 
         after(function (done) {
@@ -70,12 +66,12 @@ describe('Smoke check', function () {
           done();
         });
 
-        it('should return a response when getting all billing plans.',
+        it('should return a response when getting all dashboards.',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.billingPlans
+                API.resources.dashboards
                   .getAll()
                   .expect(200)
                   .end(done);
@@ -83,33 +79,31 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: please change the check for look for four existing billing plans
-        xit('should return a response when getting specific billing plan.',
+        it('should return a response when getting specific dashboard.',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.billingPlans
-                  .getOne(testBillingPlan.id)
+                API.resources.dashboards
+                  .getOne(testDashboard.id)
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
 
-        // TODO: Not needed to test yet. Also, admin_rw user is required
-        xit('should return a response when creating an billing plan.',
+        it('should return a response when creating a dashboard.',
           function (done) {
-            var newBillingPlan = BillingPlansDP.generateOne();
+            var newDashboard = DashboardsDP.generateOne();
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.billingPlans
-                  .createOne(newBillingPlan)
+                API.resources.dashboards
+                  .createOne(newDashboard)
                   .expect(200)
                   .then(function (response) {
-                    // Delete billingPlan
-                    API.resources.billingPlans
+                    // Delete dashboard
+                    API.resources.dashboards
                       .deleteOne(response.body.object_id)
                       .end(done);
                   })
@@ -118,39 +112,37 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        // TODO: Not needed to test yet. Also, admin_rw user is required
-        xit('should return a response when updating an billing plan.',
+        it('should return a response when updating a dashboard.',
           function (done) {
-            var newBillingPlan = BillingPlansDP.generateOne();
-            var updatedBillingPlan = BillingPlansDP
-              .generateOneForUpdate(newBillingPlan);
+            var newDashboard = DashboardsDP.generateOne();
+            var updatedDashboard = DashboardsDP
+              .generateOneForUpdate(newDashboard);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.billingPlans
-                  .createOneAsPrerequisite(newBillingPlan);
+                return API.resources.dashboards
+                  .createOneAsPrerequisite(newDashboard);
               })
               .then(function (response) {
-                API.resources.billingPlans
-                  .update(response.body.object_id, updatedBillingPlan)
+                API.resources.dashboards
+                  .update(response.body.object_id, updatedDashboard)
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
 
-        // TODO: Not needed to test yet. Also, admin_rw user is required
-        xit('should return a response when deleting an billing plan.',
+        it('should return a response when deleting a dashboard.',
           function (done) {
-            var newBillingPlan = BillingPlansDP.generateOne();
+            var newDashboard = DashboardsDP.generateOne();
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.billingPlans
-                  .createOneAsPrerequisite(newBillingPlan);
+                return API.resources.dashboards
+                  .createOneAsPrerequisite(newDashboard);
               })
               .then(function (response) {
-                API.resources.billingPlans
+                API.resources.dashboards
                   .deleteOne(response.body.object_id)
                   .expect(200)
                   .end(done);

@@ -53,26 +53,33 @@ exports.getUsers = function getUsers(request, reply) {
     renderJSON(request, reply, error, listOfUsers);
   });
 };
-
+/**
+ * @createUser
+ * @description
+ *   Create new User
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.createUser = function(request, reply) {
   var newUser = request.payload;
-
-  if (newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
-    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+  // NOTE: set default companyId
+  if ((newUser.companyId === undefined || newUser.companyId.length === 0) && utils.getAccountID(request).length !== 0) {
+      newUser.companyId = utils.getAccountID(request);
   }
 
-  if (newUser.companyId) {
-    // TODO: need to move the permissions check to a separate function or use the existing function
-    if (request.auth.credentials.role !== 'revadmin' && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request))) {
-      return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
-    }
-  } else if (request.auth.credentials.companyId.length !== 0) {
-    newUser.companyId = request.auth.credentials.companyId;
-  } else {
+  // NOTE: New User must have "companyId"
+  if(newUser.companyId === undefined || newUser.companyId.length === 0){
     return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
   }
+  // NOTE: Who is creating new User must have access to the user after creation
+  if (!utils.checkUserAccessPermissionToUser(request, newUser)) {
+      // TODO: fix the error message text "You don't have permissions for this action "
+      return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
+  }
 
-  var account_id = newUser.companyId[0];
+  var accountId = newUser.companyId[0];
 
   // TODO: Add a check for domains
 
@@ -82,11 +89,8 @@ exports.createUser = function(request, reply) {
   }, function(error, result) {
     // got results so the email is in use
     if (result) {
-      // TODO fix the error message text
-      return reply(boom.badRequest('The email address is already used by another user'));
-
+      return reply(boom.badRequest('The email address is already used by another user'));  // TODO: fix the error message text
     } else {
-
       users.add(newUser, function(error, result) {
 
         var statusResponse;
@@ -99,9 +103,9 @@ exports.createUser = function(request, reply) {
         }
 
         result = publicRecordFields.handle(result, 'user');
-
+        // TODO: add activity log to all accounts (not only newUser.companyId[0])
         AuditLogger.store({
-          account_id       : account_id,
+          account_id       : accountId,
           activity_type    : 'add',
           activity_target  : 'user',
           target_id        : result.user_id,
@@ -166,8 +170,9 @@ exports.updateUser = function(request, reply) {
     return reply(boom.badRequest('Please specify at least one updated attiribute'));
   }
 
-  if (newUser.role && newUser.role === 'reseller' && request.auth.credentials.role !== 'revadmin') {
-    return reply(boom.badRequest('Only revadmin can assign "reseller" role'));
+  if (newUser.role && newUser.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
+    request.auth.credentials.role !== 'reseller')) {
+    return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
   }
 
   var user_id = request.params.user_id;

@@ -62,7 +62,7 @@ var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var apiKeysService = require('../services/APIKeys.js');
 var dashboardService = require('../services/dashboards.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
-
+var sslCertificatesService = require('../services/sslCertificates.js');
 var emailService = require('../services/email.js');
 
 exports.getAccounts = function getAccounts(request, reply) {
@@ -135,7 +135,16 @@ exports.createAccount = function(request, reply) {
     }
   });
 };
-
+/**
+ * @name  createBillingProfile
+ * @description
+ *
+ *    Create Chargify Customer
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.createBillingProfile = function(request, reply) {
   var account_id = request.params.account_id;
 
@@ -151,7 +160,7 @@ exports.createBillingProfile = function(request, reply) {
 
     accounts.update(updatedAccount, function(error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update the account'));
+        return reply(boom.badImplementation('Failed to update the account', error));
       }
 
       result = publicRecordFields.handle(result, 'account');
@@ -179,33 +188,29 @@ exports.createBillingProfile = function(request, reply) {
   accounts.get({
     _id: account_id
   }, function(error, result) {
+    if(error){
+       return reply(boom.badImplementation('Failed to get account with Id '+ account_id, error));
+    }
     if (result) {
-      //result = publicRecordFields.handle(result, 'account');
-      Customer.create(result, function resultCreatingCustomer(error, data) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to create a billing profile ', error));
-        }
-        // Set billing_id for account
-        result.billing_id = data.customer.id;
-        // TODO: Can not get link for new user
-        // Customer.getBillingPortalLink(result.chargify_id, function resultGetBillingPortalLink(error, link) {
-        //   // if (error) {
-        //   //   return reply(boom.badImplementation('Failed to create billind profile::error get managment link'));
-        //   // }
-        //   // result.billing_portal_link = {
-        //   //   url: link.url,
-        //   //   expires_at: expiresAt
-        //   // };
-        // })
-        // result = publicRecordFields.handle(result, 'account');
-        //data.message = 'Successfully create billing profile for the account'
-        // renderJSON(request, reply, error, data);
-        data = publicRecordFields.handle(result, 'account');
-        updateAccountInformation(result, request, reply);
-      });
+      result = publicRecordFields.handle(result, 'account');
+      if (result.billing_id === null || result.billing_id === undefined || result.billing_id === ''){
+        Customer.create(result, function resultCreatingCustomer(error, data) {
+          if (error) {
+            if (!!error.error && error.error.name === 'ValidationError') {
+              return reply(boom.badRequest('The customer account is not configured with all required contact/billing details', error));
+            }
+            return reply(boom.badImplementation('Failed to create a billing profile', error));
+          }
+          // Set billing_id for account
+          result.billing_id = data.customer.id;
+          updateAccountInformation(result, request, reply);
+        });
+      }else{
+        return renderJSON(request, reply, error, result);
+      }
 
     } else {
-      return reply(boom.badRequest('Account ID not found'));
+      return reply(boom.badRequest('Account ID not found', account_id));
     }
   });
 };
@@ -232,7 +237,7 @@ exports.getAccount = function(request, reply) {
   }, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Accounts::getAccount: Failed to get an account' +
-        ' Account ID: ' + account_id, error));
+        ' Account ID: ' + account_id, error, error));
     }
 
     if (result) {
@@ -619,15 +624,27 @@ exports.updateAccount = function(request, reply) {
             if (error) {
               return reply(boom.badRequest('Billing plan not found'));
             }
-            Customer.changeProduct(account.subscription_id, plan.chargify_handle, function(error) {
-              if (error) {
-                return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
-                  ' Account ID: ' + updatedAccount.account_id +
-                  ' Subscription ID: ' + account.subscription_id +
-                  ' Product handle: ' + plan.chargify_handle));
-              }
-              updateAccount(request, reply);
-            });
+            if (!account.subscription_id) {
+              Customer.createSubscription(updatedAccount.account_id, plan.chargify_handle, function(error, data) {
+                if (error) {
+                  return reply(boom.badImplementation('Accounts::updateAccount: failed to create subscription by Chargify product' +
+                    ' Account ID: ' + updatedAccount.account_id +
+                    ' Subscription ID: ' + account.subscription_id +
+                    ' Product handle: ' + plan.chargify_handle, error));
+                }
+                updateAccount(request, reply);
+              });
+            } else {
+              Customer.changeProduct(account.subscription_id, plan.chargify_handle, function(error) {
+                if (error) {
+                  return reply(boom.badImplementation('Accounts::updateAccount: failed to change Chargify product' +
+                    ' Account ID: ' + updatedAccount.account_id +
+                    ' Subscription ID: ' + account.subscription_id +
+                    ' Product handle: ' + plan.chargify_handle, error));
+                }
+                updateAccount(request, reply);
+              });
+            }
           });
 
         }
@@ -796,6 +813,17 @@ exports.deleteAccount = function(request, reply) {
           cb(null);
         }
       },
+      // Automatically delete All Private SSL Certificates
+      function(cb) {
+        sslCertificatesService.deletePrivateSSLCertificatesWithAccountId(account_id, {deleted_by : _deleted_by},function(error, data) {
+            if (error) {
+              logger.error('Accounts::deleteAccount:Error remove Private SSL Certificates while removing account ID ' + account_id);
+              return reply(boom.badImplementation('Failed to delete Private SSL Certificates for account ID ' + account_id,error));
+            }
+            logger.info('Removed All Private SSL Certificates while removing account ID ' + account_id);
+            cb();
+          });
+      },
       // Automatically delete all API keys belonging to the account ID
       function removeAccountsApiKeys(cb) {
         apiKeysService.deleteAPIKeysWithAccountId(account_id, function(error) {
@@ -803,6 +831,7 @@ exports.deleteAccount = function(request, reply) {
             logger.error('Error remove All API keys while removing account ID ' + account_id);
             return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
           }
+          logger.info('Removed All API keys while removing account ID ' + account_id);
           cb();
         });
       },

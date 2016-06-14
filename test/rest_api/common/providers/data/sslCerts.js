@@ -27,7 +27,7 @@ var faker = require('faker');
 // depending on your test needs.
 var SSLCertDataProvider = {
 
-  prefix: 'API-TEST',
+  prefix: 'api-test',
 
   /**
    * ### SSLCertDataProvider.generateOne()
@@ -51,7 +51,10 @@ var SSLCertDataProvider = {
    */
   generateOne: function (accountId) {
     var prefix = Date.now();
-    var items = ['shared', 'private'];
+    var items = ['private'];  
+    // var items = ['shared', 'private'];  TODO shared certs should be tested using a different
+    // approach: they are available for revadmin only and for now there can be only one shared cert
+    // in the system
     return {
       account_id: accountId,
       cert_name: faker.lorem.sentence() + ' ' + prefix,

@@ -28,6 +28,7 @@ var AccountsHelper = require('./accounts');
 var AppsHelper = require('./apps');
 var APIKeysHelper = require('./apiKeys');
 var BillingPlansHelper = require('./billingPlans');
+var Dashboards = require('./dashboards');
 var DomainConfigsHelper = require('./domainConfigs');
 var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
@@ -43,6 +44,7 @@ module.exports = {
   apps: AppsHelper,
   apiKeys: APIKeysHelper,
   billingPlans: BillingPlansHelper,
+  dashboards: Dashboards,
   domainConfigs: DomainConfigsHelper,
   purge: PurgeHelper,
   signUp: SignUpHelper,

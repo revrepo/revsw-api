@@ -47,7 +47,7 @@ function DomainConfig(mongoose, connection, options) {
     'updated_at': {type: Date, default: Date.now},
     'created_at': {type: Date, default: Date.now},
     'created_by': {type: String},
-    'domain_name': {type: String},
+    'domain_name': {type: String, lowercase: true},
     'deleted': {type: Boolean, default: false},
     'deleted_at': {type: Date},
     'deleted_by': {type: String},

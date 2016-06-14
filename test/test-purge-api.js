@@ -154,7 +154,7 @@ xdescribe('Rev Purge API', function() {
 
 
   it('should submit a purge request', function(done) {
-    var  purgeJson = {
+    var purgeJson = {
       domainName: 'qa-api-test-domain.revsw.net',
       purges: [{
         url: {

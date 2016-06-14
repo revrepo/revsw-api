@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Billing Plans Resource object
+// # Dashboards Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
@@ -24,21 +24,20 @@ var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var billingPlanIdKey = 'billingPlanId';
+var dashboardIdKey = 'dashboardId';
 var resourceConfig = {
-  idKey: billingPlanIdKey,
-  name: 'billingPlans',
-  path: '/billing_plans/{' + billingPlanIdKey + '}',
+  idKey: dashboardIdKey,
+  name: 'dashboards',
+  path: '/dashboards/{' + dashboardIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,
     Methods.READ_ONE,
     Methods.UPDATE,
     Methods.DELETE
-  ],
-  nestedResources: []
+  ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `Billing Plans resource`
+// `dashboards resource`
 module.exports = new BasicResource(resourceConfig);
