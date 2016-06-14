@@ -35,7 +35,7 @@ function SSLName(mongoose, connection, options) {
 
   this.SSLNameSchema = new this.Schema({
     'account_id': {type: this.ObjectId, required: true},
-    'ssl_name': {type: String, required: true, lowercase: true, unique: true},
+    'ssl_name': {type: String, required: true, lowercase: true},
     'created_at': {type: Date, default: Date.now},
     'created_by': {type: String},
     'deployed': {type: Boolean, default: false},
@@ -83,7 +83,7 @@ SSLName.prototype = {
   },
 
   get: function (item, callback) {
-    this.model.findOne({_id: item}, function (err, _doc) {
+    this.model.findOne({_id: item, deleted: { $ne: true }}, function (err, _doc) {
       if (err) {
         callback(err);
       }
@@ -98,7 +98,7 @@ SSLName.prototype = {
   },
 
   getbyname: function (item, callback) {
-    this.model.findOne({ssl_name: item}, function (err, _doc) {
+    this.model.findOne({ssl_name: item, deleted: { $ne: true }}, function (err, _doc) {
       if (err) {
         callback(err);
       }

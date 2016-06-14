@@ -32,7 +32,7 @@ var _ = require('lodash');
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
-var GlobalSign = require('../lib/globalsignapi');
+var GlobalSign = require('../lib/globalSignAPI');
 
 var Account = require('../models/Account');
 var SSLName = require('../models/SSLName');
@@ -42,9 +42,10 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var sslNames = new SSLName(mongoose, mongoConnection.getConnectionPortal());
 
 exports.listSSLNames = function (request, reply) {
+  // TODO add a permissions check
   sslNames.list(function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names'));
+      return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
     }
 
     var response2 = publicRecordFields.handle(result, 'sslNames');
@@ -56,16 +57,20 @@ exports.listSSLNames = function (request, reply) {
 exports.getSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
-
+  // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
     /*
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
     */
+
+    if (!result) {
+      return reply(boom.badRequest('SSL name ID not found'));
+    }
 
     var response = publicRecordFields.handle(result, 'sslName');
     renderJSON(request, reply, error, response);
@@ -76,28 +81,32 @@ exports.getSSLName = function (request, reply) {
 exports.getSSLNameApprovers = function (request, reply) {
   var sslNameId = request.params.ssl_name_id;
   var approvers = '';
-
+  // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
 
-    globalSignApi.getStatus(function (err, data) {
-      if (err) {
-        console.log(err);
-        return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName));
+    if (!result) {
+      return reply(boom.badRequest('SSL name ID not found'));
+    }
+
+    globalSignApi.getStatus(function (error, data) {
+      if (error) {
+        console.log(error);
+        return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName, error));
       } else {
         console.log(data.output.message);
         var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
         //console.log(fqdn);
-        globalSignApi.getApproveList(result.ssl_name, fqdn, function (err, data) {
-          if (err) {
-            console.log(err);
-            return reply(boom.badImplementation('Failed to retrieve approve for SSL name ' + SSLName));
+        globalSignApi.getApproveList(result.ssl_name, fqdn, function (error, data) {
+          if (error) {
+            console.log(error);
+            return reply(boom.badImplementation('Failed to retrieve approve for SSL name ' + SSLName, error));
           } else {
             console.log(data.output.message);
             approvers = data.output.message.Response.Approvers[0];
-            renderJSON(request, reply, err, approvers);
+            renderJSON(request, reply, error, approvers);
           }
         });
       }
@@ -112,15 +121,16 @@ exports.addSSLName = function (request, reply) {
   var verificationMethod = request.payload.verification_method;
   var verificationEmail = request.payload.verification_email;
   var verificationWildcard = request.payload.verification_wildcard;
+  var created_by = utils.generateCreatedByField(request);
   var approvers = '';
   var verificationObject = '';
   var status;
 
-  function createNewSSL (SSLName, verificationMethod, verificationObject, approvers) {
+  function createNewSSLName (accountId, SSLName, created_by, verificationMethod, verificationObject, approvers) {
     var newSSLArray = {
               account_id: accountId,
               ssl_name: SSLName,
-              created_by: utils.generateCreatedByField(request),
+              created_by: created_by,
               deployed: false,
               deployed_at: '',
               deployed_by: '',
@@ -141,7 +151,7 @@ exports.addSSLName = function (request, reply) {
               if (result) {
                 statusResponse = {
                   statusCode: 200,
-                  message: 'Successfully created new user',
+                  message: 'Successfully added new SSL name',
                   object_id: result.ssl_name_id
                 };
               }
@@ -149,16 +159,16 @@ exports.addSSLName = function (request, reply) {
               renderJSON(request, reply, error, statusResponse);
             });
   }
-
+  // TODO add a permissions check
   sslNames.getbyname(SSLName, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + SSLName));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + SSLName, error));
     }
 
     if (result) {
       var statusResponse = {
         statusCode: 202,
-        message: 'Already Exists',
+        message: 'The SSL name is already registered in the system',
         object_id: result.ssl_name_id
       };
       renderJSON(request, reply, error, statusResponse);
@@ -166,39 +176,39 @@ exports.addSSLName = function (request, reply) {
 
       if (verificationMethod === 'email') {
 
-        globalSignApi.getStatus(function (err, data) {
-          if (err) {
-            console.log(err);
-            return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName));
+        globalSignApi.getStatus(function (error, data) {
+          if (error) {
+            console.log(error);
+            return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName, error));
           } else {
             console.log(data.output.message);
             var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
             //console.log(fqdn);
-            globalSignApi.getApproveList(SSLName, fqdn, function (err, data) {
-              if (err) {
-                console.log(err);
-                return reply(boom.badImplementation('Failed to retrieve approve for SSL name ' + SSLName));
+            globalSignApi.getApproveList(SSLName, fqdn, function (error, data) {
+              if (error) {
+                console.log(error);
+                return reply(boom.badImplementation('Failed to retrieve approve for SSL name ' + SSLName, error));
               } else {
                 console.log(data.output.message);
                 approvers = data.output.message.Response.Approvers[0];
                 if (approvers !== '') {
-                  globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (err, data) {
-                    if (err) {
-                      console.log(err);
-                      return reply(boom.badImplementation('Failed addition SSL name ' + SSLName));
+                  globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (error, data) {
+                    if (error) {
+                      console.log(error);
+                      return reply(boom.badImplementation('Failed addition SSL name ' + SSLName, error));
                     } else {
                       console.log(data.output.message);
-                      //renderJSON(request, reply, err, data.output.message);
+                      //renderJSON(request, reply, error, data.output.message);
                       status = data.output.message.Response.OrderResponseHeader.SuccessCode;
                     }
                   });
 
-                  globalSignApi.getStatus(function (err, data) {
-                    if (err) {
-                      console.log(err);
+                  globalSignApi.getStatus(function (error, data) {
+                    if (error) {
+                      console.log(error);
                     } else {
                       verificationObject = 'Waiting on email verification';
-                      createNewSSL(SSLName, verificationMethod, verificationObject, approvers);
+                      createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
                     }
                   });
                 }
@@ -208,13 +218,13 @@ exports.addSSLName = function (request, reply) {
         });
 
       } else {
-        globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (err, data) {
-          if (err) {
-            console.log(err);
-            return reply(boom.badImplementation('Failed addition SSL name ' + SSLName));
+        globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (error, data) {
+          if (error) {
+            console.log(error);
+            return reply(boom.badImplementation('Failed addition SSL name ' + SSLName, error));
           } else {
             console.log(data.output.message);
-            //renderJSON(request, reply, err, data.output.message);
+            //renderJSON(request, reply, error, data.output.message);
 
             //status = data.output.message.Response.OrderResponseHeader.SuccessCode;
             if (verificationMethod === 'url') {
@@ -223,7 +233,7 @@ exports.addSSLName = function (request, reply) {
               verificationObject = data.output.message.Response.CloudOVSANInfo.TxtRecord;
             }
 
-            createNewSSL(SSLName, verificationMethod, verificationObject, approvers);
+            createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
           }
         });
       }
@@ -239,10 +249,10 @@ exports.verifySSLName = function (request, reply) {
 
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
 
-    // TODO add a permissions check for new account_id
+    // TODO add a permissions check
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
@@ -285,10 +295,10 @@ exports.verifySSLName = function (request, reply) {
 exports.deleteSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
-
+  // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
     /*
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
@@ -296,29 +306,33 @@ exports.deleteSSLName = function (request, reply) {
     }
     */
 
+    if (!result) {
+      return reply(boom.badRequest('SSL name ID not found'));
+    }
+
     var response = publicRecordFields.handle(result, 'sslName');
     response.deleted = true;
     response.deleted_at = new Date();
     response.deleted_by = utils.generateCreatedByField(request);
 
     if (response.verified === true) {
-      globalSignApi.sanModifyOperation(sslNameId, 'DELETE', response.verification_method, response.verification_object, false, function (err, data) {
-        if (err) {
-          console.log(err);
-          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId));
+      globalSignApi.sanModifyOperation(response.ssl_name, 'DELETE', response.verification_method, response.verification_object, false, function (error, data) {
+        if (error) {
+          console.log(error);
+          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
         } else {
           console.log(data.output.message);
-          renderJSON(request, reply, err, data.output.message);
+          renderJSON(request, reply, error, data.output.message);
         }
       });
     } else {
-      globalSignApi.sanModifyOperation(sslNameId, 'CANCEL', response.verification_method, response.verification_object, false, function (err, data) {
-        if (err) {
-          console.log(err);
-          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId));
+      globalSignApi.sanModifyOperation(response.ssl_name, 'CANCEL', response.verification_method, response.verification_object, false, function (error, data) {
+        if (error) {
+          console.log(error);
+          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
         } else {
           console.log(data.output.message);
-          renderJSON(request, reply, err, data.output.message);
+          renderJSON(request, reply, error, data.output.message);
         }
       });
     }
