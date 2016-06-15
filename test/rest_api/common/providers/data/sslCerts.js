@@ -51,7 +51,7 @@ var SSLCertDataProvider = {
    */
   generateOne: function (accountId) {
     var prefix = Date.now();
-    var items = ['private'];  
+    var items = ['private'];
     // var items = ['shared', 'private'];  TODO shared certs should be tested using a different
     // approach: they are available for revadmin only and for now there can be only one shared cert
     // in the system

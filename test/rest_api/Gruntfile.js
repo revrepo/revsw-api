@@ -30,15 +30,15 @@ module.exports = function (grunt) {
           // (defaults to false)
           clearRequireCache: false
         },
-        src: [
-          'setup/apiKeys.js',
-          'setup/apps.js',
-          'setup/billingPlans.js',
-          'setup/dashboards.js',
-          'setup/domainConfigs.js',
-          'setup/sslCerts.js',
-          'setup/accounts.js',
-          'setup/users.js'
+        src: [ // NOTE: Execution order is really IMPORTANT
+          'scripts/clean/apiKeys.js',
+          'scripts/clean/apps.js',
+          'scripts/clean/billingPlans.js',
+          'scripts/clean/dashboards.js',
+          'scripts/clean/domainConfigs.js',
+          'scripts/clean/sslCerts.js',
+          'scripts/clean/accounts.js',
+          'scripts/clean/users.js'
         ]
       },
       setup: {
@@ -52,8 +52,8 @@ module.exports = function (grunt) {
           // (defaults to false)
           clearRequireCache: false
         },
-        src: [
-          'setup/apps/setupApps.js'
+        src: [ // NOTE: Execution order is note relevant.
+          'scripts/setup/*.js'
         ]
       },
       smoke: {

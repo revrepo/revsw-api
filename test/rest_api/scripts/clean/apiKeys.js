@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,18 +16,18 @@
  * from Rev Software, Inc.
  */
 
+var Promise = require('bluebird');
+
 var config = require('config');
-var API = require('./../common/api');
-var DomainConfigDP = require('./../common/providers/data/domainConfigs');
+var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.revAdmin');
-  var namePattern = new RegExp(DomainConfigDP.prefix +
-    '-[0-9]{13}|[0-9]{13}-portal-ui-test');
+  var user = config.get('api.users.revAdmin');
+  var namePattern = /[0-9]{13}/;
 
   before(function (done) {
     done();
@@ -37,7 +37,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('Domain Configs resource', function () {
+  describe('API Keys resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -47,27 +47,35 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean DomainConfigs created for testing.',
+    it('should clean API Keys created for testing.',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.domainConfigs
+            return API.resources.apiKeys
               .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var domainConfigs = res.body;
-                domainConfigs.forEach(function (domainConfig) {
-                  if (namePattern.test(domainConfig.domain_name)) {
-                    ids.push(domainConfig.id);
-                  }
-                });
-                API.resources.domainConfigs
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+              .expect(200);
+          })
+          .then(function (res) {
+            var apiKeys = res.body;
+            var idsForApiKeysToDelete = [];
+            return Promise
+              .each(apiKeys, function (apiKey) { // One promise after other
+                return API.resources.accounts
+                  .getOne(apiKey.account_id)
+                  .then(function (res) {
+                    var account = res.body;
+                    if (namePattern.test(account.companyName) ||
+                      namePattern.test(account.contact_email)) {
+                      idsForApiKeysToDelete.push(apiKey.id);
+                    }
+                  });
               })
-              .catch(done);
+              .then(function () {
+                API.resources.apiKeys
+                  .deleteManyIfExist(idsForApiKeysToDelete)
+                  .finally(done);
+              });
           })
           .catch(done);
       });
