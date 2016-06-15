@@ -33,7 +33,7 @@ describe('Negative check', function () {
   var account;
   var domainConfig;
   var reseller = config.get('api.users.reseller');
-
+  var bad_domain_id = config.get('api.purge.bad_domain_id');
   /**
    * Based on `data` from DataDriven case, generates callback for mocha test
    * to execute.
@@ -100,16 +100,19 @@ describe('Negative check', function () {
 
   describe('Purge resource', function () {
 
-    it('should return `not found` response when providing `empty` purge ID',
-      function (done) {
+    it('should return `Domain ID not found` response when providing `bad` domain ID',
+      function(done) {
         API.helpers
           .authenticateUser(reseller)
-          .then(function () {
+          .then(function() {
             API.resources.purge
-              .getOne('')
-              .expect(404)
-              .then(function (res) {
-                res.body.error.should.equal('Not Found');
+              .getAll({
+                'domain_id': bad_domain_id
+              })
+              .expect(400)
+              .then(function(res) {
+                res.body.error.should.equal('Bad Request');
+                res.body.message.should.equal('Domain ID not found');
                 done();
               })
               .catch(done);
@@ -117,6 +120,24 @@ describe('Negative check', function () {
           .catch(done);
       });
 
+    it('should return `Bad Request` response when providing `not correct` domain ID',
+      function(done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function() {
+            API.resources.purge
+              .getAll({
+                'domain_id': 'notcorrectdomainid'
+              })
+              .expect(400)
+              .then(function(res) {
+                res.body.error.should.equal('Bad Request');
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
     describe('Create with empty data', function () {
 
       beforeEach(function (done) {
