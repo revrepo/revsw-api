@@ -38,6 +38,7 @@ var PurgeJob = require('../models/PurgeJob');
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 
+var queryString = require('querystring');
 //
 // Management of purges
 //
@@ -113,6 +114,32 @@ exports.getPurgeJobStatus = function(request, reply) {
     }
     var response_json = JSON.parse(body);
     if ( res.statusCode === 400 ) {
+      return reply(boom.badRequest(response_json.message));
+    } else {
+      renderJSON(request, reply, err, response_json);
+    }
+  });
+};
+
+
+exports.getPurgeJobs = function(request, reply) {
+  var options = {
+    skip: request.query.skip || 0,
+    limit: request.query.limit || 10,
+    domain_id: request.query.domain_id
+  };
+  var filter = {};
+  cds_request({
+    url: config.get('cds_url') + '/v1/purge?' + queryString.stringify(options),
+    headers: {
+      Authorization: 'Bearer ' + config.get('cds_api_token')
+    }
+  }, function(err, res, body) {
+    if (err) {
+      return reply(boom.badImplementation('Failed to get purge job list from the CDS'));
+    }
+    var response_json = JSON.parse(body);
+    if (res.statusCode === 400) {
       return reply(boom.badRequest(response_json.message));
     } else {
       renderJSON(request, reply, err, response_json);

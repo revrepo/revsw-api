@@ -67,6 +67,35 @@ module.exports = [
 
   {
     method: 'GET',
+    path: '/v1/purge',
+    config: {
+      auth: {
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey' ]
+      },
+      handler: purges.getPurgeJobs,
+      description: 'Get list purge requests',
+      notes: 'Use the call to get list of a previously submitted object purge request.',
+      tags: ['api', 'purge'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        query: {
+          domain_id:Joi.objectId().required().description('Domain Id'),
+          limit: Joi.number().integer().min(0).default(10).optional().description('Pagination parameter - limit of record'),
+          skip: Joi.number().integer().min(0).default(0).optional().description('Pagination parameter - skip')
+        }
+      },
+      // response: {
+      //   schema: routeModels.statusModel
+      // }
+    }
+  },
+
+  {
+    method: 'GET',
     path: '/v1/purge/{request_id}',
     config: {
       auth: {
