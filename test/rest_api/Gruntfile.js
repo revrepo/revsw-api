@@ -31,14 +31,14 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [
-          'setup/apiKeys.js',
-          'setup/apps.js',
-          'setup/billingPlans.js',
-          'setup/dashboards.js',
-          'setup/domainConfigs.js',
-          'setup/sslCerts.js',
-          'setup/accounts.js',
-          'setup/users.js'
+          'scripts/cleanup/apiKeys.js',
+          'scripts/cleanup/apps.js',
+          'scripts/cleanup/billingPlans.js',
+          'scripts/cleanup/dashboards.js',
+          'scripts/cleanup/domainConfigs.js',
+          'scripts/cleanup/sslCerts.js',
+          'scripts/cleanup/accounts.js',
+          'scripts/cleanup/users.js'
         ]
       },
       setup: {
@@ -53,7 +53,7 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [
-          'setup/apps/setupApps.js'
+          'scripts/setup/*.js'
         ]
       },
       smoke: {
