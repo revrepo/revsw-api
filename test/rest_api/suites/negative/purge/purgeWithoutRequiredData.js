@@ -100,16 +100,16 @@ describe('Negative check', function () {
 
   describe('Purge resource', function () {
 
-    it('should return `Not Found` response when not providing a purge ID',
-      function (done) {
+    it('should return `Bad Request` response when not providing a query parameters',
+      function(done) {
         API.helpers
           .authenticateUser(reseller)
-          .then(function () {
+          .then(function() {
             API.resources.purge
-              .getOne()
-              .expect(404)
-              .then(function (res) {
-                res.body.error.should.equal('Not Found');
+              .getAll({})
+              .expect(400)
+              .then(function(res) {
+                res.body.error.should.equal('Bad Request');
                 done();
               })
               .catch(done);
