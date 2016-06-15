@@ -33,7 +33,6 @@ describe('Negative check', function () {
   var account;
   var domainConfig;
   var reseller = config.get('api.users.reseller');
-  var bad_domain_id = config.get('api.purge.bad_domain_id');
   /**
    * Based on `data` from DataDriven case, generates callback for mocha test
    * to execute.
@@ -100,19 +99,19 @@ describe('Negative check', function () {
 
   describe('Purge resource', function () {
 
-    it('should return `Domain ID not found` response when providing `bad` domain ID',
+    it('should return `child "domain_id" fails..` response when providing `empty` domain ID',
       function(done) {
         API.helpers
           .authenticateUser(reseller)
           .then(function() {
             API.resources.purge
               .getAll({
-                'domain_id': bad_domain_id
+                'domain_id': ''
               })
               .expect(400)
               .then(function(res) {
                 res.body.error.should.equal('Bad Request');
-                res.body.message.should.equal('Domain ID not found');
+                res.body.message.should.startWith('child "domain_id" fails');
                 done();
               })
               .catch(done);

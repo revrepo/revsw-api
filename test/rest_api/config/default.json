@@ -105,10 +105,6 @@
       "account_id": "55b6ff6a7957012304a49d04",
       "domain_id": "56558390b6eb546a6732ab4f",
       "domain_name": "www.google-test.com"
-    },
-    "purge":{
-      "bad_domain_id":  "33333333b6eb546a6732ab4f",
-      "good_domain_id": "56558390b6eb546a6732ab4f"
     }
   },
   "stats_api": {
