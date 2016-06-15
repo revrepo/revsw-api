@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -17,15 +17,15 @@
  */
 
 var config = require('config');
-var API = require('./../common/api');
+var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var reseller = config.get('api.users.revAdmin');
-  var pattern = /[0-9]{13}/;
+  var reseller = config.get('api.users.reseller');
+  var namePattern = /[0-9]{13}/;
 
   before(function (done) {
     done();
@@ -35,7 +35,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('Accounts resource', function () {
+  describe('Dashboards resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -45,25 +45,24 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean Accounts created for testing.',
+    it('should clean Dashboards created for testing.',
       function (done) {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            API.resources.accounts
+            API.resources.dashboards
               .getAll()
               .expect(200)
               .then(function (res) {
                 var ids = [];
-                var accounts = res.body;
-                accounts.forEach(function (account) {
-                  if (pattern.test(account.companyName) ||
-                    pattern.test(account.createdBy)) {
-                    ids.push(account.id);
+                var dashboards = res.body;
+                dashboards.forEach(function (dashboard) {
+                  if (namePattern.test(dashboard.title)) {
+                    ids.push(dashboard.id);
                   }
                 });
 
-                API.resources.accounts
+                API.resources.dashboards
                   .deleteManyIfExist(ids)
                   .finally(done);
               })

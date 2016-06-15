@@ -17,16 +17,15 @@
  */
 
 var config = require('config');
-var API = require('./../common/api');
+var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.revAdmin');
-  var namePattern = /API_TEST_APP_[0-9]{13}/;
-  var namePattern2 = /[0-9]{13}/;
+  var user = config.get('api.users.revAdmin');
+  var namePattern = /[0-9]{13}/;
 
   before(function (done) {
     done();
@@ -36,7 +35,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('Apps resource', function () {
+  describe('SSL Certificates resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -46,25 +45,23 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean Apps created for testing.',
+    it('should clean SSL Certificates created for testing.',
       function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.apps
+            API.resources.sslCerts
               .getAll()
               .expect(200)
               .then(function (res) {
                 var ids = [];
-                var apps = res.body;
-                apps.forEach(function (app) {
-                  if (namePattern.test(app.app_name) ||
-                      namePattern2.test(app.app_name)) {
-                    ids.push(app.id);
+                var certificates = res.body;
+                certificates.forEach(function (certificate) {
+                  if (namePattern.test(certificate.cert_name)) {
+                    ids.push(certificate.id);
                   }
                 });
-
-                API.resources.apps
+                API.resources.sslCerts
                   .deleteManyIfExist(ids)
                   .finally(done);
               })
