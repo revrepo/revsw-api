@@ -22,10 +22,12 @@
 'use strict';
 
 var Joi = require('joi');
-
 var purges = require('../handlers/purges');
-
 var routeModels = require('../lib/routeModels');
+var config = require('config');
+
+var purgeJobEnvironments = config.get('purge_job_environments');
+var defaultPurgeJobEnvironment = config.get('purge_job_default_environment');
 
 module.exports = [
 
@@ -56,7 +58,8 @@ module.exports = [
                 .description('Set true if "expression" is a regular expression, set to "false" if the "expression" is a wildcard pattern'),
               expression: Joi.string().max(150).trim().required().description('Wildcard expression if "is_wildcard" is set to true, otherwise - a regular expression')
             })
-          }).required().description('Array of URLs to purge')
+          }).required().description('Array of URLs to purge'),
+          environment: Joi.string().default(defaultPurgeJobEnvironment).valid(purgeJobEnvironments).description('Purge job servers environment')
         }
       },
       response: {
