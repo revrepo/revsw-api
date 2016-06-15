@@ -51,7 +51,7 @@ var SSLCertDataProvider = {
    */
   generateOne: function (accountId) {
     var prefix = Date.now();
-    var items = ['shared', 'private'];
+    var items = ['private']; // 'shared' excluded
     return {
       account_id: accountId,
       cert_name: faker.lorem.sentence() + ' ' + prefix,
