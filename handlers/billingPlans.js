@@ -52,7 +52,7 @@ exports.createBillingPlan = function (request, reply) {
   }, function (err, plan) {
 
     if (err) {
-      return reply(boom.badImplementation('Failed to verify the new billing plan name'));
+      return reply(boom.badImplementation('Failed to verify the new billing plan name', err));
     }
 
     if (plan) {
@@ -62,7 +62,7 @@ exports.createBillingPlan = function (request, reply) {
     BillingPlan.add(requestPayload, function (error, result) {
 
       if (error || !result) {
-        return reply(boom.badImplementation('Failed to add new billing plan'));
+        return reply(boom.badImplementation('Failed to add new billing plan', error));
       }
 
       result = publicRecordFields.handle(result, 'billingPlan');
@@ -94,7 +94,7 @@ exports.get = function (request, reply) {
   var id = request.params.id;
   BillingPlan.get({_id: id}, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to get Billing plan ' + id));
+      return reply(boom.badImplementation('Failed to get Billing plan ' + id, error));
     }
 
     if (result) {
@@ -114,7 +114,7 @@ exports.updateBillingPlan = function (request, reply) {
 
   BillingPlan.get({_id: id}, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to verify Billing plan ' + id));
+      return reply(boom.badImplementation('Failed to verify Billing plan ' + id, error));
     }
 
     if (!result) {
@@ -124,7 +124,7 @@ exports.updateBillingPlan = function (request, reply) {
     updatedData.id = id;
     BillingPlan.updateBillingPlan(updatedData, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update Billing plan ' + id));
+        return reply(boom.badImplementation('Failed to update Billing plan ' + id, error));
       }
 
       var statusResponse = {
@@ -156,7 +156,7 @@ exports.delete = function (request, reply) {
   var id = request.params.id;
   BillingPlan.get({_id: id}, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id));
+      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id, error));
     }
     if (!result) {
       return reply(boom.badRequest('Billing Plan not found'));
@@ -165,14 +165,14 @@ exports.delete = function (request, reply) {
     // Get list of users who uses this billing plan
     users.getUsersUsesBillingPlan(result.id, function(err, users) {
       if (err) {
-        return reply(boom.badImplementation('Could not fetch list of users who using billing plan with id : ' + result.id));
+        return reply(boom.badImplementation('Could not fetch list of users who using billing plan with id : ' + result.id, err));
       }
       if (_.isArray(users) || users.length > 0) {
         return reply(boom.badImplementation('There are users who using billing plan : ' + result.id));
       }
       BillingPlan.removeBillingPlan({_id: id}, function (error) {
         if (error) {
-          return reply(boom.badImplementation('Error while removing billing plan with id ' + result.id));
+          return reply(boom.badImplementation('Error while removing billing plan with id ' + result.id, error));
         }
 
         var statusResponse = {
@@ -194,27 +194,6 @@ exports.delete = function (request, reply) {
         renderJSON(request, reply, error, statusResponse);
       });
 
-    });
-  });
-};
-
-exports.getHostedPage = function (request, reply) {
-  var id = request.params.id;
-  BillingPlan.get({_id: id}, function (error, res) {
-    if (error){
-      return reply(boom.badImplementation('Error retrieving Billing Plan ' + id));
-    }
-    Chargify.Product.getHostedPage(res.chargify_handle, function (error, result) {
-      if (error) {
-        return reply(boom.badImplementation());
-      }
-
-      var response = {
-        statusCode: 200,
-        body: result
-      };
-
-      renderJSON(request, reply, error, result);
     });
   });
 };
