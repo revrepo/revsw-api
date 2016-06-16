@@ -79,40 +79,30 @@ exports.getSSLName = function (request, reply) {
 };
 
 exports.getSSLNameApprovers = function (request, reply) {
-  var sslNameId = request.params.ssl_name_id;
+  var sslName = request.params.ssl_name;
   var approvers = '';
   // TODO add a permissions check
-  sslNames.get(sslNameId, function (error, result) {
+  globalSignApi.getStatus(function (error, data) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
+      console.log(error);
+      return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + sslName, error));
+    } else {
+      console.log(data.output.message);
+      var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
+      //console.log(fqdn);
+      globalSignApi.getApproveList(sslName, fqdn, function (error, data) {
+        if (error) {
+          console.log(error);
+          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ' + sslName, error));
+        } else {
+          console.log(data.output.message);
+          approvers = data.output.message.Response.Approvers[0];
+          renderJSON(request, reply, error, approvers);
+        }
+      });
     }
-
-    if (!result) {
-      return reply(boom.badRequest('SSL name ID not found'));
-    }
-
-    globalSignApi.getStatus(function (error, data) {
-      if (error) {
-        console.log(error);
-        return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName, error));
-      } else {
-        console.log(data.output.message);
-        var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
-        //console.log(fqdn);
-        globalSignApi.getApproveList(result.ssl_name, fqdn, function (error, data) {
-          if (error) {
-            console.log(error);
-            return reply(boom.badImplementation('Failed to retrieve approve for SSL name ' + SSLName, error));
-          } else {
-            console.log(data.output.message);
-            approvers = data.output.message.Response.Approvers[0];
-            renderJSON(request, reply, error, approvers);
-          }
-        });
-      }
-    });
-
   });
+
 };
 
 exports.addSSLName = function (request, reply) {
@@ -203,14 +193,9 @@ exports.addSSLName = function (request, reply) {
                     }
                   });
 
-                  globalSignApi.getStatus(function (error, data) {
-                    if (error) {
-                      console.log(error);
-                    } else {
-                      verificationObject = 'Waiting on email verification';
-                      createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
-                    }
-                  });
+                  verificationObject = 'Waiting on email verification';
+                  createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
+
                 }
               }
             });
@@ -253,11 +238,84 @@ exports.verifySSLName = function (request, reply) {
     }
 
     // TODO add a permissions check
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+    if (!result) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
+    //console.log(result.verification_method);
+
+    if(result.verification_method === 'email'){
+      globalSignApi.getStatus(function (error, data) {
+        if (error) {
+          console.log(error);
+        } else {
+          var domain;
+          var domains = data.output.message.Response.OrderDetail.CloudOVSANInfo.CloudOVSANDetail;
+          //console.log(JSON.stringify(domains));
+          for (var i = 0; domains.length > i; i += 1) {
+            if (domains[i].CloudOVSAN === result.ssl_name) {
+              if(domains[i].CloudOVSANStatus !== 8 && domains[i].CloudOVSANStatus !== 9){
+                domain = domains[i];
+              }
+            }
+          }
+          //renderJSON(request, reply, error, globalSignApi.sanStatusCode[domain.CloudOVSANStatus]);
+          var statusResponse;
+          if (result) {
+            statusResponse = {
+              statusCode: 200,
+              message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
+              object_id: result.ssl_name_id
+            };
+          }
+          renderJSON(request, reply, error, statusResponse);
+        }
+      });
+    } else if (result.verification_method === 'url') {
+
+      globalSignApi.urlVerification(result.ssl_name, function (error, data) {
+        if (error) {
+          console.log(error);
+        } else {
+          /*
+           var statusResponse;
+           if (result) {
+           statusResponse = {
+           statusCode: 200,
+           message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
+           object_id: result.ssl_name_id
+           };
+           }*/
+          renderJSON(request, reply, error, data);
+        }
+      });
+
+    } else if (result.verification_method === 'dns') {
+
+      globalSignApi.dnsVerification(result.ssl_name, function (error, data) {
+        if (error) {
+          console.log(error);
+        } else {
+          /*
+           var statusResponse;
+           if (result) {
+           statusResponse = {
+           statusCode: 200,
+           message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
+           object_id: result.ssl_name_id
+           };
+           }*/
+          renderJSON(request, reply, error, data);
+        }
+      });
+    } else {
+      return reply(boom.badImplementation('Failed to verify for SSL name ID ' + sslNameId, error));
+    }
+
     /*
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+      return reply(boom.badRequest('SSL name ID not found'));
+    }
 
      newLogJob.updated_by = utils.generateCreatedByField(request);
 
@@ -402,18 +460,21 @@ exports.deleteSSLName = function (request, reply) {
   });*/
 };
 
-/*
-exports.getSSLCerts = function (request, reply) {
-  globalSignApi.getStatus(function (err, data) {
+exports.updateIssue = function (request, reply) {
+  globalSignApi.issueRequest(function (err, data) {
     if (err) {
       console.log(err);
-      return reply(boom.badImplementation('Failed to receive SSL certificates for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to update SSL certificates'));
     } else {
-      var response = data.output.message.Response.OrderDetail.Fulfillment;
-      renderJSON(request, reply, err, response);
+      globalSignApi.getStatus(function (err, data) {
+        if (err) {
+          console.log(err);
+          return reply(boom.badImplementation('Failed to receive SSL certificates'));
+        } else {
+          var response = data.output.message.Response.OrderDetail.Fulfillment;
+          renderJSON(request, reply, err, response);
+        }
+      });
     }
   });
-
 };
-
-*/

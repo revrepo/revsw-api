@@ -70,7 +70,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_name_id}/approvers',
+    path: '/v1/ssl_names/{ssl_name}/approvers',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -80,7 +80,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.string().required().description('SSL name ID')
+          ssl_name: Joi.string().required().description('SSL name')
         }
       },
       plugins: {
@@ -146,6 +146,23 @@ module.exports = [
     }
   },
 
+  {
+    method: 'GET',
+    path: '/v1/ssl_names/issue',
+    config: {
+      auth: {
+        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: sslNameHandlers.updateIssue,
+      description: 'Update SSL certificates',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      }
+    }
+  },
 
   {
     method: 'DELETE',

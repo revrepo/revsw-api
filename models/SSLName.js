@@ -52,7 +52,7 @@ function SSLName(mongoose, connection, options) {
     'verification_method': {type: String, required: true},
     'verification_object': {type: String, required: false},
     'comment': {type: String, default: ''},
-    'approvers': {type: String}
+    'approvers': []
   });
 
   this.model = connection.model('SSLName', this.SSLNameSchema, 'SSLName');
