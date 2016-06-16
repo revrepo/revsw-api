@@ -17,15 +17,16 @@
  */
 
 var config = require('config');
-var API = require('./../common/api');
+var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var reseller = config.get('api.users.reseller');
-  var namePattern = /[0-9]{13}/;
+  var reseller = config.get('api.users.revAdmin');
+  var namePattern = /API_TEST_APP_[0-9]{13}/;
+  var namePattern2 = /[0-9]{13}/;
 
   before(function (done) {
     done();
@@ -35,7 +36,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('Dashboards resource', function () {
+  describe('Apps resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -45,24 +46,25 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean Dashboards created for testing.',
+    it('should clean Apps created for testing.',
       function (done) {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            API.resources.dashboards
+            API.resources.apps
               .getAll()
               .expect(200)
               .then(function (res) {
                 var ids = [];
-                var dashboards = res.body;
-                dashboards.forEach(function (dashboard) {
-                  if (namePattern.test(dashboard.title)) {
-                    ids.push(dashboard.id);
+                var apps = res.body;
+                apps.forEach(function (app) {
+                  if (namePattern.test(app.app_name) ||
+                      namePattern2.test(app.app_name)) {
+                    ids.push(app.id);
                   }
                 });
 
-                API.resources.dashboards
+                API.resources.apps
                   .deleteManyIfExist(ids)
                   .finally(done);
               })
