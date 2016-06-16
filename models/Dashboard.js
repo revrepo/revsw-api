@@ -22,7 +22,7 @@
 //  data access layer
 
 var utils = require('../lib/utilities.js');
-
+var _ = require('lodash');
 function Dashboard(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -133,6 +133,14 @@ Dashboard.prototype = {
       });
     } else {
       callback(utils.buildError('400', 'No dashboard ID passed to remove function'), null);
+    }
+  },
+
+  removeMany: function (data, callback) {
+    if(_.isEmpty(data)){
+        callback(true);
+    }else{
+       this.model.remove(data, callback);
     }
   },
 
