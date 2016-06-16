@@ -120,7 +120,6 @@ describe('Rev stats top API', function() {
         var response_json = JSON.parse(res.text);
         var jwtTokenWithResellerPerm = response_json.token;
         response_json.token.should.be.a.String(jwtTokenWithResellerPerm);
-        // TODO: check permission for this domain
         request(testAPIUrl)
           .get('/v1/stats/top/' + testDomainId)
           .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
