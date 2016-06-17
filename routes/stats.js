@@ -106,7 +106,8 @@ module.exports = [
           http2: Joi.string().valid( 'h2', 'h2c' ).description('HTTP2 protocol type to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
-          device: Joi.string().description('Device name/version to filter')
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
         }
       }
     }
@@ -139,6 +140,9 @@ module.exports = [
             'http_protocol', 'http_method', 'content_encoding', 'os', 'device', 'country', 'QUIC', 'http2', 'top5xx', 'browser' )
             .description('Type of requested report (defaults to "referer")'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
         }
       }
     }

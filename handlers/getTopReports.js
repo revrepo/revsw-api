@@ -147,13 +147,10 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     };
   }
 
-  if (req.query.country) {
-    requestBody.query.filtered.filter.bool.must.push({
-      term: {
-        'geoip.country_code2': req.query.country
-      }
-    });
-  }
+  var terms = elasticSearch.buildESQueryTerms(req);
+  var sub = requestBody.query.filtered.filter.bool;
+  sub.must = sub.must.concat( terms.must );
+  sub.must_not = sub.must_not.concat( terms.must_not );
 
   var indicesList = utils.buildIndexList(span.start, span.end);
   return elasticSearch.getClientURL().search({
