@@ -83,6 +83,9 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     case 'http2':
       field = 'http2';
       break;
+    case 'browser':
+      field = 'name';
+      break;
     default:
       return reply(boom.badImplementation('Received bad report_type value ' + req.query.report_type));
   }
