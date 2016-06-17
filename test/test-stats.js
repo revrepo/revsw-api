@@ -14,7 +14,6 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',
   qaUserWithAdminPerm = 'qa_user_with_admin_perm@revsw.com',
   qaUserWithAdminPermPassword = 'password1',
-  qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
   qaUserWithResellerPerm = 'qa_user_with_reseller_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
@@ -108,7 +107,7 @@ describe('Rev stats top API', function() {
   });
 
 
-  it.skip('should allow a request for user with Reseller role', function(done) {
+  it('should allow a request for user with Reseller role', function(done) {
     request(testAPIUrl)
       .post('/v1/authenticate')
       .send(userAuthWithResellerPerm)
@@ -120,7 +119,6 @@ describe('Rev stats top API', function() {
         var response_json = JSON.parse(res.text);
         var jwtTokenWithResellerPerm = response_json.token;
         response_json.token.should.be.a.String(jwtTokenWithResellerPerm);
-        // TODO: check resselers`s permission for this testDomainId
         request(testAPIUrl)
           .get('/v1/stats/top/' + testDomainId)
           .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
@@ -140,8 +138,6 @@ describe('Rev stats top API', function() {
 
       });
   });
-
-
 
   it('should fail if report_type is not set', function(done) {
     request(testAPIUrl)
@@ -183,7 +179,6 @@ describe('Rev stats top API', function() {
         request(testAPIUrl)
           .get('/v1/stats/top/' + testDomainId)
           .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
-          // .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
           .query({
             report_type: 'referer233333333'
           })
