@@ -106,7 +106,8 @@ var top_reports_ = function( req, reply, domain_name, span ) {
               term: {
                 domain: domain_name
               }
-            }]
+            }],
+            must_not: []
           }
         }
       }
