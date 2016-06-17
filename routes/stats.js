@@ -65,7 +65,8 @@ module.exports = [
           quic: Joi.string().valid( 'QUIC', 'HTTP' ).description('Last mile protocol to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
-          device: Joi.string().description('Device name/version to filter')
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
         }
       }
     }

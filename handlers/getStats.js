@@ -86,7 +86,6 @@ exports.getStats = function(request, reply) {
             date_histogram: {
               field: '@timestamp',
               interval: ( '' + span.interval ),
-              // 'pre_zone_adjust_large_interval': true,  //  Deprecated in 1.5.0.
               min_doc_count: 0,
               extended_bounds : {
                 min: span.start,
