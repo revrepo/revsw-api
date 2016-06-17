@@ -365,6 +365,7 @@ describe('Rev Purge API (RevAdmin role)', function() {
   });
 
   it('should read the status of purge job and make sure it is "Success"', function(done) {
+    this.timeout(50000);
     request(testAPIUrl)
       .post('/v1/authenticate')
       .send(userAuthWithRevAdminPerm)
@@ -376,10 +377,10 @@ describe('Rev Purge API (RevAdmin role)', function() {
         var response_json = JSON.parse(res.text);
         var jwtTokenWithRevAdminPerm = response_json.token;
         response_json.token.should.be.a.String(jwtTokenWithRevAdminPerm);
+        sleep.sleep(25);
         request(testAPIUrl)
           .get('/v1/purge/' + purgeRequestID)
           .set('Authorization', 'Bearer ' + jwtTokenWithRevAdminPerm)
-          // .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)!!!
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -408,7 +409,6 @@ describe('Rev Purge API (RevAdmin role)', function() {
         request(testAPIUrl)
           .get('/v1/purge/24qwerasfasdfsdfsdf')
           .set('Authorization', 'Bearer ' + jwtTokenWithRevAdminPerm)
-          // .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
           .expect(400)
           .end(function(err, res) {
             if (err) {
