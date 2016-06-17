@@ -13,14 +13,14 @@ var crypto = require('crypto');
 var utils = require('../lib/utilities.js');
 var config = require('config');
 
-var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + 
+var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' +
   config.get('service.https_port');
-var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + 
+var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' +
   config.get('service.http_port');
-var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + 
+var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' +
   config.get('service.http_port');
 
-xdescribe('Rev password reset API', function() {
+describe('Rev password reset API', function() {
 
   this.timeout(10000);
 
@@ -42,8 +42,9 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
     domainConfigJson = {},
     resetToken = '',
     testUser = 'revswqa@gmail.com',
-    notExistingUser = 'needtomakesure@thattheuserdoesnotexist.com',
     testUserGmailPass = 'revswqa1',
+    notExistingUser = 'needtomakesure@thattheuserdoesnotexist.com',
+
     testPass = crypto.randomBytes(5).toString('hex');
 
 
@@ -94,7 +95,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should receive to the Gmail account an email with password reset link', function(done) {
+  it.skip('should receive to the Gmail account an email with password reset link', function(done) {
 
     this.timeout(50000);
     sleep.sleep(25);
@@ -105,7 +106,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
         user: testUser,
         pass: testUserGmailPass
       },
-      debug: false
+      debug: true
     });
 
     client.connect();
@@ -142,7 +143,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
     });
   });
 
-  it('should verify that received password reset token is valid', function(done) {
+  it.skip('should verify that received password reset token is valid', function(done) {
     console.log('resetToken = ' + resetToken);
     request(testAPIUrl)
       .get('/v1/reset/' + resetToken)
@@ -157,7 +158,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should set new password', function(done) {
+  it.skip('should set new password', function(done) {
     request(testAPIUrl)
       .post('/v1/reset/' + resetToken)
       .send( { password: testPass } )
@@ -172,7 +173,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should verify that the new password is active for the test user', function(done) {
+  it.skip('should verify that the new password is active for the test user', function(done) {
 
     request(testAPIUrl)
       .post('/v1/authenticate')
@@ -186,7 +187,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should verify that the password reset token is not valid anymore', function(done) {
+  it.skip('should verify that the password reset token is not valid anymore', function(done) {
     request(testAPIUrl)
       .get('/v1/reset/' + resetToken)
       .expect(400)
@@ -202,7 +203,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should receive to the Gmail account a password change confirmation email', function(done) {
+  it.skip('should receive to the Gmail account a password change confirmation email', function(done) {
 
     this.timeout(40000);
     sleep.sleep(30);
@@ -230,7 +231,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 //            console.log('mail_object = ', mail_object);
             if (mail_object.headers.subject !== 'Your RevAPM Customer Portal password has been changed') {
               throw 'Failed to receive a portal password change confirmation email';
-            } 
+            }
             done();
           });
         });
@@ -238,7 +239,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
     });
   });
 
-  it('should trigger one more time the password reset process for user ' + testUser, function(done) {
+  it.skip('should trigger one more time the password reset process for user ' + testUser, function(done) {
     request(testAPIUrl)
       .post('/v1/forgot')
       .send( { email: testUser } )
@@ -253,7 +254,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       });
   });
 
-  it('should verify that the new password is still active for the test user', function(done) {
+  it.skip('should verify that the new password is still active for the test user', function(done) {
 
     request(testAPIUrl)
       .post('/v1/authenticate')
