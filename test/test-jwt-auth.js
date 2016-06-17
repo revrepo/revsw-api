@@ -29,7 +29,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
 
 
-  var adminToken = '',
+  var jwtTokenWithAdminPerm = '',
     jwtToken = '',
     userCompanyId = '',
     testDomainId,
@@ -65,11 +65,28 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
       'dashBoard': true
     }
   };
+  before(function(done){
+     request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send({
+        email: qaUserWithAdminPerm,
+        password: qaUserWithAdminPermPassword
+      })
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        jwtTokenWithAdminPerm = response_json.token;
+        done();
+       });
+  });
 
   it('should create a new user account ' + testUserJWT, function(done) {
     request(testAPIUrl)
       .post('/v1/users')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .send(newUserJson)
       .expect(200)
       .end(function(err, res) {
@@ -88,7 +105,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   it('should find a new record about the addition of new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -194,7 +211,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   it('should successfully change the user password', function(done) {
     request(testAPIUrl)
       .put('/v1/users/password/' + testUserId)
-      .auth(testUserJWT, testPass)
+      .set('Authorization', 'Bearer ' + jwtToken)
       .send( changePasswordJson2 )
       .expect(200)
       .end(function(err, res) {
@@ -210,21 +227,36 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
 
   it('should find a new record about modify password the user in logger', function(done) {
     request(testAPIUrl)
-      .get('/v1/activity')
-      .auth(testUserJWT, newTestPass)
+      .post('/v1/authenticate')
+      .send({
+        email: testUserJWT,
+        password:  newTestPass
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        var last_obj      = response_json.data[0];
-        last_obj.target_id.should.be.equal(testUserId);
-        last_obj.activity_type.should.be.equal('modify');
-        last_obj.activity_target.should.be.equal('user');
-        done();
+        jwtTokenWithUserPerm = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/activity')
+          .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            var last_obj = response_json.data[1];
+            last_obj.target_id.should.be.equal(testUserId);
+            last_obj.activity_type.should.be.equal('modify');
+            last_obj.activity_target.should.be.equal('user');
+            done();
+          });
       });
   });
+
 
   it('should fail to get a list of LM locations using the same token after password change', function(done) {
     request(testAPIUrl)
@@ -243,7 +275,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   it('should delete test user account ' + testUserJWT, function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -261,7 +293,7 @@ var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   it('should find a new record about deleting the user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
