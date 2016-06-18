@@ -37,6 +37,10 @@
   "elasticsearch_timeout_ms": 120000,
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
   "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
+
+  "shared_domain_id": "5723e997bd75f6e7668dbe26",
+  "shared_domain_account_id": "5588869fbde7a0d00338ce8f",
+
   "default_cname_domain": "revdn.net",
   "portal_mongo": {
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"

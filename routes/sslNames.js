@@ -23,7 +23,7 @@
 var Joi = require('joi');
 
 var sslNameHandlers = require('../handlers/sslNames');
-
+var sslNameServices = require('../services/sslNames');
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
@@ -57,7 +57,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.string().required().description('SSL name ID')
+          ssl_name_id: Joi.objectId().required().description('SSL name ID')
         }
       },
       plugins: {
@@ -70,7 +70,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_name}/approvers',
+    path: '/v1/ssl_names/approvers',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -79,7 +79,7 @@ module.exports = [
       description: 'Get a list of approvers for email-based domain control validation',
       tags: ['api'],
       validate: {
-        params: {
+        query: {
           ssl_name: Joi.string().required().description('SSL name')
         }
       },
@@ -135,7 +135,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.string().required().description('SSL name ID')
+          ssl_name_id: Joi.objectId().required().description('SSL name ID')
         },
       },
       plugins: {
@@ -153,7 +153,7 @@ module.exports = [
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: sslNameHandlers.updateIssue,
+      handler: sslNameServices.updateIssue,
       description: 'Update SSL certificates',
       tags: ['api'],
       plugins: {
@@ -176,7 +176,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.string().required().description('SSL name ID')
+          ssl_name_id: Joi.objectId().required().description('SSL name ID')
         }
       },
       plugins: {

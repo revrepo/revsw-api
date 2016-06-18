@@ -79,7 +79,7 @@ exports.getSSLName = function (request, reply) {
 };
 
 exports.getSSLNameApprovers = function (request, reply) {
-  var sslName = request.params.ssl_name;
+  var sslName = request.query.ssl_name;
   var approvers = '';
   // TODO add a permissions check
   globalSignApi.getStatus(function (error, data) {
@@ -458,23 +458,4 @@ exports.deleteSSLName = function (request, reply) {
 
 
   });*/
-};
-
-exports.updateIssue = function (request, reply) {
-  globalSignApi.issueRequest(function (err, data) {
-    if (err) {
-      console.log(err);
-      return reply(boom.badImplementation('Failed to update SSL certificates'));
-    } else {
-      globalSignApi.getStatus(function (err, data) {
-        if (err) {
-          console.log(err);
-          return reply(boom.badImplementation('Failed to receive SSL certificates'));
-        } else {
-          var response = data.output.message.Response.OrderDetail.Fulfillment;
-          renderJSON(request, reply, err, response);
-        }
-      });
-    }
-  });
 };
