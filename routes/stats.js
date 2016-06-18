@@ -115,6 +115,38 @@ module.exports = [
 
   {
     method: 'GET',
+    path: '/v1/stats/slowest_fbt_objects/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: getTopObjects.getSlowestFBTObjects,
+      description: 'Get a list of object requests with slowest FBT',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of top objects to report (default to 30)'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
     path: '/v1/stats/top/{domain_id}',
     config: {
       auth: {
