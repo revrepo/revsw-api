@@ -152,7 +152,7 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            var counter = 180000; // 3 mins
+            var counter = 360000; // 6 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
