@@ -11,3 +11,5 @@ service and also easily try available functions using your RevAPM customer porta
 For general information about the service please see [RevAPM Customer API](https://revapm.zendesk.com/hc/en-us/categories/200833373-RevAPM-API)
 section on our Help Center site.
 
+
+sudo -E ssh -F /home/kobra/.ssh/config -l yuri2 IAD02-MANAGER01.REVSW.NET -L 127.0.0.100:443:system.globalsign.com:443

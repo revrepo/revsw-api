@@ -80,7 +80,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         query: {
-          ssl_name: Joi.string().required().description('SSL name')
+          ssl_name: Joi.string().min(1).max(150).required().description('SSL name')
         }
       },
       plugins: {
@@ -138,24 +138,6 @@ module.exports = [
           ssl_name_id: Joi.objectId().required().description('SSL name ID')
         },
       },
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      }
-    }
-  },
-
-  {
-    method: 'GET',
-    path: '/v1/ssl_names/issue',
-    config: {
-      auth: {
-        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
-      },
-      handler: sslNameServices.updateIssue,
-      description: 'Update SSL certificates',
-      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

@@ -268,33 +268,33 @@ exports.verifySSLName = function (request, reply) {
             }
 
             cds_request({
-              url: config.get('cds_url') + '/v1/ssl_certs/' + config.get('shared_domain_id'),
+              url: config.get('cds_url') + '/v1/ssl_certs/' + config.get('shared_ssl_cert_id'),
               headers: authHeader
             }, function (err, res, body) {
               if (err) {
                 return reply(boom.badImplementation('Failed to get from CDS the configuration for SSL certificate ID ' + sslNameId));
               }
-              var response_json = JSON.parse(body);
+              var responseJson = JSON.parse(body);
               if (res.statusCode === 400) {
-                return reply(boom.badRequest(response_json.message));
+                return reply(boom.badRequest(responseJson.message));
               }
 
               newSSLCert = {
-                'account_id': response_json.account_id,
-                'bp_group_id': response_json.bp_group_id,
-                'cert_name': response_json.cert_name,
-                'cert_type': response_json.cert_type,
-                'comment': response_json.account_id,
+                'account_id': responseJson.account_id,
+                'bp_group_id': responseJson.bp_group_id,
+                'cert_name': responseJson.cert_name,
+                'cert_type': responseJson.cert_type,
+                'comment': responseJson.account_id,
                 'public_ssl_cert': newPublicCert,
-                'private_ssl_key': response_json.private_ssl_key,
-                'private_ssl_key_passphrase': response_json.private_ssl_key_passphrase,
-                'chain_ssl_cert': response_json.chain_ssl_cert,
+                'private_ssl_key': responseJson.private_ssl_key,
+                'private_ssl_key_passphrase': responseJson.private_ssl_key_passphrase,
+                'chain_ssl_cert': responseJson.chain_ssl_cert,
                 'updated_by': utils.generateCreatedByField(request)
               };
               // renderJSON(request, reply, err, newSSLCert);
 
               cds_request({
-                url: config.get('cds_url') + '/v1/ssl_certs/' + response_json.id,
+                url: config.get('cds_url') + '/v1/ssl_certs/' + responseJson.id + '?options=publish',
                 method: 'PUT',
                 headers: authHeader,
                 body: JSON.stringify(newSSLCert)
@@ -302,12 +302,12 @@ exports.verifySSLName = function (request, reply) {
                 if (err) {
                   return reply(boom.badImplementation('Failed to update the CDS with confguration for shared SSL certificate'));
                 }
-                var response_json = JSON.parse(body);
+                var responseJson = JSON.parse(body);
                 if (res.statusCode === 400) {
-                  return reply(boom.badRequest(response_json.message));
+                  return reply(boom.badRequest(responseJson.message));
                 }
                 /*
-                 var response = response_json;
+                 var response = responseJson;
                  if (response) {
                  var statusResponse = {
                  statusCode: 202,
