@@ -102,7 +102,7 @@ exports.updateIssue = function (request, reply) {
             headers: authHeader
           }, function (err, res, body) {
             if (err) {
-              return reply(boom.badImplementation('Failed to get from CDS the configuration for SSL certificate ID ' + sslCertId));
+              return reply(boom.badImplementation('Failed to get from CDS the configuration for SSL certificate ID'));
             }
             var response_json = JSON.parse(body);
             if (res.statusCode === 400) {
