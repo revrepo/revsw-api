@@ -37,6 +37,10 @@
   "elasticsearch_timeout_ms": 120000,
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
   "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
+
+  "shared_domain_id": "5723e997bd75f6e7668dbe26",
+  "shared_domain_account_id": "5588869fbde7a0d00338ce8f",
+
   "default_cname_domain": "revdn.net",
   "portal_mongo": {
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
@@ -92,5 +96,14 @@
   "notify_developers_by_email_about_bad_implementation": "eng@revsw.com",
 
   "purge_job_environments": ["staging_only", "global_only", "global_and_staging"],
-  "purge_job_default_environment": "global_and_staging"
+  "purge_job_default_environment": "global_and_staging",
+
+  "globalsign": {
+    "OrderId": "the_correct_value_is_in_local_json",
+    "GsignUser": "the_correct_value_is_in_local_json",
+    "GsignPass": "the_correct_value_is_in_local_json",
+    "GasOrder": "https://system.globalsign.com/bb/ws/GasOrder?wsdl",
+    "GasQuery": "https://system.globalsign.com/bb/ws/GasQuery?wsdl",
+    "ServerSSLService": "https://system.globalsign.com/bb/ws/ServerSSLService?wsdl"
+  }
 }
