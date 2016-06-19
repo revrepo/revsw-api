@@ -12,4 +12,3 @@ For general information about the service please see [RevAPM Customer API](https
 section on our Help Center site.
 
 
-sudo -E ssh -F /home/kobra/.ssh/config -l yuri2 IAD02-MANAGER01.REVSW.NET -L 127.0.0.100:443:system.globalsign.com:443
