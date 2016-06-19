@@ -33,9 +33,20 @@ var qaUserWithAdminPerm         = 'api_qa_user_with_admin_perm@revsw.com',
 var wrongUser         = 'test@test.com',
     wrongUserPassword = 'test123456';
 
+var userAuthWithUserPerm = {
+  email: qaUserWithUserPerm,
+  password: qaUserWithUserPermPassword
+};
+
+var wrongUserAuth = {
+  email: qaUserWithUserPerm,
+  password: qaUserWithUserPermPassword
+};
+
+
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' +
   config.get('service.https_port');
-
+console.log(testAPIUrl);
 describe('Rev API /v1/activity call', function() {
 
   this.timeout(10000);
@@ -47,11 +58,41 @@ describe('Rev API /v1/activity call', function() {
   var userNotFound    = 'User ID not found';
   var companyNotFound = 'Account ID not found';
 
-  it('Should return 401 fail', function(done) {
+  var jwtTokenWithUserPerm = '';
+
+  before(function(done){
+      request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send(userAuthWithUserPerm )
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        jwtTokenWithUserPerm = response_json.token;
+        done();
+      });
+  });
+
+  it('Should return 401 fail for auth method', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
       .auth(wrongUser, wrongUserPassword)
       .expect(401)
+      .end(function(err) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
+  it('Should return 400 fail for not exist token', function(done) {
+    request(testAPIUrl)
+      .get('/v1/activity')
+      .set('Authorization', 'Bearer notcorrecttokennotcorrecttokennotcorrecttoken' )
+      .expect(400)
       .end(function(err) {
         if (err) {
           throw err;
@@ -65,7 +106,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity'+getParams)
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .expect(400)
       .end(function(err, res) {
         if (err) {
@@ -80,7 +121,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -110,7 +151,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : otherId })
       .expect(400)
       .end(function(err, res) {
@@ -157,7 +198,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : userId })
       .expect(200)
       .end(function(err, res) {
@@ -189,7 +230,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ account_id : companyId })
       .expect(200)
       .end(function(err, res) {
@@ -221,7 +262,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .expect(400)
       .query({ user_id : userId, account_id : '5588869fbde7a0d00338ce6f' })
       .end(function(err, res) {
@@ -237,7 +278,7 @@ describe('Rev API /v1/activity call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .expect(200)
       .query({ user_id : userId, account_id : companyId })
       .end(function(err, res) {
@@ -278,10 +319,27 @@ describe('Rev API /v1/activity/summary call', function() {
   var userNotFound    = 'User ID not found';
   var companyNotFound = 'Account ID not found';
 
-  it('Should return 401 fail', function(done) {
+  var jwtTokenWithUserPerm = '';
+
+  before(function(done){
+      request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send(userAuthWithUserPerm )
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        jwtTokenWithUserPerm = response_json.token;
+        done();
+      });
+  });
+
+  it('Should return 401 fail ', function(done) {
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(wrongUser, wrongUserPassword)
+      .set('Authorization', 'Bearer ' + 'notcorrecttoken.notcorrecttoken.notcorrecttoken')
       .expect(401)
       .end(function(err) {
         if (err) {
@@ -292,10 +350,9 @@ describe('Rev API /v1/activity/summary call', function() {
   });
 
   it('Should return error 400 (User not found)', function(done) {
-
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : wrongUserId })
       .expect(400)
       .end(function(err, res) {
@@ -311,7 +368,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -329,7 +386,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : otherId })
       .expect(400)
       .end(function(err, res) {
@@ -345,7 +402,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .query({ user_id : otherId })
       .expect(200)
       .end(function(err, res) {
@@ -364,7 +421,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : userId })
       .expect(200)
       .end(function(err, res) {
@@ -383,7 +440,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ account_id : companyId })
       .expect(200)
       .end(function(err, res) {
@@ -402,7 +459,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : userId, account_id : '5588869fbde7a0d00338ce6f' })
       .expect(400)
       .end(function(err, res) {
@@ -418,7 +475,7 @@ describe('Rev API /v1/activity/summary call', function() {
 
     request(testAPIUrl)
       .get('/v1/activity/summary')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
       .query({ user_id : userId, account_id : companyId })
       .expect(200)
       .end(function(err, res) {
