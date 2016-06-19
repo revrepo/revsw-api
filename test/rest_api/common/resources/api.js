@@ -34,7 +34,8 @@ var PurgeResource = require('./purge');
 var SdkConfigsResource = require('./sdkConfigs');
 var SignUpResource = require('./signUp');
 var SSLCerts = require('./sslCerts');
-var StatsResource = require('./stats');
+var StagingServers = require('./sslCerts');
+var StatsResource = require('./staginServers');
 var StatsSDKResource = require('./stats-sdk');
 var TwoFAResource = require('./2fa');
 var UsersResource = require('./users');
@@ -58,6 +59,7 @@ module.exports = {
   sdkConfigs: SdkConfigsResource,
   signUp: SignUpResource,
   sslCerts: SSLCerts,
+  staginServers: StagingServers,
   stats: StatsResource,
   stats_sdk: StatsSDKResource,
   twoFA: TwoFAResource,
