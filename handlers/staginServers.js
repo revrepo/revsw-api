@@ -63,7 +63,7 @@ exports.getStaginServers = function(request, reply) {
           server_name: proxyServer.server_name
         };
         return staginServer;
-      })
+      });
       renderJSON(request, reply, err, response_json);
     }
   });
