@@ -33,9 +33,12 @@ var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
 var GlobalSign = require('../lib/globalSignAPI');
-
 var Account = require('../models/Account');
 var SSLName = require('../models/SSLName');
+var x509 = require('x509');
+
+var cds_request = require('request');
+var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
 var globalSignApi = new GlobalSign();
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
@@ -232,19 +235,125 @@ exports.verifySSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
 
-  sslNames.get(sslNameId, function (error, result) {
+  function setStatusVerified(request, reply, response) {
+    var newSSLCert;
+    globalSignApi.issueRequest(function (err, data) {
+      if (err) {
+        console.log(err);
+        return reply(boom.badImplementation('Failed to update SSL certificates'));
+      } else {
+        globalSignApi.getStatus(function (err, data) {
+          if (err) {
+            console.log(err);
+            return reply(boom.badImplementation('Failed to receive SSL certificates'));
+          } else {
+            var certs = data.output.message.Response.OrderDetail.Fulfillment;
+            var CACert = certs.CACertificates.CACertificate[1].CACert;
+            var X509Cert = certs.ServerCertificate.X509Cert;
+
+            var newPublicCert = X509Cert + '\r\n' + CACert;
+
+            var altNames = x509.getAltNames(newPublicCert);
+            //console.log(altNames);
+
+
+            var domains = data.output.message.Response.OrderDetail.CloudOVSANInfo.CloudOVSANDetail;
+
+            for (var i = 0; domains.length > i; i += 1) {
+              if (domains[i].CloudOVSANStatus === '2' || domains[i].CloudOVSANStatus === '3') {
+                if (altNames.indexOf(domains[i].CloudOVSAN) < 0) {
+                  return reply('Failed to validate shared SSL certificate');
+                }
+              }
+            }
+
+            cds_request({
+              url: config.get('cds_url') + '/v1/ssl_certs/' + config.get('shared_domain_id'),
+              headers: authHeader
+            }, function (err, res, body) {
+              if (err) {
+                return reply(boom.badImplementation('Failed to get from CDS the configuration for SSL certificate ID ' + sslNameId));
+              }
+              var response_json = JSON.parse(body);
+              if (res.statusCode === 400) {
+                return reply(boom.badRequest(response_json.message));
+              }
+
+              newSSLCert = {
+                'account_id': response_json.account_id,
+                'bp_group_id': response_json.bp_group_id,
+                'cert_name': response_json.cert_name,
+                'cert_type': response_json.cert_type,
+                'comment': response_json.account_id,
+                'public_ssl_cert': newPublicCert,
+                'private_ssl_key': response_json.private_ssl_key,
+                'private_ssl_key_passphrase': response_json.private_ssl_key_passphrase,
+                'chain_ssl_cert': response_json.chain_ssl_cert,
+                'updated_by': utils.generateCreatedByField(request)
+              };
+              // renderJSON(request, reply, err, newSSLCert);
+
+              cds_request({
+                url: config.get('cds_url') + '/v1/ssl_certs/' + response_json.id,
+                method: 'PUT',
+                headers: authHeader,
+                body: JSON.stringify(newSSLCert)
+              }, function (err, res, body) {
+                if (err) {
+                  return reply(boom.badImplementation('Failed to update the CDS with confguration for shared SSL certificate'));
+                }
+                var response_json = JSON.parse(body);
+                if (res.statusCode === 400) {
+                  return reply(boom.badRequest(response_json.message));
+                }
+                /*
+                 var response = response_json;
+                 if (response) {
+                 var statusResponse = {
+                 statusCode: 202,
+                 message: 'Successfully saved the updated SSL certificate',
+                 object_id: response.ssl_name_id
+                 };
+                 renderJSON(request, reply, err, statusResponse);
+                 }
+                 */
+                sslNames.update(response, function (error, resoult) {
+                  if (error) {
+                    return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
+                  }
+
+                  var statusResponse;
+                  if (resoult) {
+                    statusResponse = {
+                      statusCode: 200,
+                      message: 'Successfully verified',
+                      object_id: resoult._id
+                    };
+                  }
+                  renderJSON(request, reply, error, statusResponse);
+                });
+              });
+            });
+          }
+        });
+      }
+    });
+
+  }
+
+  sslNames.get(sslNameId, function (error, resoult) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
 
     // TODO add a permissions check
-    if (!result) {
+    if (!resoult) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
-    //console.log(result.verification_method);
+    //console.log(resoult.verification_method);
 
-    if(result.verification_method === 'email'){
+    if(resoult.verification_method === 'email'){
       globalSignApi.getStatus(function (error, data) {
         if (error) {
           console.log(error);
@@ -253,56 +362,62 @@ exports.verifySSLName = function (request, reply) {
           var domains = data.output.message.Response.OrderDetail.CloudOVSANInfo.CloudOVSANDetail;
           //console.log(JSON.stringify(domains));
           for (var i = 0; domains.length > i; i += 1) {
-            if (domains[i].CloudOVSAN === result.ssl_name) {
-              if(domains[i].CloudOVSANStatus !== 8 && domains[i].CloudOVSANStatus !== 9){
+            if (domains[i].CloudOVSAN === resoult.ssl_name) {
+              if(domains[i].CloudOVSANStatus !== '8' && domains[i].CloudOVSANStatus !== '9'){
                 domain = domains[i];
               }
             }
           }
           //renderJSON(request, reply, error, globalSignApi.sanStatusCode[domain.CloudOVSANStatus]);
-          var statusResponse;
-          if (result) {
-            statusResponse = {
-              statusCode: 200,
-              message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
-              object_id: result.ssl_name_id
-            };
+          console.log(domain.CloudOVSANStatus);
+          if (domain.CloudOVSANStatus === '2' || domain.CloudOVSANStatus === '3') {
+            resoult.verified = true;
+            setStatusVerified(request, reply, resoult);
+          } else {
+            var statusResponse;
+            if (resoult) {
+              statusResponse = {
+                statusCode: 200,
+                message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
+                object_id: resoult.ssl_name_id
+              };
+            }
+            renderJSON(request, reply, error, statusResponse);
           }
-          renderJSON(request, reply, error, statusResponse);
         }
       });
-    } else if (result.verification_method === 'url') {
+    } else if (resoult.verification_method === 'url') {
 
-      globalSignApi.urlVerification(result.ssl_name, function (error, data) {
+      globalSignApi.urlVerification(resoult.ssl_name, function (error, data) {
         if (error) {
           console.log(error);
         } else {
           /*
            var statusResponse;
-           if (result) {
+           if (resoult) {
            statusResponse = {
            statusCode: 200,
            message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
-           object_id: result.ssl_name_id
+           object_id: resoult.ssl_name_id
            };
            }*/
           renderJSON(request, reply, error, data);
         }
       });
 
-    } else if (result.verification_method === 'dns') {
+    } else if (resoult.verification_method === 'dns') {
 
-      globalSignApi.dnsVerification(result.ssl_name, function (error, data) {
+      globalSignApi.dnsVerification(resoult.ssl_name, function (error, data) {
         if (error) {
           console.log(error);
         } else {
           /*
            var statusResponse;
-           if (result) {
+           if (resoult) {
            statusResponse = {
            statusCode: 200,
            message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
-           object_id: result.ssl_name_id
+           object_id: resoult.ssl_name_id
            };
            }*/
           renderJSON(request, reply, error, data);
@@ -313,27 +428,27 @@ exports.verifySSLName = function (request, reply) {
     }
 
     /*
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+    if (!resoult || !utils.checkUserAccessPermissionToSSLName(request, resoult)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
      newLogJob.updated_by = utils.generateCreatedByField(request);
 
-     logShippingJobs.update(newLogJob, function (error, result) {
+     logShippingJobs.update(newLogJob, function (error, resoult) {
      if (error) {
      return reply(boom.badImplementation('Failed to update the DB for log shipping job ID ' + logJobId));
      }
 
-     var result2 = publicRecordFields.handle(result, 'LogShippingJob');
+     var result2 = publicRecordFields.handle(resoult, 'LogShippingJob');
      result2.destination_key = '<Hidden for security reasons>';
      result2.destination_password = '<Hidden for security reasons>';
 
      AuditLogger.store({
-     account_id       : result.account_id,
+     account_id       : resoult.account_id,
      activity_type    : 'modify',
      activity_target  : 'logshippingjob',
      target_id        : logJobId,
-     target_name      : result.job_name,
+     target_name      : resoult.job_name,
      target_object    : result2,
      operation_status : 'success'
      }, request);
@@ -380,7 +495,7 @@ exports.deleteSSLName = function (request, reply) {
           return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
         } else {
           console.log(data.output.message);
-          renderJSON(request, reply, error, data.output.message);
+          //renderJSON(request, reply, error, data.output.message);
         }
       });
     } else {
@@ -390,16 +505,15 @@ exports.deleteSSLName = function (request, reply) {
           return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
         } else {
           console.log(data.output.message);
-          renderJSON(request, reply, error, data.output.message);
+          //renderJSON(request, reply, error, data.output.message);
         }
       });
     }
-/*
+
     sslNames.update(response,function (error, resoult) {
       if (error) {
       return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
-      //renderJSON(request, reply, error, resoult);
 
       var statusResponse;
       if (result) {
@@ -411,10 +525,8 @@ exports.deleteSSLName = function (request, reply) {
       }
       renderJSON(request, reply, error, statusResponse);
 
-    })
+    });
 
-*/
-    //renderJSON(request, reply, error, response);
   });
 
   /*
