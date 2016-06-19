@@ -74,6 +74,7 @@
     "should": "^7.1.0",
     "should-http": "0.0.4",
     "sleep": "^3.0.1",
+    "soap": "^0.15.0",
     "speakeasy": "^1.0.3",
     "superagent": "^1.8.0",
     "winston": "^2.2.0",

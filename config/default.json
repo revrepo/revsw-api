@@ -96,5 +96,14 @@
   "notify_developers_by_email_about_bad_implementation": "eng@revsw.com",
 
   "purge_job_environments": ["staging_only", "global_only", "global_and_staging"],
-  "purge_job_default_environment": "global_and_staging"
+  "purge_job_default_environment": "global_and_staging",
+
+  "globalsign": {
+    "OrderId": "the_correct_value_is_in_local_json",
+    "GsignUser": "the_correct_value_is_in_local_json",
+    "GsignPass": "the_correct_value_is_in_local_json",
+    "GasOrder": "https://system.globalsign.com/bb/ws/GasOrder?wsdl",
+    "GasQuery": "https://system.globalsign.com/bb/ws/GasQuery?wsdl",
+    "ServerSSLService": "https://system.globalsign.com/bb/ws/ServerSSLService?wsdl"
+  }
 }
