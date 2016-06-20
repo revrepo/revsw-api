@@ -336,7 +336,6 @@ var top_5xx_ = function( req, reply, domainName, span ) {
     });
 };
 
-
 //  ---------------------------------
 exports.getTopReports = function( request, reply ) {
 
@@ -447,6 +446,10 @@ exports.getTopLists = function( request, reply ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
         }
+
+        var sorter = function( lhs, rhs ) {
+          return lhs.localeCompare( rhs );
+        };
         var response = {
           metadata: {
             domain_name: domainName,
@@ -460,15 +463,17 @@ exports.getTopLists = function( request, reply ) {
           data: {
             os: body.aggregations.oses.buckets.map( function( item ) {
                 return item.key;
-              }),
+              }).sort( sorter ),
             device: body.aggregations.devices.buckets.map( function( item ) {
                 return item.key;
-              }),
+              }).sort( sorter ),
             browser: body.aggregations.browsers.buckets.map( function( item ) {
                 return item.key;
-              }),
+              }).sort( sorter ),
             country: body.aggregations.countries.buckets.map( function( item ) {
-                return item.key;
+                return { key: item.key, value: utils.countries[item.key] };
+              }).sort( function( lhs, rhs ) {
+                return lhs.value === 'United States' ? -1 : ( rhs.value === 'United States' ? 1 : lhs.value.localeCompare(rhs.value) );
               })
           }
         };
