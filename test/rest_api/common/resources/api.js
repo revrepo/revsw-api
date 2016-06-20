@@ -59,7 +59,7 @@ module.exports = {
   sdkConfigs: SdkConfigsResource,
   signUp: SignUpResource,
   sslCerts: SSLCerts,
-//  stagingServers: StagingServers,
+  stagingServers: StagingServers,
   stats: StatsResource,
   stats_sdk: StatsSDKResource,
   twoFA: TwoFAResource,
