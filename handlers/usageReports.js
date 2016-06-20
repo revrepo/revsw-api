@@ -35,26 +35,26 @@ var logger = require('revsw-logger')(config.log_config);
 // TODO: need to move the function to "utils" module
 var checkAccountAccessPermissions_ = function( request ) {
 
-  var account_id = request.query.account_id || '';
+  var accountID = request.query.account_id || '';
   var creds = request.auth.credentials;
 
   if ( creds.role === 'revadmin' ) {
-    return account_id;
+    return accountID;
   }
 
-  if ( !account_id ) {
-    account_id = creds.companyId;
-    if ( account_id.length === 0 ) {
+  if ( !accountID ) {
+    accountID = creds.companyId;
+    if ( accountID.length === 0 ) {
       return false;
     }
-    if ( account_id.length === 1 ) {
-      account_id = account_id[0];
+    if ( accountID.length === 1 ) {
+      accountID = accountID[0];
     }
-    return account_id;
+    return accountID;
   }
 
-  if (utils.getAccountID(request).indexOf( account_id ) !== -1) {
-    return account_id;
+  if (utils.getAccountID(request).indexOf( accountID ) !== -1) {
+    return accountID;
   }
 
   return false;
@@ -64,8 +64,8 @@ var checkAccountAccessPermissions_ = function( request ) {
 
 exports.getAccountReport = function( request, reply ) {
 
-  var account_id = checkAccountAccessPermissions_( request );
-  if ( account_id === false/*strict identity*/ ) {
+  var accountID = checkAccountAccessPermissions_( request );
+  if ( accountID === false/*strict identity*/ ) {
     reply(boom.badRequest( 'Account ID not found' ));
     return false;
   }
@@ -84,7 +84,7 @@ exports.getAccountReport = function( request, reply ) {
     to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
   }
 
-  reports.checkLoadReports( from, to, account_id, request.query.only_overall, request.query.keep_samples )
+  reports.checkLoadReports( from, to, accountID, request.query.only_overall, request.query.keep_samples )
     .then( function( response ) {
 
       response = {
