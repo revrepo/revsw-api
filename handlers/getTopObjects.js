@@ -39,17 +39,17 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 //
 exports.getTopObjects = function(request, reply) {
 
-  var domain_id = request.params.domain_id;
-  var domain_name,
+  var domainID = request.params.domain_id;
+  var domainName,
       metadataFilterField;
 
-  domainConfigs.get(domain_id, function(error, result) {
+  domainConfigs.get(domainID, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
 
-      domain_name = result.domain_name;
+      domainName = result.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -71,7 +71,7 @@ exports.getTopObjects = function(request, reply) {
                   }
                 }, {
                   term: {
-                    domain: domain_name
+                    domain: domainName
                   }
                 }],
                 must_not: []
@@ -106,7 +106,7 @@ exports.getTopObjects = function(request, reply) {
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
         }
         var dataArray = [];
         for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
@@ -117,8 +117,8 @@ exports.getTopObjects = function(request, reply) {
         }
         var response = {
           metadata: {
-            domain_name: domain_name,
-            domain_id: domain_id,
+            domain_name: domainName,
+            domain_id: domainID,
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -132,7 +132,7 @@ exports.getTopObjects = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
 
     } else {
@@ -147,17 +147,17 @@ exports.getTopObjects = function(request, reply) {
 
 exports.getSlowestFBTObjects = function(request, reply) {
 
-  var domain_id = request.params.domain_id;
-  var domain_name,
+  var domainID = request.params.domain_id;
+  var domainName,
       metadataFilterField;
 
-  domainConfigs.get(domain_id, function(error, result) {
+  domainConfigs.get(domainID, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
 
-      domain_name = result.domain_name;
+      domainName = result.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -178,7 +178,7 @@ exports.getSlowestFBTObjects = function(request, reply) {
                       }
                     }
                   },
-                  { term: { domain: domain_name } },
+                  { term: { domain: domainName } },
                   { range: { FBT_mu: { gt: 1000 } } }
                 ],
                 must_not: []
@@ -217,7 +217,7 @@ exports.getSlowestFBTObjects = function(request, reply) {
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
         }
         var dataArray = body.aggregations.results.buckets.map( function( item ) {
           return {
@@ -231,8 +231,8 @@ exports.getSlowestFBTObjects = function(request, reply) {
 
         var response = {
           metadata: {
-            domain_name: domain_name,
-            domain_id: domain_id,
+            domain_name: domainName,
+            domain_id: domainID,
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -246,7 +246,7 @@ exports.getSlowestFBTObjects = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
 
     } else {

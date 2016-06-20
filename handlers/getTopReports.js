@@ -35,7 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 //  ---------------------------------
-var top_reports_ = function( req, reply, domainName, span ) {
+var topReports_ = function( req, reply, domainName, span ) {
 
   req.query.report_type = req.query.report_type || 'referer';
 
@@ -238,7 +238,7 @@ var top_reports_ = function( req, reply, domainName, span ) {
 };
 
 //  ---------------------------------
-var top_5xx_ = function( req, reply, domainName, span ) {
+var top5XX_ = function( req, reply, domainName, span ) {
 
   var requestBody = {
     query: {
@@ -339,12 +339,11 @@ var top_5xx_ = function( req, reply, domainName, span ) {
 //  ---------------------------------
 exports.getTopReports = function( request, reply ) {
 
-  var domain_id = request.params.domain_id;
-
-  domainConfigs.get(domain_id, function(error, result) {
+  var domainID = request.params.domain_id;
+  domainConfigs.get(domainID, function(error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
@@ -355,9 +354,9 @@ exports.getTopReports = function( request, reply ) {
       }
 
       if ( request.query.report_type === 'top5xx' ) {
-        return top_5xx_( request, reply, result.domain_name, span );
+        return top5XX_( request, reply, result.domain_name, span );
       } else {
-        return top_reports_( request, reply, result.domain_name, span );
+        return topReports_( request, reply, result.domain_name, span );
       }
     } else {
       return reply(boom.badRequest('Domain ID not found'));
@@ -368,12 +367,11 @@ exports.getTopReports = function( request, reply ) {
 //  ---------------------------------
 exports.getTopLists = function( request, reply ) {
 
-  var domain_id = request.params.domain_id;
-
-  domainConfigs.get(domain_id, function(error, result) {
+  var domainID = request.params.domain_id;
+  domainConfigs.get(domainID, function(error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
@@ -471,7 +469,7 @@ exports.getTopLists = function( request, reply ) {
                 return item.key;
               }).sort( sorter ),
             country: body.aggregations.countries.buckets.map( function( item ) {
-                return { key: item.key, value: utils.countries[item.key] };
+                return { key: item.key, value: ( utils.countries[item.key] || item.key ) };
               }).sort( function( lhs, rhs ) {
                 return lhs.value === 'United States' ? -1 : ( rhs.value === 'United States' ? 1 : lhs.value.localeCompare(rhs.value) );
               })

@@ -37,10 +37,10 @@ var domainConfigs = new DomainConfig( mongoose, mongoConnection.getConnectionPor
 //  ----------------------------------------------------------------------------------------------//
 exports.getFBTAverage = function( request, reply ) {
 
-  var domain_id = request.params.domain_id;
-  domainConfigs.get( domain_id, function( error, result ) {
+  var domainID = request.params.domain_id;
+  domainConfigs.get( domainID, function( error, result ) {
     if ( error ) {
-      return reply( boom.badImplementation( 'Failed to retrieve domain details for ID ' + domain_id ) );
+      return reply( boom.badImplementation( 'Failed to retrieve domain details for ID ' + domainID ) );
     }
     if ( result && utils.checkUserAccessPermissionToDomain( request, result ) ) {
 
@@ -49,7 +49,7 @@ exports.getFBTAverage = function( request, reply ) {
         return reply( boom.badRequest( span.error ) );
       }
 
-      var domain_name = result.domain_name;
+      var domainName = result.domain_name;
       var requestBody = {
         size: 0,
         query: {
@@ -58,7 +58,7 @@ exports.getFBTAverage = function( request, reply ) {
               bool: {
                 must: [ {
                   term: {
-                    domain: domain_name
+                    domain: domainName
                   }
                 }, {
                   range: {
@@ -119,8 +119,8 @@ exports.getFBTAverage = function( request, reply ) {
           }
           var response = {
             metadata: {
-              domain_name: domain_name,
-              domain_id: domain_id,
+              domain_name: domainName,
+              domain_id: domainID,
               start_timestamp: span.start,
               start_datetime: new Date( span.start ),
               end_timestamp: span.end,
@@ -134,7 +134,7 @@ exports.getFBTAverage = function( request, reply ) {
           renderJSON( request, reply, error, response );
         }, function( error ) {
           logger.error(error);
-          return reply( boom.badImplementation( 'Failed to retrieve data from ES for domain ' + domain_name ) );
+          return reply( boom.badImplementation( 'Failed to retrieve data from ES for domain ' + domainName ) );
         } );
     } else {
       return reply( boom.badRequest( 'Domain ID not found' ) );
@@ -145,10 +145,10 @@ exports.getFBTAverage = function( request, reply ) {
 //  ---------------------------------
 exports.getFBTDistribution = function( request, reply ) {
 
-  var domain_id = request.params.domain_id;
-  domainConfigs.get( domain_id, function( error, result ) {
+  var domainID = request.params.domain_id;
+  domainConfigs.get( domainID, function( error, result ) {
     if ( error ) {
-      return reply( boom.badImplementation( 'Failed to retrieve domain details for ID ' + domain_id ) );
+      return reply( boom.badImplementation( 'Failed to retrieve domain details for ID ' + domainID ) );
     }
     if ( result && utils.checkUserAccessPermissionToDomain( request, result ) ) {
 
@@ -157,7 +157,7 @@ exports.getFBTDistribution = function( request, reply ) {
         return reply( boom.badRequest( span.error ) );
       }
 
-      var domain_name = result.domain_name,
+      var domainName = result.domain_name,
         interval = ( request.query.interval_ms || 100 ) * 1000,
         limit = ( request.query.limit_ms || 10000 ) * 1000;
 
@@ -169,7 +169,7 @@ exports.getFBTDistribution = function( request, reply ) {
               bool: {
                 must: [ {
                   term: {
-                    domain: domain_name
+                    domain: domainName
                   }
                 }, {
                   range: {
@@ -224,8 +224,8 @@ exports.getFBTDistribution = function( request, reply ) {
           }
           var response = {
             metadata: {
-              domain_name: domain_name,
-              domain_id: domain_id,
+              domain_name: domainName,
+              domain_id: domainID,
               start_timestamp: span.start,
               start_datetime: new Date( span.start ),
               end_timestamp: span.end,
@@ -240,7 +240,7 @@ exports.getFBTDistribution = function( request, reply ) {
           renderJSON( request, reply, error, response );
         }, function( error ) {
           logger.error(error);
-          return reply( boom.badImplementation( 'Failed to retrieve data from ES data for domain ' + domain_name ) );
+          return reply( boom.badImplementation( 'Failed to retrieve data from ES data for domain ' + domainName ) );
         } );
     } else {
       return reply( boom.badRequest( 'Domain ID not found' ) );
@@ -251,16 +251,16 @@ exports.getFBTDistribution = function( request, reply ) {
 //  ---------------------------------
 exports.getFBTHeatmap = function(request, reply) {
 
-  var domain_id = request.params.domain_id;
-  var domain_name;
+  var domainID = request.params.domain_id,
+    domainName;
 
-  domainConfigs.get(domain_id, function(error, result) {
+  domainConfigs.get(domainID, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
 
-      domain_name = result.domain_name;
+      domainName = result.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -273,7 +273,7 @@ exports.getFBTHeatmap = function(request, reply) {
               bool: {
                 must: [{
                   term: {
-                    domain: domain_name
+                    domain: domainName
                   }
                 }, {
                   range: {
@@ -349,7 +349,7 @@ exports.getFBTHeatmap = function(request, reply) {
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
         }
         var dataArray = body.aggregations.countries.buckets.map( function( country ) {
           var item = {
@@ -398,8 +398,8 @@ exports.getFBTHeatmap = function(request, reply) {
 
         var response = {
           metadata: {
-            domain_name: domain_name,
-            domain_id: domain_id,
+            domain_name: domainName,
+            domain_id: domainID,
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -412,7 +412,7 @@ exports.getFBTHeatmap = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domain_name));
+        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domainName));
       });
     } else {
       return reply(boom.badRequest('Domain ID not found'));

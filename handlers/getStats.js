@@ -40,16 +40,16 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 
 exports.getStats = function(request, reply) {
 
-  var domain_id = request.params.domain_id,
-    domain_name,
+  var domainID = request.params.domain_id,
+    domainName,
     metadataFilterField;
 
-  domainConfigs.get(domain_id, function(error, result) {
+  domainConfigs.get(domainID, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
-      domain_name = result.domain_name;
+      domainName = result.domain_name;
 
       var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
       if ( span.error ) {
@@ -66,7 +66,7 @@ exports.getStats = function(request, reply) {
               bool: {
                 must: [{
                   term: {
-                    domain: domain_name
+                    domain: domainName
                   }
                 }, {
                   range: {
@@ -132,8 +132,8 @@ exports.getStats = function(request, reply) {
         }
         var response = {
           metadata: {
-            domain_name: domain_name,
-            domain_id: domain_id,
+            domain_name: domainName,
+            domain_id: domainID,
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -148,7 +148,7 @@ exports.getStats = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
     } else {
       return reply(boom.badRequest('Domain ID not found'));

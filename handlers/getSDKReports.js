@@ -37,9 +37,9 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 // TODO Need to move the function to "utils" module
 var checkAppAccessPermissions_ = function( request, reply, callback ) {
 
-  var account_id = request.query.account_id || request.params.account_id || '';
-  var app_id = request.query.app_id || request.params.app_id || '';
-  if ( !account_id && !app_id ) {
+  var accountID = request.query.account_id || request.params.account_id || '';
+  var appID = request.query.app_id || request.params.app_id || '';
+  if ( !accountID && !appID ) {
     return reply( boom.badRequest( 'Either Account ID or Application ID should be provided' ) );
   }
 
@@ -50,22 +50,22 @@ var checkAppAccessPermissions_ = function( request, reply, callback ) {
   }
 
   //  account(company)
-  if ( account_id &&
-      utils.getAccountID(request).indexOf( account_id ) === -1 ) {
+  if ( accountID &&
+      utils.getAccountID(request).indexOf( accountID ) === -1 ) {
       //  user's companyId array must contain requested account ID
     return reply(boom.badRequest( 'Account ID not found' ));
   }
 
   //  app
-  if ( app_id ) {
+  if ( appID ) {
     //  get account ID which the _application_ belongs to
-    apps.getAccountID( app_id, function( err, acc_id ) {
+    apps.getAccountID( appID, function( err, accID ) {
       if ( err ) {
         return reply( boom.badImplementation( err ) );
       }
 
       //  user's companyId array must contain this account ID
-      if ( utils.getAccountID(request).indexOf( acc_id ) === -1 ) {
+      if ( utils.getAccountID(request).indexOf( accID ) === -1 ) {
         return reply(boom.badRequest( 'Application ID not found' ));
       }
       callback();
@@ -86,7 +86,7 @@ exports.getAppReport = function( request, reply ) {
     if ( span.error ) {
       return reply( boom.badRequest( span.error ) );
     }
-    var app_id = request.params.app_id;
+    var appID = request.params.app_id;
     var requestBody = {
       size: 0,
       query: {
@@ -95,7 +95,7 @@ exports.getAppReport = function( request, reply ) {
             bool: {
               must: [ {
                 term: {
-                  app_id: app_id
+                  app_id: appID
                 }
               }, {
                 range: {
@@ -131,7 +131,7 @@ exports.getAppReport = function( request, reply ) {
       .then( function( body ) {
         var response = {
           metadata: {
-            app_id: app_id,
+            app_id: appID,
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
@@ -146,7 +146,7 @@ exports.getAppReport = function( request, reply ) {
         renderJSON( request, reply, false, response );
       }, function( error ) {
         logger.error( error );
-        return reply( boom.badImplementation( 'Failed to retrieve data from ES for app ID ' + app_id ) );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES for app ID ' + appID ) );
       } );
   });
 };
@@ -161,7 +161,7 @@ exports.getAccountReport = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.params.account_id;
+    var accountID = request.params.account_id;
     var requestBody = {
       size: 0,
       query: {
@@ -170,7 +170,7 @@ exports.getAccountReport = function( request, reply ) {
             bool: {
               must: [ {
                 term: {
-                  account_id: account_id
+                  account_id: accountID
                 }
               }, {
                 range: {
@@ -206,7 +206,7 @@ exports.getAccountReport = function( request, reply ) {
       .then( function( body ) {
         var response = {
           metadata: {
-            account_id: account_id,
+            account_id: accountID,
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
@@ -221,7 +221,7 @@ exports.getAccountReport = function( request, reply ) {
         renderJSON( request, reply, false, response );
       }, function( error ) {
         logger.error( error );
-        return reply( boom.badImplementation( 'Failed to retrieve data from ES for account ID ' + account_id ) );
+        return reply( boom.badImplementation( 'Failed to retrieve data from ES for account ID ' + accountID ) );
       } );
   });
 };
@@ -236,8 +236,8 @@ exports.getDirs = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '' ;
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '' ;
 
     var requestBody = {
       size: 0,
@@ -246,7 +246,7 @@ exports.getDirs = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -304,11 +304,11 @@ exports.getDirs = function( request, reply ) {
             data.devices.push( buckets[i].key );
           }
           buckets = body.aggregations.operators.buckets;
-          var unknown_added = false;
+          var unknownAdded = false;
           for ( i = 0, len = buckets.length; i < len; i++ ) {
             if ( buckets[i].key === '-' || buckets[i].key === '*' || buckets[i].key === '_' || buckets[i].key === '' ) {
-              if ( !unknown_added ) {
-                unknown_added = true;
+              if ( !unknownAdded ) {
+                unknownAdded = true;
                 data.operators.push( 'Unknown' );
               }
             } else {
@@ -327,8 +327,8 @@ exports.getDirs = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
@@ -356,8 +356,8 @@ exports.getFlowReport = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '';
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '';
 
     var requestBody = {
       size: 0,
@@ -366,7 +366,7 @@ exports.getFlowReport = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -444,10 +444,10 @@ exports.getFlowReport = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0,
-          total_sent = 0,
-          total_received = 0,
-          total_spent_ms = 0,
+        var totalHits = 0,
+          totalSent = 0,
+          totalReceived = 0,
+          totalSpentMs = 0,
           dataArray = [];
 
         if ( body.aggregations ) {
@@ -462,25 +462,25 @@ exports.getFlowReport = function( request, reply ) {
               sent_bytes: item.sent_bytes.value,
               time_spent_ms: item.time_spent_ms.value
             });
-            total_hits += item.doc_count;
-            total_received += item.received_bytes.value;
-            total_sent += item.sent_bytes.value;
-            total_spent_ms += item.time_spent_ms.value;
+            totalHits += item.doc_count;
+            totalReceived += item.received_bytes.value;
+            totalSent += item.sent_bytes.value;
+            totalSpentMs += item.time_spent_ms.value;
           }
         }
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
-            total_hits: total_hits,
-            total_received: total_received,
-            total_sent: total_sent,
-            total_spent_ms: total_spent_ms
+            total_hits: totalHits,
+            total_received: totalReceived,
+            total_sent: totalSent,
+            total_spent_ms: totalSpentMs
           },
           data: dataArray
         };
@@ -503,12 +503,12 @@ exports.getAggFlowReport = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
-      report_type = request.query.report_type || 'status_code';
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
+      reportType = request.query.report_type || 'status_code';
 
     var field, keys;
-    switch (report_type) {
+    switch (reportType) {
       case 'status_code':
         field = 'requests.status_code';
         keys = {};
@@ -542,7 +542,7 @@ exports.getAggFlowReport = function( request, reply ) {
         };
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -552,7 +552,7 @@ exports.getAggFlowReport = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -630,15 +630,15 @@ exports.getAggFlowReport = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0;
-        var total_sent = 0;
-        var total_received = 0;
+        var totalHits = 0;
+        var totalSent = 0;
+        var totalReceived = 0;
         var dataArray = [];
 
         if ( body.aggregations ) {
           var codes = body.aggregations.results.date_range.buckets[0].codes.buckets;
           for ( var ci = 0, clen = codes.length; ci < clen; ++ci ) {
-            if ( report_type === 'status_code' && codes[ci].key === 0 ) {
+            if ( reportType === 'status_code' && codes[ci].key === 0 ) {
               //  0 http status code actually means absense of the code in a failed requests
               continue;
             }
@@ -664,24 +664,24 @@ exports.getAggFlowReport = function( request, reply ) {
               data.sent_bytes += item.sent_bytes.value;
             }
             dataArray.push( data );
-            total_hits += data.hits;
-            total_sent += data.received_bytes;
-            total_received += data.sent_bytes;
+            totalHits += data.hits;
+            totalSent += data.received_bytes;
+            totalReceived += data.sent_bytes;
           }
         }
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
-            total_hits: total_hits,
-            total_received: total_received,
-            total_sent: total_sent
+            total_hits: totalHits,
+            total_received: totalReceived,
+            total_sent: totalSent
           },
           data: dataArray
         };
@@ -704,13 +704,13 @@ exports.getTopRequests = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 0,
-      report_type = request.query.report_type || 'country';
+      reportType = request.query.report_type || 'country';
 
     var field;
-    switch (report_type) {
+    switch (reportType) {
       case 'country':
         field = 'geoip.country_code2';
         break;
@@ -728,7 +728,7 @@ exports.getTopRequests = function( request, reply ) {
         field = 'carrier.signal_type';
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -738,7 +738,7 @@ exports.getTopRequests = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -797,7 +797,7 @@ exports.getTopRequests = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
-            if ( report_type === 'operator' && item.key === '_' ) {
+            if ( reportType === 'operator' && item.key === '_' ) {
               item.key = 'No Cellular Connection';
             }
             data.push({
@@ -809,8 +809,8 @@ exports.getTopRequests = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -840,13 +840,13 @@ exports.getTopUsers = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 0,
-      report_type = request.query.report_type || 'country';
+      reportType = request.query.report_type || 'country';
 
     var field;
-    switch (report_type) {
+    switch (reportType) {
       case 'country':
         field = 'geoip.country_code2';
         break;
@@ -864,7 +864,7 @@ exports.getTopUsers = function( request, reply ) {
         field = 'carrier.signal_type';
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -874,7 +874,7 @@ exports.getTopUsers = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -926,7 +926,7 @@ exports.getTopUsers = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
-            if ( report_type === 'operator' && item.key === '_' ) {
+            if ( reportType === 'operator' && item.key === '_' ) {
               item.key = 'No Cellular Connection';
             }
             data.push({
@@ -938,8 +938,8 @@ exports.getTopUsers = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -969,13 +969,13 @@ exports.getTopGBT = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 0,
-      report_type = request.query.report_type || 'country';
+      reportType = request.query.report_type || 'country';
 
     var field;
-    switch (report_type) {
+    switch (reportType) {
       case 'country':
         field = 'geoip.country_code2';
         break;
@@ -993,7 +993,7 @@ exports.getTopGBT = function( request, reply ) {
         field = 'carrier.signal_type';
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -1003,7 +1003,7 @@ exports.getTopGBT = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1077,7 +1077,7 @@ exports.getTopGBT = function( request, reply ) {
         if ( body.aggregations ) {
           for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
             var item = body.aggregations.results.buckets[i];
-            if ( report_type === 'operator' && item.key === '_' ) {
+            if ( reportType === 'operator' && item.key === '_' ) {
               item.key = 'No Cellular Connection';
             }
             if ( item.deep && item.deep.hits && item.deep.hits.buckets.length ) {
@@ -1101,8 +1101,8 @@ exports.getTopGBT = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -1132,13 +1132,13 @@ exports.getDistributions = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 30,
-      report_type = request.query.report_type || 'destination';
+      reportType = request.query.report_type || 'destination';
 
     var field, keys;
-    switch (report_type) {
+    switch (reportType) {
       case 'destination':
         field = 'requests.destination';
         keys = {
@@ -1181,7 +1181,7 @@ exports.getDistributions = function( request, reply ) {
         };
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -1191,7 +1191,7 @@ exports.getDistributions = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1229,7 +1229,7 @@ exports.getDistributions = function( request, reply ) {
         }
       }
     };
-    if ( report_type !== 'status_code' ) {
+    if ( reportType !== 'status_code' ) {
       requestBody.aggs.result.aggs.result.aggs.distribution.aggs = {
         received_bytes: {
           sum: {
@@ -1274,8 +1274,8 @@ exports.getDistributions = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -1305,13 +1305,13 @@ exports.getTopObjects = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 30,
-      report_type = request.query.report_type || 'any_request',
+      reportType = request.query.report_type || 'any_request',
       term = false;
 
-    switch (report_type) {
+    switch (reportType) {
       case 'any_request':
         break;
       case 'cache_missed':
@@ -1324,7 +1324,7 @@ exports.getTopObjects = function( request, reply ) {
         term = { 'status_code': 404 };
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -1334,7 +1334,7 @@ exports.getTopObjects = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1422,8 +1422,8 @@ exports.getTopObjects = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -1453,13 +1453,13 @@ exports.getTopObjectsSlowest = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 30,
-      report_type = request.query.report_type || 'full';
+      reportType = request.query.report_type || 'full';
 
     var field;
-    switch (report_type) {
+    switch (reportType) {
       case 'full':
         field = 'requests.end_ts';
         break;
@@ -1467,7 +1467,7 @@ exports.getTopObjectsSlowest = function( request, reply ) {
         field = 'requests.first_byte_ts';
         break;
       default:
-        return reply(boom.badImplementation('Received bad report_type value ' + report_type));
+        return reply(boom.badImplementation('Received bad reportType value ' + reportType));
     }
 
     var requestBody = {
@@ -1477,7 +1477,7 @@ exports.getTopObjectsSlowest = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1552,8 +1552,8 @@ exports.getTopObjectsSlowest = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -1583,8 +1583,8 @@ exports.getTopObjects5xx = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       count = request.query.count || 30;
 
     var requestBody = {
@@ -1594,7 +1594,7 @@ exports.getTopObjects5xx = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1676,8 +1676,8 @@ exports.getTopObjects5xx = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -1707,8 +1707,8 @@ exports.getAB4FBTAverage = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '';
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '';
 
     var requestBody = {
       size: 0,
@@ -1717,7 +1717,7 @@ exports.getAB4FBTAverage = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1797,12 +1797,12 @@ exports.getAB4FBTAverage = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0;
+        var totalHits = 0;
         var dataArray = [];
 
         if ( body.aggregations ) {
           dataArray = body.aggregations.results.date_range.buckets[0].destinations.buckets.map( function( d ) {
-            total_hits += d.doc_count;
+            totalHits += d.doc_count;
             return {
               key: d.key,
               count: d.doc_count,
@@ -1821,14 +1821,14 @@ exports.getAB4FBTAverage = function( request, reply ) {
         }
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
-            total_hits: total_hits
+            total_hits: totalHits
           },
           data: dataArray
         };
@@ -1851,8 +1851,8 @@ exports.getAB4FBTDistribution = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '',
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '',
       interval = request.query.interval_ms || 100,
       limit = request.query.limit_ms || 10000;
 
@@ -1863,7 +1863,7 @@ exports.getAB4FBTDistribution = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -1930,14 +1930,14 @@ exports.getAB4FBTDistribution = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0;
+        var totalHits = 0;
         var dataArray = [];
 
         if ( body.aggregations &&
             body.aggregations.results.date_range.buckets[0].doc_count &&
             body.aggregations.results.date_range.buckets[0].value_range.buckets[0].doc_count ) {
           dataArray = body.aggregations.results.date_range.buckets[0].value_range.buckets[0].destinations.buckets.map( function( d ) {
-            total_hits += d.doc_count;
+            totalHits += d.doc_count;
             return {
               key: d.key,
               count: d.doc_count,
@@ -1953,13 +1953,13 @@ exports.getAB4FBTDistribution = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
-            total_hits: total_hits
+            total_hits: totalHits
           },
           data: dataArray
         };
@@ -1983,8 +1983,8 @@ exports.getAB4Errors = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '';
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '';
 
     var requestBody = {
       size: 0,
@@ -1993,7 +1993,7 @@ exports.getAB4Errors = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -2061,12 +2061,12 @@ exports.getAB4Errors = function( request, reply ) {
       } )
       .then( function( body ) {
 
-        var total_hits = 0;
+        var totalHits = 0;
         var dataArray = [];
 
         if ( body.aggregations ) {
           dataArray = body.aggregations.results.date_range.buckets[0].errors.destinations.buckets.map( function( d ) {
-            total_hits += d.doc_count;
+            totalHits += d.doc_count;
             return {
               key: d.key,
               count: d.doc_count,
@@ -2082,14 +2082,14 @@ exports.getAB4Errors = function( request, reply ) {
         }
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
-            total_hits: total_hits
+            total_hits: totalHits
           },
           data: dataArray
         };
@@ -2112,8 +2112,8 @@ exports.getAB4Speed = function( request, reply ) {
       return reply( boom.badRequest( span.error ) );
     }
 
-    var account_id = request.query.account_id,
-      app_id = request.query.app_id || '';
+    var accountID = request.query.account_id,
+      appID = request.query.app_id || '';
 
     var requestBody = {
       size: 0,
@@ -2122,7 +2122,7 @@ exports.getAB4Speed = function( request, reply ) {
           filter: {
             bool: {
               must: [ {
-                term: ( app_id ? { app_id: app_id } : { account_id: account_id } )
+                term: ( appID ? { app_id: appID } : { account_id: accountID } )
               }, {
                 range: {
                   'start_ts': {
@@ -2205,23 +2205,23 @@ exports.getAB4Speed = function( request, reply ) {
       })
       .then( function( body ) {
 
-        var total_hits = 0,
-          total_sent = 0,
-          total_received = 0,
-          total_spent_ms = 0,
+        var totalHits = 0,
+          totalSent = 0,
+          totalReceived = 0,
+          totalSpentMs = 0,
           dataArray = [];
 
         if ( body.aggregations ) {
           dataArray = body.aggregations.results.date_range.buckets[0].destinations.buckets.map( function( d ) {
-            total_hits += d.doc_count;
+            totalHits += d.doc_count;
             return {
               key: d.key,
               count: d.doc_count,
               items: d.date_histogram.buckets.map( function( item ) {
 
-                total_received += item.received_bytes.value;
-                total_sent += item.sent_bytes.value;
-                total_spent_ms += item.time_spent_ms.value;
+                totalReceived += item.received_bytes.value;
+                totalSent += item.sent_bytes.value;
+                totalSpentMs += item.time_spent_ms.value;
                 return {
                   key_as_string: item.key_as_string,
                   key: item.key,
@@ -2239,17 +2239,17 @@ exports.getAB4Speed = function( request, reply ) {
 
         var response = {
           metadata: {
-            account_id: ( account_id || '*' ),
-            app_id: ( app_id || '*' ),
+            account_id: ( accountID || '*' ),
+            app_id: ( appID || '*' ),
             start_timestamp: span.start,
             start_datetime: new Date( span.start ),
             end_timestamp: span.end,
             end_datetime: new Date( span.end ),
             interval_sec: ( Math.floor( span.interval / 1000 ) ),
-            total_hits: total_hits,
-            total_received: total_received,
-            total_sent: total_sent,
-            total_spent_ms: total_spent_ms
+            total_hits: totalHits,
+            total_received: totalReceived,
+            total_sent: totalSent,
+            total_spent_ms: totalSpentMs
           },
           data: dataArray
         };
