@@ -73,7 +73,8 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
 
     sslNames.list(function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
+        logger.error('Failed to retrieve from the DB a list of SSL names');
+        return false;
       }
       for (var i = 0; result.length > i; i += 1) {
         if (result[i].verified === true && result[i].published !== true) {
@@ -97,13 +98,15 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
       if (unpublished.length > 0) {
         globalSignApi.issueRequest(function (err, data) {
           if (err) {
-            console.log(err);
-            return reply(boom.badImplementation('Failed to update SSL certificates'));
+            //console.log(err);
+            logger.error('Failed to update SSL certificates');
+            return false;
           } else {
             globalSignApi.getStatus(function (err, data) {
               if (err) {
-                console.log(err);
-                return reply(boom.badImplementation('Failed to receive SSL certificates'));
+                //console.log(err);
+                logger.error('Failed to receive SSL certificates');
+                return false;
               } else {
                 var certs = data.output.message.Response.OrderDetail.Fulfillment;
                 var CACert = certs.CACertificates.CACertificate[1].CACert;
@@ -115,7 +118,8 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                 for (var i = 0; domains.length > i; i += 1) {
                   if (domains[i].CloudOVSANStatus === '2' || domains[i].CloudOVSANStatus === '3') {
                     if (altNames.indexOf(domains[i].CloudOVSAN) < 0) {
-                      return reply('Failed to validate SSL certificates');
+                      logger.error('Failed to validate SSL certificates');
+                      return false;
                     }
                   }
                 }
@@ -125,11 +129,13 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                   headers: authHeader
                 }, function (err, res, body) {
                   if (err) {
-                    return reply(boom.badImplementation('Failed to get from CDS the configuration for SSL certificate ID ' + sslCertId));
+                    logger.error('Failed to get from CDS the configuration for shared SSL certificate');
+                    return false;
                   }
                   var responseJson = JSON.parse(body);
                   if (res.statusCode === 400) {
-                    return reply(boom.badRequest(responseJson.message));
+                    logger.error(responseJson.message);
+                    return false;
                   }
 
                   newSSLCert = {
@@ -153,23 +159,29 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                     body: JSON.stringify(newSSLCert)
                   }, function (err, res, body) {
                     if (err) {
-                      return reply(boom.badImplementation('Failed to update the CDS with confguration for shared SSL certificate'));
+                      logger.error('Failed to update the CDS with confguration for shared SSL certificate');
+                      return false;
                     }
                     var responseJson = JSON.parse(body);
                     if (res.statusCode === 400) {
-                      return reply(boom.badRequest(responseJson.message));
+                      logger.error(responseJson.message);
+                      return false;
                     }
 
+                    function updateSSL(data) {
+                      sslNames.update(data, function (error, resoult) {
+                        if (error) {
+                          logger.error('Failed to published details for SSL name ID ' + resoult.ssl_name);
+                          return false;
+                        }
+                        logger.info('Published ' + resoult.ssl_name);
+                      });
+                    }
 
                     if (responseJson) {
                       for (var i = 0; unpublished.length > i; i += 1) {
                         unpublished[i].published = true;
-                        sslNames.update(unpublished[i], function (error, resoult) {
-                          if (error) {
-                            return reply(boom.badImplementation('Failed to published details for SSL name ID ' + resoult.ssl_name));
-                          }
-                          console.log('Published ' + resoult.ssl_name)
-                        });
+                        updateSSL(unpublished[i]);
                       }
                     }
                   });
@@ -179,7 +191,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
           }
         });
       } else {
-        console.log('Unpublished domains not found.')
+        logger.info('Unpublished domains not found.');
       }
 
     });
