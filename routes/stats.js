@@ -182,6 +182,33 @@ module.exports = [
 
   {
     method: 'GET',
+    path: '/v1/stats/top_lists/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: getTopReports.getTopLists,
+      description: 'Get all possible values of [country, os, device, browser] for the domain and timespan',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
     path: '/v1/stats/lastmile_rtt/{domain_id}',
     config: {
       auth: {
