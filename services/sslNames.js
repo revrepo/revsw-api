@@ -104,6 +104,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
               if (err) {
                 //console.log(err);
                 logger.error('Failed to receive SSL certificates');
+                return false;
               } else {
                 var certs = data.output.message.Response.OrderDetail.Fulfillment;
                 var CACert = certs.CACertificates.CACertificate[1].CACert;
@@ -116,6 +117,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                   if (domains[i].CloudOVSANStatus === '2' || domains[i].CloudOVSANStatus === '3') {
                     if (altNames.indexOf(domains[i].CloudOVSAN) < 0) {
                       logger.error('Failed to validate SSL certificates');
+                      return false;
                     }
                   }
                 }
@@ -125,11 +127,13 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                   headers: authHeader
                 }, function (err, res, body) {
                   if (err) {
-                    logger.error('Failed to get from CDS the configuration for SSL certificate ID ' + sslCertId);
+                    logger.error('Failed to get from CDS the configuration for shared SSL certificate');
+                    return false;
                   }
                   var responseJson = JSON.parse(body);
                   if (res.statusCode === 400) {
-                    return reply(boom.badRequest(responseJson.message));
+                    logger.error(responseJson.message);
+                    return false;
                   }
 
                   newSSLCert = {
@@ -157,7 +161,8 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                     }
                     var responseJson = JSON.parse(body);
                     if (res.statusCode === 400) {
-                      return reply(boom.badRequest(responseJson.message));
+                      logger.error(responseJson.message);
+                      return false;
                     }
 
 
@@ -167,6 +172,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                         sslNames.update(unpublished[i], function (error, resoult) {
                           if (error) {
                             logger.error('Failed to published details for SSL name ID ' + resoult.ssl_name);
+                            return false;
                           }
                           logger.info('Published ' + resoult.ssl_name)
                         });
