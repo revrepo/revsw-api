@@ -67,12 +67,12 @@ SSLName.prototype = {
 
   add : function (item, callback) {
 
-    new this.model(item).save(function (err, item) {
+    new this.model(item).save(function (err, _item) {
       if (err) {
         callback(err);
       }
       if (callback) {
-        var item = utils.clone(item);
+        var item = utils.clone(_item);
         item.ssl_name_id = item._id;
 
         delete item.__v;

@@ -3,8 +3,6 @@ var should = require('should-http');
 var request = require('supertest');
 var agent = require('supertest-as-promised');
 
-var express = require('express');
-var fs = require('fs');
 var https = require('https');
 var sleep = require('sleep');
 var utils = require('../lib/utilities.js');
@@ -14,15 +12,13 @@ var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://
 var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
 var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
 
-var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
-  qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
-  qaUserWithAdminPermPassword = 'password1',
-  qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
-  qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
-  qaUserWithResellerPermPassword = 'password1',
-  wrongUsername = 'wrong_username@revsw.com',
-  wrongPassword = 'we5rsdfsdfs',
-  testDomain = 'qa-api-test-domain.revsw.net';  // this domain should exist in the QA environment
+var qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
+  qaUserWithResellerPermPassword = 'password1';
+
+var userAuthWithResellerPerm = {
+  email: qaUserWithResellerPerm,
+  password: qaUserWithResellerPermPassword
+}
 
 describe('Rev API Reseller User', function() {
 
@@ -31,11 +27,29 @@ describe('Rev API Reseller User', function() {
   var testCompanyName = 'API QA Test Company ' + Date.now();
   var newAccountJson = { companyName: testCompanyName };
   var testCompanyID = '';
+  var jwtTokenWithResellerPerm = '';
+
+  before(function(done){
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send(userAuthWithResellerPerm)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        jwtTokenWithResellerPerm = response_json.token;
+        response_json.token.should.be.a.String(jwtTokenWithResellerPerm);
+        done();
+    });
+  });
 
   it('should be able to get a list of companies', function(done) {
+
     request(testAPIUrl)
       .get('/v1/accounts')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -48,11 +62,10 @@ describe('Rev API Reseller User', function() {
       });
   });
 
-
   it('should create a new account', function(done) {
     request(testAPIUrl)
       .post('/v1/accounts')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .send(newAccountJson)
       .expect(200)
       .end(function(err, res) {
@@ -71,7 +84,7 @@ describe('Rev API Reseller User', function() {
   it('should find a new record about adding a new account in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -90,7 +103,7 @@ describe('Rev API Reseller User', function() {
   it('should fail to create a new account with empty JSON request', function(done) {
     request(testAPIUrl)
       .post('/v1/accounts')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .send({})
       .expect(400)
       .end(function(err, res) {
@@ -109,7 +122,7 @@ describe('Rev API Reseller User', function() {
   it('should see the new account in the list of registered accounts', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .send(newAccountJson)
       .expect(200)
       .end(function(err, res) {
@@ -132,7 +145,7 @@ describe('Rev API Reseller User', function() {
   it('should get details for an account', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts/' + testCompanyID)
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .send(newAccountJson)
       .expect(200)
       .end(function(err, res) {
@@ -152,7 +165,7 @@ describe('Rev API Reseller User', function() {
     newAccountJson = { companyName: testCompanyName };
     request(testAPIUrl)
       .put('/v1/accounts/' + testCompanyID)
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .send(newAccountJson)
       .expect(200)
       .end(function(err, res) {
@@ -169,7 +182,7 @@ describe('Rev API Reseller User', function() {
   it('should find a new record about updating account in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -190,7 +203,7 @@ describe('Rev API Reseller User', function() {
   it('should delete an account', function(done) {
     request(testAPIUrl)
       .delete('/v1/accounts/' + testCompanyID)
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -206,7 +219,7 @@ describe('Rev API Reseller User', function() {
   it('should find a new record about deleting account in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -224,7 +237,7 @@ describe('Rev API Reseller User', function() {
   it('should fail to delete a non-existing account', function(done) {
     request(testAPIUrl)
       .delete('/v1/accounts/' + testCompanyID)
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(400)
       .end(function(err, res) {
         if (err) {
@@ -240,7 +253,7 @@ describe('Rev API Reseller User', function() {
   it('should fail to delete account 55ba46a67957012304a49d0f belonging to another user', function(done) {
     request(testAPIUrl)
       .delete('/v1/accounts/55ba46a67957012304a49d0f')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
       .expect(400)
       .end(function(err, res) {
         if (err) {

@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-// # Purge Resource object
+// # Locations Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
@@ -24,18 +24,15 @@ var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var purgeIdKey = 'purgeId';
 var resourceConfig = {
-  idKey: purgeIdKey,
-  name: 'purge',
-  path: '/purge/{' + purgeIdKey + '}',
+  idKey: null,
+  name: 'stagingServers',
+  path: '/staging_servers',
   methods: [
-    Methods.CREATE,
-    Methods.READ_ONE,
     Methods.READ_ALL
   ]
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `purge resource`
+// `locations resource`
 module.exports = new BasicResource(resourceConfig);

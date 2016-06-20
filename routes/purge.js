@@ -22,10 +22,12 @@
 'use strict';
 
 var Joi = require('joi');
-
 var purges = require('../handlers/purges');
-
 var routeModels = require('../lib/routeModels');
+var config = require('config');
+
+var purgeJobEnvironments = config.get('purge_job_environments');
+var defaultPurgeJobEnvironment = config.get('purge_job_default_environment');
 
 module.exports = [
 
@@ -56,12 +58,42 @@ module.exports = [
                 .description('Set true if "expression" is a regular expression, set to "false" if the "expression" is a wildcard pattern'),
               expression: Joi.string().max(150).trim().required().description('Wildcard expression if "is_wildcard" is set to true, otherwise - a regular expression')
             })
-          }).required().description('Array of URLs to purge')
+          }).required().description('Array of URLs to purge'),
+          environment: Joi.string().default(defaultPurgeJobEnvironment).valid(purgeJobEnvironments).description('Purge job servers environment')
         }
       },
       response: {
         schema: routeModels.statusModel
       }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/purge',
+    config: {
+      auth: {
+        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey' ]
+      },
+      handler: purges.getPurgeJobs,
+      description: 'Get list purge requests',
+      notes: 'Use the call to get list of a previously submitted object purge request.',
+      tags: ['api', 'purge'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        query: {
+          domain_id:Joi.objectId().required().description('Domain Id'),
+          limit: Joi.number().integer().min(0).default(10).optional().description('Pagination parameter - limit of record'),
+          skip: Joi.number().integer().min(0).default(0).optional().description('Pagination parameter - skip')
+        }
+      },
+      // response: {
+      //   schema: routeModels.statusModel
+      // }
     }
   },
 

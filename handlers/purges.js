@@ -38,71 +38,87 @@ var PurgeJob = require('../models/PurgeJob');
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 
+var queryString = require('querystring');
 //
 // Management of purges
 //
 exports.purgeObject = function(request, reply) {
-  var domain = request.payload.domainName;
+  var domainName = request.payload.domainName;
+  var requestedEnvironment = request.payload.environment;
+  var purges = request.payload.purges;
   var account_id;
 
   domainConfigs.query({
-    domain_name : domain
+    domain_name : domainName
   }, function (error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to retrive domain details for domain name ' + domain));
+      return reply(boom.badImplementation('Failed to retrive domain details for domain name ' + domainName));
     }
 
-    if (!result[0] || !utils.checkUserAccessPermissionToDomain(request,result[0])) {
+    if (!result[0] || !utils.checkUserAccessPermissionToDomain(request, result[0])) {
       return reply(boom.badRequest('Domain not found'));
     }
     result = result[0];
 
     account_id = result.proxy_config.account_id;
 
-    var newPurgeJob = {};
-    newPurgeJob.request_json = request.payload;
-    newPurgeJob.req_id = uuid.v1();
-    for (var i = 0; i < newPurgeJob.request_json.purges.length; i++) {
-      newPurgeJob.request_json.purges[i].url.domain = domain;
-    }
-    delete newPurgeJob.request_json.domain;
-    newPurgeJob.request_json.version = 1;
-    newPurgeJob.req_domain = domain;
-    newPurgeJob.req_email = request.auth.credentials.email;
-    logger.debug('Purge job to store = ' + JSON.stringify(newPurgeJob));
-    purgeJobs.add(newPurgeJob, function (error, result) {
-      if (error || !result) {
-        return reply(boom.badImplementation('Failed to write new purgeJob object ' + JSON.stringify(newPurgeJob)));
+    var PurgeJobJson = {
+      domain_name: domainName,
+      request_email: request.auth.credentials.email,
+      environment: requestedEnvironment,
+      purges: purges
+    };
+
+    cds_request.post( {
+      url: config.get('cds_url') + '/v1/purge',
+      headers: {
+        Authorization: 'Bearer ' + config.get('cds_api_token')
+      },
+      form: PurgeJobJson
+    }, function (err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to queue purge job for ' + domainName));
       }
-      var purgeStatusResponse;
-      purgeStatusResponse = {
-        statusCode : 200,
-        message    : 'The purge request has been successfully queued',
-        request_id : result.req_id
-      };
+      var response_json = JSON.parse(body);
+      logger.debug('purgeObject: ' + config.get('cds_url') + '/v1/purge : response', response_json);
 
-      newPurgeJob = publicRecordFields.handle(newPurgeJob, 'purge');
+      if (res.statusCode === 400) {
+        return reply(boom.badRequest(response_json.message));
+      } else if (res.statusCode === 500) {
+        return reply(boom.badImplementation('Error occurred while processing your request, try again later'));
+      } else {
+        var purgeObjectResponse = response_json.request_object;
+        var purgeRequestIdResponse = response_json.request_id;
 
-      AuditLogger.store({
-        account_id       : account_id,
-        activity_type    : 'purge',
-        activity_target  : 'purge',
-        target_id        : newPurgeJob.req_id,
-        target_name      : newPurgeJob.req_domain,
-        target_object    : newPurgeJob,
-        operation_status : 'success'
-      }, request);
+        var purgeStatusResponse = {
+          statusCode : 200,
+          message    : 'The purge request has been successfully queued',
+          request_id : purgeRequestIdResponse
+        };
 
-      renderJSON(request, reply, error, purgeStatusResponse);
+        var PurgeJobResponse = publicRecordFields.handle(purgeObjectResponse, 'purge');
+
+        AuditLogger.store({
+          account_id       : account_id,
+          activity_type    : 'purge',
+          activity_target  : 'purge',
+          target_id        : PurgeJobResponse.req_id,
+          target_name      : PurgeJobResponse.req_domain,
+          target_object    : PurgeJobResponse,
+          operation_status : 'success'
+        }, request);
+
+        renderJSON(request, reply, error, purgeStatusResponse);
+      }
     });
   });
 };
 
 
 exports.getPurgeJobStatus = function(request, reply) {
-
   var request_id = request.params.request_id;
+  logger.info('getPurgeJobStatus: ', config.get('cds_url') + '/v1/purge/' + request_id);
   cds_request( { url: config.get('cds_url') + '/v1/purge/' + request_id,
     headers: {
       Authorization: 'Bearer ' + config.get('cds_api_token')
@@ -112,11 +128,51 @@ exports.getPurgeJobStatus = function(request, reply) {
       return reply(boom.badImplementation('Failed to get purge job details from the CDS for request ID ' + request_id));
     }
     var response_json = JSON.parse(body);
-    if ( res.statusCode === 400 ) {
+    logger.info('getPurgeJobStatus: response_json', response_json);
+    if (res.statusCode === 400) {
       return reply(boom.badRequest(response_json.message));
+    } else if (res.statusCode === 500) {
+      return reply(boom.badImplementation('Error occurred while processing your request, try again later'));
     } else {
       renderJSON(request, reply, err, response_json);
     }
   });
 };
+
+
+exports.getPurgeJobs = function(request, reply) {
+  var domainId = request.query.domain_id;
+  var options = {
+    skip: request.query.skip || 0,
+    limit: request.query.limit || 10,
+    domain_id: domainId
+  };
+  var filter = {};
+  domainConfigs.get(domainId, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive domain details for domain ID ' + domainId));
+    }
+    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+
+    cds_request({
+      url: config.get('cds_url') + '/v1/purge?' + queryString.stringify(options),
+      headers: {
+        Authorization: 'Bearer ' + config.get('cds_api_token')
+      }
+    }, function(err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to get purge job list from the CDS'));
+      }
+      var response_json = JSON.parse(body);
+      if (res.statusCode === 400) {
+        return reply(boom.badRequest(response_json.message));
+      } else {
+        renderJSON(request, reply, err, response_json);
+      }
+    });
+  });
+};
+
 

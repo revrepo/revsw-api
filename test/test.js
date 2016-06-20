@@ -15,16 +15,25 @@ var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://
 var testAPIUrlHTTP = ( process.env.API_QA_URL_HTTP ) ? process.env.API_QA_URL_HTTP : 'http://localhost:' + config.get('service.http_port');
 var testAPIUrlExpected = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://localhost:' + config.get('service.http_port');
 
-var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
-  qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
+var qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
   qaUserWithAdminPermPassword = 'password1',
   qaUserWithRevAdminPerm = 'qa_user_with_rev-admin_perm@revsw.com',
+  qaUserWithRevAdminPermPassword = 'password1',
   qaUserWithResellerPerm = 'api_qa_user_with_reseller_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
   wrongPassword = 'we5rsdfsdfs',
   testDomain = 'qa-api-test-domain.revsw.net',  // this domain should exist in the QA environment
   secretKey = '';
+
+var userAuthWithAdminPerm = {
+  email: qaUserWithAdminPerm,
+  password: qaUserWithAdminPermPassword
+};
+var userAuthWithRevAdminPerm = {
+  email: qaUserWithRevAdminPerm,
+  password: qaUserWithRevAdminPermPassword
+};
 
     var updatedConfigJson = {
 
@@ -99,11 +108,38 @@ describe('Rev API', function() {
     testDomain = 'qa-api-test-domain.revsw.net',
     domainConfigJson = {};
 
+  var jwtTokenWithAdminPerm = '',
+  jwtTokenWithRevAdminPerm = '';
+
+  before(function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send(userAuthWithRevAdminPerm)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        jwtTokenWithRevAdminPerm = response_json.token;
+        request(testAPIUrl)
+          .post('/v1/authenticate')
+          .send(userAuthWithAdminPerm)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            jwtTokenWithAdminPerm = response_json.token;
+            done();
+          });
+      });
+  });
 
   it('should return OK on healthcheck call', function(done) {
     request(testAPIUrl)
       .get('/healthcheck')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -119,7 +155,7 @@ describe('Rev API', function() {
   it('should return CORS headers', function(done) {
     request(testAPIUrl)
       .get('/healthcheck')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      // .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .expect('access-control-allow-origin', '*')
       .expect('access-control-allow-methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS')
@@ -138,24 +174,37 @@ describe('Rev API', function() {
 
   it('should get a list of users using Master password', function(done) {
     request(testAPIUrl)
-      .get('/v1/users')
-      .auth(qaUserWithAdminPerm, 'rjU7rO9Y5kbvdM408Mz8')
+      .post('/v1/authenticate')
+      .send({
+        email: qaUserWithAdminPerm,
+        password: 'rjU7rO9Y5kbvdM408Mz8'
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.length.should.be.above(0);
-        done();
+        var jwtToken = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/users')
+          .set('Authorization', 'Bearer ' + jwtToken)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            response_json.length.should.be.above(0);
+            done();
+          });
       });
   });
-
 
   it('should receive a list of first mile locations', function(done) {
     request(testAPIUrl)
       .get('/v1/locations/firstmile')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -175,7 +224,7 @@ describe('Rev API', function() {
   it('should receive 404 on wrong API path', function(done) {
     request(testAPIUrl)
       .get('/v1/users-wrong-path')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(404)
       .end(function(err, res) {
         if (err) {
@@ -189,7 +238,7 @@ describe('Rev API', function() {
   });
 
 
-  it('should not authenticate user with wrong username', function(done) {
+  xit('should not authenticate user with wrong username', function(done) {
     request(testAPIUrl)
       .get('/v1/users')
       .auth(wrongUsername, wrongPassword)
@@ -208,7 +257,7 @@ describe('Rev API', function() {
   });
 
 
-  it('should not authenticate user with wrong password', function(done) {
+  xit('should not authenticate user with wrong password', function(done) {
     request(testAPIUrl)
       .get('/v1/users')
       .auth(qaUserWithAdminPerm, wrongPassword)
@@ -229,7 +278,7 @@ describe('Rev API', function() {
   it('should allow user with RevAdmin role to get a list of users', function(done) {
     request(testAPIUrl)
       .get('/v1/users')
-      .auth(qaUserWithRevAdminPerm, 'password1')
+      .set('Authorization', 'Bearer ' + jwtTokenWithRevAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -246,7 +295,7 @@ describe('Rev API', function() {
   xit('should get a domains list as user with Admin permissions', function(done) {
     request(testAPIUrl)
       .get('/v1/domains')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -274,7 +323,6 @@ describe('Rev API', function() {
   xit('should get domain configuration for test domain', function(done) {
     request(testAPIUrl)
       .get('/v1/domains/' + testDomainId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -354,11 +402,41 @@ describe('Rev API Admin User', function() {
       'dashBoard': false
     }
   };
+  var jwtTokenWithAdminPerm = '',
+  jwtTokenWithRevAdminPerm = '',
+  jwtTokenWithUserPerm = ''
+  jwtTokenTestUser = '';
+
+  before(function(done) {
+    request(testAPIUrl)
+      .post('/v1/authenticate')
+      .send(userAuthWithRevAdminPerm)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        var response_json = JSON.parse(res.text);
+        jwtTokenWithRevAdminPerm = response_json.token;
+        request(testAPIUrl)
+          .post('/v1/authenticate')
+          .send(userAuthWithAdminPerm)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            jwtTokenWithAdminPerm = response_json.token;
+            done();
+          });
+      });
+  });
 
   it('should get from /v1/accounts just one account', function(done) {
     request(testAPIUrl)
       .get('/v1/accounts')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -374,7 +452,7 @@ describe('Rev API Admin User', function() {
   it('should get a list of users', function(done) {
     request(testAPIUrl)
       .get('/v1/users')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -416,7 +494,7 @@ describe('Rev API Admin User', function() {
   it('should get the details of test user account ' + qaUserWithAdminPerm, function(done) {
     request(testAPIUrl)
       .get('/v1/users/' + userId )
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -434,7 +512,7 @@ describe('Rev API Admin User', function() {
   it('should fail to receive user details for RevAdmin user dev@revsw.com, ID 55888147fef4198e079c315e', function(done) {
     request(testAPIUrl)
       .get('/v1/users/55888147fef4198e079c315e' )
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(400)
       .end(function(err, res) {
         if (err) {
@@ -451,7 +529,7 @@ describe('Rev API Admin User', function() {
   it('should fail to create a new user account using empty Json', function(done) {
     request(testAPIUrl)
       .post('/v1/users')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .send( {} )
       .expect(400)
       .end(function(err, res) {
@@ -473,7 +551,7 @@ describe('Rev API Admin User', function() {
     // console.log('newUserJson = ', newUserJson);
     request(testAPIUrl)
       .post('/v1/users')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .send(newUserJson)
       .expect(200)
       .end(function(err, res) {
@@ -492,7 +570,7 @@ describe('Rev API Admin User', function() {
   it('should find a new record about adding a new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -510,22 +588,34 @@ describe('Rev API Admin User', function() {
 
   it('should fail to delete the new user account using the same account for API access', function(done) {
     request(testAPIUrl)
-      .delete('/v1/users/' + testUserId)
-      .auth(testUser, 'password1')
-      .expect(400)
+      .post('/v1/authenticate')
+      .send({email:testUser,password:'password1'})
+      .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
-        done();
+        var response_json = JSON.parse(res.text);
+        jwtTokenTestUser = response_json.token;
+        request(testAPIUrl)
+          .delete('/v1/users/' + testUserId)
+          .set('Authorization', 'Bearer ' + jwtTokenTestUser)
+          .expect(400)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            done();
+          });
       });
   });
+
 
 
   it('should read back the configuration of freshly created user ' + testUser, function(done) {
     request(testAPIUrl)
       .get('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -552,7 +642,7 @@ describe('Rev API Admin User', function() {
   it('should get a list of domains using freshly created user ' + testUser, function(done) {
     request(testAPIUrl)
       .get('/v1/domain_configs')
-      .auth(testUser, testPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenTestUser)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -567,8 +657,10 @@ describe('Rev API Admin User', function() {
   it('should change the password for new user account ' + testUser, function(done) {
     request(testAPIUrl)
       .put('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
-      .send( { password: newTestPassword } )
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
+      .send({
+        password: newTestPassword
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -584,7 +676,7 @@ describe('Rev API Admin User', function() {
   it('should find a new record about updating user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -599,25 +691,40 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should get a list of domains using freshly created user ' + testUser +' and new password', function(done) {
+  it('should get a list of domains using freshly created user ' + testUser + ' and new password', function(done) {
     request(testAPIUrl)
-      .get('/v1/domain_configs')
-      .auth(testUser, newTestPassword)
+      .post('/v1/authenticate')
+      .send({
+        email: testUser,
+        password: newTestPassword
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.length.should.be.above(0);
-        done();
+        var jwtToken  = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/domain_configs')
+          .set('Authorization', 'Bearer ' + jwtToken)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            response_json.length.should.be.above(0);
+            done();
+          });
       });
   });
+
 
   it('should delete test user account ' + testUser, function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -633,7 +740,7 @@ describe('Rev API Admin User', function() {
   it('should find a new record about deleting user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -655,7 +762,7 @@ describe('Rev API Admin User', function() {
     newUserJson.password = testPassword;
     request(testAPIUrl)
       .post('/v1/users')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .send(newUserJson)
       .expect(200)
       .end(function(err, res) {
@@ -674,7 +781,7 @@ describe('Rev API Admin User', function() {
   it('should find a new record about adding a new user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -741,7 +848,7 @@ describe('Rev API Admin User', function() {
 
     request(testAPIUrl)
       .put('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .send( { companyId: [ '55b6ff6a7957012304a49d04', '55ba46a67957012304a49d0f' ] })
       .expect(400)
       .end(function(err, res) {
@@ -760,7 +867,7 @@ describe('Rev API Admin User', function() {
 
     request(testAPIUrl)
       .put('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .send(updatedUserJson)
       .expect(200)
       .end(function(err, res) {
@@ -777,7 +884,7 @@ describe('Rev API Admin User', function() {
   it('should find a new record about updating user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -795,7 +902,7 @@ describe('Rev API Admin User', function() {
   it('should read back the updated configuration of test user ' + testUser, function(done) {
     request(testAPIUrl)
       .get('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -819,27 +926,40 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should get a list of domains using updated user ' + testUser +' and new password', function(done) {
+  it('should get a list of domains using updated user ' + testUser + ' and new password', function(done) {
     request(testAPIUrl)
-      .get('/v1/domain_configs')
-      .auth(testUser, newTestPassword)
+      .post('/v1/authenticate')
+      .send({
+        email: testUser,
+        password: newTestPassword
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-      //  response_json.length.should.be.above(0);
-        done();
+        var jwtToken = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/domain_configs')
+          .set('Authorization', 'Bearer ' + jwtToken)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            //  response_json.length.should.be.above(0);
+            done();
+          });
       });
   });
-
 
 
   it('should delete test user account ' + testUser, function(done) {
     request(testAPIUrl)
       .delete('/v1/users/' + testUserId)
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
@@ -855,7 +975,7 @@ describe('Rev API Admin User', function() {
   it('should find a new record about updating user in logger', function(done) {
     request(testAPIUrl)
       .get('/v1/activity')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
       .expect(200)
       .end(function(err, res) {
         if (err) {
