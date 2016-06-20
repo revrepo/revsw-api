@@ -35,7 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 //  ---------------------------------
-var top_reports_ = function( req, reply, domain_name, span ) {
+var top_reports_ = function( req, reply, domainName, span ) {
 
   req.query.report_type = req.query.report_type || 'referer';
 
@@ -104,7 +104,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
               }
             }, {
               term: {
-                domain: domain_name
+                domain: domainName
               }
             }],
             must_not: []
@@ -163,7 +163,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     .then(function(body) {
       if ( !body.aggregations ) {
         return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
       }
 
       var data = body.aggregations.results.buckets.map( function( res ) {
@@ -217,7 +217,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
 
       var response = {
         metadata: {
-          domain_name: domain_name,
+          domain_name: domainName,
           domain_id: req.params.domain_id,
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
@@ -233,12 +233,12 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     })
     .catch( function(error) {
       logger.error(error);
-      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
 
 //  ---------------------------------
-var top_5xx_ = function( req, reply, domain_name, span ) {
+var top_5xx_ = function( req, reply, domainName, span ) {
 
   var requestBody = {
     query: {
@@ -254,7 +254,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
               }
             }, {
               term: {
-                domain: domain_name
+                domain: domainName
               }
             }, {
               prefix: {
@@ -295,7 +295,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
 
       if ( !body.aggregations ) {
         return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
       }
 
       var data = {};
@@ -317,7 +317,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
 
       var response = {
         metadata: {
-          domain_name: domain_name,
+          domain_name: domainName,
           domain_id: req.params.domain_id,
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
@@ -332,7 +332,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
     })
     .catch( function(error) {
       logger.error(error);
-      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
 
@@ -384,7 +384,7 @@ exports.getTopLists = function( request, reply ) {
         return reply(boom.badRequest( span.error ));
       }
 
-    var domain_name = result.domain_name;
+    var domainName = result.domain_name;
     var requestBody = {
       query: {
         filtered: {
@@ -399,7 +399,7 @@ exports.getTopLists = function( request, reply ) {
                 }
               }, {
                 term: {
-                  domain: domain_name
+                  domain: domainName
                 }
               }]
             }
@@ -445,11 +445,11 @@ exports.getTopLists = function( request, reply ) {
       .then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
         }
         var response = {
           metadata: {
-            domain_name: domain_name,
+            domain_name: domainName,
             domain_id: request.params.domain_id,
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
@@ -476,7 +476,7 @@ exports.getTopLists = function( request, reply ) {
       })
       .catch( function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
 
     } else {
