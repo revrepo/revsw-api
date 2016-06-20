@@ -31,6 +31,7 @@ var DomainConfigsResource = require('./domainConfigs');
 var ForgotResource = require('./forgot');
 var LocationsResource = require('./locations');
 var PurgeResource = require('./purge');
+var ResetResource = require('./reset');
 var SdkConfigsResource = require('./sdkConfigs');
 var SignUpResource = require('./signUp');
 var SSLCerts = require('./sslCerts');
@@ -56,6 +57,7 @@ module.exports = {
   forgot: ForgotResource,
   locations: LocationsResource,
   purge: PurgeResource,
+  reset: ResetResource,
   sdkConfigs: SdkConfigsResource,
   signUp: SignUpResource,
   sslCerts: SSLCerts,
