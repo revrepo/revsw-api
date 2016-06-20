@@ -31,56 +31,99 @@ describe('Rev API /v1/users/myself call', function() {
 
   it('should return back user details for user with User role', function(done) {
     request(testAPIUrl)
-      .get('/v1/users/myself')
-      .auth(qaUserWithUserPerm, qaUserWithUserPermPassword)
+      .post('/v1/authenticate')
+      .send({
+        email:qaUserWithUserPerm,
+        password: qaUserWithUserPermPassword
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.email.should.be.equal(qaUserWithUserPerm);
-        response_json.updated_at.should.be.a.String();
-        response_json.created_at.should.be.a.String();
-        done();
+        jwtTokenWithUserPerm = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/users/myself')
+          .set('Authorization', 'Bearer ' + jwtTokenWithUserPerm)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            response_json.email.should.be.equal(qaUserWithUserPerm);
+            response_json.updated_at.should.be.a.String();
+            response_json.created_at.should.be.a.String();
+            done();
+          });
       });
   });
 
   it('should return back user details for user with Admin role', function(done) {
     request(testAPIUrl)
-      .get('/v1/users/myself')
-      .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
+      .post('/v1/authenticate')
+      .send({
+        email: qaUserWithAdminPerm,
+        password: qaUserWithAdminPermPassword
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.email.should.be.equal(qaUserWithAdminPerm);
-        response_json.updated_at.should.be.a.String();
-        response_json.created_at.should.be.a.String();
-        done();
+        jwtTokenWithAdminPerm = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/users/myself')
+          .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            response_json.email.should.be.equal(qaUserWithAdminPerm);
+            response_json.updated_at.should.be.a.String();
+            response_json.created_at.should.be.a.String();
+            done();
+          });
       });
   });
 
-/*
+
   it('should return back user details for user with Reseller role', function(done) {
     request(testAPIUrl)
-      .get('/v1/users/myself')
-      .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+      .post('/v1/authenticate')
+      .send({
+        email: qaUserWithResellerPerm,
+        password: qaUserWithResellerPermPassword
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           throw err;
         }
         var response_json = JSON.parse(res.text);
-        response_json.email.should.be.equal(qaUserWithResellerPerm);
-        response_json.updated_at.should.be.a.String();
-        response_json.created_at.should.be.a.String();
-        done();
+        jwtTokenWithResellerPerm = response_json.token;
+        request(testAPIUrl)
+          .get('/v1/users/myself')
+          .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
+          // .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            var response_json = JSON.parse(res.text);
+            response_json.email.should.be.equal(qaUserWithResellerPerm);
+            response_json.updated_at.should.be.a.String();
+            response_json.created_at.should.be.a.String();
+            done();
+          });
       });
   });
-*/
+
 
 });
 

@@ -39,23 +39,23 @@ var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
  * @name  createUserDashboard
  * @description
  *
- *
- *
- * @param  {Staring}   user_id
+ * @param  {Staring}   userId
  * @param  {Object| null }   newDashboardOptions
  * @param  {Function} cb                  [description]
  * @return {[type]}                       [description]
  */
-exports.createUserDashboard = function(user_id, newDashboardOptions, cb) {
+exports.createUserDashboard = function(userId, newDashboardOptions, cb) {
   var _defaultDashboard = {
     title: 'My Dashboard',
     structure: '6-6',
+    options: {
+      autorefresh: '1'
+    },
     rows: [{
       columns: [{
         styleClass: 'col-md-6',
         widgets: []
-      },
-      {
+      }, {
         styleClass: 'col-md-6',
         widgets: []
       }]
@@ -63,7 +63,7 @@ exports.createUserDashboard = function(user_id, newDashboardOptions, cb) {
   };
 
   var newDashboard = newDashboardOptions || _defaultDashboard;
-  newDashboard.user_id = user_id;
+  newDashboard.user_id = userId;
   dashboard.add(newDashboard, function(error, result) {
     if (error) {
       logger.error('createUserDashboard::Failed to add new dashboard ' + newDashboard.title);
@@ -76,21 +76,36 @@ exports.createUserDashboard = function(user_id, newDashboardOptions, cb) {
 };
 
 /**
- * [deleteUserDashboards description]
- * @param  {[type]}   user_id [description]
- * @param  {Function} cb      [description]
- * @return {[type]}           [description]
+ * @name deleteUserDashboards
+ * @description
+ *
+ * @param  {String}   userId
+ * @param  {Function} cb
+ * @return {[type]}
  */
-exports.deleteDashboardsWithUserId = function(user_id, cb) {
-  dashboard.remove({
-    user_id: user_id
-  }, function(error, result) {
-    if (error) {
-      logger.error('deleteUserDashboards::Failed to delete dashboards user with Id' + user_id);
-      cb(error);
-    } else {
-      logger.info('deleteUserDashboards::Success deleted dashboards user with Id ' + user_id);
-      cb(null, result);
-    }
-  });
+exports.deleteDashboardsWithUserId = function(userId, cb) {
+  dashboard.getDashboardsByUserID(
+    userId,
+    function(err, result) {
+      if (err) {
+        logger.error('deleteUserDashboards::Failed to get dashboards for user with Id' + userId);
+        cb(err);
+      }
+      if (result.length > 0) {
+        dashboard.removeMany({
+          user_id: userId
+        }, function(error, result) {
+          if (error) {
+            logger.error('deleteUserDashboards::Failed to delete dashboards user with Id' + userId);
+            cb(error);
+          } else {
+            logger.info('deleteUserDashboards::Successfully deleted dashboards for user Id ' + userId);
+            cb(null, result);
+          }
+        });
+      } else {
+        logger.info('deleteUserDashboards::Successfully deleted dashboards for user Id ' + userId);
+        cb(null, result);
+      }
+    });
 };
