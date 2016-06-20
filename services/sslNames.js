@@ -66,9 +66,8 @@ exports.deleteSSLNamesWithAccountId = function (accountId, cb) {
   });
 };
 
-if (config.get('cds_scheduler') === true) {
-  var updateIssue = schedule.scheduleJob(config.get('cds_scheduler_period'), function () {
-    // console.log('Ping!');
+if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
+  var updateIssue = schedule.scheduleJob(config.get('shared_ssl_regeneration_scheduler_period'), function () {
     var unpublished = [];
     var newSSLCert;
 
@@ -77,17 +76,12 @@ if (config.get('cds_scheduler') === true) {
         return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
       }
       for (var i = 0; result.length > i; i += 1) {
-        //console.log(JSON.stringify(result[i]));
-        console.log(result[i].ssl_name);
-        console.log(result[i].verified);
-        console.log(result[i].published);
         if (result[i].verified === true && result[i].published !== true) {
           unpublished.push(result[i]);
         }
         //unpublished.push(result[i]);
       }
 
-      console.log(unpublished.length);
       /*
        for (var i = 0; unpublished.length > i; i += 1) {
        unpublished[i].published = false;

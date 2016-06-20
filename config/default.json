@@ -38,6 +38,9 @@
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
   "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
 
+  "enable_shared_ssl_regeneration_scheduler": true,
+  "shared_ssl_regeneration_scheduler_period": "*/5 * * * *",
+
   "shared_ssl_cert_id": "5723e997bd75f6e7668dbe26",
 
   "default_cname_domain": "revdn.net",
