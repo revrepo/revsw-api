@@ -74,6 +74,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
     sslNames.list(function (error, result) {
       if (error) {
         logger.error('Failed to retrieve from the DB a list of SSL names');
+        return false;
       }
       for (var i = 0; result.length > i; i += 1) {
         if (result[i].verified === true && result[i].published !== true) {
@@ -99,6 +100,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
           if (err) {
             //console.log(err);
             logger.error('Failed to update SSL certificates');
+            return false;
           } else {
             globalSignApi.getStatus(function (err, data) {
               if (err) {
@@ -158,6 +160,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                   }, function (err, res, body) {
                     if (err) {
                       logger.error('Failed to update the CDS with confguration for shared SSL certificate');
+                      return false;
                     }
                     var responseJson = JSON.parse(body);
                     if (res.statusCode === 400) {
@@ -165,17 +168,20 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                       return false;
                     }
 
+                    function updateSSL(data) {
+                      sslNames.update(data, function (error, resoult) {
+                        if (error) {
+                          logger.error('Failed to published details for SSL name ID ' + resoult.ssl_name);
+                          return false;
+                        }
+                        logger.info('Published ' + resoult.ssl_name);
+                      });
+                    }
 
                     if (responseJson) {
                       for (var i = 0; unpublished.length > i; i += 1) {
                         unpublished[i].published = true;
-                        sslNames.update(unpublished[i], function (error, resoult) {
-                          if (error) {
-                            logger.error('Failed to published details for SSL name ID ' + resoult.ssl_name);
-                            return false;
-                          }
-                          logger.info('Published ' + resoult.ssl_name)
-                        });
+                        updateSSL(unpublished[i]);
                       }
                     }
                   });
@@ -185,7 +191,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
           }
         });
       } else {
-        logger.info('Unpublished domains not found.')
+        logger.info('Unpublished domains not found.');
       }
 
     });
