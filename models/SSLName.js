@@ -51,6 +51,7 @@ function SSLName(mongoose, connection, options) {
     'verified_by': {type: String},
     'verification_method': {type: String, required: true},
     'verification_object': {type: String, required: false},
+    'published': {type: Boolean, default: false},
     'comment': {type: String, default: ''},
     'approvers': []
   });

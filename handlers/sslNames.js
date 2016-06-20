@@ -317,6 +317,8 @@ exports.verifySSLName = function (request, reply) {
                  renderJSON(request, reply, err, statusResponse);
                  }
                  */
+                response.published = true;
+
                 sslNames.update(response, function (error, resoult) {
                   if (error) {
                     return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
