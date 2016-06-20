@@ -33,7 +33,7 @@ var sslNames = new SSLName(mongoose, mongoConnection.getConnectionPortal());
 var GlobalSign = require('../lib/globalSignAPI');
 var globalSignApi = new GlobalSign();
 var renderJSON = require('../lib/renderJSON');
-var cds_request = require('request');
+var cdsRequest = require('request');
 var utils = require('../lib/utilities.js');
 var publicRecordFields = require('../lib/publicRecordFields');
 var boom = require('boom');
@@ -67,6 +67,7 @@ exports.deleteSSLNamesWithAccountId = function (accountId, cb) {
 };
 
 if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
+  logger.info('Starting shared SSL cert regeneration scheduler...');
   var updateIssue = schedule.scheduleJob(config.get('shared_ssl_regeneration_scheduler_period'), function () {
     var unpublished = [];
     var newSSLCert;
@@ -124,7 +125,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                   }
                 }
 
-                cds_request({
+                cdsRequest({
                   url: config.get('cds_url') + '/v1/ssl_certs/' + config.get('shared_ssl_cert_id'),
                   headers: authHeader
                 }, function (err, res, body) {
@@ -152,7 +153,7 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                   };
                   // renderJSON(request, reply, err, newSSLCert);
 
-                  cds_request({
+                  cdsRequest({
                     url: config.get('cds_url') + '/v1/ssl_certs/' + responseJson.id + '?options=publish',
                     method: 'PUT',
                     headers: authHeader,
@@ -169,12 +170,12 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                     }
 
                     function updateSSL(data) {
-                      sslNames.update(data, function (error, resoult) {
+                      sslNames.update(data, function (error, result) {
                         if (error) {
-                          logger.error('Failed to published details for SSL name ID ' + resoult.ssl_name);
+                          logger.error('Failed to published details for SSL name ID ' + result.ssl_name);
                           return false;
                         }
-                        logger.info('Published ' + resoult.ssl_name);
+                        logger.info('Published ' + result.ssl_name);
                       });
                     }
 
@@ -191,9 +192,8 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
           }
         });
       } else {
-        logger.info('Unpublished domains not found.');
+        logger.info('Unpublished domains not found');
       }
-
     });
   });
 }
