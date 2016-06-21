@@ -36,6 +36,7 @@ var GlobalSign = require('../lib/globalSignAPI');
 var Account = require('../models/Account');
 var SSLName = require('../models/SSLName');
 var x509 = require('x509');
+var tld = require('tldjs');
 
 var cds_request = require('request');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
@@ -52,12 +53,17 @@ var generateVerificationNames = function (data) {
   } else {
     if (data.verification_method !== 'url') {
       verificationNames.push(data.ssl_name);
-      verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
+      if(tld.getDomain(data.ssl_name) !== data.ssl_name){
+        verificationNames.push(tld.getDomain(data.ssl_name));
+      }
     } else {
       verificationNames.push('http://' + data.ssl_name);
-      verificationNames.push('http://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
       verificationNames.push('https://' + data.ssl_name);
-      verificationNames.push('https://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
+
+      if(tld.getDomain(data.ssl_name) !== data.ssl_name){
+        verificationNames.push('http://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
+        verificationNames.push('https://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
+      }
     }
   }
   data.verification_names = verificationNames;
