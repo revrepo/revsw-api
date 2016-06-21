@@ -138,7 +138,7 @@ module.exports = [
           ssl_name_id: Joi.objectId().required().description('SSL name ID')
         },
         query: {
-          url: Joi.string().min(1).max(150).optional().description('SSL name')
+          url: Joi.string().min(1).max(150).optional().description('Optional parameter specifying a domain name or URL to be used in domain control validation')
         }
       },
       plugins: {

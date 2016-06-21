@@ -136,8 +136,9 @@ SSLName.prototype = {
       if (err) {
         callback(err, null);
       }
-      var results = certs.map(function (r) {
+      var results = utils.clone(certs).map(function (r) {
         delete r.__v;
+        r.id = r._id;
         return r;
       });
       callback(err, results);
@@ -169,6 +170,12 @@ SSLName.prototype = {
       doc.save(function (err, res) {
         if (err) {
           throw err;
+        }
+        if (res) {
+          res = utils.clone(res);
+          res.user_id = res._id;
+          delete res._id;
+          delete res.__v;
         }
         callback(null, res);
       });
