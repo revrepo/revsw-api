@@ -376,7 +376,7 @@ exports.getTopLists = function( request, reply ) {
 
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
 
-      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 31 * 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
@@ -432,8 +432,14 @@ exports.getTopLists = function( request, reply ) {
       }
     };
 
+    if ( request.query.status_codes ) {
+      requestBody.aggs.status_codes = {
+        terms: { field: 'response' }
+      };
+    }
+
     var indicesList = utils.buildIndexList(span.start, span.end);
-    return elasticSearch.getClientURL().search({
+    return elasticSearch.getClient().search({
         index: indicesList,
         ignoreUnavailable: true,
         timeout: config.get('elasticsearch_timeout_ms'),
@@ -475,6 +481,13 @@ exports.getTopLists = function( request, reply ) {
               })
           }
         };
+
+        if ( request.query.status_codes ) {
+          response.data.status_code = body.aggregations.status_codes.buckets.map( function( item ) {
+            return item.key;
+          }).sort( sorter );
+        }
+
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
