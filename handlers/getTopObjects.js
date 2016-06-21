@@ -254,3 +254,116 @@ exports.getSlowestFBTObjects = function(request, reply) {
     }
   });
 };
+
+exports.getSlowestDownloadObjects = function(request, reply) {
+
+  var domainID = request.params.domain_id;
+  var domainName,
+      metadataFilterField;
+
+  domainConfigs.get(domainID, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+    }
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+
+      domainName = result.domain_name;
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
+
+      var requestBody = {
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: span.start,
+                        lte: span.end
+                      }
+                    }
+                  },
+                  { term: { domain: domainName } },
+                  { range: { duration: { gt: 0 } } }
+                ],
+                must_not: []
+              }
+            }
+          }
+        },
+        size: 0,
+        aggs: {
+          results: {
+            terms: {
+              field: 'request',
+              min_doc_count: 1,
+              order : { duration_avg : 'desc' },
+              size: ( request.query.count || 30 )
+            },
+            aggs: {
+              duration_avg: { avg: { field: 'duration' } },
+              duration_min: { min: { field: 'duration' } },
+              duration_max: { max: { field: 'duration' } },
+              size_avg: { avg: { field: 's_bytes' } }
+            }
+          }
+        }
+      };
+
+      var terms = elasticSearch.buildESQueryTerms(request);
+      var sub = requestBody.query.filtered.filter.bool;
+      sub.must = sub.must.concat( terms.must );
+      sub.must_not = sub.must_not.concat( terms.must_not );
+
+      var indicesList = utils.buildIndexList(span.start, span.end);
+      elasticSearch.getClientURL().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: config.get('elasticsearch_timeout_ms'),
+        body: requestBody
+      }).then(function(body) {
+        if ( !body.aggregations ) {
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
+        }
+        var dataArray = body.aggregations.results.buckets.map( function( item ) {
+          return {
+            path: item.key,
+            count: item.doc_count,
+            duration_max: Math.round( item.duration_max.value * 1000 ),
+            duration_min: Math.round( item.duration_min.value * 1000 ),
+            duration_avg: Math.round( item.duration_avg.value * 1000 ),
+            size_avg: Math.round( item.size_avg.value )
+          };
+        });
+
+        var response = {
+          metadata: {
+            domain_name: domainName,
+            domain_id: domainID,
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: body.hits.total,
+            filter: metadataFilterField,
+            data_points_count: body.aggregations.results.buckets.length
+          },
+          data: dataArray
+        };
+        renderJSON(request, reply, error, response);
+      }, function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
+      });
+
+    } else {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+  });
+};
