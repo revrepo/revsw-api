@@ -33,13 +33,15 @@ var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
 
-var DomainConfig   = require('../models/DomainConfig');
+var DomainConfig = require('../models/DomainConfig');
 var Account = require('../models/Account');
 var LogShippingJob = require('../models/LogShippingJob');
+var App = require('../models/App');
 
-var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
-var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
-var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnectionPortal());
+var apps = Promise.promisifyAll(new App(mongoose, mongoConnection.getConnectionPortal()));
+var domainConfigs  = Promise.promisifyAll(new DomainConfig(mongoose, mongoConnection.getConnectionPortal()));
+var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
+var logShippingJobs = Promise.promisifyAll(new LogShippingJob(mongoose, mongoConnection.getConnectionPortal()));
 
 exports.getLogShippingJobStatus = function(request, reply) {
 
@@ -94,7 +96,7 @@ exports.getLogShippingJob = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for log shipping job ID ' + logJobId));
     }
     if (!result || !utils.checkUserAccessPermissionToLogShippingJob(request,result)) {
-      return reply(boom.badRequest('Log job ID not found'));
+      return reply(boom.badRequest('Log shipping job ID not found'));
     }
 
     var response = publicRecordFields.handle(result, 'logShippingJob');
@@ -103,11 +105,9 @@ exports.getLogShippingJob = function(request, reply) {
 };
 
 exports.createLogShippingJob = function(request, reply) {
-
   var newLogJob = request.payload;
-  var logJobId = request.params.log_job_id;
 
-  if (!utils.checkUserAccessPermissionToLogShippingJob(request,newLogJob)) {
+  if (!utils.checkUserAccessPermissionToLogShippingJob(request, newLogJob)) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -118,9 +118,9 @@ exports.createLogShippingJob = function(request, reply) {
       return reply(boom.badImplementation('Failed to store in the DB new log shipping job ' + JSON.stringify(newLogJob)));
     }
 
-    var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-    result2.destination_key = '<Hidden for security reasons>';
-    result2.destination_password = '<Hidden for security reasons>';
+    var newJobObject = publicRecordFields.handle(result, 'LogShippingJob');
+    newJobObject.destination_key = '<Hidden for security reasons>';
+    newJobObject.destination_password = '<Hidden for security reasons>';
 
     AuditLogger.store({
       account_id       : result.account_id,
@@ -128,7 +128,7 @@ exports.createLogShippingJob = function(request, reply) {
       activity_target  : 'logshippingjob',
       target_id        : result.id,
       target_name      : result.job_name,
-      target_object    : result2,
+      target_object    : newJobObject,
       operation_status : 'success'
     }, request);
 
@@ -143,40 +143,93 @@ exports.createLogShippingJob = function(request, reply) {
 };
 
 exports.updateLogShippingJob = function(request, reply) {
-
-  var newLogJob = request.payload;
+  var foundShippingJob;
+  var updatedLogJob = request.payload;
   var logJobId = request.params.log_job_id;
-  newLogJob.id = logJobId;
+  updatedLogJob.id = logJobId;
 
-  logShippingJobs.get(logJobId, function (error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for log shipping job ID ' + logJobId));
-    }
-
-    // TODO add a permissions check for new account_id
-    if (!result || !utils.checkUserAccessPermissionToLogShippingJob(request,result)) {
-      return reply(boom.badRequest('Log shipping job ID not found'));
-    }
-
-    newLogJob.updated_by = utils.generateCreatedByField(request);
-
-    logShippingJobs.update(newLogJob, function (error, result) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to update the DB for log shipping job ID ' + logJobId));
+  return Promise.try(function(resolve, reject) {
+      return logShippingJobs.getAsync(logJobId);
+    })
+    .then(function (result) {
+      if (!result) {
+        throw new Error('Failed to retrieve details for log shipping job ID ' + logJobId);
       }
 
-      var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-      result2.destination_key = '<Hidden for security reasons>';
-      result2.destination_password = '<Hidden for security reasons>';
+      if (!utils.checkUserAccessPermissionToLogShippingJob(request, result)) {
+        throw new Error('Log shipping job ID not found');
+      }
+
+      if (!utils.checkUserAccessPermissionToAccount(request, updatedLogJob.account_id)) {
+        throw new Error('Account ID not found');
+      }
+
+      foundShippingJob = result;
+    })
+    .then(function () {
+      if (updatedLogJob.destination_type === 's3') {
+        updatedLogJob.destination_port = '';
+        updatedLogJob.destination_username = '';
+      } else if (updatedLogJob.destination_type === 'ftp') {
+        updatedLogJob.destination_key = '';
+      } else if (updatedLogJob.destination_type === 'sftp') {
+        updatedLogJob.destination_key = '';
+      } else if (updatedLogJob.destination_type === 'elasticsearch') {
+        updatedLogJob.destination_username = '';
+        updatedLogJob.destination_password = '';
+        updatedLogJob.destination_key = '';
+      }
+
+      return new Promise(function(resolve, reject) {
+        if (updatedLogJob.source_type === 'domain') {
+          // Check if the user/api key able to control domain
+          domainConfigs.getAsync(updatedLogJob.source_id)
+            .then(function (result) {
+              if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+                return reject(Error('Domain ID not found'));
+              } else {
+                return resolve(true);
+              }
+            });
+        } else if (updatedLogJob.source_type === 'app') {
+          // Check if the user/api key able to control app
+          apps.getAsync(updatedLogJob.source_id)
+            .then(function (result) {
+              if (!result || !utils.checkUserAccessPermissionToApps(request, result)) {
+                return reject(Error('App ID not found'));
+              } else {
+                return resolve(true);
+              }
+            });
+        }
+      });
+    })
+    .then(function (result) {
+      updatedLogJob.updated_by = utils.generateCreatedByField(request);
+
+      if (updatedLogJob.operational_mode === 'active' && !updatedLogJob.destination_host) {
+        return Promise.reject(Error('Cannot activate unconfigured logshipping job'));
+      }
+
+      return logShippingJobs.updateAsync(updatedLogJob);
+    })
+    .then(function (result) {
+      if (!result) {
+        throw new Error('Failed to update the DB for log shipping job ID ' + logJobId);
+      }
+
+      var updatedJobObject = publicRecordFields.handle(result, 'LogShippingJob');
+      updatedJobObject.destination_key = '<Hidden for security reasons>';
+      updatedJobObject.destination_password = '<Hidden for security reasons>';
 
       AuditLogger.store({
-        account_id       : result.account_id,
-        activity_type    : 'modify',
-        activity_target  : 'logshippingjob',
-        target_id        : logJobId,
-        target_name      : result.job_name,
-        target_object    : result2,
-        operation_status : 'success'
+        account_id: result.account_id,
+        activity_type: 'modify',
+        activity_target: 'logshippingjob',
+        target_id: logJobId,
+        target_name: result.job_name,
+        target_object: updatedJobObject,
+        operation_status: 'success'
       }, request);
 
       var statusResponse = {
@@ -184,9 +237,27 @@ exports.updateLogShippingJob = function(request, reply) {
         message: 'Successfully updated the log shipping job'
       };
 
-      renderJSON(request, reply, error, statusResponse);
+      return renderJSON(request, reply, null, statusResponse);
+    })
+    .catch(function(error) {
+      if (/Failed to retrieve details/.test(error.message)) {
+        return reply(boom.badRequest(error.message));
+      } else if (/Failed to update the DB/.test(error.message)) {
+        return reply(boom.badImplementation(error.message));
+      } else if (/App ID not found/.test(error.message)) {
+        return reply(boom.badRequest(error.message));
+      } else if (/Domain ID not found/.test(error.message)) {
+        return reply(boom.badRequest(error.message));
+      } else if (/Log shipping job ID not found/.test(error.message)) {
+        return reply(boom.badRequest(error.message));
+      } else if (/Account ID not found/.test(error.message)) {
+        return reply(boom.badRequest(error.message));
+      } else if (/Cannot activate unconfigured/.test(error.message)) {
+        return reply(boom.badRequest('Logshipping job should be configured before starting'));
+      } else {
+        return reply(boom.badImplementation(error.message));
+      }
     });
-  });
 };
 
 exports.deleteLogShippingJob = function(request, reply) {
@@ -197,11 +268,11 @@ exports.deleteLogShippingJob = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for log shipping job ID ' + logJobId));
     }
-    
+
     if (!result || !utils.checkUserAccessPermissionToLogShippingJob(request,result)) {
       return reply(boom.badRequest('Log shipping job ID not found'));
     }
-  
+
     logShippingJobs.remove({ _id: logJobId}, function (error, item) {
       if (error) {
         return reply(boom.badImplementation('Failed to delete from the DB log shipping job ID ' + logJobId));
