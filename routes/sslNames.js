@@ -137,6 +137,9 @@ module.exports = [
         params: {
           ssl_name_id: Joi.objectId().required().description('SSL name ID')
         },
+        query: {
+          url: Joi.string().min(1).max(150).optional().description('SSL name')
+        }
       },
       plugins: {
         'hapi-swagger': {
