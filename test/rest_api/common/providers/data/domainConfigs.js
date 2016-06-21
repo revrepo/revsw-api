@@ -25,7 +25,7 @@
 // depending on your test needs.
 var DomainConfigsDataProvider = {
 
-  prefix: 'API-TEST',
+  prefix: 'api-test',
 
   /**
    * ### DomainConfigsDataProvider.generateOne()

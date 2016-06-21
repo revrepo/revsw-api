@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,162 +16,148 @@
  * from Rev Software, Inc.
  */
 
-// # Smoke check: accounts
+require('should-http');
 
-// ## Sample spec/test suite.
-
-// This file is an example of how we should write specs/tests for our REST API.
-// You will __fine this kind of documentation only in this file__. Usually a
-// test file should not be too verbose. Instead, you should make it to:
-
-// * Be simple, verbose code makes it difficult to understand. In case there
-// is some code that could be moved to a common place, do so.
-// * Show relevant data to the validation. Don't make your test to do magic
-// actions. For example, if you are going to validate that username should not
-// be only numbers, then reflect that in the body of the test by creating a
-// variable to store that data.
-// * Do not depend on other tests/results. Instead, take advantage of
-// `before()`, `after()`, `beforeEach()` and `afterEach()` function to set the
-// pre-requisites for your test.
-// * Be atomic. Do not make your test to be a "super-test" that will
-// validate everything you can. If you thing it  is giong to make the execution
-// time of all test to be extended, do not worry, it is always better.
-
-// Following are some required lines that you will need to add in every test.
-
-// We need to load some configuration values for our spec/test to execute. This
-// config module has some defined shared properties like username, passwords
-// host information and others
 var config = require('config');
+var API = require('./../../common/api');
+var BillingPlansDP = require('./../../common/providers/data/billingPlans');
 
-// ### Requiring common components to use in our spec/test.
+// TODO Disabling billing plan tests for now. We need to remove the plan creation
+// functions and check for four existing plans (Developer/Bronze/Silver/Gold) only
 
-// `API` object, is the main component which should be imported en every
-// spec/test that you would create. It is the entry point to all resources
-// that we could consume from the REVSW REST API.
-var API= require('./../../common/api');
-// `DataProvider` is another important component which its main goal is to
-// provide valid test data for our specs/tests.
-var DataProvider= require('./../../common/providers/data');
+describe('Smoke check', function () {
 
-// Defining our __siute__ for our set of tests that belongs to the same
-// category. Please, note that here wer are talking about categories or type
-// of tests.
-//
-// If you are not familiar with this, it is highly recommended to
-// review this resource: [API Testing
-// Dojo](http://www.soapui.org/testing-dojo/welcome-to-the-dojo/overview.html)
-xdescribe('Smoke check', function () {
+  // Changing default mocha's timeout (Default is 2 seconds).
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  // Changing default mocha's timeout (Default is 2 seconds). Note that the
-  // new value is retrieved from config file. It is recommended to have this
-  // setting in each suite since t might vary from suite to suite.
-  this.timeout(config.api.request.maxTimeout);
+  // Defining set of users for which all below tests will be run
+  var users = [
+    config.get('api.users.revAdmin')
+  ];
 
-  // Generating new `account` data in order to use later in our tests.
-  var sample = DataProvider.generateBillingPlan();
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  var adminUser = config.api.users.admin;
+  users.forEach(function (user) {
 
-  // ### Test suite
+    var testBillingPlan;
 
-  // This block is run every time a suite starts the execution of their tests.
-  // It does not require any string as first param, just a `callback`. Also
-  // note that this `callback` receives a `done` parameter which is used later
-  // in the callback body to indicate that execution of this block is ready
-  // and we are good to proceed with the execution of our tests.
-  before(function (done) {
-    // I the following lines we start using `API` object in order to consume
-    // REVSW REST API services
+    describe('With user: ' + user.role, function () {
 
-    // Setting a user for all upcoming API requests
-    API.session.setCurrentUser(adminUser);
+      describe('Billing Plans resource', function () {
 
-    API.resources.billingPlans
-      .createOneAsPrerequisite(sample)
-      .then(function (response) {
-        sample.id = response.body.object_id;
-        done();
+        before(function (done) {
+/*          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              return API.helpers.billingPlans.createOne();
+            })
+            .then(function (billingPlan) {
+              testBillingPlan = billingPlan;
+            })
+            .then(done)
+            .catch(done);
+*/
+          done();
+        });
+
+        after(function (done) {
+          done();
+        });
+
+        beforeEach(function (done) {
+          done();
+        });
+
+        afterEach(function (done) {
+          done();
+        });
+
+        it('should return a response when getting all billing plans.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.billingPlans
+                  .getAll()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        // TODO: please change the check for look for four existing billing plans
+        xit('should return a response when getting specific billing plan.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.billingPlans
+                  .getOne(testBillingPlan.id)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        // TODO: Not needed to test yet. Also, admin_rw user is required
+        xit('should return a response when creating an billing plan.',
+          function (done) {
+            var newBillingPlan = BillingPlansDP.generateOne();
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.billingPlans
+                  .createOne(newBillingPlan)
+                  .expect(200)
+                  .then(function (response) {
+                    // Delete billingPlan
+                    API.resources.billingPlans
+                      .deleteOne(response.body.object_id)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        // TODO: Not needed to test yet. Also, admin_rw user is required
+        xit('should return a response when updating an billing plan.',
+          function (done) {
+            var newBillingPlan = BillingPlansDP.generateOne();
+            var updatedBillingPlan = BillingPlansDP
+              .generateOneForUpdate(newBillingPlan);
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.billingPlans
+                  .createOneAsPrerequisite(newBillingPlan);
+              })
+              .then(function (response) {
+                API.resources.billingPlans
+                  .update(response.body.object_id, updatedBillingPlan)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        // TODO: Not needed to test yet. Also, admin_rw user is required
+        xit('should return a response when deleting an billing plan.',
+          function (done) {
+            var newBillingPlan = BillingPlansDP.generateOne();
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.billingPlans
+                  .createOneAsPrerequisite(newBillingPlan);
+              })
+              .then(function (response) {
+                API.resources.billingPlans
+                  .deleteOne(response.body.object_id)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
-  });
-
-  // This block is run after a suite run all their tests. Same idea applies
-  // here in regards to the `done` parameter.
-  after(function (done) {
-    // ### Using our `API` object
-
-    // Again, we set the user for the following API calls. This is to make sure
-    // that we are using the right user account (in case any other test run
-    // changed it to a different value)
-    API.session.setCurrentUser(adminUser);
-
-    API.resources.billingPlans.deleteAllPrerequisites(done);
-
-  });
-
-  describe('BillingPlan resource', function () {
-
-    // Use this block to run some statements before an spec/test starts its
-    // execution. This is not the same as before method call.
-    beforeEach(function (done) {
-      done();
     });
-
-    // Use this block to run some statements after an spec/test ends its
-    // execution. This is not the same as after method call.
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should return a response when getting all billing plans.',
-      function (done) {
-        // Setting user for all upcoming REST API calls
-        //API.session.setCurrentUser(adminUser);
-        // Using `API` to get `accounts resource`
-        API.resources.billingPlans
-          // Getting all accounts
-          .getAll()
-          // Validate response is a success one
-          .expect(200)
-          // And finish either if there was a failure or if there was a success
-          // response, `done` callback will be invoked.
-          .end(done);
-      });
-
-    // ### Spec/test to get specific account
-    it('should return a response when getting specific account.',
-      function (done) {
-        // Setting user
-        API.session.setCurrentUser(adminUser);
-        API.resources.billingPlans
-          // Getting one specific account giving its ID
-          .getOne(sample.id)
-          // Validate it has a success response
-          .expect(200)
-          // And done, test complete
-          .end(done);
-      });
-
-    it('should return a response when creating specific billing plan.',
-      function (done) {
-        var newBillingPlan = DataProvider.generateBillingPlan();
-        API.session.setCurrentUser(adminUser);
-        API.resources.billingPlans
-          //Creating new account by using data generated
-          .createOne(newBillingPlan)
-          // Validate it has a success reponse
-          .expect(200)
-          // Calling `then()` function instead of `done()`. This is a feature of
-          // `supertest-as-promised` package. It receives as param the sucess
-          // response.
-          .then(function (response) {
-            // Since we got a success response, we need to clean account created
-            API.resources.accounts
-              .deleteOne(response.body.object_id)
-              .end(done);
-          })
-          .finally(done);
-      });
   });
 });

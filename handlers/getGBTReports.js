@@ -37,17 +37,17 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 
 exports.getGBTReports = function(request, reply) {
 
-  var domain_id = request.params.domain_id;
-  var domain_name,
+  var domainID = request.params.domain_id,
+    domainName,
     field;
 
-  domainConfigs.get(domain_id, function(error, result) {
+  domainConfigs.get(domainID, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
 
-      domain_name = result.domain_name;
+      domainName = result.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -76,7 +76,7 @@ exports.getGBTReports = function(request, reply) {
               bool: {
                 must: [{
                   term: {
-                    domain: domain_name
+                    domain: domainName
                   }
                 }, {
                   range: {
@@ -144,7 +144,7 @@ exports.getGBTReports = function(request, reply) {
       }).then(function(body) {
         if ( !body.aggregations ) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
         }
 
         var dataArray = body.aggregations.results.buckets.map( function( res ) {
@@ -191,8 +191,8 @@ exports.getGBTReports = function(request, reply) {
 
         var response = {
           metadata: {
-            domain_name: domain_name,
-            domain_id: domain_id,
+            domain_name: domainName,
+            domain_id: domainID,
             start_timestamp: span.start,
             start_datetime: new Date(span.start),
             end_timestamp: span.end,
@@ -206,7 +206,7 @@ exports.getGBTReports = function(request, reply) {
         renderJSON(request, reply, error, response);
       }, function(error) {
         logger.error(error);
-        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domain_name));
+        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domainName));
       });
     } else {
       return reply(boom.badRequest('Domain ID not found'));

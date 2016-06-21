@@ -76,32 +76,6 @@ module.exports = [
       }*/
     }
   },
-
-  {
-    method: 'GET',
-    path: '/v1/billing_plans/{id}/hosted_page',
-    config: {
-      auth: false,
-      handler: billingPlanHandler.getHostedPage,
-      description: 'Get Billing Plan Hosted Signup Page',
-      notes: 'Use this function to get a signup page for a Billing plan',
-//      tags: ['api'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-      validate: {
-        params: {
-          id: Joi.objectId().required().description('ID of the Billing plan')
-        }
-      },
-      /*      response: {
-       schema: routeValidation.BillingPlanModel
-       }*/
-    }
-  },
-
   {
     method: 'POST',
     path: '/v1/billing_plans',

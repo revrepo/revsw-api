@@ -25,7 +25,7 @@
 // depending on your test needs.
 var PurgeDataProvider = {
 
-  prefix: 'API-TEST',
+  prefix: 'api-test',
 
   /**
    * ### PurgeDataProvider.generateOne()

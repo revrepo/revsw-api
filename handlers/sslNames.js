@@ -19,199 +19,429 @@
 /*jslint node: true */
 'use strict';
 
-var mongoose    = require('mongoose');
-var boom        = require('boom');
+var mongoose = require('mongoose');
+var boom = require('boom');
 var AuditLogger = require('../lib/audit');
-var config      = require('config');
-var cds_request = require('request');
-var utils           = require('../lib/utilities.js');
+var config = require('config');
+var utils = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
 var Promise = require('bluebird');
 var _ = require('lodash');
 
-var renderJSON      = require('../lib/renderJSON');
+var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
-
+var GlobalSign = require('../lib/globalSignAPI');
 var Account = require('../models/Account');
 var SSLName = require('../models/SSLName');
+var x509 = require('x509');
+var tld = require('tldjs');
 
+var cdsRequest = require('request');
+var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+
+var globalSignApi = new GlobalSign();
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var sslNames = new SSLName(mongoose, mongoConnection.getConnectionPortal());
 
-exports.listSSLNames = function(request, reply) {
-  sslNames.list(function (error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names'));
-    }
+var generateVerificationNames = function (data) {
+  var arrDomain = data.ssl_name.split('.');
+  var verificationNames = [];
+  if (arrDomain[0] === '*') {
+    verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
+  } else {
+    if (data.verification_method !== 'url') {
+      verificationNames.push(data.ssl_name);
+      if(tld.getDomain(data.ssl_name) !== data.ssl_name){
+        verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
+      }
+    } else {
+      verificationNames.push('http://' + data.ssl_name);
+      verificationNames.push('https://' + data.ssl_name);
 
-    var response = [];
-    for (var i=0; i < result.length; i++) {
-      if (utils.checkUserAccessPermissionToSSLName(request,result[i])) {
-        response.push(result[i]);
+      if(tld.getDomain(data.ssl_name) !== data.ssl_name){
+        verificationNames.push('http://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
+        verificationNames.push('https://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
       }
     }
-    var response2 = publicRecordFields.handle(response, 'sslNames');
-    renderJSON(request, reply, error, response2);
-  });
+  }
+  data.verification_names = verificationNames;
+  return data;
 };
 
-exports.getSSLName = function(request, reply) {
+exports.listSSLNames = function (request, reply) {
+
+  sslNames.list(function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
+    }
+
+    var response = publicRecordFields.handle(result, 'sslNames');
+    var response2 = [];
+    for (var i = 0; response.length > i; i++) {
+      console.log('response[i] = ', response[i]);
+      if (utils.checkUserAccessPermissionToSSLName(request, response[i])) {
+        response2.push(generateVerificationNames(response[i]));
+      }
+    }
+
+    renderJSON(request, reply, error, response2);
+  });
+
+};
+
+exports.getSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
-
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request,result)) {
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
     var response = publicRecordFields.handle(result, 'sslName');
-    renderJSON(request, reply, error, response);
+    renderJSON(request, reply, error, generateVerificationNames(response));
+  });
+
+};
+
+exports.getSSLNameApprovers = function (request, reply) {
+  var sslName = request.query.ssl_name;
+  var approvers = '';
+
+  logger.info('Getting a list of SSL name approvers for domain ' + sslName);
+  globalSignApi.getStatus(function (error, data) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve GS status for SSL name ' + sslName, error));
+    } else {
+      var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
+      globalSignApi.getApproveList(sslName, fqdn, function (error, data) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to retrieve from GS a list of approvals for SSL name ' + sslName, error));
+        } else {
+          approvers = data.output.message.Response.Approvers[0].Approver;
+          renderJSON(request, reply, error, approvers);
+        }
+      });
+    }
   });
 };
 
-exports.getSSLNameApprovers = function(request, reply) {
+exports.addSSLName = function (request, reply) {
+  var accountId = request.payload.account_id;
+  var SSLName = request.payload.ssl_name;
+  var verificationMethod = request.payload.verification_method;
+  var verificationEmail = request.payload.verification_email;
+  var verificationWildcard = request.payload.verification_wildcard;
+  var created_by = utils.generateCreatedByField(request);
+  var approvers = '';
+  var verificationObject = '';
+  var status;
 
-  var domain = request.params.domain_name;
+  function createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers) {
+    var newSSLArray = {
+      account_id: accountId,
+      ssl_name: SSLName,
+      created_by: created_by,
+      deployed: false,
+      deployed_at: '',
+      deployed_by: '',
+      deleted: false,
+      deleted_at: '',
+      deleted_by: '',
+      updated_by: '',
+      verified: false,
+      verified_by: '',
+      verification_method: verificationMethod,
+      verification_object: verificationObject,
+      comment: '',
+      approvers: approvers
+    };
+    console.log(newSSLArray);
+    sslNames.add(newSSLArray, function (error, result) {
+      var statusResponse;
+      if (result) {
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully added new SSL name',
+          object_id: result.ssl_name_id
+        };
+      }
+      //result = publicRecordFields.handle(result, 'addSSLName');
 
-};
+      AuditLogger.store({
+        account_id      : accountId,
+        activity_type   : 'add',
+        activity_target : 'sslname',
+        target_id       : result.ssl_name_id,
+        target_name     : SSLName,
+        target_object   : result,
+        operation_status: 'success'
+      }, request);
 
-exports.addSSLName = function(request, reply) {
-
-  var newSSLName = request.payload;
-
-  if (!utils.checkUserAccessPermissionToSSLName(request,newSSLName)) {
-    return reply(boom.badRequest('SSL name ID not found'));
+      renderJSON(request, reply, error, statusResponse);
+    });
   }
 
-  newSSLName.created_by = utils.generateCreatedByField(request);
+  if (!utils.checkUserAccessPermissionToSSLName(request, { account_id: accountId })) {
+    return reply(boom.badRequest('Account ID not found'));
+  }
 
-/*
-
-  logShippingJobs.add(newLogJob, function (error, result) {
-    if (error || !result) {
-      return reply(boom.badImplementation('Failed to store in the DB new log shipping job ' + JSON.stringify(newLogJob)));
+  sslNames.getbyname(SSLName, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + SSLName, error));
     }
 
-    var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-    result2.destination_key = '<Hidden for security reasons>';
-    result2.destination_password = '<Hidden for security reasons>';
+    if (result) {
+      return reply(boom.badRequest('The SSL name is already registered in the system'));
+    } else {
 
-    AuditLogger.store({
-      account_id       : result.account_id,
-      activity_type    : 'add',
-      activity_target  : 'logshippingjob',
-      target_id        : result.id,
-      target_name      : result.job_name,
-      target_object    : result2,
-      operation_status : 'success'
-    }, request);
+      if (verificationMethod === 'email') {
 
-    var statusResponse = {
-      statusCode: 200,
-      message: 'Successfully created a new log shipping job',
-      object_id: result.id
-    };
+        globalSignApi.getStatus(function (error, data) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName, error));
+          } else {
+            // console.log(data.output.message);
+            var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
+            //console.log(fqdn);
+            globalSignApi.getApproveList(SSLName, fqdn, function (error, data) {
+              if (error) {
+                // console.log(error);
+                return reply(boom.badImplementation('Failed to retrieve from GS a list of approvals for SSL name ' + SSLName, error));
+              } else {
+                // console.log(data.output.message);
+                approvers = data.output.message.Response.Approvers[0];
+                if (approvers !== '') {
+                  globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (error, data) {
+                    if (error) {
+                      // console.log(error);
+                      return reply(boom.badImplementation('Failed to add to GS a new SSL name ' + SSLName, error));
+                    } else {
+                      // console.log(data.output.message);
+                      status = data.output.message.Response.OrderResponseHeader.SuccessCode;
+                    }
+                  });
 
-    renderJSON(request, reply, error, statusResponse);
-*/
+                  verificationObject = 'Waiting on email verification';
+                  createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
+                }
+              }
+            });
+          }
+        });
 
+      } else {
+        globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (error, data) {
+          if (error) {
+            // console.log(error);
+            return reply(boom.badImplementation('GS failed to add new SSL name ' + SSLName, error));
+          } else {
+            // console.log(data.output.message);
+            if (verificationMethod === 'url') {
+              verificationObject = data.output.message.Response.CloudOVSANInfo.MetaTag;
+            } else {
+              verificationObject = data.output.message.Response.CloudOVSANInfo.TxtRecord;
+            }
+
+            createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
+          }
+        });
+      }
+    }
+  });
 };
 
-exports.verifySSLName = function(request, reply) {
+exports.verifySSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
+  var url = request.query.url;
 
-  sslNames.get(sslNameId, function (error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
-    }
-
-    // TODO add a permissions check for new account_id
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request,result)) {
-      return reply(boom.badRequest('SSL name ID not found'));
-    }
-
-/*
-
-    newLogJob.updated_by = utils.generateCreatedByField(request);
-
-    logShippingJobs.update(newLogJob, function (error, result) {
+  function setStatusVerified(request, reply, response) {
+    response.verified = true;
+    sslNames.update(response, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update the DB for log shipping job ID ' + logJobId));
+        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
 
-      var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-      result2.destination_key = '<Hidden for security reasons>';
-      result2.destination_password = '<Hidden for security reasons>';
-
+      var statusResponse;
+      if (result) {
+        statusResponse = {
+          statusCode: 200,
+          message: 'The domain control has been successfully verified',
+          object_id: result.id
+        };
+      }
       AuditLogger.store({
-        account_id       : result.account_id,
-        activity_type    : 'modify',
-        activity_target  : 'logshippingjob',
-        target_id        : logJobId,
-        target_name      : result.job_name,
-        target_object    : result2,
-        operation_status : 'success'
+        account_id: result.account_id,
+        activity_type: 'verify',
+        activity_target: 'sslname',
+        target_id: result._id,
+        target_name: result.ssl_name,
+        target_object: result,
+        operation_status: 'success'
       }, request);
-
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully updated the log shipping job'
-      };
 
       renderJSON(request, reply, error, statusResponse);
     });
-*/
+  }
+
+  sslNames.get(sslNameId, function (error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
+    }
+
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+      return reply(boom.badRequest('SSL name ID not found'));
+    }
+
+    if (result.verification_method === 'email') {
+      globalSignApi.getStatus(function (error, data) {
+        if (error) {
+          console.log(error);
+        } else {
+          var domain;
+          var domains = data.output.message.Response.OrderDetail.CloudOVSANInfo.CloudOVSANDetail;
+          //console.log(JSON.stringify(domains));
+          for (var i = 0; domains.length > i; i += 1) {
+            if (domains[i].CloudOVSAN === result.ssl_name) {
+              if (domains[i].CloudOVSANStatus !== '8' && domains[i].CloudOVSANStatus !== '9') {
+                domain = domains[i];
+              }
+            }
+          }
+          //renderJSON(request, reply, error, globalSignApi.sanStatusCode[domain.CloudOVSANStatus]);
+          console.log(domain.CloudOVSANStatus);
+          if (domain.CloudOVSANStatus === '2' || domain.CloudOVSANStatus === '3') {
+            setStatusVerified(request, reply, result);
+          } else {
+            var statusResponse;
+            if (result) {
+              statusResponse = {
+                statusCode: 200,
+                message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
+                object_id: result.ssl_name_id
+              };
+            }
+            renderJSON(request, reply, error, statusResponse);
+          }
+        }
+      });
+    } else if (result.verification_method === 'url') {
+
+      globalSignApi.urlVerification(result.ssl_name, url, function (error, data) {
+        if (error) {
+          console.log(error);
+        } else {
+          if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
+            setStatusVerified(request, reply, result);
+          } else {
+            return reply(boom.badImplementation('Failed to verify SSL name ID ' + sslNameId, error));
+          }
+        }
+      });
+
+    } else if (result.verification_method === 'dns') {
+
+      globalSignApi.dnsVerification(result.ssl_name, url, function (error, data) {
+        if (error) {
+          console.log(error);
+        } else {
+          if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
+            setStatusVerified(request, reply, result);
+          } else {
+            return reply(boom.badImplementation('Failed to verify SSL name ID ' + sslNameId, error));
+          }
+        }
+      });
+    } else {
+      return reply(boom.badImplementation('Failed to verify SSL name ID ' + sslNameId, error));
+    }
+
+    /*
+     if (!resoult || !utils.checkUserAccessPermissionToSSLName(request, resoult)) {
+     return reply(boom.badRequest('SSL name ID not found'));
+     }
+     */
 
   });
 };
 
-exports.deleteSSLName = function(request, reply) {
+exports.deleteSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
-
+  // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
-    
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request,result)) {
+    /*
+     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+     return reply(boom.badRequest('SSL name ID not found'));
+     }
+     */
+
+    if (!result) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
-/*
-  
-    logShippingJobs.remove({ _id: logJobId}, function (error, item) {
+    var response = publicRecordFields.handle(result, 'sslName');
+    response.deleted = true;
+    response.deleted_at = new Date();
+    response.deleted_by = utils.generateCreatedByField(request);
+
+    if (response.verified === true) {
+      globalSignApi.sanModifyOperation(response.ssl_name, 'DELETE', response.verification_method, response.verification_object, false, function (error, data) {
+        if (error) {
+          console.log(error);
+          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
+        } else {
+          console.log(data.output.message);
+          //renderJSON(request, reply, error, data.output.message);
+        }
+      });
+    } else {
+      globalSignApi.sanModifyOperation(response.ssl_name, 'CANCEL', response.verification_method, response.verification_object, false, function (error, data) {
+        if (error) {
+          console.log(error);
+          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
+        } else {
+          console.log(data.output.message);
+          //renderJSON(request, reply, error, data.output.message);
+        }
+      });
+    }
+
+    sslNames.update(response, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to delete from the DB log shipping job ID ' + logJobId));
+        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
 
-      var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-      result2.destination_key = '<Hidden for security reasons>';
-      result2.destination_password = '<Hidden for security reasons>';
+      var statusResponse;
+      if (result) {
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully deleted the SSL name ID',
+          object_id: result.id
+        };
+      }
 
       AuditLogger.store({
-        account_id       : result.account_id,
-        activity_type    : 'delete',
-        activity_target  : 'logshippingjob',
-        target_id        : logJobId,
-        target_name      : result.job_name,
-        target_object    : result2,
-        operation_status : 'success'
+        account_id      : result.account_id,
+        activity_type   : 'delete',
+        activity_target : 'sslname',
+        target_id       : result._id,
+        target_name     : result.ssl_name,
+        target_object   : result,
+        operation_status: 'success'
       }, request);
 
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully deleted the log shipping job'
-      };
-
       renderJSON(request, reply, error, statusResponse);
+
     });
-*/
 
   });
+
 };

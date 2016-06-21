@@ -23,7 +23,7 @@
 var Joi = require('joi');
 
 var sslNameHandlers = require('../handlers/sslNames');
-
+var sslNameServices = require('../services/sslNames');
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
@@ -35,7 +35,7 @@ module.exports = [
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: sslNameHandlers.listSSLNames,
-      description: 'List a list of configured SSL names',
+      description: 'List of configured SSL names',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -70,7 +70,7 @@ module.exports = [
 
   {
     method: 'GET',
-    path: '/v1/ssl_names/{ssl_name_id}/approvers',
+    path: '/v1/ssl_names/approvers',
     config: {
       auth: {
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -79,8 +79,8 @@ module.exports = [
       description: 'Get a list of approvers for email-based domain control validation',
       tags: ['api'],
       validate: {
-        params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID')
+        query: {
+          ssl_name: Joi.string().min(1).max(150).required().description('SSL name')
         }
       },
       plugins: {
@@ -105,9 +105,10 @@ module.exports = [
         payload : {
           account_id: Joi.objectId().required().description('Account ID of the account the SSL name should be created for'),
           ssl_name: Joi.string().min(1).max(150).required().description('SSL domain name'),
-          comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
+          //comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           verification_method: Joi.string().valid('email','url','dns').required().description('Domain control verification method'),
-          verification_email: Joi.string().email().description('Email address to use for email-based domain control verification method')
+          verification_email: Joi.string().allow('').email().description('Email address to use for email-based domain control verification method'),
+          verification_wildcard: Joi.string().allow('').valid('true', 'false').description('Wildcard domain')
         }
       },
       plugins: {
@@ -134,8 +135,11 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID'),
+          ssl_name_id: Joi.objectId().required().description('SSL name ID')
         },
+        query: {
+          url: Joi.string().min(1).max(150).optional().description('Optional parameter specifying a domain name or URL to be used in domain control validation')
+        }
       },
       plugins: {
         'hapi-swagger': {
@@ -144,7 +148,6 @@ module.exports = [
       }
     }
   },
-
 
   {
     method: 'DELETE',
@@ -158,7 +161,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         params: {
-          ssl_name_id: Joi.objectId().required().description('SSL name ID'),
+          ssl_name_id: Joi.objectId().required().description('SSL name ID')
         }
       },
       plugins: {

@@ -31,7 +31,8 @@ var resourceConfig = {
   path: '/purge/{' + purgeIdKey + '}',
   methods: [
     Methods.CREATE,
-    Methods.READ_ONE
+    Methods.READ_ONE,
+    Methods.READ_ALL
   ]
 };
 

@@ -44,7 +44,7 @@ describe('Smoke check', function () {
 
   describe('Sign Up resource', function () {
 
-    it('should return success response when signing up user',
+    it('should return sucess response when signing up user using a random billing plan',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)

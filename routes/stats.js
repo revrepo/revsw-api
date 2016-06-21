@@ -65,7 +65,8 @@ module.exports = [
           quic: Joi.string().valid( 'QUIC', 'HTTP' ).description('Last mile protocol to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
-          device: Joi.string().description('Device name/version to filter')
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
         }
       }
     }
@@ -105,7 +106,40 @@ module.exports = [
           http2: Joi.string().valid( 'h2', 'h2c' ).description('HTTP2 protocol type to filter'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
-          device: Joi.string().description('Device name/version to filter')
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/slowest_fbt_objects/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: getTopObjects.getSlowestFBTObjects,
+      description: 'Get a list of object requests with slowest FBT',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of top objects to report (default to 30)'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
         }
       }
     }
@@ -135,9 +169,40 @@ module.exports = [
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
           report_type: Joi.string().required().valid ( 'referer', 'status_code', 'cache_status', 'content_type', 'protocol', 'request_status',
-            'http_protocol', 'http_method', 'content_encoding', 'os', 'device', 'country', 'QUIC', 'http2', 'top5xx' )
+            'http_protocol', 'http_method', 'content_encoding', 'os', 'device', 'country', 'QUIC', 'http2', 'top5xx', 'browser' )
             .description('Type of requested report (defaults to "referer")'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
+          os: Joi.string().description('OS name/version to filter'),
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/stats/top_lists/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: getTopReports.getTopLists,
+      description: 'Get all possible values of [country, os, device, browser, statuses(optional)] for the domain and timespan',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          status_codes: Joi.boolean().default(false).description('add list of status codes, default false'),
         }
       }
     }
@@ -225,7 +290,8 @@ module.exports = [
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
-          device: Joi.string().description('Device name/version to filter')
+          device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter')
         }
       }
     }
@@ -256,6 +322,7 @@ module.exports = [
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
           device: Joi.string().description('Device name/version to filter'),
+          browser: Joi.string().description('Browser name to filter'),
           interval_ms: Joi.number().integer().description('Distribution sampling size, step, ms'),
           limit_ms: Joi.number().integer().description('Maximal value, ms'),
         }

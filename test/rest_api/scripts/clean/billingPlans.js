@@ -17,14 +17,14 @@
  */
 
 var config = require('config');
-var API = require('./../common/api');
+var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.get('api.request.maxTimeout'));
+  this.timeout(config.api.request.maxTimeout);
 
-  var user = config.get('api.users.revAdmin');
+  var reseller = config.get('api.users.reseller');
   var namePattern = /[0-9]{13}/;
 
   before(function (done) {
@@ -35,7 +35,7 @@ describe('Clean up', function () {
     done();
   });
 
-  describe('SSL Certificates resource', function () {
+  describe('Billing Plans resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -45,23 +45,25 @@ describe('Clean up', function () {
       done();
     });
 
-    it('should clean SSL Certificates created for testing.',
+    // TODO: Need to run this script as 'admin_rw' user
+    xit('should clean Billing Plans created for testing.',
       function (done) {
         API.helpers
-          .authenticateUser(user)
+          .authenticateUser(reseller)
           .then(function () {
-            API.resources.sslCerts
+            API.resources.billingPlans
               .getAll()
               .expect(200)
               .then(function (res) {
                 var ids = [];
-                var certificates = res.body;
-                certificates.forEach(function (certificate) {
-                  if (namePattern.test(certificate.cert_name)) {
-                    ids.push(certificate.id);
+                var billingPlans = res.body;
+                billingPlans.forEach(function (billingPlan) {
+                  if (namePattern.test(billingPlan.name)) {
+                    ids.push(billingPlan.id);
                   }
                 });
-                API.resources.sslCerts
+
+                API.resources.billingPlans
                   .deleteManyIfExist(ids)
                   .finally(done);
               })

@@ -379,7 +379,7 @@ describe('Functional check', function () {
           'publishing an app',
           function (done) {
             var appId;
-            var counter = 180000; // 3 mins
+            var counter = 360000; // 6 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
@@ -422,6 +422,38 @@ describe('Functional check', function () {
               })
               .catch(done);
           });
+
+         it('should allow to create apps with same data for two different account.', function(done) {
+          var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+          API.helpers
+            .authenticateUser(user)
+            .then(function() {
+              return API.resources.apps.createOneAsPrerequisite(newApp)
+                .then(function() {
+                  return API.resources.apps
+                    .createOne(newApp)
+                    .expect(400);
+                });
+            })
+            .then(function(resource) {
+              return API.helpers
+                .authenticateUser(secondReseller)
+                .then(function() {
+                  // Same data for second Account
+                  newApp.account_id = secondTestAccount.id;
+                  return API.resources.apps.createOne(newApp)
+                    .expect(200)
+                    .then(function(response) {
+                      // Delete app
+                      API.resources.apps
+                        .deleteOne(response.body.object_id)
+                        .end(done);
+                    })
+                    .catch(done);
+                });
+            })
+            .catch(done);
+        });
 
         it('should allow to get app data after updating it.',
           function (done) {

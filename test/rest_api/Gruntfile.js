@@ -19,11 +19,48 @@ module.exports = function (grunt) {
     },
 
     mochaTest: {
-      test: {
+      clean: {
         options: {
           reporter: 'spec',
           // Optionally capture the reporter output to a file
-          captureFile: 'results/mocha.txt',
+          captureFile: 'results/mocha-clean-env.txt',
+          // Optionally suppress output to standard out (defaults to false)
+          quiet: false,
+          // Optionally clear the require cache before running tests
+          // (defaults to false)
+          clearRequireCache: false
+        },
+        src: [ // NOTE: Execution order is really IMPORTANT
+          'scripts/clean/apiKeys.js',
+          'scripts/clean/apps.js',
+          'scripts/clean/billingPlans.js',
+          'scripts/clean/dashboards.js',
+          'scripts/clean/domainConfigs.js',
+          'scripts/clean/sslCerts.js',
+          'scripts/clean/accounts.js',
+          'scripts/clean/users.js'
+        ]
+      },
+      setup: {
+        options: {
+          reporter: 'spec',
+          // Optionally capture the reporter output to a file
+          captureFile: 'results/mocha-setup-env.txt',
+          // Optionally suppress output to standard out (defaults to false)
+          quiet: false,
+          // Optionally clear the require cache before running tests
+          // (defaults to false)
+          clearRequireCache: false
+        },
+        src: [ // NOTE: Execution order is note relevant.
+          'scripts/setup/*.js'
+        ]
+      },
+      smoke: {
+        options: {
+          reporter: 'spec',
+          // Optionally capture the reporter output to a file
+          captureFile: 'results/mocha-smoke-test.txt',
           // Optionally suppress output to standard out (defaults to false)
           quiet: false,
           // Optionally clear the require cache before running tests
@@ -31,25 +68,43 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [
-          'suites/**/account*.js', // Accounts specs
-          'suites/**/*omainConfig*.js', // DomainConfigs specs
-          'suites/**/stat*.js', // Stats specs
-          'suites/**/purge*.js', // Purge specs
-          'suites/**/2fa*.js', // 2fa specs
-          'suites/**/countries*.js', // Countries specs
-          'suites/**/locations*.js', // Locations specs
-          'suites/**/authenticate*.js', // Authenticate specs
-          'suites/**/forgot*.js', // Forgot specs
-          'suites/**/activity*.js', // Activity specs
-          'suites/**/apps*.js', // Apps specs
-          'suites/**/usage*.js', // Usage Reports specs
-          // Cleaning up env.
-          'setup/apps.js',
-          'setup/domainConfigs.js',
-          'setup/accounts.js',
-          'setup/users.js'
+          'suites/smoke/*.js'
         ]
       },
+      regression: {
+        options: {
+          reporter: 'spec',
+          // Optionally capture the reporter output to a file
+          captureFile: 'results/mocha-full-regression-test.txt',
+          // Optionally suppress output to standard out (defaults to false)
+          quiet: false,
+          // Optionally clear the require cache before running tests
+          // (defaults to false)
+          clearRequireCache: false
+        },
+        src: [
+          'suites/**/2fa*.js',
+          'suites/**/account*.js',
+          'suites/**/activity*.js',
+          'suites/**/apiKey*.js',
+          'suites/**/app*.js',
+          'suites/**/authenticate*.js',
+          'suites/**/billingPlan*.js',
+          'suites/**/billingStatement*.js',
+          'suites/**/countr*.js',
+          'suites/**/dashboard*.js',
+          'suites/**/*omainConfig*.js',
+          'suites/**/forgot*.js',
+          'suites/**/location*.js',
+          'suites/**/purge*.js',
+          'suites/**/signUp*.js',
+          'suites/**/sslCert*.js',
+          'suites/**/stat*.js',
+          'suites/**/stats-sdk*.js',
+          'suites/**/user*.js',
+          'suites/**/zenDeskArticle*.js'
+        ]
+      }
     },
 
     jshint: {
@@ -90,8 +145,27 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-docker');
   grunt.loadNpmTasks('grunt-env');
 
-  grunt.registerTask('default', ['clean', 'jshint:test', 'mochaTest',
-    'docker']);
-  grunt.registerTask('test', ['clean', 'jshint:test', 'mochaTest']);
+  grunt.registerTask('default', [
+    'clean',
+    'jshint:test',
+    'mochaTest:clean',
+    'mochaTest:setup',
+    'mochaTest:regression',
+    'docker'
+  ]);
+  grunt.registerTask('test', [
+    'clean',
+    'jshint:test',
+    'mochaTest:clean',
+    'mochaTest:setup',
+    'mochaTest:regression'
+  ]);
+  grunt.registerTask('smokeTest', [
+    'clean',
+    'jshint:test',
+    'mochaTest:clean',
+    'mochaTest:setup',
+    'mochaTest:smoke'
+  ]);
   grunt.registerTask('doc', ['clean', 'docker']);
 };

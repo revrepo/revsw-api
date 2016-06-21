@@ -38,6 +38,7 @@ var PurgeJob = require('../models/PurgeJob');
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
 
+var queryString = require('querystring');
 //
 // Management of purges
 //
@@ -137,4 +138,41 @@ exports.getPurgeJobStatus = function(request, reply) {
     }
   });
 };
+
+
+exports.getPurgeJobs = function(request, reply) {
+  var domainId = request.query.domain_id;
+  var options = {
+    skip: request.query.skip || 0,
+    limit: request.query.limit || 10,
+    domain_id: domainId
+  };
+  var filter = {};
+  domainConfigs.get(domainId, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive domain details for domain ID ' + domainId));
+    }
+    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+
+    cds_request({
+      url: config.get('cds_url') + '/v1/purge?' + queryString.stringify(options),
+      headers: {
+        Authorization: 'Bearer ' + config.get('cds_api_token')
+      }
+    }, function(err, res, body) {
+      if (err) {
+        return reply(boom.badImplementation('Failed to get purge job list from the CDS'));
+      }
+      var response_json = JSON.parse(body);
+      if (res.statusCode === 400) {
+        return reply(boom.badRequest(response_json.message));
+      } else {
+        renderJSON(request, reply, err, response_json);
+      }
+    });
+  });
+};
+
 

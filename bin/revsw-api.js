@@ -29,7 +29,6 @@ var Hapi = require('hapi'),
   config = require('config'),
   AuditLogger = require('../lib/audit'),
   Pack = require('../package'),
-  UserAuth = require('../handlers/userAuth'),
   validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
   validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
   User = require('../models/User'),
@@ -129,10 +128,6 @@ var swaggerOptions = {
   }
 };
 
-server.register(require('hapi-auth-basic'), function (err) {
-  server.auth.strategy('basic', 'basic', {validateFunc: UserAuth});
-});
-
 server.register(require('hapi-auth-jwt'), function (err) {
   server.auth.strategy('token', 'jwt', {
     key: jwtPrivateKey,
@@ -167,10 +162,8 @@ server.register([{
 });
 
 server.auth.default({
-  strategies: [ 'basic', 'token', 'apikey' ]
+  strategies: ['token', 'apikey' ]
 });
-
-//server.route(Routes.routes);
 
 // Redirect all non-HTTPS requests to HTTPS
 server.ext('onRequest', function (request, reply) {

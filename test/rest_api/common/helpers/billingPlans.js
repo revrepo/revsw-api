@@ -18,11 +18,17 @@
 
 var BillingPlansResource = require('./../resources/billingPlans');
 var APITestError = require('./../apiTestError');
+var BillingPlansDP = require('./../providers/data/billingPlans');
 
 // # Billing Plans Helper
 // Abstracts common functionality for the related resource.
 module.exports = {
 
+  /**
+   * Gets random billing plan object
+   *
+   * @returns {Promise}
+   */
   getRandomOne: function () {
     return BillingPlansResource
       .getAll()
@@ -33,6 +39,25 @@ module.exports = {
       })
       .catch(function (error) {
         throw new APITestError('Getting billing plans', error.response.body);
+      });
+  },
+
+  /**
+   * Creates a new Billing Plan.
+   *
+   * @returns {Object} Promise, with the new dashboard object created
+   */
+  createOne: function () {
+    var dashboard = BillingPlansDP.generateOne();
+    return BillingPlansResource
+      .createOneAsPrerequisite(dashboard)
+      .catch(function (error) {
+        throw new APITestError('Creating Dashboard', error.response.body,
+          dashboard);
+      })
+      .then(function (res) {
+        dashboard.id = res.body.object_id;
+        return dashboard;
       });
   }
 };

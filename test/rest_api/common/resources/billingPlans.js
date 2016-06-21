@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,18 +16,29 @@
  * from Rev Software, Inc.
  */
 
-// # Accounts Resource object
+// # Billing Plans Resource object
 
 // Requiring config and `BaseResource`
 var config = require('config');
-var BaseResource = require('./base');
+var BasicResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
+
+var billingPlanIdKey = 'billingPlanId';
+var resourceConfig = {
+  idKey: billingPlanIdKey,
+  name: 'billingPlans',
+  path: '/billing_plans/{' + billingPlanIdKey + '}',
+  methods: [
+    Methods.CREATE,
+    Methods.READ_ALL,
+    Methods.READ_ONE,
+    Methods.UPDATE,
+    Methods.DELETE
+  ],
+  nestedResources: []
+};
 
 // Creating new instance of BaseResource which is going to represent the API
-// `accounts resource`
-// TODO: In the future we need to improve this way of instantiation by providing
-// allowed method for the resource being created.
-module.exports = new BaseResource({
-  host: config.api.host,
-  apiVersion: config.api.version,
-  apiResource: config.api.resources.billingPlans
-});
+// `Billing Plans resource`
+module.exports = new BasicResource(resourceConfig);

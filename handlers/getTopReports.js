@@ -35,7 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 //  ---------------------------------
-var top_reports_ = function( req, reply, domain_name, span ) {
+var topReports_ = function( req, reply, domainName, span ) {
 
   req.query.report_type = req.query.report_type || 'referer';
 
@@ -83,6 +83,9 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     case 'http2':
       field = 'http2';
       break;
+    case 'browser':
+      field = 'name';
+      break;
     default:
       return reply(boom.badImplementation('Received bad report_type value ' + req.query.report_type));
   }
@@ -101,9 +104,10 @@ var top_reports_ = function( req, reply, domain_name, span ) {
               }
             }, {
               term: {
-                domain: domain_name
+                domain: domainName
               }
-            }]
+            }],
+            must_not: []
           }
         }
       }
@@ -144,13 +148,10 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     };
   }
 
-  if (req.query.country) {
-    requestBody.query.filtered.filter.bool.must.push({
-      term: {
-        'geoip.country_code2': req.query.country
-      }
-    });
-  }
+  var terms = elasticSearch.buildESQueryTerms(req);
+  var sub = requestBody.query.filtered.filter.bool;
+  sub.must = sub.must.concat( terms.must );
+  sub.must_not = sub.must_not.concat( terms.must_not );
 
   var indicesList = utils.buildIndexList(span.start, span.end);
   return elasticSearch.getClientURL().search({
@@ -162,7 +163,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     .then(function(body) {
       if ( !body.aggregations ) {
         return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
       }
 
       var data = body.aggregations.results.buckets.map( function( res ) {
@@ -216,7 +217,7 @@ var top_reports_ = function( req, reply, domain_name, span ) {
 
       var response = {
         metadata: {
-          domain_name: domain_name,
+          domain_name: domainName,
           domain_id: req.params.domain_id,
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
@@ -232,12 +233,12 @@ var top_reports_ = function( req, reply, domain_name, span ) {
     })
     .catch( function(error) {
       logger.error(error);
-      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
 
 //  ---------------------------------
-var top_5xx_ = function( req, reply, domain_name, span ) {
+var top5XX_ = function( req, reply, domainName, span ) {
 
   var requestBody = {
     query: {
@@ -253,7 +254,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
               }
             }, {
               term: {
-                domain: domain_name
+                domain: domainName
               }
             }, {
               prefix: {
@@ -294,7 +295,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
 
       if ( !body.aggregations ) {
         return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domain_name ) );
+          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
       }
 
       var data = {};
@@ -316,7 +317,7 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
 
       var response = {
         metadata: {
-          domain_name: domain_name,
+          domain_name: domainName,
           domain_id: req.params.domain_id,
           start_timestamp: span.start,
           start_datetime: new Date(span.start),
@@ -331,20 +332,18 @@ var top_5xx_ = function( req, reply, domain_name, span ) {
     })
     .catch( function(error) {
       logger.error(error);
-      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domain_name));
+      return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
-
 
 //  ---------------------------------
 exports.getTopReports = function( request, reply ) {
 
-  var domain_id = request.params.domain_id;
-
-  domainConfigs.get(domain_id, function(error, result) {
+  var domainID = request.params.domain_id;
+  domainConfigs.get(domainID, function(error, result) {
 
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domain_id));
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
     if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
@@ -355,10 +354,147 @@ exports.getTopReports = function( request, reply ) {
       }
 
       if ( request.query.report_type === 'top5xx' ) {
-        return top_5xx_( request, reply, result.domain_name, span );
+        return top5XX_( request, reply, result.domain_name, span );
       } else {
-        return top_reports_( request, reply, result.domain_name, span );
+        return topReports_( request, reply, result.domain_name, span );
       }
+    } else {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+  });
+};
+
+//  ---------------------------------
+exports.getTopLists = function( request, reply ) {
+
+  var domainID = request.params.domain_id;
+  domainConfigs.get(domainID, function(error, result) {
+
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+    }
+
+    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 31 * 24/*allowed period in hrs*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+
+    var domainName = result.domain_name;
+    var requestBody = {
+      query: {
+        filtered: {
+          filter: {
+            bool: {
+              must: [{
+                range: {
+                  '@timestamp': {
+                    gte: span.start,
+                    lte: span.end
+                  }
+                }
+              }, {
+                term: {
+                  domain: domainName
+                }
+              }]
+            }
+          }
+        }
+      },
+      size: 0,
+      aggs: {
+        oses: {
+          terms: {
+            field: 'os',
+            size: 250
+          }
+        },
+        devices: {
+          terms: {
+            field: 'device',
+            size: 250
+          }
+        },
+        countries: {
+          terms: {
+            field: 'geoip.country_code2',
+            size: 250
+          }
+        },
+        browsers: {
+          terms: {
+            field: 'name',
+            size: 250
+          }
+        },
+      }
+    };
+
+    if ( request.query.status_codes ) {
+      requestBody.aggs.status_codes = {
+        terms: { field: 'response' }
+      };
+    }
+
+    var indicesList = utils.buildIndexList(span.start, span.end);
+    return elasticSearch.getClient().search({
+        index: indicesList,
+        ignoreUnavailable: true,
+        timeout: config.get('elasticsearch_timeout_ms'),
+        body: requestBody
+      })
+      .then(function(body) {
+        if ( !body.aggregations ) {
+          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
+        }
+
+        var sorter = function( lhs, rhs ) {
+          return lhs.localeCompare( rhs );
+        };
+        var response = {
+          metadata: {
+            domain_name: domainName,
+            domain_id: request.params.domain_id,
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: body.hits.total
+          },
+          data: {
+            os: body.aggregations.oses.buckets.map( function( item ) {
+                return item.key;
+              }).sort( sorter ),
+            device: body.aggregations.devices.buckets.map( function( item ) {
+                return item.key;
+              }).sort( sorter ),
+            browser: body.aggregations.browsers.buckets.map( function( item ) {
+                return item.key;
+              }).sort( sorter ),
+            country: body.aggregations.countries.buckets.map( function( item ) {
+                return { key: item.key, value: ( utils.countries[item.key] || item.key ) };
+              }).sort( function( lhs, rhs ) {
+                return lhs.value === 'United States' ? -1 : ( rhs.value === 'United States' ? 1 : lhs.value.localeCompare(rhs.value) );
+              })
+          }
+        };
+
+        if ( request.query.status_codes ) {
+          response.data.status_code = body.aggregations.status_codes.buckets.map( function( item ) {
+            return item.key;
+          }).sort( sorter );
+        }
+
+        renderJSON( request, reply, false/*error is undefined here*/, response );
+      })
+      .catch( function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
+      });
+
     } else {
       return reply(boom.badRequest('Domain ID not found'));
     }
