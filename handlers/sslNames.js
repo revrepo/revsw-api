@@ -54,7 +54,7 @@ var generateVerificationNames = function (data) {
     if (data.verification_method !== 'url') {
       verificationNames.push(data.ssl_name);
       if(tld.getDomain(data.ssl_name) !== data.ssl_name){
-        verificationNames.push(tld.getDomain(data.ssl_name));
+        verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
       }
     } else {
       verificationNames.push('http://' + data.ssl_name);
