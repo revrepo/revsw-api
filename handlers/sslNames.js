@@ -180,6 +180,17 @@ exports.addSSLName = function (request, reply) {
         };
       }
       //result = publicRecordFields.handle(result, 'addSSLName');
+
+      AuditLogger.store({
+        account_id      : accountId,
+        activity_type   : 'add',
+        activity_target : 'sslname',
+        target_id       : result.ssl_name_id,
+        target_name     : SSLName,
+        target_object   : result,
+        operation_status: 'success'
+      }, request);
+
       renderJSON(request, reply, error, statusResponse);
     });
   }
@@ -339,17 +350,7 @@ exports.verifySSLName = function (request, reply) {
                 if (res.statusCode === 400) {
                   return reply(boom.badRequest(responseJson.message));
                 }
-                /*
-                 var response = responseJson;
-                 if (response) {
-                 var statusResponse = {
-                 statusCode: 202,
-                 message: 'Successfully saved the updated SSL certificate',
-                 object_id: response.ssl_name_id
-                 };
-                 renderJSON(request, reply, err, statusResponse);
-                 }
-                 */
+
                 response.published = true;
 
                 sslNames.update(response, function (error, resoult) {
@@ -365,6 +366,17 @@ exports.verifySSLName = function (request, reply) {
                       object_id: resoult._id
                     };
                   }
+
+                  AuditLogger.store({
+                    account_id: resoult.account_id,
+                    activity_type: 'verify',
+                    activity_target: 'sslname',
+                    target_id: resoult._id,
+                    target_name: resoult.ssl_name,
+                    target_object: resoult,
+                    operation_status: 'success'
+                  }, request);
+
                   renderJSON(request, reply, error, statusResponse);
                 });
               });
@@ -466,35 +478,6 @@ exports.verifySSLName = function (request, reply) {
      if (!resoult || !utils.checkUserAccessPermissionToSSLName(request, resoult)) {
      return reply(boom.badRequest('SSL name ID not found'));
      }
-
-     newLogJob.updated_by = utils.generateCreatedByField(request);
-
-     logShippingJobs.update(newLogJob, function (error, resoult) {
-     if (error) {
-     return reply(boom.badImplementation('Failed to update the DB for log shipping job ID ' + logJobId));
-     }
-
-     var result2 = publicRecordFields.handle(resoult, 'LogShippingJob');
-     result2.destination_key = '<Hidden for security reasons>';
-     result2.destination_password = '<Hidden for security reasons>';
-
-     AuditLogger.store({
-     account_id       : resoult.account_id,
-     activity_type    : 'modify',
-     activity_target  : 'logshippingjob',
-     target_id        : logJobId,
-     target_name      : resoult.job_name,
-     target_object    : result2,
-     operation_status : 'success'
-     }, request);
-
-     var statusResponse = {
-     statusCode: 200,
-     message: 'Successfully updated the log shipping job'
-     };
-
-     renderJSON(request, reply, error, statusResponse);
-     });
      */
 
   });
@@ -558,51 +541,21 @@ exports.deleteSSLName = function (request, reply) {
           object_id: result._id
         };
       }
+
+      AuditLogger.store({
+        account_id      : result.account_id,
+        activity_type   : 'delete',
+        activity_target : 'sslname',
+        target_id       : result._id,
+        target_name     : result.ssl_name,
+        target_object   : result,
+        operation_status: 'success'
+      }, request);
+
       renderJSON(request, reply, error, statusResponse);
 
     });
 
   });
 
-  /*
-   sslNames.get(sslNameId, function (error, result) {
-   if (error) {
-   return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId));
-   }
-
-   if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
-   return reply(boom.badRequest('SSL name ID not found'));
-   }
-
-
-
-   logShippingJobs.remove({ _id: logJobId}, function (error, item) {
-   if (error) {
-   return reply(boom.badImplementation('Failed to delete from the DB log shipping job ID ' + logJobId));
-   }
-
-   var result2 = publicRecordFields.handle(result, 'LogShippingJob');
-   result2.destination_key = '<Hidden for security reasons>';
-   result2.destination_password = '<Hidden for security reasons>';
-
-   AuditLogger.store({
-   account_id       : result.account_id,
-   activity_type    : 'delete',
-   activity_target  : 'logshippingjob',
-   target_id        : logJobId,
-   target_name      : result.job_name,
-   target_object    : result2,
-   operation_status : 'success'
-   }, request);
-
-   var statusResponse = {
-   statusCode: 200,
-   message: 'Successfully deleted the log shipping job'
-   };
-
-   renderJSON(request, reply, error, statusResponse);
-   });
-
-
-   });*/
 };
