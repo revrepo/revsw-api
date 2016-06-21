@@ -34,6 +34,7 @@ var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
 var SSLCertsHelper = require('./sslCerts');
 var UsersHelper = require('./users');
+var LogShippingJobsHelper = require('./logShippingJobs');
 
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
@@ -50,6 +51,7 @@ module.exports = {
   signUp: SignUpHelper,
   sslCerts: SSLCertsHelper,
   users: UsersHelper,
+  logShippingJobs: LogShippingJobsHelper,
 
   /**
    * ### API.helpers.authenticateUser()
