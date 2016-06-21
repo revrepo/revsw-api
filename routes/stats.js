@@ -188,7 +188,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: getTopReports.getTopLists,
-      description: 'Get all possible values of [country, os, device, browser] for the domain and timespan',
+      description: 'Get all possible values of [country, os, device, browser, statuses(optional)] for the domain and timespan',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -201,7 +201,8 @@ module.exports = [
         },
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          status_codes: Joi.boolean().default(false).description('add list of status codes, default false'),
         }
       }
     }
