@@ -172,7 +172,7 @@ exports.addSSLName = function (request, reply) {
       deleted: false,
       deleted_at: '',
       deleted_by: '',
-      updated_by: '',
+      updated_by: created_by,
       verified: false,
       verified_by: '',
       verification_method: verificationMethod,
