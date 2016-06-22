@@ -44,12 +44,12 @@ exports.getStats = function(request, reply) {
     domainName,
     metadataFilterField;
 
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
-      domainName = result.domain_name;
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+      domainName = domainConfig.domain_name;
 
       var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
       if ( span.error ) {
@@ -65,18 +65,13 @@ exports.getStats = function(request, reply) {
             filter: {
               bool: {
                 must: [{
-                  term: {
-                    domain: domainName
-                  }
-                }, {
                   range: {
                     '@timestamp': {
                       gte: span.start,
                       lt: span.end
                     }
                   }
-                }],
-                must_not: []
+                }]
               }
             }
           }
@@ -109,10 +104,8 @@ exports.getStats = function(request, reply) {
         }
       };
 
-      var terms = elasticSearch.buildESQueryTerms(request);
-      var sub = requestBody.query.filtered.filter.bool;
-      sub.must = sub.must.concat( terms.must );
-      sub.must_not = sub.must_not.concat( terms.must_not );
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
 
       elasticSearch.getClient().search({
         index: utils.buildIndexList(span.start, span.end),
