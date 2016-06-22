@@ -49,6 +49,9 @@ var generateVerificationNames = function (data) {
   var verificationNames = [];
   if (arrDomain[0] === '*') {
     verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
+    if(tld.getDomain(data.ssl_name.replace(arrDomain[0] + '.', '')) !== data.ssl_name.replace(arrDomain[0] + '.', '')){
+        verificationNames.push(tld.getDomain(data.ssl_name.replace(arrDomain[0] + '.', '')));
+    }
   } else {
     if (data.verification_method !== 'url') {
       verificationNames.push(data.ssl_name);
