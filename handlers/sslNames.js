@@ -361,6 +361,27 @@ exports.verifySSLName = function (request, reply) {
 exports.deleteSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
+
+  var setDelete = function (response) {
+        sslNames.update(response, function (error, result) {
+      if (error || !result) {
+        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
+      }
+
+      AuditLogger.store({
+        account_id      : result.account_id,
+        activity_type   : 'delete',
+        activity_target : 'sslname',
+        target_id       : result._id,
+        target_name     : result.ssl_name,
+        target_object   : publicRecordFields.handle(result, 'sslName'),
+        operation_status: 'success'
+      }, request);
+
+      sendStatusReport(request, reply, error, 200, 'Successfully deleted the SSL name', result.id);
+    });
+  };
+
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
@@ -378,32 +399,20 @@ exports.deleteSSLName = function (request, reply) {
       globalSignApi.sanModifyOperation(response.ssl_name, 'DELETE', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to delete SSL name ID ' + sslNameId);
+        }else{
+          setDelete(response);
         }
       });
     } else {
       globalSignApi.sanModifyOperation(response.ssl_name, 'CANCEL', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to cancel SSL name ID ' + sslNameId);
+        }else{
+          setDelete(response);
         }
       });
     }
 
-    sslNames.update(response, function (error, result) {
-      if (error || !result) {
-        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
-      }
 
-      AuditLogger.store({
-        account_id      : result.account_id,
-        activity_type   : 'delete',
-        activity_target : 'sslname',
-        target_id       : result._id,
-        target_name     : result.ssl_name,
-        target_object   : publicRecordFields.handle(result, 'sslName'),
-        operation_status: 'success'
-      }, request);
-
-      sendStatusReport(request, reply, error, 200, 'Successfully deleted the SSL name', result.id);
-    });
   });
 };
