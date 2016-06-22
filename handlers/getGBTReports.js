@@ -41,13 +41,13 @@ exports.getGBTReports = function(request, reply) {
     domainName,
     field;
 
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      domainName = result.domain_name;
+      domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -75,10 +75,6 @@ exports.getGBTReports = function(request, reply) {
             filter: {
               bool: {
                 must: [{
-                  term: {
-                    domain: domainName
-                  }
-                }, {
                   range: {
                     '@timestamp': {
                       gte: span.start,
@@ -134,6 +130,9 @@ exports.getGBTReports = function(request, reply) {
           }
         };
       }
+
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, false, domainConfig );
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({

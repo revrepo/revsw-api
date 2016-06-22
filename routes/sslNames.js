@@ -107,8 +107,7 @@ module.exports = [
           ssl_name: Joi.string().min(1).max(150).required().description('SSL domain name'),
           //comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           verification_method: Joi.string().valid('email','url','dns').required().description('Domain control verification method'),
-          verification_email: Joi.string().allow('').email().description('Email address to use for email-based domain control verification method'),
-          verification_wildcard: Joi.string().allow('').valid('true', 'false').description('Wildcard domain')
+          verification_email: Joi.string().allow('').email().description('Email address to use for email-based domain control verification method')
         }
       },
       plugins: {
