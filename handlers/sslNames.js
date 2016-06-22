@@ -90,7 +90,7 @@ exports.listSSLNames = function (request, reply) {
 
   sslNames.list(function (error, result) {
     if (error) {
-      sendStatusReport(request, reply, error, 400, 'Failed to retrieve from the DB a list of SSL names');
+      return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
     }
 
     var response = publicRecordFields.handle(result, 'sslNames');
@@ -101,7 +101,7 @@ exports.listSSLNames = function (request, reply) {
       }
     }
 
-    sendStatusReport(request, reply, error, 200, response2);
+    renderJSON(request, reply, error, response2);
   });
 
 };
@@ -111,14 +111,14 @@ exports.getSSLName = function (request, reply) {
   var sslNameId = request.params.ssl_name_id;
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
       sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
     }
 
     var response = publicRecordFields.handle(result, 'sslName');
-    sendStatusReport(request, reply, error, 200, generateVerificationNames(response));
+    renderJSON(request, reply, error, generateVerificationNames(response));
   });
 
 };
@@ -138,8 +138,7 @@ exports.getSSLNameApprovers = function (request, reply) {
           sendStatusReport(request, reply, error, 400, 'Failed to retrieve from GS a list of approvals for SSL name ' + sslName);
         } else {
           if (data.output.message.Response.Approvers[0]) {
-            approvers = data.output.message.Response.Approvers[0].Approver;
-            sendStatusReport(request, reply, error, 200, approvers);
+            renderJSON(request, reply, error, data.output.message.Response.Approvers[0].Approver);
           }
         }
       });
@@ -196,12 +195,12 @@ exports.addSSLName = function (request, reply) {
   }
 
   if (!utils.checkUserAccessPermissionToSSLName(request, { account_id: accountId })) {
-    sendStatusReport(request, reply, null, 400, 'Account ID not found');
+    return reply(boom.badRequest('Account ID not found'));
   }
 
   sslNames.getbyname(SSLName, function (error, result) {
     if (error) {
-      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + SSLName);
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + SSLName, error));
     }
 
     if (result) {
@@ -266,11 +265,7 @@ exports.verifySSLName = function (request, reply) {
     response.verified = true;
     sslNames.update(response, function (error, result) {
       if (error) {
-        sendStatusReport(request, reply, error, 400, 'Failed to update details for SSL name ID ' + sslNameId);
-      }
-
-      if (result) {
-        sendStatusReport(request, reply, error, 200, 'The domain control has been successfully verified', result.id);
+        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
 
       AuditLogger.store({
@@ -289,11 +284,11 @@ exports.verifySSLName = function (request, reply) {
 
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
 
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
-      sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
+      return reply(boom.badRequest('SSL name ID not found'));
     }
 
     if (result.verification_method === 'email') {
@@ -363,7 +358,7 @@ exports.deleteSSLName = function (request, reply) {
   // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
+      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
     /*
      if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
@@ -372,7 +367,7 @@ exports.deleteSSLName = function (request, reply) {
      */
 
     if (!result) {
-      sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
+      return reply(boom.badRequest('SSL name ID not found'));
     }
 
     var response = publicRecordFields.handle(result, 'sslName');
@@ -380,7 +375,7 @@ exports.deleteSSLName = function (request, reply) {
     response.deleted_at = new Date();
     response.deleted_by = utils.generateCreatedByField(request);
 
-    if (response.verified === true) {
+    if (response.published === true) {
       globalSignApi.sanModifyOperation(response.ssl_name, 'DELETE', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to delete SSL name ID ' + sslNameId);
@@ -400,7 +395,7 @@ exports.deleteSSLName = function (request, reply) {
 
     sslNames.update(response, function (error, result) {
       if (error) {
-        sendStatusReport(request, reply, error, 400, 'Failed to update details for SSL name ID ' + sslNameId);
+        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
 
       AuditLogger.store({
