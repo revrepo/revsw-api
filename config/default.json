@@ -38,8 +38,10 @@
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
   "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
 
-  "shared_domain_id": "5723e997bd75f6e7668dbe26",
-  "shared_domain_account_id": "5588869fbde7a0d00338ce8f",
+  "enable_shared_ssl_regeneration_scheduler": false,
+  "shared_ssl_regeneration_scheduler_period": "*/5 * * * *",
+
+  "shared_ssl_cert_id": "5723e997bd75f6e7668dbe26",
 
   "default_cname_domain": "revdn.net",
   "portal_mongo": {
@@ -83,7 +85,7 @@
     "domain": "the_correct_value_is_in_local_json",
     "api_key": "the_correct_value_is_in_local_json",
     "shared_key": "the_correct_value_is_in_local_json"
-  },  
+  },
 
   "notify_admin_by_email_on_user_login": "",
   "notify_admin_by_email_on_account_cancellation": "",

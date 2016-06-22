@@ -136,15 +136,42 @@ module.exports = [
         payload: {
           account_id: Joi.objectId().required().description('Account ID'),
           job_name: Joi.string().min(1).max(150).required().description('Log shipping job name'),
-          operational_mode: Joi.string().valid('active','pause','stop').required().description('Set current job mode'),
-          source_type: Joi.string().valid('domain','app').required().description('Source type (domain or app)'),
+          operational_mode: Joi.string().valid('active', 'pause', 'stop').required().description('Set current job mode'),
+          // TODO: Add 'app' to valid, as soon as it would be completed on logshipper side
+          source_type: Joi.string().valid('domain').required().description('Source type (domain or app)'),
           source_id: Joi.objectId().required().description('Source ID'),
-          destination_type: Joi.string().valid('syslog','s3', 'ftp', 'sftp', 'logstash', 'elasticsearch').required().description('Destination type'),
-          destination_host: Joi.string().allow('').max(150).description('Destination host'),
-          destination_port: Joi.string().allow('').max(10).description('Destination TCP/UDP port'),
-          destination_key: Joi.string().allow('').max(150).description('Destination secret key'),
-          destination_username: Joi.string().allow('').max(150).description('Destination username'),
-          destination_password: Joi.string().allow('').max(150).description('Destination password'),
+          // TODO: Add syslog, logstash in future
+          destination_type: Joi.string().valid('s3', 'ftp', 'sftp', 'elasticsearch').required().description('Destination type'),
+          destination_host: Joi.string().max(150)
+            .when('destination_type', {is: 's3', then: Joi.required()})
+            .when('destination_type', {is: 'ftp', then: Joi.required()})
+            .when('destination_type', {is: 'sftp', then: Joi.required()})
+            .when('destination_type', {is: 'elasticsearch', then: Joi.required()})
+            .description('Destination host'),
+          destination_port: Joi.string().max(10)
+            .when('destination_type', {is: 's3', then: Joi.allow('')})
+            .when('destination_type', {is: 'ftp', then: Joi.allow('')})
+            .when('destination_type', {is: 'sftp', then: Joi.allow('')})
+            .when('destination_type', {is: 'elasticsearch', then: Joi.allow('')})
+            .description('Destination TCP/UDP port'),
+          destination_key: Joi.string().max(150)
+            .when('destination_type', {is: 's3', then: Joi.required()})
+            .when('destination_type', {is: 'ftp', then: Joi.allow('')})
+            .when('destination_type', {is: 'sftp', then: Joi.allow('')})
+            .when('destination_type', {is: 'elasticsearch', then: Joi.allow('')})
+            .description('Destination secret key'),
+          destination_username: Joi.string().max(150)
+            .when('destination_type', {is: 's3', then: Joi.allow('')})
+            .when('destination_type', {is: 'ftp', then: Joi.required()})
+            .when('destination_type', {is: 'sftp', then: Joi.required()})
+            .when('destination_type', {is: 'elasticsearch', then: Joi.allow('')})
+            .description('Destination username'),
+          destination_password: Joi.string().max(150)
+            .when('destination_type', {is: 's3', then: Joi.allow('')})
+            .when('destination_type', {is: 'ftp', then: Joi.required()})
+            .when('destination_type', {is: 'sftp', then: Joi.required()})
+            .when('destination_type', {is: 'elasticsearch', then: Joi.allow('')})
+            .description('Destination password'),
           notification_email: Joi.string().email().allow('').description('Notification email'),
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
         }

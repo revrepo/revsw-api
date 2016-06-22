@@ -51,6 +51,7 @@ function SSLName(mongoose, connection, options) {
     'verified_by': {type: String},
     'verification_method': {type: String, required: true},
     'verification_object': {type: String, required: false},
+    'published': {type: Boolean, default: false},
     'comment': {type: String, default: ''},
     'approvers': []
   });
@@ -135,8 +136,9 @@ SSLName.prototype = {
       if (err) {
         callback(err, null);
       }
-      var results = certs.map(function (r) {
+      var results = utils.clone(certs).map(function (r) {
         delete r.__v;
+        r.id = r._id;
         return r;
       });
       callback(err, results);
@@ -168,6 +170,12 @@ SSLName.prototype = {
       doc.save(function (err, res) {
         if (err) {
           throw err;
+        }
+        if (res) {
+          res = utils.clone(res);
+          res.user_id = res._id;
+          delete res._id;
+          delete res.__v;
         }
         callback(null, res);
       });

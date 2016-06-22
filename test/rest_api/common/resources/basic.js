@@ -201,15 +201,18 @@ var BasicResource = function (data) {
      * Creates a new object form the requested type.
      *
      * @param {object} object, the supertest-as-promised instance
-     *
      * @param {object} query, will be transformed to a query string
+     * @param {object} param, will be transformed to a query string in case
+     * first para is object ID (string)
      *
      * @returns {object} the supertest-as-promised instance
      */
-    _resource.createOne = function (object, query) {
+    _resource.createOne = function (object, query, param) {
       var location;
       if (typeof object === 'string') {
         location = getPath(data, object);
+        object = query;
+        query = param;
       }
       else {
         location = getPath(data);

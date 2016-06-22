@@ -37,7 +37,7 @@ function LogShippingJob(mongoose, connection, options) {
     'created_at': {type: Date, default: Date.now},
     'source_type': {type: String, default: 'domain'},
     'source_id': String,
-    'destination_type': {type: String, default: 's3' },
+    'destination_type': {type: String, default: 's3'},
     'destination_host': {type: String, default: ''},
     'destination_port': {type: String, default: ''},
     'destination_key': {type: String, default: ''},

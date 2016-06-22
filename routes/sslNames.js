@@ -80,7 +80,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         query: {
-          ssl_name: Joi.string().required().description('SSL name')
+          ssl_name: Joi.string().min(1).max(150).required().description('SSL name')
         }
       },
       plugins: {
@@ -107,8 +107,7 @@ module.exports = [
           ssl_name: Joi.string().min(1).max(150).required().description('SSL domain name'),
           //comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           verification_method: Joi.string().valid('email','url','dns').required().description('Domain control verification method'),
-          verification_email: Joi.string().allow('').email().description('Email address to use for email-based domain control verification method'),
-          verification_wildcard: Joi.string().allow('').valid('true', 'false').description('Wildcard domain')
+          verification_email: Joi.string().allow('').email().description('Email address to use for email-based domain control verification method')
         }
       },
       plugins: {
@@ -137,25 +136,10 @@ module.exports = [
         params: {
           ssl_name_id: Joi.objectId().required().description('SSL name ID')
         },
-      },
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
+        query: {
+          url: Joi.string().min(1).max(150).optional().description('Optional parameter specifying a domain name or URL to be used in domain control validation')
         }
-      }
-    }
-  },
-
-  {
-    method: 'GET',
-    path: '/v1/ssl_names/issue',
-    config: {
-      auth: {
-        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: sslNameServices.updateIssue,
-      description: 'Update SSL certificates',
-      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

@@ -31,6 +31,7 @@ var DomainConfigsResource = require('./domainConfigs');
 var ForgotResource = require('./forgot');
 var LocationsResource = require('./locations');
 var PurgeResource = require('./purge');
+var ResetResource = require('./reset');
 var SdkConfigsResource = require('./sdkConfigs');
 var SignUpResource = require('./signUp');
 var SSLCerts = require('./sslCerts');
@@ -40,6 +41,7 @@ var StatsSDKResource = require('./stats-sdk');
 var TwoFAResource = require('./2fa');
 var UsersResource = require('./users');
 var UsageReportResource = require('./usage-report');
+var LogShippingJobsResource = require('./logShippingJobs');
 
 // Set of all resources that the REST API service provides..
 module.exports = {
@@ -56,6 +58,7 @@ module.exports = {
   forgot: ForgotResource,
   locations: LocationsResource,
   purge: PurgeResource,
+  reset: ResetResource,
   sdkConfigs: SdkConfigsResource,
   signUp: SignUpResource,
   sslCerts: SSLCerts,
@@ -64,5 +67,6 @@ module.exports = {
   stats_sdk: StatsSDKResource,
   twoFA: TwoFAResource,
   users: UsersResource,
-  usage_report: UsageReportResource
+  usage_report: UsageReportResource,
+  logShippingJobs: LogShippingJobsResource
 };
