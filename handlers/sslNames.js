@@ -178,6 +178,9 @@ exports.addSSLName = function (request, reply) {
     };
 
     sslNames.add(newSSLArray, function (error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to add SSL name ID ' + SSLName, error));
+      }
       AuditLogger.store({
         account_id      : accountId,
         activity_type   : 'add',
