@@ -25,6 +25,7 @@ var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
 var mongoose = require('mongoose');
+var AuditLogger = require('../lib/audit');
 
 var mongoConnection = require('../lib/mongoConnections');
 var SSLName = require('../models/SSLName');
@@ -162,6 +163,23 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                           logger.error('Failed to published details for SSL name ID ' + result.ssl_name);
                           return false;
                         }
+
+                        var result_ = publicRecordFields.handle(result, 'sslName');
+                        AuditLogger.store({  // TODO in the current format the 'Publish' audit record is not
+                            // visible to user who added the domain - need to refactor this
+                          ip_address: '127.0.0.1',
+                          user_id: 'xxxxxxxxxxxxxxxxxxxxxxxx',
+                          user_name: 'Internal Scheduler',
+                          user_type: 'user',
+                          account_id: result_.account_id,
+                          activity_type: 'publish',
+                          activity_target: 'sslname',
+                          target_id: result_.id,
+                          target_name: result_.ssl_name,
+                          target_object: publicRecordFields.handle(result_, 'sslName'),
+                          operation_status: 'success'
+                        });
+
                         logger.info('Completed the publishing process for new SSL name ' + result.ssl_name);
                       });
                     }

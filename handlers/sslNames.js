@@ -367,7 +367,7 @@ exports.deleteSSLName = function (request, reply) {
       if (error || !result) {
         return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
-      console.log(JSON.stringify(result));
+//      console.log(JSON.stringify(result));
       AuditLogger.store({
         account_id      : result.account_id,
         activity_type   : 'delete',

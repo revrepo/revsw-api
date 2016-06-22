@@ -173,7 +173,7 @@ SSLName.prototype = {
         }
         if (res) {
           res = utils.clone(res);
-          res.user_id = res._id;
+          res.id = res._id;
           delete res._id;
           delete res.__v;
         }
