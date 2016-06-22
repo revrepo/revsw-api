@@ -325,7 +325,7 @@ exports.verifySSLName = function (request, reply) {
           if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
             setStatusVerified(request, reply, result);
           } else {
-            sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors, 400, 'Failed to verify SSL name ID ' + sslNameId);
+            sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors.Error, 400, 'Failed to verify SSL name ID ' + sslNameId);
           }
         }
       });
@@ -339,7 +339,7 @@ exports.verifySSLName = function (request, reply) {
           if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
             setStatusVerified(request, reply, result);
           } else {
-            sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors, 400, 'Failed to verify SSL name ID ' + sslNameId);
+            sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors.Error, 400, 'Failed to verify SSL name ID ' + sslNameId);
           }
         }
       });
