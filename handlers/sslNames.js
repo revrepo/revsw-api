@@ -114,7 +114,7 @@ exports.getSSLName = function (request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
-      sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
+      return reply(boom.badRequest('SSL name ID not found'));
     }
 
     var response = publicRecordFields.handle(result, 'sslName');
@@ -204,7 +204,7 @@ exports.addSSLName = function (request, reply) {
     }
 
     if (result) {
-      sendStatusReport(request, reply, error, 400, 'The SSL name is already registered in the system');
+      return reply(boom.badRequest('The SSL name is already registered in the system'));
     } else {
 
       if (verificationMethod === 'email') {
