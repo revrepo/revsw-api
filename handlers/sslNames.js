@@ -141,8 +141,16 @@ exports.getSSLNameApprovers = function (request, reply) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to retrieve from GS a list of approvals for SSL name ' + sslName);
         } else {
-          if (data.output.message.Response.Approvers[0]) {
-            renderJSON(request, reply, error, data.output.message.Response.Approvers[0].Approver);
+          if (data && data.output && data.output.message && data.output.message.Response.Approvers && data.output.message.Response.Approvers[0] &&
+            data.output.message.Response.Approvers[0].Approver) {
+            var approversList = _.map(data.output.message.Response.Approvers[0].Approver, function(item){
+              return {
+                approver_email: item.ApproverEmail
+              };
+            });
+            renderJSON(request, reply, error, approversList);
+          } else {
+            return reply(boom.badRequest('Failed to generate a list of approver emails. Please use another domain name or try again later'));
           }
         }
       });
