@@ -182,7 +182,7 @@ exports.addSSLName = function (request, reply) {
     };
 
     sslNames.add(newSSLArray, function (error, result) {
-      if (error) {
+      if (error || !result) {
         return reply(boom.badImplementation('Failed to add SSL name ID ' + SSLName, error));
       }
       AuditLogger.store({
@@ -195,9 +195,7 @@ exports.addSSLName = function (request, reply) {
         operation_status: 'success'
       }, request);
 
-      if (result) {
-        sendStatusReport(request, reply, error, 200, 'Successfully added new SSL name', result.ssl_name_id);
-      }
+      sendStatusReport(request, reply, error, 200, 'Successfully added new SSL name', result.ssl_name_id);
     });
   }
 
@@ -271,7 +269,7 @@ exports.verifySSLName = function (request, reply) {
   function setStatusVerified(request, reply, response) {
     response.verified = true;
     sslNames.update(response, function (error, result) {
-      if (error) {
+      if (error || !result) {
         return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
 
@@ -349,29 +347,19 @@ exports.verifySSLName = function (request, reply) {
     } else {
       sendStatusReport(request, reply, error, 400, 'Failed to verify SSL name ID ' + sslNameId);
     }
-
-    /*
-     if (!resoult || !utils.checkUserAccessPermissionToSSLName(request, resoult)) {
-     return reply(boom.badRequest('SSL name ID not found'));
-     }
-     */
-
   });
 };
 
 exports.deleteSSLName = function (request, reply) {
 
   var sslNameId = request.params.ssl_name_id;
-  // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
-    /*
-     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
-     return reply(boom.badRequest('SSL name ID not found'));
-     }
-     */
+    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+      return reply(boom.badRequest('SSL name ID not found'));
+    }
 
     if (!result) {
       return reply(boom.badRequest('SSL name ID not found'));
@@ -401,7 +389,7 @@ exports.deleteSSLName = function (request, reply) {
     }
 
     sslNames.update(response, function (error, result) {
-      if (error) {
+      if (error || !result) {
         return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
       }
 
@@ -415,10 +403,7 @@ exports.deleteSSLName = function (request, reply) {
         operation_status: 'success'
       }, request);
 
-      sendStatusReport(request, reply, error, 200, 'Successfully deleted the SSL name ID', result.id);
-
+      sendStatusReport(request, reply, error, 200, 'Successfully deleted the SSL name', result.id);
     });
-
   });
-
 };
