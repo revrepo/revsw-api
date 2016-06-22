@@ -201,7 +201,7 @@ exports.addSSLName = function (request, reply) {
         activity_target : 'sslname',
         target_id       : result_.id,
         target_name     : SSLName,
-        target_object   : result_,
+        target_object: publicRecordFields.handle(result_, 'sslName'),
         operation_status: 'success'
       }, request);
 
@@ -287,7 +287,7 @@ exports.verifySSLName = function (request, reply) {
         activity_target: 'sslname',
         target_id: result._id,
         target_name: result.ssl_name,
-        target_object: result,   // TODO need to prube the object
+        target_object: publicRecordFields.handle(result, 'sslName'),
         operation_status: 'success'
       }, request);
 
@@ -378,21 +378,16 @@ exports.deleteSSLName = function (request, reply) {
       globalSignApi.sanModifyOperation(response.ssl_name, 'DELETE', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to delete SSL name ID ' + sslNameId);
-        } else {
-          sendStatusReport(request, reply, error, 200, data.output.message);
         }
       });
     } else {
       globalSignApi.sanModifyOperation(response.ssl_name, 'CANCEL', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to cancel SSL name ID ' + sslNameId);
-        } else {
-          sendStatusReport(request, reply, error, 200, data.output.message);
         }
       });
     }
 
-    // TODO do we ever reach the stage?
     sslNames.update(response, function (error, result) {
       if (error || !result) {
         return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
@@ -404,7 +399,7 @@ exports.deleteSSLName = function (request, reply) {
         activity_target : 'sslname',
         target_id       : result._id,
         target_name     : result.ssl_name,
-        target_object   : result,   // TODO need to prune the object before use
+        target_object   : publicRecordFields.handle(result, 'sslName'),
         operation_status: 'success'
       }, request);
 
