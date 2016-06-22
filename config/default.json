@@ -25,9 +25,12 @@
   },
   "enforce_2fa_for_revadmin_role": false,
   "master_password": "8cdea34a9c582e10940da5beb29b4597",
+  // by default use a self-signed certificate distributed wih the package
   "key_path": "./config/dev_ssl_certs/server.key",
   "cert_path": "./config/dev_ssl_certs/server.crt",
+  // by default go to the QA portal instance
   "portal_url": "https://testsjc20-portal01.revsw.net",
+  // by default use QA instance of ES service
   "elasticsearch_url": "testsjc20-es01.revsw.net:9200",
   "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200",
   "elasticsearch_log_level": false,
@@ -58,7 +61,7 @@
   "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
   "user_verify_token_lifetime" : 86400000,
 
-  "password_reset_token_lifespan": 3600000,
+  "password_reset_token_lifespan": 3600000,     // 1 hour
   "password_reset_email_subject": "RevAPM Customer Portal Password Reset",
   "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
   "password_reset_confirmation_email_subject": "Your RevAPM Customer Portal password has been changed",
@@ -66,7 +69,7 @@
   "support_name" : "RevAPM Support Team",
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
-  "jwt_token_lifetime_minutes": 1440,
+  "jwt_token_lifetime_minutes": 1440,   // 24 hours
   "number_of_reported_audit_log_records": 40,
 
   "available_sdk_release_versions": {
