@@ -162,9 +162,9 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: {
-        schema: routeModels.userModel
-      }
+     // response: {    // TODO need to add a conditional response schema for user and API key objects
+     //   schema: routeModels.userModel
+     // }
     }
   },
 
