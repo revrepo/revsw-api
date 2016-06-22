@@ -78,9 +78,10 @@ var sendStatusReport = function (request, reply, error, statusCode, message, obj
   if(objectId){
     statusResponse.object_id = objectId;
   }
-  if(error){
+  if(statusCode === 400){
     statusResponse.error = error;
     logger.info(error);
+    return reply(statusResponse, error).code(400);
   }
   logger.debug(statusResponse);
   renderJSON(request, reply, error, statusResponse);
