@@ -285,7 +285,7 @@ exports.verifySSLName = function (request, reply) {
         account_id: result.account_id,
         activity_type: 'verify',
         activity_target: 'sslname',
-        target_id: result._id,
+        target_id: result.id,
         target_name: result.ssl_name,
         target_object: publicRecordFields.handle(result, 'sslName'),
         operation_status: 'success'
@@ -372,7 +372,7 @@ exports.deleteSSLName = function (request, reply) {
         account_id      : result.account_id,
         activity_type   : 'delete',
         activity_target : 'sslname',
-        target_id       : result._id,
+        target_id       : result.id,
         target_name     : result.ssl_name,
         target_object   : publicRecordFields.handle(result, 'sslName'),
         operation_status: 'success'
