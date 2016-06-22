@@ -69,23 +69,39 @@ var generateVerificationNames = function (data) {
   return data;
 };
 
+var sendStatusReport = function (request, reply, error, statusCode, message, objectId) {
+  var statusResponse;
+  statusResponse = {
+    statusCode: statusCode,
+    message: message
+  };
+  if(objectId){
+    statusResponse.object_id = objectId;
+  }
+  if(error){
+    statusResponse.error = error;
+    logger.info(error);
+  }
+  logger.debug(statusResponse);
+  renderJSON(request, reply, error, statusResponse);
+};
+
 exports.listSSLNames = function (request, reply) {
 
   sslNames.list(function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
+      sendStatusReport(request, reply, error, 400, 'Failed to retrieve from the DB a list of SSL names');
     }
 
     var response = publicRecordFields.handle(result, 'sslNames');
     var response2 = [];
     for (var i = 0; response.length > i; i++) {
-      console.log('response[i] = ', response[i]);
       if (utils.checkUserAccessPermissionToSSLName(request, response[i])) {
         response2.push(generateVerificationNames(response[i]));
       }
     }
 
-    renderJSON(request, reply, error, response2);
+    sendStatusReport(request, reply, error, 200, response2);
   });
 
 };
@@ -95,14 +111,14 @@ exports.getSSLName = function (request, reply) {
   var sslNameId = request.params.ssl_name_id;
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
+      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
     }
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
-      return reply(boom.badRequest('SSL name ID not found'));
+      sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
     }
 
     var response = publicRecordFields.handle(result, 'sslName');
-    renderJSON(request, reply, error, generateVerificationNames(response));
+    sendStatusReport(request, reply, error, 200, generateVerificationNames(response));
   });
 
 };
@@ -114,15 +130,17 @@ exports.getSSLNameApprovers = function (request, reply) {
   logger.info('Getting a list of SSL name approvers for domain ' + sslName);
   globalSignApi.getStatus(function (error, data) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve GS status for SSL name ' + sslName, error));
+      sendStatusReport(request, reply, error, 400, 'Failed to retrieve GS status for SSL name ' + sslName);
     } else {
       var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
       globalSignApi.getApproveList(sslName, fqdn, function (error, data) {
         if (error) {
-          return reply(boom.badImplementation('Failed to retrieve from GS a list of approvals for SSL name ' + sslName, error));
+          sendStatusReport(request, reply, error, 400, 'Failed to retrieve from GS a list of approvals for SSL name ' + sslName);
         } else {
-          approvers = data.output.message.Response.Approvers[0].Approver;
-          renderJSON(request, reply, error, approvers);
+          if (data.output.message.Response.Approvers[0]) {
+            approvers = data.output.message.Response.Approvers[0].Approver;
+            sendStatusReport(request, reply, error, 200, approvers);
+          }
         }
       });
     }
@@ -159,18 +177,8 @@ exports.addSSLName = function (request, reply) {
       comment: '',
       approvers: approvers
     };
-    console.log(newSSLArray);
-    sslNames.add(newSSLArray, function (error, result) {
-      var statusResponse;
-      if (result) {
-        statusResponse = {
-          statusCode: 200,
-          message: 'Successfully added new SSL name',
-          object_id: result.ssl_name_id
-        };
-      }
-      //result = publicRecordFields.handle(result, 'addSSLName');
 
+    sslNames.add(newSSLArray, function (error, result) {
       AuditLogger.store({
         account_id      : accountId,
         activity_type   : 'add',
@@ -181,50 +189,46 @@ exports.addSSLName = function (request, reply) {
         operation_status: 'success'
       }, request);
 
-      renderJSON(request, reply, error, statusResponse);
+      if (result) {
+        sendStatusReport(request, reply, error, 200, 'Successfully added new SSL name', result.ssl_name_id);
+      }
     });
   }
 
   if (!utils.checkUserAccessPermissionToSSLName(request, { account_id: accountId })) {
-    return reply(boom.badRequest('Account ID not found'));
+    sendStatusReport(request, reply, null, 400, 'Account ID not found');
   }
 
   sslNames.getbyname(SSLName, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + SSLName, error));
+      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + SSLName);
     }
 
     if (result) {
-      return reply(boom.badRequest('The SSL name is already registered in the system'));
+      sendStatusReport(request, reply, error, 400, 'The SSL name is already registered in the system');
     } else {
 
       if (verificationMethod === 'email') {
 
         globalSignApi.getStatus(function (error, data) {
           if (error) {
-            return reply(boom.badImplementation('Failed to retrieve status for SSL name ' + SSLName, error));
+            sendStatusReport(request, reply, error, 400, 'Failed to retrieve status for SSL name ' + SSLName);
           } else {
-            // console.log(data.output.message);
             var fqdn = data.output.message.Response.OrderDetail.OrderInfo.DomainName;
-            //console.log(fqdn);
             globalSignApi.getApproveList(SSLName, fqdn, function (error, data) {
               if (error) {
-                // console.log(error);
-                return reply(boom.badImplementation('Failed to retrieve from GS a list of approvals for SSL name ' + SSLName, error));
+                sendStatusReport(request, reply, error, 400, 'Failed to retrieve from GS a list of approvals for SSL name ' + SSLName);
               } else {
-                // console.log(data.output.message);
                 approvers = data.output.message.Response.Approvers[0];
                 if (approvers !== '') {
                   globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (error, data) {
                     if (error) {
-                      // console.log(error);
-                      return reply(boom.badImplementation('Failed to add to GS a new SSL name ' + SSLName, error));
+                      sendStatusReport(request, reply, error, 400, 'Failed to add to GS a new SSL name ' + SSLName);
                     } else {
-                      // console.log(data.output.message);
                       status = data.output.message.Response.OrderResponseHeader.SuccessCode;
+                      logger.info(status);
                     }
                   });
-
                   verificationObject = 'Waiting on email verification';
                   createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers);
                 }
@@ -236,8 +240,7 @@ exports.addSSLName = function (request, reply) {
       } else {
         globalSignApi.sanModifyOperation(SSLName, 'ADDITION', verificationMethod, verificationEmail, verificationWildcard, function (error, data) {
           if (error) {
-            // console.log(error);
-            return reply(boom.badImplementation('GS failed to add new SSL name ' + SSLName, error));
+            sendStatusReport(request, reply, error, 400, 'GS failed to add new SSL name ' + SSLName);
           } else {
             // console.log(data.output.message);
             if (verificationMethod === 'url') {
@@ -263,17 +266,13 @@ exports.verifySSLName = function (request, reply) {
     response.verified = true;
     sslNames.update(response, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
+        sendStatusReport(request, reply, error, 400, 'Failed to update details for SSL name ID ' + sslNameId);
       }
 
-      var statusResponse;
       if (result) {
-        statusResponse = {
-          statusCode: 200,
-          message: 'The domain control has been successfully verified',
-          object_id: result.id
-        };
+        sendStatusReport(request, reply, error, 200, 'The domain control has been successfully verified', result.id);
       }
+
       AuditLogger.store({
         account_id: result.account_id,
         activity_type: 'verify',
@@ -284,27 +283,26 @@ exports.verifySSLName = function (request, reply) {
         operation_status: 'success'
       }, request);
 
-      renderJSON(request, reply, error, statusResponse);
+      sendStatusReport(request, reply, error, 200, 'The domain control has been successfully verified', result.id);
     });
   }
 
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
+      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
     }
 
     if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
-      return reply(boom.badRequest('SSL name ID not found'));
+      sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
     }
 
     if (result.verification_method === 'email') {
       globalSignApi.getStatus(function (error, data) {
         if (error) {
-          console.log(error);
+          sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
         } else {
           var domain;
           var domains = data.output.message.Response.OrderDetail.CloudOVSANInfo.CloudOVSANDetail;
-          //console.log(JSON.stringify(domains));
           for (var i = 0; domains.length > i; i += 1) {
             if (domains[i].CloudOVSAN === result.ssl_name) {
               if (domains[i].CloudOVSANStatus !== '8' && domains[i].CloudOVSANStatus !== '9') {
@@ -312,20 +310,10 @@ exports.verifySSLName = function (request, reply) {
               }
             }
           }
-          //renderJSON(request, reply, error, globalSignApi.sanStatusCode[domain.CloudOVSANStatus]);
-          console.log(domain.CloudOVSANStatus);
           if (domain.CloudOVSANStatus === '2' || domain.CloudOVSANStatus === '3') {
             setStatusVerified(request, reply, result);
           } else {
-            var statusResponse;
-            if (result) {
-              statusResponse = {
-                statusCode: 200,
-                message: globalSignApi.sanStatusCode[domain.CloudOVSANStatus],
-                object_id: result.ssl_name_id
-              };
-            }
-            renderJSON(request, reply, error, statusResponse);
+            sendStatusReport(request, reply, error, 200, globalSignApi.sanStatusCode[domain.CloudOVSANStatus], result.id);
           }
         }
       });
@@ -333,12 +321,12 @@ exports.verifySSLName = function (request, reply) {
 
       globalSignApi.urlVerification(result.ssl_name, url, function (error, data) {
         if (error) {
-          console.log(error);
+          sendStatusReport(request, reply, error, 400, 'Failed to verify for SSL name ID ' + sslNameId);
         } else {
           if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
             setStatusVerified(request, reply, result);
           } else {
-            return reply(boom.badImplementation('Failed to verify SSL name ID ' + sslNameId, error));
+            sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors, 400, 'Failed to verify SSL name ID ' + sslNameId);
           }
         }
       });
@@ -347,17 +335,17 @@ exports.verifySSLName = function (request, reply) {
 
       globalSignApi.dnsVerification(result.ssl_name, url, function (error, data) {
         if (error) {
-          console.log(error);
+          sendStatusReport(request, reply, error, 400, 'Failed to verify for SSL name ID ' + sslNameId);
         } else {
           if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
             setStatusVerified(request, reply, result);
           } else {
-            return reply(boom.badImplementation('Failed to verify SSL name ID ' + sslNameId, error));
+            sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors, 400, 'Failed to verify SSL name ID ' + sslNameId);
           }
         }
       });
     } else {
-      return reply(boom.badImplementation('Failed to verify SSL name ID ' + sslNameId, error));
+      sendStatusReport(request, reply, error, 400, 'Failed to verify SSL name ID ' + sslNameId);
     }
 
     /*
@@ -375,7 +363,7 @@ exports.deleteSSLName = function (request, reply) {
   // TODO add a permissions check
   sslNames.get(sslNameId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
+      sendStatusReport(request, reply, error, 400, 'Failed to retrieve details for SSL name ID ' + sslNameId);
     }
     /*
      if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
@@ -384,7 +372,7 @@ exports.deleteSSLName = function (request, reply) {
      */
 
     if (!result) {
-      return reply(boom.badRequest('SSL name ID not found'));
+      sendStatusReport(request, reply, error, 400, 'SSL name ID not found');
     }
 
     var response = publicRecordFields.handle(result, 'sslName');
@@ -395,37 +383,24 @@ exports.deleteSSLName = function (request, reply) {
     if (response.verified === true) {
       globalSignApi.sanModifyOperation(response.ssl_name, 'DELETE', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
-          console.log(error);
-          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
+          sendStatusReport(request, reply, error, 400, 'Failed to delete SSL name ID ' + sslNameId);
         } else {
-          console.log(data.output.message);
-          //renderJSON(request, reply, error, data.output.message);
+          sendStatusReport(request, reply, error, 200, data.output.message);
         }
       });
     } else {
       globalSignApi.sanModifyOperation(response.ssl_name, 'CANCEL', response.verification_method, response.verification_object, false, function (error, data) {
         if (error) {
-          console.log(error);
-          return reply(boom.badImplementation('Failed to retrieve approve for SSL name ID ' + sslNameId, error));
+          sendStatusReport(request, reply, error, 400, 'Failed to cancel SSL name ID ' + sslNameId);
         } else {
-          console.log(data.output.message);
-          //renderJSON(request, reply, error, data.output.message);
+          sendStatusReport(request, reply, error, 200, data.output.message);
         }
       });
     }
 
     sslNames.update(response, function (error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to update details for SSL name ID ' + sslNameId));
-      }
-
-      var statusResponse;
-      if (result) {
-        statusResponse = {
-          statusCode: 200,
-          message: 'Successfully deleted the SSL name ID',
-          object_id: result.id
-        };
+        sendStatusReport(request, reply, error, 400, 'Failed to update details for SSL name ID ' + sslNameId);
       }
 
       AuditLogger.store({
@@ -438,7 +413,7 @@ exports.deleteSSLName = function (request, reply) {
         operation_status: 'success'
       }, request);
 
-      renderJSON(request, reply, error, statusResponse);
+      sendStatusReport(request, reply, error, 200, 'Successfully deleted the SSL name ID', result.id);
 
     });
 
