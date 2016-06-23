@@ -80,8 +80,7 @@
 
   "enable_self_registration": true,
   "enable_simplified_signup_process": true,
-  "report_about_unknown_domains": "googgah@gmail.com",
-  // "report_about_unknown_domains": "ops@revsw.com",
+  "report_about_unknown_domains": "ops@revsw.com",
 
   "chargify": {
     "domain": "the_correct_value_is_in_local_json",
