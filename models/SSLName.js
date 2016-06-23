@@ -73,7 +73,7 @@ SSLName.prototype = {
       }
       if (callback) {
         var item = utils.clone(_item);
-        item.ssl_name_id = item._id;
+        item.id = item._id;
 
         delete item.__v;
         delete item._id;
@@ -98,7 +98,7 @@ SSLName.prototype = {
     });
   },
 
-  getbyname: function (item, callback) {
+  getByName: function (item, callback) {
     this.model.findOne({ssl_name: item, deleted: { $ne: true }}, function (err, _doc) {
       if (err) {
         callback(err);
@@ -173,7 +173,7 @@ SSLName.prototype = {
         }
         if (res) {
           res = utils.clone(res);
-          res.user_id = res._id;
+          res.id = res._id;
           delete res._id;
           delete res.__v;
         }

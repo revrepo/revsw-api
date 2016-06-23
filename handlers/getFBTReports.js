@@ -38,37 +38,31 @@ var domainConfigs = new DomainConfig( mongoose, mongoConnection.getConnectionPor
 exports.getFBTAverage = function( request, reply ) {
 
   var domainID = request.params.domain_id;
-  domainConfigs.get( domainID, function( error, result ) {
+  domainConfigs.get( domainID, function( error, domainConfig ) {
     if ( error ) {
       return reply( boom.badImplementation( 'Failed to retrieve domain details for ID ' + domainID ) );
     }
-    if ( result && utils.checkUserAccessPermissionToDomain( request, result ) ) {
+    if ( domainConfig && utils.checkUserAccessPermissionToDomain( request, domainConfig ) ) {
 
       var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
       if ( span.error ) {
         return reply( boom.badRequest( span.error ) );
       }
 
-      var domainName = result.domain_name;
       var requestBody = {
         size: 0,
         query: {
           filtered: {
             filter: {
               bool: {
-                must: [ {
-                  term: {
-                    domain: domainName
-                  }
-                }, {
+                must: [{
                   range: {
                     '@timestamp': {
                       gte: span.start,
                       lt: span.end
                     }
                   }
-                } ],
-                must_not: []
+                } ]
               }
             }
           }
@@ -96,10 +90,9 @@ exports.getFBTAverage = function( request, reply ) {
         }
       };
 
-      var terms = elasticSearch.buildESQueryTerms(request);
-      var sub = requestBody.query.filtered.filter.bool;
-      sub.must = sub.must.concat( terms.must );
-      sub.must_not = sub.must_not.concat( terms.must_not );
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
+      var domainName = domainConfig.domain_name;
 
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
@@ -146,18 +139,18 @@ exports.getFBTAverage = function( request, reply ) {
 exports.getFBTDistribution = function( request, reply ) {
 
   var domainID = request.params.domain_id;
-  domainConfigs.get( domainID, function( error, result ) {
+  domainConfigs.get( domainID, function( error, domainConfig ) {
     if ( error ) {
       return reply( boom.badImplementation( 'Failed to retrieve domain details for ID ' + domainID ) );
     }
-    if ( result && utils.checkUserAccessPermissionToDomain( request, result ) ) {
+    if ( domainConfig && utils.checkUserAccessPermissionToDomain( request, domainConfig ) ) {
 
       var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
       if ( span.error ) {
         return reply( boom.badRequest( span.error ) );
       }
 
-      var domainName = result.domain_name,
+      var domainName = domainConfig.domain_name,
         interval = ( request.query.interval_ms || 100 ) * 1000,
         limit = ( request.query.limit_ms || 10000 ) * 1000;
 
@@ -167,11 +160,7 @@ exports.getFBTDistribution = function( request, reply ) {
           filtered: {
             filter: {
               bool: {
-                must: [ {
-                  term: {
-                    domain: domainName
-                  }
-                }, {
+                must: [{
                   range: {
                     '@timestamp': {
                       gte: span.start,
@@ -185,8 +174,7 @@ exports.getFBTDistribution = function( request, reply ) {
                       lte: limit
                     }
                   }
-                }],
-                must_not: []
+                }]
               }
             }
           }
@@ -202,10 +190,8 @@ exports.getFBTDistribution = function( request, reply ) {
         }
       };
 
-      var terms = elasticSearch.buildESQueryTerms(request);
-      var sub = requestBody.query.filtered.filter.bool;
-      sub.must = sub.must.concat( terms.must );
-      sub.must_not = sub.must_not.concat( terms.must_not );
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
 
       elasticSearch.getClient().search( {
           index: utils.buildIndexList( span.start, span.end ),
@@ -254,13 +240,13 @@ exports.getFBTHeatmap = function(request, reply) {
   var domainID = request.params.domain_id,
     domainName;
 
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      domainName = result.domain_name;
+      domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -272,10 +258,6 @@ exports.getFBTHeatmap = function(request, reply) {
             filter: {
               bool: {
                 must: [{
-                  term: {
-                    domain: domainName
-                  }
-                }, {
                   range: {
                     FBT_mu: {
                       gte: 0
@@ -339,6 +321,9 @@ exports.getFBTHeatmap = function(request, reply) {
           }
         }
       };
+
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, false, domainConfig );
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({

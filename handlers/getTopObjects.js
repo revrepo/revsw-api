@@ -43,13 +43,13 @@ exports.getTopObjects = function(request, reply) {
   var domainName,
       metadataFilterField;
 
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      domainName = result.domain_name;
+      domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -69,12 +69,7 @@ exports.getTopObjects = function(request, reply) {
                       lte: span.end
                     }
                   }
-                }, {
-                  term: {
-                    domain: domainName
-                  }
-                }],
-                must_not: []
+                }]
               }
             }
           }
@@ -92,10 +87,9 @@ exports.getTopObjects = function(request, reply) {
           }
         }
       };
-      var terms = elasticSearch.buildESQueryTerms(request);
-      var sub = requestBody.query.filtered.filter.bool;
-      sub.must = sub.must.concat( terms.must );
-      sub.must_not = sub.must_not.concat( terms.must_not );
+
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({
@@ -151,13 +145,13 @@ exports.getSlowestFBTObjects = function(request, reply) {
   var domainName,
       metadataFilterField;
 
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      domainName = result.domain_name;
+      domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -178,10 +172,8 @@ exports.getSlowestFBTObjects = function(request, reply) {
                       }
                     }
                   },
-                  { term: { domain: domainName } },
                   { range: { FBT_mu: { gt: 1000 } } }
-                ],
-                must_not: []
+                ]
               }
             }
           }
@@ -203,10 +195,9 @@ exports.getSlowestFBTObjects = function(request, reply) {
           }
         }
       };
-      var terms = elasticSearch.buildESQueryTerms(request);
-      var sub = requestBody.query.filtered.filter.bool;
-      sub.must = sub.must.concat( terms.must );
-      sub.must_not = sub.must_not.concat( terms.must_not );
+
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({
@@ -261,13 +252,13 @@ exports.getSlowestDownloadObjects = function(request, reply) {
   var domainName,
       metadataFilterField;
 
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      domainName = result.domain_name;
+      domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
@@ -288,7 +279,6 @@ exports.getSlowestDownloadObjects = function(request, reply) {
                       }
                     }
                   },
-                  { term: { domain: domainName } },
                   { range: { duration: { gt: 0 } } }
                 ],
                 must_not: []
@@ -315,10 +305,8 @@ exports.getSlowestDownloadObjects = function(request, reply) {
         }
       };
 
-      var terms = elasticSearch.buildESQueryTerms(request);
-      var sub = requestBody.query.filtered.filter.bool;
-      sub.must = sub.must.concat( terms.must );
-      sub.must_not = sub.must_not.concat( terms.must_not );
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       elasticSearch.getClientURL().search({
