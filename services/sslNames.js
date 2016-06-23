@@ -25,6 +25,7 @@ var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
 var mongoose = require('mongoose');
+var AuditLogger = require('../lib/audit');
 
 var mongoConnection = require('../lib/mongoConnections');
 var SSLName = require('../models/SSLName');
@@ -42,9 +43,6 @@ var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 var schedule = require('node-schedule');
 
 exports.deleteSSLNamesWithAccountId = function (accountId, cb) {
-  // найти все SSL Names относящихся к AccountId
-  //выполнить обновление над каждым найденным эл-том
-  // логирование операций
 
   var getSSLNamesQuery = {
     account_id: accountId,
@@ -67,7 +65,7 @@ exports.deleteSSLNamesWithAccountId = function (accountId, cb) {
 };
 
 if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
-  logger.info('Starting shared SSL cert regeneration scheduler...');
+  logger.info('Starting shared SSL cert regeneration scheduler');
   var updateIssue = schedule.scheduleJob(config.get('shared_ssl_regeneration_scheduler_period'), function () {
     var unpublished = [];
     var newSSLCert;
@@ -81,32 +79,19 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
         if (result[i].verified === true && result[i].published !== true) {
           unpublished.push(result[i]);
         }
-        //unpublished.push(result[i]);
       }
 
-      /*
-       for (var i = 0; unpublished.length > i; i += 1) {
-       unpublished[i].published = false;
-       sslNames.update(unpublished[i], function (error, resoult) {
-       if (error) {
-       return reply(boom.badImplementation('Failed to published details for SSL name ID ' + resoult.ssl_name));
-       }
-       console.log('Published ' + resoult.ssl_name)
-       });
-       console.log(unpublished[i]);
-       }
-       */
       if (unpublished.length > 0) {
+        logger.info('Found ' + unpublished.length + ' verified but not yet published SSL names - starting ' +
+          'the shared SSL certificate regeneration and publishing process...');
         globalSignApi.issueRequest(function (err, data) {
           if (err) {
-            //console.log(err);
-            logger.error('Failed to update SSL certificates');
+            logger.error('Failed to issue a new shared SSL certificate - GS error: ', err);
             return false;
           } else {
             globalSignApi.getStatus(function (err, data) {
               if (err) {
-                //console.log(err);
-                logger.error('Failed to receive SSL certificates');
+                logger.error('Failed to receive SSL certificate status - GS error: ', err);
                 return false;
               } else {
                 var certs = data.output.message.Response.OrderDetail.Fulfillment;
@@ -116,15 +101,18 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                 var altNames = x509.getAltNames(newPublicCert);
                 var domains = data.output.message.Response.OrderDetail.CloudOVSANInfo.CloudOVSANDetail;
 
+                logger.info('Checking that the new shared SSL cert includes all new approved SSL names...');
                 for (var i = 0; domains.length > i; i += 1) {
                   if (domains[i].CloudOVSANStatus === '2' || domains[i].CloudOVSANStatus === '3') {
                     if (altNames.indexOf(domains[i].CloudOVSAN) < 0) {
-                      logger.error('Failed to validate SSL certificates');
+                      logger.error('It looks like the new shared SSL cert does not include new SSL name ' + domains[i].CloudOVSAN +
+                        ': aborting the publishing process');
                       return false;
                     }
                   }
                 }
 
+                logger.info('Calling CDS to deploy a new shared SSL cert with ID ' + config.get('shared_ssl_cert_id'));
                 cdsRequest({
                   url: config.get('cds_url') + '/v1/ssl_certs/' + config.get('shared_ssl_cert_id'),
                   headers: authHeader
@@ -175,7 +163,24 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
                           logger.error('Failed to published details for SSL name ID ' + result.ssl_name);
                           return false;
                         }
-                        logger.info('Published ' + result.ssl_name);
+
+                        var result_ = publicRecordFields.handle(result, 'sslName');
+                        AuditLogger.store({  // TODO in the current format the 'Publish' audit record is not
+                            // visible to user who added the domain - need to refactor this
+                          ip_address: '127.0.0.1',
+                          user_id: 'xxxxxxxxxxxxxxxxxxxxxxxx',
+                          user_name: 'Internal Scheduler',
+                          user_type: 'user',
+                          account_id: result_.account_id,
+                          activity_type: 'publish',
+                          activity_target: 'sslname',
+                          target_id: result_.id,
+                          target_name: result_.ssl_name,
+                          target_object: publicRecordFields.handle(result_, 'sslName'),
+                          operation_status: 'success'
+                        });
+
+                        logger.info('Completed the publishing process for new SSL name ' + result.ssl_name);
                       });
                     }
 
@@ -192,8 +197,10 @@ if (config.get('enable_shared_ssl_regeneration_scheduler') === true) {
           }
         });
       } else {
-        logger.info('Unpublished domains not found');
+        logger.info('Could not find any approved but unpublished SSL names');
       }
     });
   });
+} else {
+  logger.info('Shared SSL cert regeneration scheduler is disabled');
 }
