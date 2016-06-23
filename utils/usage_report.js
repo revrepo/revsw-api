@@ -36,10 +36,14 @@ var showHelp = function() {
   console.log('\n  Usage Report Generator - a tool to collect usage data and store it to the MongoDB');
   console.log('  Usage:');
   console.log('    --date :');
-  console.log('        date of the report, for ex. "2015-11-19" or "-3d"');
+  console.log('        date of the report, for ex. "2015-11-19"');
   console.log('        today assumed if absent');
   console.log('    --dry-run :');
-  console.log('        show collected data, does not store anything (debug mode)');
+  console.log('        does not store anything (debug mode)');
+  console.log('    --verbose, -v :');
+  console.log('        show collected data');
+  console.log('    --report-orphans :');
+  console.log('        collect orphaned domains and send email');
   console.log('    -h, --help :');
   console.log('        this message\n\n');
   process.exit(0);
@@ -61,6 +65,10 @@ for (var i = 0; i < parslen; ++i) {
     curr_par = 'date';
   } else if (pars[i] === '--dry-run') {
     conf.dry = true;
+  } else if (pars[i] === '--verbose' || pars[i] === '-v' ) {
+    conf.verbose = true;
+  } else if (pars[i] === '--report-orphans' ) {
+    conf.orphans = true;
   } else if (curr_par) {
     conf[curr_par] = pars[i];
     curr_par = false;
@@ -75,10 +83,14 @@ for (var i = 0; i < parslen; ++i) {
 
 require( '../lib/usageReport.js' ).collectDayReport(
     ( conf.date || 'now' ),
-    false/*no particular id(s)*/,
-    conf.dry/*do not save, return collected data*/ )
+    false,        //  no particular id(s)
+    conf.dry,     //  do not save, return collected data
+    conf.orphans  //  collect orphans
+  )
   .then( function( data ) {
-    log_( data, 2 );
+    if ( conf.verbose ) {
+      log_( data, 2 );
+    }
     console.log( 'done.\n' );
   })
   .catch( function( err ) {
