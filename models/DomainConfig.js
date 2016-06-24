@@ -144,6 +144,7 @@ DomainConfig.prototype = {
   //     domain_name: account_id,
   //     ...
   //   },
+  //   domain_to_acc_id_wildcards: [{account_id,regex}],
   //   account_domains_count: {
   //     account_id: {
   //       total: X, deleted: Y, active: Z, ssl_enabled: S
@@ -158,35 +159,75 @@ DomainConfig.prototype = {
       { 'proxy_config.account_id': ( _.isArray( account_id ) ? { $in: account_id } : account_id/*string*/ ) } :
       {};
 
-    return this.model.find( where,
-        { _id: 0, domain_name: 1, 'proxy_config.account_id': 1, deleted: 1, 'proxy_config.rev_component_bp.enable_security': 1 } )
+    return this.model.find( where, {
+        _id: 0,
+        domain_name: 1,
+        deleted: 1,
+        'proxy_config.account_id': 1,
+        'proxy_config.rev_component_bp.enable_security': 1,
+        'proxy_config.domain_aliases': 1,
+        'proxy_config.domain_wildcard_alias': 1
+      })
       .exec()
       .then( function( data ) {
         var map = {};
         var dist = {};
+        var wildcards = [];
         data.forEach( function( item ) {
           // logger.debug('Processing domain ' + item.domain_name + ', proxy_config = ' + JSON.stringify(item.proxy_config));
-          map[item.domain_name] = item.proxy_config.account_id.toString();
 
-          if ( !dist[item.proxy_config.account_id] ) {
-            dist[item.proxy_config.account_id] = { total: 0, deleted: 0, active: 0, ssl_enabled: 0 };
+          //  domain mappings
+          var accountID = item.proxy_config.account_id.toString();
+          map[item.domain_name] = accountID;
+
+          //  domain aliases mappings
+          if ( item.proxy_config.domain_aliases && item.proxy_config.domain_aliases.length ) {
+            item.proxy_config.domain_aliases.forEach( function( alias ) {
+              map[alias] = accountID;
+            });
+          }
+          //  domain wildcard aliases mappings
+          if ( item.proxy_config.domain_wildcard_alias ) {
+            if ( item.proxy_config.domain_wildcard_alias.constructor === Array ) {
+
+              item.proxy_config.domain_wildcard_alias.forEach( function( wild ) {
+                wildcards.push({
+                  account_id: accountID,
+                  wildcard: ( new RegExp( wild.replace( /\./g, '\\.' ).replace( /\*/g, '.*' ) ) )
+                });
+              });
+
+            } else {
+              wildcards.push({
+                account_id: accountID,
+                wildcard: ( new RegExp( item.proxy_config.domain_wildcard_alias
+                              .replace( /\./g, '\\.' )
+                              .replace( /\*/g, '.*' ) ) )
+              });
+            }
+          }
+
+          //  distributions
+          if ( !dist[accountID] ) {
+            dist[accountID] = { total: 0, deleted: 0, active: 0, ssl_enabled: 0 };
           }
           if ( item.deleted ) {
-            ++dist[item.proxy_config.account_id].deleted;
+            ++dist[accountID].deleted;
           } else {
-            ++dist[item.proxy_config.account_id].active;
+            ++dist[accountID].active;
           }
 
           // TODO temporarily disabling the collection of SSL data - later the data should be take from ssl_names
 //          if ( item.proxy_config &&
 //              item.proxy_config.rev_component_bp &&
 //              item.proxy_config.rev_component_bp.enable_security ) {
-//            ++dist[item.proxy_config.account_id].ssl_enabled;
+//            ++dist[accountID].ssl_enabled;
 //          }
-          ++dist[item.proxy_config.account_id].total;
+          ++dist[accountID].total;
         });
         return {
           domain_to_acc_id_map: map,
+          domain_to_acc_id_wildcards: wildcards,
           account_domains_count: dist
         };
       });
@@ -203,11 +244,9 @@ DomainConfig.prototype = {
     return this.model.find( where, { _id: 0, domain_name: 1 } )
       .exec()
       .then( function( data ) {
-        var res = [];
-        data.forEach( function( item ) {
-          res.push(item.domain_name);
+        return data.map( function( item ) {
+          return item.domain_name;
         });
-        return res;
       });
   },
 
