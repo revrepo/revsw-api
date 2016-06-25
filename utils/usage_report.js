@@ -42,8 +42,6 @@ var showHelp = function() {
   console.log('        does not store anything (debug mode)');
   console.log('    --verbose, -v :');
   console.log('        show collected data');
-  console.log('    --report-orphans :');
-  console.log('        collect orphaned domains and send email');
   console.log('    -h, --help :');
   console.log('        this message\n\n');
   process.exit(0);
@@ -67,8 +65,6 @@ for (var i = 0; i < parslen; ++i) {
     conf.dry = true;
   } else if (pars[i] === '--verbose' || pars[i] === '-v' ) {
     conf.verbose = true;
-  } else if (pars[i] === '--report-orphans' ) {
-    conf.orphans = true;
   } else if (curr_par) {
     conf[curr_par] = pars[i];
     curr_par = false;
@@ -85,7 +81,7 @@ require( '../lib/usageReport.js' ).collectDayReport(
     ( conf.date || 'now' ),
     false,        //  no particular id(s)
     conf.dry,     //  do not save, return collected data
-    conf.orphans  //  collect orphans
+    true          //  collect orphans
   )
   .then( function( data ) {
     if ( conf.verbose ) {
