@@ -173,7 +173,7 @@ module.exports = [
             .when('destination_type', {is: 'elasticsearch', then: Joi.allow('')})
             .description('Destination password'),
           notification_email: Joi.string().email().allow('').description('Notification email'),
-          comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
+          comment: Joi.string().max(300).allow('').optional().description('Optional comment field')
         }
       },
       plugins: {
