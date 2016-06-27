@@ -17,6 +17,22 @@
  */
 'use strict';
 
+/** *********************************
+@dmitry:
+
+I'd recommend to do the following:
+
+  • var showHelp = function(...
+    I would make the help text more relevant to the task, it's not about storing in MongoDB
+    I also would add "subscription" parameter description
+
+  • I would hide that sequence of then/map under the separate method of the billingSystemReport module
+    it's not extremely necessary, just to make it more neat
+
+  • about those chechListAccounts and infoResultReporting - no reason to name them
+
+ */
+
 var promise = require('bluebird');
 var billingSystemReport = require('../lib/billingSystemReport.js');
 //  this is 0.10, console.dir( obj, opts ) doesn't work

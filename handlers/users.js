@@ -147,21 +147,29 @@ exports.getUser = function(request, reply) {
 
 exports.getMyUser = function(request, reply) {
 
-  var user_id = request.auth.credentials.user_id;
-  users.get({
-    _id: user_id
-  }, function(error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
-    }
-    if (result) {
-      result = publicRecordFields.handle(result, 'user');
+  if (request.auth.credentials.user_type === 'user') {
+    var user_id = request.auth.credentials.user_id;
+    users.get({
+      _id: user_id
+    }, function(error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
+      }
+      if (result) {
+        result = publicRecordFields.handle(result, 'user');
 
-      renderJSON(request, reply, error, result);
-    } else {
-      return reply(boom.badRequest('User ID not found'));
-    }
-  });
+        renderJSON(request, reply, error, result);
+      } else {
+        return reply(boom.badRequest('User ID not found'));
+      }
+    });
+  } else if (request.auth.credentials.user_type === 'apikey') {
+    var apiKey = request.auth.credentials;
+    var result = publicRecordFields.handle(apiKey, 'apiKey');
+    renderJSON(request, reply, null, result);
+  } else {
+    return reply(boom.badImplementation('getMyUser:: Unknown user_type for user ', request.auth.credentials));
+  }
 };
 
 exports.updateUser = function(request, reply) {

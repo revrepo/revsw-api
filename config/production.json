@@ -27,6 +27,9 @@
   "elasticsearch_fullurl_url": "iad02-esurl01.revsw.net:9200",
   "cds_url": "https://cds.revdn.net:9000",
   "cds_api_token": "the_correct_value_is_in_local_json",
+
+  "shared_ssl_cert_id": "572973b9e8ebfce21d047afa",
+
   "portal_mongo": {
     "connect_string": "mongodb://IAD02-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
   },

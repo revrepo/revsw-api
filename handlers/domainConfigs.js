@@ -23,7 +23,7 @@ var mongoose    = require('mongoose');
 var boom        = require('boom');
 var AuditLogger = require('../lib/audit');
 var config      = require('config');
-var cds_request = require('request');
+var cdsRequest = require('request');
 var utils           = require('../lib/utilities.js');
 var logger = require('revsw-logger')(config.log_config);
 var Promise = require('bluebird');
@@ -94,7 +94,7 @@ exports.getDomainConfigStatus = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/config_status',
+    cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/config_status',
       headers: authHeader
     }, function (err, res, body) {
       if (err) {
@@ -113,7 +113,7 @@ exports.getDomainConfigStatus = function(request, reply) {
 
 exports.getDomainConfigs = function(request, reply) {
 
-  cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
+  cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs',
     headers: authHeader
   }, function (err, res, body) {
     if (err) {
@@ -156,7 +156,7 @@ exports.getDomainConfig = function(request, reply) {
     }
 
     logger.info('Calling CDS to get configuration for domain ID: ' + domain_id);
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
+    cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + version,
       headers: authHeader
     }, function (err, res, body) {
       if (err) {
@@ -200,7 +200,7 @@ exports.getDomainConfigVersions = function(request, reply) {
     }
 
     logger.info('Calling CDS to get configuration versions for domain ID: ', domain_id);
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/versions',
+    cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + '/versions',
       headers: authHeader
     }, function (err, res, body) {
       if (err) {
@@ -252,7 +252,7 @@ exports.createDomainConfig = function(request, reply) {
       }
 
       logger.info('Calling CDS to create new domain ' + JSON.stringify(newDomainJson));
-      cds_request( { url: config.get('cds_url') + '/v1/domain_configs',
+      cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs',
         method: 'POST',
         headers: authHeader,
         body: JSON.stringify(newDomainJson)
@@ -410,7 +410,7 @@ exports.updateDomainConfig = function(request, reply) {
     delete newDomainJson.btt_key;
 
     var newDomainJson2 = {
-      updated_by: request.auth.credentials.email,
+      updated_by: utils.generateCreatedByField(request),
       proxy_config: newDomainJson,
       comment: _comment,
       enable_ssl: _enable_ssl,
@@ -423,7 +423,7 @@ exports.updateDomainConfig = function(request, reply) {
     };
     logger.info('Calling CDS to update configuration for domain ID: ' + domain_id +', optionsFlag: ' + optionsFlag + ', request body: ' +
       JSON.stringify(newDomainJson2));
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
+    cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
       method: 'PUT',
       headers: authHeader,
       body: JSON.stringify(newDomainJson2)
@@ -459,30 +459,30 @@ exports.updateDomainConfig = function(request, reply) {
 };
 
 exports.deleteDomainConfig = function(request, reply) {
-  var domain_id = request.params.domain_id;
-  var _deleted_by = utils.generateCreatedByField(request);
-  var options = '?deleted_by='+_deleted_by;
+  var domainId = request.params.domain_id;
+  var _deletedBy = utils.generateCreatedByField(request);
+  var options = '?deleted_by='+_deletedBy;
 
-  domainConfigs.get(domain_id, function (error, result) {
+  domainConfigs.get(domainId, function (error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id, error));
+      return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domainId, error));
     }
     if (!result || !utils.checkUserAccessPermissionToDomain(request,result)) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
-    logger.info('Calling CDS to delete domain ID: ' + domain_id + ' and option deleted_by '+ _deleted_by);
+    logger.info('Calling CDS to delete domain ID: ' + domainId + ' and option deleted_by '+ _deletedBy);
 
-    cds_request( { url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + options,
+    cdsRequest( { url: config.get('cds_url') + '/v1/domain_configs/' + domainId + options,
       method: 'DELETE',
       headers: authHeader,
     }, function (err, res, body) {
       if (err) {
-        return reply(boom.badImplementation('Failed to send a CDS command to delete domain ID ' + domain_id));
+        return reply(boom.badImplementation('Failed to send a CDS command to delete domain ID ' + domainId));
       }
-      var response_json = JSON.parse(body);
+      var responseJson = JSON.parse(body);
       if (res.statusCode === 400) {
-        return reply(boom.badRequest(response_json.message));
+        return reply(boom.badRequest(responseJson.message));
       }
 
       AuditLogger.store({
@@ -494,7 +494,7 @@ exports.deleteDomainConfig = function(request, reply) {
         target_object    : result.proxy_config,
         operation_status : 'success'
       }, request);
-      var response = response_json;
+      var response = responseJson;
       renderJSON(request, reply, err, response);
     });
   });

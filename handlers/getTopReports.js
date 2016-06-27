@@ -35,11 +35,12 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 //  ---------------------------------
-var topReports_ = function( req, reply, domainName, span ) {
+var topReports_ = function( req, reply, domainConfig, span ) {
 
   req.query.report_type = req.query.report_type || 'referer';
+  var domainName = domainConfig.domain_name,
+    field;
 
-  var field;
   switch (req.query.report_type) {
     case 'referer':
       field = 'referer';
@@ -102,12 +103,7 @@ var topReports_ = function( req, reply, domainName, span ) {
                   lte: span.end
                 }
               }
-            }, {
-              term: {
-                domain: domainName
-              }
-            }],
-            must_not: []
+            }]
           }
         }
       }
@@ -148,10 +144,8 @@ var topReports_ = function( req, reply, domainName, span ) {
     };
   }
 
-  var terms = elasticSearch.buildESQueryTerms(req);
-  var sub = requestBody.query.filtered.filter.bool;
-  sub.must = sub.must.concat( terms.must );
-  sub.must_not = sub.must_not.concat( terms.must_not );
+  //  update query
+  elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, req, domainConfig );
 
   var indicesList = utils.buildIndexList(span.start, span.end);
   return elasticSearch.getClientURL().search({
@@ -238,8 +232,9 @@ var topReports_ = function( req, reply, domainName, span ) {
 };
 
 //  ---------------------------------
-var top5XX_ = function( req, reply, domainName, span ) {
+var top5XX_ = function( req, reply, domainConfig, span ) {
 
+  var domainName = domainConfig.domain_name;
   var requestBody = {
     query: {
       filtered: {
@@ -251,10 +246,6 @@ var top5XX_ = function( req, reply, domainName, span ) {
                   'gte': span.start,
                   'lte': span.end
                 }
-              }
-            }, {
-              term: {
-                domain: domainName
               }
             }, {
               prefix: {
@@ -283,6 +274,9 @@ var top5XX_ = function( req, reply, domainName, span ) {
       }
     }
   };
+
+  //  update query
+  elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, req, domainConfig );
 
   var indicesList = utils.buildIndexList(span.start, span.end);
   return elasticSearch.getClientURL().search({
@@ -340,13 +334,13 @@ var top5XX_ = function( req, reply, domainName, span ) {
 exports.getTopReports = function( request, reply ) {
 
   var domainID = request.params.domain_id;
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
 
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
       if ( span.error ) {
@@ -354,9 +348,9 @@ exports.getTopReports = function( request, reply ) {
       }
 
       if ( request.query.report_type === 'top5xx' ) {
-        return top5XX_( request, reply, result.domain_name, span );
+        return top5XX_( request, reply, domainConfig, span );
       } else {
-        return topReports_( request, reply, result.domain_name, span );
+        return topReports_( request, reply, domainConfig, span );
       }
     } else {
       return reply(boom.badRequest('Domain ID not found'));
@@ -368,20 +362,20 @@ exports.getTopReports = function( request, reply ) {
 exports.getTopLists = function( request, reply ) {
 
   var domainID = request.params.domain_id;
-  domainConfigs.get(domainID, function(error, result) {
+  domainConfigs.get(domainID, function(error, domainConfig) {
 
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (result && utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 31 * 24/*allowed period in hrs*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
 
-    var domainName = result.domain_name;
+    var domainName = domainConfig.domain_name;
     var requestBody = {
       query: {
         filtered: {
@@ -393,10 +387,6 @@ exports.getTopLists = function( request, reply ) {
                     gte: span.start,
                     lte: span.end
                   }
-                }
-              }, {
-                term: {
-                  domain: domainName
                 }
               }]
             }
@@ -432,8 +422,17 @@ exports.getTopLists = function( request, reply ) {
       }
     };
 
+    if ( request.query.status_codes ) {
+      requestBody.aggs.status_codes = {
+        terms: { field: 'response' }
+      };
+    }
+
+    //  update query
+    elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, false, domainConfig );
+
     var indicesList = utils.buildIndexList(span.start, span.end);
-    return elasticSearch.getClientURL().search({
+    return elasticSearch.getClient().search({
         index: indicesList,
         ignoreUnavailable: true,
         timeout: config.get('elasticsearch_timeout_ms'),
@@ -475,6 +474,13 @@ exports.getTopLists = function( request, reply ) {
               })
           }
         };
+
+        if ( request.query.status_codes ) {
+          response.data.status_code = body.aggregations.status_codes.buckets.map( function( item ) {
+            return item.key;
+          }).sort( sorter );
+        }
+
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
