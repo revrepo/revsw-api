@@ -177,7 +177,6 @@ exports.updateLogShippingJob = function(request, reply) {
       } else if (updatedLogJob.destination_type === 'elasticsearch') {
         updatedLogJob.destination_username = '';
         updatedLogJob.destination_password = '';
-        updatedLogJob.destination_key = '';
       }
 
       return new Promise(function(resolve, reject) {
