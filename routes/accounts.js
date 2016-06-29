@@ -89,7 +89,7 @@ module.exports = [{
         scope: ['reseller_rw', 'revadmin_rw', 'admin_rw', 'apikey_rw']
       },
       handler: account.createBillingProfile,
-      description: 'Create billing profile',
+      description: 'Create a billing profile',
       tags: ['api', 'accounts'],
       plugins: {
         'hapi-swagger': {
@@ -274,7 +274,7 @@ module.exports = [{
         scope: ['admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: account.getAccountSubscriptionPreview,
-      description: 'Get preview migration information ',
+      description: 'Get an information preview about billing plan migration process',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -298,7 +298,7 @@ module.exports = [{
         scope: ['admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: account.getAccountSubscriptionSummary,
-      description: 'Get Subscription Summary for Account',
+      description: 'Get a subscription summary for an account',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

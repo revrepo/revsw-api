@@ -404,7 +404,7 @@ exports.getAccountStatements = function(request, reply) {
     }
 
     if (!account.subscription_id) {
-      return reply(boom.badRequest('No subscription registered for the account'));
+      return reply(boom.badRequest('No subscription is registered for the account'));
     }
     Customer.getStatements(account.subscription_id, function(error, statements) {
       if (error) {
@@ -433,7 +433,7 @@ exports.getAccountTransactions = function(request, reply) {
     }
 
     if (!account.subscription_id) {
-      return reply(boom.badRequest('No subscription registered for account.'));
+      return reply(boom.badRequest('No subscription is registered for the account'));
     }
     Customer.getTransactions(account.subscription_id, function(error, transactions) {
       if (error) {
@@ -464,7 +464,7 @@ exports.getAccountStatement = function(request, reply) {
     }
 
     if (!account.subscription_id) {
-      return reply(boom.badRequest('No subscription registered for account.'));
+      return reply(boom.badRequest('No subscription is registered for the account'));
     }
 
     Customer.getStatements(account.subscription_id, function(error, statements) {
