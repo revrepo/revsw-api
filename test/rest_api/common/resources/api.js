@@ -42,6 +42,7 @@ var TwoFAResource = require('./2fa');
 var UsersResource = require('./users');
 var UsageReportResource = require('./usage-report');
 var LogShippingJobsResource = require('./logShippingJobs');
+var DNSZonesResource = require('./dnsZones');
 
 // Set of all resources that the REST API service provides..
 module.exports = {
@@ -68,5 +69,6 @@ module.exports = {
   twoFA: TwoFAResource,
   users: UsersResource,
   usage_report: UsageReportResource,
-  logShippingJobs: LogShippingJobsResource
+  logShippingJobs: LogShippingJobsResource,
+  dnsZones: DNSZonesResource
 };
