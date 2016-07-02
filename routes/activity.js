@@ -47,7 +47,19 @@ module.exports = [
           user_id: Joi.objectId().description('User ID'),
           account_id: Joi.objectId().description('Account ID'),
           from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
+          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)'),
+          target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname').description('Target type'),
+          target_id: Joi.objectId().description('Target ID')
+            .when('target_type', { is: 'user', then: Joi.required() })
+            .when('target_type', { is: 'account', then: Joi.required() })
+            .when('target_type', { is: 'domain', then: Joi.required() })
+            .when('target_type', { is: 'purge', then: Joi.required() })
+            .when('target_type', { is: 'object', then: Joi.required() })
+            .when('target_type', { is: 'apikey', then: Joi.required() })
+            .when('target_type', { is: 'team', then: Joi.required() })
+            .when('target_type', { is: 'app', then: Joi.required() })
+            .when('target_type', { is: 'sslcert', then: Joi.required() })
+            .when('target_type', { is: 'sslname', then: Joi.required() })
         }
       }
     }
