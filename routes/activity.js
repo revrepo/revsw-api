@@ -26,67 +26,56 @@ var auditInfo = require('../handlers/activity');
 
 var routeModels = require('../lib/routeModels');
 
-module.exports = [
-  {
-    method: 'GET',
-    path: '/v1/activity',
-    config: {
-      auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey']
-      },
-      handler: auditInfo.getDetailedAuditInfo,
-      description: 'Get a detailed audit report of user activity',
-      tags: ['api'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-      validate: {
-        query: {
-          user_id: Joi.objectId().description('User ID'),
-          account_id: Joi.objectId().description('Account ID'),
-          from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)'),
-          target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname').description('Target type'),
-          target_id: Joi.objectId().description('Target ID')
-            .when('target_type', { is: 'user', then: Joi.required() })
-            .when('target_type', { is: 'account', then: Joi.required() })
-            .when('target_type', { is: 'domain', then: Joi.required() })
-            .when('target_type', { is: 'purge', then: Joi.required() })
-            .when('target_type', { is: 'object', then: Joi.required() })
-            .when('target_type', { is: 'apikey', then: Joi.required() })
-            .when('target_type', { is: 'team', then: Joi.required() })
-            .when('target_type', { is: 'app', then: Joi.required() })
-            .when('target_type', { is: 'sslcert', then: Joi.required() })
-            .when('target_type', { is: 'sslname', then: Joi.required() })
-        }
+module.exports = [{
+  method: 'GET',
+  path: '/v1/activity',
+  config: {
+    auth: {
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+    },
+    handler: auditInfo.getDetailedAuditInfo,
+    description: 'Get a detailed audit report of user activity',
+    tags: ['api'],
+    plugins: {
+      'hapi-swagger': {
+        responseMessages: routeModels.standardHTTPErrors
       }
-    }
-  },
-  {
-    method: 'GET',
-    path: '/v1/activity/summary',
-    config: {
-      auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
-      },
-      handler: auditInfo.getSummaryAuditInfo,
-      description: 'Get a summarized audit report of user activity',
-      tags: [],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-      validate: {
-        query: {
-          user_id: Joi.objectId().description('User ID'),
-          account_id: Joi.objectId().description('Account ID'),
-          from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
-          to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
-        }
+    },
+    validate: {
+      query: {
+        user_id: Joi.objectId().description('User ID'),
+        account_id: Joi.objectId().description('Account ID'),
+        from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
+        to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)'),
+        target_id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).description('Target ID'),
+        target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname')
+          .when('target_id', { is: /^[0-9a-fA-F]{24}$/, then: Joi.required() })
+          .description('Target type  (\'user\', \'account\', \'domain\', \'purge\', \'object\', \'apikey\', \'team\', \'app\', \'sslcert\', \'sslname\'')
       }
     }
   }
-];
+}, {
+  method: 'GET',
+  path: '/v1/activity/summary',
+  config: {
+    auth: {
+      scope: ['user', 'admin', 'reseller', 'revadmin']
+    },
+    handler: auditInfo.getSummaryAuditInfo,
+    description: 'Get a summarized audit report of user activity',
+    tags: [],
+    plugins: {
+      'hapi-swagger': {
+        responseMessages: routeModels.standardHTTPErrors
+      }
+    },
+    validate: {
+      query: {
+        user_id: Joi.objectId().description('User ID'),
+        account_id: Joi.objectId().description('Account ID'),
+        from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
+        to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)')
+      }
+    }
+  }
+}];
