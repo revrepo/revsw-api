@@ -84,7 +84,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.createApiKey,
-      description: 'Create a new API key in the system',
+      description: 'Create a new API key',
       notes: 'Use the call to create a new API key for your company. ' +
         'After creating a new API key you can use a PUT call to /v1/api_keys/{key_id} to configure the key.',
       tags: ['api'],
@@ -157,7 +157,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.activateApiKey,
-      description: 'Make the API key active',
+      description: 'Activate an API key',
       notes: 'Use the call to activate an API key for your company in the system',
       tags: ['api', 'accounts'],
       plugins: {
@@ -184,7 +184,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.deactivateApiKey,
-      description: 'Make the API key inactive',
+      description: 'Deactive an API key',
       notes: 'Use the call to deactivate an API key. The key\' configuration will be stored in the system but it will be not ' +
         'possible to use the key to access the customer API service',
       tags: ['api'],
@@ -212,7 +212,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.deleteApiKey,
-      description: 'Remove a customer API key',
+      description: 'Delete a customer API key',
       notes: 'This function should be used by a company admin to delete an API key',
       tags: ['api'],
       plugins: {

@@ -266,6 +266,8 @@ describe('Domain configs functional test', function () {
                 originServerV2 = firstFdc.origin_server;
                 delete firstFdc.domain_name;
                 delete firstFdc.cname;
+                delete firstFdc.published_domain_version;
+                delete firstFdc.last_published_domain_version;
                 var counter = 180000; // 3 mins
                 var interval = 1000;
                 var cb = function () {
@@ -470,7 +472,7 @@ describe('Domain configs functional test', function () {
           .catch(done);
       });
 
-    it('should return global status as `Published` right after verifying a ' +
+    it('should return global status as `Modified` right after verifying a ' +
       'modified domain config',
       function (done) {
         API.helpers
@@ -488,20 +490,25 @@ describe('Domain configs functional test', function () {
                 .getOne()
                 .expect(200)
                 .then(function (response) {
-                  if (response.body.global_status !== 'Published') {
+                  if (response.body.global_status !== 'Modified') {
                     setTimeout(cb, interval);
                     return;
                   }
-                  response.body.global_status.should.equal('Published');
+                  response.body.global_status.should.equal('Modified');
                   done();
                 })
                 .catch(done);
             };
             API.resources.domainConfigs
-              .update(firstDc.id, firstFdc, {options: 'verify_only'})
+              .update(firstDc.id, firstFdc)
               .expect(200)
               .then(function () {
-                setTimeout(cb, interval);
+                API.resources.domainConfigs.update(firstDc.id, firstFdc, {options: 'verify_only'})
+                .expect(200)
+                .then(function () {
+                  setTimeout(cb, interval);
+                })
+                .catch(done);
               })
               .catch(done);
           })
