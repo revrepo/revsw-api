@@ -500,10 +500,15 @@ describe('Domain configs functional test', function () {
                 .catch(done);
             };
             API.resources.domainConfigs
-              .update(firstDc.id, firstFdc, {options: 'verify_only'})
+              .update(firstDc.id, firstFdc)
               .expect(200)
               .then(function () {
-                setTimeout(cb, interval);
+                API.resources.domainConfigs.update(firstDc.id, firstFdc, {options: 'verify_only'})
+                .expect(200)
+                .then(function () {
+                  setTimeout(cb, interval);
+                })
+                .catch(done);
               })
               .catch(done);
           })
