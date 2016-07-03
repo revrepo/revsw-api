@@ -35,7 +35,7 @@ module.exports = [
         scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: sslNameHandlers.listSSLNames,
-      description: 'List of configured SSL names',
+      description: 'Get a list of configured SSL names',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {

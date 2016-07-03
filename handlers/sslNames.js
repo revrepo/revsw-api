@@ -46,27 +46,28 @@ var sslNames = new SSLName(mongoose, mongoConnection.getConnectionPortal());
 
 var generateVerificationNames = function (data) {
   var arrDomain = data.ssl_name.split('.');
+  var verificationNames_ = [];
   var verificationNames = [];
+  // TODO: need to fix the code to iterate over all possible domain options
+  // from *.test.domain.monitor.revsw.net to revsw.net
   if (arrDomain[0] === '*') {
-    verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
+    verificationNames_.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
     if(tld.getDomain(data.ssl_name.replace(arrDomain[0] + '.', '')) !== data.ssl_name.replace(arrDomain[0] + '.', '')){
-        verificationNames.push(tld.getDomain(data.ssl_name.replace(arrDomain[0] + '.', '')));
+        verificationNames_.push(tld.getDomain(data.ssl_name.replace(arrDomain[0] + '.', '')));
     }
   } else {
-    if (data.verification_method !== 'url') {
-      verificationNames.push(data.ssl_name);
-      if(tld.getDomain(data.ssl_name) !== data.ssl_name){
-        verificationNames.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
-      }
-    } else {
-      verificationNames.push('http://' + data.ssl_name);
-      verificationNames.push('https://' + data.ssl_name);
-
-      if(tld.getDomain(data.ssl_name) !== data.ssl_name){
-        verificationNames.push('http://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
-        verificationNames.push('https://' + data.ssl_name.replace(arrDomain[0] + '.', ''));
-      }
+    verificationNames_.push(data.ssl_name);
+    if(tld.getDomain(data.ssl_name) !== data.ssl_name){
+      verificationNames_.push(data.ssl_name.replace(arrDomain[0] + '.', ''));
     }
+  }
+  if (data.verification_method === 'url') {
+    for (var i=0; i < verificationNames_.length; i++) {
+      verificationNames.push('http://' + verificationNames_[i]);
+      verificationNames.push('https://' + verificationNames_[i]);
+    }
+  } else {
+    verificationNames = verificationNames_;
   }
   data.verification_names = verificationNames;
   return data;
