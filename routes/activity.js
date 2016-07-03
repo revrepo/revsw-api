@@ -35,7 +35,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: auditInfo.getDetailedAuditInfo,
-      description: 'Detailed audit reports',
+      description: 'Get a detailed audit report of user activity',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -72,7 +72,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
       },
       handler: auditInfo.getSummaryAuditInfo,
-      description: 'Summary audit reports',
+      description: 'Get a summarized audit report of user activity',
       tags: [],
       plugins: {
         'hapi-swagger': {

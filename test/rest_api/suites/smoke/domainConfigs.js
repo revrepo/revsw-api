@@ -124,6 +124,8 @@ describe('Smoke check', function () {
         firstFdc.origin_host_header = 'UPDATED-' + firstFdc.origin_host_header;
         firstFdc.origin_server = 'UPDATED-' + firstFdc.origin_server;
         delete firstFdc.domain_name;
+        delete firstFdc.published_domain_version;
+        delete firstFdc.last_published_domain_version;
         delete firstFdc.cname;
         API.helpers
           .authenticateUser(reseller)

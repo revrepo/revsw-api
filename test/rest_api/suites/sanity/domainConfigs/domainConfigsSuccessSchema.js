@@ -155,6 +155,8 @@ describe('Sanity check', function () {
           firstFdc.origin_server = 'UPDATED' + firstFdc.origin_server;
           delete firstFdc.domain_name;
           delete firstFdc.cname;
+          delete firstFdc.published_domain_version;
+          delete firstFdc.last_published_domain_version;
           API.helpers
             .authenticateUser(reseller)
             .then(function () {

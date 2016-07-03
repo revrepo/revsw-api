@@ -141,6 +141,8 @@ describe('Functional check', function () {
                 firstFdc.origin_server = 'UPDATED-' + firstFdc.origin_server;
                 delete firstFdc.domain_name;
                 delete firstFdc.cname;
+                delete firstFdc.published_domain_version;
+                delete firstFdc.last_published_domain_version;
               })
               .catch(done);
           })
