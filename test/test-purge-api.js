@@ -201,7 +201,6 @@ describe('Rev Purge API (RevAdmin role)', function() {
         request(testAPIUrl)
           .post('/v1/purge')
           .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
-          // .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
           .send(purgeJson)
           .expect(400)
           .end(function(err, res) {
@@ -276,7 +275,6 @@ describe('Rev Purge API (RevAdmin role)', function() {
         request(testAPIUrl)
           .post('/v1/purge')
           .set('Authorization', 'Bearer ' + jwtTokenWithRevAdminPerm)
-          // .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
           .send(purgeJson)
           .expect(200)
           .end(function(err, res) {
@@ -309,7 +307,6 @@ describe('Rev Purge API (RevAdmin role)', function() {
         request(testAPIUrl)
           .get('/v1/activity')
           .set('Authorization', 'Bearer ' + jwtTokenWithRevAdminPerm)
-          // .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword) !!!
           .expect(200)
           .end(function(err, res) {
 
