@@ -34,7 +34,7 @@ var logger = require('revsw-logger')(config.log_config);
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
-
+//  ---------------------------------
 exports.getRTTReports = function(request, reply) {
 
   var domainID = request.params.domain_id,
@@ -219,6 +219,119 @@ exports.getRTTReports = function(request, reply) {
       }, function(error) {
         logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domainName));
+      });
+    } else {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+  });
+};
+
+//  ---------------------------------
+exports.getRTTStats = function(request, reply) {
+
+  var domainID = request.params.domain_id,
+    domainName,
+    metadataFilterField;
+
+  domainConfigs.get(domainID, function(error, domainConfig) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+    }
+    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+      domainName = domainConfig.domain_name;
+
+      // var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
+      var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
+      if ( span.error ) {
+        return reply(boom.badRequest( span.error ));
+      }
+
+      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
+
+      var requestBody = {
+        size: 0,
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  range: {
+                    lm_rtt: {
+                      gt: 1000
+                    }
+                  }
+                }, {
+                  range: {
+                    '@timestamp': {
+                      gte: span.start,
+                      lt: span.end
+                    }
+                  }
+                }]
+              }
+            }
+          }
+        },
+        aggs: {
+          results: {
+            date_histogram: {
+              field: '@timestamp',
+              interval: ( '' + span.interval ),
+              min_doc_count: 0,
+              extended_bounds : {
+                min: span.start,
+                max: ( span.end - 1 )
+              },
+              offset: ( '' + ( span.end % span.interval ) )
+            },
+            aggs: {
+              rtt_avg: { avg: { field: 'lm_rtt' } },
+              rtt_min: { min: { field: 'lm_rtt' } },
+              rtt_max: { max: { field: 'lm_rtt' } }
+            }
+          }
+        }
+      };
+
+      //  update query
+      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
+
+      // elasticSearch.getClientURL().search({
+      elasticSearch.getClient().search({
+        index: utils.buildIndexList(span.start, span.end),
+        ignoreUnavailable: true,
+        timeout: config.get('elasticsearch_timeout_ms'),
+        body: requestBody
+      })
+      .then(function(body) {
+
+        var response = {
+          metadata: {
+            domain_name: domainName,
+            domain_id: domainID,
+            start_timestamp: span.start,
+            start_datetime: new Date(span.start),
+            end_timestamp: span.end,
+            end_datetime: new Date(span.end),
+            total_hits: body.hits.total,
+            interval_sec: span.interval/1000,
+            filter: metadataFilterField,
+            data_points_count: body.aggregations.results.buckets.length
+          },
+          data: body.aggregations.results.buckets.map( function( item ) {
+              return {
+                time: item.key,
+                requests: item.doc_count,
+                lm_rtt_avg_ms: Math.round( item.rtt_avg.value / 1000 ),
+                lm_rtt_min_ms: Math.round( item.rtt_min.value / 1000 ),
+                lm_rtt_max_ms: Math.round( item.rtt_max.value / 1000 )
+              };
+            })
+        };
+        renderJSON(request, reply, error, response);
+      }, function(error) {
+        logger.error(error);
+        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
     } else {
       return reply(boom.badRequest('Domain ID not found'));
