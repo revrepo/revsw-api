@@ -135,7 +135,7 @@ exports.getStats = function(request, reply) {
             total_hits: body.hits.total,
             interval_sec: span.interval/1000,
             filter: metadataFilterField,
-            data_points_count: body.aggregations.results.buckets.length
+            data_points_count: len
           },
           data: dataArray
         };
