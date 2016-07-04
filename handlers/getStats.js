@@ -115,13 +115,14 @@ exports.getStats = function(request, reply) {
       })
       .then(function(body) {
         var dataArray = [];
-        for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
-          dataArray[i] = {
-            time: body.aggregations.results.buckets[i].key,
-            requests: body.aggregations.results.buckets[i].doc_count,
-            sent_bytes: body.aggregations.results.buckets[i].sent_bytes.value,
-            received_bytes: body.aggregations.results.buckets[i].received_bytes.value
-          };
+        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; i++ ) {
+          var item = body.aggregations.results.buckets[i];
+          dataArray.push({
+            time: item.key,
+            requests: item.doc_count,
+            sent_bytes: item.sent_bytes.value,
+            received_bytes: item.received_bytes.value
+          });
         }
         var response = {
           metadata: {
@@ -134,7 +135,7 @@ exports.getStats = function(request, reply) {
             total_hits: body.hits.total,
             interval_sec: span.interval/1000,
             filter: metadataFilterField,
-            data_points_count: body.aggregations.results.buckets.length
+            data_points_count: len
           },
           data: dataArray
         };
