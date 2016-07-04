@@ -23,13 +23,14 @@ var BaseResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var dnsZoneKey = 'dnsZone';
+var dnsZoneKey = 'dnsZoneId';
 var resourceConfig = {
   idKey: dnsZoneKey,
   name: 'logShippingJobs',
   path: '/dns_zones/{' + dnsZoneKey + '}',
   methods: [
     Methods.CREATE,
+    Methods.READ_ONE,
     Methods.READ_ALL,
     Methods.DELETE
   ],

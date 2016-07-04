@@ -27,22 +27,22 @@ var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var mongoose = require('mongoose');
 
-function DNSUser(mongoose, connection, options) {
+function DNSZone(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
   this.ObjectId = this.Schema.ObjectId;
 
-  this.DNSUserSchema = new this.Schema({
+  this.DNSZoneSchema = new this.Schema({
     account_id: String,
-    zones: [{type: String, lowercase: true}]
+    zone: {type: String, lowercase: true}
   });
 
-  this.model = connection.model('DNSUser', this.DNSUserSchema, 'DNSUser');
+  this.model = connection.model('DNSZone', this.DNSZoneSchema, 'DNSZone');
 }
 
 mongoose.set('debug', config.get('mongoose_debug_logging'));
 
-DNSUser.prototype = {
+DNSZone.prototype = {
   add: function(item, callback) {
     new this.model(item).save(function(err, item) {
       if (item) {
@@ -53,29 +53,38 @@ DNSUser.prototype = {
     });
   },
   get: function(item, callback) {
-    this.model.findOne({account_id: item}, function(err, doc) {
+    this.model.findOne({_id: item}, function(err, doc) {
       if (doc) {
         doc = utils.clone(doc);
+        doc.id = doc._id + '';
+        delete doc._id;
         delete doc.__v;
       }
       callback(err, doc);
     });
   },
   accountListZones: function(aids, callback) {
-    this.model.find({account_id: {$in: aids}}, {zones: 1}, function(err, dnsUsers) {
-      var zones = [];
-      if (dnsUsers) {
-        dnsUsers.forEach(function(dnsUser) {
-          zones.push.apply(zones, dnsUser.zones);
+    this.model.find({account_id: {$in: aids}}, {_id: 1, zone: 1}, function(err, dnsZones) {
+      if (dnsZones) {
+        dnsZones = utils.clone(dnsZones).map(function(dnsZone) {
+          return {
+            id: dnsZone._id + '',
+            zone: dnsZone.zone,
+            account_id: dnsZone.account_id
+          }
         });
+      } else {
+        dnsZones = null;
       }
-      callback(err, zones);
+      callback(err, dnsZones);
     });
   },
   getByZone: function(dnsZone, callback) {
-    this.model.findOne({zones: {$in: [dnsZone]}}, function(err, doc) {
+    this.model.findOne({zone: dnsZone}, function(err, doc) {
       if (doc) {
         doc = utils.clone(doc);
+        doc.id = doc._id + '';
+        delete doc._id;
         delete doc.__v;
       }
       callback(err, doc);
@@ -98,7 +107,14 @@ DNSUser.prototype = {
         callback(err, doc);
       }
     });
+  },
+  remove: function (id, callback) {
+    this.model.remove({
+      _id: id
+    }, function (err, data) {
+      callback(err, data.result);
+    });
   }
 };
 
-module.exports = DNSUser;
+module.exports = DNSZone;

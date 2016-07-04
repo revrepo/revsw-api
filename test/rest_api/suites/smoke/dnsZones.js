@@ -74,7 +74,7 @@ describe('Smoke check', function () {
           .catch(done);
     });
 
-    it('should return success response code when creating a new dns zone', function (done) {
+    it('should return success response code when creating new dns zone', function (done) {
         firstDnsZone = DNSZonesDP.generateOne(account.id);
         API.helpers
           .authenticateUser(reseller)
@@ -83,6 +83,8 @@ describe('Smoke check', function () {
               .createOne(firstDnsZone)
               .expect(200)
               .then(function (res) {
+                var responseJson = res.body;
+                firstDnsZone._id = responseJson.object_id;
                 done();
               })
               .catch(done);
@@ -90,15 +92,16 @@ describe('Smoke check', function () {
           .catch(done);
     });
 
-    it('should return a recently created dns zone when getting a list of dns zones', function (done) {
+    it('should return a recently created dns zone when getting a specific dns zone', function (done) {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
           API.resources.dnsZones
-            .getAll()
+            .getOne(firstDnsZone._id)
             .expect(200)
             .then(function(res) {
-              res.body.length.should.be.above(0);
+              var responseJson = res.body;
+              console.log(responseJson);
               done();
             });
         })
@@ -110,7 +113,7 @@ describe('Smoke check', function () {
           .authenticateUser(reseller)
           .then(function () {
             API.resources.dnsZones
-              .deleteOne(firstDnsZone.dns_zone)
+              .deleteOne(firstDnsZone._id)
               .expect(200)
               .end(done);
           })

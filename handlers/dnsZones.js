@@ -32,18 +32,18 @@ var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
 
-var DNSUser = require('../models/DNSUser');
+var DNSZone = require('../models/DNSZone');
 var User = require('../models/User');
 var utils = require('../lib/utilities.js');
 
-var dnsUsers = Promise.promisifyAll(new DNSUser(mongoose, mongoConnection.getConnectionPortal()));
+var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getConnectionPortal()));
 
 var NS1 = require('ns1');
-NS1.set_api_key(config.get('nsone_api_key'));
+NS1.set_api_key(config.get('nsone.api_key'));
 
 exports.getDnsZones = function(request, reply) {
   var accountIds = utils.getAccountID(request);
-  dnsUsers.accountListZones(accountIds, function (error, zones) {
+  dnsZones.accountListZones(accountIds, function (error, zones) {
     renderJSON(request, reply, error, zones);
   });
 };
@@ -51,12 +51,8 @@ exports.getDnsZones = function(request, reply) {
 exports.createDnsZone = function(request, reply) {
   var payload = request.payload;
   var accountId = payload.account_id;
-  var dnsZone = payload.dns_zone;
-
-  var statusResponse = {
-    statusCode: 200,
-    message: 'Successfully created a new dns zone'
-  };
+  var zone = payload.dns_zone;
+  var statusResponse;
 
   return Promise.try(function() {
     // Check account access
@@ -64,59 +60,54 @@ exports.createDnsZone = function(request, reply) {
       throw new Error('Account ID not found');
     }
 
-    return dnsUsers.getByZoneAsync(dnsZone);
+    return dnsZones.getByZoneAsync(zone);
   })
-    .then(function(dnsUser) {
+    .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (dnsUser) {
-        throw new Error('DNS Zone is unavailable');
+      if (dnsZone) {
+        throw new Error('DNS zone is unavailable');
       }
 
-      return NS1.Zone.find(dnsZone)
-        .then(function(zone) {
-          throw new Error('DNS Zone is unavailable');
+      return NS1.Zone.find(zone)
+        .then(function(nsoneZone) {
+          throw new Error('DNS zone is unavailable');
         })
         .catch(function(error) {
-          return true;
+          return Promise.resolve(true);
         });
     })
     .then(function() {
-      return NS1.Zone.create({zone: dnsZone})
-        .then(function(zone) {
-          return zone;
+      return NS1.Zone.create({zone: zone})
+        .then(function(nsoneZone) {
+          return nsoneZone;
         })
         .catch(function(error) {
           throw error;
         });
     })
     .then(function(nsoneZone) {
-      if (nsoneZone) {
-        return dnsUsers.getAsync(accountId);
-      } else {
-        throw new Error('Error on create NS1 Zone');
-      }
+      payload.zone = zone;
+      delete payload.dns_zone;
+      return dnsZones.addAsync(payload);
     })
-    .then(function(dnsUser) {
-      if (dnsUser) {
-        dnsUser.zones.push(dnsZone);
-        return dnsUsers.updateAsync(dnsUser);
-      } else {
-        payload.zones = [dnsZone];
-        return dnsUsers.addAsync(payload);
-      }
-    })
-    .then(function(result) {
+    .then(function(newZone) {
+      statusResponse = {
+        statusCode: 200,
+        message: 'Successfully created new DNS zone',
+        object_id: newZone._id
+      };
+
       renderJSON(request, reply, null, statusResponse);
     })
     .catch(function(error) {
       // Process NS1 Errors
       if (/NS1 API Request Failed on/.test(error.message)) {
         if (/Input validation failed/.test(error.message)) {
-          return reply('Invalid DNS Zone provided');
+          return reply('Invalid DNS zone provided');
         }
       } else {
-        if (/NS1 Zone/.test(error.message)) {
-          return reply(boom.badImplementation('DNS Service unable to process your request now, try again later'));
+        if (/NS1 zone/.test(error.message)) {
+          return reply(boom.badImplementation('DNS service unable to process your request now, try again later'));
         } else {
           return reply(boom.badRequest(error.message));
         }
@@ -125,77 +116,240 @@ exports.createDnsZone = function(request, reply) {
 };
 
 exports.deleteDnsZone = function(request, reply) {
-  var dnsZone = request.params.dns_zone;
-  var foundDnsUser;
+  var zoneId = request.params.dns_zone_id;
+  var foundDnsZone;
 
   var statusResponse = {
     statusCode: 200,
-    message: 'Successfully deleted a new dns zone'
+    message: 'Successfully deleted the DNS zone'
   };
 
   return Promise.try(function() {
-    return dnsUsers.getByZoneAsync(dnsZone);
+    return dnsZones.getAsync(zoneId);
   })
-    .then(function(dnsUser) {
+    .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsUser) {
-        throw new Error('DNS Zone does not exists');
+      if (!dnsZone) {
+        throw new Error('DNS zone does not exists');
       } else {
         // Check account access
-        if (!utils.checkUserAccessPermissionToAccount(request, dnsUser.account_id)) {
+        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
           throw new Error('Account ID not found');
         } else {
-          foundDnsUser = dnsUser;
-          return true;
+          foundDnsZone = dnsZone;
+          return Promise.resolve(true);
         }
       }
     })
     .then(function() {
-      return NS1.Zone.find(dnsZone)
-        .then(function(zone) {
-          zone.destroy()
+      return NS1.Zone.find(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          nsoneZone.destroy()
             .then(function() {
-              return true;
+              return Promise.resolve(true);
             })
             .catch(function(error){
-              throw new Error('DNS Zone cannot be deleted');
+              throw new Error('DNS zone cannot be deleted');
             });
         })
         .catch(function(error) {
-          throw new Error('DNS Zone does not exists');
+          throw new Error('DNS zone does not exists');
         });
     })
     .then(function() {
-      var dnsZonesLen = foundDnsUser.zones.length;
-      var dnsZoneIndex = foundDnsUser.zones.indexOf(dnsZone);
-
-      if (dnsZoneIndex !== -1) {
-        foundDnsUser.zones.splice(dnsZoneIndex, 1);
-      }
-      if (dnsZonesLen === foundDnsUser.zones.length) {
-        throw new Error('DNS Zone is not deleted properly');
-      }
-    })
-    .then(function() {
-      return dnsUsers.updateAsync(foundDnsUser);
+      return dnsZones.removeAsync(zoneId);
     })
     .then(function(result) {
       renderJSON(request, reply, null, statusResponse);
     })
     .catch(function(error) {
-      if (/is not deleted properly/.test(error.message)) {
-        return reply(boom.badImplementation('DNS Zone is not deleted'));
-      } else {
-        return reply(boom.badRequest(error.message));
-      }
+      return reply(boom.badRequest(error.message));
     });
 };
 
-exports.getDnsZoneRecords = function(request, reply) {
-  var dnsZone = request.params.dns_zone;
+exports.getDnsZone = function(request, reply) {
+  var zoneId = request.params.dns_zone_id;
+  var foundDnsZone;
+
+  return Promise.try(function() {
+    return dnsZones.getAsync(zoneId);
+  })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone) {
+        throw new Error('DNS zone does not exists');
+      } else {
+        // Check account access
+        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
+          throw new Error('Account ID not found');
+        } else {
+          foundDnsZone = dnsZone;
+          return true;
+        }
+      }
+    })
+    .then(function() {
+      return NS1.Zone.find(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          foundDnsZone.records = nsoneZone.records;
+          return true;
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone does not exists');
+        });
+    })
+    .then(function(result) {
+      renderJSON(request, reply, null, foundDnsZone);
+    })
+    .catch(function(error) {
+      return reply(boom.badRequest(error.message));
+    });
+};
+
+exports.createDnsZoneRecord = function(request, reply) {
+  var zoneId = request.params.dns_zone_id;
+  var payload = request.payload;
+  var foundDnsZone;
 
   var statusResponse = {
     statusCode: 200,
-    message: ''
+    message: 'Successfully created new DNS zone record'
   };
+
+  return Promise.try(function() {
+    return dnsZones.getAsync(zoneId);
+  })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone) {
+        throw new Error('DNS zone does not exists');
+      } else {
+        // Check account access
+        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
+          throw new Error('Account ID not found');
+        } else {
+          foundDnsZone = dnsZone;
+          return Promise.resolve(true);
+        }
+      }
+    })
+    .then(function() {
+      if (payload.record_domain.indexOf(foundDnsZone.zone) === -1) {
+        throw new Error('Invalid DNS zone provided for the record domain');
+      }
+
+      return NS1.Zone.find(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          return Promise.resolve(true);
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone does not exists');
+        });
+    })
+    .then(function() {
+      var recordQuery = foundDnsZone.zone + '/' + payload.record_domain + '/' + payload.record_type;
+      return NS1.Record.find(recordQuery)
+        .then(function(nsoneRecord) {
+          throw new Error('DNS zone record already exists');
+        })
+        .catch(function(error) {
+          // Not found
+          return Promise.resolve(true);
+        });
+    })
+    .then(function() {
+      var newRecord = {
+          'zone': foundDnsZone.zone,
+          'domain': payload.record_domain,
+          'type': payload.record_type,
+          'answers': payload.record_body
+      };
+      return NS1.Record.create(newRecord)
+        .then(function(newNsoneRecord) {
+          return newNsoneRecord;
+        })
+        .catch(function(error) {
+          throw new Error('Cannot create new DNS zone record');
+        });
+    })
+    .then(function(createdNsoneRecord) {
+      renderJSON(request, reply, null, statusResponse);
+    })
+    .catch(function(error) {
+      return reply(boom.badRequest(error.message));
+    });
+};
+
+exports.deleteDnsZoneRecord = function(request, reply) {
+  var zoneId = request.params.dns_zone_id;
+  var payload = request.payload;
+  var foundDnsZone;
+
+  var statusResponse = {
+    statusCode: 200,
+    message: 'Successfully deleted the DNS zone record'
+  };
+
+  return Promise.try(function() {
+    return dnsZones.getAsync(zoneId);
+  })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone) {
+        throw new Error('DNS zone does not exists');
+      } else {
+        // Check account access
+        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
+          throw new Error('Account ID not found');
+        } else {
+          foundDnsZone = dnsZone;
+          return Promise.resolve(true);
+        }
+      }
+    })
+    .then(function() {
+      if (payload.record_domain.indexOf(foundDnsZone.zone) === -1) {
+        throw new Error('Invalid DNS zone provided for the record domain');
+      }
+
+      return NS1.Zone.find(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          return Promise.resolve(true);
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone does not exists');
+        });
+    })
+    .then(function() {
+      var recordQuery = foundDnsZone.zone + '/' + payload.record_domain + '/' + payload.record_type;
+      return NS1.Record.find(recordQuery)
+        .then(function(nsoneRecord) {
+          return nsoneRecord;
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone record does not exists');
+        });
+    })
+    .then(function(nsoneRecord) {
+      return nsoneRecord.destroy()
+        .then(function() {
+          return Promise.resolve(true);
+        })
+        .catch(function(error) {
+          throw new Error('Cannot delete the DNS zone record');
+        });
+    })
+    .then(function() {
+      renderJSON(request, reply, null, statusResponse);
+    })
+    .catch(function(error) {
+      return reply(boom.badRequest(error.message));
+    });
+};
+
+exports.updateDnsZoneRecord = function(request, reply) {
+  var zoneId = request.params.dns_zone_id;
+  var payload = request.payload;
+  var foundDnsZone;
+  //
 };
