@@ -109,7 +109,6 @@ describe('Rev API /v1/users/myself call', function() {
         request(testAPIUrl)
           .get('/v1/users/myself')
           .set('Authorization', 'Bearer ' + jwtTokenWithResellerPerm)
-          // .auth(qaUserWithResellerPerm, qaUserWithResellerPermPassword)
           .expect(200)
           .end(function(err, res) {
             if (err) {

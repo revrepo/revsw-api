@@ -38,7 +38,8 @@ exports.getDetailedAuditInfo = function (request, reply) {
   var requestBody = {};
   var start_time;
   var end_time;
-
+  var targetType = request.query.target_type;
+  var targetId = request.query.target_id;
   var user_id = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
   var account_id;
   if(request.auth.credentials.user_type === 'user'){
@@ -63,7 +64,7 @@ exports.getDetailedAuditInfo = function (request, reply) {
     function (cb) {
       users.getById(user_id, function (err, result) {
         if (err) {
-          return reply(boom.badImplementation('Failed to retreive user details for ID ' + user_id));
+          return reply(boom.badImplementation('Failed to retreive user details for ID ' + user_id, err));
         }
         if (!result) {
           return reply(boom.badRequest('User ID not found'));
@@ -122,6 +123,16 @@ exports.getDetailedAuditInfo = function (request, reply) {
         '$gte' : start_time,
         '$lte' : end_time
       };
+      // NOTE: set filter for get only one type Activity Target
+      if(targetType){
+       requestBody['meta.activity_target']= targetType;
+      }
+      // NOTE: set filter for get list Activities for Activity Target(Type) with ID
+      if(targetType && targetId){
+       requestBody['meta.activity_target']= targetType;
+       requestBody['meta.target_id']= targetId;
+      }
+
       // TODO: Need to add proper indexes for the audit collection
       auditevents.detailed(requestBody, function (error, data) {
         var result = {
@@ -243,4 +254,3 @@ exports.getSummaryAuditInfo = function (request, reply) {
       }
   });
 };
-

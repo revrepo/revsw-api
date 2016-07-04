@@ -219,7 +219,6 @@ describe('Rev user password change API', function() {
         request(testAPIUrl)
           .put('/v1/users/password/' + testUserId)
           .set('Authorization', 'Bearer ' + jwtTokenTestUser)
-          // .auth(testUser, testPass)
           .send(changePassJsonLocal)
           .expect(400)
           .end(function(err, res) {
