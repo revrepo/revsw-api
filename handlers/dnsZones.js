@@ -72,12 +72,12 @@ exports.createDnsZone = function(request, reply) {
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (dnsZone) {
-        throw new Error('DNS zone is unavailable');
+        throw new Error('DNS zone is already registered in the system');
       }
 
       return NS1.Zone.find(zone)
         .then(function(nsoneZone) {
-          throw new Error('DNS zone is unavailable');
+          throw new Error('DNS zone is already registered in the system');
         })
         .catch(function(error) {
           return Promise.resolve(true);
@@ -137,7 +137,7 @@ exports.deleteDnsZone = function(request, reply) {
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
-        throw new Error('DNS zone does not exists');
+        throw new Error('DNS zone does not exists in the system');
       } else {
         // Check account access
         if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
@@ -160,7 +160,8 @@ exports.deleteDnsZone = function(request, reply) {
             });
         })
         .catch(function(error) {
-          throw new Error('DNS zone does not exists');
+          logger.error('DNS zone not found at ns1 but expected: ' + foundDnsZone.zone);
+          throw new Error('DNS zone does not exists at DNS service');
         });
     })
     .then(function() {
@@ -190,7 +191,7 @@ exports.updateDnsZone = function(request, reply) {
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
-        throw new Error('DNS zone does not exists');
+        throw new Error('DNS zone does not exists in the system');
       } else {
         // Check account access
         if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
@@ -207,7 +208,8 @@ exports.updateDnsZone = function(request, reply) {
           return nsoneZone;
         })
         .catch(function(error) {
-          throw new Error('DNS zone does not exists');
+          logger.error('DNS zone not found at ns1 but expected: ' + foundDnsZone.zone);
+          throw new Error('DNS zone does not exists at DNS service');
         });
     })
     .then(function(updatingNsonsZone) {
@@ -255,7 +257,8 @@ exports.getDnsZone = function(request, reply) {
           return Promise.resolve(true);
         })
         .catch(function(error) {
-          throw new Error('DNS zone does not exists');
+          logger.error('DNS zone not found at ns1 but expected: ' + foundDnsZone.zone);
+          throw new Error('DNS zone does not exists at DNS service');
         });
     })
     .then(function(result) {
@@ -282,7 +285,7 @@ exports.createDnsZoneRecord = function(request, reply) {
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
-        throw new Error('DNS zone does not exists');
+        throw new Error('DNS zone does not exists in the system');
       } else {
         // Check account access
         if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
@@ -303,14 +306,15 @@ exports.createDnsZoneRecord = function(request, reply) {
           return Promise.resolve(true);
         })
         .catch(function(error) {
-          throw new Error('DNS zone does not exists');
+          logger.error('DNS zone not found at ns1 but expected: ' + foundDnsZone.zone);
+          throw new Error('DNS zone does not exists at DNS service');
         });
     })
     .then(function() {
       var recordQuery = foundDnsZone.zone + '/' + payload.record_domain + '/' + payload.record_type;
       return NS1.Record.find(recordQuery)
         .then(function(nsoneRecord) {
-          throw new Error('DNS zone record already exists');
+          throw new Error('DNS zone record already present in the system');
         })
         .catch(function(error) {
           // Not found
@@ -356,11 +360,11 @@ exports.deleteDnsZoneRecord = function(request, reply) {
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
-        throw new Error('DNS zone does not exists');
+        throw new Error('DNS zone does not exists in the system');
       } else {
         // Check account access
         if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
-          throw new Error('Account ID not found');
+          throw new Error('DNS zone not found');
         } else {
           foundDnsZone = dnsZone;
           return Promise.resolve(true);
@@ -377,7 +381,8 @@ exports.deleteDnsZoneRecord = function(request, reply) {
           return Promise.resolve(true);
         })
         .catch(function(error) {
-          throw new Error('DNS zone does not exists');
+          logger.error('DNS zone not found at ns1 but expected: ' + foundDnsZone.zone);
+          throw new Error('DNS zone does not exists at DNS service');
         });
     })
     .then(function() {
@@ -387,7 +392,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
           return nsoneRecord;
         })
         .catch(function(error) {
-          throw new Error('DNS zone record does not exists');
+          throw new Error('DNS zone record does not exists in the system');
         });
     })
     .then(function(nsoneRecord) {
@@ -423,7 +428,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
-        throw new Error('DNS zone does not exists');
+        throw new Error('DNS zone does not exists in the system');
       } else {
         // Check account access
         if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
@@ -444,7 +449,8 @@ exports.updateDnsZoneRecord = function(request, reply) {
           return Promise.resolve(true);
         })
         .catch(function(error) {
-          throw new Error('DNS zone does not exists');
+          logger.error('DNS zone not found at ns1 but expected: ' + foundDnsZone.zone);
+          throw new Error('DNS zone does not exists at DNS service');
         });
     })
     .then(function() {
@@ -454,7 +460,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
           return nsoneRecord;
         })
         .catch(function(error) {
-          throw new Error('DNS zone record does not exists');
+          throw new Error('DNS zone record does not exists in the system');
         });
     })
     .then(function(nsoneRecord) {
