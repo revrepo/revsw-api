@@ -1664,7 +1664,9 @@ exports.getTopObjects5xx = function( request, reply ) {
       .then(function(body) {
 
         var total = 0,
-          codes = ( ( body.aggregations && body.aggregations.result.result.buckets[0].codes.buckets[0].codes.buckets ) || [] ),
+          codes = ( ( body.aggregations &&
+            body.aggregations.result.result.buckets[0].codes.buckets[0].codes &&
+            body.aggregations.result.result.buckets[0].codes.buckets[0].codes.buckets ) || [] ),  //  holy green cows ..
           data = codes.map( function( c ) {
             total += c.doc_count;
             return {
@@ -1691,6 +1693,10 @@ exports.getTopObjects5xx = function( request, reply ) {
       })
       .catch( function(error) {
         logger.error(error);
+        logger.warn( 'query: ', requestBody );
+        logger.warn( 'indicesList: ' + indicesList );
+        logger.warn( 'error: ' + error.toString() );
+
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
