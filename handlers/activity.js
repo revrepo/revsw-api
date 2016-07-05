@@ -90,7 +90,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
             cb({ errorCode: 400, err: null, message: 'Account ID not found' });
             return;
           }
-          requestBody['meta.user_id'] = userId;// NOTE: user can see only his activities
+          requestBody['meta.user_id'] = userId; // NOTE: user can see only his activities
           //    requestBody['meta.account_id'] = account_id;
           cb();
           break;
@@ -117,7 +117,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
             cb({ errorCode: 400, err: null, message: 'Account ID not found' });
             return;
           }
-          //  requestBody['meta.account_id'] = account_id;
+          requestBody['meta.account_id'] = { $in: user.companyId }; // NOTE: resseller can see activities in all his current accounts
           cb();
           break;
         default:
