@@ -55,11 +55,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
   if (request.query.account_id) {
     requestBody['meta.account_id'] = accountId;
   }
-
-  if (!request.query.user_id && !request.query.account_id) {
-    requestBody['meta.user_id'] = userId;
-  }
-
+  // TODO: create  validation function checkUserAccessPermissionToTargetId 
   var currentUser = null;
   // NOTE: waterfall actions list for generate response
   async.waterfall([
@@ -94,7 +90,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
             cb({ errorCode: 400, err: null, message: 'Account ID not found' });
             return;
           }
-          //    requestBody['meta.user_id'] = user_id;
+          requestBody['meta.user_id'] = userId;// NOTE: user can see only his activities
           //    requestBody['meta.account_id'] = account_id;
           cb();
           break;
