@@ -121,7 +121,18 @@ exports.getDetailedAuditInfo = function(request, reply) {
           cb();
           break;
         default:
-          cb({ errorCode: 500, err: null, message: 'User Role not found' });
+          // The case of API keys which don't have a role parameter:
+          // TODO: need to fix the code to properly look at user_type field
+          if (request.query.user_id && !utils.checkUserAccessPermissionToUser(request, user)) {
+            cb({ errorCode: 400, err: null, message: 'User ID not found' });
+            return;
+          }
+          if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+            cb({ errorCode: 400, err: null, message: 'Account ID not found' });
+            return;
+          }
+          //  requestBody['meta.account_id'] = account_id;
+          cb();
           break;
       }
     },
