@@ -55,7 +55,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
   if (request.query.account_id) {
     requestBody['meta.account_id'] = accountId;
   }
-  // TODO: create  validation function checkUserAccessPermissionToTargetId 
+  // TODO: create  validation function checkUserAccessPermissionToTargetId
   var currentUser = null;
   // NOTE: waterfall actions list for generate response
   async.waterfall([
@@ -82,7 +82,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
           cb();
           break;
         case 'user':
-          if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
+          if (request.query.user_id && !utils.checkUserAccessPermissionToUser(request, user)) {
             cb({ errorCode: 400, err: null, message: 'User ID not found' });
             return;
           }
@@ -104,7 +104,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
             cb({ errorCode: 400, err: null, message: 'Account ID not found' });
             return;
           }
-          // requestBody['meta.account_id'] = account_id;
+          requestBody['meta.account_id'] = accountId; // NOTE: admin can see activities only his account
           cb();
           break;
 
