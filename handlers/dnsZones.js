@@ -38,13 +38,20 @@ var utils = require('../lib/utilities.js');
 
 var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getConnectionPortal()));
 
+Object.assign = require('object-assign'); // temporary module
+// TODO: Create our own NS1 Requests lib
 var NS1 = require('ns1');
 NS1.set_api_key(config.get('nsone.api_key'));
 
 exports.getDnsZones = function(request, reply) {
-  var accountIds = utils.getAccountID(request);
-  dnsZones.accountListZones(accountIds, function (error, zones) {
-    renderJSON(request, reply, error, zones);
+  dnsZones.list(function (error, zones) {
+    var responseZones = [];
+    zones.forEach(function(zone) {
+      if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
+        responseZones.push(zone);
+      }
+    });
+    renderJSON(request, reply, error, responseZones);
   });
 };
 
@@ -133,8 +140,8 @@ exports.deleteDnsZone = function(request, reply) {
         throw new Error('DNS zone does not exists');
       } else {
         // Check account access
-        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
-          throw new Error('Account ID not found');
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+          throw new Error('DNS zone not found');
         } else {
           foundDnsZone = dnsZone;
           return Promise.resolve(true);
@@ -167,9 +174,15 @@ exports.deleteDnsZone = function(request, reply) {
     });
 };
 
-exports.getDnsZone = function(request, reply) {
+exports.updateDnsZone = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
+  var payload = request.payload;
   var foundDnsZone;
+
+  var statusResponse = {
+    statusCode: 200,
+    message: 'Successfully updated the DNS zone'
+  };
 
   return Promise.try(function() {
     return dnsZones.getAsync(zoneId);
@@ -180,8 +193,55 @@ exports.getDnsZone = function(request, reply) {
         throw new Error('DNS zone does not exists');
       } else {
         // Check account access
-        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
-          throw new Error('Account ID not found');
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+          throw new Error('DNS zone not found');
+        } else {
+          foundDnsZone = dnsZone;
+          return Promise.resolve(true);
+        }
+      }
+    })
+    .then(function() {
+      return NS1.Zone.find(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          return nsoneZone;
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone does not exists');
+        });
+    })
+    .then(function(updatingNsonsZone) {
+      return updatingNsonsZone.update(payload.zone_body)
+        .then(function(updatedNsoneZone) {
+          return Promise.resolve(true);
+        })
+        .catch(function(error) {
+          throw new Error('Cannot update the DNS zone with provided body');
+        });
+    })
+    .then(function(result) {
+      renderJSON(request, reply, null, statusResponse);
+    })
+    .catch(function(error) {
+      return reply(boom.badRequest(error.message));
+    });
+};
+
+exports.getDnsZone = function(request, reply) {
+  var zoneId = request.params.dns_zone_id;
+  var foundDnsZone;
+
+  return Promise.try(function() {
+    return dnsZones.getAsync(zoneId);
+  })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone) {
+        throw new Error('DNS zone not found');
+      } else {
+        // Check account access
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+          throw new Error('DNS zone not found');
         } else {
           foundDnsZone = dnsZone;
           return true;
@@ -191,8 +251,8 @@ exports.getDnsZone = function(request, reply) {
     .then(function() {
       return NS1.Zone.find(foundDnsZone.zone)
         .then(function(nsoneZone) {
-          foundDnsZone.records = nsoneZone.records;
-          return true;
+          foundDnsZone.records = nsoneZone.attributes.records;
+          return Promise.resolve(true);
         })
         .catch(function(error) {
           throw new Error('DNS zone does not exists');
@@ -225,8 +285,8 @@ exports.createDnsZoneRecord = function(request, reply) {
         throw new Error('DNS zone does not exists');
       } else {
         // Check account access
-        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
-          throw new Error('Account ID not found');
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+          throw new Error('DNS zone not found');
         } else {
           foundDnsZone = dnsZone;
           return Promise.resolve(true);
@@ -269,7 +329,7 @@ exports.createDnsZoneRecord = function(request, reply) {
           return newNsoneRecord;
         })
         .catch(function(error) {
-          throw new Error('Cannot create new DNS zone record');
+          throw new Error('Cannot create new DNS zone record with provided body');
         });
     })
     .then(function(createdNsoneRecord) {
@@ -299,7 +359,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
         throw new Error('DNS zone does not exists');
       } else {
         // Check account access
-        if (!utils.checkUserAccessPermissionToAccount(request, dnsZone.account_id)) {
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
           throw new Error('Account ID not found');
         } else {
           foundDnsZone = dnsZone;
@@ -351,5 +411,68 @@ exports.updateDnsZoneRecord = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var payload = request.payload;
   var foundDnsZone;
-  //
+
+  var statusResponse = {
+    statusCode: 200,
+    message: 'Successfully updated the DNS zone record'
+  };
+
+  return Promise.try(function() {
+    return dnsZones.getAsync(zoneId);
+  })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone) {
+        throw new Error('DNS zone does not exists');
+      } else {
+        // Check account access
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+          throw new Error('DNS zone not found');
+        } else {
+          foundDnsZone = dnsZone;
+          return Promise.resolve(true);
+        }
+      }
+    })
+    .then(function() {
+      if (payload.record_domain.indexOf(foundDnsZone.zone) === -1) {
+        throw new Error('Invalid DNS zone provided for the record domain');
+      }
+
+      return NS1.Zone.find(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          return Promise.resolve(true);
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone does not exists');
+        });
+    })
+    .then(function() {
+      var recordQuery = foundDnsZone.zone + '/' + payload.record_domain + '/' + payload.record_type;
+      return NS1.Record.find(recordQuery)
+        .then(function(nsoneRecord) {
+          return nsoneRecord;
+        })
+        .catch(function(error) {
+          throw new Error('DNS zone record does not exists');
+        });
+    })
+    .then(function(nsoneRecord) {
+      var updatingRecord = {
+        'answers': payload.record_body
+      };
+      return nsoneRecord.update(updatingRecord)
+        .then(function(updatedNsoneRecord) {
+          return updatedNsoneRecord;
+        })
+        .catch(function(error) {
+          throw new Error('Cannot update the DNS zone record with provided body');
+        });
+    })
+    .then(function(updatedNsoneRecord) {
+      renderJSON(request, reply, null, statusResponse);
+    })
+    .catch(function(error) {
+      return reply(boom.badRequest(error.message));
+    });
 };

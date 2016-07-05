@@ -63,15 +63,15 @@ DNSZone.prototype = {
       callback(err, doc);
     });
   },
-  accountListZones: function(aids, callback) {
-    this.model.find({account_id: {$in: aids}}, {_id: 1, zone: 1}, function(err, dnsZones) {
+  list: function(callback) {
+    this.model.find({}, function(err, dnsZones) {
       if (dnsZones) {
         dnsZones = utils.clone(dnsZones).map(function(dnsZone) {
           return {
             id: dnsZone._id + '',
             zone: dnsZone.zone,
             account_id: dnsZone.account_id
-          }
+          };
         });
       } else {
         dnsZones = null;

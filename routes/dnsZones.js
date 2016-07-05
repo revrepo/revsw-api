@@ -104,6 +104,37 @@ module.exports = [
     }
   },
   {
+    method: 'PUT',
+    path: '/v1/dns_zones/{dns_zone_id}',
+    config: {
+      auth: {
+        scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
+      },
+      handler: dnsZone.updateDnsZone,
+      description: 'Update a customer DNS Zone',
+      notes: 'This function should be used by a company admin to update an DNS zone',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          dns_zone_id: Joi.objectId().required().description('DNS zone id of zone to be updated')
+        },
+        payload: {
+          zone_body: Joi.object().required()
+            .description('DNS zone update body with updating parameters')
+          // TODO: Declare valid keys available for update
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+  {
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}',
     config: {
@@ -131,7 +162,7 @@ module.exports = [
   },
   {
     method: 'POST',
-    path: '/v1/dns_zones/{dns_zone_id}',
+    path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -151,14 +182,13 @@ module.exports = [
         },
 
         payload: {
-          account_id: Joi.objectId().required().trim()
-            .description('ID of a company the new DNS zone record should be created for'),
           record_type: Joi.string().required()
             .description('DNS zone record type to be created'),
           record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
             .description('DNS zone record domain to be used in record'),
           record_body: Joi.array().required()
             .description('DNS zone record body')
+          // TODO: Implement valid body schema
         }
       },
       response: {
@@ -168,7 +198,7 @@ module.exports = [
   },
   {
     method: 'DELETE',
-    path: '/v1/dns_zones/{dns_zone_id}',
+    path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -201,7 +231,7 @@ module.exports = [
   },
   {
     method: 'PUT',
-    path: '/v1/dns_zones/{dns_zone_id}',
+    path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -227,6 +257,7 @@ module.exports = [
             .description('DNS zone record domain to be updated'),
           record_body: Joi.array().required()
             .description('DNS zone record update body')
+          // TODO: Implement valid body schema
         }
       },
       response: {
