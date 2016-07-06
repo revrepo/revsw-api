@@ -124,9 +124,14 @@ module.exports = [
           dns_zone_id: Joi.objectId().required().description('DNS zone id of zone to be updated')
         },
         payload: {
-          zone_body: Joi.object().required()
+          zone_body: Joi.object().keys({
+            refresh: Joi.number().integer().optional().description('DNS zone refresh parameter'),
+            retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
+            expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
+            nx_ttl: Joi.number().integer().optional().description('DNS zone nx ttl parameter'),
+            ttl: Joi.number().integer().optional().description('DNS zone ttl parameter')
+          }).required()
             .description('DNS zone update body with updating parameters')
-          // TODO: Declare valid keys available for update
         }
       },
       response: {
@@ -186,9 +191,11 @@ module.exports = [
             .description('DNS zone record type to be created'),
           record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
             .description('DNS zone record domain to be used in record'),
-          record_body: Joi.array().required()
+          record_body: Joi.object().keys({
+            answers: Joi.array().required().description('DNS zone record answers'),
+            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
+          }).required()
             .description('DNS zone record body')
-          // TODO: Implement valid body schema
         }
       },
       response: {
@@ -255,9 +262,11 @@ module.exports = [
             .description('DNS zone record type to be updated'),
           record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
             .description('DNS zone record domain to be updated'),
-          record_body: Joi.array().required()
-            .description('DNS zone record update body')
-          // TODO: Implement valid body schema
+          record_body: Joi.object().keys({
+            answers: Joi.array().optional().description('DNS zone record answers'),
+            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
+          }).required()
+            .description('DNS zone record body')
         }
       },
       response: {
