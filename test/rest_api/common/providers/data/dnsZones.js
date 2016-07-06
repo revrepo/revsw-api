@@ -49,6 +49,24 @@ var DNSZonesDataProvider = {
       'dns_zone': (_prefix + '-' + Date.now() + '.net').toLowerCase(),
       'account_id': accountId
     };
+  },
+
+  generateRecordOne: function (zone) {
+    return {
+      'record_type': 'A',
+      'record_domain': 'domain-' + Date.now() + '.' + zone,
+      'record_body': {
+        'ttl': 200,
+        'answers': [
+          {
+            'answer': ['1.1.1.1']
+          },
+          {
+            'answer': ['1.2.3.4']
+          }
+        ]
+      }
+    };
   }
 };
 
