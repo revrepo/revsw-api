@@ -139,20 +139,25 @@ DomainConfig.prototype = {
     return this.model.find(where, fields).exec();
   },
 
-  // returns _promise_ {
-  //   domain_to_acc_id_map: {
-  //     domain_name: account_id,
-  //     ...
-  //   },
-  //   domain_to_acc_id_wildcards: [{account_id,regex}],
-  //   account_domains_count: {
-  //     account_id: {
-  //       total: X, deleted: Y, active: Z, ssl_enabled: S
-  //     }, ....
-  //   }
-  // }
 
-  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  /**
+   *  domain's data for the given account
+   *
+   *  @param {[string,]|string|null} - account_id can be array of IDs, one ID(string) or
+   *    nothing to return data for all accounts
+   *  @return {promise({
+   *    domain_to_acc_id_map: {
+   *      domain_name: account_id,
+   *      ...
+   *    },
+   *    domain_to_acc_id_wildcards: [{account_id,regex}],
+   *    account_domains_count: {
+   *      account_id: {
+   *        total: X, deleted: Y, active: Z, ssl_enabled: S
+   *      }, ....
+   *    }
+   *  })}
+   */
   accountDomainsData: function( account_id ) {
 
     var where = account_id ?
@@ -218,11 +223,12 @@ DomainConfig.prototype = {
           }
 
           // TODO temporarily disabling the collection of SSL data - later the data should be take from ssl_names
-//          if ( item.proxy_config &&
-//              item.proxy_config.rev_component_bp &&
-//              item.proxy_config.rev_component_bp.enable_security ) {
-//            ++dist[accountID].ssl_enabled;
-//          }
+          // if ( item.proxy_config &&
+          //      item.proxy_config.rev_component_bp &&
+          //      item.proxy_config.rev_component_bp.enable_security ) {
+          //   ++dist[accountID].ssl_enabled;
+          // }
+
           ++dist[accountID].total;
         });
         return {
@@ -233,8 +239,13 @@ DomainConfig.prototype = {
       });
   },
 
-  //  returns _promise_ [] with domain names for the given account(s)
-  //  account_id can be either ID(string), an array of IDs or an empty string for all accounts (revadmin)
+  /**
+   *  domain names list for the given account(s)
+   *
+   *  @param {[string,]|string|null} - account_id can be array of IDs, one ID(string) or
+   *    nothing to return data for all accounts
+   *  @return {promise([string,])}
+   */
   domainsListForAccount: function( account_id ) {
 
     var where = account_id ?
@@ -250,8 +261,15 @@ DomainConfig.prototype = {
       });
   },
 
-  //  returns _promise_ {} with account_ids as keys and [] of domain names as a value
-  //  account_id can be either ID(string) or an array of IDs
+  /**
+   *  domain names list for the given account(s)
+   *
+   *  @param {[string,]|string} - account_id can be array of IDs or one ID(string)
+   *  @return {promise({
+   *    accID: [string,],
+   *    accID: [string,],
+   *  })}
+   */
   domainsListForAccountGrouped: function( account_id ) {
 
     if ( !account_id ) {
