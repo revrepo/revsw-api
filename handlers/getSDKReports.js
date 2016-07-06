@@ -1697,7 +1697,11 @@ exports.getTopObjects5xx = function( request, reply ) {
         logger.warn( 'indicesList: ' + indicesList );
         logger.warn( 'error: ' + error.toString() );
 
-        return reply(boom.badImplementation('Failed to retrieve data from ES'));
+        return reply(boom.badImplementation('Failed to retrieve data from ES, query: ' +
+          JSON.stringify(requestBody) +
+          ', indices: ' + indicesList +
+          ', message: ' + error.toString()
+          ) );
       });
 
   });
