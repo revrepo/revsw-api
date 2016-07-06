@@ -68,7 +68,7 @@ module.exports = [
         payload: {
           account_id: Joi.objectId().required().trim()
             .description('ID of a company the new DNS Zone should be created for'),
-          dns_zone: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          zone: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
               .description('DNS zone to be created for a company')
         }
       },
@@ -124,14 +124,17 @@ module.exports = [
           dns_zone_id: Joi.objectId().required().description('DNS zone id of zone to be updated')
         },
         payload: {
-          zone_body: Joi.object().keys({
             refresh: Joi.number().integer().optional().description('DNS zone refresh parameter'),
             retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
             expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
             nx_ttl: Joi.number().integer().optional().description('DNS zone nx ttl parameter'),
             ttl: Joi.number().integer().optional().description('DNS zone ttl parameter')
-          }).required()
-            .description('DNS zone update body with updating parameters')
+            // TODO: add secondary zone
+            // secondary: Joi.object().optional().keys({
+            //   enabled: Joi.boolean().required(),
+            //   primary_ip:Joi.number().required(),
+            //   primary_port:Joi.string().optional()
+            // }).description('If the zone is a secondary zone')
         }
       },
       response: {
