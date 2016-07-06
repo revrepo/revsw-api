@@ -43,8 +43,19 @@ var Nsone = require('../lib/nsone.js');
 exports.getDnsZones = function(request, reply) {
   dnsZones.list(function (error, zones) {
     var responseZones = [];
+    var callRerordsPromisies = [];
     zones.forEach(function(zone) {
       if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
+        // TODO: call each domain and get inforamtion about Records
+        // callRerordsPromisies.push(function(zone){return Nsone.getDnsZone(zone)
+        //   .then(function(nsoneZone) {
+        //     // Zone found at NS1, update it
+        //     return nsoneZone;
+        //   })
+        //   .catch(function(error) {
+        //     // throw error;/
+        //   });
+        // })
         responseZones.push(zone);
       }
     });
@@ -54,8 +65,10 @@ exports.getDnsZones = function(request, reply) {
 
 exports.createDnsZone = function(request, reply) {
   var payload = request.payload;
+  var newDnsZone = request.payload;
+  var createdBy = utils.generateCreatedByField(request);
   var accountId = payload.account_id;
-  var zone = payload.dns_zone;
+  var zone = payload.zone;
   var statusResponse;
 
   return Promise.try(function() {
@@ -101,12 +114,11 @@ exports.createDnsZone = function(request, reply) {
         });
     })
     .then(function(nsoneZone) {
-      // prepare paylod for mongoose DNSZone model
-      payload.zone = zone;
-      delete payload.dns_zone;
-
+      // prepare newDnsZone(paylod data) for mongoose DNSZone model
+      newDnsZone.created_by = createdBy;
+      newDnsZone.updated_by = createdBy;
       // create DNSZone doc
-      return dnsZones.addAsync(payload);
+      return dnsZones.addAsync(newDnsZone);
     })
     .then(function(newZone) {
       // zone successfully added in db
@@ -223,7 +235,8 @@ exports.deleteDnsZone = function(request, reply) {
 
 exports.updateDnsZone = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
-  var payload = request.payload;
+  var zoneBody = request.payload;
+  var createdBy = utils.generateCreatedByField(request);
   var foundDnsZone;
   var statusResponse;
 
@@ -258,11 +271,15 @@ exports.updateDnsZone = function(request, reply) {
         });
     })
     .then(function(updatingNsonsZone) {
-      // Update the zone with zone_body
-      return Nsone.updateDnsZone(updatingNsonsZone, payload.zone_body)
+      // Update the zone with zoneBody
+      return Nsone.updateDnsZone(updatingNsonsZone, zoneBody)
         .then(function(updatedNsoneZone) {
           // successfully updated the zone
-          return Promise.resolve(true);
+          // update local data
+          zoneBody._id= zoneId;
+          zoneBody.updated_at = new Date();
+          zoneBody.updated_by = createdBy;
+          return dnsZones.updateAsync(zoneBody);//Promise.resolve(true);
         })
         .catch(function(error) {
           throw error;
