@@ -35,6 +35,14 @@ var resourceConfig = {
     Methods.DELETE
   ],
   nestedResources: [
+    {
+      name: 'records',
+      path: '/records',
+      methods: [
+        Methods.CREATE,
+        Methods.DELETE_DATA
+      ]
+    }
   ]
 };
 
