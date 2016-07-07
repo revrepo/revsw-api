@@ -227,10 +227,10 @@ module.exports = [
           dns_zone_id: Joi.objectId().required().description('DNS zone id')
         },
 
-        payload: {
-          record_type: Joi.string().required()
+        query: {
+          type: Joi.string().required()
             .description('DNS zone record type to be deleted'),
-          record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
             .description('DNS zone record domain to be deleted')
         }
       },

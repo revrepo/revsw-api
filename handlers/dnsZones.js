@@ -494,6 +494,8 @@ exports.createDnsZoneRecord = function(request, reply) {
 exports.deleteDnsZoneRecord = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var payload = request.payload;
+  var recordDomain = request.query.domain;
+  var recordType = request.query.type;
   var foundDnsZone;
   var statusResponse;
 
@@ -515,7 +517,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
       }
     })
     .then(function() {
-      if (payload.record_domain.indexOf(foundDnsZone.zone) === -1) {
+      if (recordDomain.indexOf(foundDnsZone.zone) === -1) {
         throw new Error('Invalid DNS zone provided for the record domain');
       }
 
@@ -528,7 +530,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
         });
     })
     .then(function() {
-      return Nsone.getDnsZoneRecord(foundDnsZone.zone, payload.record_domain, payload.record_type)
+      return Nsone.getDnsZoneRecord(foundDnsZone.zone, recordDomain, recordType)
         .then(function(nsoneRecord) {
           return nsoneRecord;
         })
