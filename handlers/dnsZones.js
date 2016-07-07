@@ -41,34 +41,97 @@ var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getCon
 var Nsone = require('../lib/nsone.js');
 
 exports.getDnsZones = function(request, reply) {
-  dnsZones.list(function(error, zones) {
-    var responseZones = [];
-    var callRerordsPromisies = [];
-    zones.forEach(function(zone) {
-      if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
-        responseZones.push(zone);
-        // NOTE: call additional inforamtion about DNS Zone
-        callRerordsPromisies.push(
-          Promise.try(function() {
-            return Nsone.getDnsZone(zone.zone)
-              .then(function(nsoneZone) {
-                // Zone found at NS1, add additional information
-                zone.records_count = nsoneZone.records.length;
-                return nsoneZone;
-              })
-              .catch(function(error) {
-                return Promise.resolve({});
-              });
-          })
-        );
+  return Promise.try(function() {
+      return dnsZones.listAsync();
+    })
+    .then(function(zones) {
+      var responseZones = [];
+      var callRerordsPromises = [];
+      zones.forEach(function(zone) {
+        if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
+          responseZones.push(zone);
+          // NOTE: call additional inforamtion about DNS Zone
+          callRerordsPromises.push(
+            Promise.try(function() {
+              return Nsone.getDnsZone(zone.zone)
+                .then(function(nsoneZone) {
+                  // Zone found at NS1, add additional information
+                  zone.records_count = nsoneZone.records.length;
+                  return nsoneZone;
+                })
+                .catch(function(error) {
+                  return Promise.resolve({});
+                });
+            })
+          );
+        }
+      });
+      // NOTE: Back the response after get additional information
+      return Promise.all(callRerordsPromises)
+        .then(function(data) {
+          return responseZones;
+        });
+    })
+    .then(function(responseZones) {
+      renderJSON(request, reply, null, responseZones);
+    })
+    .catch(function(error) {
+      if (error.message) {
+        return reply(boom.badRequest(error.message));
+      } else {
+        logger.error('Unhandled error at handlers/dnsZone:getDnsZones');
+        return reply(boom.badImplementation('Unhandled Internal Server Error'));
       }
     });
-    // NOTE: Back response after get addinional inform
-    Promise.all(callRerordsPromisies)
-      .then(function(data) {
-        renderJSON(request, reply, error, responseZones);
+};
+
+exports.getDnsZonesStatsUsage = function(request, reply) {
+  return Promise.try(function() {
+      return dnsZones.listAsync();
+    })
+    .then(function(zones) {
+      var responseZones = [];
+      zones.forEach(function(zone) {
+        if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
+          responseZones.push(zone);
+        }
       });
-  });
+      return responseZones;
+    })
+    .then(function(responseZones) {
+      return Nsone.getDnsZonesUsage()
+        .then(function(zonesUsage) {
+          // Add usage stats to response zones
+          zonesUsage.forEach(function(usageStats) {
+            responseZones.forEach(function(dnsZone) {
+              if (usageStats.zone === dnsZone.zone) {
+                dnsZone.records_count = usageStats.records;
+                dnsZone.queries_count = usageStats.queries;
+              }
+            });
+          });
+          return responseZones;
+        })
+        .catch(function(error) {
+          throw error;
+        });
+    })
+    .then(function(responseZones) {
+      renderJSON(request, reply, null, responseZones);
+    })
+    .catch(function(error) {
+      if (error.message) {
+        // NS1 API request timeout of <x>ms exceeded
+        if (/timeout of /.test(error.message)) {
+          return reply(boom.badRequest('DNS service unable to process your request now, try again later'));
+        } else {
+          return reply(boom.badImplementation(error.message));
+        }
+      } else {
+        logger.error('Unhandled error at handlers/dnsZone:getDnsZonesStatsUsage');
+        return reply(boom.badImplementation('Unhandled Internal Server Error'));
+      }
+    });
 };
 
 exports.createDnsZone = function(request, reply) {

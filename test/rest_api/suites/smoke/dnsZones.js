@@ -76,6 +76,19 @@ describe('Smoke check', function () {
           .catch(done);
     });
 
+    it('should return success response code when getting a list of dns zones with usage stats', function (done) {
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function () {
+          API.resources.dnsZones
+            .usage()
+            .getAll()
+            .expect(200)
+            .end(done);
+        })
+        .catch(done);
+    });
+
     it('should return success response code when creating new dns zone', function (done) {
         firstDnsZone = DNSZonesDP.generateOne(account.id);
         API.helpers
@@ -109,7 +122,7 @@ describe('Smoke check', function () {
     });
 
     it('should return success response code when creating new dns zone record', function (done) {
-      firstDnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.dns_zone);
+      firstDnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.zone);
       API.helpers
         .authenticateUser(reseller)
         .then(function () {

@@ -40,13 +40,13 @@ var DNSZonesDataProvider = {
    *
    *     {
    *         account_id: string
-   *         dns_zone: string
+   *         zone: string
    *     }
    */
   generateOne: function (accountId, prefix) {
     var _prefix = prefix || this.prefix;
     return {
-      'dns_zone': (_prefix + '-' + Date.now() + '.net').toLowerCase(),
+      'zone': (_prefix + '-' + Date.now() + '.net').toLowerCase(),
       'account_id': accountId
     };
   },
