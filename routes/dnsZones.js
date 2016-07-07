@@ -49,6 +49,28 @@ module.exports = [
     }
   },
   {
+    method: 'GET',
+    path: '/v1/dns_zones/stats/usage',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZone.getDnsZonesStatsUsage,
+      description: 'Get a list of DNS zones owned by company with usage stats',
+      notes: 'Use this function to get a list of DNS zones owned by your company account with ' +
+             'usage stats included for each zone',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.listOfDNSZonesModel
+      }
+    }
+  },
+  {
     method: 'POST',
     path: '/v1/dns_zones',
     config: {
