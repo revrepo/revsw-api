@@ -42,16 +42,35 @@ var Nsone = require('../lib/nsone.js');
 
 exports.getDnsZones = function(request, reply) {
   return Promise.try(function() {
-    return dnsZones.listAsync();
-  })
-    .then(function (zones) {
+      return dnsZones.listAsync();
+    })
+    .then(function(zones) {
       var responseZones = [];
+      var callRerordsPromises = [];
       zones.forEach(function(zone) {
         if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
           responseZones.push(zone);
+          // NOTE: call additional inforamtion about DNS Zone
+          callRerordsPromises.push(
+            Promise.try(function() {
+              return Nsone.getDnsZone(zone.zone)
+                .then(function(nsoneZone) {
+                  // Zone found at NS1, add additional information
+                  zone.records_count = nsoneZone.records.length;
+                  return nsoneZone;
+                })
+                .catch(function(error) {
+                  return Promise.resolve({});
+                });
+            })
+          );
         }
       });
-      return responseZones;
+      // NOTE: Back the response after get additional information
+      return Promise.all(callRerordsPromises)
+        .then(function(data) {
+          return responseZones;
+        });
     })
     .then(function(responseZones) {
       renderJSON(request, reply, null, responseZones);
@@ -68,9 +87,9 @@ exports.getDnsZones = function(request, reply) {
 
 exports.getDnsZonesStatsUsage = function(request, reply) {
   return Promise.try(function() {
-    return dnsZones.listAsync();
-  })
-    .then(function (zones) {
+      return dnsZones.listAsync();
+    })
+    .then(function(zones) {
       var responseZones = [];
       zones.forEach(function(zone) {
         if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
@@ -124,13 +143,13 @@ exports.createDnsZone = function(request, reply) {
   var statusResponse;
 
   return Promise.try(function() {
-    // Check account access
-    if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
-      throw new Error('Account ID not found');
-    }
-    // Get DNS zone by dns_zone domain
-    return dnsZones.getByZoneAsync(zone);
-  })
+      // Check account access
+      if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+        throw new Error('Account ID not found');
+      }
+      // Get DNS zone by dns_zone domain
+      return dnsZones.getByZoneAsync(zone);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (dnsZone) {
@@ -214,9 +233,9 @@ exports.deleteDnsZone = function(request, reply) {
   var statusResponse;
 
   return Promise.try(function() {
-    // get DNS zone by id
-    return dnsZones.getAsync(zoneId);
-  })
+      // get DNS zone by id
+      return dnsZones.getAsync(zoneId);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
@@ -256,7 +275,7 @@ exports.deleteDnsZone = function(request, reply) {
     })
     .then(function(result) {
       // DNS zone successfully removed from NS1 and DNSZone collection
-      statusResponse  = {
+      statusResponse = {
         statusCode: 200,
         message: 'Successfully deleted the DNS zone'
       };
@@ -293,9 +312,9 @@ exports.updateDnsZone = function(request, reply) {
   var statusResponse;
 
   return Promise.try(function() {
-    // Get DNS zone by id
-    return dnsZones.getAsync(zoneId);
-  })
+      // Get DNS zone by id
+      return dnsZones.getAsync(zoneId);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
@@ -328,10 +347,10 @@ exports.updateDnsZone = function(request, reply) {
         .then(function(updatedNsoneZone) {
           // successfully updated the zone
           // update local data
-          zoneBody._id= zoneId;
+          zoneBody._id = zoneId;
           zoneBody.updated_at = new Date();
           zoneBody.updated_by = createdBy;
-          return dnsZones.updateAsync(zoneBody);//Promise.resolve(true);
+          return dnsZones.updateAsync(zoneBody); //Promise.resolve(true);
         })
         .catch(function(error) {
           throw error;
@@ -376,8 +395,8 @@ exports.getDnsZone = function(request, reply) {
   var foundDnsZone;
 
   return Promise.try(function() {
-    return dnsZones.getAsync(zoneId);
-  })
+      return dnsZones.getAsync(zoneId);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
@@ -446,8 +465,8 @@ exports.createDnsZoneRecord = function(request, reply) {
   var statusResponse;
 
   return Promise.try(function() {
-    return dnsZones.getAsync(zoneId);
-  })
+      return dnsZones.getAsync(zoneId);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
@@ -487,11 +506,11 @@ exports.createDnsZoneRecord = function(request, reply) {
     })
     .then(function() {
       return Nsone.createDnsZoneRecord(
-        foundDnsZone.zone,
-        payload.record_domain,
-        payload.record_type,
-        payload.record_body
-      )
+          foundDnsZone.zone,
+          payload.record_domain,
+          payload.record_type,
+          payload.record_body
+        )
         .then(function(newNsoneRecord) {
           return newNsoneRecord;
         })
@@ -538,12 +557,14 @@ exports.createDnsZoneRecord = function(request, reply) {
 exports.deleteDnsZoneRecord = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var payload = request.payload;
+  var recordDomain = request.query.domain;
+  var recordType = request.query.type;
   var foundDnsZone;
   var statusResponse;
 
   return Promise.try(function() {
-    return dnsZones.getAsync(zoneId);
-  })
+      return dnsZones.getAsync(zoneId);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
@@ -559,7 +580,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
       }
     })
     .then(function() {
-      if (payload.record_domain.indexOf(foundDnsZone.zone) === -1) {
+      if (recordDomain.indexOf(foundDnsZone.zone) === -1) {
         throw new Error('Invalid DNS zone provided for the record domain');
       }
 
@@ -572,7 +593,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
         });
     })
     .then(function() {
-      return Nsone.getDnsZoneRecord(foundDnsZone.zone, payload.record_domain, payload.record_type)
+      return Nsone.getDnsZoneRecord(foundDnsZone.zone, recordDomain, recordType)
         .then(function(nsoneRecord) {
           return nsoneRecord;
         })
@@ -590,7 +611,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
         });
     })
     .then(function() {
-      statusResponse  = {
+      statusResponse = {
         statusCode: 200,
         message: 'Successfully deleted the DNS zone record'
       };
@@ -632,8 +653,8 @@ exports.updateDnsZoneRecord = function(request, reply) {
   var statusResponse;
 
   return Promise.try(function() {
-    return dnsZones.getAsync(zoneId);
-  })
+      return dnsZones.getAsync(zoneId);
+    })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
       if (!dnsZone) {
@@ -680,7 +701,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
         });
     })
     .then(function(updatedNsoneRecord) {
-      statusResponse  = {
+      statusResponse = {
         statusCode: 200,
         message: 'Successfully updated the DNS zone record'
       };
