@@ -42,6 +42,13 @@ var resourceConfig = {
         Methods.CREATE,
         Methods.DELETE_DATA
       ]
+    },
+    {
+      name: 'usage',
+      path: '/stats/usage',
+      methods: [
+        Methods.READ_ALL
+      ]
     }
   ]
 };
