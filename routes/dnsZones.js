@@ -262,7 +262,7 @@ module.exports = [
   },
   {
     method: 'DELETE',
-    path: '/v1/dns_zones/{dns_zone_id}/records',
+    path: '/v1/dns_zones/{dns_zone_id}/records/{dns_zone_record_id}',
     config: {
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -278,15 +278,17 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id')
-        },
-
-        query: {
-          type: Joi.string().required()
-            .description('DNS zone record type to be deleted'),
-          domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
-            .description('DNS zone record domain to be deleted')
+          dns_zone_id: Joi.objectId().required().description('DNS zone id'),
+          dns_zone_record_id: Joi.objectId().required().description('DNS zone record id')
         }
+        // ,
+        //
+        // query: {
+        //   type: Joi.string().required()
+        //     .description('DNS zone record type to be deleted'),
+        //   domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+        //     .description('DNS zone record domain to be deleted')
+        // }
       },
       response: {
         schema: routeModels.statusModel
@@ -295,7 +297,7 @@ module.exports = [
   },
   {
     method: 'PUT',
-    path: '/v1/dns_zones/{dns_zone_id}/records',
+    path: '/v1/dns_zones/{dns_zone_id}/records/{dns_zone_record_id}',
     config: {
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
@@ -311,24 +313,48 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id')
+          dns_zone_id: Joi.objectId().required().description('DNS zone id'),
+          dns_zone_record_id: Joi.objectId().required().description('DNS zone record id')
         },
-
         payload: {
-          record_type: Joi.string().required()
-            .description('DNS zone record type to be updated'),
-          record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          domain: Joi.string().required().trim().lowercase()//.regex(routeModels.domainRegex)
             .description('DNS zone record domain to be updated'),
-          record_body: Joi.object().keys({
+          zone: Joi.string().optional()
+           .description('DNS zone'),
+          type: Joi.string().required()
+            .description('DNS zone record type to be updated'),
+          link: Joi.string().optional().allow(null).allow(''),
+          use_client_subnet: Joi.boolean().required(),
             answers: Joi.array().optional().description('DNS zone record answers'),
-            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
-          }).required()
-            .description('DNS zone record body')
+            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter'),
+            tier: Joi.number().integer().optional().description('DNS zone record tier parameter')
+
         }
       },
       response: {
         schema: routeModels.statusModel
       }
     }
-  }
+  },
+  {
+    method: 'GET',
+    path: '/v1/dns_zones/{dns_zone_id}/records/{dns_zone_record_id}',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZone.getDnsZoneRecord,
+      description: 'Get a DNS zone record',
+      notes: 'Use this function to get a DNS zone record',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      // response: {
+      //   schema: routeModels.listOfDNSZonesModel
+      // }
+    }
+  },
 ];
