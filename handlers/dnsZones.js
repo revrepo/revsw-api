@@ -458,9 +458,82 @@ exports.getDnsZone = function(request, reply) {
     });
 };
 
+
+exports.getDnsZoneRecords = function(request, reply) {
+  var zoneId = request.params.dns_zone_id;
+  var foundDnsZone;
+  var responseZoneRecords = [];
+  return Promise.try(function() {
+      return dnsZones.getAsync(zoneId);
+    })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone) {
+        throw new Error('DNS zone not found');
+      } else {
+        // Check account access
+        if (!utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+          throw new Error('DNS zone not found');
+        } else {
+          foundDnsZone = dnsZone;
+          return true;
+        }
+      }
+    })
+    .then(function() {
+      return Nsone.getDnsZone(foundDnsZone.zone)
+        .then(function(nsoneZone) {
+          return nsoneZone;
+        })
+        .catch(function(error) {
+          throw error;
+        });
+    })
+    .then(function(nsoneZone) {
+      nsoneZone.records.forEach(function(record) {
+          var sendRecord =  {
+            id: record.id,
+            dns_zone_id: zoneId,
+            type: record.type,
+            short_answers: record.short_answers,
+            domain: record.domain,
+            tier: record.tier
+          };
+          // NOTE: prepare record info for list
+          responseZoneRecords.push(sendRecord);
+      });
+      renderJSON(request, reply, null, responseZoneRecords);
+    })
+    .catch(function(error) {
+      if (error.message) {
+        // NS1 API request timeout of <x>ms exceeded
+        if (/timeout of /.test(error.message)) {
+          return reply(boom.badRequest('DNS service unable to process your request now, try again later'));
+        } else {
+          // Process NS1 Errors
+          if (/NS1 API Request Failed on/.test(error.message)) {
+            if (/Input validation failed/.test(error.message)) {
+              return reply('Invalid DNS zone provided');
+            }
+          } else if (/DNS zone not found/.test(error.message)) {
+            reply(boom.badRequest('DNS zone does not exist in the system'));
+          } else {
+            return reply(boom.badImplementation(error.message));
+          }
+        }
+      } else {
+        logger.error('Unhandled error at handlers/dnsZone:getDnsZone');
+        return reply(boom.badImplementation('Unhandled Internal Server Error'));
+      }
+    });
+};
+
 exports.createDnsZoneRecord = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var payload = request.payload;
+  var recordDomain = payload.domain;
+  var recordType = payload.type;
+  var recordBody = payload.record;
   var foundDnsZone;
   var statusResponse;
 
@@ -482,7 +555,7 @@ exports.createDnsZoneRecord = function(request, reply) {
       }
     })
     .then(function() {
-      if (payload.record_domain.indexOf(foundDnsZone.zone) === -1) {
+      if (recordDomain.indexOf(foundDnsZone.zone) === -1) {
         throw new Error('Invalid DNS zone provided for the record domain');
       }
 
@@ -495,7 +568,7 @@ exports.createDnsZoneRecord = function(request, reply) {
         });
     })
     .then(function() {
-      return Nsone.getDnsZoneRecord(foundDnsZone.zone, payload.record_domain, payload.record_type)
+      return Nsone.getDnsZoneRecord(foundDnsZone.zone, recordDomain, recordType)
         .then(function(nsoneRecord) {
           throw new Error('DNS zone record found');
         })
@@ -507,9 +580,9 @@ exports.createDnsZoneRecord = function(request, reply) {
     .then(function() {
       return Nsone.createDnsZoneRecord(
           foundDnsZone.zone,
-          payload.record_domain,
-          payload.record_type,
-          payload.record_body
+          recordDomain,
+          recordType,
+          recordBody
         )
         .then(function(newNsoneRecord) {
           return newNsoneRecord;

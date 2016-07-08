@@ -191,6 +191,33 @@ module.exports = [
     }
   },
   {
+    method: 'GET',
+    path: '/v1/dns_zones/{dns_zone_id}/records',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZone.getDnsZoneRecords,
+      description: 'Get a list of DNS Records',
+      notes: 'Use this function to get a list of DNS Records owned by DNS Zone',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          dns_zone_id: Joi.objectId().required().description('DNS zone id')
+        }
+      },
+      response: {
+        schema: routeModels.listOfDNSZoneRecordsModel
+      }
+    }
+  },
+
+  {
     method: 'POST',
     path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
@@ -212,11 +239,16 @@ module.exports = [
         },
 
         payload: {
-          record_type: Joi.string().required()
+          type: Joi.string().required()
             .description('DNS zone record type to be created'),
-          record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          domain: Joi.string().required().trim().lowercase()
             .description('DNS zone record domain to be used in record'),
-          record_body: Joi.object().keys({
+          record: Joi.object().keys({
+            zone: Joi.string().optional(),
+            type: Joi.string().required()
+              .description('DNS zone record type to be created'),
+            domain: Joi.string().required().trim().lowercase()
+              .description('DNS zone record domain to be used in record'),
             answers: Joi.array().required().description('DNS zone record answers'),
             ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
           }).required()
