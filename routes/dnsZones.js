@@ -49,6 +49,28 @@ module.exports = [
     }
   },
   {
+    method: 'GET',
+    path: '/v1/dns_zones/stats/usage',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZone.getDnsZonesStatsUsage,
+      description: 'Get a list of DNS zones owned by company with usage stats',
+      notes: 'Use this function to get a list of DNS zones owned by your company account with ' +
+             'usage stats included for each zone',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.listOfDNSZonesModel
+      }
+    }
+  },
+  {
     method: 'POST',
     path: '/v1/dns_zones',
     config: {
@@ -68,7 +90,7 @@ module.exports = [
         payload: {
           account_id: Joi.objectId().required().trim()
             .description('ID of a company the new DNS Zone should be created for'),
-          dns_zone: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          zone: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
               .description('DNS zone to be created for a company')
         }
       },
@@ -124,9 +146,17 @@ module.exports = [
           dns_zone_id: Joi.objectId().required().description('DNS zone id of zone to be updated')
         },
         payload: {
-          zone_body: Joi.object().required()
-            .description('DNS zone update body with updating parameters')
-          // TODO: Declare valid keys available for update
+            refresh: Joi.number().integer().optional().description('DNS zone refresh parameter'),
+            retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
+            expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
+            nx_ttl: Joi.number().integer().optional().description('DNS zone nx ttl parameter'),
+            ttl: Joi.number().integer().optional().description('DNS zone ttl parameter')
+            // TODO: add secondary zone
+            // secondary: Joi.object().optional().keys({
+            //   enabled: Joi.boolean().required(),
+            //   primary_ip:Joi.number().required(),
+            //   primary_port:Joi.string().optional()
+            // }).description('If the zone is a secondary zone')
         }
       },
       response: {
@@ -161,6 +191,33 @@ module.exports = [
     }
   },
   {
+    method: 'GET',
+    path: '/v1/dns_zones/{dns_zone_id}/records',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZone.getDnsZoneRecords,
+      description: 'Get a list of DNS Records',
+      notes: 'Use this function to get a list of DNS Records owned by DNS Zone',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          dns_zone_id: Joi.objectId().required().description('DNS zone id')
+        }
+      },
+      response: {
+        schema: routeModels.listOfDNSZoneRecordsModel
+      }
+    }
+  },
+
+  {
     method: 'POST',
     path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
@@ -182,13 +239,20 @@ module.exports = [
         },
 
         payload: {
-          record_type: Joi.string().required()
+          type: Joi.string().required()
             .description('DNS zone record type to be created'),
-          record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          domain: Joi.string().required().trim().lowercase()
             .description('DNS zone record domain to be used in record'),
-          record_body: Joi.array().required()
+          record: Joi.object().keys({
+            zone: Joi.string().optional(),
+            type: Joi.string().required()
+              .description('DNS zone record type to be created'),
+            domain: Joi.string().required().trim().lowercase()
+              .description('DNS zone record domain to be used in record'),
+            answers: Joi.array().required().description('DNS zone record answers'),
+            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
+          }).required()
             .description('DNS zone record body')
-          // TODO: Implement valid body schema
         }
       },
       response: {
@@ -217,10 +281,10 @@ module.exports = [
           dns_zone_id: Joi.objectId().required().description('DNS zone id')
         },
 
-        payload: {
-          record_type: Joi.string().required()
+        query: {
+          type: Joi.string().required()
             .description('DNS zone record type to be deleted'),
-          record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
+          domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
             .description('DNS zone record domain to be deleted')
         }
       },
@@ -255,9 +319,11 @@ module.exports = [
             .description('DNS zone record type to be updated'),
           record_domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
             .description('DNS zone record domain to be updated'),
-          record_body: Joi.array().required()
-            .description('DNS zone record update body')
-          // TODO: Implement valid body schema
+          record_body: Joi.object().keys({
+            answers: Joi.array().optional().description('DNS zone record answers'),
+            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
+          }).required()
+            .description('DNS zone record body')
         }
       },
       response: {

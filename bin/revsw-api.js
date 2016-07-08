@@ -23,18 +23,18 @@
 'use strict';
 
 var Hapi = require('hapi'),
-  Swagger = require('hapi-swagger'),
-  jwt = require('jsonwebtoken'),
-  Fs = require('fs'),
-  config = require('config'),
-  AuditLogger = require('../lib/audit'),
-  Pack = require('../package'),
-  validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
-  validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
-  User = require('../models/User'),
-  os = require('os'),
-  boom  = require('boom'),
-  mail = require('../lib/mail');
+    Swagger = require('hapi-swagger'),
+    jwt = require('jsonwebtoken'),
+    Fs = require('fs'),
+    config = require('config'),
+    AuditLogger = require('../lib/audit'),
+    Pack = require('../package'),
+    validateJWTToken = require('../handlers/validateJWTToken').validateJWTToken,
+    validateAPIKey = require('../handlers/validateAPIKey').validateAPIKey,
+    User = require('../models/User'),
+    os = require('os'),
+    boom  = require('boom'),
+    mail = require('../lib/mail');
 
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {

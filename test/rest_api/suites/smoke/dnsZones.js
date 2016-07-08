@@ -15,6 +15,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
+require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
@@ -27,6 +28,7 @@ describe('Smoke check', function () {
 
   var account;
   var firstDnsZone;
+  var firstDnsZoneRecord;
   var reseller = config.get('api.users.reseller');
   var revAdmin = config.get('api.users.revAdmin');
 
@@ -74,6 +76,19 @@ describe('Smoke check', function () {
           .catch(done);
     });
 
+    it('should return success response code when getting a list of dns zones with usage stats', function (done) {
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function () {
+          API.resources.dnsZones
+            .usage()
+            .getAll()
+            .expect(200)
+            .end(done);
+        })
+        .catch(done);
+    });
+
     it('should return success response code when creating new dns zone', function (done) {
         firstDnsZone = DNSZonesDP.generateOne(account.id);
         API.helpers
@@ -100,10 +115,75 @@ describe('Smoke check', function () {
             .getOne(firstDnsZone._id)
             .expect(200)
             .then(function(res) {
-              var responseJson = res.body;
-              console.log(responseJson);
               done();
             });
+        })
+        .catch(done);
+    });
+
+    it('should return success response code when creating new dns zone record', function (done) {
+      firstDnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.zone);
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function () {
+          API.resources.dnsZones
+            .records(firstDnsZone._id)
+            .createOne(firstDnsZoneRecord)
+            .expect(200)
+            .then(function (res) {
+              done();
+            })
+            .catch(done);
+        })
+        .catch(done);
+    });
+
+    it('should return a recently created dns zone records when getting a specific dns zone', function (done) {
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function () {
+          API.resources.dnsZones
+            .getOne(firstDnsZone._id)
+            .expect(200)
+            .then(function (res) {
+              res.body.records.length.should.equal(2); // 1 NS and recently created A record
+              done();
+            })
+            .catch(done);
+        })
+        .catch(done);
+    });
+
+    it('should return success response code when deleting a dns zone record', function (done) {
+      delete firstDnsZoneRecord.record_body;
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function () {
+          API.resources.dnsZones
+            .records(firstDnsZone._id)
+            .deleteOne(firstDnsZoneRecord)
+            .expect(200)
+            .then(function (res) {
+              done();
+            })
+            .catch(done);
+        })
+        .catch(done);
+    });
+
+    it('should return dns zone records when getting a specific dns zone after deleting dns zone record',
+      function (done) {
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function () {
+          API.resources.dnsZones
+            .getOne(firstDnsZone._id)
+            .expect(200)
+            .then(function (res) {
+              res.body.records.length.should.equal(1); // 1 NS
+              done();
+            })
+            .catch(done);
         })
         .catch(done);
     });

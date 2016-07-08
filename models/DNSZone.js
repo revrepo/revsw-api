@@ -34,7 +34,11 @@ function DNSZone(mongoose, connection, options) {
 
   this.DNSZoneSchema = new this.Schema({
     account_id: String,
-    zone: {type: String, lowercase: true}
+    zone: {type: String, lowercase: true},
+    created_at: {type: Date, default: Date.now},
+    created_by: {type: String,default: ''},
+    updated_at: {type: Date, default: Date.now},
+    updated_by: {type: String, default: ''}
   });
 
   this.model = connection.model('DNSZone', this.DNSZoneSchema, 'DNSZone');
@@ -70,7 +74,9 @@ DNSZone.prototype = {
           return {
             id: dnsZone._id + '',
             zone: dnsZone.zone,
-            account_id: dnsZone.account_id
+            account_id: dnsZone.account_id,
+            updated_at: dnsZone.updated_at,
+            updated_by: dnsZone.updated_by,
           };
         });
       } else {
