@@ -317,21 +317,12 @@ var BasicResource = function (data) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    _resource.deleteOne = function (object, query) {
-      var location;
-      if (typeof object === 'string') {
-        location = getPath(data, object);
-        object = query;
-        query = param;
-      }
-      else {
-        location = getPath(data);
-      }
+    _resource.deleteOne = function (query) {
+      var location = getPath(data);
       
       var request = getRequest()
         .del(location)
-        .query(query)
-        .send(object);
+        .query(query);
       return setUserToRequest(request);
     };
   }
