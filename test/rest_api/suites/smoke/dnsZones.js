@@ -155,7 +155,7 @@ describe('Smoke check', function () {
     });
 
     it('should return success response code when deleting a dns zone record', function (done) {
-      delete firstDnsZoneRecord.record_body;
+      delete firstDnsZoneRecord.record;
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
