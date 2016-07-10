@@ -422,7 +422,7 @@ exports.getDnsZone = function(request, reply) {
           throw error;
         });
     })
-    .then(function(nsoneZone) { 
+    .then(function(nsoneZone) {
       var responseZone = {
         id: foundDnsZone.id,
         zone: foundDnsZone.zone,
@@ -500,7 +500,8 @@ exports.getDnsZoneRecords = function(request, reply) {
           type: record.type,
           short_answers: record.short_answers,
           domain: record.domain,
-          tier: record.tier
+          tier: record.tier,
+          link: record.link
         };
         // NOTE: prepare record info for list
         responseZoneRecords.push(sendRecord);
@@ -619,8 +620,11 @@ exports.createDnsZoneRecord = function(request, reply) {
             reply(boom.badRequest('DNS zone does not exist in the system'));
           } else if (/DNS zone record found/.test(error.message)) {
             reply(boom.badRequest('The same DNS zone record already exist in the system'));
-          } else {
-            return reply(boom.badImplementation(error.message));
+          } else if (/record already exists/.test(error.message)) {
+            reply(boom.badRequest('The record already exists in the system'));
+          }
+          else {
+            return reply(boom.badImplementation(error.message,error));
           }
         }
       } else {
@@ -784,7 +788,9 @@ exports.updateDnsZoneRecord = function(request, reply) {
       var sendRecordData = {
         answers: payload.answers,
         ttl: payload.ttl,
-        use_client_subnet : payload.use_client_subnet
+        tier: payload.tier,
+        use_client_subnet : payload.use_client_subnet,
+        link: payload.link
       };
       return Nsone.updateDnsZoneRecord(nsoneRecord, sendRecordData)
         .then(function(updatedNsoneRecord) {

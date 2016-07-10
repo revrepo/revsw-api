@@ -150,7 +150,8 @@ module.exports = [
             retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
             expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
             nx_ttl: Joi.number().integer().optional().description('DNS zone nx ttl parameter'),
-            ttl: Joi.number().integer().optional().description('DNS zone ttl parameter')
+            ttl: Joi.number().integer().optional().description('DNS zone ttl parameter'),
+            link: Joi.string().optional().allow(null).description('Link')
             // TODO: add secondary zone
             // secondary: Joi.object().optional().keys({
             //   enabled: Joi.boolean().required(),
@@ -250,7 +251,8 @@ module.exports = [
             domain: Joi.string().required().trim().lowercase()
               .description('DNS zone record domain to be used in record'),
             answers: Joi.array().required().description('DNS zone record answers'),
-            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter')
+            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter'),
+            link: Joi.string().optional().allow(null).description('Link')
           }).required()
             .description('DNS zone record body')
         }
@@ -281,14 +283,6 @@ module.exports = [
           dns_zone_id: Joi.objectId().required().description('DNS zone id'),
           dns_zone_record_id: Joi.objectId().required().description('DNS zone record id')
         }
-        // ,
-        //
-        // query: {
-        //   type: Joi.string().required()
-        //     .description('DNS zone record type to be deleted'),
-        //   domain: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
-        //     .description('DNS zone record domain to be deleted')
-        // }
       },
       response: {
         schema: routeModels.statusModel
@@ -327,8 +321,7 @@ module.exports = [
           use_client_subnet: Joi.boolean().required(),
             answers: Joi.array().optional().description('DNS zone record answers'),
             ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter'),
-            tier: Joi.number().integer().optional().description('DNS zone record tier parameter')
-
+            tier: Joi.number().integer().optional().allow(null).description('DNS zone record tier parameter')
         }
       },
       response: {
