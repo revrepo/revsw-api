@@ -58,6 +58,7 @@ exports.getDnsZones = function(request, reply) {
                 .then(function(nsoneZone) {
                   // Zone found at NS1, add additional information
                   zone.records_count = nsoneZone.records.length;
+                  zone.dns_servers = nsoneZone.dns_servers;
                   return nsoneZone;
                 })
                 .catch(function(error) {
@@ -421,7 +422,7 @@ exports.getDnsZone = function(request, reply) {
           throw error;
         });
     })
-    .then(function(nsoneZone) {
+    .then(function(nsoneZone) { 
       var responseZone = {
         id: foundDnsZone.id,
         zone: foundDnsZone.zone,
@@ -431,7 +432,8 @@ exports.getDnsZone = function(request, reply) {
         retry: nsoneZone.retry,
         expiry: nsoneZone.expiry,
         refresh: nsoneZone.refresh,
-        records: nsoneZone.records
+        records: nsoneZone.records,
+        dns_servers: nsoneZone.dns_servers
       };
       renderJSON(request, reply, null, responseZone);
     })
@@ -831,7 +833,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
 
 exports.getDnsZoneRecord = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
-  var recordId = request.params.dns_zone_record_id; 
+  var recordId = request.params.dns_zone_record_id;
   var recordDomain;
   var recordType;
   var foundDnsZone;
