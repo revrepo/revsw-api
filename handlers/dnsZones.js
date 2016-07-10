@@ -183,6 +183,7 @@ exports.createDnsZone = function(request, reply) {
           return nsoneZone;
         })
         .catch(function(error) {
+          logger.error('NS1 error ', error); 
           throw error;
         });
     })
@@ -218,6 +219,10 @@ exports.createDnsZone = function(request, reply) {
             if (/NS1 zone/.test(error.message)) {
               return reply(boom.badImplementation('DNS service unable to process your request now, try again later'));
             } else {
+               if(!!error.response && error.response.body && error.response.body.message) {
+                 // NOTE: Show message from NS1
+                 return reply(boom.badRequest(error.response.body.message));
+               }
               return reply(boom.badRequest(error.message));
             }
           }
