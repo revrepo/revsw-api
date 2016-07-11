@@ -218,10 +218,11 @@ exports.createDnsZone = function(request, reply) {
             if (/NS1 zone/.test(error.message)) {
               return reply(boom.badImplementation('DNS service unable to process your request now, try again later'));
             } else {
-               if(!!error.response && error.response.body && error.response.body.message) {
-                 // NOTE: Show message from NS1
-                 return reply(boom.badRequest(error.response.body.message));
-               }
+              // TODO: please implement the approach in all DNS handlers
+              if(!!error.response && error.response.body && error.response.body.message) {
+                // NOTE: Show message from NS1
+                return reply(boom.badRequest(error.response.body.message));
+              }
               return reply(boom.badRequest(error.message));
             }
           }
@@ -591,7 +592,7 @@ exports.createDnsZoneRecord = function(request, reply) {
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
               return reply('Invalid DNS zone record provided');
-            }
+            } // TODO: please add "else" block
           } else if (/Invalid DNS zone provided for the record domain/.test(error.message)) {
             reply(boom.badRequest('Invalid DNS zone provided for the record domain'));
           } else if (/DNS zone not found/.test(error.message)) {
@@ -602,7 +603,12 @@ exports.createDnsZoneRecord = function(request, reply) {
             reply(boom.badRequest('The record already exists in the system'));
           }
           else {
-            return reply(boom.badImplementation(error.message,error));
+            if(!!error.response && error.response.body && error.response.body.message) {
+              // NOTE: Show message from NS1
+              return reply(boom.badRequest(error.response.body.message));
+            } else {
+              return reply(boom.badRequest(error.message));
+            }
           }
         }
       } else {
