@@ -140,6 +140,7 @@ exports.createDnsZone = function(request, reply) {
   var createdBy = utils.generateCreatedByField(request);
   var accountId = payload.account_id;
   var zone = payload.zone;
+  var nsoneZoneInfo;
   var statusResponse;
 
   return Promise.try(function() {
@@ -176,12 +177,13 @@ exports.createDnsZone = function(request, reply) {
     .then(function() {
       // Creating DNS zone for NS1
       return Nsone.createDnsZone(zone)
-        .then(function(nsoneZone) {
+        .then(function(nsoneZone_) {
           // zone successfully created
-          return nsoneZone;
+          nsoneZoneInfo = nsoneZone_;
+          return nsoneZone_;
         })
         .catch(function(error) {
-          logger.error('NS1 error ', error); 
+          logger.error('NS1 error ', error);
           throw error;
         });
     })
@@ -191,6 +193,25 @@ exports.createDnsZone = function(request, reply) {
       newDnsZone.updated_by = createdBy;
       // create DNSZone doc
       return dnsZones.addAsync(newDnsZone);
+    })
+    .then(function(newDnsZone_){
+      // NOTE: prepare information for audit logger and store it
+      newDnsZone_.ttl = nsoneZoneInfo.ttl;
+      newDnsZone_.refresh = nsoneZoneInfo.refresh;
+      newDnsZone_.retry = nsoneZoneInfo.retry;
+      newDnsZone_.expiry = nsoneZoneInfo.expiry;
+      newDnsZone_.nx_ttl=  nsoneZoneInfo.nx_ttl;
+
+      AuditLogger.store({
+        account_id: accountId,
+        activity_type: 'add',
+        activity_target: 'dnszone',
+        target_id: newDnsZone_._id,
+        target_name: newDnsZone_.zone,
+        target_object: newDnsZone_,
+        operation_status: 'success'
+      }, request);
+      return Promise.resolve(newDnsZone_);
     })
     .then(function(newZone) {
       // zone successfully added in db
@@ -236,6 +257,7 @@ exports.createDnsZone = function(request, reply) {
 exports.deleteDnsZone = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var foundDnsZone;
+  var nsoneZoneInfo;
   var statusResponse;
 
   return Promise.try(function() {
@@ -255,9 +277,10 @@ exports.deleteDnsZone = function(request, reply) {
     .then(function() {
       // Get zone from NS1 API
       return Nsone.getDnsZone(foundDnsZone.zone)
-        .then(function(nsoneZone) {
+        .then(function(nsoneZone_) {
+          nsoneZoneInfo = nsoneZone_;
           // Found zone, delete then
-          return Nsone.deleteDnsZone(nsoneZone)
+          return Nsone.deleteDnsZone(nsoneZone_)
             .then(function() {
               // Zone removed from NS1
               return Promise.resolve(true);
@@ -273,6 +296,24 @@ exports.deleteDnsZone = function(request, reply) {
     .then(function() {
       // Delete zone from DNSZone collection
       return dnsZones.removeAsync(zoneId);
+    })
+    .then(function(removedDnsZone_){
+      // NOTE: prepare information for audit logger and store it
+      foundDnsZone.ttl = nsoneZoneInfo.ttl;
+      foundDnsZone.refresh = nsoneZoneInfo.refresh;
+      foundDnsZone.retry = nsoneZoneInfo.retry;
+      foundDnsZone.expiry = nsoneZoneInfo.expiry;
+      foundDnsZone.nx_ttl=  nsoneZoneInfo.nx_ttl;
+
+      AuditLogger.store({
+        activity_type: 'delete',
+        activity_target: 'dnszone',
+        target_id: foundDnsZone.id,
+        target_name: foundDnsZone.zone,
+        target_object: foundDnsZone, // NOTE: save info about already deleted object
+        operation_status: 'success'
+      }, request);
+      return Promise.resolve(removedDnsZone_);
     })
     .then(function(result) {
       // DNS zone successfully removed from NS1 and DNSZone collection
@@ -307,10 +348,10 @@ exports.deleteDnsZone = function(request, reply) {
 exports.updateDnsZone = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var zoneBody = request.payload;
-  var createdBy = utils.generateCreatedByField(request);
+  var updatedBy = utils.generateCreatedByField(request);
   var foundDnsZone;
   var statusResponse;
-
+  var nsoneZoneInfo;
   // TODO: add a check that provided account_id is within the scope
   // of requesting user
 
@@ -344,11 +385,31 @@ exports.updateDnsZone = function(request, reply) {
       return Nsone.updateDnsZone(updatingNsonsZone, zoneBody)
         .then(function(updatedNsoneZone) {
           // successfully updated the zone
+          nsoneZoneInfo = updatedNsoneZone;
           // update local data
           zoneBody._id = zoneId;
           zoneBody.updated_at = new Date();
-          zoneBody.updated_by = createdBy;
-          return dnsZones.updateAsync(zoneBody); //Promise.resolve(true);
+          zoneBody.updated_by = updatedBy;
+          return dnsZones.updateAsync(zoneBody);
+        })
+        .then(function(updatedDnsZone_){
+          // NOTE: prepare information for audit logger and store it
+          updatedDnsZone_.ttl = nsoneZoneInfo.ttl;
+          updatedDnsZone_.refresh = nsoneZoneInfo.refresh;
+          updatedDnsZone_.retry = nsoneZoneInfo.retry;
+          updatedDnsZone_.expiry = nsoneZoneInfo.expiry;
+          updatedDnsZone_.nx_ttl=  nsoneZoneInfo.nx_ttl;
+
+          AuditLogger.store({
+            account_id       : updatedDnsZone_.account_id,
+            activity_type    : 'modify',
+            activity_target  : 'dnszone',
+            target_id        : updatedDnsZone_._id,
+            target_name      : updatedDnsZone_.zone,
+            target_object    : updatedDnsZone_, // NOTE: save extented information about changes
+            operation_status : 'success'
+          }, request);
+          return Promise.resolve(updatedDnsZone_);
         })
         .catch(function(error) {
           throw error;

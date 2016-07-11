@@ -48,9 +48,9 @@ module.exports = [{
         from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
         to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)'),
         target_id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).description('Target ID'),
-        target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname')
+        target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname','dnszone')
           .when('target_id', { is: /^[0-9a-fA-F]{24}$/, then: Joi.required() })
-          .description('Target type  (\'user\', \'account\', \'domain\', \'purge\', \'object\', \'apikey\', \'team\', \'app\', \'sslcert\', \'sslname\'')
+          .description('Target type  (\'user\', \'account\', \'domain\', \'purge\', \'object\', \'apikey\', \'team\', \'app\', \'sslcert\', \'sslname\',\'dnszone\'')
       }
     }
   }
