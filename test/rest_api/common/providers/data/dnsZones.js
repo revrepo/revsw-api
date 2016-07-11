@@ -53,9 +53,11 @@ var DNSZonesDataProvider = {
 
   generateRecordOne: function (zone) {
     return {
-      'record_type': 'A',
-      'record_domain': 'domain-' + Date.now() + '.' + zone,
-      'record_body': {
+      'type': 'A',
+      'domain': 'domain-' + Date.now() + '.' + zone,
+      'record': {
+        'type': 'A',
+        'domain': 'domain-' + Date.now() + '.' + zone,
         'ttl': 200,
         'answers': [
           {

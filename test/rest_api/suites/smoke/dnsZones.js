@@ -64,7 +64,7 @@ describe('Smoke check', function () {
       done();
     });
 
-    it('should return success response code when getting a list of dns zones', function (done) {
+    it('should return success response code when getting a list of DNS zones', function (done) {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
@@ -76,7 +76,7 @@ describe('Smoke check', function () {
           .catch(done);
     });
 
-    it('should return success response code when getting a list of dns zones with usage stats', function (done) {
+    it('should return success response code when getting a list of DNS zones with usage stats', function (done) {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
@@ -89,7 +89,7 @@ describe('Smoke check', function () {
         .catch(done);
     });
 
-    it('should return success response code when creating new dns zone', function (done) {
+    it('should return success response code when creating new DNS zone', function (done) {
         firstDnsZone = DNSZonesDP.generateOne(account.id);
         API.helpers
           .authenticateUser(reseller)
@@ -107,7 +107,7 @@ describe('Smoke check', function () {
           .catch(done);
     });
 
-    it('should return a recently created dns zone when getting a specific dns zone', function (done) {
+    it('should return a recently created dns zone when getting a specific DNS zone', function (done) {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
@@ -121,7 +121,7 @@ describe('Smoke check', function () {
         .catch(done);
     });
 
-    it('should return success response code when creating new dns zone record', function (done) {
+    it('should return success response code when creating a new DNS zone record', function (done) {
       firstDnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.zone);
       API.helpers
         .authenticateUser(reseller)
@@ -138,7 +138,7 @@ describe('Smoke check', function () {
         .catch(done);
     });
 
-    it('should return a recently created dns zone records when getting a specific dns zone', function (done) {
+    it('should return a recently created DNS zone records when getting a specific DNS zone', function (done) {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
@@ -154,8 +154,8 @@ describe('Smoke check', function () {
         .catch(done);
     });
 
-    it('should return success response code when deleting a dns zone record', function (done) {
-      delete firstDnsZoneRecord.record_body;
+    xit('should return success response code when deleting a DNS zone record', function (done) {
+      delete firstDnsZoneRecord.record;
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
@@ -171,7 +171,7 @@ describe('Smoke check', function () {
         .catch(done);
     });
 
-    it('should return dns zone records when getting a specific dns zone after deleting dns zone record',
+    xit('should return DNS records when getting a specific DNS zone after deleting DNS zone record',
       function (done) {
       API.helpers
         .authenticateUser(reseller)
@@ -188,7 +188,7 @@ describe('Smoke check', function () {
         .catch(done);
     });
 
-    it('should return success response code when deleting a dns zone', function (done) {
+    it('should return success response code when deleting a DNS zone', function (done) {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
@@ -199,6 +199,5 @@ describe('Smoke check', function () {
           })
           .catch(done);
     });
-
   });
 });

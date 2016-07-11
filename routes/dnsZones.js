@@ -35,8 +35,8 @@ module.exports = [
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: dnsZone.getDnsZones,
-      description: 'Get a list of DNS zones owned by company',
-      notes: 'Use this function to get a list of DNS zones owned by your company account',
+      description: 'Get a list of DNS zones',
+      notes: 'Use this function to get a list of DNS zones registered for your company account',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -56,9 +56,8 @@ module.exports = [
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: dnsZone.getDnsZonesStatsUsage,
-      description: 'Get a list of DNS zones owned by company with usage stats',
-      notes: 'Use this function to get a list of DNS zones owned by your company account with ' +
-             'usage stats included for each zone',
+      description: 'Get usage stats for all DNS zones',
+      notes: 'Use this function to get usage stats for all DNS zones registered for your account',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -78,8 +77,8 @@ module.exports = [
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: dnsZone.createDnsZone,
-      description: 'Create new DNS zone',
-      notes: 'Use the call to create new DNS zone for your company.',
+      description: 'Create a new DNS zone',
+      notes: 'Use the call to create new DNS zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -89,7 +88,7 @@ module.exports = [
       validate: {
         payload: {
           account_id: Joi.objectId().required().trim()
-            .description('ID of a company the new DNS Zone should be created for'),
+            .description('ID of a company the new DNS zone should be created for'),
           zone: Joi.string().required().trim().lowercase().regex(routeModels.domainRegex)
               .description('DNS zone to be created for a company')
         }
@@ -107,8 +106,8 @@ module.exports = [
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: dnsZone.deleteDnsZone,
-      description: 'Delete a customer DNS Zone',
-      notes: 'This function should be used by a company admin to delete an DNS zone',
+      description: 'Delete a DNS zone',
+      notes: 'This function should be used by a company admin to delete a DNS zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -117,7 +116,7 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id of zone to be deleted')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID to be deleted')
         }
       },
       response: {
@@ -133,8 +132,8 @@ module.exports = [
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: dnsZone.updateDnsZone,
-      description: 'Update a customer DNS Zone',
-      notes: 'This function should be used by a company admin to update an DNS zone',
+      description: 'Update a DNS zone',
+      notes: 'This function should be used by a company admin to update a DNS zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -143,14 +142,14 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id of zone to be updated')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID of zone to be updated')
         },
         payload: {
             refresh: Joi.number().integer().optional().description('DNS zone refresh parameter'),
             retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
             expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
-            nx_ttl: Joi.number().integer().optional().description('DNS zone nx ttl parameter'),
-            ttl: Joi.number().integer().optional().description('DNS zone ttl parameter'),
+            nx_ttl: Joi.number().integer().optional().description('DNS zone NX TTL parameter'),
+            ttl: Joi.number().integer().optional().description('DNS zone TTL parameter'),
             link: Joi.string().optional().allow(null).description('Link')
             // TODO: add secondary zone
             // secondary: Joi.object().optional().keys({
@@ -174,7 +173,7 @@ module.exports = [
       },
       handler: dnsZone.getDnsZone,
       description: 'Get a DNS zone',
-      notes: 'Use this function to a specific DNS zone with records',
+      notes: 'Use this function to get the details of a specific DNS zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -183,7 +182,7 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID')
         }
       },
       response: {
@@ -199,8 +198,8 @@ module.exports = [
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: dnsZone.getDnsZoneRecords,
-      description: 'Get a list of DNS Records',
-      notes: 'Use this function to get a list of DNS Records owned by DNS Zone',
+      description: 'Get a list of DNS records in a zone',
+      notes: 'Use this function to get a list of DNS records configured for a zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -209,7 +208,7 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID')
         }
       },
       response: {
@@ -226,8 +225,8 @@ module.exports = [
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: dnsZone.createDnsZoneRecord,
-      description: 'Create new DNS zone record',
-      notes: 'Use the call to create new DNS zone record for selected DNS zone.',
+      description: 'Create a new DNS zone record',
+      notes: 'Use the call to create a new record in a DNS zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -236,7 +235,7 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID')
         },
 
         payload: {
@@ -251,7 +250,7 @@ module.exports = [
             domain: Joi.string().required().trim().lowercase()
               .description('DNS zone record domain to be used in record'),
             answers: Joi.array().required().description('DNS zone record answers'),
-            ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter'),
+            ttl: Joi.number().integer().optional().description('DNS zone record TTL parameter'),
             link: Joi.string().optional().allow(null).description('Link')
           }).required()
             .description('DNS zone record body')
@@ -270,8 +269,8 @@ module.exports = [
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: dnsZone.deleteDnsZoneRecord,
-      description: 'Delete existing DNS zone record',
-      notes: 'Use the call to delete a DNS zone record for selected DNS zone.',
+      description: 'Delete a DNS zone record',
+      notes: 'Use the call to delete a record from a DNS zone',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -280,8 +279,8 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id'),
-          dns_zone_record_id: Joi.objectId().required().description('DNS zone record id')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID'),
+          dns_zone_record_id: Joi.objectId().required().description('DNS zone record ID')
         }
       },
       response: {
@@ -297,8 +296,8 @@ module.exports = [
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: dnsZone.updateDnsZoneRecord,
-      description: 'Update the DNS zone record',
-      notes: 'Use the call to update existing DNS zone record for selected DNS zone.',
+      description: 'Update a DNS zone record',
+      notes: 'Use the call to update a DNS zone record',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -307,8 +306,8 @@ module.exports = [
       },
       validate: {
         params: {
-          dns_zone_id: Joi.objectId().required().description('DNS zone id'),
-          dns_zone_record_id: Joi.objectId().required().description('DNS zone record id')
+          dns_zone_id: Joi.objectId().required().description('DNS zone ID'),
+          dns_zone_record_id: Joi.objectId().required().description('DNS zone record ID')
         },
         payload: {
           domain: Joi.string().required().trim().lowercase()//.regex(routeModels.domainRegex)
