@@ -58,5 +58,9 @@
   "notify_admin_by_email_on_user_login": "ops@revsw.com",
   "notify_admin_by_email_on_user_self_registration":"ops@revsw.com",
   "notify_admin_by_email_on_account_cancellation": "ops@revsw.com",
-  "usage_report_regen_age_ms": 6000000000000
+  "usage_report_regen_age_ms": 6000000000000,
+
+  "nsone": {
+    "api_key": "the_correct_value_is_in_local_json"
+  }
 }
