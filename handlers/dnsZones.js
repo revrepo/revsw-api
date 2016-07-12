@@ -622,6 +622,7 @@ exports.createDnsZoneRecord = function(request, reply) {
   var recordType = payload.type;
   var recordBody = payload.record;
   var foundDnsZone;
+  var nsoneZoneRecordInfo;
   var statusResponse;
 
   return Promise.try(function() {
@@ -666,14 +667,33 @@ exports.createDnsZoneRecord = function(request, reply) {
           recordType,
           recordBody
         )
-        .then(function(newNsoneRecord) {
-          return newNsoneRecord;
+        .then(function(newNsoneRecord_) {
+          nsoneZoneRecordInfo = newNsoneRecord_;
+          return newNsoneRecord_;
         })
         .catch(function(error) {
           throw error;
         });
     })
-    .then(function(createdNsoneRecord) {
+    .then(function(newDnsRecord_){
+      // NOTE: prepare information for audit logger and store it
+      // delete not needed data
+      delete nsoneZoneRecordInfo.networks;
+      delete nsoneZoneRecordInfo.meta;
+      delete nsoneZoneRecordInfo.regions;
+      delete nsoneZoneRecordInfo.filters;
+
+      AuditLogger.store({
+        activity_type: 'add',
+        activity_target: 'dnsrecord',
+        target_id: nsoneZoneRecordInfo.id, //NOTE: id - is NS1 record identifier
+        target_name: nsoneZoneRecordInfo.domain,
+        target_object: nsoneZoneRecordInfo,
+        operation_status: 'success'
+      }, request);
+      return Promise.resolve(true);
+    })
+    .then(function() {
       statusResponse = {
         statusCode: 200,
         message: 'Successfully created new DNS zone record'
@@ -726,9 +746,10 @@ exports.deleteDnsZoneRecord = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
   var recordId =request.params.dns_zone_record_id;
   var payload = request.payload;
-  var recordDomain;// = request.query.domain;
-  var recordType;// = request.query.type;
+  var recordDomain;
+  var recordType;
   var foundDnsZone;
+  var nsoneZoneRecordInfo;
   var statusResponse;
 
   return Promise.try(function() {
@@ -767,8 +788,9 @@ exports.deleteDnsZoneRecord = function(request, reply) {
     })
     .then(function() {
       return Nsone.getDnsZoneRecord(foundDnsZone.zone, recordDomain, recordType)
-        .then(function(nsoneRecord) {
-          return nsoneRecord;
+        .then(function(nsoneRecord_) {
+          nsoneZoneRecordInfo = nsoneRecord_;
+          return nsoneRecord_;
         })
         .catch(function(error) {
           throw error;
@@ -782,6 +804,24 @@ exports.deleteDnsZoneRecord = function(request, reply) {
         .catch(function(error) {
           throw error;
         });
+    })
+    .then(function(){
+      // NOTE: prepare information for audit logger and store it
+      // delete not needed data
+      delete nsoneZoneRecordInfo.networks;
+      delete nsoneZoneRecordInfo.meta;
+      delete nsoneZoneRecordInfo.regions;
+      delete nsoneZoneRecordInfo.filters;
+
+      AuditLogger.store({
+        activity_type: 'delete',
+        activity_target: 'dnsrecord',
+        target_id: nsoneZoneRecordInfo.id, //NOTE: id - is NS1 record identifier
+        target_name: nsoneZoneRecordInfo.domain,
+        target_object: nsoneZoneRecordInfo, // NOTE: save info about deleted object
+        operation_status: 'success'
+      }, request);
+      return Promise.resolve(true);
     })
     .then(function() {
       statusResponse = {
@@ -831,6 +871,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
   var recordZone = payload.zone;
   var recordType = payload.type;
   var foundDnsZone;
+  var nsoneZoneRecordInfo;
   var statusResponse;
 
   return Promise.try(function() {
@@ -876,12 +917,30 @@ exports.updateDnsZoneRecord = function(request, reply) {
         link: payload.link
       };
       return Nsone.updateDnsZoneRecord(nsoneRecord, sendRecordData)
-        .then(function(updatedNsoneRecord) {
-          return updatedNsoneRecord;
+        .then(function(updatedNsoneRecord_) {
+          nsoneZoneRecordInfo = updatedNsoneRecord_;
+          return updatedNsoneRecord_;
         })
         .catch(function(error) {
           throw error;
         });
+    })
+    .then(function(updatedNsoneRecord_){
+      // NOTE: prepare information for audit logger and store it
+      // delete not needed data
+      delete nsoneZoneRecordInfo.networks;
+      delete nsoneZoneRecordInfo.meta;
+      delete nsoneZoneRecordInfo.regions;
+      delete nsoneZoneRecordInfo.filters;
+      AuditLogger.store({
+        activity_type    : 'modify',
+        activity_target  : 'dnsrecord',
+        target_id        : nsoneZoneRecordInfo.id,
+        target_name      : nsoneZoneRecordInfo.domain,
+        target_object    : nsoneZoneRecordInfo, // NOTE: save extented information about changes
+        operation_status : 'success'
+      }, request);
+      return Promise.resolve(updatedNsoneRecord_);
     })
     .then(function(updatedNsoneRecord) {
       statusResponse = {
