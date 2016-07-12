@@ -1,6 +1,7 @@
 {
   "nsone": {
-    "api_key": "f8MXIsOKoGevPM2o7LUG"
+    "api_key": "f8MXIsOKoGevPM2o7LUG",
+    "req_timeout_secs": 200
   },
 
   "log_config": {

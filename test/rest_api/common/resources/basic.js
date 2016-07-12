@@ -47,7 +47,7 @@ var _contains = function (list, element) {
 var getRequest = function () {
   var host = config.get('api.host');
   var apiVersion = config.get('api.version');
-  return request( (host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion) );
+  return request((host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion));
 };
 
 // #### Helper function setUserToRequest
@@ -262,6 +262,7 @@ var BasicResource = function (data) {
      */
     _resource.createManyIfNotExist = function (items) {
       var me = this;
+      var ids = [];
       return Promise.each(items, function (item) { // One promise after other
         return me
           .createOne(item)
@@ -272,12 +273,16 @@ var BasicResource = function (data) {
             }
             else {
               console.log('      > Item created: (' + res.body.message + ')');
+              ids.push(res.body.object_id);
             }
           })
           .catch(function (err) {
             console.log('      > Cannot create item:', item, err);
           }); // We catch any errors as we don't want them to be propagated
-      });
+      })
+        .then(function () {
+          return ids;
+        });
     };
   }
 
@@ -301,6 +306,76 @@ var BasicResource = function (data) {
         .put(location)
         .query(query)
         .send(object);
+      return setUserToRequest(request);
+    };
+  }
+
+  if (_contains(data.methods, Methods.UPDATE)) {
+    /**
+     * ### BasicResource.updateManyIfExist()
+     *
+     * Sends the UPDATE request to the API in order to update specified objects.
+     * All requests are run one after other using promises.
+     *
+     * NOTE: If item to update does not exists, it won't propagate the error.
+     *
+     * @param {Array} items, list/array of the items of the objects to update
+     * with the following structure:
+     *    [
+     *       { id: Number, data: Object },
+     *       { id: Number, data: Object },
+     *       ...
+     *    ]
+     *
+     * @returns {Object} a promise instance
+     */
+    _resource.updateManyIfExist = function (items) {
+      var me = this;
+      return Promise.each(items, function (item) { // One promise after other
+        return me
+          .update(item.id, item.data)
+          .then(function (res) {
+            if (res.body.statusCode && parseInt(res.body.statusCode) !== 200) {
+              console.log('      > Cannot update item:', item,
+                res.body.message);
+            }
+            else {
+              console.log('      > Item updated: (' + res.body.message + ')');
+            }
+          })
+          .catch(function (err) {
+            console.log('      > Cannot update item:', item, err);
+          }); // We catch any errors as we don't want them to be propagated
+      });
+    };
+  }
+
+  if (_contains(data.methods, Methods.DELETE_DATA)) {
+    /**
+     * ### BasicResource.deleteOne()
+     *
+     * Sends the DELETE request to the API in order to delete specified object
+     * with given data.
+     *
+     * @param {object} object with the information/properties to delete
+     * @param {object} query, will be transformed to a query string
+     *
+     * @returns {object} the supertest-as-promised instance
+     */
+    _resource.deleteOne = function (object, query) {
+      var location;
+      if (typeof object === 'string') {
+        location = getPath(data, object);
+        object = query;
+        query = param;
+      }
+      else {
+        location = getPath(data);
+      }
+
+      var request = getRequest()
+        .del(location)
+        .query(query);
       return setUserToRequest(request);
     };
   }
