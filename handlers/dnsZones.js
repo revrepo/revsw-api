@@ -249,7 +249,9 @@ exports.createDnsZone = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_ZONE_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_ZONE_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else {
             if (/NS1 zone/.test(error.message)) {
@@ -452,7 +454,9 @@ exports.updateDnsZone = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_ZONE_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_ZONE_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else if (/DNS zone not found/.test(error.message)) {
             reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
@@ -519,7 +523,9 @@ exports.getDnsZone = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_ZONE_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_ZONE_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else if (/DNS zone not found/.test(error.message)) {
             reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
@@ -589,7 +595,9 @@ exports.getDnsZoneRecords = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_ZONE_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_ZONE_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else if (/DNS zone not found/.test(error.message)) {
             reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
@@ -682,8 +690,10 @@ exports.createDnsZoneRecord = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_RECORD_INVALID_PROVIDED);
-            } // TODO: please add "else" block
+              return reply(boom.badRequest(DNS_RECORD_INVALID_PROVIDED));
+            } else{
+              return reply(boom.badRequest(error.message));
+            }
           } else if (/Invalid DNS zone provided for the record domain/.test(error.message)) {
             reply(boom.badRequest(DNS_RECORD_ZONE_INVALID_PROVIDED));
           } else if (/DNS zone not found/.test(error.message)) {
@@ -695,8 +705,12 @@ exports.createDnsZoneRecord = function(request, reply) {
           }
           else {
             if(!!error.response && error.response.body && error.response.body.message) {
+              var message_ = error.response.body.message;
               // NOTE: Show message from NS1
-              return reply(boom.badRequest(error.response.body.message));
+              if (/record already exists/.test(message_)) {
+                 message_ = DNS_RECORD_EXISTS;
+              }
+              return reply(boom.badRequest(message_));
             } else {
               return reply(boom.badRequest(error.message));
             }
@@ -786,7 +800,9 @@ exports.deleteDnsZoneRecord = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_RECORD_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_RECORD_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else if (/Invalid DNS zone provided for the record domain/.test(error.message)) {
             reply(boom.badRequest(DNS_RECORD_ZONE_INVALID_PROVIDED));
@@ -884,7 +900,9 @@ exports.updateDnsZoneRecord = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_RECORD_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_RECORD_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else if (/Invalid DNS zone provided for the record domain/.test(error.message)) {
             reply(boom.badRequest(DNS_RECORD_ZONE_INVALID_PROVIDED));
@@ -973,7 +991,9 @@ exports.getDnsZoneRecord = function(request, reply) {
           // Process NS1 Errors
           if (/NS1 API Request Failed on/.test(error.message)) {
             if (/Input validation failed/.test(error.message)) {
-              return reply(DNS_RECORD_INVALID_PROVIDED);
+              return reply(boom.badRequest(DNS_RECORD_INVALID_PROVIDED));
+            }else{
+              return reply(boom.badRequest(error.message));
             }
           } else if (/Invalid DNS zone provided for the record domain/.test(error.message)) {
             reply(boom.badRequest(DNS_RECORD_ZONE_INVALID_PROVIDED));
@@ -986,7 +1006,7 @@ exports.getDnsZoneRecord = function(request, reply) {
               // NOTE: Show message from NS1
               return reply(boom.badRequest(error.response.body.message));
             }
-            return reply(boom.badRequest(error.message)); 
+            return reply(boom.badRequest(error.message));
           }
         }
       } else {
