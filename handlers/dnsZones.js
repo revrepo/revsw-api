@@ -255,7 +255,6 @@ exports.createDnsZone = function(request, reply) {
             if (/NS1 zone/.test(error.message)) {
               return reply(boom.badImplementation(ERROR_DNS_SERVICE_UNABLE));
             } else {
-              // TODO: please implement the approach in all DNS handlers
               if(!!error.response && error.response.body && error.response.body.message) {
                 // NOTE: Show message from NS1
                 return reply(boom.badRequest(error.response.body.message));
@@ -463,7 +462,6 @@ exports.updateDnsZone = function(request, reply) {
               return reply(boom.badRequest(error.response.body.message));
             }
             return reply(boom.badRequest(error.message));
-            // return reply(boom.badImplementation(error.message));
           }
         }
       } else {
@@ -530,8 +528,7 @@ exports.getDnsZone = function(request, reply) {
               // NOTE: Show message from NS1
               return reply(boom.badRequest(error.response.body.message));
             }
-            // return reply(boom.badRequest(error.message));
-            return reply(boom.badImplementation(error.message));
+            return reply(boom.badRequest(error.message));
           }
         }
       } else {
@@ -601,8 +598,7 @@ exports.getDnsZoneRecords = function(request, reply) {
               // NOTE: Show message from NS1
               return reply(boom.badRequest(error.response.body.message));
             }
-            // return reply(boom.badRequest(error.message));
-            return reply(boom.badImplementation(error.message));
+            return reply(boom.badRequest(error.message));
           }
         }
       } else {
@@ -803,8 +799,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
               // NOTE: Show message from NS1
               return reply(boom.badRequest(error.response.body.message));
             }
-            // return reply(boom.badRequest(error.message));
-            return reply(boom.badImplementation(error.message));
+            return reply(boom.badRequest(error.message));
           }
         }
       } else {
@@ -902,8 +897,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
               // NOTE: Show message from NS1
               return reply(boom.badRequest(error.response.body.message));
             }
-            // return reply(boom.badRequest(error.message));
-            return reply(boom.badImplementation(error.message));
+            return reply(boom.badRequest(error.message));
           }
         }
       } else {
@@ -992,8 +986,7 @@ exports.getDnsZoneRecord = function(request, reply) {
               // NOTE: Show message from NS1
               return reply(boom.badRequest(error.response.body.message));
             }
-            // return reply(boom.badRequest(error.message));
-            return reply(boom.badImplementation(error.message));
+            return reply(boom.badRequest(error.message)); 
           }
         }
       } else {
