@@ -141,7 +141,6 @@ exports.getStats = function(request, reply) {
         };
         renderJSON(request, reply, error, response);
       }, function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
     } else {

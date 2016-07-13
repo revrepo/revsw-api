@@ -204,7 +204,6 @@ exports.getGBTReports = function(request, reply) {
         };
         renderJSON(request, reply, error, response);
       }, function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domainName));
       });
     } else {

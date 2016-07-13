@@ -105,7 +105,6 @@ exports.getAccountReport = function( request, reply ) {
       var msg = err.toString() + ': account ID ' + request.params.account_id +
         ', span from ' + (new Date(from)).toUTCString() +
         ', to ' + (new Date(to)).toUTCString();
-      logger.error( 'getAccountReport error: ' + msg );
       return reply( boom.badImplementation( msg ) );
     });
 };
@@ -133,7 +132,6 @@ exports.getAccountStats = function( request, reply ) {
       var msg = err.toString() + ': account ID ' + request.params.account_id +
         ', span from ' + (new Date(span.start)).toUTCString() +
         ', to ' + (new Date(span.end)).toUTCString();
-      logger.error( 'getAccountReport error: ' + msg );
       return reply( boom.badImplementation( msg ) );
     });
 };
