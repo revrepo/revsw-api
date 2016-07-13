@@ -207,7 +207,7 @@ SSLName.prototype = {
    * list of ssl enabled domain names for the given account(s)
    *
    * @param  {string|[string,]|falsy} account ID, arrays of account IDs or nothing to get'em all
-   * @return {promise([{account_id,ssl_name},...])} - array of found SSL names
+   * @return {promise({account_id:[ssl_name,],...})} - hash of account_id --> array of found SSL names
    */
   accountNames: function ( account_id ) {
 
@@ -218,12 +218,17 @@ SSLName.prototype = {
     return this.model.find( where, { _id: 0, account_id: 1, ssl_name: 1 })
       .exec()
       .then( function( docs ) {
+        var hash = {};
         if ( docs ) {
-          docs = docs.map( function( doc ) {
-            return doc._doc;
+          docs.forEach( function( doc ) {
+            doc = doc._doc;
+            if ( !hash[doc.account_id] ) {
+              hash[doc.account_id] = [];
+            }
+            hash[doc.account_id].push( doc.ssl_name );
           });
         }
-        return docs;
+        return hash;
       });
   },
 
@@ -231,16 +236,35 @@ SSLName.prototype = {
    * number of ssl enabled domains for the given account
    *
    * @param  {string|[string,]|falsy} account ID, arrays of account IDs or nothing to get'em all
-   * @return {promise(int)} - count of found documents
+   * @return {promise({account_id:000,...})} - hash of account_id --> num of found SSL names
    */
   accountNamesCount : function ( account_id ) {
 
     var where = { deleted: { $ne:true } };
     if ( account_id ) {
-      where.account_id = _.isArray( account_id ) ? { $in: account_id } : /*string*/account_id;
+      if ( _.isArray( account_id ) ) {
+        where.account_id = { $in: account_id.map( function( id ) {
+          return mongoose.Types.ObjectId( id );
+        }) };
+      } else {
+        where.account_id = mongoose.Types.ObjectId( account_id );
+      }
     }
-    return this.model.count( where )
-      .exec();
+
+    return this.model.aggregate([
+        { $match: where },
+        { $group: { _id: '$account_id', count: { $sum: 1 } } }
+      ])
+      .exec()
+      .then( function( docs ) {
+        var hash = {};
+        if ( docs ) {
+          docs.forEach( function( doc ) {
+            hash[doc._id.toString()] = doc.count;
+          });
+        }
+        return hash;
+      });
   },
 };
 
