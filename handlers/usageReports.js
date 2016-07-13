@@ -124,6 +124,7 @@ exports.getAccountStats = function( request, reply ) {
     return reply(boom.badRequest( span.error ));
   }
 
+  span.interval = 86400000; //  voluntarily set to full day
   reports.checkLoadStats( span, accountID )
     .then( function( response ) {
       reply( response ).type( 'application/json; charset=utf-8' );
