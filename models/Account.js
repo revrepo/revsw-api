@@ -21,6 +21,7 @@
 'use strict';
 //	data access layer
 
+var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 
 function Account(mongoose, connection, options) {
@@ -266,9 +267,22 @@ Account.prototype = {
     return this.model.find(where, fields).exec();
   },
 
-  // returns _promise_ { _id: companyName, _id: companyName, ... }
-  idNameHash: function() {
-    return this.model.find({}, { _id: 1, companyName: 1 } )
+  /**
+   * account ID --> account Name hash
+   *
+   * @param  {string|array(string)|nothing} - one account ID, an array of account IDs or false/undef for any
+   * @return promise({ _id: companyName, _id: companyName, ... })
+   */
+  idNameHash: function( account_ids ) {
+
+    var self = this,
+      where = { deleted: { $ne: true } };
+
+    if ( account_ids ) {
+      where._id = _.isArray(account_ids) ? { $in: account_ids } : account_ids;
+    }
+
+    return this.model.find( where, { _id: 1, companyName: 1 } )
       .exec()
       .then( function( data ) {
         var hash  = {};

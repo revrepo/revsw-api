@@ -109,3 +109,31 @@ exports.getAccountReport = function( request, reply ) {
       return reply( boom.badImplementation( msg ) );
     });
 };
+
+//  ---------------------------------
+exports.getAccountStats = function( request, reply ) {
+
+  var accountID = checkAccountAccessPermissions_( request );
+  if ( accountID === false/*strict identity*/ ) {
+    reply(boom.badRequest( 'Account ID not found' ));
+    return false;
+  }
+
+  var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*61/*allowed period - 2 months*/ );
+  if ( span.error ) {
+    return reply(boom.badRequest( span.error ));
+  }
+
+  span.interval = 86400000; //  voluntarily set to full day
+  reports.checkLoadStats( span, accountID )
+    .then( function( response ) {
+      reply( response ).type( 'application/json; charset=utf-8' );
+    })
+    .catch( function( err ) {
+      var msg = err.toString() + ': account ID ' + request.params.account_id +
+        ', span from ' + (new Date(span.start)).toUTCString() +
+        ', to ' + (new Date(span.end)).toUTCString();
+      logger.error( 'getAccountReport error: ' + msg );
+      return reply( boom.badImplementation( msg ) );
+    });
+};
