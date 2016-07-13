@@ -145,7 +145,6 @@ exports.getAppReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES for app ID ' + appID ) );
       } );
   });
@@ -220,7 +219,6 @@ exports.getAccountReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES for account ID ' + accountID ) );
       } );
   });
@@ -339,7 +337,6 @@ exports.getDirs = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply(boom.badImplementation('Failed to retrieve data from ES for query ' + JSON.stringify(request.query)));
       } );
 
@@ -486,7 +483,6 @@ exports.getFlowReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply(boom.badImplementation('Failed to retrieve data from ES for query '  + JSON.stringify(request.query)));
       } );
 
@@ -687,7 +683,6 @@ exports.getAggFlowReport = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -823,7 +818,6 @@ exports.getTopRequests = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -952,7 +946,6 @@ exports.getTopUsers = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1115,7 +1108,6 @@ exports.getTopGBT = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1288,7 +1280,6 @@ exports.getDistributions = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1436,7 +1427,6 @@ exports.getTopObjects = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1566,7 +1556,6 @@ exports.getTopObjectsSlowest = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
@@ -1692,11 +1681,6 @@ exports.getTopObjects5xx = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
-        logger.warn( 'query: ', requestBody );
-        logger.warn( 'indicesList: ' + indicesList );
-        logger.warn( 'error: ' + error.toString() );
-
         return reply(boom.badImplementation('Failed to retrieve data from ES, query: ' +
           JSON.stringify(requestBody) +
           ', indices: ' + indicesList +
@@ -1844,7 +1828,6 @@ exports.getAB4FBTAverage = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -1975,7 +1958,6 @@ exports.getAB4FBTDistribution = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -2105,7 +2087,6 @@ exports.getAB4Errors = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
@@ -2265,7 +2246,6 @@ exports.getAB4Speed = function( request, reply ) {
         };
         renderJSON( request, reply, false, response );
       }, function( error ) {
-        logger.error( error );
         return reply( boom.badImplementation( 'Failed to retrieve data from ES' ) );
       } );
 
