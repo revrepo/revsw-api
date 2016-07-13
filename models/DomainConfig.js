@@ -169,7 +169,6 @@ DomainConfig.prototype = {
         domain_name: 1,
         deleted: 1,
         'proxy_config.account_id': 1,
-        'proxy_config.rev_component_bp.enable_security': 1,
         'proxy_config.domain_aliases': 1,
         'proxy_config.domain_wildcard_alias': 1
       })
@@ -214,20 +213,13 @@ DomainConfig.prototype = {
 
           //  distributions
           if ( !dist[accountID] ) {
-            dist[accountID] = { total: 0, deleted: 0, active: 0, ssl_enabled: 0 };
+            dist[accountID] = { total: 0, deleted: 0, active: 0 };
           }
           if ( item.deleted ) {
             ++dist[accountID].deleted;
           } else {
             ++dist[accountID].active;
           }
-
-          // TODO temporarily disabling the collection of SSL data - later the data should be take from ssl_names
-          // if ( item.proxy_config &&
-          //      item.proxy_config.rev_component_bp &&
-          //      item.proxy_config.rev_component_bp.enable_security ) {
-          //   ++dist[accountID].ssl_enabled;
-          // }
 
           ++dist[accountID].total;
         });

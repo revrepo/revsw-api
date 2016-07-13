@@ -202,6 +202,46 @@ SSLName.prototype = {
   removeMany: function (data, callback) {
     this.model.remove(data, callback);
   },
+
+  /**
+   * list of ssl enabled domain names for the given account(s)
+   *
+   * @param  {string|[string,]|falsy} account ID, arrays of account IDs or nothing to get'em all
+   * @return {promise([{account_id,ssl_name},...])} - array of found SSL names
+   */
+  accountNames: function ( account_id ) {
+
+    var where = { deleted: { $ne:true } };
+    if ( account_id ) {
+      where.account_id = _.isArray( account_id ) ? { $in: account_id } : /*string*/account_id;
+    }
+    return this.model.find( where, { _id: 0, account_id: 1, ssl_name: 1 })
+      .exec()
+      .then( function( docs ) {
+        if ( docs ) {
+          docs = docs.map( function( doc ) {
+            return doc._doc;
+          });
+        }
+        return docs;
+      });
+  },
+
+  /**
+   * number of ssl enabled domains for the given account
+   *
+   * @param  {string|[string,]|falsy} account ID, arrays of account IDs or nothing to get'em all
+   * @return {promise(int)} - count of found documents
+   */
+  accountNamesCount : function ( account_id ) {
+
+    var where = { deleted: { $ne:true } };
+    if ( account_id ) {
+      where.account_id = _.isArray( account_id ) ? { $in: account_id } : /*string*/account_id;
+    }
+    return this.model.count( where )
+      .exec();
+  },
 };
 
 module.exports = SSLName;
