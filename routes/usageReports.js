@@ -25,8 +25,7 @@ var Joi = require('joi');
 var usageReports = require('../handlers/usageReports');
 var routeModels = require('../lib/routeModels');
 
-module.exports = [
-  {
+module.exports = [{
     method: 'GET',
     path: '/v1/usage_reports/web',
     config: {
@@ -49,6 +48,30 @@ module.exports = [
           to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
           only_overall: Joi.boolean().default(true).description('Report should contain only overall summary, default true'),
           keep_samples: Joi.boolean().default(false).description('Report should contain 5min interval traffic data, default false'),
+        }
+      }
+    }
+  }, {
+    method: 'GET',
+    path: '/v1/usage_reports/web/stats',
+    config: {
+      auth: {
+        scope: [ 'admin', 'reseller', 'revadmin', 'apikey' ]
+      },
+      handler: usageReports.getAccountStats,
+      description: 'Get Usage Date Histogram for an Account(s)',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {},
+        query: {
+          account_id: Joi.objectId().default('').description('Account ID, optional'),
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
         }
       }
     }

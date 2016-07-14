@@ -323,22 +323,22 @@ module.exports = [
             custom_vcl: Joi.object({
               enabled: Joi.boolean().required(),
               backends: Joi.array().items({
-                vcl: Joi.string().max(3000).required(),
+                vcl: Joi.string().max(10000).required(),
                 dynamic: Joi.boolean().required(),
                 port: Joi.number().integer().required(),
                 host: Joi.alternatives().try([Joi.string().uri(),Joi.string().regex(routeModels.domainRegex)]).required(),
                 name: Joi.string().max(150).required()
               }),
-              recv: Joi.string().max(3000),
-              backend_response: Joi.string().max(3000),
-              backend_error: Joi.string().max(3000),
-              hit: Joi.string().max(3000),
-              miss: Joi.string().max(3000),
-              deliver: Joi.string().max(3000),
-              pass: Joi.string().max(3000),
-              pipe: Joi.string().max(3000),
-              hash: Joi.string().max(3000),
-              synth: Joi.string().max(3000)
+              recv: Joi.string().max(10000),
+              backend_response: Joi.string().max(10000),
+              backend_error: Joi.string().max(10000),
+              hit: Joi.string().max(10000),
+              miss: Joi.string().max(10000),
+              deliver: Joi.string().max(10000),
+              pass: Joi.string().max(10000),
+              pipe: Joi.string().max(10000),
+              hash: Joi.string().max(10000),
+              synth: Joi.string().max(10000)
             })
           }).required()
         }
