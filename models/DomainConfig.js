@@ -345,6 +345,7 @@ DomainConfig.prototype = {
 
     return this.model.find( where, {
         _id: 0,
+        deleted: 1,
         'proxy_config.account_id': 1,
         domain_name: 1,
         'proxy_config.domain_aliases': 1
@@ -361,14 +362,17 @@ DomainConfig.prototype = {
             res[aid] = [];
           }
           if ( item.proxy_config.domain_aliases ) {
-            res[aid] = res[aid].concat( item.proxy_config.domain_aliases );
+            res[aid] = res[aid].concat( item.proxy_config.domain_aliases.map( function( alias ) {
+              return { name: alias, deleted: !!item.deleted };
+            }) );
           }
-          res[aid].push(item.domain_name);
+          res[aid].push({ name: item.domain_name, deleted: !!item.deleted });
           //  TODO: whatta about wildcards ?? (holy fuck!)
         });
         return res;
       });
   }
+
 };
 
 module.exports = DomainConfig;
