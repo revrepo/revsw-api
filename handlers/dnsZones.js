@@ -374,9 +374,7 @@ exports.updateDnsZone = function(request, reply) {
   var foundDnsZone;
   var statusResponse;
   var nsoneZoneInfo;
-  // TODO: add a check that provided account_id is within the scope
-  // of requesting user
-
+  
   return Promise.try(function() {
       // Get DNS zone by id
       return dnsZones.getAsync(zoneId);
