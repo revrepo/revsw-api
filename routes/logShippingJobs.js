@@ -150,8 +150,8 @@ module.exports = [
             .description('Destination host'),
           destination_port: Joi.string().max(10)
             .when('destination_type', {is: 's3', then: Joi.allow('')})
-            .when('destination_type', {is: 'ftp', then: Joi.allow('')})
-            .when('destination_type', {is: 'sftp', then: Joi.allow('')})
+            .when('destination_type', {is: 'ftp', then: Joi.default('21')})
+            .when('destination_type', {is: 'sftp', then: Joi.default('22')})
             .when('destination_type', {is: 'elasticsearch', then: Joi.allow('')})
             .description('Destination TCP/UDP port'),
           destination_key: Joi.string().max(150)
