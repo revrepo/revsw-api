@@ -59,6 +59,10 @@ var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 var ApiKey = require('../models/APIKey');
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
+var DNSZone = require('../models/DNSZone');
+var dnsZones = new DNSZone(mongoose, mongoConnection.getConnectionPortal());
+
+
 var apiKeysService = require('../services/APIKeys.js');
 var dashboardService = require('../services/dashboards.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
@@ -188,12 +192,12 @@ exports.createBillingProfile = function(request, reply) {
   accounts.get({
     _id: account_id
   }, function(error, result) {
-    if(error){
-       return reply(boom.badImplementation('Failed to get account with Id '+ account_id, error));
+    if (error) {
+      return reply(boom.badImplementation('Failed to get account with Id ' + account_id, error));
     }
     if (result) {
       result = publicRecordFields.handle(result, 'account');
-      if (result.billing_id === null || result.billing_id === undefined || result.billing_id === ''){
+      if (result.billing_id === null || result.billing_id === undefined || result.billing_id === '') {
         Customer.create(result, function resultCreatingCustomer(error, data) {
           if (error) {
             if (!!error.error && error.error.name === 'ValidationError') {
@@ -205,7 +209,7 @@ exports.createBillingProfile = function(request, reply) {
           result.billing_id = data.customer.id;
           updateAccountInformation(result, request, reply);
         });
-      }else{
+      } else {
         return renderJSON(request, reply, error, result);
       }
 
@@ -779,6 +783,18 @@ exports.deleteAccount = function(request, reply) {
           cb(error);
         });
       },
+      // verify that there are no active dns zones for an account
+      function(cb) {
+        dnsZones.getByAccountId(account_id, function(error, dnsZones_) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to verify that there are no active DNS Zones for account ID ' + account_id));
+          }
+          if (dnsZones_.length > 0) {
+            return reply(boom.badRequest('There are active DNS Zones registered for the account - please remove the DNS Zones before removing the account'));
+          }
+          cb(error);
+        });
+      },
       // verify that account exists
       function getAccountData(cb) {
         accounts.get({
@@ -815,14 +831,14 @@ exports.deleteAccount = function(request, reply) {
       },
       // Automatically delete All Private SSL Certificates
       function(cb) {
-        sslCertificatesService.deletePrivateSSLCertificatesWithAccountId(account_id, {deleted_by : _deleted_by},function(error, data) {
-            if (error) {
-              logger.error('Accounts::deleteAccount:Error remove Private SSL Certificates while removing account ID ' + account_id);
-              return reply(boom.badImplementation('Failed to delete Private SSL Certificates for account ID ' + account_id,error));
-            }
-            logger.info('Removed All Private SSL Certificates while removing account ID ' + account_id);
-            cb();
-          });
+        sslCertificatesService.deletePrivateSSLCertificatesWithAccountId(account_id, { deleted_by: _deleted_by }, function(error, data) {
+          if (error) {
+            logger.error('Accounts::deleteAccount:Error remove Private SSL Certificates while removing account ID ' + account_id);
+            return reply(boom.badImplementation('Failed to delete Private SSL Certificates for account ID ' + account_id, error));
+          }
+          logger.info('Removed All Private SSL Certificates while removing account ID ' + account_id);
+          cb();
+        });
       },
       // Automatically delete all API keys belonging to the account ID
       function removeAccountsApiKeys(cb) {

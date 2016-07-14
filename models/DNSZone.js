@@ -96,6 +96,27 @@ DNSZone.prototype = {
       callback(err, doc);
     });
   },
+
+  getByAccountId: function(accountId, callback) {
+    this.model.find({ account_id: accountId }, function(err, dnsZones) {
+      if (dnsZones) {
+        dnsZones = utils.clone(dnsZones).map(function(dnsZone) {
+          return {
+            id: dnsZone._id + '',
+            zone: dnsZone.zone,
+            account_id: dnsZone.account_id,
+            updated_at: dnsZone.updated_at,
+            updated_by: dnsZone.updated_by,
+          };
+        });
+      } else {
+        dnsZones = null;
+      }
+      callback(err, dnsZones);
+    });
+  },
+
+
   update: function(item, callback) {
     this.model.findOne({_id: item._id}, function(err, doc) {
       if (doc) {
