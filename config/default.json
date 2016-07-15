@@ -113,5 +113,10 @@
     "GasOrder": "https://system.globalsign.com/bb/ws/GasOrder?wsdl",
     "GasQuery": "https://system.globalsign.com/bb/ws/GasQuery?wsdl",
     "ServerSSLService": "https://system.globalsign.com/bb/ws/ServerSSLService?wsdl"
+  },
+
+  "throttling": {
+    "max": 100,
+    "duration": 60000
   }
 }

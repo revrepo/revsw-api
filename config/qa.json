@@ -24,5 +24,10 @@
     "https_port": 443
   },
   "key_path": "./config/ssl_certs/server.key",
-  "cert_path": "./config/ssl_certs/server.crt"
+  "cert_path": "./config/ssl_certs/server.crt",
+
+  "throttling": {
+    "max": 100,
+    "duration": 60000
+  }
 }

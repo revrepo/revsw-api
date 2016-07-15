@@ -51,6 +51,7 @@
     "hapi-forward": "^1.0.0",
     "hapi-router": "^3.3.0",
     "hapi-swagger": "^0.8.1",
+    "hapi-throttling": "^1.0.2",
     "hoek": "2.10.x",
     "inbox": "^1.1.59",
     "joi": "^6.1.2",

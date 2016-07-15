@@ -34,7 +34,8 @@ var Hapi = require('hapi'),
     User = require('../models/User'),
     os = require('os'),
     boom  = require('boom'),
-    mail = require('../lib/mail');
+    mail = require('../lib/mail'),
+    hapiThrottling = require('hapi-throttling');
 
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {
@@ -234,6 +235,42 @@ server.ext('onPreResponse', function(request, reply) {
     }
   }
   return reply.continue();
+});
+
+// Register throttling plugin
+var throttlingOptions = {
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: +process.env.REDIS_PORT || 6379
+  },
+  getKey: function (request, reply, done) {
+    // limiting only requests authenticated by API key
+    var key = null;
+    if (request.auth.credentials && request.auth.credentials.user_type === 'apikey') {
+      key = request.auth.credentials.account_id;
+    }
+
+    // global key based on API key
+    // to have route-specific settings concatenate key with request.route.path
+    done(null, key);
+  },
+  getLimit: function (request, reply, done) {
+    // global limit for all API endpoints
+    // to have rout-specific settings check request.route.path parameter
+    done(null, {
+      max: config.get('throttling.max'),
+      duration: config.get('throttling.duration')
+    });
+  }
+};
+
+server.register({
+  register: hapiThrottling,
+  options: throttlingOptions
+}, function (err) {
+  if (err) {
+    console.error(err);
+  }
 });
 
 server.register({
