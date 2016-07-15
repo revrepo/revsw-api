@@ -20,8 +20,9 @@
 'use strict';
 //  ----------------------------------------------------------------------------------------------//
 
-var _ = require('lodash');
-var promise = require('bluebird');
+var _ = require('lodash'),
+  config = require('config'),
+  promise = require('bluebird');
 
 function UsageReport( mongoose, connection, options ) {
   this.options = options;
@@ -95,7 +96,7 @@ UsageReport.prototype = {
       .then( function( docs ) {
         return ( docs ? docs.map( function( doc ) {
           return doc._doc;
-        }) : docs );
+        }) : [] );
       });
   },
 
@@ -107,56 +108,67 @@ UsageReport.prototype = {
     return this.model.find(where, fields).exec();
   },
 
-  //  ---------------------------------
-  //  returns promise array [{ account_id: '000000000000000000000000', created_at: Sat Mar 19 2016 }, ...]
-  //  day is report_for_day value, default today
-  //  account_id can be either ID(string), an array of IDs or an empty string for all accounts
-  lastCreatedAt : function ( day, account_id ) {
-    if ( !day ) {
-      day = new Date();
-      day.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
-    }
+  /**
+   *  scans today's reports for the given ID(s) and check if they need to recollect usage report data
+   *
+   * @param  {id|[id,..]|nothing} - either ID(string), an array of IDs or an empty string for all accounts
+   * @return {promise([id,id,...])} - promise with array of account ids
+   */
+  checkIDsToRecollect : function ( account_id ) {
+
+    var day = new Date();
+    day.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
 
     var where = { report_for_day: day };
     if ( account_id ) {
       where.account_id = _.isArray( account_id ) ? { $in: account_id } : /*string*/account_id;
     }
+
     return this.model.find( where, { _id: 0, account_id: 1, created_at: 1 })
       .exec()
       .then( function( docs ) {
-        if ( docs ) {
-          docs = docs.map( function( doc ) {
-            return doc._doc;
-          });
-          if ( account_id ) {
-            if ( _.isString( account_id ) ) {
-              account_id = [account_id];
-            }
-            if ( docs.length < account_id.length ) {
-              //  some ids not found
-              var not_found = [];
-              account_id.forEach( function( id ) {
-                //  v0.10 doesn't support Array.find
-                var found = _.find( docs, function( doc ) {
-                  return doc.account_id === id;
-                });
-                if ( !found ) {
-                  not_found.push({ account_id: id, created_at: false });
-                }
+
+        var id_re = /[0-9a-fA-F]{24}/,  //  ID regexp to filter out aux entities like summaries
+          now = Date.now();
+        docs = docs.map( function( doc ) {
+          return doc._doc;
+        })
+        .filter( function( doc ) {
+          return id_re.test( doc.account_id );
+        });
+
+        var ids = docs.filter( function( doc ) {
+          //  is it old enought to recollect data
+          return ( ( now - doc.created_at.getTime() ) > config.usage_report_regen_age_ms );
+        })
+        .map( function( doc ) {
+          return doc.account_id;
+        });
+
+        //  then check for not found IDs
+        if ( account_id ) {
+          if ( _.isString( account_id ) ) {
+            account_id = [account_id];
+          }
+
+          if ( docs.length < account_id.length ) {
+            //  some ids not found
+            var not_found = [];
+            account_id.forEach( function( id ) {
+              //  v0.10 doesn't support Array.find
+              var found = _.find( docs, function( doc ) {
+                return doc.account_id === id;
               });
-              docs = docs.concat( not_found );
-            }
+              if ( !found ) {
+                ids.push( id );
+              }
+            });
           }
         }
-        return docs;
+
+        return ids;
       });
-
-    // return this.model.aggregate([
-    //   { $match: match },
-    //   { $group: { _id: '$account_id', minCreated: { $min: '$created_at' } } }
-    // ]).exec();
   },
-
 
 };
 
