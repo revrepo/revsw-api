@@ -268,10 +268,10 @@ Account.prototype = {
   },
 
   /**
-   * account ID --> account Name hash
+   *  account ID --> account Name hash
    *
-   * @param  {string|array(string)|nothing} - one account ID, an array of account IDs or false/undef for any
-   * @return promise({ _id: companyName, _id: companyName, ... })
+   *  @param  {string|array(string)|nothing} - one account ID, an array of account IDs or false/undef for any
+   *  @return promise({ _id: companyName, _id: companyName, ... })
    */
   idNameHash: function( account_ids ) {
 
@@ -290,6 +290,50 @@ Account.prototype = {
           hash[item._id.toString()] = item.companyName;
         });
         return hash;
+      });
+  },
+
+  /**
+   *  return array of all non-deleted account IDs
+   *
+   *  @return promise([id,id,...])
+   */
+  allAliveIDs: function() {
+
+    var where = { deleted: { $ne: true } };
+    return this.model.find( where, { _id: 1 } )
+      .exec()
+      .then( function( data ) {
+        return data.map( function( item ) {
+          return item._id.toString();
+        });
+      });
+  },
+
+  /**
+   *  return array of all account IDs, non-deleted or deleted in the given day
+   *
+   *  @param {Date|nothing} - ignore accounts deleted before this date and created after, default today
+   *  @return promise([id,id,...])
+   */
+  allHalfDeadIDs: function( day ) {
+
+    day = day || new Date();
+    day.setUTCHours( 0, 0, 0, 0 );  //  very begin of the day
+    var where = {
+      $or: [
+        { deleted_at: { $gte: day } },
+        { deleted: { $ne: true } }
+      ],
+      created_at: { $lte: ( new Date( day.valueOf() + 86400000/*day in ms*/ ) ) }
+    };
+
+    return this.model.find( where, { _id: 1 } )
+      .exec()
+      .then( function( data ) {
+        return data.map( function( item ) {
+          return item._id.toString();
+        });
       });
   },
 
