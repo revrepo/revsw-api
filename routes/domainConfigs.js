@@ -340,7 +340,27 @@ module.exports = [
               hash: Joi.string().max(10000),
               synth: Joi.string().max(10000)
             })
-          }).required()
+          }).required(),
+          bp_lua: Joi.array().items({
+            location: Joi.string().max(150)
+              .description('Lua location for BP'),
+            code: Joi.string().max(2000)
+              .description('Lua code for the BP lua location'),
+            enable: Joi.boolean().default(false)
+              .description('Include or exclude BP lua code for domain proxy configuration'),
+            approve: Joi.boolean().default(false)
+              .description('Approve lua code/location posted by user (Replaces effective params if true)')
+          }),
+          co_lua: Joi.array().items({
+            location: Joi.string().max(150)
+              .description('Lua location for CO'),
+            code: Joi.string().max(2000)
+              .description('Lua code for the CO lua location'),
+            enable: Joi.boolean().default(false)
+              .description('Include or exclude CO lua code for domain proxy configuration'),
+            approve: Joi.boolean().default(false)
+              .description('Approve lua code/location posted by user (Replaces effective params if true)')
+          })
         }
       },
 //      response    : {

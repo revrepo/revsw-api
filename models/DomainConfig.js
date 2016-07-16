@@ -33,6 +33,14 @@ function DomainConfig(mongoose, connection, options) {
   this.Schema = mongoose.Schema;
   this.ObjectId = this.Schema.ObjectId;
 
+  var luaSchema = mongoose.Schema({
+    'location': {type: String, default: ''},
+    'code': {type: String, default: ''},
+    'effective_location': {type: String, default: ''},
+    'effective_code': {type: String, default: ''},
+    'enable': {type: Boolean, default: false}
+  }, { _id : false });
+
   this.DomainConfigSchema = new this.Schema({
     'name': {type: String, required: true},
     'BPGroup': {type: String, required: true},
@@ -56,6 +64,8 @@ function DomainConfig(mongoose, connection, options) {
     'proxy_config': {},
     'published_domain_version': {type: Number, default: 0},
     'previous_domain_configs': [{}],
+    'bp_lua': [luaSchema],
+    'co_lua': [luaSchema]
   });
 
   this.model = connection.model('DomainConfig', this.DomainConfigSchema, 'DomainConfig');
