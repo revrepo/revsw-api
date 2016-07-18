@@ -26,12 +26,19 @@ var _ = require('lodash'),
   config = require('config'),
   promise = require('bluebird'),
   mongoose = require('mongoose');
-var logger = require('revsw-logger')(config.log_config);
 
 function DomainConfig(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
   this.ObjectId = this.Schema.ObjectId;
+
+  var luaSchema = mongoose.Schema({
+    'location': {type: String, default: ''},
+    'code': {type: String, default: ''},
+    'effective_location': {type: String, default: ''},
+    'effective_code': {type: String, default: ''},
+    'enable': {type: Boolean, default: false}
+  }, { _id : false });
 
   this.DomainConfigSchema = new this.Schema({
     'name': {type: String, required: true},
@@ -56,6 +63,8 @@ function DomainConfig(mongoose, connection, options) {
     'proxy_config': {},
     'published_domain_version': {type: Number, default: 0},
     'previous_domain_configs': [{}],
+    'bp_lua': [luaSchema],
+    'co_lua': [luaSchema]
   });
 
   this.model = connection.model('DomainConfig', this.DomainConfigSchema, 'DomainConfig');
@@ -182,7 +191,6 @@ DomainConfig.prototype = {
         var map = {};
         var wildcards = [];
         data.forEach( function( item ) {
-          // logger.debug('Processing domain ' + item.domain_name + ', proxy_config = ' + JSON.stringify(item.proxy_config));
 
           //  domain mappings
           var accountID = item.proxy_config.account_id.toString();
@@ -309,7 +317,7 @@ DomainConfig.prototype = {
             domains = domains.concat( item.proxy_config.domain_aliases );
           }
           domains.push( item.domain_name );
-          //  TODO: whatta about wildcards ?? (holy fuck!)
+          //  TODO: whatta about wildcards ?
         });
         return domains;
       });
@@ -326,26 +334,29 @@ DomainConfig.prototype = {
    *    accID: [string,],
    *  })}
    */
-  domainsListForAccountGrouped: function( account_id, day ) {
+  domainsListForAccountGrouped: function( account_id, from, to ) {
 
     if ( !account_id ) {
       throw new Error( 'domainsListForAccountGrouped: account_id must be provided' );
     }
 
-    day = day || new Date();
-    day.setUTCHours( 0, 0, 0, 0 );  //  very begin of the day
+    from = from || new Date();
+    from.setUTCHours( 0, 0, 0, 0 ); //  very beginning of the day
+    to = to || new Date( from );
+    to.setUTCHours( 24, 0, 0, 0 );  //  very beginning of the next day
     var where = {
       $or: [
-        { deleted_at: { $gte: day } },
+        { deleted_at: { $gte: from } },
         { deleted: { $ne: true } }
       ],
-      created_at: { $lte: ( new Date( day.valueOf() + 86400000/*day in ms*/ ) ) },
+      created_at: { $lt: to },
       'proxy_config.account_id': ( _.isArray( account_id ) ? { $in: account_id } : account_id )
     };
 
     return this.model.find( where, {
         _id: 0,
         deleted: 1,
+        deleted_at: 1,
         'proxy_config.account_id': 1,
         domain_name: 1,
         'proxy_config.domain_aliases': 1
@@ -353,6 +364,9 @@ DomainConfig.prototype = {
       .exec()
       .then( function( data ) {
         var res = {};
+
+        console.log( data );
+
         data.forEach( function( item ) {
           if ( !item.proxy_config || !item.proxy_config.account_id ) {
             return;
@@ -363,10 +377,10 @@ DomainConfig.prototype = {
           }
           if ( item.proxy_config.domain_aliases ) {
             res[aid] = res[aid].concat( item.proxy_config.domain_aliases.map( function( alias ) {
-              return { name: alias, deleted: !!item.deleted };
+              return { name: alias, deleted: item.deleted };
             }) );
           }
-          res[aid].push({ name: item.domain_name, deleted: !!item.deleted });
+          res[aid].push({ name: item.domain_name, deleted: item.deleted });
           //  TODO: whatta about wildcards ?? (holy fuck!)
         });
         return res;
