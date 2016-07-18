@@ -226,7 +226,6 @@ var topReports_ = function( req, reply, domainConfig, span ) {
       renderJSON( req, reply, false/*error is undefined here*/, response );
     })
     .catch( function(error) {
-      logger.error(error);
       return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
@@ -325,7 +324,6 @@ var top5XX_ = function( req, reply, domainConfig, span ) {
       renderJSON( req, reply, false/*error is undefined here*/, response );
     })
     .catch( function(error) {
-      logger.error(error);
       return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
@@ -484,7 +482,6 @@ exports.getTopLists = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
-        logger.error(error);
         return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
 

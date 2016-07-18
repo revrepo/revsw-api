@@ -12,7 +12,7 @@
   "main": "index",
   "scripts": {
     "start": "nodejs bin/revsw-api.js",
-    "start_": "node bin/revsw-api.js",
+    "start_": "NODE_ENV=local-dev node bin/revsw-api.js",
     "sly": "NODE_ENV=local-prod node bin/revsw-api.js",
     "lint": "jshint -c .jshintrc lib/*.js handlers/*.js && jshint -c config/.jshintrc config/*.json",
     "test": "cd test/rest_api/; NODE_ENV=qa grunt mochaTest",
