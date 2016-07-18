@@ -374,7 +374,7 @@ exports.updateDnsZone = function(request, reply) {
   var foundDnsZone;
   var statusResponse;
   var nsoneZoneInfo;
-  
+
   return Promise.try(function() {
       // Get DNS zone by id
       return dnsZones.getAsync(zoneId);
