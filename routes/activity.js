@@ -51,7 +51,10 @@ module.exports = [{
         target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname', 'dnszone', 'dnsrecord')
           .when('target_id', { is: /^[0-9a-fA-F]{24}$/, then: Joi.required() })
           .description('Target type  (\'user\', \'account\', \'domain\', \'purge\', \'object\', \'apikey\', \'team\', \'app\', \'sslcert\', \'sslname\','+
-          ' \'dnszone\',\'dnsrecord\'')
+          ' \'dnszone\',\'dnsrecord\''),
+        activity_type: Joi.string().valid('login', 'add', 'modify', 'delete', 'publish', 'purge', 'init2fa', 'enable2fa',
+          'disable2fa', 'resetpassword', 'signup', 'verify').description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\','+
+          ' \'init2fa\', \'enable2fa\', \'disable2fa\', \'resetpassword\', \'signup\', \'verify\')')
       }
     }
   }

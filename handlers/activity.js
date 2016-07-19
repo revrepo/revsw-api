@@ -41,6 +41,8 @@ exports.getDetailedAuditInfo = function(request, reply) {
   var endTime;
   var targetType = request.query.target_type;
   var targetId = request.query.target_id;
+  var activityType = request.query.activity_type;
+
   var userId = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
   var accountId;
   if (request.auth.credentials.user_type === 'user') {
@@ -136,7 +138,12 @@ exports.getDetailedAuditInfo = function(request, reply) {
           break;
       }
     },
-
+    function prepareParamActivityType(cb){
+      if (activityType) {
+        requestBody['meta.activity_type'] = activityType;
+      }
+      cb();
+    },
     function prepareParams(cb) {
       // NOTE: set filter for get only one type Activity Target
       if (targetType) {
