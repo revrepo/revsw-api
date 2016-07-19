@@ -351,6 +351,8 @@ module.exports = [
             approve: Joi.boolean().default(false)
               .description('Approve lua code/location posted by user (Replaces effective params if true)')
           }),
+          bp_lua_enable_all: Joi.boolean().optional(),
+
           co_lua: Joi.array().items({
             location: Joi.string().max(150)
               .description('Lua location for CO'),
@@ -360,7 +362,8 @@ module.exports = [
               .description('Include or exclude CO lua code for domain proxy configuration'),
             approve: Joi.boolean().default(false)
               .description('Approve lua code/location posted by user (Replaces effective params if true)')
-          })
+          }),
+          co_lua_enable_all: Joi.boolean().optional()
         }
       },
 //      response    : {
