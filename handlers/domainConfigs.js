@@ -459,6 +459,13 @@ exports.updateDomainConfig = function(request, reply) {
         bp_lua: bpLua,
         co_lua: coLua
       };
+      
+      if (newDomainJson.bp_lua_enable_all === true) {
+        newDomainJson2.bp_lua_enable_all = true;
+      }
+      if (newDomainJson.co_lua_enable_all === true) {
+        newDomainJson2.co_lua_enable_all = true;
+      }
       logger.info('Calling CDS to update configuration for domain ID: ' + domain_id + ', optionsFlag: ' + optionsFlag + ', request body: ' +
         JSON.stringify(newDomainJson2));
       cdsRequest({
