@@ -240,14 +240,20 @@ server.ext('onPreResponse', function(request, reply) {
 // Register throttling plugin
 var throttlingOptions = {
   redis: {
-    host: process.env.REDIS_HOST,
-    port: +process.env.REDIS_PORT || 6379
+    host: config.get('throttling.redis.host'),
+    port: +config.get('throttling.redis.port') || 6379
   },
   getKey: function (request, reply, done) {
-    // limiting only requests authenticated by API key
     var key = null;
     if (request.auth.credentials && request.auth.credentials.user_type === 'apikey') {
-      key = request.auth.credentials.account_id;
+      // limit by API key
+      key = request.auth.credentials.key;
+    } else if (request.auth.credentials && request.auth.credentials.user_type === 'user') {
+      // limit by user id using JWT
+      key = request.auth.credentials.user_id;
+    } else {
+      // limit by IP address
+      key = request.info.remoteAddress;
     }
 
     // global key based on API key
@@ -255,11 +261,12 @@ var throttlingOptions = {
     done(null, key);
   },
   getLimit: function (request, reply, done) {
-    // global limit for all API endpoints
-    // to have rout-specific settings check request.route.path parameter
+    // Global limit for all API endpoints.
+    // To have rout-specific limit use request.route.path parameter.
+    // To have user-specific limit use user data
     done(null, {
-      max: config.get('throttling.max'),
-      duration: config.get('throttling.duration')
+      max: config.get('throttling.max'),          // maximum number of requests within duration per key
+      duration: config.get('throttling.duration') // duration of the limit
     });
   }
 };
