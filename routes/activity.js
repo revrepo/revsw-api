@@ -48,10 +48,13 @@ module.exports = [{
         from_timestamp: Joi.string().max(50).description('Report period start timestamp (defaults to one month ago from now)'),
         to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)'),
         target_id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).description('Target ID'),
-        target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'team', 'app', 'sslcert', 'sslname', 'dnszone', 'dnsrecord')
+        target_type: Joi.string().valid('user', 'account', 'domain', 'purge', 'object', 'apikey', 'logshippingjob', 'app', 'sslcert', 'sslname', 'dnszone', 'dnsrecord')
           .when('target_id', { is: /^[0-9a-fA-F]{24}$/, then: Joi.required() })
-          .description('Target type  (\'user\', \'account\', \'domain\', \'purge\', \'object\', \'apikey\', \'team\', \'app\', \'sslcert\', \'sslname\','+
-          ' \'dnszone\',\'dnsrecord\'')
+          .description('Target type  (\'user\', \'account\', \'domain\', \'purge\', \'object\', \'apikey\', \'logshippingjob\', \'app\', \'sslcert\', \'sslname\','+
+          ' \'dnszone\',\'dnsrecord\''),
+        activity_type: Joi.string().valid('login', 'add', 'modify', 'delete', 'publish', 'purge', 'init2fa', 'enable2fa',
+          'disable2fa', 'resetpassword', 'signup', 'verify').description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\','+
+          ' \'init2fa\', \'enable2fa\', \'disable2fa\', \'resetpassword\', \'signup\', \'verify\')')
       }
     }
   }

@@ -75,7 +75,7 @@
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
   "jwt_token_lifetime_minutes": 1440,   // 24 hours
-  "number_of_reported_audit_log_records": 40,
+  "number_of_reported_audit_log_records": 1000,
 
   "available_sdk_release_versions": {
     "iOS": [ 1, 2, 4 ],
