@@ -185,8 +185,22 @@ exports.getDomainConfig = function(request, reply) {
       response.ssl_ciphers = response_json.ssl_ciphers;
       response.ssl_prefer_server_ciphers = response_json.ssl_prefer_server_ciphers;
       response.btt_key = response_json.btt_key;
-      response.bp_lua = response_json.bp_lua;
-      response.co_lua = response_json.co_lua;
+      response.bp_lua = response_json.bp_lua && response_json.bp_lua.length > 0 ?
+        response_json.bp_lua.map(function(lua) {
+          return {
+            enable: lua.enable,
+            location: lua.location,
+            code: lua.code
+          };
+        }) : [];
+      response.co_lua = response_json.co_lua && response_json.co_lua.length > 0 ?
+      response_json.co_lua.map(function(lua) {
+        return {
+          enable: lua.enable,
+          location: lua.location,
+          code: lua.code
+        };
+      }) : [];
 
       renderJSON(request, reply, err, response);
     });
@@ -459,7 +473,7 @@ exports.updateDomainConfig = function(request, reply) {
         bp_lua: bpLua,
         co_lua: coLua
       };
-      
+
       if (newDomainJson.bp_lua_enable_all === true) {
         newDomainJson2.bp_lua_enable_all = true;
       }
