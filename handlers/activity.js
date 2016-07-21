@@ -178,8 +178,8 @@ exports.getDetailedAuditInfo = function(request, reply) {
     },
 
     function prepareDataAndSendResponse(cb) {
-
-      var span = utils.query2Span(request.query, 30 * 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ , false);
+      var countMonth_ = 6; // NOTE: allow to search 6 months back
+      var span = utils.query2Span(request.query, 30 * 24 /*def start in hrs*/ , 24 * 31 * countMonth_  /*allowed period - 6 month*/ , false);
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
