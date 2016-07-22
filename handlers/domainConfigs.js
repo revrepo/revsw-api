@@ -185,8 +185,24 @@ exports.getDomainConfig = function(request, reply) {
       response.ssl_ciphers = response_json.ssl_ciphers;
       response.ssl_prefer_server_ciphers = response_json.ssl_prefer_server_ciphers;
       response.btt_key = response_json.btt_key;
-      response.bp_lua = response_json.bp_lua;
-      response.co_lua = response_json.co_lua;
+      response.bp_lua_enable_all = response_json.bp_lua_enable_all;
+      response.bp_lua = response_json.bp_lua && response_json.bp_lua.length > 0 ?
+        response_json.bp_lua.map(function(lua) {
+          return {
+            enable: lua.enable,
+            location: lua.location,
+            code: lua.code
+          };
+        }) : [];
+      response.co_lua_enable_all = response_json.co_lua_enable_all;
+      response.co_lua = response_json.co_lua && response_json.co_lua.length > 0 ?
+      response_json.co_lua.map(function(lua) {
+        return {
+          enable: lua.enable,
+          location: lua.location,
+          code: lua.code
+        };
+      }) : [];
 
       renderJSON(request, reply, err, response);
     });
@@ -381,6 +397,7 @@ exports.createDomainConfig = function(request, reply) {
 exports.updateDomainConfig = function(request, reply) {
 
   var newDomainJson = request.payload;
+  var newDomainJsonAudit = utils.clone(request.payload);
   var domain_id = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
@@ -444,6 +461,10 @@ exports.updateDomainConfig = function(request, reply) {
       delete newDomainJson.ssl_prefer_server_ciphers;
       var _btt_key = newDomainJson.btt_key || '';
       delete newDomainJson.btt_key;
+      var _bpLuaEnabled = newDomainJson.bp_lua_enable_all || false;
+      delete newDomainJson.bp_lua_enable_all;
+      var _coLuaEnabled = newDomainJson.co_lua_enable_all || false;
+      delete newDomainJson.co_lua_enable_all;
 
       var newDomainJson2 = {
         updated_by: utils.generateCreatedByField(request),
@@ -457,8 +478,11 @@ exports.updateDomainConfig = function(request, reply) {
         ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers,
         btt_key: _btt_key,
         bp_lua: bpLua,
-        co_lua: coLua
+        bp_lua_enable_all: _bpLuaEnabled,
+        co_lua: coLua,
+        co_lua_enable_all: _coLuaEnabled
       };
+
       logger.info('Calling CDS to update configuration for domain ID: ' + domain_id + ', optionsFlag: ' + optionsFlag + ', request body: ' +
         JSON.stringify(newDomainJson2));
       cdsRequest({
@@ -488,7 +512,7 @@ exports.updateDomainConfig = function(request, reply) {
             activity_target: 'domain',
             target_id: result._id,
             target_name: result.domain_name,
-            target_object: newDomainJson,
+            target_object: newDomainJsonAudit,
             operation_status: 'success'
           }, request);
         }

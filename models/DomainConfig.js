@@ -63,7 +63,9 @@ function DomainConfig(mongoose, connection, options) {
     'proxy_config': {},
     'published_domain_version': {type: Number, default: 0},
     'previous_domain_configs': [{}],
+    'bp_lua_enable_all': {type: Boolean, default: false},
     'bp_lua': [luaSchema],
+    'co_lua_enable_all': {type: Boolean, default: false},
     'co_lua': [luaSchema]
   });
 

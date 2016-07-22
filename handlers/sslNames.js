@@ -255,14 +255,26 @@ exports.addSSLName = function (request, reply) {
           if (error) {
             sendStatusReport(request, reply, error, 400, 'GS failed to add new SSL name ' + SSLName);
           } else {
-            // console.log(data.output.message);
-            if (verificationMethod === 'url') {
-              verificationObject = data.output.message.Response.CloudOVSANInfo.MetaTag;
+            // check error in Response message
+            if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
+              // console.log(data.output.message);
+              if (verificationMethod === 'url') {
+                verificationObject = data.output.message.Response.CloudOVSANInfo.MetaTag;
+              } else {
+                verificationObject = data.output.message.Response.CloudOVSANInfo.TxtRecord;
+              }
+              createNewSSLName(accountId, SSLName, createdBy, verificationMethod, verificationObject, approvers);
             } else {
-              verificationObject = data.output.message.Response.CloudOVSANInfo.TxtRecord;
-            }
-
-            createNewSSLName(accountId, SSLName, createdBy, verificationMethod, verificationObject, approvers);
+                logger.error('addSSLName:GlobalSing error '+JSON.stringify(data.output.message.Response.OrderResponseHeader.Errors.Error));
+                var message_ = 'Failed to add new SSL name ' + SSLName;
+                var errors_ = data.output.message.Response.OrderResponseHeader.Errors.Error;
+                if (_.isArray(errors_)) {
+                  if (errors_.length === 1 && errors_[0].ErrorCode === '-104') {
+                    message_ = 'One or more of the specified parameters are incorrect. Please verify the parameters and repeat the operation.';
+                  }
+                }
+                sendStatusReport(request, reply, errors_, 400, message_);
+              }
           }
         });
       }

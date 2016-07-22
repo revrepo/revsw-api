@@ -41,6 +41,8 @@ exports.getDetailedAuditInfo = function(request, reply) {
   var endTime;
   var targetType = request.query.target_type;
   var targetId = request.query.target_id;
+  var activityType = request.query.activity_type;
+
   var userId = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
   var accountId;
   if (request.auth.credentials.user_type === 'user') {
@@ -136,7 +138,12 @@ exports.getDetailedAuditInfo = function(request, reply) {
           break;
       }
     },
-
+    function prepareParamActivityType(cb){
+      if (activityType) {
+        requestBody['meta.activity_type'] = activityType;
+      }
+      cb();
+    },
     function prepareParams(cb) {
       // NOTE: set filter for get only one type Activity Target
       if (targetType) {
@@ -171,8 +178,8 @@ exports.getDetailedAuditInfo = function(request, reply) {
     },
 
     function prepareDataAndSendResponse(cb) {
-
-      var span = utils.query2Span(request.query, 30 * 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ , false);
+      var countMonth_ = 6; // NOTE: allow to search 6 months back
+      var span = utils.query2Span(request.query, 30 * 24 /*def start in hrs*/ , 24 * 31 * countMonth_  /*allowed period - 6 month*/ , false);
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
