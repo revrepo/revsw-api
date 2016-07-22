@@ -103,7 +103,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
             // check permission current request user to activityActionUser
             if (!!results.activityUser_) {
               if (!utils.checkUserAccessPermissionToUser(request, results.activityUser_)) {
-                cb({ errorCode: 400, err: null, message: 'User ID not found!!' });
+                cb({ errorCode: 400, err: null, message: 'User ID not found' });
                 return;
               }
               activityActionUserType_ = 'user';
@@ -121,7 +121,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
             cb();
           } else {
             // not found USER or APIKey for sending ID(user_id)
-            cb({ errorCode: 400, err: null, message: 'User ID not found-' });
+            cb({ errorCode: 400, err: null, message: 'User ID not found' });
           }
         });
       } else {
