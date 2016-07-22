@@ -43,7 +43,7 @@ module.exports = [{
       validate: {
         params: {},
         query: {
-          account_id: Joi.objectId().default('').description('Account ID, optional'),
+          account_id: Joi.objectId().allow('').default('').description('Account ID, optional'),
           from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
           to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
           only_overall: Joi.boolean().default(true).description('Report should contain only overall summary, default true'),
@@ -69,7 +69,7 @@ module.exports = [{
       validate: {
         params: {},
         query: {
-          account_id: Joi.objectId().default('').description('Account ID, optional'),
+          account_id: Joi.objectId().allow('').default('').description('Account ID, optional'),
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
         }
