@@ -397,6 +397,7 @@ exports.createDomainConfig = function(request, reply) {
 exports.updateDomainConfig = function(request, reply) {
 
   var newDomainJson = request.payload;
+  var newDomainJsonAudit = utils.clone(request.payload);
   var domain_id = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
 
@@ -511,7 +512,7 @@ exports.updateDomainConfig = function(request, reply) {
             activity_target: 'domain',
             target_id: result._id,
             target_name: result.domain_name,
-            target_object: newDomainJson,
+            target_object: newDomainJsonAudit,
             operation_status: 'success'
           }, request);
         }

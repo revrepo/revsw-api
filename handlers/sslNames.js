@@ -270,7 +270,7 @@ exports.addSSLName = function (request, reply) {
                 var errors_ = data.output.message.Response.OrderResponseHeader.Errors.Error;
                 if (_.isArray(errors_)) {
                   if (errors_.length === 1 && errors_[0].ErrorCode === '-104') {
-                    message_ = 'Please verify parameters. One or more of them is not correct.';
+                    message_ = 'One or more of the specified parameters are incorrect. Please verify the parameters and repeat the operation.';
                   }
                 }
                 sendStatusReport(request, reply, errors_, 400, message_);
