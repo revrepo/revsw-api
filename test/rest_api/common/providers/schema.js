@@ -259,7 +259,7 @@ module.exports = {
     var activityResponseSchema = Joi.object().keys({
       metadata: Joi.object().keys({
         user_id: Joi.string().regex(idFormatPattern).required(),
-        account_id: Joi.string().regex(idFormatPattern),
+        account_id: Joi.array().items(Joi.string().regex(idFormatPattern)).min(1),
         /*.allow([
           Joi.string().regex(idFormatPattern),
           Joi.array().items(Joi.string().regex(idFormatPattern))
@@ -271,7 +271,7 @@ module.exports = {
     });
     return activityResponseSchema;
   },
-  
+
   getApp: function () {
     return models.AppModel;
   },

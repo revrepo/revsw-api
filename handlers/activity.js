@@ -180,29 +180,9 @@ exports.getDetailedAuditInfo = function(request, reply) {
       // NOTE: set filter for get list Activities for Activity Target(Type) with ID
       if (targetType && targetId) {
         requestBody['meta.activity_target'] = targetType;
-        if (targetType === 'purge') {
-          // NOTE: for 'purge' type action  "target_id" - is domain id because purge object
-          // can't be change and have only one relation with one domain
-          domainConfigs.get(targetId, function(error, result) {
-            if (error) {
-              cb({ errorCode: 500, err: error, message: 'Failed to retrieve details for target ID ' + targetId });
-              return;
-            }
-
-            if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
-              cb({ errorCode: 400, err: null, message: 'Target ID not found' });
-              return;
-            }
-            requestBody['meta.target_name'] = result.domain_name;
-            cb();
-          });
-        } else {
-          requestBody['meta.target_id'] = targetId;
-          cb();
-        }
-      } else {
-        cb();
+        requestBody['meta.target_id'] = targetId;
       }
+      cb(null);
     },
 
     function prepareDataAndSendResponse(cb) {
@@ -227,7 +207,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
         var result = {
           metadata: {
             user_id: activityActionUserId,
-            account_id: utils.getAccountID(request, false),//accountId,
+            account_id: utils.getAccountID(request, false), //accountId,
             start_time: startTime,
             end_time: endTime
           },
