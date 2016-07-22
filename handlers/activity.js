@@ -206,7 +206,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
         }
         var result = {
           metadata: {
-            user_id: activityActionUserId,
+            user_id: activityActionUserId || userId,
             account_id: utils.getAccountID(request, false), //accountId,
             start_time: startTime,
             end_time: endTime
