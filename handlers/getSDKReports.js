@@ -967,10 +967,12 @@ exports.getTopGBT = function( request, reply ) {
       count = request.query.count || 0,
       reportType = request.query.report_type || 'country';
 
-    var field;
+    var field,
+      subfield = false;
     switch (reportType) {
       case 'country':
         field = 'geoip.country_code2';
+        subfield = 'geoip.region_name';
         break;
       case 'os':
         field = 'device.os';
@@ -987,6 +989,53 @@ exports.getTopGBT = function( request, reply ) {
         break;
       default:
         return reply(boom.badImplementation('Received bad reportType value ' + reportType));
+    }
+
+    var subaggs = {
+        deep: {
+          nested: {
+            path: 'requests'
+          },
+          aggs: {
+            hits: {
+              range: {
+                field: 'requests.start_ts',
+                ranges: [{ from: span.start, to: (span.end - 1) }]
+              },
+              aggs: {
+                received_bytes: {
+                  sum: {
+                    // swapped intentionaly
+                    field: 'requests.sent_bytes'
+                  }
+                },
+                sent_bytes: {
+                  sum: {
+                    // swapped intentionaly
+                    field: 'requests.received_bytes'
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+    if ( subfield ) {
+      subaggs = {
+        subresults: {
+          terms: {
+            field: subfield,
+            size: 0
+          },
+          aggs: subaggs
+        },
+        missing_subfield: {
+          missing: {
+            field: subfield
+          }
+        }
+      };
     }
 
     var requestBody = {
@@ -1013,41 +1062,12 @@ exports.getTopGBT = function( request, reply ) {
         results: {
           terms: {
             field: field,
-            size: count,
-            order: {
-              _count: 'desc'
-            }
+            size: count//,
+            // order: {
+            //   _count: 'desc'
+            // }
           },
-          aggs: {
-            deep: {
-              nested: {
-                path: 'requests'
-              },
-              aggs: {
-                hits: {
-                  range: {
-                    field: 'requests.start_ts',
-                    ranges: [{ from: span.start, to: (span.end - 1) }]
-                  },
-                  aggs: {
-                    //  "(un)swap incoming and outgoing bandwidth"
-                    received_bytes: {
-                      sum: {
-                        // field: 'requests.received_bytes'
-                        field: 'requests.sent_bytes'
-                      }
-                    },
-                    sent_bytes: {
-                      sum: {
-                        // field: 'requests.sent_bytes'
-                        field: 'requests.received_bytes'
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          aggs: subaggs
         },
         missing_field: {
           missing: {
@@ -1067,29 +1087,129 @@ exports.getTopGBT = function( request, reply ) {
       .then(function(body) {
 
         var data = [];
-        if ( body.aggregations ) {
-          for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; ++i ) {
-            var item = body.aggregations.results.buckets[i];
-            if ( reportType === 'operator' && item.key === '_' ) {
-              item.key = 'No Cellular Connection';
-            }
-            if ( item.deep && item.deep.hits && item.deep.hits.buckets.length ) {
-              var deep = item.deep.hits.buckets[0];
-              data.push({
-                key: item.key,
-                count: deep.doc_count,
-                received_bytes: deep.received_bytes.value,
-                sent_bytes: deep.sent_bytes.value
-              });
-            } else {
-              data.push({
-                key: item.key,
-                count: 0,
-                received_bytes: 0,
-                sent_bytes: 0
-              });
-            }
+        /*
+          "results": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "US",
+                "doc_count": 4,
+                "subresults": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "CA",
+                      "doc_count": 4,
+                      "deep": {
+                        "doc_count": 200,
+                        "hits": {
+                          "buckets": [
+                            {
+                              "key": "2016-07-20T23:35:00.000Z-2016-07-21T23:34:59.999Z",
+                              "from": 1469057700000,
+                              "from_as_string": "2016-07-20T23:35:00.000Z",
+                              "to": 1469144099999,
+                              "to_as_string": "2016-07-21T23:34:59.999Z",
+                              "doc_count": 200,
+                              "received_bytes": {
+                                "value": 25600
+                              },
+                              "sent_bytes": {
+                                "value": 5080768
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "missing_subfield": {
+                  "doc_count": 0
+                }
+              }
+            ]
           }
+        */
+
+        /*
+          "results": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "9.2",
+                "doc_count": 4,
+                "deep": {
+                  "doc_count": 200,
+                  "hits": {
+                    "buckets": [
+                      {
+                        "key": "2016-07-20T23:40:00.000Z-2016-07-21T23:39:59.999Z",
+                        "from": 1469058000000,
+                        "from_as_string": "2016-07-20T23:40:00.000Z",
+                        "to": 1469144399999,
+                        "to_as_string": "2016-07-21T23:39:59.999Z",
+                        "doc_count": 200,
+                        "received_bytes": {
+                          "value": 25600
+                        },
+                        "sent_bytes": {
+                          "value": 5080768
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        */
+
+
+        if ( body.aggregations ) {
+
+          data = body.aggregations.results.buckets.map( function( item ) {
+
+            var res = {
+              key: ( ( reportType === 'operator' && item.key === '_' ) ?
+                'No Cellular Connection' : item.key ),
+              count: 0,
+              received_bytes: 0,
+              sent_bytes: 0
+            };
+
+            if ( item.subresults ) {
+              res.regions = item.subresults.buckets.map( function( r ) {
+                var region = {
+                  key: r.key,
+                  count: 0,
+                  received_bytes: 0,
+                  sent_bytes: 0
+                };
+                if ( r.deep && r.deep.hits && r.deep.hits.buckets.length ) {
+                  var deep = r.deep.hits.buckets[0];
+                  region.count = deep.doc_count;
+                  region.received_bytes = deep.received_bytes.value;
+                  region.sent_bytes = deep.sent_bytes.value;
+                }
+                res.count += region.count;
+                res.received_bytes += region.received_bytes;
+                res.sent_bytes += region.sent_bytes;
+                return region;
+              });
+            } else if ( item.deep && item.deep.hits && item.deep.hits.buckets.length ) {
+              var deep = item.deep.hits.buckets[0];
+              res.count = deep.doc_count;
+              res.received_bytes = deep.received_bytes.value;
+              res.sent_bytes = deep.sent_bytes.value;
+            }
+
+            return res;
+          });
+
         }
 
         var response = {
@@ -1108,6 +1228,8 @@ exports.getTopGBT = function( request, reply ) {
         renderJSON( request, reply, false/*error is undefined here*/, response );
       })
       .catch( function(error) {
+        console.log( error.toString() );
+        console.log( error.stack );
         return reply(boom.badImplementation('Failed to retrieve data from ES'));
       });
 
