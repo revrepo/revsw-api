@@ -423,6 +423,41 @@ module.exports = [
 
   {
     method: 'GET',
+    path: '/v1/stats/mobile_desktop/{domain_id}',
+    config: {
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: getStats.getMobileDesktopDistribution,
+      description: 'Get mobile/desktop distribution for a domain',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp'),
+          to_timestamp: Joi.string().description('Report period end timestamp'),
+          status_code: Joi.number().integer().min(100).max(600).description('HTTP status code to filter'),
+          cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
+          request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
+          protocol: Joi.string().valid( 'HTTP', 'HTTPS' ).description('HTTP/HTTPS protocol to filter'),
+          http_method: Joi.string().valid( 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT', 'PATCH' )
+            .description('HTTP method value to filter'),
+          quic: Joi.string().valid( 'QUIC', 'HTTP' ).description('Last mile protocol to filter'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter')
+        }
+      }
+    }
+  },
+
+  {
+    method: 'GET',
     path: '/v1/stats/sdk/app/{app_id}',
     config: {
       auth: {
