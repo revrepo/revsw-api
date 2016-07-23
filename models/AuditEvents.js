@@ -21,6 +21,7 @@
 'use strict';
 
 var config = require('config');
+var utils = require('../lib/utilities.js');
 
 function AuditEvents(mongoose, connection, options) {
   this.options = options;
@@ -141,6 +142,45 @@ AuditEvents.prototype = {
         data.push(innerData);
       }
       callback(err, data);
+    });
+  },
+  //===============================================
+  // Temporary methods for one time change data
+  // TODO: delete after one time update data
+  findAllPurgeActivityTarget: function(callback) {
+    this.model.find({ 'meta.activity_target': 'purge' })
+      .exec(function(err, purgeActivityTargets) {
+        if (purgeActivityTargets) {
+          purgeActivityTargets = utils.clone(purgeActivityTargets)
+            .map(function(item) {
+              return {
+                id: item._id + '',
+                domainName: item.meta.target_name
+              };
+            });
+        } else {
+          purgeActivityTargets = [];
+        }
+        callback(err, purgeActivityTargets);
+      });
+  },
+  // TODO: delete after update data
+  changePurgeActivityTargetOnDomainActivityTarget: function(item, callback) {
+    this.model.findOne({ _id: item.id, 'meta.activity_target': 'purge' }, function(err, doc) {
+      if (doc) {
+        doc.meta.target_id = item.domainId;
+        doc.meta.activity_target = 'domain';
+        doc.meta.activity_type = 'purge';
+        doc.save(function(err, item) {
+          if (item) {
+            item = utils.clone(item);
+            delete item.__v;
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
     });
   }
 };

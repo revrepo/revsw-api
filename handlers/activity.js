@@ -30,10 +30,12 @@ var utils = require('../lib/utilities');
 var AuditEvents = require('../models/AuditEvents');
 var Users = require('../models/User');
 var DomainConfig = require('../models/DomainConfig');
+var ApiKey = require('../models/APIKey');
 
 var auditevents = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
 var users = new Users(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
 exports.getDetailedAuditInfo = function(request, reply) {
   var requestBody = {};
@@ -43,107 +45,133 @@ exports.getDetailedAuditInfo = function(request, reply) {
   var targetId = request.query.target_id;
   var activityType = request.query.activity_type;
 
-  var userId = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
-  var accountId;
-  if (request.auth.credentials.user_type === 'user') {
-    accountId = request.query.account_id ? request.query.account_id : request.auth.credentials.companyId[0];
-  } else {
-    accountId = utils.getAccountID(request, true);
-  }
+  var activityAccountId = request.query.account_id;
+  var activityActionUserId = request.query.user_id;
+  var activityActionUser = null; // NOTE: detected Action Taker
 
-  if (request.query.user_id) {
-    requestBody['meta.user_id'] = userId;
-  }
-  if (request.query.account_id) {
-    requestBody['meta.account_id'] = accountId;
-  }
+  var userId = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
+
   // TODO: create  validation function checkUserAccessPermissionToTargetId
   var currentUser = null;
   // NOTE: waterfall actions list for generate response
   async.waterfall([
+    /**
+     * @name  prepareActivityActionUserIDandActivityUserType
+     * @description
+     *
+     * @param  {Function} cb
+     * @return {[type]}
+     */
+    function prepareActivityActionUserIDandActivityUserType(cb) {
+      // starp preparing
+      if (activityActionUserId) {
+        activityActionUser = {};
+        // get information about
+        async.parallel({
+          activityUser_: function getUserInfo(cb) {
+            users.getById(activityActionUserId, function(err, result) {
+              if (err) {
+                cb({ errorCode: 500, err: err, message: 'Failed to retreive user details for ID ' + activityActionUserId });
+                return;
+              }
+              if (!!result) {
+                activityActionUser.user_type = 'user';
+              }
+              cb(null, result);
+            });
+          },
+          activityAPIKey_: function getAPIKeyInfo(cb) {
+            apiKeys.get({ _id: activityActionUserId }, function(err, result) {
+              if (err) {
+                cb({ errorCode: 500, err: err, message: 'Failed to retreive API key details for ID ' + activityActionUserId });
+                return;
+              }
+              if (!!result) {
+                activityActionUser.user_type = 'apikey';
+              }
+              cb(null, result);
+            });
+          },
 
-    function getUserInfo(cb) {
-      users.getById(userId, function(err, result) {
-        if (err) {
-          cb({ errorCode: 500, err: err, message: 'Failed to retreive user details for ID ' + userId });
-          return;
-        }
-        if (!result) {
-          cb({ errorCode: 400, err: null, message: 'User ID not found' });
-          return;
-        }
-        currentUser = result;
+        }, function checkPermissionsToActivityActionUser(err, results) {
+          if (err) {
+            cb(err);
+          }
+          activityActionUser.data = results.activityAPIKey_ || results.activityUser_;
+          if (!!results.activityAPIKey_ || !!results.activityUser_) {
+            var activityActionUserType_ = null;
+            // check permission current request user to activityActionUser
+            if (!!results.activityUser_) {
+              if (!utils.checkUserAccessPermissionToUser(request, results.activityUser_)) {
+                cb({ errorCode: 400, err: null, message: 'User ID not found' });
+                return;
+              }
+              activityActionUserType_ = 'user';
+            }
+            if (!!results.activityAPIKey_) {
+              if (!utils.checkUserAccessPermissionToAPIKey(request, results.activityAPIKey_)) {
+                cb({ errorCode: 400, err: null, message: 'User ID not found' });
+                return;
+              }
+              activityActionUserType_ = 'apikey';
+            }
+            //set requestBody and go to next steps
+            requestBody['meta.user_id'] = activityActionUserId;
+            requestBody['meta.user_type'] = activityActionUserType_;
+            cb();
+          } else {
+            // not found USER or APIKey for sending ID(user_id)
+            cb({ errorCode: 400, err: null, message: 'User ID not found' });
+          }
+        });
+      } else {
+        // Actor User Id not set
         cb(null);
-      });
-    },
-
-    function checkUserPermissions(cb) {
-      var user = currentUser;
-      switch (request.auth.credentials.role) {
-        case 'revadmin':
-          cb();
-          break;
-        case 'user':
-          if (request.query.user_id && !utils.checkUserAccessPermissionToUser(request, user)) {
-            cb({ errorCode: 400, err: null, message: 'User ID not found' });
-            return;
-          }
-          if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
-            cb({ errorCode: 400, err: null, message: 'Account ID not found' });
-            return;
-          }
-          requestBody['meta.user_id'] = userId; // NOTE: user can see only his activities
-          //    requestBody['meta.account_id'] = account_id;
-          cb();
-          break;
-
-        case 'admin':
-          if (request.query.user_id && !utils.checkUserAccessPermissionToUser(request, user)) {
-            cb({ errorCode: 400, err: null, message: 'User ID not found' });
-            return;
-          }
-          if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
-            cb({ errorCode: 400, err: null, message: 'Account ID not found' });
-            return;
-          }
-          requestBody['meta.account_id'] = accountId; // NOTE: admin can see activities only his account
-          cb();
-          break;
-
-        case 'reseller':
-          if (request.query.user_id && !utils.checkUserAccessPermissionToUser(request, user)) {
-            cb({ errorCode: 400, err: null, message: 'User ID not found' });
-            return;
-          }
-          if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
-            cb({ errorCode: 400, err: null, message: 'Account ID not found' });
-            return;
-          }
-          requestBody['meta.account_id'] = { $in: user.companyId }; // NOTE: resseller can see activities in all his current accounts
-          cb();
-          break;
-        default:
-          // The case of API keys which don't have a role parameter:
-          // TODO: need to fix the code to properly look at user_type field
-          if (request.query.user_id && !utils.checkUserAccessPermissionToUser(request, user)) {
-            cb({ errorCode: 400, err: null, message: 'User ID not found' });
-            return;
-          }
-          if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
-            cb({ errorCode: 400, err: null, message: 'Account ID not found' });
-            return;
-          }
-          //  requestBody['meta.account_id'] = account_id;
-          cb();
-          break;
       }
     },
-    function prepareParamActivityType(cb){
+    /**
+     * @name  prepareLimitOfAccountsInfo
+     * @description
+     *  If we want to see form witch account was different activity (for resselers)
+     * @param  {Function} cb [description]
+     * @return {[type]}      [description]
+     */
+    function prepareLimitOfAccountsInfo(cb) {
+      if (activityAccountId) {
+        if (!utils.checkUserAccessPermissionToAccount(request, activityAccountId)) {
+          cb({ errorCode: 400, err: null, message: 'Account ID not found' });
+          return;
+        }
+        // limit information - only one account
+        requestBody['meta.account_id'] = activityAccountId;
+        cb(null);
+      } else {
+        // we need limit data only user's accounts
+        var accountIds_ = null;
+        if (request.auth.credentials.user_type === 'user') {
+          if (request.auth.credentials.role !== 'revadmin') {
+            accountIds_ = request.auth.credentials.companyId;
+          } else {
+            // revadmin no have limit
+            accountIds_ = null;
+          }
+        } else {
+          accountIds_ = utils.getAccountID(request, false);
+        }
+        if (accountIds_) {
+          requestBody['meta.account_id'] = { $in: accountIds_ };
+        }
+        cb(null);
+      }
+    },
+    //
+    function prepareParamActivityType(cb) {
       if (activityType) {
         requestBody['meta.activity_type'] = activityType;
       }
       cb();
     },
+    //
     function prepareParams(cb) {
       // NOTE: set filter for get only one type Activity Target
       if (targetType) {
@@ -152,34 +180,14 @@ exports.getDetailedAuditInfo = function(request, reply) {
       // NOTE: set filter for get list Activities for Activity Target(Type) with ID
       if (targetType && targetId) {
         requestBody['meta.activity_target'] = targetType;
-        if (targetType === 'purge') {
-          // NOTE: for 'purge' type action  "target_id" - is domain id because purge object
-          // can't be change and have only one relation with one domain
-          domainConfigs.get(targetId, function(error, result) {
-            if (error) {
-              cb({ errorCode: 500, err: error, message: 'Failed to retrieve details for target ID ' + targetId });
-              return;
-            }
-
-            if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
-              cb({ errorCode: 400, err: null, message: 'Target ID not found' });
-              return;
-            }
-            requestBody['meta.target_name'] = result.domain_name;
-            cb();
-          });
-        } else {
-          requestBody['meta.target_id'] = targetId;
-          cb();
-        }
-      } else {
-        cb();
+        requestBody['meta.target_id'] = targetId;
       }
+      cb(null);
     },
 
     function prepareDataAndSendResponse(cb) {
-
-      var span = utils.query2Span(request.query, 30 * 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ , false);
+      var countMonth_ = 6; // NOTE: allow to search 6 months back
+      var span = utils.query2Span(request.query, 30 * 24 /*def start in hrs*/ , 24 * 31 * countMonth_ /*allowed period - 6 month*/ , false);
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
@@ -198,8 +206,8 @@ exports.getDetailedAuditInfo = function(request, reply) {
         }
         var result = {
           metadata: {
-            user_id: userId,
-            account_id: accountId,
+            user_id: activityActionUserId || userId,
+            account_id: utils.getAccountID(request, false), //accountId,
             start_time: startTime,
             end_time: endTime
           },
@@ -311,7 +319,7 @@ exports.getSummaryAuditInfo = function(request, reply) {
           metadata: {
             user_id: userId,
             //domain_id  : request.query.domain_id,
-            company_id: request.query.company_id ? request.query.company_id : user.companyId,
+            company_id: utils.getAccountID(request, false),//request.query.company_id ? request.query.company_id : user.companyId,
             start_time: startTime,
             end_time: endTime
           },

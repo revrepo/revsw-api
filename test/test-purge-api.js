@@ -316,7 +316,7 @@ describe('Rev Purge API (RevAdmin role)', function() {
             var response_json = JSON.parse(res.text);
             var last_obj = response_json.data[1];
             last_obj.activity_type.should.be.equal('purge');
-            last_obj.activity_target.should.be.equal('purge');
+            last_obj.activity_target.should.be.equal('domain');
             done();
           });
       });

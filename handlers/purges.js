@@ -46,7 +46,8 @@ exports.purgeObject = function(request, reply) {
   var domainName = request.payload.domainName;
   var requestedEnvironment = request.payload.environment;
   var purges = request.payload.purges;
-  var account_id;
+  var accountId;
+  var domainId;
 
   domainConfigs.query({
     domain_name : domainName
@@ -61,7 +62,8 @@ exports.purgeObject = function(request, reply) {
     }
     result = result[0];
 
-    account_id = result.proxy_config.account_id;
+    domainId = result._id;
+    accountId = result.proxy_config.account_id;
 
     var PurgeJobJson = {
       domain_name: domainName,
@@ -100,10 +102,10 @@ exports.purgeObject = function(request, reply) {
         var PurgeJobResponse = publicRecordFields.handle(purgeObjectResponse, 'purge');
 
         AuditLogger.store({
-          account_id       : account_id,
+          account_id       : accountId,
           activity_type    : 'purge',
-          activity_target  : 'purge',
-          target_id        : PurgeJobResponse.req_id,
+          activity_target  : 'domain',
+          target_id        : domainId,
           target_name      : PurgeJobResponse.req_domain,
           target_object    : PurgeJobResponse,
           operation_status : 'success'
@@ -114,7 +116,6 @@ exports.purgeObject = function(request, reply) {
     });
   });
 };
-
 
 exports.getPurgeJobStatus = function(request, reply) {
   var request_id = request.params.request_id;
