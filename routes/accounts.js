@@ -24,7 +24,6 @@ var Joi = require('joi');
 
 var account = require('../handlers/accounts');
 
-var accountValidation = require('../route-validation/account');
 
 var routeModels = require('../lib/routeModels');
 var logShippingJobsService = require('../services/logShippingJobs.js');
@@ -131,7 +130,41 @@ module.exports = [{
         params: {
           account_id: Joi.objectId().required().description('Account ID to be updated')
         },
-        payload: accountValidation.accountUpdatePayload
+        payload: {
+          companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
+            .trim().description('Company name of newly registered customer account'),
+          comment: Joi.string().allow('').max(300).trim()
+            .description('Free-text comment about the company'),
+          first_name: Joi.string().optional().min(1).max(150).trim()
+            .description('First name of contact person'),
+          last_name: Joi.string().optional().min(1).max(150).trim()
+            .description('Last name of contact person'),
+          phone_number: Joi.string().min(1).max(30).trim()
+            .description('Phone number').optional(),
+          contact_email: Joi.string().email()
+            .description('Contact email').optional(),
+          address1: Joi.string().min(1).max(150).trim()
+            .description('Address 1').optional(),
+          address2: Joi.string().min(1).max(150).trim()
+            .description('Address 2').optional().allow(''),
+          country: Joi.string().min(1).max(150).trim()
+            .description('Country').optional(),
+          state: Joi.string().min(1).max(150).trim()
+            .description('State').optional(),
+          city: Joi.string().min(1).max(150).trim()
+            .description('City').optional(),
+          zipcode: Joi.string().min(1).max(30).trim()
+            .description('Zip Code').optional(),
+          // TODO: add proper  min/max restrictions for billing_plan
+          billing_plan: Joi.string().trim()
+            .description('Billing plan ID'),
+          use_contact_info_as_billing_info: Joi.boolean()
+            .description('Use contact info as billing info'),
+          billing_info: Joi.object().optional()
+            .description('Billing information for create Chargify Customer Account'),
+          subscription_state: Joi.string().min(1).max(30).trim()
+            .description('Subscription state (status)')
+        }
       },
       response: {
         schema: routeModels.statusModel
@@ -336,7 +369,10 @@ module.exports = [{
         params: {
           account_id: Joi.objectId().required().description('Account ID to delete')
         },
-        payload: accountValidation.accountDeletePayload
+        payload: {
+          cancellation_message: Joi.string().optional().allow(null).trim().allow('').max(300)
+            .description('Free-text comment about reason delete the account')
+        }
       },
       response: {
         schema: routeModels.statusModel

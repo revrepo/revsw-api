@@ -163,12 +163,8 @@ exports.getMyUser = function(request, reply) {
         return reply(boom.badRequest('User ID not found'));
       }
     });
-  } else if (request.auth.credentials.user_type === 'apikey') {
-    var apiKey = request.auth.credentials;
-    var result = publicRecordFields.handle(apiKey, 'apiKey');
-    renderJSON(request, reply, null, result);
   } else {
-    return reply(boom.badImplementation('getMyUser:: Unknown user_type for user ', request.auth.credentials));
+    return reply(boom.badRequest('Non-User authorization'));
   }
 };
 
@@ -183,10 +179,16 @@ exports.updateUser = function(request, reply) {
     return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
   }
 
+  if (newUser.role && newUser.role === 'user' &&
+    request.auth.credentials.role === 'admin') {
+    return reply(boom.badRequest('Admin cannot change role to user'));
+  }
+
   var user_id = request.params.user_id;
   newUser.user_id = request.params.user_id;
   // TODO use an existing access verification function instead of the code
-  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId && !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
+  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId &&
+    !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
     return reply(boom.badRequest('The new companyId is not found'));
   }
 
@@ -199,6 +201,12 @@ exports.updateUser = function(request, reply) {
     if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
       return reply(boom.badRequest('User ID not found'));
     }
+    
+    if (newUser.role && newUser.role === 'user' &&
+      result.companyId.length > 1) {
+      return reply(boom.badRequest('Cannot change role with more, than 1 account assigned for the user'));
+    }
+
     var account_id = result.companyId[0];
 
     users.update(newUser, function(error, result) {

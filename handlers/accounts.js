@@ -93,50 +93,60 @@ exports.createAccount = function(request, reply) {
   var newAccount = request.payload;
   newAccount.createdBy = utils.generateCreatedByField(request);
 
-  accounts.add(newAccount, function(error, result) {
+  // Update the user who created the new company account with details of the new account ID
+  var updatedUser = {
+    user_id: request.auth.credentials.user_id,
+    companyId: utils.getAccountID(request)
+  };
 
-    if (error || !result) {
-      return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
+  users.get({_id: updatedUser.user_id}, function(error, user) {
+    if (error || !user) {
+      return reply(boom.badImplementation('Failed to get user ' + updatedUser.user_id));
+    }
+    
+    if ((user.role === 'admin' || user.role === 'user') && user.companyId.length !== 0) {
+      return reply(boom.badRequest('Cannot assign more, than one account to the user'));
     }
 
-    result = publicRecordFields.handle(result, 'account');
-
-    var statusResponse;
-    if (result) {
-      statusResponse = {
-        statusCode: 200,
-        message: 'Successfully created new account',
-        object_id: result.id
-      };
-
-      AuditLogger.store({
-        user_name: newAccount.createdBy,
-        activity_type: 'add',
-        activity_target: 'account',
-        target_id: result.id,
-        target_name: result.companyName,
-        target_object: result,
-        operation_status: 'success'
-      }, request);
-
-      // Update the user who created the new company account with details of the new account ID
-      var updatedUser = {
-        user_id: request.auth.credentials.user_id,
-        companyId: utils.getAccountID(request)
-      };
-      if (request.auth.credentials.role !== 'revadmin') {
-        updatedUser.companyId.push(result.id);
+    accounts.add(newAccount, function (error, result) {
+      if (error || !result) {
+        return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
       }
 
-      users.update(updatedUser, function(error, result) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id +
-            ' with details of new account IDs ' + updatedUser.companyId));
-        } else {
-          renderJSON(request, reply, error, statusResponse);
+      result = publicRecordFields.handle(result, 'account');
+
+      var statusResponse;
+      if (result) {
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully created new account',
+          object_id: result.id
+        };
+
+        AuditLogger.store({
+          user_name: newAccount.createdBy,
+          activity_type: 'add',
+          activity_target: 'account',
+          target_id: result.id,
+          target_name: result.companyName,
+          target_object: result,
+          operation_status: 'success'
+        }, request);
+
+        if (request.auth.credentials.role !== 'revadmin') {
+          updatedUser.companyId.push(result.id);
         }
-      });
-    }
+
+        users.update(updatedUser, function (error, result) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id +
+              ' with details of new account IDs ' + updatedUser.companyId));
+          } else {
+            renderJSON(request, reply, error, statusResponse);
+          }
+        });
+      }
+    });
   });
 };
 /**

@@ -48,7 +48,34 @@ module.exports = [
       }
     }
   },
-
+  
+  {
+    method: 'GET',
+    path: '/v1/api_keys/myself',
+    config: {
+      validate: {
+        options: {
+          stripUnknown: true
+        }
+      },
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: apiKey.getMyApiKey,
+      description: 'Get your API key information',
+      notes: 'Use the call to get the details of your API key.',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.APIKeyModel
+      }
+    }
+  },
+  
   {
     method: 'GET',
     path: '/v1/api_keys/{key_id}',

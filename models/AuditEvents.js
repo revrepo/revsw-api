@@ -75,6 +75,33 @@ AuditEvents.prototype = {
     });
   },
 
+  detailedOffset: function (request, limit, offset, callback) {
+    this.model.find(request).sort({'timestamp': 'descending'}).skip(offset)
+      .limit(limit).exec( function (err, auditevents) {
+      var data      = [];
+      for (var key in auditevents) {
+        var innerData = {
+          ip_address        : auditevents[key].meta.ip_address,
+          user_id          : auditevents[key].meta.user_id,
+          user_name        : auditevents[key].meta.user_name,
+          user_type        : auditevents[key].meta.user_type,
+          account_id       : auditevents[key].meta.account_id,
+          datetime         : auditevents[key].meta.datetime,
+          account          : auditevents[key].meta.account,
+          activity_type    : auditevents[key].meta.activity_type,
+          activity_target  : auditevents[key].meta.activity_target,
+          target_name      : auditevents[key].meta.target_name,
+          target_id        : auditevents[key].meta.target_id,
+          operation_status : auditevents[key].meta.operation_status,
+          target_object    : auditevents[key].meta.target_object
+
+        };
+        data.push(innerData);
+      }
+      callback(err, data);
+    });
+  },
+
   summary : function (request, callback) {
     var requestBody = [
       {
