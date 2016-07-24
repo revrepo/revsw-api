@@ -25,7 +25,6 @@ var Joi = require('joi');
 var billingPlanHandler = require('../handlers/billingPlans');
 
 var routeModels = require('../lib/routeModels');
-var routeValidation = require('../route-validation/billingPlan');
 
 module.exports = [
   {
@@ -41,10 +40,7 @@ module.exports = [
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
         }
-      },
-/*      response: {
-        schema: routeValidation.listOfBillingPlanModels
-      }*/
+      }
     }
   },
 
@@ -70,10 +66,7 @@ module.exports = [
         params: {
           id: Joi.objectId().required().description('ID of the Billing plan')
         }
-      },
-/*      response: {
-        schema: routeValidation.BillingPlanModel
-      }*/
+      }
     }
   },
   {
@@ -93,7 +86,35 @@ module.exports = [
         }
       },
       validate: {
-        payload: routeValidation.BillingPlanRequestPayload
+        payload: {
+          name: Joi.string().required().description('Billing plan name'),
+          description: Joi.string().required().description('Billing plan description'),
+          type: Joi.string().valid('public', 'private').description('Type of the billing plan'),
+          monthly_fee: Joi.number().required().description('Monthly fee of the billing plan'),
+          chargify_handle: Joi.string().description('Product handler within EBS'),
+          hosted_page: Joi.string().description('Chargify hosted signup page'),
+          services: Joi.array().items({
+            code_name: Joi.string().description('Name of the service'),
+            description: Joi.string().description('Description of the service'),
+            measurement_unit: Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
+            cost: Joi.number().description('Cost of the service'),
+            included: Joi.number().description('Amount included in the service'),
+            type: Joi.string().description('Component type in Chargify'),
+            billing_id: Joi.number().description('Services id in Chargify')
+          }).description('List of the services of the billing plan'),
+
+          prepay_discounts: Joi.array().items({
+            period: Joi.number().description('The number of months after which this discount will be activated'),
+            discount: Joi.number().description('The actual discount (e.g. 20)')
+          }).description('List of the prepay discounts of the billing plan'),
+
+          commitment_discounts: Joi.array().items({
+            period: Joi.number().description('The number of months after which this discount will be activated'),
+            discount: Joi.number().description('The actual discount (e.g. 20)')
+          }).description('List of the long commitment discounts of the billing plan'),
+
+          order: Joi.number().description('Order of Billing plan')
+        }
       },
       response: {
         schema: routeModels.statusModel
@@ -124,7 +145,35 @@ module.exports = [
         params: {
           id: Joi.string().required().description('ID of the Billing plan to be updated')
         },
-        payload: routeValidation.BillingPlanRequestPayload
+        payload: {
+          name: Joi.string().required().description('Billing plan name'),
+          description: Joi.string().required().description('Billing plan description'),
+          type: Joi.string().valid('public', 'private').description('Type of the billing plan'),
+          monthly_fee: Joi.number().required().description('Monthly fee of the billing plan'),
+          chargify_handle: Joi.string().description('Product handler within EBS'),
+          hosted_page: Joi.string().description('Chargify hosted signup page'),
+          services: Joi.array().items({
+            code_name: Joi.string().description('Name of the service'),
+            description: Joi.string().description('Description of the service'),
+            measurement_unit: Joi.string().description('Unit of the measurement for this service (e.g GB, $)'),
+            cost: Joi.number().description('Cost of the service'),
+            included: Joi.number().description('Amount included in the service'),
+            type: Joi.string().description('Component type in Chargify'),
+            billing_id: Joi.number().description('Services id in Chargify')
+          }).description('List of the services of the billing plan'),
+
+          prepay_discounts: Joi.array().items({
+            period: Joi.number().description('The number of months after which this discount will be activated'),
+            discount: Joi.number().description('The actual discount (e.g. 20)')
+          }).description('List of the prepay discounts of the billing plan'),
+
+          commitment_discounts: Joi.array().items({
+            period: Joi.number().description('The number of months after which this discount will be activated'),
+            discount: Joi.number().description('The actual discount (e.g. 20)')
+          }).description('List of the long commitment discounts of the billing plan'),
+
+          order: Joi.number().description('Order of Billing plan')
+        }
       },
       response: {
         schema: routeModels.statusModel

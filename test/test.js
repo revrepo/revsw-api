@@ -391,7 +391,7 @@ describe('Rev API Admin User', function() {
       'qa-api-test-domain.revsw.net'
     ],
     'theme': 'dark',
-    'role': 'user',
+    'role': 'admin',
     'password': newTestPassword,
     'two_factor_auth_enabled' : false,
     'access_control_list': {
