@@ -197,7 +197,16 @@ exports.getMobileDesktopDistribution = function(request, reply) {
                 terms: { field: 'device', size: 30 }
               }
             }
+          },
+          missing_oses: {
+            missing: { field: 'os_name' },
+            aggs: {
+              devs: {
+                terms: { field: 'device', size: 30 }
+              }
+            }
           }
+
         }
       };
 
@@ -214,7 +223,8 @@ exports.getMobileDesktopDistribution = function(request, reply) {
 
         var mobile = 0,
           desktop = 0,
-          spiders = 0;
+          spiders = 0,
+          unknown = 0;
 
         body.aggregations.oses.buckets.forEach( function( os ) {
           desktop += os.doc_count;
@@ -229,11 +239,24 @@ exports.getMobileDesktopDistribution = function(request, reply) {
           });
         });
 
+        var missing = body.aggregations.missing_oses;
+        unknown += missing.doc_count - missing.devs.sum_other_doc_count;
+        mobile += missing.devs.sum_other_doc_count;
+        missing.devs.buckets.forEach( function( dev ) {
+          if ( dev.key === 'Spider' ) {
+            spiders += dev.doc_count;
+          } else {
+            mobile += dev.doc_count;
+          }
+          unknown -= dev.doc_count;
+        });
+
         if ( body.aggregations.oses.sum_other_doc_count ) {
-          var dist = body.aggregations.oses.sum_other_doc_count / ( desktop + mobile + spiders );
+          var dist = body.aggregations.oses.sum_other_doc_count / ( desktop + mobile + spiders + unknown );
           desktop += Math.round( desktop * dist );
           mobile += Math.round( mobile * dist );
           spiders += Math.round( spiders * dist );
+          unknown += Math.round( unknown * dist );
         }
 
         var response = {
@@ -250,7 +273,8 @@ exports.getMobileDesktopDistribution = function(request, reply) {
           data: {
             desktop: desktop,
             mobile: mobile,
-            spiders: spiders
+            spiders: spiders,
+            unknown: unknown
           }
         };
 
