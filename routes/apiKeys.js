@@ -48,7 +48,7 @@ module.exports = [
       }
     }
   },
-  
+
   {
     method: 'GET',
     path: '/v1/api_keys/myself',
@@ -59,7 +59,7 @@ module.exports = [
         }
       },
       auth: {
-        scope: ['admin', 'reseller', 'revadmin', 'apikey']
+        scope: ['apikey']
       },
       handler: apiKey.getMyApiKey,
       description: 'Get your API key information',
@@ -75,7 +75,7 @@ module.exports = [
       }
     }
   },
-  
+
   {
     method: 'GET',
     path: '/v1/api_keys/{key_id}',

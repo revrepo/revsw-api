@@ -108,7 +108,7 @@ exports.getMyApiKey = function(request, reply) {
       _id: apiKeyId
     }, function(error, result) {
       if (error) {
-        return reply(boom.badImplementation('Failed to retrieve details for api key ' + apiKeyId));
+        return reply(boom.badImplementation('Failed to retrieve details for API key ' + apiKeyId));
       }
       if (result) {
         result = publicRecordFields.handle(result, 'apiKeys');

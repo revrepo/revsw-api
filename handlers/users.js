@@ -201,9 +201,10 @@ exports.updateUser = function(request, reply) {
     if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
       return reply(boom.badRequest('User ID not found'));
     }
-    
+
     if (newUser.role && newUser.role === 'user' &&
-      result.companyId.length > 1) {
+      (result.role === 'admin' || result.role === 'reseller') && result.companyId.length > 1) {
+      console.log(result.companyId);
       return reply(boom.badRequest('Cannot change role with more, than 1 account assigned for the user'));
     }
 

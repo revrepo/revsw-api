@@ -89,9 +89,13 @@ exports.getAccounts = function getAccounts(request, reply) {
 };
 
 exports.createAccount = function(request, reply) {
-
   var newAccount = request.payload;
   newAccount.createdBy = utils.generateCreatedByField(request);
+
+  // TODO: Make it able to use user_type apikey to create accounts
+  if (request.auth.credentials.user_type === 'apikey') {
+    return reply(boom.badRequest('Cannot create account with API key'));
+  }
 
   // Update the user who created the new company account with details of the new account ID
   var updatedUser = {
