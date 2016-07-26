@@ -20,26 +20,29 @@
 
 'use strict';
 
-var boom        = require('boom');
-var mongoose    = require('mongoose');
+var boom = require('boom');
+var mongoose = require('mongoose');
 var AuditLogger = require('../lib/audit');
-var speakeasy   = require('speakeasy');
-var config      = require('config');
+var speakeasy = require('speakeasy');
+var config = require('config');
+var Promise = require('bluebird');
 
-var utils           = require('../lib/utilities.js');
+var utils = require('../lib/utilities.js');
 var dashboardService = require('../services/dashboards.js');
-var renderJSON      = require('../lib/renderJSON');
+var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
 var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
+var Account = require('../models/Account');
 
-var users = new User(mongoose, mongoConnection.getConnectionPortal());
+var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectionPortal()));
+var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 
 exports.getUsers = function getUsers(request, reply) {
   // TODO: move the user list filtering from the user DB model to this function
-  users.list(request, function(error, listOfUsers) {
+  users.list(request, function (error, listOfUsers) {
     if (error || !listOfUsers) {
       return reply(boom.badImplementation('Failed to get a list of users'));
     }
@@ -62,21 +65,21 @@ exports.getUsers = function getUsers(request, reply) {
  * @param  {[type]} reply   [description]
  * @return {[type]}         [description]
  */
-exports.createUser = function(request, reply) {
+exports.createUser = function (request, reply) {
   var newUser = request.payload;
   // NOTE: set default companyId
   if ((newUser.companyId === undefined || newUser.companyId.length === 0) && utils.getAccountID(request).length !== 0) {
-      newUser.companyId = utils.getAccountID(request);
+    newUser.companyId = utils.getAccountID(request);
   }
 
   // NOTE: New User must have "companyId"
-  if(newUser.companyId === undefined || newUser.companyId.length === 0){
+  if (newUser.companyId === undefined || newUser.companyId.length === 0) {
     return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
   }
   // NOTE: Who is creating new User must have access to the user after creation
   if (!utils.checkUserAccessPermissionToUser(request, newUser)) {
-      // TODO: fix the error message text "You don't have permissions for this action "
-      return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
+    // TODO: fix the error message text "You don't have permissions for this action "
+    return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
   }
 
   var accountId = newUser.companyId[0];
@@ -86,12 +89,12 @@ exports.createUser = function(request, reply) {
   // check that the email address is not already in use
   users.get({
     email: newUser.email
-  }, function(error, result) {
+  }, function (error, result) {
     // got results so the email is in use
     if (result) {
       return reply(boom.badRequest('The email address is already used by another user'));  // TODO: fix the error message text
     } else {
-      users.add(newUser, function(error, result) {
+      users.add(newUser, function (error, result) {
 
         var statusResponse;
         if (result) {
@@ -105,16 +108,16 @@ exports.createUser = function(request, reply) {
         result = publicRecordFields.handle(result, 'user');
         // TODO: add activity log to all accounts (not only newUser.companyId[0])
         AuditLogger.store({
-          account_id       : accountId,
-          activity_type    : 'add',
-          activity_target  : 'user',
-          target_id        : result.user_id,
-          target_name      : result.email,
-          target_object    : result,
-          operation_status : 'success'
+          account_id: accountId,
+          activity_type: 'add',
+          activity_target: 'user',
+          target_id: result.user_id,
+          target_name: result.email,
+          target_object: result,
+          operation_status: 'success'
         }, request);
         // NOTE: create default dashboard for new user
-        dashboardService.createUserDashboard(result.user_id, null, function(err) {
+        dashboardService.createUserDashboard(result.user_id, null, function (err) {
           if (err) {
             logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
           } else {
@@ -127,12 +130,12 @@ exports.createUser = function(request, reply) {
   });
 };
 
-exports.getUser = function(request, reply) {
+exports.getUser = function (request, reply) {
 
   var user_id = request.params.user_id;
   users.get({
     _id: user_id
-  }, function(error, result) {
+  }, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve user details for user ID ' + user_id));
     }
@@ -145,13 +148,13 @@ exports.getUser = function(request, reply) {
   });
 };
 
-exports.getMyUser = function(request, reply) {
+exports.getMyUser = function (request, reply) {
 
   if (request.auth.credentials.user_type === 'user') {
     var user_id = request.auth.credentials.user_id;
     users.get({
       _id: user_id
-    }, function(error, result) {
+    }, function (error, result) {
       if (error) {
         return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
       }
@@ -168,97 +171,145 @@ exports.getMyUser = function(request, reply) {
   }
 };
 
-exports.updateUser = function(request, reply) {
+exports.updateUser = function (request, reply) {
   var newUser = request.payload;
-  if (Object.keys(newUser).length === 0) {
-    return reply(boom.badRequest('Please specify at least one updated attiribute'));
-  }
+  var userAccountId;
+  var userId;
 
-  if (newUser.role && newUser.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
-    request.auth.credentials.role !== 'reseller')) {
-    return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
-  }
-
-  if (newUser.role && newUser.role === 'user' &&
-    request.auth.credentials.role === 'admin') {
-    return reply(boom.badRequest('Admin cannot change role to user'));
-  }
-
-  var user_id = request.params.user_id;
-  newUser.user_id = request.params.user_id;
-  // TODO use an existing access verification function instead of the code
-  if (request.auth.credentials.role !== 'revadmin' && (newUser.companyId &&
-    !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
-    return reply(boom.badRequest('The new companyId is not found'));
-  }
-
-  users.get({
-    _id: user_id
-  }, function(error, result) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
-    }
-    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
-      return reply(boom.badRequest('User ID not found'));
+  return Promise.try(function (resolve, reject) {
+    if (Object.keys(newUser).length === 0) {
+      return Promise.reject(Error('No attributes specified'));
     }
 
-    if (newUser.role && newUser.role === 'user' &&
-      (result.role === 'admin' || result.role === 'reseller') && result.companyId.length > 1) {
-      console.log(result.companyId);
-      return reply(boom.badRequest('Cannot change role with more, than 1 account assigned for the user'));
+    if (newUser.role && newUser.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
+      request.auth.credentials.role !== 'reseller')) {
+      return Promise.reject(Error('Only revadmin or reseller roles can assign "reseller" role'));
     }
 
-    var account_id = result.companyId[0];
+    userId = request.params.user_id;
+    newUser.user_id = userId;
 
-    users.update(newUser, function(error, result) {
-      if (!error) {
-        var statusResponse;
-        statusResponse = {
-          statusCode: 200,
-          message: 'Successfully updated the user'
-        };
+    // TODO use an existing access verification function instead of the code
+    if (request.auth.credentials.role !== 'revadmin' &&
+      (newUser.companyId &&
+      !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
+      return Promise.reject(Error('The new account is not found'));
+    }
 
-        result = publicRecordFields.handle(result, 'user');
+    return users.getAsync({_id: userId});
+  })
+    .then(function (result) {
+      if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+        return Promise.reject(Error('User not found'));
+      }
 
-        AuditLogger.store({
-          account_id       : account_id,
-          activity_type    : 'modify',
-          activity_target  : 'user',
-          target_id        : result.user_id,
-          target_name      : result.email,
-          target_object    : result,
-          operation_status : 'success'
-        }, request);
+      userAccountId = result.companyId[0];
 
-        renderJSON(request, reply, error, statusResponse);
+      if (newUser.role && newUser.role === 'user') {
+        if (result.role === 'admin') {
+          return Promise.try(function (resolve, reject) {
+            return users.getAsync({
+              _id: { $ne: result.user_id },
+              companyId: new RegExp(userAccountId, 'i'),
+              role: result.role
+            });
+          })
+            .then(function (user) {
+              if (!user) {
+                return Promise.reject(Error('Cannot change role if you are the only one admin for the account'));
+              } else {
+                return users.updateAsync(newUser);
+              }
+            })
+            .catch(function (error) {
+              return Promise.reject(Error('Cannot change role if you are the only one admin for the account'));
+            });
+        } else if (result.role === 'reseller') {
+          return Promise.try(function (resolve, reject) {
+            return users.getAsync({
+              _id: { $ne: result.user_id },
+              companyId: new RegExp(result.companyId.join('.*,'), 'ig'),
+              role: result.role
+            });
+          })
+            .then(function (user) {
+              if (!user) {
+                return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
+              } else {
+                return users.updateAsync(newUser);
+              }
+            })
+            .catch(function (error) {
+              return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
+            });
+        } else {
+          return users.updateAsync(newUser); 
+        }
       } else {
-        return reply(boom.badImplementation('Failed to update details for user with ID ' + user_id));
+        return users.updateAsync(newUser);
+      }
+    })
+    .then(function (result) {
+      console.log(result);
+      var statusResponse = {
+        statusCode: 200,
+        message: 'Successfully updated the user'
+      };
+
+      result = publicRecordFields.handle(result, 'user');
+
+      AuditLogger.store({
+        account_id: userAccountId,
+        activity_type: 'modify',
+        activity_target: 'user',
+        target_id: result.user_id,
+        target_name: result.email,
+        target_object: result,
+        operation_status: 'success'
+      }, request);
+
+      return renderJSON(request, reply, null, statusResponse);
+    })
+    .catch(function (error) {
+      if (/No attributes specified/.test(error.message)) {
+        return reply(boom.badRequest('Please specify at least one update attribute'));
+      } else if (/Only revadmin or reseller roles can assign "reseller" role/.test(error.message)) {
+        return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
+      } else if (/The new account is not found/.test(error.message)) {
+        return reply(boom.badRequest('The new account is not found'));
+      } else if (/User not found/.test(error.message)) {
+        return reply(boom.badRequest('User not found'));
+      } else if (/Cannot change role if you are the only one admin/.test(error.message)) {
+        return reply(boom.badRequest('Cannot change role if you are the only one admin for the account'));
+      } else if (/Cannot change role if you are the only one reseller/.test(error.message)) {
+        return reply(boom.badRequest('Cannot change role if you are the only one reseller for the accounts'));
+      } else {
+        return reply(boom.badImplementation(error.message));
       }
     });
-  });
 };
 
-exports.updateUserPassword = function(request, reply) {
+exports.updateUserPassword = function (request, reply) {
   var currentPassword = request.payload.current_password;
   var newPassword = request.payload.new_password;
   var user_id = request.params.user_id;
-  if ( user_id !== request.auth.credentials.user_id ) {
+  if (user_id !== request.auth.credentials.user_id) {
     return reply(boom.badRequest('Cannot update the password of another user'));
   }
   users.get({
     _id: user_id
-  }, function(error, user) {
+  }, function (error, user) {
     if (user) {
       var account_id = user.companyId[0];
       var currPassHash = utils.getHash(currentPassword);
-      if ( currPassHash !== user.password ) {
+      if (currPassHash !== user.password) {
         return reply(boom.badRequest('The current user password is not correct'));
       }
-      if ( currentPassword === newPassword ) {
+      if (currentPassword === newPassword) {
         return reply(boom.badRequest('Cannot set the same password'));
       }
       user.password = newPassword;
-      users.update(user, function(error, result) {
+      users.update(user, function (error, result) {
         if (!error) {
           var statusResponse;
           statusResponse = {
@@ -269,13 +320,13 @@ exports.updateUserPassword = function(request, reply) {
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            account_id       : account_id,
-            activity_type    : 'modify',
-            activity_target  : 'user',
-            target_id        : result.user_id,
-            target_name      : result.email,
-            target_object    : result,
-            operation_status : 'success'
+            account_id: account_id,
+            activity_type: 'modify',
+            activity_target: 'user',
+            target_id: result.user_id,
+            target_name: result.email,
+            target_object: result,
+            operation_status: 'success'
           }, request);
 
           renderJSON(request, reply, error, statusResponse);
@@ -289,16 +340,16 @@ exports.updateUserPassword = function(request, reply) {
   });
 };
 
-exports.deleteUser = function(request, reply) {
+exports.deleteUser = function (request, reply) {
   var user_id = request.params.user_id;
 
-  if ( user_id === request.auth.credentials.user_id ) {
+  if (user_id === request.auth.credentials.user_id) {
     return reply(boom.badRequest('You cannot delete your own account'));
   }
 
   users.get({
     _id: user_id
-  }, function(error, result) {
+  }, function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
@@ -310,23 +361,23 @@ exports.deleteUser = function(request, reply) {
     result = publicRecordFields.handle(result, 'user');
 
     var auditRecord = {
-      ip_address       : utils.getAPIUserRealIP(request),
-      datetime         : Date.now(),
-      user_id          : request.auth.credentials.user_id,
-      user_name        : request.auth.credentials.email,
-      user_type        : 'user',
-      account_id       : account_id,
-      activity_type    : 'delete',
-      activity_target  : 'user',
-      target_id        : result.user_id,
-      target_name      : result.email,
-      target_object    : result,
-      operation_status : 'success'
+      ip_address: utils.getAPIUserRealIP(request),
+      datetime: Date.now(),
+      user_id: request.auth.credentials.user_id,
+      user_name: request.auth.credentials.email,
+      user_type: 'user',
+      account_id: account_id,
+      activity_type: 'delete',
+      activity_target: 'user',
+      target_id: result.user_id,
+      target_name: result.email,
+      target_object: result,
+      operation_status: 'success'
     };
 
     users.remove({
       _id: user_id
-    }, function(error, result) {
+    }, function (error, result) {
       if (!error) {
         var statusResponse;
         statusResponse = {
@@ -348,25 +399,25 @@ exports.init2fa = function (request, reply) {
   var user_id = request.auth.credentials.user_id;
   users.get({
     _id: user_id
-  }, function(error, user) {
+  }, function (error, user) {
     if (user) {
       var account_id = user.companyId[0];
       var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true});
       user.two_factor_auth_secret_base32 = secretKey.base32;
       delete user.password;
-      users.update(user, function(error, result) {
+      users.update(user, function (error, result) {
         if (!error) {
 
           result = publicRecordFields.handle(result, 'user');
 
           AuditLogger.store({
-            account_id       : account_id,
-            activity_type    : 'init2fa',
-            activity_target  : 'user',
-            target_id        : result.user_id,
-            target_name      : result.email,
-            target_object    : result,
-            operation_status : 'success'
+            account_id: account_id,
+            activity_type: 'init2fa',
+            activity_target: 'user',
+            target_id: result.user_id,
+            target_name: result.email,
+            target_object: result,
+            operation_status: 'success'
           }, request);
 
           renderJSON(request, reply, error, secretKey);
@@ -385,7 +436,7 @@ exports.enable2fa = function (request, reply) {
   var user_id = request.auth.credentials.user_id;
   users.get({
     _id: user_id
-  }, function(error, user) {
+  }, function (error, user) {
     if (user) {
       var account_id = user.companyId[0];
       if (user.two_factor_auth_secret_base32) {
@@ -393,7 +444,7 @@ exports.enable2fa = function (request, reply) {
         if (generatedOneTimePassword === oneTimePassword) {
           user.two_factor_auth_enabled = true;
           delete user.password;
-          users.update(user, function(error, result) {
+          users.update(user, function (error, result) {
             if (!error) {
               var statusResponse = {
                 statusCode: 200,
@@ -403,13 +454,13 @@ exports.enable2fa = function (request, reply) {
               result = publicRecordFields.handle(result, 'user');
 
               AuditLogger.store({
-                account_id       : account_id,
-                activity_type    : 'enable2fa',
-                activity_target  : 'user',
-                target_id        : user.user_id,
-                target_name      : result.email,
-                target_object    : result,
-                operation_status : 'success'
+                account_id: account_id,
+                activity_type: 'enable2fa',
+                activity_target: 'user',
+                target_id: user.user_id,
+                target_name: result.email,
+                target_object: result,
+                operation_status: 'success'
               }, request);
 
               renderJSON(request, reply, error, statusResponse);
@@ -435,7 +486,7 @@ exports.disable2fa = function (request, reply) {
 
   users.get({
     _id: user_id
-  }, function(error, user) {
+  }, function (error, user) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
     }
@@ -449,7 +500,7 @@ exports.disable2fa = function (request, reply) {
     var account_id = user.companyId[0];
     user.two_factor_auth_enabled = false;
     delete user.password;
-    users.update(user, function(error, result) {
+    users.update(user, function (error, result) {
       if (!error) {
         var statusResponse = {
           statusCode: 200,
@@ -459,13 +510,13 @@ exports.disable2fa = function (request, reply) {
         result = publicRecordFields.handle(result, 'user');
 
         AuditLogger.store({
-          account_id       : account_id,
-          activity_type    : 'disable2fa',
-          activity_target  : 'user',
-          target_id        : user.user_id,
-          target_name      : result.email,
-          target_object    : result,
-          operation_status : 'success'
+          account_id: account_id,
+          activity_type: 'disable2fa',
+          activity_target: 'user',
+          target_id: user.user_id,
+          target_name: result.email,
+          target_object: result,
+          operation_status: 'success'
         }, request);
 
         renderJSON(request, reply, error, statusResponse);

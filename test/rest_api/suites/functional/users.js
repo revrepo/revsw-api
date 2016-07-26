@@ -30,33 +30,34 @@ describe('Functional check', function () {
   var resellerUser = config.get('api.users.reseller');
   var revAdmin = config.get('api.users.revAdmin');
   var userSample = DataProvider.generateUser('admin');
+  var accountSample = AccountsDP.generateOne();
 
   before(function (done) {
     API.helpers
       .authenticateUser(resellerUser)
       .then(function () {
-        var newAccount = AccountsDP.generateOne();
-        return API.resources.accounts
-          .createOneAsPrerequisite(newAccount);
+        return API.resources.accounts.createOneAsPrerequisite(accountSample);
+      })
+      .then(function (response) {
+        accountSample.id = response.body.object_id;
       })
       .then(function () {
         userSample.access_control_list.readOnly = false;
-        API.resources.users
-          .createOneAsPrerequisite(userSample)
-          .then(function (response) {
-            userSample.id = response.body.object_id;
-            userSample.name = userSample.email;
+        userSample.companyId = [accountSample.id + ''];
+        return API.resources.users.createOneAsPrerequisite(userSample);
+      })
+      .then(function (response) {
+        userSample.id = response.body.object_id;
+        userSample.name = userSample.email;
 
-            return API.resources.authenticate.createOne({
-              email: userSample.email,
-              password: userSample.password
-            });
-          })
-          .then(function (response) {
-            userSample.token = response.body.token;
-            done();
-          })
-          .catch(done);
+        return API.resources.authenticate.createOne({
+          email: userSample.email,
+          password: userSample.password
+        });
+      })
+      .then(function (response) {
+        userSample.token = response.body.token;
+        done();
       })
       .catch(done);
   });
@@ -65,7 +66,10 @@ describe('Functional check', function () {
     API.helpers
       .authenticateUser(revAdmin)
       .then(function () {
-        API.resources.users.deleteAllPrerequisites(done);
+        API.resources.users.deleteAllPrerequisites(
+          function () {
+            API.resources.accounts.deleteAllPrerequisites(done);
+          });
       })
       .catch(done);
   });
@@ -79,24 +83,44 @@ describe('Functional check', function () {
           .then(function () {
             API.resources.users
               .update(userSample.id, {
-                firstName: 'Yegor',
-                lastName: 'Betin',
+                firstname: 'Yegor',
+                lastname: 'Betin',
                 role: 'user'
               })
               .expect(400)
               .end(function (err, res) {
-                res.body.message.should.equal('Admin cannot change role to user');
+                res.body.message.should.equal('Cannot change role if you are the only one admin for the account');
                 done();
               });
           })
           .catch(done);
       });
 
+    it('should update user with reseller role', function (done) {
+      API.helpers
+        .authenticateUser(revAdmin)
+        .then(function () {
+          API.resources.users
+            .update(userSample.id, {
+              role: 'reseller'
+            })
+            .expect(200)
+            .end(function (err, res) {
+              done();
+            });
+        })
+        .catch(done);
+    });
+
     it('should return `Bad Request` when updating user\'s role from `reseller` to `user` having multiple' +
       ' accounts assigned to the reseller',
       function (done) {
         API.helpers
-          .authenticateUser(resellerUser)
+          .authenticateUser(userSample)
+          .then(function() {
+            var resellerAccountSample = AccountsDP.generateOne();
+            return API.resources.accounts.createOneAsPrerequisite(resellerAccountSample);
+          })
           .then(function () {
             API.resources.users
               .update(userSample.id, {
@@ -104,8 +128,8 @@ describe('Functional check', function () {
               })
               .expect(400)
               .end(function (err, res) {
-                res.body.message.should.equal('Cannot change role with more, ' +
-                  'than 1 account assigned for the user');
+                res.body.message.should.equal('Cannot change role if you are the ' +
+                  'only one reseller for the accounts');
                 done();
               });
           })
