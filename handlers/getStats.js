@@ -191,13 +191,22 @@ exports.getMobileDesktopDistribution = function(request, reply) {
         },
         aggs: {
           oses: {
-            terms: { field: 'os_name', size: 30 },
+            terms: { field: 'os_name', size: 0 },
+            aggs: {
+              devs: {
+                terms: { field: 'device', size: 30 }
+              }
+            }
+          },
+          missing_oses: {
+            missing: { field: 'os_name' },
             aggs: {
               devs: {
                 terms: { field: 'device', size: 30 }
               }
             }
           }
+
         }
       };
 
@@ -214,10 +223,11 @@ exports.getMobileDesktopDistribution = function(request, reply) {
 
         var mobile = 0,
           desktop = 0,
-          spiders = 0;
+          spiders = 0,
+          unknown = 0;
 
         body.aggregations.oses.buckets.forEach( function( os ) {
-          desktop += os.doc_count;
+          desktop += os.doc_count - os.devs.sum_other_doc_count;
           mobile += os.devs.sum_other_doc_count;
           os.devs.buckets.forEach( function( dev ) {
             if ( dev.key === 'Spider' ) {
@@ -229,12 +239,17 @@ exports.getMobileDesktopDistribution = function(request, reply) {
           });
         });
 
-        if ( body.aggregations.oses.sum_other_doc_count ) {
-          var dist = body.aggregations.oses.sum_other_doc_count / ( desktop + mobile + spiders );
-          desktop += Math.round( desktop * dist );
-          mobile += Math.round( mobile * dist );
-          spiders += Math.round( spiders * dist );
-        }
+        var missing = body.aggregations.missing_oses;
+        unknown += missing.doc_count - missing.devs.sum_other_doc_count;
+        mobile += missing.devs.sum_other_doc_count;
+        missing.devs.buckets.forEach( function( dev ) {
+          if ( dev.key === 'Spider' ) {
+            spiders += dev.doc_count;
+          } else {
+            mobile += dev.doc_count;
+          }
+          unknown -= dev.doc_count;
+        });
 
         var response = {
           metadata: {
@@ -250,7 +265,8 @@ exports.getMobileDesktopDistribution = function(request, reply) {
           data: {
             desktop: desktop,
             mobile: mobile,
-            spiders: spiders
+            spiders: spiders,
+            unknown: unknown
           }
         };
 
