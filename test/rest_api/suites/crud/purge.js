@@ -27,6 +27,8 @@ describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
+  
+  var revAdmin = config.get('api.users.revAdmin');
 
   // Defining set of users for which all below tests will be run
   var users = [
@@ -67,7 +69,7 @@ describe('CRUD check', function () {
 
         after(function (done) {
           API.helpers
-            .authenticateUser(user)
+            .authenticateUser(revAdmin)
             .then(function () {
               return API.resources.domainConfigs.deleteOne(domainConfig.id);
             })
