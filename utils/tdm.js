@@ -108,7 +108,7 @@ for (var i = 0; i < parslen; ++i) {
 if ( conf.colors ) {
   prefix_lg = '    ' + utils.colored( 'LightBlue', '• ' );
   prefix_sm = '    ' + utils.colored( 'LightBlue', '· ' );
-  prefix_ussr = utils.colored( 'Red', '☭ ' );
+  prefix_cccp = utils.colored( 'Red', '☭ ' );
 }
 
 if (action === '') {
