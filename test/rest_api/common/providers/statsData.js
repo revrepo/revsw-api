@@ -33,6 +33,8 @@ var _ = require('lodash'),
 
 require( 'datejs' );
 
+// var domain_name = config.api.usage_report.domains_name;
+// var domain_aliases_ = config.api.usage_report.domain_aliases;
 //  ----------------------------------------------------------------------------------------------//
 
 var client_ = false,
@@ -112,7 +114,7 @@ var DataProvider = module.exports = function( from, to ) {
     template: {
       '@timestamp': '',
       '@version': '1',
-      domain: config.api.stats.domains.google.name,
+      domain: config.api.usage_report.domain_name,
       ipport: '80',
       protocol: 'HTTP/1.1',
       clientip: '66.249.93.145',
@@ -144,7 +146,7 @@ var DataProvider = module.exports = function( from, to ) {
     template_short: {
       '@timestamp': '',
       '@version': '1',
-      domain: config.api.stats.domains.google.name,
+      domain: config.api.usage_report.domain_name,
       ipport: '80',
       duration: 0.147,
       upstream_time: '0.147',
@@ -329,7 +331,11 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
     len8 = keys.device.length,
     total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7 * len8,
     t = this.options.from,
-    span = ( this.options.to - this.options.from ) / total;
+    span = ( this.options.to - this.options.from ) / total,
+    aliases = config.api.usage_report.domain_aliases || [];
+
+  aliases.push( config.api.usage_report.domain_name );
+  var aliases_num = aliases.length;
 
   this.clear();
   //  generate
@@ -360,6 +366,8 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
 
                     var r_ = _.clone( tmpl );
                     r_.geoip = _.clone( tmpl.geoip );
+                    r_.domain = aliases[Math.floor( Math.random() * aliases_num )];
+
                     this.options.data.push({ _source: r_, t: t });
 
                     t += span;
