@@ -116,7 +116,14 @@
     "usage_report": {
       "account_id": "55b6ff6a7957012304a49d04",
       "domain_id": "56558390b6eb546a6732ab4f",
-      "domain_name": "www.google-test.com"
+      "domain_name": "www.google-test.com",
+      "domain_aliases": [
+        "black.google-test.com",
+        "white.google-test.com",
+        "gray.google-test.com",
+        "yellow.google-disaster.com",
+        "green.google-disaster.com"
+      ]
     }
   },
   "stats_api": {
