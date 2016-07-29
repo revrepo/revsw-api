@@ -16,9 +16,11 @@
  * from Rev Software, Inc.
  */
 
+var Utils = require('./../../common/utils');
 var API = require('./../../common/api');
 var dp = require('./../../common/providers/statsData');
 var DP = new dp();
+var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 
 var should = require('should-http');
 var promise = require('bluebird');
@@ -27,6 +29,11 @@ var config = require('config');
 var user = config.get('api.users.admin');
 var domains = config.get('api.stats.domains');
 
+var prefix_lg = '    ' + Utils.colored( 'LightBlue', '• ' );
+var prefix_smr = '    ' + Utils.colored( 'LightRed', '· ' );
+var prefix_smb = '    ' + Utils.colored( 'LightBlue', '· ' );
+
+//  ----------------------------------------------------------------------------------------------//
 describe('Functional check.', function () {
 
   this.timeout(config.get('api.request.maxTimeout'));
@@ -240,6 +247,128 @@ describe('Functional check.', function () {
         });
     });
   });
+
+});
+
+//  ----------------------------------------------------------------------------------------------//
+describe('Functional check, Domain aliases ', function () {
+
+  this.timeout(config.get('api.request.maxTimeout'));
+
+  var now = Date.now();
+  var DP = new dp( Math.floor( now / 86400000 ) * 86400000, now );
+  var domain = domains['aliases-test'];
+  domain.aliases.push( domain.name );
+  var hits = 32;
+  var esDataType = 'aliases-test';
+
+  //  ---------------------------------
+  before(function (done) {
+
+    API.helpers
+      .authenticateUser(user)
+      .then(function () {
+        console.log( '    "before all" hook, testing data creation' );
+        console.log( prefix_lg + 'user authenticated' );
+
+        console.log( '    cleanup' );
+        return DP.removeTestingData( 'esurl', esDataType, function( str ) {
+          console.log( '    ' + Utils.colored( 'LightRed', '· ' ) + str );
+        } );
+      })
+      .then(function () {
+        return DP.waitForESUploaded( 'esurl', esDataType, 0/*goal*/, 16/*attempts*/, function( str ) {
+          console.log( '    ' + Utils.colored( 'LightRed', '· ' ) + str );
+        });
+      })
+      .then(function () {
+        console.log( '    uploading test data' );
+        DP.generateDomainsTestingData( 'esurl', domain.aliases, hits );
+        return DP.uploadTestingData( 'esurl', esDataType, function( str ) {
+          console.log( '    ' + Utils.colored( 'LightBlue', '· ' ) + str );
+        });
+      })
+      .then(function () {
+        return DP.waitForESUploaded( 'esurl', esDataType, domain.aliases.length * hits, 16/*attempts*/, function( str ) {
+          console.log( '    ' + Utils.colored( 'LightBlue', '· ' ) + str );
+        });
+      })
+      .then(function () {
+        console.log( prefix_lg + 'done\n' );
+        done();
+      })
+      .catch(done);
+  });
+
+  after(function (done) {
+    done();
+  });
+
+  //  ---------------------------------
+  describe('Check domain aliases', function () {
+
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    it('Get top report, cache_status', function (done) {
+
+      return API.resources.stats
+        .top()
+        .getOne(domain.id, {
+          from_timestamp: DP.options.from,
+          to_timestamp: DP.options.to,
+          report_type: 'cache_status'
+        })
+        .expect(200)
+        .then(function (res) {
+          var metadata = res.body.metadata;
+          metadata.total_hits.should.equal( domain.aliases.length * hits );
+          metadata.data_points_count.should.equal( 1 );
+          done();
+        })
+        .catch(done);
+
+    });
+
+    it('Get top report, status_code', function (done) {
+
+      return API.resources.stats
+        .top()
+        .getOne(domain.id, {
+          from_timestamp: DP.options.from,
+          to_timestamp: DP.options.to,
+          report_type: 'status_code'
+        })
+        .expect(200)
+        .then(function (res) {
+          var metadata = res.body.metadata;
+          metadata.total_hits.should.equal( domain.aliases.length * hits );
+          metadata.data_points_count.should.equal( 1 );
+          done();
+        })
+        .catch(done);
+
+    });
+
+    it('Get top objects', function (done) {
+
+      return API.resources.stats
+        .topObjects()
+        .getOne(domain.id, {
+          from_timestamp: DP.options.from,
+          to_timestamp: DP.options.to
+        })
+        .expect(200)
+        .then(function (res) {
+          var metadata = res.body.metadata;
+          metadata.total_hits.should.equal( domain.aliases.length * hits );
+          metadata.data_points_count.should.equal( 1 );
+          done();
+        })
+        .catch(done);
+
+    });
+  });
+
 
 });
 

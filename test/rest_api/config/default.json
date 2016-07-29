@@ -98,6 +98,18 @@
         "google": {
           "id": "56558390b6eb546a6732ab4f",
           "name": "www.google-test.com"
+        },
+        "aliases-test": {
+          "id": "579953f3d537138243c56e96",
+          "name": "test-domain-aliases.revsw.net",
+          "aliases": [
+            "black.revsw.net",
+            "white.revsw.net",
+            "gray.revsw.net",
+            "blue.revsw.net",
+            "black.disaster-257.net",
+            "white.disaster-257.net"
+          ]
         }
       }
     },
