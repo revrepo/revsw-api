@@ -738,11 +738,13 @@ exports.checkIntegration = function(request, reply) {
             dnsResolve.checkDomainCNAMEsIncludeCname(name_, cname_, function prepare(err, info) {
               if (!err) {
                 response_.check_status_code = checkStatusCode.OK;
-                response_.message = 'The domain wildcard alias is correct';
+                response_.message = 'DNS confgiguration for domain alias "' + domainWildcardAlias_ +
+                  '" is correct (tested for domain "' + name_ + '")';
                 response_.data.push(info);
               } else {
                 response_.check_status_code = checkStatusCode.ERROR;
-                response_.message = 'The domain wildcard alias is not configured correctly';
+                response_.message = 'DNS configuration for wildcard domain "' + domainWildcardAlias_ +
+                  '" is not pointing to the assigned CNAME record (tested for domain "' + name_ + '")';
                 response_.data.push(err);
               }
               cb(null);
