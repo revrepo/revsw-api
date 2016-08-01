@@ -574,6 +574,7 @@ exports.deleteDomainConfig = function(request, reply) {
 //=============================
 //
 //=============================
+// TODO please move "require" and "var" commands to the top of the file
 var dnsResolve = require('../lib/dnsResolve');
 // TODO: rebase to constats
 var checkStatusCode = {
@@ -614,11 +615,11 @@ exports.checkIntegration = function(request, reply) {
           dnsResolve.resolveA(name, function prepare(err, info) {
             if (!err) {
               response_.check_status_code = checkStatusCode.OK;
-              response_.message = 'The CNAME returns an IP address';
+              response_.message = 'The CNAME record returns an IP address';
               response_.data.push(info);
             } else {
               response_.check_status_code = checkStatusCode.ERROR;
-              response_.message = 'Can`t resolve the IP address';
+              response_.message = 'Cannot resolve the CNAME record';
             }
             cb(null);
           });
@@ -635,11 +636,11 @@ exports.checkIntegration = function(request, reply) {
           dnsResolve.checkDomainCNAMEsIncludeCname(name_, cname_, function prepare(err, info) {
             if (!err) {
               response_.check_status_code = checkStatusCode.OK;
-              response_.message = 'The domain name is pointing to the CNAME';
+              response_.message = 'The domain name is pointing to the assigned RevAPM CNAME record';
               response_.data.push(info);
             } else {
               response_.check_status_code = checkStatusCode.ERROR;
-              response_.message = 'The domain not pointing to the CNAME or not solving';
+              response_.message = 'The domain is not pointing to the assigned RevAPM CNAME record or could not be resolved';
               response_.data.push(err);
             }
             cb(null);
@@ -669,11 +670,11 @@ exports.checkIntegration = function(request, reply) {
                     dnsResolve.checkDomainCNAMEsIncludeCname(domainName_, domainCNAME_, function prepare(err, info) {
                       if (!err) {
                         resultCheck.check_status_code = checkStatusCode.OK;
-                        resultCheck.message = 'Domain ' + domainName_ + ' is resolved';
+                        resultCheck.message = 'Domain name ' + domainName_ + ' can be resolved';
                         resultCheck.data.push(info);
                       } else {
                         resultCheck.check_status_code = checkStatusCode.ERROR;
-                        resultCheck.message = 'Domain name resolve problem (' + domainName_ + ')';
+                        resultCheck.message = 'Cannot resolve domain name ' + domainName_;
                         resultCheck.data.push(err);
                       }
                       cb(null, resultCheck);
@@ -689,17 +690,18 @@ exports.checkIntegration = function(request, reply) {
               } else {
                 response_.data = results;
                 response_.check_status_code = checkStatusCode.OK;
-                response_.message = 'All domain aliases is resolved';
+                response_.message = 'All domain aliases can be resolved';
                 var warningCount = 0;
                 results.forEach(function(item) {
                   if (!!item.check_status_code && item.check_status_code === checkStatusCode.ERROR) {
-                    response_.message = 'One or more aliases has problems';
+                    response_.message = 'One or more domain aliases cannot be solved';  // TODO need to specify which
+                    // are actually failing
                     response_.check_status_code = checkStatusCode.WARNING;
                     warningCount++;
                   }
                 });
                 if (warningCount === results.length) {
-                  response_.message = 'All aliases is not correct';
+                  response_.message = 'All domain aliases cannot be resolved';
                   response_.check_status_code = checkStatusCode.ERROR;
                 }
                 cb(null);
@@ -708,7 +710,7 @@ exports.checkIntegration = function(request, reply) {
           } else {
             // NOTE: empty array - valid
             response_.check_status_code = checkStatusCode.OK;
-            response_.message = 'No data for validation';
+            response_.message = 'No configuration to validate (domain option "Non-Wildcard Domain Aliases")';
             response_.data = [];
             cb(null);
           }
@@ -726,7 +728,7 @@ exports.checkIntegration = function(request, reply) {
           if (!domainWildcardAlias_ || domainWildcardAlias_ === '') {
             // NOTE: empty string - no need validate
             response_.check_status_code = checkStatusCode.OK;
-            response_.message = 'The domain wildcard alias is correct';
+            response_.message = 'No configuration to validate (domain option "Wildcard Domain Alias")';
             response_.data = [];
             cb(null);
           } else {
@@ -736,11 +738,13 @@ exports.checkIntegration = function(request, reply) {
             dnsResolve.checkDomainCNAMEsIncludeCname(name_, cname_, function prepare(err, info) {
               if (!err) {
                 response_.check_status_code = checkStatusCode.OK;
-                response_.message = 'The domain wildcard alias is correct';
+                response_.message = 'DNS confgiguration for domain alias "' + domainWildcardAlias_ +
+                  '" is correct (tested for domain "' + name_ + '")';
                 response_.data.push(info);
               } else {
                 response_.check_status_code = checkStatusCode.ERROR;
-                response_.message = 'The domain wildcard alias is not correct';
+                response_.message = 'DNS configuration for wildcard domain "' + domainWildcardAlias_ +
+                  '" is not pointing to the assigned CNAME record (tested for domain "' + name_ + '")';
                 response_.data.push(err);
               }
               cb(null);
@@ -790,7 +794,7 @@ exports.checkIntegration = function(request, reply) {
               var timeout_ = 10000;
               if (stagingProxyServers.length === 0) {
                 response_.check_status_code = checkStatusCode.ERROR;
-                response_.message = 'The staging proxy servers not found';
+                response_.message = 'Could not find an online staging server';
                 return cb(null);
               }
               var requestUrl_ = 'http://' + stagingProxyServers[0].server_name;
@@ -807,7 +811,7 @@ exports.checkIntegration = function(request, reply) {
                 function resultReguestProxyServer(err, response, body) {
                   if (err) {
                     response_.check_status_code = checkStatusCode.ERROR;
-                    response_.message = 'Request is fail';
+                    response_.message = 'Failed to send a test request to staging server ' + stagingProxyServers[0].server_name;
                     response_.data.push(err);
                     if (err.code === 'ETIMEDOUT') {
                       response_.message = 'Request timeout';
@@ -818,7 +822,7 @@ exports.checkIntegration = function(request, reply) {
                   if (response.statusCode >= 200 && response.statusCode <= 400) {
                     response_.data.push({
                       check_status_code: checkStatusCode.OK,
-                      message: 'Http request is success',
+                      message: 'Successfully received a response for test HTTP request',
                       status_code: response.statusCode
                     });
                   }
@@ -828,7 +832,7 @@ exports.checkIntegration = function(request, reply) {
                   if (response_.elapsed_time > minReceivedTime_) {
                     response_.data.push({
                       check_status_code: checkStatusCode.WARNING,
-                      message: 'The response is received above 1 second'
+                      message: 'The request response time is above 1 second'
                     });
                   }
 
@@ -838,11 +842,11 @@ exports.checkIntegration = function(request, reply) {
             // 3. prepare total result
             function totalStatusAndMessage(cb) {
               response_.check_status_code = checkStatusCode.OK;
-              response_.message = 'Request Staging Server Success ';
+              response_.message = 'Successfully tested the domain on a staging server'; 
               var warningCount = 0;
               response_.data.forEach(function(item) {
                 if (!!item.check_status_code && (item.check_status_code === checkStatusCode.ERROR || item.check_status_code === checkStatusCode.WARNING)) {
-                  response_.message = 'Http request has problem';
+                  response_.message = 'There were problems while testing the domain on a staging server';
                   response_.check_status_code = checkStatusCode.WARNING;
                   warningCount++;
                 }
@@ -871,6 +875,8 @@ exports.checkIntegration = function(request, reply) {
             function getProductionProxySerever(callback) {
               var options = '?environment=prod';
               cdsRequest({
+                // TODO later we need to take the domain's bp_group_id attrbite into considiration while selecting
+                // online production servers
                 url: config.get('cds_url') + '/v1/proxy_servers' + options,
                 headers: authHeader
               }, function(err, res, body) {
@@ -902,7 +908,7 @@ exports.checkIntegration = function(request, reply) {
               var timeout_ = 10000;
               if (productionProxyServers.length === 0) {
                 response_.check_status_code = checkStatusCode.ERROR;
-                response_.message = 'The production proxy servers not found';
+                response_.message = 'Cound not find a global server to test';
                 return cb(null);
               }
               var requestUrl_ = 'http://' + productionProxyServers[0].server_name;
@@ -918,7 +924,7 @@ exports.checkIntegration = function(request, reply) {
 
                 if (err) {
                   response_.check_status_code = checkStatusCode.ERROR;
-                  response_.message = 'Request is fail';
+                  response_.message = 'Failed to send a test request to a global proxy server';
                   response_.data.push(err);
                   if (err.code === 'ETIMEDOUT') {
                     response_.message = 'Request timeout';
@@ -929,7 +935,7 @@ exports.checkIntegration = function(request, reply) {
                 if (response.statusCode >= 200 && response.statusCode <= 400) {
                   response_.data.push({
                     check_status_code: checkStatusCode.OK,
-                    message: 'Http request is success',
+                    message: 'Successfully tested the domain on a global proxy server',
                     status_code: response.statusCode
                   });
                 }
@@ -939,7 +945,7 @@ exports.checkIntegration = function(request, reply) {
                 if (response_.elapsed_time > minReceivedTime_) {
                   response_.data.push({
                     check_status_code: checkStatusCode.WARNING,
-                    message: 'The response is received above 1 second'
+                    message: 'The request response time is above 1 second'
                   });
                 }
                 cb(null);
@@ -948,11 +954,11 @@ exports.checkIntegration = function(request, reply) {
             // 3. prepare total result
             function totalStatusAndMessage(cb) {
               response_.check_status_code = checkStatusCode.OK;
-              response_.message = 'Request Production Server Success ';
+              response_.message = 'Successfully tested the domain on a global proxy server';
               var warningCount = 0;
               response_.data.forEach(function(item) {
                 if (!!item.check_status_code && (item.check_status_code === checkStatusCode.ERROR || item.check_status_code === checkStatusCode.WARNING)) {
-                  response_.message = 'Http request has problem';
+                  response_.message = 'There were problems while testing the domain on a global server';
                   response_.check_status_code = checkStatusCode.WARNING;
                   warningCount++;
                 }

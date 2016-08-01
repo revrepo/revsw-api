@@ -129,14 +129,15 @@ module.exports = [{
     }
   }, {
     method: 'GET',
-    path: '/v1/domain_configs/{domain_id}/check_integration/{check_type}',
+    path: '/v1/domain_configs/{domain_id}/check_integration/{check_type}', // TODO please move "check_type" from path to query
+    // string parameter and make it optional. 
     config: {
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: domainConfigsHandlers.checkIntegration,
-      description: 'Check integration',
-      notes: 'Use the call to make checks current configuretion settincs for specified domain ID.',
+      description: 'Check the correctness of a domain integration',
+      notes: 'Use the call to run a series of checks to verify the correctness of web domain configuration/integration for a domain.',
       tags: ['api', 'domain_configs'],
       plugins: {
         'hapi-swagger': {
@@ -147,7 +148,7 @@ module.exports = [{
         params: {
           domain_id: Joi.objectId().required().description('Domain ID'),
           check_type: Joi.string().required().valid('cname', 'domain_name', 'domain_aliases', 'domain_wildcard_alias', 'stagin_proxy_server', 'production_proxy_server')
-            .description('Type checking integration')
+            .description('The type of performed integration check')
         }
       },
       // response    : {
