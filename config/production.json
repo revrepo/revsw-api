@@ -62,5 +62,14 @@
 
   "nsone": {
     "api_key": "the_correct_value_is_in_local_json"
+  },
+
+  "throttling": {
+    "max": 100,                 // maximum number of requests per key within duration
+    "duration": 60000,          // duration of limit in ms
+    "redis": {
+      "host": "192.168.99.100", // redis server address
+      "port": 6379              // redis server port
+    }
   }
 }

@@ -34,7 +34,8 @@ var Hapi = require('hapi'),
     User = require('../models/User'),
     os = require('os'),
     boom  = require('boom'),
-    mail = require('../lib/mail');
+    mail = require('../lib/mail'),
+    hapiThrottling = require('hapi-throttling');
 
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {
@@ -234,6 +235,49 @@ server.ext('onPreResponse', function(request, reply) {
     }
   }
   return reply.continue();
+});
+
+// Register throttling plugin
+var throttlingOptions = {
+  redis: {
+    host: config.get('throttling.redis.host'),
+    port: +config.get('throttling.redis.port') || 6379
+  },
+  getKey: function (request, reply, done) {
+    var key = null;
+    if (request.auth.credentials && request.auth.credentials.user_type === 'apikey') {
+      // limit by API key
+      key = request.auth.credentials.key;
+    } else if (request.auth.credentials && request.auth.credentials.user_type === 'user') {
+      // limit by user id using JWT
+      key = request.auth.credentials.user_id;
+    } else {
+      // limit by IP address
+      key = request.info.remoteAddress;
+    }
+
+    // global key based on API key
+    // to have route-specific settings concatenate key with request.route.path
+    done(null, key);
+  },
+  getLimit: function (request, reply, done) {
+    // Global limit for all API endpoints.
+    // To have rout-specific limit use request.route.path parameter.
+    // To have user-specific limit use user data
+    done(null, {
+      max: config.get('throttling.max'),          // maximum number of requests within duration per key
+      duration: config.get('throttling.duration') // duration of the limit
+    });
+  }
+};
+
+server.register({
+  register: hapiThrottling,
+  options: throttlingOptions
+}, function (err) {
+  if (err) {
+    console.error(err);
+  }
 });
 
 server.register({
