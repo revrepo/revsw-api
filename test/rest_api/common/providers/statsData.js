@@ -335,7 +335,8 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
     aliases = config.api.usage_report.domain_aliases || [];
 
   aliases.push( config.api.usage_report.domain_name );
-  var aliases_num = aliases.length;
+  var aliases_num = aliases.length,
+    ai = 0;
 
   this.clear();
   //  generate
@@ -366,7 +367,8 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
 
                     var r_ = _.clone( tmpl );
                     r_.geoip = _.clone( tmpl.geoip );
-                    r_.domain = aliases[Math.floor( Math.random() * aliases_num )];
+                    // r_.domain = aliases[Math.floor( Math.random() * aliases_num )];
+                    r_.domain = aliases[ ai++ % aliases_num ];
 
                     this.options.data.push({ _source: r_, t: t });
 
