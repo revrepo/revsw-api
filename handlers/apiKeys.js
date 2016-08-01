@@ -41,7 +41,7 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 function verifyDomainOwnership(companyId, domainList, callback) {
-  
+
   var verified = true;
   var okDomains = [];
   var wrongDomains = [];
@@ -99,6 +99,28 @@ exports.getApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
   });
+};
+
+exports.getMyApiKey = function(request, reply) {
+  if (request.auth.credentials.user_type === 'apikey') {
+    var apiKeyId = request.auth.credentials.id;
+    apiKeys.get({
+      _id: apiKeyId
+    }, function(error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to retrieve details for API key ' + apiKeyId));
+      }
+      if (result) {
+        result = publicRecordFields.handle(result, 'apiKeys');
+
+        renderJSON(request, reply, error, result);
+      } else {
+        return reply(boom.badRequest('API Key not found'));
+      }
+    });
+  } else {
+    return reply(boom.badRequest('Non-API Key authorization'));
+  }
 };
 
 exports.createApiKey = function(request, reply) {
@@ -166,7 +188,7 @@ exports.createApiKey = function(request, reply) {
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
   var id = request.params.key_id;
-  
+
   function doUpdate() {
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {

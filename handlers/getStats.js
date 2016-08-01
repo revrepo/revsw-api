@@ -191,7 +191,7 @@ exports.getMobileDesktopDistribution = function(request, reply) {
         },
         aggs: {
           oses: {
-            terms: { field: 'os_name', size: 30 },
+            terms: { field: 'os_name', size: 0 },
             aggs: {
               devs: {
                 terms: { field: 'device', size: 30 }
@@ -227,7 +227,7 @@ exports.getMobileDesktopDistribution = function(request, reply) {
           unknown = 0;
 
         body.aggregations.oses.buckets.forEach( function( os ) {
-          desktop += os.doc_count;
+          desktop += os.doc_count - os.devs.sum_other_doc_count;
           mobile += os.devs.sum_other_doc_count;
           os.devs.buckets.forEach( function( dev ) {
             if ( dev.key === 'Spider' ) {
@@ -250,14 +250,6 @@ exports.getMobileDesktopDistribution = function(request, reply) {
           }
           unknown -= dev.doc_count;
         });
-
-        if ( body.aggregations.oses.sum_other_doc_count ) {
-          var dist = body.aggregations.oses.sum_other_doc_count / ( desktop + mobile + spiders + unknown );
-          desktop += Math.round( desktop * dist );
-          mobile += Math.round( mobile * dist );
-          spiders += Math.round( spiders * dist );
-          unknown += Math.round( unknown * dist );
-        }
 
         var response = {
           metadata: {

@@ -19,9 +19,10 @@
 require('should-http');
 
 var config = require('config');
-var accounts= require('./../../../common/resources/accounts');
-var API= require('./../../../common/api');
-var AccountsDP= require('./../../../common/providers/data/accounts');
+var accounts = require('./../../../common/resources/accounts');
+var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
+var DataProvider = require('./../../../common/providers/data');
 
 describe('Functional check', function () {
 
@@ -30,13 +31,40 @@ describe('Functional check', function () {
 
   var resellerUser = config.get('api.users.reseller');
   var anotherResellerUser = config.get('api.users.secondReseller');
+  var revAdmin = config.get('api.users.revAdmin');
+  var userSample = DataProvider.generateUser();
 
   before(function (done) {
-    done();
+    API.helpers
+      .authenticateUser(resellerUser)
+      .then(function () {
+        API.resources.users
+          .createOneAsPrerequisite(userSample)
+          .then(function (response) {
+            userSample.id = response.body.object_id;
+            userSample.name = userSample.email;
+
+            return API.resources.authenticate.createOne({
+              email: userSample.email,
+              password: userSample.password
+            });
+          })
+          .then(function (response) {
+            userSample.token = response.body.token;
+            done();
+          })
+          .catch(done);
+      })
+      .catch(done);
   });
 
   after(function (done) {
-    done();
+    API.helpers
+      .authenticateUser(revAdmin)
+      .then(function () {
+        API.resources.users.deleteAllPrerequisites(done);
+      })
+      .catch(done);
   });
 
   describe('Accounts resource', function () {
@@ -208,6 +236,22 @@ describe('Functional check', function () {
                   .catch(done);
               })
               .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return `Bad Request` when trying to `create` account from not `reseller` user',
+      function (done) {
+        var newAccount = AccountsDP.generateOne();
+        API.helpers
+          .authenticateUser(userSample)
+          .then(function () {
+            API.resources.accounts
+              .createOne(newAccount)
+              .expect(400)
+              .end(function (error, response) {
+                done();
+              });
           })
           .catch(done);
       });

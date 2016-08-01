@@ -86,6 +86,7 @@
   "enable_self_registration": true,
   "enable_simplified_signup_process": true,
   "report_about_unknown_domains": "ops@revsw.com",
+  "report_daily_activity_logs": "ops@revsw.com",
 
   "chargify": {
     "domain": "the_correct_value_is_in_local_json",

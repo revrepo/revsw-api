@@ -33,6 +33,8 @@ var _ = require('lodash'),
 
 require( 'datejs' );
 
+// var domain_name = config.api.usage_report.domains_name;
+// var domain_aliases_ = config.api.usage_report.domain_aliases;
 //  ----------------------------------------------------------------------------------------------//
 
 var client_ = false,
@@ -71,7 +73,6 @@ var date_2_timestamp_ = function ( date ) {
   }
   throw new Error( 'illegal date/timestamp value' );
 };
-
 
 //  DataProvider ---------------------------------------------------------------------------------//
 
@@ -113,7 +114,7 @@ var DataProvider = module.exports = function( from, to ) {
     template: {
       '@timestamp': '',
       '@version': '1',
-      domain: config.api.stats.domains.google.name,
+      domain: config.api.usage_report.domain_name,
       ipport: '80',
       protocol: 'HTTP/1.1',
       clientip: '66.249.93.145',
@@ -145,7 +146,7 @@ var DataProvider = module.exports = function( from, to ) {
     template_short: {
       '@timestamp': '',
       '@version': '1',
-      domain: config.api.stats.domains.google.name,
+      domain: config.api.usage_report.domain_name,
       ipport: '80',
       duration: 0.147,
       upstream_time: '0.147',
@@ -310,7 +311,6 @@ var get_client_ = function( which_one ) {
  * Stats DataProvider.generateTestingData()
  *
  * @parameter {String} 'es'/'esurl' to define what cluster to use
- * @returns {Object} promise to check for success/error
  */
 DataProvider.prototype.generateTestingData = function ( which_one ) {
 
@@ -331,7 +331,11 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
     len8 = keys.device.length,
     total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7 * len8,
     t = this.options.from,
-    span = ( this.options.to - this.options.from ) / total;
+    span = ( this.options.to - this.options.from ) / total,
+    aliases = config.api.usage_report.domain_aliases || [];
+
+  aliases.push( config.api.usage_report.domain_name );
+  var aliases_num = aliases.length;
 
   this.clear();
   //  generate
@@ -362,6 +366,8 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
 
                     var r_ = _.clone( tmpl );
                     r_.geoip = _.clone( tmpl.geoip );
+                    r_.domain = aliases[Math.floor( Math.random() * aliases_num )];
+
                     this.options.data.push({ _source: r_, t: t });
 
                     t += span;
@@ -377,15 +383,57 @@ DataProvider.prototype.generateTestingData = function ( which_one ) {
 };
 
 /**
+ * Stats DataProvider.generateDomainsTestingData()
+ *
+ * @param {String} 'es'/'esurl' to define what cluster to use
+ * @param {Array[String]} list of domain names
+ * @param {int} number of records to store for every domain
+ */
+DataProvider.prototype.generateDomainsTestingData = function ( which_one, domains, hits ) {
+
+  if ( which_one !== 'es' && which_one !== 'esurl' ) {
+    throw new Error( 'DataProvider.generateDomainsTestingData, invalid parameter value: ' + which_one );
+  }
+
+  var tmpl = ( which_one === 'es' ? this.options.template_short : this.options.template ),
+    t = this.options.from,
+    total = domains.length * hits,
+    span = ( this.options.to - this.options.from ) / total;
+
+  this.clear();
+
+  //  generate
+  var self = this;
+  domains.forEach( function( domain ) {
+
+    var r_ = _.clone( tmpl );
+    r_.geoip = _.clone( tmpl.geoip );
+    r_.domain = domain;
+
+    for ( var i = 0; i < hits; ++i ) {
+      r_['@timestamp'] = new Date(Math.round(t)).toISOString().slice(0,-1);
+
+      self.options.data.push({ _source: r_, t: t });
+      ++self.options.dataCount;
+      t += span;
+    }
+
+  });
+};
+
+/**
  * Stats DataProvider.uploadTestingData()
  * upload data to the QA ES cluster
  *
- * @parameter {String} 'es'/'esurl' to define what cluster to use
- * @parameter {Bool} blabbing output
+ * @parameter {string} 'es'/'esurl' to define what cluster to use
+ * @parameter {string} index type, optional, default is config.api.stats.type
+ * @parameter {function} function to log out, optional
  * @return {Object} promise to check for success/error
  */
-DataProvider.prototype.uploadTestingData = function ( which_one, verbose ) {
+DataProvider.prototype.uploadTestingData = function ( which_one, type, logger ) {
 
+  type = type || config.api.stats.type;
+  logger = logger || function() {};
   var client = get_client_( which_one );
   var requests = [];
   var curr = 0;
@@ -406,7 +454,7 @@ DataProvider.prototype.uploadTestingData = function ( which_one, verbose ) {
     }
 
     requests.push({
-      type: config.api.stats.type,
+      type: type,
       body: body
     });
   }
@@ -414,23 +462,73 @@ DataProvider.prototype.uploadTestingData = function ( which_one, verbose ) {
   return promise.map( requests, function( req ) {
     return client.bulk( req )
       .then( function( resp ) {
-        if ( verbose ) {
-          console.log( '      # ' + which_one.toUpperCase() + ' portion upload done, items: ' +
-            resp.items.length + ', errors: ' + resp.errors );
-        }
+        logger( 'portion upload done, items: ' + resp.items.length + ', errors: ' + resp.errors );
       });
   }, { concurrency: config.api.stats.upload_concurrency } );
 };
 
 /**
+ * Stats DataProvider.waitForESUploaded()
+ * wait for the records stored in the given ES cluster reached appointed amount
+ *
+ * @parameter {string} 'es'/'esurl' to define what cluster to use
+ * @parameter {string} index type, optional, default is config.api.stats.type
+ * @parameter {int} amount of records to reach
+ * @parameter {int} attempts to retrieve data from the cluster
+ * @parameter {function} function to log out, optional
+ * @return {Object} promise to check for success/error
+ */
+DataProvider.prototype.waitForESUploaded = function( which_one, type, goal, attempts, logger ) {
+
+  type = type || config.api.stats.type;
+  attempts = attempts || 16;
+  logger = logger || function() {};
+
+  var delay = 5000; // ms
+  var idx = this.options.indicesList;
+
+  //  async loop inside IIFE
+  return ( function loop( count ) {
+    if ( count ) {
+      return get_client_( which_one ).count({
+          index: idx,
+          type: type,
+          ignoreUnavailable: true,
+        })
+        .then( function( data ) {
+          logger('counted ' + data.count + ' messages currently stored in ' + which_one.toUpperCase() + ' cluster');
+          if ( data.count === goal ) {
+            return promise.resolve( true );
+          } else {
+            logger('the goal ' + goal + ' is not achieved, wait another ' + delay + 'ms for the indices to be refreshed');
+            return promise.delay(delay)
+              .then( function() {
+                return loop( --count );
+              });
+          }
+        });
+    }
+  })( attempts )
+    .then(function( res ) {
+      if ( !res ) {
+        throw new Error( 'messsages amount stored in the ES cluster still not equal to sent amount' );
+      }
+    });
+},
+
+/**
  * Stats DataProvider.removeTestingData()
  * remove all uploaded data from the QA ES cluster
  *
- * @parameter {String} 'es'/'esurl' to define what cluster to use
- * @parameter {Bool} blabbing output
+ * @parameter {string} 'es'/'esurl' to define what cluster to use
+ * @parameter {string} index type, optional, default is config.api.stats.type
+ * @parameter {function} function to log out, optional
  * @returns {Object} promise to check for success/error
  */
-DataProvider.prototype.removeTestingData = function ( which_one, verbose ) {
+DataProvider.prototype.removeTestingData = function ( which_one, type, logger ) {
+
+  type = type || config.api.stats.type;
+  logger = logger || function() {};
 
   var client = get_client_( which_one );
   var self = this;
@@ -439,14 +537,9 @@ DataProvider.prototype.removeTestingData = function ( which_one, verbose ) {
   return client.search({
     index: self.options.indicesList,
     ignoreUnavailable: true,
-    type: config.api.stats.type,
+    type: type,
     size: 500000,
-    body: {
-      query: {
-        match_all: {}
-      },
-      _source: false
-    }
+    body: { _source: false }
   })
   .then( function( resp ) {
 
@@ -457,11 +550,12 @@ DataProvider.prototype.removeTestingData = function ( which_one, verbose ) {
     //   hits: { total: 220921, max_score: 1, hits: [ ..................... ] } }
     //  hits[0]:
     // { _index: 'logstash-2015.11.15',
-    //   _type: 'apache_json_testing',
+    //   _type: 'apache_json_testing'|'test-aliases',
     //   _id: 'AVEOT1CTkHRFAn3jGiD2',
     //   _score: 1 }
 
     if ( !resp.hits || !resp.hits.hits || !resp.hits.hits.length ) {
+      logger( which_one.toUpperCase() + ' cluster, no data found' );
       return false;
     }
 
@@ -486,7 +580,7 @@ DataProvider.prototype.removeTestingData = function ( which_one, verbose ) {
 
       //  push one bulk request to remove portion of records
       requests.push({
-        type: config.api.stats.type,
+        type: type,
         body: body
       });
 
@@ -495,9 +589,7 @@ DataProvider.prototype.removeTestingData = function ( which_one, verbose ) {
     return promise.map( requests, function( req ) {
       return client.bulk( req )
         .then( function( /*resp*/ ) {
-          if ( verbose ) {
-            console.log( '      # ' + which_one.toUpperCase() + ' cluster, portion removing done' );
-          }
+          logger( which_one.toUpperCase() + ' cluster, portion removing done' );
         });
     }, { concurrency: config.api.stats.upload_concurrency } );
 

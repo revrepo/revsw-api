@@ -391,7 +391,7 @@ describe('Rev API Admin User', function() {
       'qa-api-test-domain.revsw.net'
     ],
     'theme': 'dark',
-    'role': 'user',
+    'role': 'admin',
     'password': newTestPassword,
     'two_factor_auth_enabled' : false,
     'access_control_list': {
@@ -858,7 +858,7 @@ describe('Rev API Admin User', function() {
         var response_json = JSON.parse(res.text);
         response_json.statusCode.should.be.equal(400);
         response_json.error.should.be.equal('Bad Request');
-        response_json.message.should.be.equal('The new companyId is not found');
+        response_json.message.should.be.equal('The new account is not found');
         done();
       });
   });
