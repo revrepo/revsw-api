@@ -1176,10 +1176,10 @@ exports.checkDnsZoneNS = function(request, reply) {
 
         if (workFlowData_.root_dns_servers.indexOf(item) !== -1) {
           checkReport_.check_status_code = CHECK_STATUS_CODES.OK;
-          checkReport_.message = 'Check DNS server "' + item + '" is passed';
+          checkReport_.message = 'NS record "' + item + '" is properly configured';
         } else {
           checkReport_.check_status_code = CHECK_STATUS_CODES.ERROR;
-          checkReport_.message = 'Failed check DNS server "' + item + '" ';
+          checkReport_.message = 'NS record "' + item + '" is not pointing to an expected DNS server';
         }
         workFlowData_.check_reports.push(checkReport_);
       });
@@ -1197,15 +1197,15 @@ exports.checkDnsZoneNS = function(request, reply) {
       if (totalErrorStatus_ > 0) {
         if (totalErrorStatus_ === workFlowData_.check_reports.length) {
           workFlowData_.check_status_code = CHECK_STATUS_CODES.ERROR;
-          workFlowData_.message = 'All checks DNS servers failed';
+          workFlowData_.message = 'All NS records have failed to pass the test';
         }
         if (totalErrorStatus_ !== workFlowData_.check_reports.length) {
           workFlowData_.check_status_code = CHECK_STATUS_CODES.WARNING;
-          workFlowData_.message = 'Checking DNS servers have errors';
+          workFlowData_.message = 'Some NS records have failed to pass the test';
         }
       } else {
         workFlowData_.check_status_code = CHECK_STATUS_CODES.OK;
-        workFlowData_.message = 'All DNS servers checks successfully';
+        workFlowData_.message = 'All NS records are configured correctly';
       }
     })
     .then(function(data) {
