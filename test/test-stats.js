@@ -12,10 +12,8 @@ var config = require('config');
 
 var qaUserWithUserPerm = 'qa_user_with_user_perm@revsw.com',
   qaUserWithUserPermPassword = 'password1',
-  qaUserWithAdminPerm = 'victor@revsw.com',
-  qaUserWithAdminPermPassword = '123qweasd',
-  // qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
-  // qaUserWithAdminPermPassword = 'password1',
+  qaUserWithAdminPerm = 'qa_user_with_admin_perm@revsw.com',
+  qaUserWithAdminPermPassword = 'password1',
   qaUserWithResellerPerm = 'qa_user_with_reseller_perm@revsw.com',
   qaUserWithResellerPermPassword = 'password1',
   wrongUsername = 'wrong_username@revsw.com',
