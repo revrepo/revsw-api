@@ -190,6 +190,51 @@ module.exports = [
       }
     }
   },
+    {
+     method: 'GET',
+     path: '/v1/dns_zones/{dns_zone_id}/checkintegration/dns_servers',
+     config: {
+       auth: {
+         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+       },
+       handler: dnsZone.checkDnsZoneNS,
+       description: 'Get a check integration information about NSONE DNS Servers',
+       notes: 'Use this function to check integration NSONE DNS Servers ',
+       tags: ['api'],
+       plugins: {
+         'hapi-swagger': {
+           responseMessages: routeModels.standardHTTPErrors
+         }
+       },
+       validate: {
+         params: {
+           dns_zone_id: Joi.objectId().required().description('DNS zone ID')
+         }
+       }
+     }
+   }, {
+     method: 'GET',
+     path: '/v1/dns_zones/{dns_zone_id}/checkintegration/records',
+     config: {
+       auth: {
+         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+       },
+       handler: dnsZone.checkDnsZoneRecords,
+       description: 'Get a check integration informations for DNS Zone Records',
+       notes: 'Use this function to check integration NSONE DNS Records',
+       tags: ['api'],
+       plugins: {
+         'hapi-swagger': {
+           responseMessages: routeModels.standardHTTPErrors
+         }
+       },
+       validate: {
+         params: {
+           dns_zone_id: Joi.objectId().required().description('DNS zone ID')
+         }
+       }
+     }
+   },
   {
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}/records',
