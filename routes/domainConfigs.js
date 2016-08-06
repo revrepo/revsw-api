@@ -288,7 +288,7 @@ module.exports = [{
                 is_wildcard: Joi.boolean().required(),
                 value: Joi.string().max(300).required()
               }).required(),
-              enable_esi: Joi.boolean().required(),
+              enable_esi: Joi.boolean().default(false),
               edge_caching: Joi.object({
                 override_origin: Joi.boolean().required(),
                 new_ttl: Joi.number().integer().required(),
