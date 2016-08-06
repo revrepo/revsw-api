@@ -119,7 +119,8 @@ var DomainConfigsResponseSP = {
                 'is_wildcard': Joi.boolean(),
                 'value': Joi.string()
               },
-              'version': Joi.number()
+              'version': Joi.number(),
+              'enable_esi': Joi.boolean()
             }
           ],
           'cdn_overlay_urls': Joi.array(),

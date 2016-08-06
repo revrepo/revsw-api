@@ -202,7 +202,8 @@ module.exports = {
               'is_wildcard': true,
               'value': '**'
             },
-            'version': 1
+            'version': 1,
+            'enable_esi': false
           }
         ],
         'cdn_overlay_urls': [],
