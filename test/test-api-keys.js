@@ -27,7 +27,7 @@ var userAuthWithUserPerm = {
 };
 describe('Rev API keys', function() {
 
-  this.timeout(20000);
+  this.timeout(60000);
 
   var myCompanyId = '55b6ff6a7957012304a49d04';
   var myDomains = [];
