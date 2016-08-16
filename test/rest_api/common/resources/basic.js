@@ -350,36 +350,6 @@ var BasicResource = function (data) {
     };
   }
 
-  if (_contains(data.methods, Methods.DELETE_DATA)) {
-    /**
-     * ### BasicResource.deleteOne()
-     *
-     * Sends the DELETE request to the API in order to delete specified object
-     * with given data.
-     *
-     * @param {object} object with the information/properties to delete
-     * @param {object} query, will be transformed to a query string
-     *
-     * @returns {object} the supertest-as-promised instance
-     */
-    _resource.deleteOne = function (object, query) {
-      var location;
-      if (typeof object === 'string') {
-        location = getPath(data, object);
-        object = query;
-        query = param;
-      }
-      else {
-        location = getPath(data);
-      }
-
-      var request = getRequest()
-        .del(location)
-        .query(query);
-      return setUserToRequest(request);
-    };
-  }
-
   if (_contains(data.methods, Methods.DELETE)) {
     /**
      * ### BasicResource.deleteOne()

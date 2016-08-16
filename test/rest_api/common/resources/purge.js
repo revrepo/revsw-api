@@ -18,8 +18,6 @@
 
 // # Purge Resource object
 
-// Requiring config and `BaseResource`
-var config = require('config');
 var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;

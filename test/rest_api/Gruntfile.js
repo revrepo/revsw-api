@@ -38,7 +38,8 @@ module.exports = function (grunt) {
           'scripts/clean/domainConfigs.js',
           'scripts/clean/sslCerts.js',
           'scripts/clean/accounts.js',
-          'scripts/clean/users.js'
+          'scripts/clean/users.js',
+          'scripts/clean/dnsZones.js'
         ]
       },
       setup: {
