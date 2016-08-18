@@ -392,5 +392,36 @@ module.exports = [
     }
   },
 
+  // List Single Sign On Authorization
+  {
+    method: 'POST',
+    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/listSingleSignOnToken',
+    config: {
+      handler: azure.listSingleSignOnToken,
+      description: 'List SSO token',
+      notes: 'List SSL token',
+      tags: ['api'],
+      auth: false,
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        options: {
+          stripUnknown: false
+        },
+        params: {
+          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().description('Azure Resource name')
+        }
+      },
+//      response: {
+//        schema: routeModels.listOfDNSZonesModel
+//     }
+    }
+  },
+
 ];
 

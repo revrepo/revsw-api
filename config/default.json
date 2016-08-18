@@ -114,5 +114,9 @@
     "GasOrder": "https://system.globalsign.com/bb/ws/GasOrder?wsdl",
     "GasQuery": "https://system.globalsign.com/bb/ws/GasQuery?wsdl",
     "ServerSSLService": "https://system.globalsign.com/bb/ws/ServerSSLService?wsdl"
+  },
+
+  "azure_marketplace": {
+    "sso_endpoint": "https://testsjc20-portal01.revsw.net/azure-sso"
   }
 }
