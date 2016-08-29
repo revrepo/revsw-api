@@ -25,7 +25,9 @@ var mongoose = require('mongoose');
 var AuditLogger = require('../lib/audit');
 var config = require('config');
 var Promise = require('bluebird');
+var Fs = require('fs');
 var base64 = require('js-base64').Base64;
+var base64url = require('base64-url');
 
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
@@ -35,18 +37,73 @@ var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
 var Account = require('../models/Account');
+var AzureSubscription = require('../models/AzureSubscription');
+var AzureResource = require('../models/AzureResource');
 
 var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectionPortal()));
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
+var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mongoConnection.getConnectionPortal()));
+var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 
 exports.createSubscription = function (request, reply) {
 
   var subscription = request.payload,
-    subscriptionId = request.params.subscription_id;
+    subscriptionId = request.params.subscription_id,
+    subscriptionDate = request.payload.RegistrationDate,
+    state = request.payload.state,
+    properties = request.payload.properties;
 
-  var error;
+  logger.info('Processing Azure Create Subscription request for ID ' + subscriptionId + ', payload ' +
+    JSON.stringify(subscription));
 
-  renderJSON(request, reply, error, subscription);
+  azureSubscriptions.get({subscription_id: subscriptionId}, function(error, existingSubscription) {
+    if(error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (existingSubscription) {
+      logger.info('Azure Subscription ID ' + subscriptionId + ' already exists: processing possible state change');
+      if (existingSubscription.subscription_state === state) { // If the subscription already exists with the same state then do
+        // nothing and just return 200
+        renderJSON(request, reply, error, subscription);
+      } else {
+        // For now just update the state in the subscription record
+        // TODO: later we need to add a proper handling of state changes
+        // TODO: what to do if the current state is "Deleted"?
+        var updatedSubscription = {
+          id: existingSubscription.id,
+          subscription_id: subscriptionId,
+          subscription_state: state,
+          properties: properties
+        };
+        azureSubscriptions.update(updatedSubscription, function (error, result) {
+          if (error || !result) {
+            return reply(boom.badImplementation('Failed to update Azure subscription ' + JSON.stringify(updatedSubscription)));
+          }
+          renderJSON(request, reply, error, subscription);
+        });
+      }
+    } else {
+      // A call with state "Unregistered" for none existing subscription should return 200
+      if (state === 'Unregistered') {
+        renderJSON(request, reply, error, subscription);
+      }
+
+      logger.info('Adding new Azure Subscription with ID ' + subscriptionId + ', payload ' + JSON.stringify(subscription));
+      var newSubscription = {
+        subscription_id: subscriptionId,
+        subscription_state: state,
+        properties: properties
+      };
+      azureSubscriptions.add(newSubscription, function(error, result) {
+        if(error) {
+          return reply(boom.badImplementation('Failed to add to the DB a new Azure subscription ' + JSON.stringify(newSubscription)));
+        }
+        logger.info('Successfully added new Azure Subscription with ID ' + subscriptionId + ', subscription object ' + 
+          JSON.stringify(result));
+        renderJSON(request, reply, error, subscription);
+      }); 
+    }
+  });
 };
 
 exports.createUpdateResource = function (request, reply) {
@@ -54,11 +111,55 @@ exports.createUpdateResource = function (request, reply) {
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
-    resourceName = request.params.resource_name;
+    resourceName = request.params.resource_name,
+    tags = resource.tags,
+    resourceId = resource.id,
+    properties = resource.properties,
+    plan = resource.plan;
 
-  var error;
+  azureSubscriptions.get({ subscription_id: subscriptionId }, function(error, result) {
+    if(error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    logger.info('Adding new Azure Resource for subscription ID ' + subscriptionId + ', payload ' + JSON.stringify(resource));
+    var newAccount = {
+      companyName: 'Azure Marketplace Resource ' + resourceName,   // TODO add resource group name too?
+      createdBy: 'Azure Marketplace Subscription ' + subscriptionId,
+      // TODO add billing plan
+    };
+    accounts.add(newAccount, function (error, account) {
+      if (error || !account) {
+        return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
+          ', payload ' + JSON.stringify(newAccount)));
+      }
+      var newResource = {
+          subscription_id: subscriptionId,
+          resource_name: resourceName,
+          resource_id: resourceId,
+          resource_group_name: resourceGroupName, 
+          account_id: account.id,
+          tags: tags,
+          plan: plan,
+          properties: properties
+        };
+
+      azureResources.add(newResource, function(error, createdResource) {
+        if (error || !createdResource) {
+          return reply(boom.badImplementation('Failed to add new Azure resource for subscription ID ' + subscriptionId +
+            ', payload ' + JSON.stringify(newResource)));
+        }
+        renderJSON(request, reply, error, resource);
+      });
+    });
+  });
 };
 
 exports.patchResource = function (request, reply) {
@@ -86,24 +187,59 @@ exports.listAllResourcesInResourceGroup = function (request, reply) {
 
 exports.listAllResourcesInSubscription = function (request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id;
+  var subscriptionId = request.params.subscription_id;
 
-  var error;
+  azureSubscriptions.get({ subscription_id: subscriptionId }, function(error, result) {
+    if(error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    azureResources.queryP({ subscription_id: subscriptionId }, function(error, resources) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId));
+      }
+      renderJSON(request, reply, error, resources);
+    });
+  });
 };
 
 exports.getResource = function (request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id,
+  var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
 
-  var error;
+  azureSubscriptions.get({ subscription_id: subscriptionId }, function(error, result) {
+    if(error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    azureResources.get({ resource_name: resourceName, resource_group_name: resourceGroupName, subscription_id: subscriptionId },
+      function(error, resource) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+          ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+      }
+      if (!resource) {
+        return reply(boom.notFound('The resource is not found'));
+      }
+      renderJSON(request, reply, error, resource);
+    });
+  });
 };
 
 exports.deleteResource = function (request, reply) {
@@ -267,12 +403,20 @@ exports.listSingleSignOnToken = function (request, reply) {
   var error;
   var token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
+  var NodeRSA = require('node-rsa');
+  var key = new NodeRSA(Fs.readFileSync('cert.key'));
+
+  var encrypted = key.encrypt(token);
+  var signed = key.sign(encrypted);
+
   var response = {
     'url': config.get('azure_marketplace.sso_endpoint'),
-    'resourceId': base64.encode('resourceId:/subscriptions/' + subscriptionId + '/resourceGroups/' +
+    'resourceId': base64url.encode('resourceId:/subscriptions/' + subscriptionId + '/resourceGroups/' +
       resourceGroupName + '/providers/RevAPM/ResourceType/' + resourceName),
-    'token': base64.encode(token)
+    'token': base64url.encode(signed)
   };
 
   renderJSON(request, reply, error, response);
 };
+
+

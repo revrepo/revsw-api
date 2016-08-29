@@ -53,6 +53,11 @@ module.exports = [
         },
         params: {
           subscription_id: Joi.string().required().description('Azure Subscription ID')
+        },
+        payload: {
+          RegistrationDate: Joi.string().required().trim(),
+          state: Joi.string().required().valid('Registered', 'Suspended', 'Deleted', 'Unregistered', 'Warned'),
+          properties: Joi.object().allow(null)
         }
       },
 //      response: {
@@ -84,6 +89,20 @@ module.exports = [
           subscription_id: Joi.string().required().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().description('Azure Resource Group name'),
           resource_name: Joi.string().required().description('Azure Resource name')
+        },
+        payload: {
+          location: Joi.string().required().trim(),
+          id: Joi.string().required().trim(),
+          name: Joi.string().required().trim(),
+          type: Joi.string().required().trim(),
+          plan: Joi.object({
+            name: Joi.string().required().valid('developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string().required().valid('RevAPM'),
+            product: Joi.string().required().valid('accounts'),
+            promotioncode: Joi.string().required().allow(null)  
+          }),
+          tags: Joi.object().allow(null),
+          properties: Joi.object()
         }
       },
 //      response: {
