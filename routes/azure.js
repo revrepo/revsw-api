@@ -29,13 +29,14 @@ var Joi = require('joi');
 var azure = require('../handlers/azure');
 
 var routeModels = require('../lib/routeModels');
+var provider = 'RevAPM.MobileCDN';
 
 module.exports = [
 
   // Subscription Operation
   {
     method: 'PUT',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}',
+    path: '/subscriptions/{subscription_id}',
     config: {
       handler: azure.createSubscription,
       description: 'Create a new Azure Marketplace subscription',
@@ -69,7 +70,7 @@ module.exports = [
   // Create/Update Resource
   {
     method: 'PUT',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.createUpdateResource,
       description: 'Create or update a resource',
@@ -97,7 +98,7 @@ module.exports = [
           type: Joi.string().required().trim(),
           plan: Joi.object({
             name: Joi.string().required().valid('developer', 'silver', 'bronze', 'gold'),
-            publisher: Joi.string().required().valid('RevAPM'),
+            publisher: Joi.string().required().valid(provider),
             product: Joi.string().required().valid('accounts'),
             promotioncode: Joi.string().required().allow(null)  
           }),
@@ -114,7 +115,7 @@ module.exports = [
   // Update (PATCH) a Resource
   {
     method: 'PATCH',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.patchResource,
       description: 'Patch a resource',
@@ -134,6 +135,20 @@ module.exports = [
           subscription_id: Joi.string().required().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().description('Azure Resource Group name'),
           resource_name: Joi.string().required().description('Azure Resource name')
+        },
+        payload: {
+          location: Joi.string().required().trim(),
+          id: Joi.string().required().trim(),
+          name: Joi.string().required().trim(),
+          type: Joi.string().required().trim(),
+          plan: Joi.object({
+            name: Joi.string().required().valid('developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string().required().valid(provider),
+            product: Joi.string().required().valid('accounts'),
+            promotioncode: Joi.string().required().allow(null)
+          }),
+          tags: Joi.object().allow(null),
+          properties: Joi.object()
         }
       },
 //      response: {
@@ -145,7 +160,7 @@ module.exports = [
   // Get All Resources in Resource Group
   {
     method: 'GET',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
@@ -175,7 +190,7 @@ module.exports = [
   // Get All Resources in Subscription
   {
     method: 'GET',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/providers/RevAPM/accounts',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
@@ -204,7 +219,7 @@ module.exports = [
   // Get a Resource
   {
     method: 'GET',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.getResource,
       description: 'Get a Resource',
@@ -232,10 +247,40 @@ module.exports = [
     }
   },
 
+  // Move resources across groups/subscriptions
+  {
+    method: 'POST',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/moveResources',
+    config: {
+      handler: azure.moveResources,
+      description: 'Move resources across groups/subscriptions',
+      notes: 'Move resources across groups/subscriptions',
+      tags: ['api'],
+      auth: false,
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        options: {
+          stripUnknown: false
+        },
+        params: {
+          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
+        },
+      },
+//      response: {
+//        schema: routeModels.listOfDNSZonesModel
+//     }
+    }
+  },
+
   // Delete a Resource
   {
     method: 'DELETE',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.deleteResource,
       description: 'Delete a Resource',
@@ -267,7 +312,7 @@ module.exports = [
   // List Secrets
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/ListSecrets',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/ListSecrets',
     config: {
       handler: azure.listSecrets,
       description: 'List secrets',
@@ -298,7 +343,7 @@ module.exports = [
   // List supported Operations
   {
     method: 'GET',
-    path: '/providers/RevAPM/providers/RevAPM/{empty}/operations',
+    path: '/providers/' + provider + '/{empty}/operations',
     config: {
       handler: azure.listOperations,
       description: 'List supported RP operations',
@@ -324,7 +369,7 @@ module.exports = [
   // Update Communication Preference
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/providers/RevAPM/UpdateCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/UpdateCommunicationPreference',
     config: {
       handler: azure.updateCommunicationPreference,
       description: 'Update Communication Preference',
@@ -353,7 +398,7 @@ module.exports = [
   // List Communication Preference
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/providers/RevAPM/{empty}/ListCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/{empty}/ListCommunicationPreference',
     config: {
       handler: azure.listCommunicationPreference,
       description: 'List Communication Preference',
@@ -383,7 +428,7 @@ module.exports = [
   // Regenerate Keys
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/RegenerateKey',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/RegenerateKey',
     config: {
       handler: azure.regenerateKey,
       description: 'Regenerate key',
@@ -414,7 +459,7 @@ module.exports = [
   // List Single Sign On Authorization
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/listSingleSignOnToken',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSingleSignOnToken',
     config: {
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
@@ -441,6 +486,5 @@ module.exports = [
 //     }
     }
   },
-
 ];
 

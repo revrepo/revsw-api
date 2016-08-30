@@ -45,7 +45,8 @@ function AzureResource(mongoose, connection, options) {
     'properties': {},
     'plan': {},
     'tags': {},
-    'account_id': this.ObjectId
+    'account_id': this.ObjectId,
+    'original_object': {}
   });
 
   this.model = connection.model('AzureResource', this.AzureResourceSchema, 'AzureResource');

@@ -42,7 +42,8 @@ function AzureSubscription(mongoose, connection, options) {
     'cancellation_message': {type: String, default: null},
     'preperties': {},
     'account_id': this.ObjectId,
-    'resource_id': [ this.ObjectId ]
+    'resource_id': [ this.ObjectId ],
+    'original_object': {}
   });
 
   this.model = connection.model('AzureSubscription', this.AzureSubscriptionSchema, 'AzureSubscription');

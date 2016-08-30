@@ -28,6 +28,7 @@ var Promise = require('bluebird');
 var Fs = require('fs');
 var base64 = require('js-base64').Base64;
 var base64url = require('base64-url');
+var crypto = require('crypto');
 
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
@@ -45,7 +46,7 @@ var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getCon
 var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mongoConnection.getConnectionPortal()));
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 
-exports.createSubscription = function (request, reply) {
+exports.createSubscription = function(request, reply) {
 
   var subscription = request.payload,
     subscriptionId = request.params.subscription_id,
@@ -56,8 +57,10 @@ exports.createSubscription = function (request, reply) {
   logger.info('Processing Azure Create Subscription request for ID ' + subscriptionId + ', payload ' +
     JSON.stringify(subscription));
 
-  azureSubscriptions.get({subscription_id: subscriptionId}, function(error, existingSubscription) {
-    if(error) {
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, existingSubscription) {
+    if (error) {
       return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
     }
     if (existingSubscription) {
@@ -73,9 +76,10 @@ exports.createSubscription = function (request, reply) {
           id: existingSubscription.id,
           subscription_id: subscriptionId,
           subscription_state: state,
-          properties: properties
+          properties: properties,
+          original_object: subscription
         };
-        azureSubscriptions.update(updatedSubscription, function (error, result) {
+        azureSubscriptions.update(updatedSubscription, function(error, result) {
           if (error || !result) {
             return reply(boom.badImplementation('Failed to update Azure subscription ' + JSON.stringify(updatedSubscription)));
           }
@@ -92,21 +96,22 @@ exports.createSubscription = function (request, reply) {
       var newSubscription = {
         subscription_id: subscriptionId,
         subscription_state: state,
-        properties: properties
+        properties: properties,
+        original_object: subscription
       };
       azureSubscriptions.add(newSubscription, function(error, result) {
-        if(error) {
+        if (error) {
           return reply(boom.badImplementation('Failed to add to the DB a new Azure subscription ' + JSON.stringify(newSubscription)));
         }
-        logger.info('Successfully added new Azure Subscription with ID ' + subscriptionId + ', subscription object ' + 
+        logger.info('Successfully added new Azure Subscription with ID ' + subscriptionId + ', subscription object ' +
           JSON.stringify(result));
         renderJSON(request, reply, error, subscription);
-      }); 
+      });
     }
   });
 };
 
-exports.createUpdateResource = function (request, reply) {
+exports.createUpdateResource = function(request, reply) {
 
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
@@ -117,8 +122,10 @@ exports.createUpdateResource = function (request, reply) {
     properties = resource.properties,
     plan = resource.plan;
 
-  azureSubscriptions.get({ subscription_id: subscriptionId }, function(error, result) {
-    if(error) {
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
       return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
     }
     if (!result) {
@@ -129,68 +136,95 @@ exports.createUpdateResource = function (request, reply) {
       return reply(boom.conflict('The requested subscription ID is not in Registered state'));
     }
 
-    logger.info('Adding new Azure Resource for subscription ID ' + subscriptionId + ', payload ' + JSON.stringify(resource));
-    var newAccount = {
-      companyName: 'Azure Marketplace Resource ' + resourceName,   // TODO add resource group name too?
-      createdBy: 'Azure Marketplace Subscription ' + subscriptionId,
-      // TODO add billing plan
-    };
-    accounts.add(newAccount, function (error, account) {
-      if (error || !account) {
-        return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
-          ', payload ' + JSON.stringify(newAccount)));
-      }
-      var newResource = {
-          subscription_id: subscriptionId,
-          resource_name: resourceName,
-          resource_id: resourceId,
-          resource_group_name: resourceGroupName, 
-          account_id: account.id,
-          tags: tags,
-          plan: plan,
-          properties: properties
-        };
-
-      azureResources.add(newResource, function(error, createdResource) {
-        if (error || !createdResource) {
-          return reply(boom.badImplementation('Failed to add new Azure resource for subscription ID ' + subscriptionId +
-            ', payload ' + JSON.stringify(newResource)));
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
+      function(error, existingResource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to check the existance of new Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
         }
-        renderJSON(request, reply, error, resource);
-      });
+        if (existingResource) {
+          renderJSON(request, reply, error, resource);
+        } else {
+
+
+          logger.info('Adding new Azure Resource for subscription ID ' + subscriptionId + ', payload ' + JSON.stringify(resource));
+          var newAccount = {
+            companyName: 'Azure Marketplace Resource ' + resourceName, // TODO add resource group name too?
+            createdBy: 'Azure Marketplace Subscription ' + subscriptionId,
+            // TODO add billing plan
+          };
+          accounts.add(newAccount, function(error, account) {
+            if (error || !account) {
+              return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
+              ', payload ' + JSON.stringify(newAccount)));
+            }
+
+            var email = subscriptionId + '_' + resourceName + '@azure-user.revapm.net';
+            var password = crypto.randomBytes(8).toString('hex');
+
+            var newUser = {
+              companyId: account.id,
+              role: 'admin',
+              firstname: 'Azure Marketplace Subscription ' + subscriptionId,
+              lastname: 'Resource ' + resourceName,
+              password: password,
+              email: email
+            };
+
+            users.add(newUser, function(error, user) {
+            if (error || !user) {
+              return reply(boom.badImplementation('Failed to add new user record for Azure subscription ID ' + subscriptionId +
+                ', payload ' + JSON.stringify(newUser)));
+            }
+
+            // TODO: add code to send email notifications about new Azure resources registered in the system
+            // TODO: add code to add audit records for new subscription, resource, account, user
+
+            var newResource = {
+              subscription_id: subscriptionId,
+              resource_name: resourceName,
+              resource_id: resourceId,
+              resource_group_name: resourceGroupName,
+              account_id: account.id,
+              tags: tags,
+              plan: plan,
+              properties: properties,
+              original_object: resource
+            };
+
+            azureResources.add(newResource, function(error, createdResource) {
+              if (error || !createdResource) {
+                return reply(boom.badImplementation('Failed to add new Azure resource for subscription ID ' + subscriptionId +
+                  ', payload ' + JSON.stringify(newResource)));
+              }
+              renderJSON(request, reply, error, resource);
+            });
+          });
+        });
+      }
     });
   });
 };
 
-exports.patchResource = function (request, reply) {
+exports.patchResource = function(request, reply) {
 
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
-    resourceName = request.params.resource_name;
+    resourceName = request.params.resource_name,
+    tags = resource.tags,
+    resourceId = resource.id,
+    properties = resource.properties,
+    plan = resource.plan;
 
-  var error;
-
-  renderJSON(request, reply, error, resource);
-};
-
-exports.listAllResourcesInResourceGroup = function (request, reply) {
-
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id,
-    resourceGroupName = request.params.resource_group_name;
-
-  var error;
-
-  renderJSON(request, reply, error, resource);
-};
-
-exports.listAllResourcesInSubscription = function (request, reply) {
-
-  var subscriptionId = request.params.subscription_id;
-
-  azureSubscriptions.get({ subscription_id: subscriptionId }, function(error, result) {
-    if(error) {
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
       return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
     }
     if (!result) {
@@ -201,23 +235,129 @@ exports.listAllResourcesInSubscription = function (request, reply) {
       return reply(boom.conflict('The requested subscription ID is not in Registered state'));
     }
 
-    azureResources.queryP({ subscription_id: subscriptionId }, function(error, resources) {
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
+      function(error, existingResource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        }
+        if (!existingResource) {
+          return reply(boom.notFound('The resource is not found'));
+        } else {
+          var updatedResource = {
+            id: existingResource.id,
+            tags: tags,
+            plan: plan,
+            properties: properties,
+            original_object: resource
+          };
+
+          azureResources.update(updatedResource, function(error, result) {
+            if (error || !result) {
+              return reply(boom.badImplementation('Failed to update Azure resource for subscription ID ' + subscriptionId +
+                ', payload ' + JSON.stringify(updatedResource)));
+            }
+            renderJSON(request, reply, error, resource);
+          });
+        }
+      });
+  });
+};
+
+exports.listAllResourcesInResourceGroup = function(request, reply) {
+
+  var subscriptionId = request.params.subscription_id,
+    resourceGroupName = request.params.resource_group_name;
+
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
+
+    azureResources.queryP({
+      subscription_id: subscriptionId,
+      resource_group_name: resourceGroupName
+    }, function(error, resources) {
       if (error) {
-        return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId));
+        return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId +
+          ', group name ' + resourceGroupName));
       }
-      renderJSON(request, reply, error, resources);
+      if (resources.length === 0) {
+        return reply(boom.notFound('The Resource Group Name is not found'));
+      } else {
+        var response2 = resources.map(function(obj) {
+          return obj.original_object;
+        });
+        var response = {
+          value: response2,
+          nextlink: ''
+        };
+        renderJSON(request, reply, error, response);
+      }
     });
   });
 };
 
-exports.getResource = function (request, reply) {
+exports.listAllResourcesInSubscription = function(request, reply) {
+
+  var subscriptionId = request.params.subscription_id;
+
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
+
+    azureResources.queryP({
+      subscription_id: subscriptionId
+    }, function(error, resources) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId));
+      }
+
+      var response2 = resources.map(function(obj) {
+        return obj.original_object;
+      });
+      var response = {
+        value: response2,
+        nextlink: ''
+      };
+      renderJSON(request, reply, error, response);
+    });
+  });
+};
+
+exports.getResource = function(request, reply) {
 
   var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
 
-  azureSubscriptions.get({ subscription_id: subscriptionId }, function(error, result) {
-    if(error) {
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
       return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
     }
     if (!result) {
@@ -228,132 +368,216 @@ exports.getResource = function (request, reply) {
       return reply(boom.conflict('The requested subscription ID is not in Registered state'));
     }
 
-    azureResources.get({ resource_name: resourceName, resource_group_name: resourceGroupName, subscription_id: subscriptionId },
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
       function(error, resource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        }
+        if (!resource) {
+          return reply(boom.notFound('The resource is not found'));
+        }
+        renderJSON(request, reply, error, resource.original_object);
+      });
+  });
+};
+
+exports.moveResources = function(request, reply) {
+
+  var subscriptionId = request.params.subscription_id,
+    resourceGroupName = request.params.resource_group_name;
+
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
+
+    azureResources.queryP({
+      subscription_id: subscriptionId,
+      resource_group_name: resourceGroupName
+    }, function(error, resources) {
       if (error) {
-        return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
-          ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId +
+          ', group name ' + resourceGroupName));
       }
-      if (!resource) {
-        return reply(boom.notFound('The resource is not found'));
+      if (resources.length === 0) {
+        return reply(boom.notFound('The Resource Group Name is not found'));
+      } else {
+        return reply(boom.badRequest('The resource type does not support move'));
       }
-      renderJSON(request, reply, error, resource);
     });
   });
 };
 
-exports.deleteResource = function (request, reply) {
+exports.deleteResource = function(request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id,
+  var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
 
-  var error;
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
+      function(error, resource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        }
+        if (!resource) {
+          return reply('No Content').code(204);
+        } else {
+          renderJSON(request, reply, error, resource.orignal_object);
+        }
+      });
+  });
 };
 
-exports.listSecrets = function (request, reply) {
+exports.listSecrets = function(request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id,
+  var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
 
-  var error;
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
+      function(error, resource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        }
+        if (!resource) {
+          return reply(boom.notFound('The resource is not found'));
+        } else {
+          renderJSON(request, reply, error, {});
+        }
+      });
+  });
 };
 
-exports.listOperations = function (request, reply) {
+exports.listOperations = function(request, reply) {
 
   var operations = {
-'value': [
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/operations/read',
-        'display': {
-            'operation': 'Read Operations',
-            'resource': 'Operations',
-            'description': 'Read any Operation',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/updateCommunicationPreference/action',
-        'display': {
-            'operation': 'Update Communication Preferences',
-            'resource': 'Update Communication Preferences',
-            'description': 'Updates Communication Preferences',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/listCommunicationPreference/action',
-        'display': {
-            'operation': 'List Communication Preferences',
-            'resource': 'List Communication Preferences',
-            'description': 'Read any Communication Preferences',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/read',
-        'display': {
-            'operation': 'Read <Resource Type>',
-            'resource': '<Resource Type>',
-            'description': 'Read any <Resource Type>',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/write',
-        'display': {
-            'operation': 'Create or Update <Resource Type>',
-            'resource': '<Resource Type>',
-            'description': 'Create or Update any <Resource Type>',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/delete',
-        'display': {
-            'operation': 'Delete <Resource Type>',
-            'resource': '<Resource Type>',
-            'description': 'Deletes any <Resource Type>',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/listSecrets/action',
-        'display': {
-            'operation': 'List Secrets',
-            'resource': '<Resource Type>',
-            'description': 'Read any <Resource Type> Secrets',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/regenerateKeys/action',
-        'display': {
-            'operation': 'Regenerate Keys',
-            'resource': '<Resource Type>',
-            'description': 'Regenerate any <Resource Type> Keys',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    },
-    {
-        'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/listSingleSignOnToken/action',
-        'display': {
-            'operation': 'List Single Sign On Tokens',
-            'resource': '<Resource Type>',
-            'description': 'Read any <Resource Type> Single Sign On Tokens',
-            'provider': 'CompanyIdentifier ProductIdentifier'
-        }
-    }
-],
+    'value': [{
+      'name': 'CompanyIdentifier.ProductIdentifier/operations/read',
+      'display': {
+        'operation': 'Read Operations',
+        'resource': 'Operations',
+        'description': 'Read any Operation',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/updateCommunicationPreference/action',
+      'display': {
+        'operation': 'Update Communication Preferences',
+        'resource': 'Update Communication Preferences',
+        'description': 'Updates Communication Preferences',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/listCommunicationPreference/action',
+      'display': {
+        'operation': 'List Communication Preferences',
+        'resource': 'List Communication Preferences',
+        'description': 'Read any Communication Preferences',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/read',
+      'display': {
+        'operation': 'Read <Resource Type>',
+        'resource': '<Resource Type>',
+        'description': 'Read any <Resource Type>',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/write',
+      'display': {
+        'operation': 'Create or Update <Resource Type>',
+        'resource': '<Resource Type>',
+        'description': 'Create or Update any <Resource Type>',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/delete',
+      'display': {
+        'operation': 'Delete <Resource Type>',
+        'resource': '<Resource Type>',
+        'description': 'Deletes any <Resource Type>',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/listSecrets/action',
+      'display': {
+        'operation': 'List Secrets',
+        'resource': '<Resource Type>',
+        'description': 'Read any <Resource Type> Secrets',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/regenerateKeys/action',
+      'display': {
+        'operation': 'Regenerate Keys',
+        'resource': '<Resource Type>',
+        'description': 'Regenerate any <Resource Type> Keys',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }, {
+      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/listSingleSignOnToken/action',
+      'display': {
+        'operation': 'List Single Sign On Tokens',
+        'resource': '<Resource Type>',
+        'description': 'Read any <Resource Type> Single Sign On Tokens',
+        'provider': 'CompanyIdentifier ProductIdentifier'
+      }
+    }],
 
-};
+  };
 
 
   var error;
@@ -361,7 +585,7 @@ exports.listOperations = function (request, reply) {
   renderJSON(request, reply, error, operations);
 };
 
-exports.updateCommunicationPreference = function (request, reply) {
+exports.updateCommunicationPreference = function(request, reply) {
 
   var resource = request.payload,
     subscriptionId = request.params.subscription_id;
@@ -371,7 +595,7 @@ exports.updateCommunicationPreference = function (request, reply) {
   renderJSON(request, reply, error, resource);
 };
 
-exports.listCommunicationPreference = function (request, reply) {
+exports.listCommunicationPreference = function(request, reply) {
 
   var resource = request.payload,
     subscriptionId = request.params.subscription_id;
@@ -381,19 +605,51 @@ exports.listCommunicationPreference = function (request, reply) {
   renderJSON(request, reply, error, resource);
 };
 
-exports.regenerateKey = function (request, reply) {
+exports.regenerateKey = function(request, reply) {
 
-  var resource = request.payload,
+  var keys = request.payload,
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
 
-  var error;
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
+      function(error, resource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        }
+        if (!resource) {
+          return reply(boom.notFound('The resource is not found'));
+        } else {
+          var newKeys = {};
+          for (var key in keys) {
+            newKeys[key] = '1111111111';
+          }
+          renderJSON(request, reply, error, newKeys);
+        }
+      });
+  });
 };
 
-exports.listSingleSignOnToken = function (request, reply) {
+exports.listSingleSignOnToken = function(request, reply) {
 
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
@@ -409,14 +665,16 @@ exports.listSingleSignOnToken = function (request, reply) {
   var encrypted = key.encrypt(token);
   var signed = key.sign(encrypted);
 
+  var Zlib = require('zlibjs');
+  var gzip = new Zlib.Gzip(signed);
+  var compressed = gzip.compress();
+
   var response = {
     'url': config.get('azure_marketplace.sso_endpoint'),
     'resourceId': base64url.encode('resourceId:/subscriptions/' + subscriptionId + '/resourceGroups/' +
       resourceGroupName + '/providers/RevAPM/ResourceType/' + resourceName),
-    'token': base64url.encode(signed)
+    'token': base64url.encode(compressed)
   };
 
   renderJSON(request, reply, error, response);
 };
-
-
