@@ -46,6 +46,8 @@ var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getCon
 var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mongoConnection.getConnectionPortal()));
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 
+var provider = 'RevAPM.MobileCDN';
+
 exports.createSubscription = function(request, reply) {
 
   var subscription = request.payload,
@@ -111,7 +113,7 @@ exports.createSubscription = function(request, reply) {
   });
 };
 
-exports.createUpdateResource = function(request, reply) {
+exports.createResource = function(request, reply) {
 
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
@@ -153,8 +155,8 @@ exports.createUpdateResource = function(request, reply) {
 
           logger.info('Adding new Azure Resource for subscription ID ' + subscriptionId + ', payload ' + JSON.stringify(resource));
           var newAccount = {
-            companyName: 'Azure Marketplace Resource ' + resourceName, // TODO add resource group name too?
-            createdBy: 'Azure Marketplace Subscription ' + subscriptionId,
+            companyName: 'Azure Resource ' + resourceName, // TODO add resource group name too?
+            createdBy: 'Azure Subscription ' + subscriptionId,
             // TODO add billing plan
           };
           accounts.add(newAccount, function(error, account) {
@@ -169,7 +171,7 @@ exports.createUpdateResource = function(request, reply) {
             var newUser = {
               companyId: account.id,
               role: 'admin',
-              firstname: 'Azure Marketplace Subscription ' + subscriptionId,
+              firstname: 'Azure Subscription ' + subscriptionId,
               lastname: 'Resource ' + resourceName,
               password: password,
               email: email
@@ -455,6 +457,7 @@ exports.deleteResource = function(request, reply) {
         if (!resource) {
           return reply('No Content').code(204);
         } else {
+          // TODO implement actual removal of the resource: domains, apps, keys, dashboards, etc
           renderJSON(request, reply, error, resource.orignal_object);
         }
       });
@@ -504,81 +507,79 @@ exports.listOperations = function(request, reply) {
 
   var operations = {
     'value': [{
-      'name': 'CompanyIdentifier.ProductIdentifier/operations/read',
+      'name': provider + '/operations/read',
       'display': {
         'operation': 'Read Operations',
         'resource': 'Operations',
         'description': 'Read any Operation',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/updateCommunicationPreference/action',
+      'name': provider + '/updateCommunicationPreference/action',
       'display': {
         'operation': 'Update Communication Preferences',
         'resource': 'Update Communication Preferences',
         'description': 'Updates Communication Preferences',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/listCommunicationPreference/action',
+      'name': provider + '/listCommunicationPreference/action',
       'display': {
         'operation': 'List Communication Preferences',
         'resource': 'List Communication Preferences',
         'description': 'Read any Communication Preferences',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/read',
+      'name': provider + '/{resourceType}/read',
       'display': {
         'operation': 'Read <Resource Type>',
         'resource': '<Resource Type>',
         'description': 'Read any <Resource Type>',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/write',
+      'name': provider + '/{resourceType}/write',
       'display': {
         'operation': 'Create or Update <Resource Type>',
         'resource': '<Resource Type>',
         'description': 'Create or Update any <Resource Type>',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/delete',
+      'name': provider + '/{resourceType}/delete',
       'display': {
         'operation': 'Delete <Resource Type>',
         'resource': '<Resource Type>',
         'description': 'Deletes any <Resource Type>',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/listSecrets/action',
+      'name': provider + '/{resourceType}/listSecrets/action',
       'display': {
         'operation': 'List Secrets',
         'resource': '<Resource Type>',
         'description': 'Read any <Resource Type> Secrets',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/regenerateKeys/action',
+      'name': provider + '/{resourceType}/regenerateKeys/action',
       'display': {
         'operation': 'Regenerate Keys',
         'resource': '<Resource Type>',
         'description': 'Regenerate any <Resource Type> Keys',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }, {
-      'name': 'CompanyIdentifier.ProductIdentifier/{resourceType}/listSingleSignOnToken/action',
+      'name': provider + '/{resourceType}/listSingleSignOnToken/action',
       'display': {
         'operation': 'List Single Sign On Tokens',
         'resource': '<Resource Type>',
         'description': 'Read any <Resource Type> Single Sign On Tokens',
-        'provider': 'CompanyIdentifier ProductIdentifier'
+        'provider': provider
       }
     }],
-
   };
-
 
   var error;
 

@@ -65,7 +65,8 @@ module.exports = [
       },
       validate    : {
         payload : {
-          token    : Joi.string().required().description('Encrypted and signed SSO token')
+          token    : Joi.string().required().description('Encrypted and signed SSO token'),
+          resourceId    : Joi.string().required().description('Base64-encoded resource ID')
         }
       }
     }

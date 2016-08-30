@@ -67,14 +67,14 @@ module.exports = [
     }
   },
 
-  // Create/Update Resource
+  // Create Resource
   {
     method: 'PUT',
     path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
-      handler: azure.createUpdateResource,
-      description: 'Create or update a resource',
-      notes: 'Create or update a resource',
+      handler: azure.createResource,
+      description: 'Create a resource',
+      notes: 'Create a resource',
       tags: ['api'],
       auth: false,
       plugins: {
@@ -247,7 +247,7 @@ module.exports = [
     }
   },
 
-  // Move resources across groups/subscriptions
+  // Move resources across groups/subscriptions - TODO: it is save to remove the route (it is not required)
   {
     method: 'POST',
     path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/moveResources',
