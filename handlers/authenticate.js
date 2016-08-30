@@ -188,3 +188,32 @@ exports.authenticate = function(request, reply) {
     }
   });
 };
+
+exports.authenticateSSOAzure = function(request, reply) {
+  var email = '6_r1@azure-user.revapm.net';
+  users.getValidation({
+    email: email
+  }, function(error, user) {
+
+    if (error) {
+      logger.error('Authenticate::authenticate: Failed to retrieve user details for' + ' email: ' + email);
+      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
+        ' email: ' + email));
+    }
+
+    if (!user) {
+      logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
+      return reply(boom.unauthorized());
+    } else {
+      var authPassed = true;
+      var sendResultChecks = function sendResultChecks(authPassed) {
+        if (authPassed) {
+          onAuthPassed(user, request, reply, error);
+        } else {
+          return reply(boom.unauthorized());
+        }
+      };
+      sendResultChecks(authPassed);
+    }
+  });
+};
