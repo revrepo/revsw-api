@@ -72,7 +72,8 @@ describe('Boundary check', function () {
           'JobNameLongJobNameLongJobNameLongJobNameLongJobName' +
           'LongJobNameLongJobNameLongJobNameLongJobNameLongJob' +
           'NameLongJobNameLongJobNameLongJobNameLongJobName').toLowerCase();
-        var expectedMsg = 'child \"job_name\" fails because [\"job_name\" length must be less than or equal to 150 characters long]';
+        var expectedMsg = 'child \"job_name\" fails because [\"job_name\" ' +
+          'length must be less than or equal to 150 characters long]';
         API.helpers
           .authenticateUser(reseller)
           .then(function () {

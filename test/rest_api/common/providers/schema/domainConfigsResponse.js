@@ -120,7 +120,7 @@ var DomainConfigsResponseSP = {
                 'value': Joi.string()
               },
               'version': Joi.number(),
-              'enable_esi': Joi.boolean()
+              'enable_esi': Joi.boolean().default(false)
             }
           ],
           'cdn_overlay_urls': Joi.array(),

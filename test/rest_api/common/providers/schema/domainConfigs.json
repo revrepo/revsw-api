@@ -78,7 +78,7 @@
   "rev_component_bp.caching_rules.0.origin_redirects.override": "Joi.boolean().required()",
   "rev_component_bp.caching_rules.0.origin_redirects.follow": "Joi.boolean().required()",
   "rev_component_bp.caching_rules.0.cookies_cache_bypass": "Joi.array().items(Joi.string())",
-  "rev_component_bp.caching_rules.0.enable_esi": "Joi.boolean().required()",
+  "rev_component_bp.caching_rules.0.enable_esi": "Joi.boolean().default(false)",
   "rev_component_bp.enable_security": "Joi.boolean().required()",
   "rev_component_bp.web_app_firewall": "Joi.string().valid(\"off\", \"detect\", \"block\", \"block_all\").required()",
   "rev_component_bp.acl": "Joi.object({}).required()",
