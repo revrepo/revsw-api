@@ -30,6 +30,7 @@ var base64 = require('js-base64').Base64;
 var base64url = require('base64-url');
 var crypto = require('crypto');
 var zlib = require('zlib');
+var _ = require('lodash');
 
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
@@ -532,51 +533,51 @@ exports.listOperations = function(request, reply) {
         'provider': provider
       }
     }, {
-      'name': provider + '/{resourceType}/read',
+      'name': provider + '/accounts/read',
       'display': {
-        'operation': 'Read <Resource Type>',
-        'resource': '<Resource Type>',
-        'description': 'Read any <Resource Type>',
+        'operation': 'Read accounts',
+        'resource': 'accounts',
+        'description': 'Read any accounts',
         'provider': provider
       }
     }, {
-      'name': provider + '/{resourceType}/write',
+      'name': provider + '/accounts/write',
       'display': {
-        'operation': 'Create or Update <Resource Type>',
-        'resource': '<Resource Type>',
-        'description': 'Create or Update any <Resource Type>',
+        'operation': 'Create or Update accounts',
+        'resource': 'accounts',
+        'description': 'Create or Update any accounts',
         'provider': provider
       }
     }, {
-      'name': provider + '/{resourceType}/delete',
+      'name': provider + '/accounts/delete',
       'display': {
-        'operation': 'Delete <Resource Type>',
-        'resource': '<Resource Type>',
-        'description': 'Deletes any <Resource Type>',
+        'operation': 'Delete accounts',
+        'resource': 'accounts',
+        'description': 'Deletes any accounts',
         'provider': provider
       }
     }, {
-      'name': provider + '/{resourceType}/listSecrets/action',
+      'name': provider + '/accounts/listSecrets/action',
       'display': {
         'operation': 'List Secrets',
-        'resource': '<Resource Type>',
-        'description': 'Read any <Resource Type> Secrets',
+        'resource': 'accounts',
+        'description': 'Read any accounts Secrets',
         'provider': provider
       }
     }, {
-      'name': provider + '/{resourceType}/regenerateKeys/action',
+      'name': provider + '/accounts/regenerateKeys/action',
       'display': {
         'operation': 'Regenerate Keys',
-        'resource': '<Resource Type>',
-        'description': 'Regenerate any <Resource Type> Keys',
+        'resource': 'accounts',
+        'description': 'Regenerate any accounts Keys',
         'provider': provider
       }
     }, {
-      'name': provider + '/{resourceType}/listSingleSignOnToken/action',
+      'name': provider + '/accounts/listSingleSignOnToken/action',
       'display': {
         'operation': 'List Single Sign On Tokens',
-        'resource': '<Resource Type>',
-        'description': 'Read any <Resource Type> Single Sign On Tokens',
+        'resource': 'accounts',
+        'description': 'Read any accounts Single Sign On Tokens',
         'provider': provider
       }
     }],
@@ -695,18 +696,41 @@ exports.listSingleSignOnToken = function(request, reply) {
         var NodeRSA = require('node-rsa');
         var key = new NodeRSA(Fs.readFileSync('cert.key'));
 
-        var encrypted = key.encrypt(tokenString);
-        logger.debug('Encrypted token: ', encrypted);
+        // var encrypted = key.encrypt(tokenString);
+        // logger.debug('Encrypted token: ', encrypted);
+        // var signed = key.sign(encrypted);
+        // logger.debug('Signed token: ', signed);
+
+        var sharedSecret = crypto.randomBytes(32);
+        var initializationVector = crypto.randomBytes(16);
+
+        var encrypted;
+
+        var cipher = crypto.Cipheriv('aes-256-cbc', sharedSecret, initializationVector);
+        encrypted += cipher.update(tokenString, 'utf8', 'hex');
         var signed = key.sign(encrypted);
-        logger.debug('Signed token: ', signed);
 
-        zlib.gzip(signed, function(error, compressed) {
-          logger.debug('Compressed token: ', compressed);
+        var signed2 = {
+          SignedHash: signed,
+          EncryptedData: encrypted,
+          EncryptedKey: sharedSecret,
+          Iv: initializationVector
+        };
 
+        zlib.gzip(JSON.stringify(signed2), function(error, compressed) {
+        //  logger.debug('Compressed token: ', compressed);
+          // compressed = 'mystring';
+          var encoded = base64url.encode(compressed);
+
+          var padding = 4 - encoded.length % 4;
+          logger.debug('Padding = ' + padding + ', Encoded length = ' + encoded.length);
+          if (padding === 4) {
+            padding = '';
+          }
           var response = {
             'url': config.get('azure_marketplace.sso_endpoint'),
             'resourceId': base64url.encode(resource.resource_id),
-            'token': base64url.encode(compressed)
+            'token': encoded + padding + ''
           };
 
           renderJSON(request, reply, error, response);
