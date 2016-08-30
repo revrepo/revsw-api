@@ -117,6 +117,6 @@
   },
 
   "azure_marketplace": {
-    "sso_endpoint": "https://testsjc20-portal01.revsw.net/azure-sso"
+    "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso"
   }
 }

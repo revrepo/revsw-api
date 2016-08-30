@@ -29,6 +29,7 @@ var Fs = require('fs');
 var base64 = require('js-base64').Base64;
 var base64url = require('base64-url');
 var crypto = require('crypto');
+var zlib = require('zlib');
 
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
@@ -162,7 +163,7 @@ exports.createResource = function(request, reply) {
           accounts.add(newAccount, function(error, account) {
             if (error || !account) {
               return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
-              ', payload ' + JSON.stringify(newAccount)));
+                ', payload ' + JSON.stringify(newAccount)));
             }
 
             var email = subscriptionId + '_' + resourceName + '@azure-user.revapm.net';
@@ -178,37 +179,37 @@ exports.createResource = function(request, reply) {
             };
 
             users.add(newUser, function(error, user) {
-            if (error || !user) {
-              return reply(boom.badImplementation('Failed to add new user record for Azure subscription ID ' + subscriptionId +
-                ', payload ' + JSON.stringify(newUser)));
-            }
-
-            // TODO: add code to send email notifications about new Azure resources registered in the system
-            // TODO: add code to add audit records for new subscription, resource, account, user
-
-            var newResource = {
-              subscription_id: subscriptionId,
-              resource_name: resourceName,
-              resource_id: resourceId,
-              resource_group_name: resourceGroupName,
-              account_id: account.id,
-              tags: tags,
-              plan: plan,
-              properties: properties,
-              original_object: resource
-            };
-
-            azureResources.add(newResource, function(error, createdResource) {
-              if (error || !createdResource) {
-                return reply(boom.badImplementation('Failed to add new Azure resource for subscription ID ' + subscriptionId +
-                  ', payload ' + JSON.stringify(newResource)));
+              if (error || !user) {
+                return reply(boom.badImplementation('Failed to add new user record for Azure subscription ID ' + subscriptionId +
+                  ', payload ' + JSON.stringify(newUser)));
               }
-              renderJSON(request, reply, error, resource);
+
+              // TODO: add code to send email notifications about new Azure resources registered in the system
+              // TODO: add code to add audit records for new subscription, resource, account, user
+
+              var newResource = {
+                subscription_id: subscriptionId,
+                resource_name: resourceName,
+                resource_id: resourceId,
+                resource_group_name: resourceGroupName,
+                account_id: account.id,
+                tags: tags,
+                plan: plan,
+                properties: properties,
+                original_object: resource
+              };
+
+              azureResources.add(newResource, function(error, createdResource) {
+                if (error || !createdResource) {
+                  return reply(boom.badImplementation('Failed to add new Azure resource for subscription ID ' + subscriptionId +
+                    ', payload ' + JSON.stringify(newResource)));
+                }
+                renderJSON(request, reply, error, resource);
+              });
             });
           });
-        });
-      }
-    });
+        }
+      });
   });
 };
 
@@ -657,25 +658,59 @@ exports.listSingleSignOnToken = function(request, reply) {
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
 
-  var error;
-  var token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  var NodeRSA = require('node-rsa');
-  var key = new NodeRSA(Fs.readFileSync('cert.key'));
+    azureResources.get({
+        resource_name: resourceName,
+        resource_group_name: resourceGroupName,
+        subscription_id: subscriptionId
+      },
+      function(error, resource) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read Azure resource for subscription ID ' + subscriptionId +
+            ', resource name ' + resourceName + ', group name ' + resourceGroupName));
+        }
+        if (!resource) {
+          return reply(boom.notFound('The resource is not found'));
+        }
 
-  var encrypted = key.encrypt(token);
-  var signed = key.sign(encrypted);
+        var token = {
+          ExpirationTime: 'sdfsdfsdf',  // TODO add proper time for +15 minutes
+          ProviderData: 'mykey'
+        };
+        var tokenString = JSON.stringify(token);
 
-  var Zlib = require('zlibjs');
-  var gzip = new Zlib.Gzip(signed);
-  var compressed = gzip.compress();
+        var NodeRSA = require('node-rsa');
+        var key = new NodeRSA(Fs.readFileSync('cert.key'));
 
-  var response = {
-    'url': config.get('azure_marketplace.sso_endpoint'),
-    'resourceId': base64url.encode('resourceId:/subscriptions/' + subscriptionId + '/resourceGroups/' +
-      resourceGroupName + '/providers/RevAPM/ResourceType/' + resourceName),
-    'token': base64url.encode(compressed)
-  };
+        var encrypted = key.encrypt(tokenString);
+        logger.debug('Encrypted token: ', encrypted);
+        var signed = key.sign(encrypted);
+        logger.debug('Signed token: ', signed);
 
-  renderJSON(request, reply, error, response);
+        zlib.gzip(signed, function(error, compressed) {
+          logger.debug('Compressed token: ', compressed);
+
+          var response = {
+            'url': config.get('azure_marketplace.sso_endpoint'),
+            'resourceId': base64url.encode(resource.resource_id),
+            'token': base64url.encode(compressed)
+          };
+
+          renderJSON(request, reply, error, response);
+        });
+      });
+  });
 };
