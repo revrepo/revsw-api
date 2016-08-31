@@ -90,7 +90,7 @@ AzureSubscription.prototype = {
     });
   },
 
-  listAll : function (request, callback) {
+  listAll : function (callback) {
     this.model.find(function (err, accounts) {
       if (accounts) {
         accounts = utils.clone(accounts);
@@ -98,7 +98,6 @@ AzureSubscription.prototype = {
           accounts[i].id = accounts[i]._id + '';
           delete accounts[i]._id;
           delete accounts[i].__v;
-          delete accounts[i].status;
         }
       }
 

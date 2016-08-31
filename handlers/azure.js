@@ -50,6 +50,16 @@ var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConne
 
 var provider = 'RevAPM.MobileCDN';
 
+exports.listSubscriptions = function(request, reply) {
+
+  azureSubscriptions.listAll(function(error, subscriptions) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB a list of all Azure subscriptions'));
+    }
+    renderJSON(request, reply, error, subscriptions);
+  });
+};
+
 exports.createSubscription = function(request, reply) {
 
   var subscription = request.payload,
@@ -295,7 +305,8 @@ exports.listAllResourcesInResourceGroup = function(request, reply) {
 
     azureResources.queryP({
       subscription_id: subscriptionId,
-      resource_group_name: resourceGroupName
+      resource_group_name: resourceGroupName,
+      deleted: { $ne: true }
     }, function(error, resources) {
       if (error) {
         return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId +
@@ -336,7 +347,8 @@ exports.listAllResourcesInSubscription = function(request, reply) {
     }
 
     azureResources.queryP({
-      subscription_id: subscriptionId
+      subscription_id: subscriptionId,
+      deleted: { $ne: true }
     }, function(error, resources) {
       if (error) {
         return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId));
@@ -462,7 +474,15 @@ exports.deleteResource = function(request, reply) {
           return reply('No Content').code(204);
         } else {
           // TODO implement actual removal of the resource: domains, apps, keys, dashboards, etc
-          renderJSON(request, reply, error, resource.orignal_object);
+          resource.deleted = true;
+          
+          azureResources.update(resource, function(error, result) {
+            if (error || !result) {
+              return reply(boom.badImplementation('Failed to mark as deleted Azure resource for subscription ID ' + subscriptionId +
+                ', payload ' + JSON.stringify(resource)));
+            } 
+            renderJSON(request, reply, error, resource.original_object);
+          });
         }
       });
   });
@@ -693,7 +713,8 @@ exports.regenerateKey = function(request, reply) {
         } else {
           var newKeys = {};
           for (var key in keys) {
-            newKeys[key] = '1111111111';
+            // Just returning some random stuff - the function is not really in use
+            newKeys[key] = crypto.randomBytes(32) + '';
           }
           renderJSON(request, reply, error, newKeys);
         }

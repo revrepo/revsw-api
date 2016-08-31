@@ -36,6 +36,7 @@ function AzureResource(mongoose, connection, options) {
     'comment': {type: String, default: ''},
     'created_at'  : {type : Date, default : Date.now},
     'updated_at'  : {type : Date, default : Date.now},
+    'deleted': {type: Boolean, default: false},
     'deleted_by': String,
     'deleted_at'  : {type : Date, default : null},
     'cancellation_message': {type: String, default: null},
@@ -106,6 +107,7 @@ AzureResource.prototype = {
   },
 
   get: function (item, callback) {
+    item.deleted = { $ne: true };
     this.model.findOne(item, function (err, doc) {
       if (doc) {
         doc = utils.clone(doc);

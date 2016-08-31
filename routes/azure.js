@@ -33,6 +33,29 @@ var provider = 'RevAPM.MobileCDN';
 
 module.exports = [
 
+  // Get a list of subscriptions
+  {
+    method: 'GET',
+    path: '/subscriptions',
+    config: {
+      handler: azure.listSubscriptions,
+      description: 'Get a list of registered Subscriptionis',
+      notes: 'Get a list of registred Subscriptions',
+      tags: ['api'],
+      auth: {
+        scope: ['revadmin']
+      },
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+//      response: {
+//        schema: routeModels.listOfDNSZonesModel
+//     }
+    }
+  },
+
   // Subscription Operation
   {
     method: 'PUT',
