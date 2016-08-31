@@ -43,6 +43,10 @@ function AzureSubscription(mongoose, connection, options) {
     'preperties': {},
     'account_id': this.ObjectId,
     'resource_id': [ this.ObjectId ],
+    'first_name': {type : String, default : null},
+    'last_name': {type : String, default : null},
+    'email': {type : String, default : null},
+    'opt_in_for_communication': {type : Boolean, default : null},
     'original_object': {}
   });
 

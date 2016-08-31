@@ -117,14 +117,16 @@ exports.createSubscription = function(request, reply) {
 
 exports.createResource = function(request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id,
+  var resource = request.payload;
+    resource.tags = resource.tags ? resource.tags : {};
+  var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
     tags = resource.tags,
     resourceId = resource.id,
     properties = resource.properties,
     plan = resource.plan;
+
 
   azureSubscriptions.get({
     subscription_id: subscriptionId
@@ -167,7 +169,7 @@ exports.createResource = function(request, reply) {
                 ', payload ' + JSON.stringify(newAccount)));
             }
 
-            var email = subscriptionId + '_' + resourceName + '@azure-user.revapm.net';
+            var email = account.id + '@azure-user.revapm.net';
             var password = crypto.randomBytes(8).toString('hex');
 
             var newUser = {
@@ -590,22 +592,69 @@ exports.listOperations = function(request, reply) {
 
 exports.updateCommunicationPreference = function(request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id;
+  var payload = request.payload,
+    subscriptionId = request.params.subscription_id,
+    firstName = payload.firstName,
+    lastName = payload.lastName,
+    email = payload.email,
+    optInForCommunication = payload.optInForCommunication;
 
-  var error;
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    result.first_name = firstName;
+    result.last_name = lastName;
+    result.email = email;
+    result.opt_in_for_communication = optInForCommunication;
+
+    azureSubscriptions.update(result, function(error, result2) {
+      if (error || !result2) {
+        return reply(boom.badImplementation('Failed to update Azure subscription ' + JSON.stringify(result)));
+      }
+      renderJSON(request, reply, error, payload);
+    });
+  });
 };
 
 exports.listCommunicationPreference = function(request, reply) {
 
-  var resource = request.payload,
-    subscriptionId = request.params.subscription_id;
+  var subscriptionId = request.params.subscription_id;
 
-  var error;
+  azureSubscriptions.get({
+    subscription_id: subscriptionId
+  }, function(error, result) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB an Azure subscription with ID ' + subscriptionId));
+    }
+    if (!result) {
+      // return 404 status code if the requested subscription does not exist in our records
+      return reply(boom.notFound('The requested subscription ID is not found'));
+    }
+    if (result.subscription_state !== 'Registered') {
+      return reply(boom.conflict('The requested subscription ID is not in Registered state'));
+    }
 
-  renderJSON(request, reply, error, resource);
+    var response = {
+      firstName: result.first_name,
+      lastName: result.last_name,
+      email: result.email,
+      optInForCommunication: result.opt_in_for_communication
+    };
+
+    renderJSON(request, reply, error, response);
+  });
+
 };
 
 exports.regenerateKey = function(request, reply) {
@@ -694,7 +743,7 @@ exports.listSingleSignOnToken = function(request, reply) {
         var tokenString = JSON.stringify(token);
 
         var NodeRSA = require('node-rsa');
-        var key = new NodeRSA(Fs.readFileSync('cert.key'));
+        var key = new NodeRSA(Fs.readFileSync('config/ssl_certs/server.key'));
 
         // var encrypted = key.encrypt(tokenString);
         // logger.debug('Encrypted token: ', encrypted);

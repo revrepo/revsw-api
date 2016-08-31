@@ -56,7 +56,7 @@ module.exports = [
           subscription_id: Joi.string().required().description('Azure Subscription ID')
         },
         payload: {
-          RegistrationDate: Joi.string().required().trim(),
+          registrationDate: Joi.string().trim(),
           state: Joi.string().required().valid('Registered', 'Suspended', 'Deleted', 'Unregistered', 'Warned'),
           properties: Joi.object().allow(null)
         }
@@ -97,10 +97,10 @@ module.exports = [
           name: Joi.string().required().trim(),
           type: Joi.string().required().trim(),
           plan: Joi.object({
-            name: Joi.string().required().valid('developer', 'silver', 'bronze', 'gold'),
-            publisher: Joi.string().required().valid(provider),
-            product: Joi.string().required().valid('accounts'),
-            promotioncode: Joi.string().required().allow(null)  
+            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string().required(),
+            product: Joi.string().required(),
+            promotioncode: Joi.string().allow(null)  
           }),
           tags: Joi.object().allow(null),
           properties: Joi.object()
@@ -142,10 +142,10 @@ module.exports = [
           name: Joi.string().required().trim(),
           type: Joi.string().required().trim(),
           plan: Joi.object({
-            name: Joi.string().required().valid('developer', 'silver', 'bronze', 'gold'),
-            publisher: Joi.string().required().valid(provider),
-            product: Joi.string().required().valid('accounts'),
-            promotioncode: Joi.string().required().allow(null)
+            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string().required(),
+            product: Joi.string().required(),
+            promotioncode: Joi.string().allow(null)
           }),
           tags: Joi.object().allow(null),
           properties: Joi.object()
@@ -312,7 +312,7 @@ module.exports = [
   // List Secrets
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/ListSecrets',
+    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSecrets',
     config: {
       handler: azure.listSecrets,
       description: 'List secrets',
@@ -343,7 +343,7 @@ module.exports = [
   // List supported Operations
   {
     method: 'GET',
-    path: '/providers/' + provider + '/{empty}/operations',
+    path: '/providers/' + provider + '/operations',
     config: {
       handler: azure.listOperations,
       description: 'List supported RP operations',
@@ -369,7 +369,7 @@ module.exports = [
   // Update Communication Preference
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/providers/' + provider + '/UpdateCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/updateCommunicationPreference',
     config: {
       handler: azure.updateCommunicationPreference,
       description: 'Update Communication Preference',
@@ -387,6 +387,12 @@ module.exports = [
         },
         params: {
           subscription_id: Joi.string().required().description('Azure Subscription ID'),
+        },
+        payload: {
+          firstName: Joi.string().required(),
+          lastName: Joi.string().required(),
+          email: Joi.string().email().required(),
+          optInForCommunication: Joi.boolean().required()
         }
       },
 //      response: {
@@ -398,7 +404,7 @@ module.exports = [
   // List Communication Preference
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/providers/' + provider + '/{empty}/ListCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/listCommunicationPreference',
     config: {
       handler: azure.listCommunicationPreference,
       description: 'List Communication Preference',
