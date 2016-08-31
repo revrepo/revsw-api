@@ -481,7 +481,7 @@ exports.deleteResource = function(request, reply) {
               return reply(boom.badImplementation('Failed to mark as deleted Azure resource for subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(resource)));
             } 
-            renderJSON(request, reply, error, {});
+            renderJSON(request, reply, error, '');
           });
         }
       });
