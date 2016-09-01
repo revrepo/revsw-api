@@ -41,7 +41,7 @@ module.exports = [
       handler: azure.listSubscriptions,
       description: 'Get a list of registered Subscriptionis',
       notes: 'Get a list of registred Subscriptions',
-      tags: ['api'],
+//      tags: ['api'],
       auth: {
         scope: ['revadmin']
       },
@@ -64,7 +64,7 @@ module.exports = [
       handler: azure.createSubscription,
       description: 'Create a new Azure Marketplace subscription',
       notes: 'Create a new Azure Marketplace subscription',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -98,7 +98,7 @@ module.exports = [
       handler: azure.createResource,
       description: 'Create a resource',
       notes: 'Create a resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -143,7 +143,7 @@ module.exports = [
       handler: azure.patchResource,
       description: 'Patch a resource',
       notes: 'Patch a resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -188,7 +188,7 @@ module.exports = [
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
       notes: 'Get all resources in Resource Group',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -218,7 +218,7 @@ module.exports = [
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
       notes: 'Get all resources in a Subscription',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -247,7 +247,7 @@ module.exports = [
       handler: azure.getResource,
       description: 'Get a Resource',
       notes: 'Get a Resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -278,7 +278,7 @@ module.exports = [
       handler: azure.moveResources,
       description: 'Move resources across groups/subscriptions',
       notes: 'Move resources across groups/subscriptions',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -308,7 +308,7 @@ module.exports = [
       handler: azure.deleteResource,
       description: 'Delete a Resource',
       notes: 'Delete a Resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -340,7 +340,7 @@ module.exports = [
       handler: azure.listSecrets,
       description: 'List secrets',
       notes: 'List secrets',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -371,7 +371,7 @@ module.exports = [
       handler: azure.listOperations,
       description: 'List supported RP operations',
       notes: 'List supported RP operations',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -397,7 +397,7 @@ module.exports = [
       handler: azure.updateCommunicationPreference,
       description: 'Update Communication Preference',
       notes: 'Update Communication Preference',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -432,7 +432,7 @@ module.exports = [
       handler: azure.listCommunicationPreference,
       description: 'List Communication Preference',
       notes: 'List Communication Preference',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -462,7 +462,7 @@ module.exports = [
       handler: azure.regenerateKey,
       description: 'Regenerate key',
       notes: 'Regenerate key',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -493,7 +493,7 @@ module.exports = [
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
       notes: 'List SSL token',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {

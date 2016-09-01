@@ -205,6 +205,7 @@ exports.authenticateSSOAzure = function(request, reply) {
       logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
       return reply(boom.unauthorized());
     } else {
+      // TODO need to fix the code to do the actual verification of provided token and resourceId
       var authPassed = true;
       var sendResultChecks = function sendResultChecks(authPassed) {
         if (authPassed) {

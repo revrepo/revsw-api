@@ -764,7 +764,7 @@ exports.listSingleSignOnToken = function(request, reply) {
         var tokenString = JSON.stringify(token);
 
         var NodeRSA = require('node-rsa');
-        var key = new NodeRSA(Fs.readFileSync('config/ssl_certs/server.key'));
+        var key = new NodeRSA(Fs.readFileSync(config.get('key_path')));
 
         // var encrypted = key.encrypt(tokenString);
         // logger.debug('Encrypted token: ', encrypted);
@@ -797,9 +797,16 @@ exports.listSingleSignOnToken = function(request, reply) {
           if (padding === 4) {
             padding = '';
           }
-          var response = {
+
+          var resourceEncoded = base64url.encode(resource.resource_id);
+          var padding2 = 4 - resourceEncoded.length % 4;
+          logger.debug('Padding2 = ' + padding2 + ', Encoded length = ' + resourceEncoded.length);
+          if (padding2 === 4) {
+            padding2 = '';
+          }
+            var response = {
             'url': config.get('azure_marketplace.sso_endpoint'),
-            'resourceId': base64url.encode(resource.resource_id),
+            'resourceId': resourceEncoded + padding2 + '',
             'token': encoded + padding + ''
           };
 
