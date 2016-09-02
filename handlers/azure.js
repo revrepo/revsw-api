@@ -49,6 +49,7 @@ var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mo
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 
 var provider = 'RevAPM.MobileCDN';
+var providerForOperationsResponse = 'RevAPM MobileCDN';
 
 exports.listSubscriptions = function(request, reply) {
 
@@ -128,7 +129,7 @@ exports.createSubscription = function(request, reply) {
 exports.createResource = function(request, reply) {
 
   var resource = request.payload;
-    resource.tags = resource.tags ? resource.tags : {};
+  resource.tags = resource.tags ? resource.tags : {};
   var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
@@ -306,7 +307,9 @@ exports.listAllResourcesInResourceGroup = function(request, reply) {
     azureResources.queryP({
       subscription_id: subscriptionId,
       resource_group_name: resourceGroupName,
-      deleted: { $ne: true }
+      deleted: {
+        $ne: true
+      }
     }, function(error, resources) {
       if (error) {
         return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId +
@@ -348,7 +351,9 @@ exports.listAllResourcesInSubscription = function(request, reply) {
 
     azureResources.queryP({
       subscription_id: subscriptionId,
-      deleted: { $ne: true }
+      deleted: {
+        $ne: true
+      }
     }, function(error, resources) {
       if (error) {
         return reply(boom.badImplementation('Failed to read a list of Azure resources for subscription ID ' + subscriptionId));
@@ -475,12 +480,12 @@ exports.deleteResource = function(request, reply) {
         } else {
           // TODO implement actual removal of the resource: domains, apps, keys, dashboards, etc
           resource.deleted = true;
-          
+
           azureResources.update(resource, function(error, result) {
             if (error || !result) {
               return reply(boom.badImplementation('Failed to mark as deleted Azure resource for subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(resource)));
-            } 
+            }
             renderJSON(request, reply, error, '');
           });
         }
@@ -536,7 +541,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'Read Operations',
         'resource': 'Operations',
         'description': 'Read any Operation',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/updateCommunicationPreference/action',
@@ -544,7 +549,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'Update Communication Preferences',
         'resource': 'Update Communication Preferences',
         'description': 'Updates Communication Preferences',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/listCommunicationPreference/action',
@@ -552,7 +557,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'List Communication Preferences',
         'resource': 'List Communication Preferences',
         'description': 'Read any Communication Preferences',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/accounts/read',
@@ -560,7 +565,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'Read accounts',
         'resource': 'accounts',
         'description': 'Read any accounts',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/accounts/write',
@@ -568,7 +573,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'Create or Update accounts',
         'resource': 'accounts',
         'description': 'Create or Update any accounts',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/accounts/delete',
@@ -576,7 +581,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'Delete accounts',
         'resource': 'accounts',
         'description': 'Deletes any accounts',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/accounts/listSecrets/action',
@@ -584,7 +589,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'List Secrets',
         'resource': 'accounts',
         'description': 'Read any accounts Secrets',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/accounts/regenerateKeys/action',
@@ -592,7 +597,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'Regenerate Keys',
         'resource': 'accounts',
         'description': 'Regenerate any accounts Keys',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }, {
       'name': provider + '/accounts/listSingleSignOnToken/action',
@@ -600,7 +605,7 @@ exports.listOperations = function(request, reply) {
         'operation': 'List Single Sign On Tokens',
         'resource': 'accounts',
         'description': 'Read any accounts Single Sign On Tokens',
-        'provider': provider
+        'provider': providerForOperationsResponse
       }
     }],
   };
@@ -758,7 +763,7 @@ exports.listSingleSignOnToken = function(request, reply) {
         }
 
         var token = {
-          ExpirationTime: 'sdfsdfsdf',  // TODO add proper time for +15 minutes
+          ExpirationTime: 'sdfsdfsdf', // TODO add proper time for +15 minutes
           ProviderData: 'mykey'
         };
         var tokenString = JSON.stringify(token);
@@ -774,43 +779,43 @@ exports.listSingleSignOnToken = function(request, reply) {
         var sharedSecret = crypto.randomBytes(32);
         var initializationVector = crypto.randomBytes(16);
 
-        var encrypted;
+        var encrypted = '';
 
         var cipher = crypto.Cipheriv('aes-256-cbc', sharedSecret, initializationVector);
-        encrypted += cipher.update(tokenString, 'utf8', 'hex');
+        encrypted += cipher.update(tokenString, 'utf8', 'base64');
+        encrypted += cipher.final('base64');
         var signed = key.sign(encrypted);
 
         var signed2 = {
-          SignedHash: signed,
+          SignedHash: signed.toString('base64'),
           EncryptedData: encrypted,
-          EncryptedKey: sharedSecret,
-          Iv: initializationVector
+          EncryptedKey: sharedSecret.toString('base64'),
+          Iv: initializationVector.toString('base64')
         };
 
-        zlib.gzip(JSON.stringify(signed2), function(error, compressed) {
-        //  logger.debug('Compressed token: ', compressed);
-          // compressed = 'mystring';
-          var encoded = base64url.encode(compressed);
+        var signedString = JSON.stringify(signed2);
+        logger.debug('signedString = ', signedString);
 
-          var padding = 4 - encoded.length % 4;
-          logger.debug('Padding = ' + padding + ', Encoded length = ' + encoded.length);
-          if (padding === 4) {
-            padding = '';
-          }
+        zlib.gzip(signedString, function(error, compressed) {
+          zlib.gzip(JSON.stringify(resource.resource_id), function(error, resourceIdCompressed) {
+            //  logger.debug('Compressed token: ', compressed);
+            // compressed = JSON.stringify(signed2);
+            var encoded = base64url.encode(compressed);
 
-          var resourceEncoded = base64url.encode(resource.resource_id);
-          var padding2 = 4 - resourceEncoded.length % 4;
-          logger.debug('Padding2 = ' + padding2 + ', Encoded length = ' + resourceEncoded.length);
-          if (padding2 === 4) {
-            padding2 = '';
-          }
+            var padding = (4 - encoded.length % 4) % 4;
+            logger.debug('Padding = ' + padding + ', Encoded length = ' + encoded.length);
+
+            var resourceEncoded = base64url.encode(resourceIdCompressed);
+            var padding2 = (4 - resourceEncoded.length % 4) % 4;
+            logger.debug('Padding2 = ' + padding2 + ', Encoded length = ' + resourceEncoded.length);
             var response = {
-            'url': config.get('azure_marketplace.sso_endpoint'),
-            'resourceId': resourceEncoded + padding2 + '',
-            'token': encoded + padding + ''
-          };
+              'url': config.get('azure_marketplace.sso_endpoint'),
+              'resourceId': resourceEncoded + padding2 + '',
+              'token': encoded + padding + ''
+            };
 
-          renderJSON(request, reply, error, response);
+            renderJSON(request, reply, error, response);
+          });
         });
       });
   });
