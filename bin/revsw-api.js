@@ -82,7 +82,11 @@ server.connection({
     key: Fs.readFileSync(config.get('key_path')),
     cert: Fs.readFileSync(config.get('cert_path'))
   },
-  routes: { cors: true }
+  routes: { cors: true },
+  router: {
+    isCaseSensitive: false,
+    stripTrailingSlash: false
+  }
 });
 
 // Configure HTTP connection - all HTTP requests will be redirected to HTTPS

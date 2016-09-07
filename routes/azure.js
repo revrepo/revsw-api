@@ -93,7 +93,7 @@ module.exports = [
   // Create Resource
   {
     method: 'PUT',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.createResource,
       description: 'Create a resource',
@@ -138,7 +138,7 @@ module.exports = [
   // Update (PATCH) a Resource
   {
     method: 'PATCH',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.patchResource,
       description: 'Patch a resource',
@@ -183,7 +183,7 @@ module.exports = [
   // Get All Resources in Resource Group
   {
     method: 'GET',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
@@ -242,7 +242,7 @@ module.exports = [
   // Get a Resource
   {
     method: 'GET',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.getResource,
       description: 'Get a Resource',
@@ -273,7 +273,7 @@ module.exports = [
   // Move resources across groups/subscriptions - TODO: it is save to remove the route (it is not required)
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/moveResources',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/moveResources',
     config: {
       handler: azure.moveResources,
       description: 'Move resources across groups/subscriptions',
@@ -303,7 +303,7 @@ module.exports = [
   // Delete a Resource
   {
     method: 'DELETE',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.deleteResource,
       description: 'Delete a Resource',
@@ -335,7 +335,7 @@ module.exports = [
   // List Secrets
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSecrets',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSecrets',
     config: {
       handler: azure.listSecrets,
       description: 'List secrets',
@@ -457,7 +457,7 @@ module.exports = [
   // Regenerate Keys
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/RegenerateKey',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/RegenerateKey',
     config: {
       handler: azure.regenerateKey,
       description: 'Regenerate key',
@@ -488,7 +488,7 @@ module.exports = [
   // List Single Sign On Authorization
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSingleSignOnToken',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSingleSignOnToken',
     config: {
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
