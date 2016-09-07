@@ -76,10 +76,11 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID')
         },
         payload: {
           registrationDate: Joi.string().trim(),
+          RegistrationDate: Joi.string().trim(),
           state: Joi.string().required().valid('Registered', 'Suspended', 'Deleted', 'Unregistered', 'Warned'),
           properties: Joi.object().allow(null)
         }
@@ -110,13 +111,13 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         },
         payload: {
-          location: Joi.string().required().trim(),
-          id: Joi.string().required().trim(),
+          location: Joi.string().required().lowercase().trim(),
+          id: Joi.string().trim(),
           name: Joi.string().required().trim(),
           type: Joi.string().required().trim(),
           plan: Joi.object({
@@ -155,9 +156,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         },
         payload: {
           location: Joi.string().required().trim(),
@@ -200,8 +201,8 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
         }
       },
 //      response: {
@@ -230,7 +231,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         }
       },
 //      response: {
@@ -259,9 +260,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -290,8 +291,8 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
         },
       },
 //      response: {
@@ -320,9 +321,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -352,9 +353,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -409,7 +410,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         },
         payload: {
           firstName: Joi.string().required(),
@@ -444,7 +445,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         }
       },
 //      response: {
@@ -474,9 +475,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -505,9 +506,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
