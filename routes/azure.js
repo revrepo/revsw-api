@@ -118,13 +118,14 @@ module.exports = [
         payload: {
           location: Joi.string().required().lowercase().trim(),
           id: Joi.string().trim(),
-          name: Joi.string().required().trim(),
-          type: Joi.string().required().trim(),
+          name: Joi.string().trim(),
+          type: Joi.string().trim(),
           plan: Joi.object({
             name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
-            publisher: Joi.string().required(),
-            product: Joi.string().required(),
-            promotioncode: Joi.string().allow(null)  
+            publisher: Joi.string(),
+            product: Joi.string(),
+            promotioncode: Joi.string().allow(null, ''),
+            promotionCode: Joi.string().allow(null, '')
           }),
           tags: Joi.object().allow(null),
           properties: Joi.object()
@@ -169,7 +170,8 @@ module.exports = [
             name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
             publisher: Joi.string().required(),
             product: Joi.string().required(),
-            promotioncode: Joi.string().allow(null)
+            promotioncode: Joi.string().allow(null, ''),
+            promotionCode: Joi.string().allow(null, '')
           }),
           tags: Joi.object().allow(null),
           properties: Joi.object()
