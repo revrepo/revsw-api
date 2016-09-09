@@ -31,6 +31,7 @@ var base64url = require('base64-url');
 var crypto = require('crypto');
 var zlib = require('zlib');
 var _ = require('lodash');
+var ursa = require('ursa');
 
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
@@ -180,7 +181,7 @@ exports.createResource = function(request, reply) {
                 ', payload ' + JSON.stringify(newAccount)));
             }
 
-            var email = account.id + '@azure-user.revapm.net';
+            var email = account.id + '@' + config.get('azure_marketplace.user_email_domain');
             var password = crypto.randomBytes(8).toString('hex');
 
             var newUser = {
@@ -671,7 +672,7 @@ exports.listCommunicationPreference = function(request, reply) {
     }
 
     var response = {
-      firstName: result.first_name,
+      firstName: result.first_name ? result.first_name : null,
       lastName: result.last_name,
       email: result.email,
       optInForCommunication: result.opt_in_for_communication
@@ -762,56 +763,69 @@ exports.listSingleSignOnToken = function(request, reply) {
           return reply(boom.notFound('The resource is not found'));
         }
 
-        var token = {
-          ExpirationTime: 'sdfsdfsdf', // TODO add proper time for +15 minutes
-          ProviderData: 'mykey'
+        // This token will eventually reach the authenticateSSOAzure function which will generate a proper JWT token
+        // for portal authentication
+        var appToken = {
+          expirationTimestamp: (new Date().getTime()) + config.get('azure_marketplace.ssl_token_lifetime_minutes') * 60 * 1000,
+          providerData: resource.account_id
         };
-        var tokenString = JSON.stringify(token);
+        var appTokenString = JSON.stringify(appToken);
+        logger.debug('appTokenString = ', appTokenString);
 
-        var NodeRSA = require('node-rsa');
-        var key = new NodeRSA(Fs.readFileSync(config.get('key_path')));
-
-        // var encrypted = key.encrypt(tokenString);
-        // logger.debug('Encrypted token: ', encrypted);
-        // var signed = key.sign(encrypted);
-        // logger.debug('Signed token: ', signed);
-
+        // These two values will be used in symmetric enryption of the appToken
         var sharedSecret = crypto.randomBytes(32);
         var initializationVector = crypto.randomBytes(16);
 
-        var encrypted = '';
+        // This private key will be used to sign the SSO token
+        var key = ursa.createPrivateKey(Fs.readFileSync(config.get('azure_marketplace.sso_private_key')));
+        // This public key will be used to encrypt the SSO token
+        var pubkey = ursa.createPublicKey(Fs.readFileSync(config.get('azure_marketplace.sso_public_key')));
 
+
+        // Performing symmetric encryption of the appToken
+        var encryptedAppToken = '';
         var cipher = crypto.Cipheriv('aes-256-cbc', sharedSecret, initializationVector);
-        encrypted += cipher.update(tokenString, 'utf8', 'base64');
-        encrypted += cipher.final('base64');
-        var signed = key.sign(encrypted);
+        encryptedAppToken += cipher.update(appTokenString, 'utf8', 'base64');
+        encryptedAppToken += cipher.final('base64');
 
-        var signed2 = {
-          SignedHash: signed.toString('base64'),
-          EncryptedData: encrypted,
-          EncryptedKey: sharedSecret.toString('base64'),
-          Iv: initializationVector.toString('base64')
+        // Signing the appToken
+        var appTokenSigned = key.hashAndSign('sha256', appTokenString, 'utf8', 'base64');
+
+        // Now let's create a token with the symmetric and IV keys and encrypt them with the public key
+        var secretToken = {
+          symmetricKey: sharedSecret.toString('base64'),
+          iv: initializationVector.toString('base64')
+        };
+        var secretTokenString = JSON.stringify(secretToken);
+
+        // Encrypting the secretTokenString object with the public key
+        var secretTokenEncrypted = pubkey.encrypt(secretTokenString, 'utf8', 'base64');
+
+        // Now let's prepare a token which  later will be encrypted using the public key
+        var token = {
+          signedHash: appTokenSigned,
+          encryptedData: encryptedAppToken,
+          secretToken: secretTokenEncrypted
         };
 
-        var signedString = JSON.stringify(signed2);
-        logger.debug('signedString = ', signedString);
+        var tokenString = JSON.stringify(token);
+        logger.debug('tokenString = ', tokenString);
 
-        zlib.gzip(signedString, function(error, compressed) {
+        // Now let's compress the token
+        zlib.gzip(tokenString, function(error, tokenCompressed) {
+          // Also need to compress the resourceId string
           zlib.gzip(JSON.stringify(resource.resource_id), function(error, resourceIdCompressed) {
-            //  logger.debug('Compressed token: ', compressed);
-            // compressed = JSON.stringify(signed2);
-            var encoded = base64url.encode(compressed);
 
-            var padding = (4 - encoded.length % 4) % 4;
-            logger.debug('Padding = ' + padding + ', Encoded length = ' + encoded.length);
+            // Now let's URL-encode the compressed token
+            var tokenEncoded = utils.webURLEncoding(tokenString);
 
-            var resourceEncoded = base64url.encode(resourceIdCompressed);
-            var padding2 = (4 - resourceEncoded.length % 4) % 4;
-            logger.debug('Padding2 = ' + padding2 + ', Encoded length = ' + resourceEncoded.length);
+            // URL-encoding the compressed resourceId string
+            var resourceEncoded = utils.webURLEncoding(resourceIdCompressed);
+
             var response = {
               'url': config.get('azure_marketplace.sso_endpoint'),
-              'resourceId': resourceEncoded + padding2 + '',
-              'token': encoded + padding + ''
+              'resourceId': resourceEncoded,
+              'token': tokenEncoded
             };
 
             renderJSON(request, reply, error, response);

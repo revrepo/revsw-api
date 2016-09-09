@@ -190,7 +190,23 @@ exports.authenticate = function(request, reply) {
 };
 
 exports.authenticateSSOAzure = function(request, reply) {
-  var email = '6_r1@azure-user.revapm.net';
+
+  var tokenEncrypted = request.payload.token;
+  var token = utils.decodeSSOToken(tokenEncrypted);
+  logger.info('authenticateSSOAzure: SSO token = ', token);
+  if (!token || !token.providerData || !token.expirationTimestamp) {
+    logger.warn('authenticateSSOAzure:: Missing or incorrect SSO token');
+    return reply(boom.unauthorized());
+  }
+
+  var currentTimestamp = new Date().getTime();
+  if (token.expirationTimestamp < currentTimestamp) {
+    logger.warn('authenticateSSOAzure:: Expired SSO token. currentTimestamp = ' + currentTimestamp + ', expirationTimestamp = ' +
+      token.expirationTimestamp);
+    return reply(boom.unauthorized());
+  }
+
+  var email = token.providerData + '@' + config.get('azure_marketplace.user_email_domain');
   users.getValidation({
     email: email
   }, function(error, user) {

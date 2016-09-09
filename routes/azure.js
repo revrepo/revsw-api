@@ -162,14 +162,14 @@ module.exports = [
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         },
         payload: {
-          location: Joi.string().required().trim(),
-          id: Joi.string().required().trim(),
-          name: Joi.string().required().trim(),
-          type: Joi.string().required().trim(),
+          location: Joi.string().trim(),
+          id: Joi.string().trim(),
+          name: Joi.string().trim(),
+          type: Joi.string().trim(),
           plan: Joi.object({
-            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
-            publisher: Joi.string().required(),
-            product: Joi.string().required(),
+            name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string(),
+            product: Joi.string(),
             promotioncode: Joi.string().allow(null, ''),
             promotionCode: Joi.string().allow(null, '')
           }),
@@ -431,6 +431,7 @@ module.exports = [
   {
     method: 'POST',
     path: '/subscriptions/{subscription_id}/providers/' + provider + '/listCommunicationPreference',
+    // path: '/subscriptions/{subscription_id}/providers/' + provider + '/{empty}/listCommunicationPreference', // Use this line for MockTool testing
     config: {
       handler: azure.listCommunicationPreference,
       description: 'List Communication Preference',
