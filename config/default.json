@@ -117,6 +117,10 @@
   },
 
   "azure_marketplace": {
-    "sso_endpoint": "https://testsjc20-portal01.revsw.net/azure-sso"
+    "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+    "ssl_token_lifetime_minutes": 10,
+    "sso_private_key": "./config/sso_private_key.pem",
+    "sso_public_key": "./config/sso_public_key.pem",
+    "user_email_domain": "azure-user.revapm.net"
   }
 }

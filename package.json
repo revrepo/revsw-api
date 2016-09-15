@@ -25,6 +25,7 @@
     "func-usage": "cd test/rest_api/; NODE_ENV=qa mocha suites/functional/usage-report.js"
   },
   "dependencies": {
+    "atob": "^2.0.3",
     "base64-url": "^1.3.2",
     "bcrypt": "~0.8.3",
     "blipp": "2.1.x",
@@ -83,10 +84,12 @@
     "speakeasy": "^1.0.3",
     "superagent": "^1.8.0",
     "tldjs": "^1.6.2",
+    "ursa": "^0.9.4",
     "winston": "^2.2.0",
     "winston-mongodb": "^1.3.0",
     "x509": "^0.2.6",
-    "yargs": "^3.30.0"
+    "yargs": "^3.30.0",
+    "zlibjs": "^0.2.0"
   },
   "devDependencies": {
     "async": "^1.4.0",

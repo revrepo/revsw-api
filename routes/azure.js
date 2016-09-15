@@ -29,18 +29,42 @@ var Joi = require('joi');
 var azure = require('../handlers/azure');
 
 var routeModels = require('../lib/routeModels');
+var provider = 'RevAPM.MobileCDN';
 
 module.exports = [
+
+  // Get a list of subscriptions
+  {
+    method: 'GET',
+    path: '/subscriptions',
+    config: {
+      handler: azure.listSubscriptions,
+      description: 'Get a list of registered Subscriptionis',
+      notes: 'Get a list of registred Subscriptions',
+//      tags: ['api'],
+      auth: {
+        scope: ['revadmin']
+      },
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+//      response: {
+//        schema: routeModels.listOfDNSZonesModel
+//     }
+    }
+  },
 
   // Subscription Operation
   {
     method: 'PUT',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}',
+    path: '/subscriptions/{subscription_id}',
     config: {
       handler: azure.createSubscription,
       description: 'Create a new Azure Marketplace subscription',
       notes: 'Create a new Azure Marketplace subscription',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -52,10 +76,11 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID')
         },
         payload: {
-          RegistrationDate: Joi.string().required().trim(),
+          registrationDate: Joi.string().trim(),
+          RegistrationDate: Joi.string().trim(),
           state: Joi.string().required().valid('Registered', 'Suspended', 'Deleted', 'Unregistered', 'Warned'),
           properties: Joi.object().allow(null)
         }
@@ -66,15 +91,15 @@ module.exports = [
     }
   },
 
-  // Create/Update Resource
+  // Create Resource
   {
     method: 'PUT',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
-      handler: azure.createUpdateResource,
-      description: 'Create or update a resource',
-      notes: 'Create or update a resource',
-      tags: ['api'],
+      handler: azure.createResource,
+      description: 'Create a resource',
+      notes: 'Create a resource',
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -86,20 +111,21 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         },
         payload: {
-          location: Joi.string().required().trim(),
-          id: Joi.string().required().trim(),
-          name: Joi.string().required().trim(),
-          type: Joi.string().required().trim(),
+          location: Joi.string().required().lowercase().trim(),
+          id: Joi.string().trim(),
+          name: Joi.string().trim(),
+          type: Joi.string().trim(),
           plan: Joi.object({
-            name: Joi.string().required().valid('developer', 'silver', 'bronze', 'gold'),
-            publisher: Joi.string().required().valid('RevAPM'),
-            product: Joi.string().required().valid('accounts'),
-            promotioncode: Joi.string().required().allow(null)  
+            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string(),
+            product: Joi.string(),
+            promotioncode: Joi.string().allow(null, ''),
+            promotionCode: Joi.string().allow(null, '')
           }),
           tags: Joi.object().allow(null),
           properties: Joi.object()
@@ -114,12 +140,12 @@ module.exports = [
   // Update (PATCH) a Resource
   {
     method: 'PATCH',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.patchResource,
       description: 'Patch a resource',
       notes: 'Patch a resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -131,9 +157,24 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
+        },
+        payload: {
+          location: Joi.string().trim(),
+          id: Joi.string().trim(),
+          name: Joi.string().trim(),
+          type: Joi.string().trim(),
+          plan: Joi.object({
+            name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            publisher: Joi.string(),
+            product: Joi.string(),
+            promotioncode: Joi.string().allow(null, ''),
+            promotionCode: Joi.string().allow(null, '')
+          }),
+          tags: Joi.object().allow(null),
+          properties: Joi.object()
         }
       },
 //      response: {
@@ -145,12 +186,12 @@ module.exports = [
   // Get All Resources in Resource Group
   {
     method: 'GET',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
       notes: 'Get all resources in Resource Group',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -162,8 +203,8 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
         }
       },
 //      response: {
@@ -175,12 +216,12 @@ module.exports = [
   // Get All Resources in Subscription
   {
     method: 'GET',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/providers/RevAPM/accounts',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
       notes: 'Get all resources in a Subscription',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -192,7 +233,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         }
       },
 //      response: {
@@ -204,12 +245,12 @@ module.exports = [
   // Get a Resource
   {
     method: 'GET',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.getResource,
       description: 'Get a Resource',
       notes: 'Get a Resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -221,10 +262,40 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
+      },
+//      response: {
+//        schema: routeModels.listOfDNSZonesModel
+//     }
+    }
+  },
+
+  // Move resources across groups/subscriptions - TODO: it is save to remove the route (it is not required)
+  {
+    method: 'POST',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/moveResources',
+    config: {
+      handler: azure.moveResources,
+      description: 'Move resources across groups/subscriptions',
+      notes: 'Move resources across groups/subscriptions',
+//      tags: ['api'],
+      auth: false,
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        options: {
+          stripUnknown: false
+        },
+        params: {
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+        },
       },
 //      response: {
 //        schema: routeModels.listOfDNSZonesModel
@@ -235,12 +306,12 @@ module.exports = [
   // Delete a Resource
   {
     method: 'DELETE',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
     config: {
       handler: azure.deleteResource,
       description: 'Delete a Resource',
       notes: 'Delete a Resource',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -252,9 +323,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -267,12 +338,12 @@ module.exports = [
   // List Secrets
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/ListSecrets',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSecrets',
     config: {
       handler: azure.listSecrets,
       description: 'List secrets',
       notes: 'List secrets',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -284,9 +355,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -298,12 +369,12 @@ module.exports = [
   // List supported Operations
   {
     method: 'GET',
-    path: '/providers/RevAPM/providers/RevAPM/{empty}/operations',
+    path: '/providers/' + provider + '/operations',
     config: {
       handler: azure.listOperations,
       description: 'List supported RP operations',
       notes: 'List supported RP operations',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -324,12 +395,12 @@ module.exports = [
   // Update Communication Preference
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/providers/RevAPM/UpdateCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/updateCommunicationPreference',
     config: {
       handler: azure.updateCommunicationPreference,
       description: 'Update Communication Preference',
       notes: 'Update Communication Preference',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -341,7 +412,13 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+        },
+        payload: {
+          firstName: Joi.string().required(),
+          lastName: Joi.string().required(),
+          email: Joi.string().email().required(),
+          optInForCommunication: Joi.boolean().required()
         }
       },
 //      response: {
@@ -353,12 +430,13 @@ module.exports = [
   // List Communication Preference
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/providers/RevAPM/{empty}/ListCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/listCommunicationPreference',
+    // path: '/subscriptions/{subscription_id}/providers/' + provider + '/{empty}/listCommunicationPreference', // Use this line for MockTool testing
     config: {
       handler: azure.listCommunicationPreference,
       description: 'List Communication Preference',
       notes: 'List Communication Preference',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -370,7 +448,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         }
       },
 //      response: {
@@ -383,12 +461,12 @@ module.exports = [
   // Regenerate Keys
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/RegenerateKey',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/RegenerateKey',
     config: {
       handler: azure.regenerateKey,
       description: 'Regenerate key',
       notes: 'Regenerate key',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -400,9 +478,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -414,12 +492,12 @@ module.exports = [
   // List Single Sign On Authorization
   {
     method: 'POST',
-    path: '/providers/RevAPM/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/RevAPM/accounts/{resource_name}/listSingleSignOnToken',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSingleSignOnToken',
     config: {
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
       notes: 'List SSL token',
-      tags: ['api'],
+//      tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -431,9 +509,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          subscription_id: Joi.string().required().description('Azure Subscription ID'),
-          resource_group_name: Joi.string().required().description('Azure Resource Group name'),
-          resource_name: Joi.string().required().description('Azure Resource name')
+          subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
+          resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
+          resource_name: Joi.string().required().lowercase().description('Azure Resource name')
         }
       },
 //      response: {
@@ -441,6 +519,5 @@ module.exports = [
 //     }
     }
   },
-
 ];
 

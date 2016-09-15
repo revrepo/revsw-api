@@ -48,5 +48,27 @@ module.exports = [
         }
       }
     }
+  },
+
+  {
+    method : 'POST',
+    path   : '/v1/authenticate-sso-azure',
+    config : {
+      handler     : authenticate.authenticateSSOAzure,
+      auth        : false,
+      description : 'An internal portal call for Azure SSO authentication',
+//      tags        : ['api', 'web'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        payload : {
+          token: Joi.string().required().description('Encrypted and signed SSO token'),
+          resourceId: Joi.string().required().description('Base64-encoded resource ID')
+        }
+      }
+    }
   }
 ];

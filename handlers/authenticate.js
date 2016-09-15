@@ -188,3 +188,49 @@ exports.authenticate = function(request, reply) {
     }
   });
 };
+
+exports.authenticateSSOAzure = function(request, reply) {
+
+  var tokenEncrypted = request.payload.token;
+  var token = utils.decodeSSOToken(tokenEncrypted);
+  logger.info('authenticateSSOAzure: SSO token = ', token);
+  if (!token || !token.providerData || !token.expirationTimestamp) {
+    logger.warn('authenticateSSOAzure:: Missing or incorrect SSO token');
+    return reply(boom.unauthorized());
+  }
+
+  var currentTimestamp = new Date().getTime();
+  if (token.expirationTimestamp < currentTimestamp) {
+    logger.warn('authenticateSSOAzure:: Expired SSO token. currentTimestamp = ' + currentTimestamp + ', expirationTimestamp = ' +
+      token.expirationTimestamp);
+    return reply(boom.unauthorized());
+  }
+
+  var email = token.providerData + '@' + config.get('azure_marketplace.user_email_domain');
+  users.getValidation({
+    email: email
+  }, function(error, user) {
+
+    if (error) {
+      logger.error('Authenticate::authenticate: Failed to retrieve user details for' + ' email: ' + email);
+      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
+        ' email: ' + email));
+    }
+
+    if (!user) {
+      logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
+      return reply(boom.unauthorized());
+    } else {
+      // TODO need to fix the code to do the actual verification of provided token and resourceId
+      var authPassed = true;
+      var sendResultChecks = function sendResultChecks(authPassed) {
+        if (authPassed) {
+          onAuthPassed(user, request, reply, error);
+        } else {
+          return reply(boom.unauthorized());
+        }
+      };
+      sendResultChecks(authPassed);
+    }
+  });
+};

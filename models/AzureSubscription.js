@@ -42,7 +42,12 @@ function AzureSubscription(mongoose, connection, options) {
     'cancellation_message': {type: String, default: null},
     'preperties': {},
     'account_id': this.ObjectId,
-    'resource_id': [ this.ObjectId ]
+    'resource_id': [ this.ObjectId ],
+    'first_name': {type : String, default : null},
+    'last_name': {type : String, default : null},
+    'email': {type : String, default : null},
+    'opt_in_for_communication': {type : Boolean, default : null},
+    'original_object': {}
   });
 
   this.model = connection.model('AzureSubscription', this.AzureSubscriptionSchema, 'AzureSubscription');
@@ -85,7 +90,7 @@ AzureSubscription.prototype = {
     });
   },
 
-  listAll : function (request, callback) {
+  listAll : function (callback) {
     this.model.find(function (err, accounts) {
       if (accounts) {
         accounts = utils.clone(accounts);
@@ -93,7 +98,6 @@ AzureSubscription.prototype = {
           accounts[i].id = accounts[i]._id + '';
           delete accounts[i]._id;
           delete accounts[i].__v;
-          delete accounts[i].status;
         }
       }
 

@@ -62,5 +62,9 @@
 
   "nsone": {
     "api_key": "the_correct_value_is_in_local_json"
+  },
+
+  "azure_marketplace": {
+    "sso_endpoint": "https://iad02-portal03.revsw.net/#/azure-sso"
   }
 }
