@@ -128,7 +128,7 @@ module.exports = [
             promotionCode: Joi.string().allow(null, '')
           }),
           tags: Joi.object().allow(null),
-          properties: Joi.object()
+          properties: Joi.object().allow(null)
         }
       },
 //      response: {
@@ -163,9 +163,13 @@ module.exports = [
         },
         payload: {
           location: Joi.string().trim(),
+          Location: Joi.string().trim(),
           id: Joi.string().trim(),
+          Id: Joi.string().trim(),
           name: Joi.string().trim(),
+          Name: Joi.string().trim(),
           type: Joi.string().trim(),
+          Type: Joi.string().trim(),
           plan: Joi.object({
             name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
             publisher: Joi.string(),
@@ -173,8 +177,17 @@ module.exports = [
             promotioncode: Joi.string().allow(null, ''),
             promotionCode: Joi.string().allow(null, '')
           }),
+          Plan: Joi.object({
+            Name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            Publisher: Joi.string(),
+            Product: Joi.string(),
+            PromotionCode: Joi.string().allow(null, '')
+          }),
           tags: Joi.object().allow(null),
-          properties: Joi.object()
+          Tags: Joi.object().allow(null),
+          Etag: Joi.object().allow(null),
+          properties: Joi.object().allow(null),
+          Properties: Joi.object().allow(null)
         }
       },
 //      response: {

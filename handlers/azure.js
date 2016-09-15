@@ -139,6 +139,9 @@ exports.createResource = function(request, reply) {
     properties = resource.properties,
     plan = resource.plan;
 
+  resource.id = resourceId;
+  resource.type = 'RevAPM.MobileCDN/accounts';
+  resource.name = resourceName;
 
   azureSubscriptions.get({
     subscription_id: subscriptionId
@@ -202,10 +205,6 @@ exports.createResource = function(request, reply) {
               // TODO: add code to send email notifications about new Azure resources registered in the system
               // TODO: add code to add audit records for new subscription, resource, account, user
 
-              resource.id = resourceId;
-              resource.type = 'RevAPM.MobileCDN/accounts';
-              resource.name = resourceName;
-
               var newResource = {
                 subscription_id: subscriptionId,
                 resource_name: resourceName,
@@ -238,10 +237,10 @@ exports.patchResource = function(request, reply) {
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
-    tags = resource.tags,
-    resourceId = resource.id,
-    properties = resource.properties,
-    plan = resource.plan;
+    tags = resource.Tags ? resource.Tags : resource.tags,
+    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + provider + '/accounts/' + resourceName,
+    properties = resource.Properties ? resource.Properties : resource.properties,
+    plan = resource.Plan ? resource.Plan : resource.plan;
 
   azureSubscriptions.get({
     subscription_id: subscriptionId
@@ -270,20 +269,32 @@ exports.patchResource = function(request, reply) {
         if (!existingResource) {
           return reply(boom.notFound('The resource is not found'));
         } else {
-          var updatedResource = {
-            id: existingResource.id,
-            tags: tags,
-            plan: plan,
-            properties: properties,
-            original_object: resource
-          };
+          var updatedResource = existingResource;
+          var originalObject = existingResource.original_object;
+          if (plan) {
+            updatedResource.plan = plan;
+            originalObject.plan = plan;
+          }
+          if (properties) {
+            updatedResource.properties = properties;
+            originalObject.properties = properties;
+          }
+          if (tags) {
+            updatedResource.tags = tags;
+            originalObject.tags = tags;
+          } else {
+            updatedResource.tags = {};
+            originalObject.tags = {};
+          }
+
+          updatedResource.original_object = originalObject;
 
           azureResources.update(updatedResource, function(error, result) {
             if (error || !result) {
               return reply(boom.badImplementation('Failed to update Azure resource for subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(updatedResource)));
             }
-            renderJSON(request, reply, error, resource);
+            renderJSON(request, reply, error, originalObject);
           });
         }
       });
