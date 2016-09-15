@@ -36,12 +36,12 @@ module.exports = [
   // Get a list of subscriptions
   {
     method: 'GET',
-    path: '/subscriptions',
+    path: '/v1/azure/subscriptions',
     config: {
       handler: azure.listSubscriptions,
       description: 'Get a list of registered Subscriptionis',
       notes: 'Get a list of registred Subscriptions',
-//      tags: ['api'],
+     // tags: ['api','azure'],
       auth: {
         scope: ['revadmin']
       },
@@ -59,12 +59,12 @@ module.exports = [
   // Subscription Operation
   {
     method: 'PUT',
-    path: '/subscriptions/{subscription_id}',
+    path: '/v1/azure/subscriptions/{subscription_id}',
     config: {
       handler: azure.createSubscription,
       description: 'Create a new Azure Marketplace subscription',
       notes: 'Create a new Azure Marketplace subscription',
-//      tags: ['api'],
+     // tags: ['api','azure'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -191,7 +191,7 @@ module.exports = [
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
       notes: 'Get all resources in Resource Group',
-//      tags: ['api'],
+     // tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -216,12 +216,12 @@ module.exports = [
   // Get All Resources in Subscription
   {
     method: 'GET',
-    path: '/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
+    path: '/v1/azure/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
       notes: 'Get all resources in a Subscription',
-//      tags: ['api'],
+     // tags: ['api','azure'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -250,7 +250,7 @@ module.exports = [
       handler: azure.getResource,
       description: 'Get a Resource',
       notes: 'Get a Resource',
-//      tags: ['api'],
+     // tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
@@ -374,7 +374,7 @@ module.exports = [
       handler: azure.listOperations,
       description: 'List supported RP operations',
       notes: 'List supported RP operations',
-//      tags: ['api'],
+     // tags: ['api'],
       auth: false,
       plugins: {
         'hapi-swagger': {
