@@ -36,7 +36,7 @@ module.exports = [
   // Get a list of subscriptions
   {
     method: 'GET',
-    path: '/v1/azure/subscriptions',
+    path: '/subscriptions',
     config: {
       handler: azure.listSubscriptions,
       description: 'Get a list of registered Subscriptionis',
@@ -59,7 +59,7 @@ module.exports = [
   // Subscription Operation
   {
     method: 'PUT',
-    path: '/v1/azure/subscriptions/{subscription_id}',
+    path: '/subscriptions/{subscription_id}',
     config: {
       handler: azure.createSubscription,
       description: 'Create a new Azure Marketplace subscription',
@@ -216,7 +216,7 @@ module.exports = [
   // Get All Resources in Subscription
   {
     method: 'GET',
-    path: '/v1/azure/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
+    path: '/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
     config: {
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
