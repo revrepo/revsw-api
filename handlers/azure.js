@@ -135,7 +135,7 @@ exports.createResource = function(request, reply) {
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
     tags = resource.tags,
-    resourceId = resource.id,
+    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + provider + '/accounts/' + resourceName,
     properties = resource.properties,
     plan = resource.plan;
 
@@ -201,6 +201,10 @@ exports.createResource = function(request, reply) {
 
               // TODO: add code to send email notifications about new Azure resources registered in the system
               // TODO: add code to add audit records for new subscription, resource, account, user
+
+              resource.id = resourceId;
+              resource.type = 'RevAPM.MobileCDN/accounts';
+              resource.name = resourceName;
 
               var newResource = {
                 subscription_id: subscriptionId,
