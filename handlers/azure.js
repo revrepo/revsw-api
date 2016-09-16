@@ -635,10 +635,10 @@ exports.updateCommunicationPreference = function(request, reply) {
 
   var payload = request.payload,
     subscriptionId = request.params.subscription_id,
-    firstName = payload.firstName,
-    lastName = payload.lastName,
-    email = payload.email,
-    optInForCommunication = payload.optInForCommunication;
+    firstName = payload.FirstName ? payload.FirstName : payload.firstName,
+    lastName = payload.LastName ? payload.LastName : payload.lastName,
+    email = payload.Email ? payload.Email : payload.email,
+    optInForCommunication = payload.OptInForCommunication ? payload.OptInForCommunication : payload.optInForCommunication;
 
   azureSubscriptions.get({
     subscription_id: subscriptionId

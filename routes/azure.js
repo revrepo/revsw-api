@@ -428,10 +428,14 @@ module.exports = [
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         },
         payload: {
-          firstName: Joi.string().required(),
-          lastName: Joi.string().required(),
-          email: Joi.string().email().required(),
-          optInForCommunication: Joi.boolean().required()
+          firstName: Joi.string(),
+          FirstName: Joi.string(),
+          lastName: Joi.string(),
+          LastName: Joi.string(),
+          email: Joi.string().email(),
+          Email: Joi.string().email(),
+          optInForCommunication: Joi.boolean(),
+          OptInForCommunication: Joi.boolean()
         }
       },
 //      response: {
