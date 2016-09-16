@@ -65,6 +65,6 @@
   },
 
   "azure_marketplace": {
-    "sso_endpoint": "https://iad02-portal03.revsw.net/#/azure-sso"
+    "sso_endpoint": "https://portal.revapm.net/#/azure-sso"
   }
 }
