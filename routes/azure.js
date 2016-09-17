@@ -65,7 +65,7 @@ module.exports = [
       description: 'Create a new Azure Marketplace subscription',
       notes: 'Create a new Azure Marketplace subscription',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -100,7 +100,7 @@ module.exports = [
       description: 'Create a resource',
       notes: 'Create a resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -146,7 +146,7 @@ module.exports = [
       description: 'Patch a resource',
       notes: 'Patch a resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -205,7 +205,7 @@ module.exports = [
       description: 'Get all resources in a Resource Group',
       notes: 'Get all resources in Resource Group',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -235,7 +235,7 @@ module.exports = [
       description: 'Get all resources in a Subscription',
       notes: 'Get all resources in a Subscription',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -264,7 +264,7 @@ module.exports = [
       description: 'Get a Resource',
       notes: 'Get a Resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -295,7 +295,7 @@ module.exports = [
       description: 'Move resources across groups/subscriptions',
       notes: 'Move resources across groups/subscriptions',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -325,7 +325,7 @@ module.exports = [
       description: 'Delete a Resource',
       notes: 'Delete a Resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -357,7 +357,7 @@ module.exports = [
       description: 'List secrets',
       notes: 'List secrets',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -388,7 +388,7 @@ module.exports = [
       description: 'List supported RP operations',
       notes: 'List supported RP operations',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -414,7 +414,7 @@ module.exports = [
       description: 'Update Communication Preference',
       notes: 'Update Communication Preference',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -454,7 +454,7 @@ module.exports = [
       description: 'List Communication Preference',
       notes: 'List Communication Preference',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -484,7 +484,7 @@ module.exports = [
       description: 'Regenerate key',
       notes: 'Regenerate key',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -515,7 +515,7 @@ module.exports = [
       description: 'List SSO token',
       notes: 'List SSL token',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
