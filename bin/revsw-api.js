@@ -159,6 +159,7 @@ server.register(require('hapi-auth-bearer-token'), function (err) {
         allowQueryToken: false,              // optional, true by default
         allowMultipleHeaders: false,        // optional, false by default
         accessTokenName: 'access_token',    // optional, 'access_token' by default
+        tokenType: 'Bearer-RP',
         validateFunc: function(token, callback) {
 
             // For convenience, the request object can be accessed

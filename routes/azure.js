@@ -235,7 +235,10 @@ module.exports = [
       description: 'Get all resources in a Subscription',
       notes: 'Get all resources in a Subscription',
 //      tags: ['api'],
-      auth: 'azure-token',
+      auth: {
+        strategies: ['azure-token', 'token'],
+        scope: ['revadmin', 'azure-rp']
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
