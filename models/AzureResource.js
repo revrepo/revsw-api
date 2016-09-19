@@ -90,19 +90,18 @@ AzureResource.prototype = {
     });
   },
 
-  listAll : function (request, callback) {
-    this.model.find(function (err, accounts) {
-      if (accounts) {
-        accounts = utils.clone(accounts);
-        for (var i = 0; i < accounts.length; i++) {
-          accounts[i].id = accounts[i]._id + '';
-          delete accounts[i]._id;
-          delete accounts[i].__v;
-          delete accounts[i].status;
+  listAll : function (callback) {
+    this.model.find(function (err, resources) {
+      if (resources) {
+        resources = utils.clone(resources);
+        for (var i = 0; i < resources.length; i++) {
+          resources[i].id = resources[i]._id + '';
+          delete resources[i]._id;
+          delete resources[i].__v;
         }
       }
 
-      callback(err, accounts);
+      callback(err, resources);
     });
   },
 

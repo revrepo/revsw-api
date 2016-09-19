@@ -62,6 +62,16 @@ exports.listSubscriptions = function(request, reply) {
   });
 };
 
+exports.listResources = function(request, reply) {
+
+  azureResources.listAll(function(error, resources) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB a list of all Azure resources'));
+    }
+    renderJSON(request, reply, error, resources);
+  });
+};
+
 exports.createSubscription = function(request, reply) {
 
   var subscription = request.payload,
