@@ -48,6 +48,7 @@ var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectio
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mongoConnection.getConnectionPortal()));
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
+var dashboardService = require('../services/dashboards.js');
 
 var provider = 'RevAPM.MobileCDN';
 var providerForOperationsResponse = 'RevAPM MobileCDN';
@@ -232,6 +233,15 @@ exports.createResource = function(request, reply) {
                   return reply(boom.badImplementation('Failed to add new Azure resource for subscription ID ' + subscriptionId +
                     ', payload ' + JSON.stringify(newResource)));
                 }
+
+                // NOTE: create default dashboard for new user
+                dashboardService.createUserDashboard(user.user_id, null, function (err) {
+                  if (err) {
+                    logger.error('createResource:createUser:error add default dashboard: ' + JSON.stringify(err));
+                  } else {
+                    logger.info('createResource:createUser:success add default dashboard for User with id ' + user.user_id);
+                  }
+                });
                 renderJSON(request, reply, error, resource);
               });
             });
