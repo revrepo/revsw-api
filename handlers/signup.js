@@ -516,7 +516,7 @@ exports.signup2 = function(req, reply) {
         });
     })
     // NOTE:  update Admin User Data about account Id
-    .then(function loggerSelftRegistrationOperattion(user) {
+    .then(function logSelfRegistrationOperation(user) {
         AuditLogger.store({
           ip_address: utils.getAPIUserRealIP(req),
           datetime: Date.now(),
