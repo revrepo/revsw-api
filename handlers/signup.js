@@ -32,6 +32,8 @@ var _ = require('lodash');
 
 var emailService = require('../services/email.js');
 var dashboardService = require('../services/dashboards.js');
+var usersService = require('../services/users.js');
+
 
 var Promise = require('bluebird');
 var url = require('url');
@@ -55,6 +57,9 @@ Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
 Promise.promisifyAll(chargifyProduct);
 Promise.promisifyAll(chargifyCustomer);
+
+Promise.promisifyAll(usersService);
+
 
 var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
@@ -232,12 +237,13 @@ exports.signup = function(req, reply) {
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
+        self_registered: true,
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
         email: data.email
       };
-      return createUser(newUser).then(
+      return usersService.createUserAsync(newUser).then(
         function(user) {
           _newUser = user;
 
@@ -384,56 +390,6 @@ exports.signup = function(req, reply) {
 
 };
 
-
-/**
- * @name  createUser
- * @description
- *
- * @param  {String} email - the user's data for registration
- * @return {Promise}
- */
-function createUser(newUser) {
-  return new Promise(function(resolve, reject) {
-    users.getValidation({
-      email: newUser.email
-    }, function(err, user) {
-      if (err) {
-        reject(err);
-      }
-      if (!!user) {
-        reject({
-          user: user
-        });
-      } else {
-        var token = utils.generateToken();
-        newUser.self_registered = true;
-        newUser.validation = {
-          expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
-          token: token,
-          verified: false
-        };
-        users.addAsync(newUser)
-          .then(
-            function(user) {
-              // Each created user need to have Dashboard
-              dashboardService.createUserDashboard(user.user_id, null, function(err) {
-                if (err) {
-                  logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
-                } else {
-                  logger.info('Signup:createUser:success add default dashboard for User with id ' + user.user_id);
-                }
-              });
-              resolve(user);
-            },
-            function(err) {
-              reject(err);
-            }
-          );
-      }
-    });
-  });
-}
-
 /**
  * @name  signup2
  * @description
@@ -505,7 +461,7 @@ exports.signup2 = function(req, reply) {
           };
         });
     })
-    // NOTE: create new Account
+    // NOTE: create new Account for self registry User
     .then(function createNewAccount() {
       var newCompany = {
         companyName: data.company_name || data.first_name + ' ' + data.last_name,
@@ -533,82 +489,74 @@ exports.signup2 = function(req, reply) {
           city: data.city || '',
           zipcode: data.zipcode || ''
         },
-        self_registered: true
+        self_registered: true //NOTE: Important for self registration account
       };
       return accounts.addAsync(newCompany);
     })
     // NOTE:  create new Admin User
     .then(function createNewAdminUser(account) {
       _newAccount = publicRecordFields.handle(account, 'account');
+
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
+        self_registered: true, // NOTE: Important for self registration user
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
         email: data.email
       };
-      return createUser(newUser).then(
-        function(user) {
+
+      return usersService.createUserAsync(newUser)
+        .then(function successUserCreated(user) {
           _newUser = user;
-          AuditLogger.store({
-            ip_address: utils.getAPIUserRealIP(req),
-            datetime: Date.now(),
-            user_type: 'user',
-            user_name: data.email,
-            account_id: _newAccount.id,
-            activity_type: 'signup',
-            activity_target: 'account',
-            target_id: _newAccount.id,
-            target_name: _newAccount.companyName,
-            target_object: _newAccount,
-            operation_status: 'success',
-            user_id: user.user_id
-          });
-          // TODO: user_id is not specified - we need to read the value from newUser response
-          // also, the user object does not consist the whole user object - just a short status
-          AuditLogger.store({
-            ip_address: utils.getAPIUserRealIP(req),
-            datetime: Date.now(),
-            user_type: 'user',
-            user_name: user.email,
-            account_id: user.companyId[0],
-            activity_type: 'signup',
-            activity_target: 'user',
-            target_id: user.user_id,
-            target_name: user.email,
-            target_object: publicRecordFields.handle(user, 'user'),
-            operation_status: 'success',
-            user_id: user.user_id
-          });
-          return user;
-        },
-        function onErrorCreateUser(dataError) {
-          //NOTE:  user  not created
-          if (!!dataError.user && !!dataError.user.validation) {
-            // NOTE: User not verify
-            if (dataError.user.validation.verified === false) {
-              throw {
-                statusCode: 402, //
-                message: 'You account is not verified. Please check your email address at \'' + newUser.email + '\' to finish the registration process.'
-              };
-            }
-            //
-            if (dataError.user.validation.verified === true) {
-              throw {
-                statusCode: 406,
-                message: 'User with email ' + newUser.email + ' already exists. Please use another email address.'
-              };
-            }
-          } else {
-            // TODO: add more detais about error
-            throw {
-              statusCode: 403,
-              message: 'User can not be created.'
-            };
-          }
+          logger.info('signup2:: User ' + user.email + ' created with account ID ' + _newAccount.id);
+          // NOTE: not yet add information in AuditLogger. Do it after full registration cjmplite
+          return Promise.resolve(user);
         });
     })
+    // NOTE:  update Admin User Data about account Id
+    .then(function logSelfRegistrationOperation(user) {
+        AuditLogger.store({
+          ip_address: utils.getAPIUserRealIP(req),
+          datetime: Date.now(),
+          user_type: 'user',
+          user_name: data.email,
+          account_id: _newAccount.id,
+          activity_type: 'signup',
+          activity_target: 'account',
+          target_id: _newAccount.id,
+          target_name: _newAccount.companyName,
+          target_object: _newAccount,
+          operation_status: 'success',
+          user_id: user.user_id
+        });
+        // TODO: user_id is not specified - we need to read the value from newUser response
+        // also, the user object does not consist the whole user object - just a short status
+        AuditLogger.store({
+          ip_address: utils.getAPIUserRealIP(req),
+          datetime: Date.now(),
+          user_type: 'user',
+          user_name: user.email,
+          account_id: user.companyId[0],
+          activity_type: 'signup',
+          activity_target: 'user',
+          target_id: user.user_id,
+          target_name: user.email,
+          target_object: publicRecordFields.handle(user, 'user'),
+          operation_status: 'success',
+          user_id: user.user_id
+        });
+        return user;
+      },
+      function onErrorCreateUser(dataError) {
+        // TODO: add more detais about error
+        throw {
+          statusCode: 403,
+          message: 'User can not be created.'
+        };
+
+      })
     .then(function createChargifyAccount() {
       return new Promise(function(resolve, reject) {
         chargifyCustomer.createBySubscription(_newAccount, data.billing_plan, function(err, data) {
@@ -626,9 +574,13 @@ exports.signup2 = function(req, reply) {
               subscription_state: _subscription.state,
               billing_id: _customer.id // NOTE: Billing Id = Chargify Customer Id
             };
-            accounts.updateAsync(account).then(function(acc) {
-              // TODO: add logger result update Account
-            });
+            accounts.updateAsync(account)
+              .then(function(acc) {
+                // TODO: add logger result update Account
+              }, function(err) {
+                logger.error('createChargifyAccount:updateAccount:error ' + JSON.stringify(err));
+                return;
+              });
           }
         });
       });
@@ -638,8 +590,8 @@ exports.signup2 = function(req, reply) {
       return new Promise(function(resolve, reject) {
         sendVerifyToken(_newUser, _newUser.validation.token, function(err, res) {
           if (err) {
-            // TODO: add logger send email
-          }
+            logger.error('sendEmailForSelfRegistratedUser:sendVerifyToken:error ' + JSON.stringify(err));
+           }
           resolve();
         });
       });

@@ -41,7 +41,7 @@ module.exports = [
       handler: azure.listSubscriptions,
       description: 'Get a list of registered Subscriptionis',
       notes: 'Get a list of registred Subscriptions',
-//      tags: ['api'],
+     // tags: ['api','azure'],
       auth: {
         scope: ['revadmin']
       },

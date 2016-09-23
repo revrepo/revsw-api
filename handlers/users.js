@@ -40,6 +40,8 @@ var Account = require('../models/Account');
 var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectionPortal()));
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 
+var usersService = require('../services/users.js');
+
 exports.getUsers = function getUsers(request, reply) {
   // TODO: move the user list filtering from the user DB model to this function
   users.list(request, function (error, listOfUsers) {
@@ -94,8 +96,8 @@ exports.createUser = function (request, reply) {
     if (result) {
       return reply(boom.badRequest('The email address is already used by another user'));  // TODO: fix the error message text
     } else {
-      users.add(newUser, function (error, result) {
-
+      // call operation create user and apply another operations
+      usersService.createUser(newUser, function (error, result) {
         var statusResponse;
         if (result) {
           statusResponse = {
@@ -116,14 +118,6 @@ exports.createUser = function (request, reply) {
           target_object: result,
           operation_status: 'success'
         }, request);
-        // NOTE: create default dashboard for new user
-        dashboardService.createUserDashboard(result.user_id, null, function (err) {
-          if (err) {
-            logger.error('Signup:createUser:error add default dashboard: ' + JSON.stringify(err));
-          } else {
-            logger.info('Signup:createUser:success add default dashboard for User with id ' + result.user_id);
-          }
-        });
         renderJSON(request, reply, error, statusResponse);
       });
     }
@@ -243,7 +237,7 @@ exports.updateUser = function (request, reply) {
               return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
             });
         } else {
-          return users.updateAsync(newUser); 
+          return users.updateAsync(newUser);
         }
       } else {
         return users.updateAsync(newUser);
@@ -374,10 +368,8 @@ exports.deleteUser = function (request, reply) {
       target_object: result,
       operation_status: 'success'
     };
-
-    users.remove({
-      _id: user_id
-    }, function (error, result) {
+    // call operation remove user and apply another operations
+    usersService.removeUser(user_id, function (error, result) {
       if (!error) {
         var statusResponse;
         statusResponse = {
