@@ -33,7 +33,7 @@ var provider = 'RevAPM.MobileCDN';
 
 module.exports = [
 
-  // Get a list of subscriptions
+  // Get a list of all subscriptions
   {
     method: 'GET',
     path: '/subscriptions',
@@ -56,6 +56,29 @@ module.exports = [
     }
   },
 
+  // Get a list of all resources in the system
+  {
+    method: 'GET',
+    path: '/resources',
+    config: {
+      handler: azure.listResources,
+      description: 'Get a list of registered Resources',
+      notes: 'Get a list of registred Resources',
+//      tags: ['api'],
+      auth: {
+        scope: ['revadmin']
+      },
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+//      response: {
+//        schema: routeModels.listOfDNSZonesModel
+//     }
+    }
+  },
+
   // Subscription Operation
   {
     method: 'PUT',
@@ -64,8 +87,8 @@ module.exports = [
       handler: azure.createSubscription,
       description: 'Create a new Azure Marketplace subscription',
       notes: 'Create a new Azure Marketplace subscription',
-     // tags: ['api','azure'],
-      auth: false,
+//      tags: ['api'],
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -100,7 +123,7 @@ module.exports = [
       description: 'Create a resource',
       notes: 'Create a resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -128,7 +151,7 @@ module.exports = [
             promotionCode: Joi.string().allow(null, '')
           }),
           tags: Joi.object().allow(null),
-          properties: Joi.object()
+          properties: Joi.object().allow(null)
         }
       },
 //      response: {
@@ -146,7 +169,7 @@ module.exports = [
       description: 'Patch a resource',
       notes: 'Patch a resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -163,9 +186,13 @@ module.exports = [
         },
         payload: {
           location: Joi.string().trim(),
+          Location: Joi.string().trim(),
           id: Joi.string().trim(),
+          Id: Joi.string().trim(),
           name: Joi.string().trim(),
+          Name: Joi.string().trim(),
           type: Joi.string().trim(),
+          Type: Joi.string().trim(),
           plan: Joi.object({
             name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
             publisher: Joi.string(),
@@ -173,8 +200,17 @@ module.exports = [
             promotioncode: Joi.string().allow(null, ''),
             promotionCode: Joi.string().allow(null, '')
           }),
+          Plan: Joi.object({
+            Name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            Publisher: Joi.string(),
+            Product: Joi.string(),
+            PromotionCode: Joi.string().allow(null, '')
+          }),
           tags: Joi.object().allow(null),
-          properties: Joi.object()
+          Tags: Joi.object().allow(null),
+          Etag: Joi.object().allow(null),
+          properties: Joi.object().allow(null),
+          Properties: Joi.object().allow(null)
         }
       },
 //      response: {
@@ -191,8 +227,8 @@ module.exports = [
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
       notes: 'Get all resources in Resource Group',
-     // tags: ['api'],
-      auth: false,
+//      tags: ['api'],
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -221,8 +257,11 @@ module.exports = [
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
       notes: 'Get all resources in a Subscription',
-     // tags: ['api','azure'],
-      auth: false,
+//      tags: ['api'],
+      auth: {
+        strategies: ['azure-token', 'token'],
+        scope: ['revadmin', 'azure-rp']
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -250,8 +289,8 @@ module.exports = [
       handler: azure.getResource,
       description: 'Get a Resource',
       notes: 'Get a Resource',
-     // tags: ['api'],
-      auth: false,
+//      tags: ['api'],
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -282,7 +321,7 @@ module.exports = [
       description: 'Move resources across groups/subscriptions',
       notes: 'Move resources across groups/subscriptions',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -312,7 +351,7 @@ module.exports = [
       description: 'Delete a Resource',
       notes: 'Delete a Resource',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -344,7 +383,7 @@ module.exports = [
       description: 'List secrets',
       notes: 'List secrets',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -374,8 +413,8 @@ module.exports = [
       handler: azure.listOperations,
       description: 'List supported RP operations',
       notes: 'List supported RP operations',
-     // tags: ['api'],
-      auth: false,
+//      tags: ['api'],
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -401,7 +440,7 @@ module.exports = [
       description: 'Update Communication Preference',
       notes: 'Update Communication Preference',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -415,10 +454,14 @@ module.exports = [
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         },
         payload: {
-          firstName: Joi.string().required(),
-          lastName: Joi.string().required(),
-          email: Joi.string().email().required(),
-          optInForCommunication: Joi.boolean().required()
+          firstName: Joi.string(),
+          FirstName: Joi.string(),
+          lastName: Joi.string(),
+          LastName: Joi.string(),
+          email: Joi.string().email(),
+          Email: Joi.string().email(),
+          optInForCommunication: Joi.boolean(),
+          OptInForCommunication: Joi.boolean()
         }
       },
 //      response: {
@@ -437,7 +480,7 @@ module.exports = [
       description: 'List Communication Preference',
       notes: 'List Communication Preference',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -467,7 +510,7 @@ module.exports = [
       description: 'Regenerate key',
       notes: 'Regenerate key',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -498,7 +541,7 @@ module.exports = [
       description: 'List SSO token',
       notes: 'List SSL token',
 //      tags: ['api'],
-      auth: false,
+      auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

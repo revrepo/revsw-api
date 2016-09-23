@@ -62,6 +62,16 @@ exports.listSubscriptions = function(request, reply) {
   });
 };
 
+exports.listResources = function(request, reply) {
+
+  azureResources.listAll(function(error, resources) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrive from the DB a list of all Azure resources'));
+    }
+    renderJSON(request, reply, error, resources);
+  });
+};
+
 exports.createSubscription = function(request, reply) {
 
   var subscription = request.payload,
@@ -135,10 +145,13 @@ exports.createResource = function(request, reply) {
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
     tags = resource.tags,
-    resourceId = resource.id,
+    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + provider + '/accounts/' + resourceName,
     properties = resource.properties,
     plan = resource.plan;
 
+  resource.id = resourceId;
+  resource.type = 'RevAPM.MobileCDN/accounts';
+  resource.name = resourceName;
 
   azureSubscriptions.get({
     subscription_id: subscriptionId
@@ -234,10 +247,10 @@ exports.patchResource = function(request, reply) {
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
-    tags = resource.tags,
-    resourceId = resource.id,
-    properties = resource.properties,
-    plan = resource.plan;
+    tags = resource.Tags ? resource.Tags : resource.tags,
+    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + provider + '/accounts/' + resourceName,
+    properties = resource.Properties ? resource.Properties : resource.properties,
+    plan = resource.Plan ? resource.Plan : resource.plan;
 
   azureSubscriptions.get({
     subscription_id: subscriptionId
@@ -266,20 +279,32 @@ exports.patchResource = function(request, reply) {
         if (!existingResource) {
           return reply(boom.notFound('The resource is not found'));
         } else {
-          var updatedResource = {
-            id: existingResource.id,
-            tags: tags,
-            plan: plan,
-            properties: properties,
-            original_object: resource
-          };
+          var updatedResource = existingResource;
+          var originalObject = existingResource.original_object;
+          if (plan) {
+            updatedResource.plan = plan;
+            originalObject.plan = plan;
+          }
+          if (properties) {
+            updatedResource.properties = properties;
+            originalObject.properties = properties;
+          }
+          if (tags) {
+            updatedResource.tags = tags;
+            originalObject.tags = tags;
+          } else {
+            updatedResource.tags = {};
+            originalObject.tags = {};
+          }
+
+          updatedResource.original_object = originalObject;
 
           azureResources.update(updatedResource, function(error, result) {
             if (error || !result) {
               return reply(boom.badImplementation('Failed to update Azure resource for subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(updatedResource)));
             }
-            renderJSON(request, reply, error, resource);
+            renderJSON(request, reply, error, originalObject);
           });
         }
       });
@@ -620,10 +645,10 @@ exports.updateCommunicationPreference = function(request, reply) {
 
   var payload = request.payload,
     subscriptionId = request.params.subscription_id,
-    firstName = payload.firstName,
-    lastName = payload.lastName,
-    email = payload.email,
-    optInForCommunication = payload.optInForCommunication;
+    firstName = payload.FirstName ? payload.FirstName : payload.firstName,
+    lastName = payload.LastName ? payload.LastName : payload.lastName,
+    email = payload.Email ? payload.Email : payload.email,
+    optInForCommunication = payload.OptInForCommunication ? payload.OptInForCommunication : payload.optInForCommunication;
 
   azureSubscriptions.get({
     subscription_id: subscriptionId

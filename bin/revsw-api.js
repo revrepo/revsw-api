@@ -36,6 +36,8 @@ var Hapi = require('hapi'),
     boom  = require('boom'),
     mail = require('../lib/mail');
 
+var logger = require('revsw-logger')(config.log_config);
+
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
 if (notifyEmail !== '') {
   process.on('uncaughtException', function (er) {
@@ -147,6 +149,38 @@ server.register(require('../lib/chargify-webhook-signature'), function (err) {
   server.auth.strategy('hmac', 'signature');
 });
 
+// Used for authentication of Azure/ARM calls
+server.register(require('hapi-auth-bearer-token'), function (err) {
+    if(err) {
+      logger.error('Could not register hapi-auth-bearer-token', err);
+      // TODO currently it continues on error
+    }
+    server.auth.strategy('azure-token', 'bearer-access-token', {
+        allowQueryToken: false,              // optional, true by default
+        allowMultipleHeaders: false,        // optional, false by default
+        accessTokenName: 'access_token',    // optional, 'access_token' by default
+        tokenType: 'Bearer-RP',
+        validateFunc: function(token, callback) {
+
+            // For convenience, the request object can be accessed
+            // from `this` within validateFunc.
+            var request = this;
+            var result = {
+              token: token
+            };
+
+            if (token === config.get('azure_marketplace.api_token')) {
+                logger.info('Successful Azure API token authentication');
+                result.scope = 'azure-rp';
+                callback(null, true, result);
+            } else {
+                logger.warn('Failed Azure API token authentication');
+                callback(null, false, {token: token});
+            }
+        }
+    });
+});
+
 // adds swagger self documentation plugin
 server.register([{
   register: require('hapi-swagger'),
@@ -166,7 +200,7 @@ server.register([{
 });
 
 server.auth.default({
-  strategies: ['token', 'apikey' ]
+  strategies: ['token', 'apikey']
 });
 
 // Redirect all non-HTTPS requests to HTTPS
