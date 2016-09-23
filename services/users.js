@@ -50,12 +50,7 @@ var dashboardService = require('./dashboards.js');
 
 exports.createUser = function(newUser, callback) {
   var _createdUser_ = null;
-  console.log('service.createUser', newUser);
-  // типы создания пользователей
-  // 1. Admin при самостоятельной регристрации (self_registry == true)
-  // 2. Admin при регистрации RevAdmin или Resseler (self_registry == true)
-  // 3. Создание обычного пользователя User
-  // Для каждого нового пользователя создается dashboard
+
   async.waterfall([
       //
       function checkExistUser(cb) {
