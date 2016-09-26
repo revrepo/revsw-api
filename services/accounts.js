@@ -61,8 +61,8 @@ var apiKeysService = require('../services/APIKeys.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
 var sslCertificatesService = require('../services/sslCertificates.js');
 
-
-
+var cdsRequest = require('request');
+var authHeader = { Authorization: 'Bearer ' + config.get('cds_api_token') };
 
 /**
  * @name createAccount
@@ -154,31 +154,55 @@ exports.removeAccount = function(accountId, options, callback) {
           if (error) {
             // badImplementation
             err_ = new Error('Failed to verify that there are no active apps for account ID ' + accountId);
-          }
-          if (existingApps.length > 0) {
-            if (autoRemove_) {
-              // NOTE: delete all existing Apps
-              async.each(existingApps, function(appId, _callback_) {
-                apps.remove({ _id: appId }, function resRemovedOneApp(err, app) {
-                  _callback_(err);
-                });
-              }, function resRemovedAllApps(_err_) {
-                console.log('resRemovedAllApps', _err_);
-                if (_err_) {
-                  cb(new Error('Can`t delete all Apps'));
-                } else {
-                  cb(null);
-                }
-              });
-            } else {
-              // badRequest
-              err_ = new Error('There are active apps for the account - please remove the apps before removing the account');
-              cb(err_);
-            }
           } else {
-            cb(null);
-          }
 
+            if (existingApps.length > 0) {
+              if (autoRemove_) {
+                var options = '?deleted_by=' + deletedBy_;
+                async.map(existingApps, function(appId, mapCallback) {
+                    logger.info('Calling CDS to delete app ID ' + appId + ' and option deleted_by ' + deletedBy_);
+
+                    // call CDS API
+                    cdsRequest({
+                        method: 'DELETE',
+                        url: config.get('cds_url') + '/v1/apps/' + appId + options,
+                        headers: authHeader
+                      },
+                      function(err, res, body) {
+                        var _isDeleted = false;
+                        if (err) {
+                          logger.error('CDS failed to delete the mobile app with App ID ' + appId);
+                        } else {
+                          _isDeleted = (!!res.statusCode && res.statusCode == 200)
+                        }
+                        var response_json = JSON.parse(body);
+                        mapCallback(null, {
+                          app_id: appId,
+                          isDeleted: _isDeleted
+                        });
+                      });
+                  },
+                  function(err, delResult) {
+                    async.each(delResult, function(logDel, cb) {
+                      if (logDel.isDeleted) {
+                        logger.info('Account::removeAccount: Deleted App with id ' + logDel.app_id);
+                      } else {
+                        logger.error('Account::removeAccount: Failed to delete App with id ' + logDel.app_id + ' ');
+                      }
+                    }, function(err) {
+                      logger.info('Account::removeAccount: Deleted App with id ' + logDel.app_id);
+                    });
+                    cb(null); // All request is finished
+                  });
+              } else {
+                // badRequest
+                err_ = new Error('There are active apps for the account - please remove the apps before removing the account');
+                cb(err_);
+              }
+            } else {
+              cb(null);
+            }
+          }
         });
       },
       // verify that there are no active domains for an account
@@ -188,22 +212,62 @@ exports.removeAccount = function(accountId, options, callback) {
           deleted: {
             $ne: true
           }
-        }, function(error, domains) {
+        }, function(error, domainsList) {
           var err_ = null;
           if (error) {
             // badImplementation
             err_ = new Error('Failed to verify that there are no active domains for account ID ' + accountId);
-          }
-          if (domains.length > 0) {
-            if (autoRemove_) {
-              // TODO: Remove all domainConfigs
+            cd(err_);
+          } else {
+            if (!error && domainsList.length > 0) {
+              if (autoRemove_) {
+                // NOTE: Call remove all domainConfigs
+                var options = '?deleted_by=' + deletedBy_;
+                async.map(domainsList, function(domainConfig, mapCallback) {
 
+                    logger.info('Calling CDS to delete domain ID: ' + domainConfig._id + ' and option deleted_by ' + deletedBy_);
+                    // Call CDS API
+                    cdsRequest({
+                        url: config.get('cds_url') + '/v1/domain_configs/' + domainConfig._id + options,
+                        method: 'DELETE',
+                        headers: authHeader,
+                      },
+
+                      function(err, res, body) {
+                        var _isDeleted = false;
+                        if (err) {
+                          logger.error('CDS failed to delete the delete domain ID ' + domainConfig._id);
+                        } else {
+                          _isDeleted = (!!res.statusCode && res.statusCode == 200)
+                        }
+                        var response_json = JSON.parse(body);
+                        mapCallback(null, {
+                          domainConfig: domainConfig,
+                          isDeleted: _isDeleted
+                        });
+                      });
+                  },
+                  function(err, delResult) {
+                    async.each(delResult, function(logDel, cb) {
+                      if (logDel.isDeleted) {
+                        logger.info('Account::removeAccount: Deleted delete domain ID ' + logDel.domainConfig._id);
+                      } else {
+                        logger.error('Account::removeAccount: Failed to delete domain ID ' + logDel.domainConfig._id + ' ');
+                      }
+                    }, function(err) {
+                      logger.info('Account::removeAccount: Delete domain ID ' + logDel.domainConfig._id);
+                    });
+                    cb(null); // All request is finished
+                  });
+              } else {
+                //badRequest
+                err_ = new Error('There are active domains registered for the account - please remove the domains before removing the account');
+                cb(err_);
+              }
             } else {
-              //badRequest
-              err_ = new Error('There are active domains registered for the account - please remove the domains before removing the account');
+              cb(null);
             }
           }
-          cb(err_);
         });
       },
       // verify that there are no active dns zones for an account
@@ -213,16 +277,21 @@ exports.removeAccount = function(accountId, options, callback) {
           if (error) {
             // badImplementation
             err_ = new Error('Failed to verify that there are no active DNS Zones for account ID ' + accountId);
-          }
-          if (dnsZones_.length > 0) {
-            if (autoRemove_) {
-              // TODO: Remove all dnsZones
+            cb(err_);
+          } else {
+            if (dnsZones_.length > 0) {
+              if (autoRemove_) {
+                // TODO: Remove all dnsZones
+
+              } else {
+                //badRequest
+                err_ = new Error('There are active DNS Zones registered for the account - please remove the DNS Zones before removing the account');
+                cb(err_);
+              }
             } else {
-              //badRequest
-              err_ = new Error('There are active DNS Zones registered for the account - please remove the DNS Zones before removing the account');
+              cb(null);
             }
           }
-          cb(err_);
         });
       },
       // NOTE: Cancel subscription
