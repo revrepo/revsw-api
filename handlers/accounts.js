@@ -44,30 +44,7 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var Customer = require('../lib/chargify').Customer;
 
-var DomainConfig = require('../models/DomainConfig');
-var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
-
-var LogShippingJob = require('../models/LogShippingJob');
-var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnectionPortal());
-
-var Dashboard = require('../models/Dashboard');
-var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
-
-var App = require('../models/App');
-var apps = new App(mongoose, mongoConnection.getConnectionPortal());
-
-var ApiKey = require('../models/APIKey');
-var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
-
-var DNSZone = require('../models/DNSZone');
-var dnsZones = new DNSZone(mongoose, mongoConnection.getConnectionPortal());
-
-
-var apiKeysService = require('../services/APIKeys.js');
-var dashboardService = require('../services/dashboards.js');
-var logShippingJobsService = require('../services/logShippingJobs.js');
-var sslCertificatesService = require('../services/sslCertificates.js');
-var emailService = require('../services/email.js');
+var accountService = require('../services/accounts.js');
 
 exports.getAccounts = function getAccounts(request, reply) {
 
@@ -103,21 +80,26 @@ exports.createAccount = function(request, reply) {
     companyId: utils.getAccountID(request)
   };
 
-  users.get({_id: updatedUser.user_id}, function(error, user) {
+  users.get({ _id: updatedUser.user_id }, function(error, user) {
     if (error || !user) {
       return reply(boom.badImplementation('Failed to get user ' + updatedUser.user_id));
     }
-    
     if ((user.role === 'admin' || user.role === 'user') && user.companyId.length !== 0) {
       return reply(boom.badRequest('Cannot assign more, than one account to the user'));
     }
 
-    accounts.add(newAccount, function (error, result) {
+    var loggerData = {
+      user_name: newAccount.createdBy,
+      activity_type: 'add',
+      activity_target: 'account',
+      operation_status: 'success',
+      request: request
+    };
+
+    accountService.createAccount(newAccount, { loggerData: loggerData }, function(err, result) {
       if (error || !result) {
         return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
       }
-
-      result = publicRecordFields.handle(result, 'account');
 
       var statusResponse;
       if (result) {
@@ -127,21 +109,11 @@ exports.createAccount = function(request, reply) {
           object_id: result.id
         };
 
-        AuditLogger.store({
-          user_name: newAccount.createdBy,
-          activity_type: 'add',
-          activity_target: 'account',
-          target_id: result.id,
-          target_name: result.companyName,
-          target_object: result,
-          operation_status: 'success'
-        }, request);
-
         if (request.auth.credentials.role !== 'revadmin') {
           updatedUser.companyId.push(result.id);
         }
 
-        users.update(updatedUser, function (error, result) {
+        users.update(updatedUser, function(error, result) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id +
               ' with details of new account IDs ' + updatedUser.companyId));
@@ -686,320 +658,65 @@ exports.deleteAccount = function(request, reply) {
   var account_id = request.params.account_id;
   var account;
   var _payload = request.payload;
-  var _cancellation_message = _payload.cancellation_message || 'not provided';
+  var cancellationMessage_ = _payload.cancellation_message || 'not provided';
 
   if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
     return reply(boom.badRequest('Account ID not found'));
   }
-  var _deleted_by = utils.generateCreatedByField(request);
-  var _cancellation_message_for_chargify = 'Cancel by customer on ' + moment().toISOString() +
-    '(UTC),  user (' + _deleted_by + '), cancellation node (' + _cancellation_message + ')';
 
-  // NOTE:  detect role for different roles use differet work-flow
-  // 1. Work-flow for users with role Admin and call with apikey - in safe mode
-  // 2. Work-flow for users with roles RevAdmin or Resseler - in hard mode (auto delete all related apps, domains and APIkeys)
+  var loggerInfo_ = {
+    activity_type: 'delete',
+    activity_target: 'account',
+    request: request // TODO: set all properties from request for AuditLogger
+  };
+
+  var removeOptions_ = {
+    autoRemove: false, // NOTE: don`t delete
+    loggerInfo: loggerInfo_,
+    deletedBy: utils.generateCreatedByField(request),
+    remoteIP: utils.getAPIUserRealIP(request),
+    cancellationMessage: cancellationMessage_
+  };
 
   switch (request.auth.credentials.user_type) {
     case 'user':
-      var role = request.auth.credentials.role;
-      if (role === 'revadmin' || role === 'reseller') {
-        // TODO: need delete Account in hard mode - method not finished -> deleteAccountInHardMode();
-        deleteAccountInSafeMode();
-      }
-      if (role === 'admin') {
-        deleteAccountInSafeMode();
-      }
-      break;
     case 'apikey':
-      deleteAccountInSafeMode();
+      removedAccountResult(account_id, removeOptions_);
       break;
     default:
       logger.error('Account::deleteAccount: Missing or wrong "user_type" attribute in "request" object ' + JSON.stringify(request.auth.credentials));
       return reply(boom.badImplementation('Failed to delete Account with account ID ' + account_id, JSON.stringify(request.auth.credentials)));
-      // break;
   }
 
   /**
-   * @name  deleteAccountInHardMode
+   * @name  removedAccountResult
    * @description
    *
-   * Delete Account in Hard Mode
-   * !!! NOT IMPLEMENTED
+   *  Remove Account
    *
+   * @param  {String} accountId [description]
+   * @param  {Object} options   [description]
    * @return
    */
-  function deleteAccountInHardMode() {
-
-    async.waterfall([
-      // TODO:  Automatically delete all active Apps
-      // function deleteActiveApps(cb) {
-      // cb()
-      // },
-      //
-      // TODO: Automatically delete all API keys belonging to the account ID
-      // function removeAccountsApiKeys(cb) {
-      // cb()
-      // },
-      function loggerDeleteAccount(cb) {
-        cb(true);
-      }
-    ], function(err) {
-      if (err) {
-        logger.error('Account::deleteAccountInHardMode:  ' + JSON.stringify(request.auth.credentials));
-        return reply(boom.badImplementation('Failed to delete account ID ' + account_id, err));
-      }
-    });
-  }
-  /**
-   * @name  deleteAccountInSafeMode
-   * @description
-   *
-   * Delete Account in Safly mode
-   *
-   * @return {[type]} [description]
-   */
-  function deleteAccountInSafeMode() {
-    async.waterfall([
-      // Verify that there are no active apps for an account
-      function checkActiveApps(cb) {
-        var getAppQuery = {
-          account_id: account_id,
-          deleted: {
-            $ne: true
+  function removedAccountResult(accountId, options) {
+    accountService.removeAccount(accountId, options,
+      function(err, result) {
+        if (err) {
+          logger.error('Account::deleteAccount: erro r in remove process ' + JSON.stringify(err));
+          if (err.message) {
+            // NOTE: show error message from accountService.removeAccount
+            return reply(boom.badRequest(err.message, err));
           }
-        };
-
-        apps.get(getAppQuery, function(error, existing_app) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to verify that there are no active apps for account ID ' + account_id));
-          }
-
-          if (existing_app) {
-            return reply(boom.badRequest('There are active apps for the account - please remove the apps before removing the account'));
-          }
-          cb(error);
-        });
-      },
-      // verify that there are no active domains for an account
-      function(cb) {
-        domainConfigs.query({
-          'proxy_config.account_id': account_id,
-          deleted: {
-            $ne: true
-          }
-        }, function(error, domains) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to verify that there are no active domains for account ID ' + account_id));
-          }
-          if (domains.length > 0) {
-            return reply(boom.badRequest('There are active domains registered for the account - please remove the domains before removing the account'));
-          }
-          cb(error);
-        });
-      },
-      // verify that there are no active dns zones for an account
-      function(cb) {
-        dnsZones.getByAccountId(account_id, function(error, dnsZones_) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to verify that there are no active DNS Zones for account ID ' + account_id));
-          }
-          if (dnsZones_.length > 0) {
-            return reply(boom.badRequest('There are active DNS Zones registered for the account - please remove the DNS Zones before removing the account'));
-          }
-          cb(error);
-        });
-      },
-      // verify that account exists
-      function getAccountData(cb) {
-        accounts.get({
-          _id: account_id
-        }, function(error, account2) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to read account details for account ID ' + account_id));
-          }
-          if (!account2) {
-            return reply(boom.badRequest('Account ID not found'));
-          }
-
-          account = account2;
-
-          cb(error, account);
-        });
-      },
-      // NOTE: Cancel subscription
-      function cancellAccountSubscription(account, cb) {
-        if (account.subscription_id && (account.subscription_state !== 'canceled')) {
-          Customer.cancelSubscription(account.subscription_id, _cancellation_message_for_chargify, function(err, data) {
-            if (err) {
-              // NOTE: can be to get error if try canceled subscription from anothe Cahrgify Site trialing
-              logger.error('Accoutn::deleteAccount:error on cancellAccountSubscription ' + JSON.stringify(err));
-              cb(err);
-            } else {
-              logger.info('Accoutn::deleteAccount:  Subscription with ID ' + account.subscription_id + ' was canceled.' + JSON.stringify(data));
-              cb(err);
-            }
-          });
-        } else {
-          cb(null);
+          return reply(boom.badImplementation('Failed to delete Account with account ID ' + accountId, err));
         }
-      },
-      // Automatically delete All Private SSL Certificates
-      function(cb) {
-        sslCertificatesService.deletePrivateSSLCertificatesWithAccountId(account_id, { deleted_by: _deleted_by }, function(error, data) {
-          if (error) {
-            logger.error('Accounts::deleteAccount:Error remove Private SSL Certificates while removing account ID ' + account_id);
-            return reply(boom.badImplementation('Failed to delete Private SSL Certificates for account ID ' + account_id, error));
-          }
-          logger.info('Removed All Private SSL Certificates while removing account ID ' + account_id);
-          cb();
-        });
-      },
-      // Automatically delete all API keys belonging to the account ID
-      function removeAccountsApiKeys(cb) {
-        apiKeysService.deleteAPIKeysWithAccountId(account_id, function(error) {
-          if (error) {
-            logger.error('Error remove All API keys while removing account ID ' + account_id);
-            return reply(boom.badImplementation('Failed to delete API keys for account ID ' + account_id));
-          }
-          logger.info('Removed All API keys while removing account ID ' + account_id);
-          cb();
-        });
-      },
-      // NOTE: Auto Delete Log Shipping Jobs
-      function autoRemoveLogShippingJobs(cb) {
-        logShippingJobsService.deleteJobsWithAccountId(account_id, function(err, data) {
-          if (err) {
-            logger.error('Error remove All Log Shipping Jobs while removing account ID ' + account_id);
-            return reply(boom.badImplementation('Failed to delete Log Shipping Jobs for account ID ' + account_id));
-          }
-          logger.info('Removed All Log Shipping Jobs while removing account ID ' + account_id);
-          cb();
-        });
-      },
-      // Drop the deleted account_id from companyId of all users which are managing the account
-      function getAccountUsersForDelete(cb) {
-        users.listAll(request, function(error, usersToUpdate) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to retrieve from the DB a list of all users'));
-          }
-          for (var i = 0; i < usersToUpdate.length; i++) {
-            if (usersToUpdate[i].companyId.indexOf(account_id) === -1) {
-              usersToUpdate.splice(i, 1);
-              i--;
-            }
-          }
-          cb(error, usersToUpdate);
-        });
-      },
-      function dropAccountUsers(usersToUpdate, cb) {
-        async.eachSeries(usersToUpdate, function(user, callback) {
-            var user_id = user.user_id;
-            var _role = user.role;
-            logger.info('User with ID ' + user_id + 'and role "' + _role + '"  while removing account ID ' + account_id + '. Count Companies = ' +
-              user.companyId.length + ' ' + JSON.stringify(user.companyId));
-            if (user.companyId.length === 1) {
-              // NOTE: delete user's dashboards
-              logger.info('Accounts:dropAccountUsers:Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + account_id);
-              dashboardService.deleteDashboardsWithUserId(user_id, function(error) {
-                if (error) {
-                  return reply(boom.badImplementation('Error removing the dashboards'));
-                } else {
-                  // NOTE: delete user if all his dashboards deleted
-                  users.remove({
-                    _id: user.user_id
-                  }, function(error, result) {
-                    if (error) {
-                      logger.warn('Accounts:dropAccountUsers:Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id);
-                      return reply(boom.badImplementation('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + account_id, error));
-                    }
-                    logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + account_id);
-                    callback(error, user);
-                  });
-                }
-              });
-            } else { /// else just update the user account and delete the account_id from companyId array
-              logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + account_id);
-              var indexToDelete = user.companyId.indexOf(account_id);
-              logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + account_id + ', user.companyId = ' + user.companyId);
-              user.companyId.splice(indexToDelete, 1);
-              var updatedUser = {
-                user_id: user_id,
-                companyId: user.companyId
-              };
-
-              users.update(updatedUser, function(error, result) {
-                if (error) {
-                  return reply(boom.badImplementation('Failed to update user ID ' + user.user_id + ' while removing account ID ' + account_id, error));
-                }
-                callback(error, user);
-              });
-            }
-          },
-          function(error) {
-            cb(error);
-          });
-      },
-      // Mark account as deleted
-      function markAccountAsDeleted(cb) {
-        var deleteAccountQuery = {
-          account_id: account_id,
-          deleted: true,
-          subscription_state: 'canceled',
-          deleted_by: _deleted_by,
-          deleted_at: new Date(),
-          cancellation_message: _cancellation_message,
-        };
-
-        accounts.update(deleteAccountQuery, function(error) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to set delete flag to account ID ' + account_id, error));
-          }
-          cb(error);
-        });
-      },
-      // Send an email to Rev ops team notifying about the closed account
-      function sendRevOpsEmailAboutCloseAccount(cb) {
-        logger.info('deleteAccount:sendRevOpsEmailAboutNewSignup');
-        emailService.sendRevOpsEmailAboutCloseAccount({
-          remoteIP: utils.getAPIUserRealIP(request),
-          account_id: account_id,
-          companyName: account.companyName,
-          deleted_by: _deleted_by,
-          cancellation_message: _cancellation_message
-        }, function(err, data) {
-          if (err) {
-            logger.error('deleteAccount:sendRevOpsEmailAboutCloseAccount:error: ' + JSON.stringify(err));
-          } else {
-            logger.info('deleteAccount:sendRevOpsEmailAboutCloseAccount:success');
-          }
-        });
-        cb(null);
-      },
-      // Log results and finish request
-      function loggerDeleteAccount(cb) {
+        logger.info('Account::deleteAccount: Successfully deleted the account with id ' + accountId);
         var statusResponse;
         statusResponse = {
           statusCode: 200,
           message: 'Successfully deleted the account'
         };
-
-        account = publicRecordFields.handle(account, 'account');
-
-        AuditLogger.store({
-          activity_type: 'delete',
-          activity_target: 'account',
-          target_id: account.id,
-          target_name: account.companyName,
-          target_object: account,
-          operation_status: 'success'
-        }, request);
-
         renderJSON(request, reply, null, statusResponse);
-      }
-    ], function(err) {
-      if (err) {
-        return reply(boom.badImplementation('Failed to delete account ID ' + account_id));
-      }
-    });
+      });
   }
+
 };
