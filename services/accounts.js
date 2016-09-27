@@ -47,7 +47,6 @@ var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
 var DNSZone = require('../models/DNSZone');
-var dnsZones = new DNSZone(mongoose, mongoConnection.getConnectionPortal());
 
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
@@ -64,6 +63,9 @@ var sslCertificatesService = require('../services/sslCertificates.js');
 var cdsRequest = require('request');
 var authHeader = { Authorization: 'Bearer ' + config.get('cds_api_token') };
 
+var Nsone = require('../lib/nsone.js');
+var Promise = require('bluebird');
+var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getConnectionPortal()));
 /**
  * @name createAccount
  * @description
@@ -118,8 +120,8 @@ exports.createAccount = function(newAccount, options, callback) {
  * @name removeAccount
  * @description
 
- * @param  {[type]}   accountId [description]
- * @param  {[type]}   options   [description]
+ * @param  {String}   accountId [description]
+ * @param  {Object}   options   [description]
  * @param  {Function} callback  [description]
  * @return
  */
@@ -161,7 +163,6 @@ exports.removeAccount = function(accountId, options, callback) {
                 var options = '?deleted_by=' + deletedBy_;
                 async.map(existingApps, function(appId, mapCallback) {
                     logger.info('Calling CDS to delete app ID ' + appId + ' and option deleted_by ' + deletedBy_);
-
                     // call CDS API
                     cdsRequest({
                         method: 'DELETE',
@@ -173,7 +174,7 @@ exports.removeAccount = function(accountId, options, callback) {
                         if (err) {
                           logger.error('CDS failed to delete the mobile app with App ID ' + appId);
                         } else {
-                          _isDeleted = (!!res.statusCode && res.statusCode == 200)
+                          _isDeleted = (!!res.statusCode && res.statusCode === 200);
                         }
                         var response_json = JSON.parse(body);
                         mapCallback(null, {
@@ -190,7 +191,7 @@ exports.removeAccount = function(accountId, options, callback) {
                         logger.error('Account::removeAccount: Failed to delete App with id ' + logDel.app_id + ' ');
                       }
                     }, function(err) {
-                      logger.info('Account::removeAccount: Deleted App with id ' + logDel.app_id);
+                      logger.info('Account::removeAccount: Deleted all Apps finished');
                     });
                     cb(null); // All request is finished
                   });
@@ -217,7 +218,7 @@ exports.removeAccount = function(accountId, options, callback) {
           if (error) {
             // badImplementation
             err_ = new Error('Failed to verify that there are no active domains for account ID ' + accountId);
-            cd(err_);
+            cb(err_);
           } else {
             if (!error && domainsList.length > 0) {
               if (autoRemove_) {
@@ -232,13 +233,12 @@ exports.removeAccount = function(accountId, options, callback) {
                         method: 'DELETE',
                         headers: authHeader,
                       },
-
                       function(err, res, body) {
                         var _isDeleted = false;
                         if (err) {
                           logger.error('CDS failed to delete the delete domain ID ' + domainConfig._id);
                         } else {
-                          _isDeleted = (!!res.statusCode && res.statusCode == 200)
+                          _isDeleted = (!!res.statusCode && res.statusCode === 200);
                         }
                         var response_json = JSON.parse(body);
                         mapCallback(null, {
@@ -250,12 +250,12 @@ exports.removeAccount = function(accountId, options, callback) {
                   function(err, delResult) {
                     async.each(delResult, function(logDel, cb) {
                       if (logDel.isDeleted) {
-                        logger.info('Account::removeAccount: Deleted delete domain ID ' + logDel.domainConfig._id);
+                        logger.info('Account::removeAccount: Deleted domain ID ' + logDel.domainConfig._id);
                       } else {
                         logger.error('Account::removeAccount: Failed to delete domain ID ' + logDel.domainConfig._id + ' ');
                       }
                     }, function(err) {
-                      logger.info('Account::removeAccount: Delete domain ID ' + logDel.domainConfig._id);
+                      logger.info('Account::removeAccount: Delete All domain finished');
                     });
                     cb(null); // All request is finished
                   });
@@ -281,15 +281,88 @@ exports.removeAccount = function(accountId, options, callback) {
           } else {
             if (dnsZones_.length > 0) {
               if (autoRemove_) {
-                // TODO: Remove all dnsZones
-
+                // NOTE: Remove all dnsZones one by one (async.mapSeries)
+                async.mapSeries(dnsZones_,
+                  function removeEachDNSZone(zone_, callbackData_) {
+                    // Run delete one DNS Zone from list
+                    var nsoneZoneInfo = null;
+                    Promise.try(function() {
+                        Nsone.getDnsZone(zone_.zone)
+                          .then(function(nsoneZone_) {
+                            nsoneZoneInfo = nsoneZone_;
+                            // Found zone, delete then
+                            return Nsone.deleteDnsZone(nsoneZone_)
+                              .then(function() {
+                                // Zone removed from NS1
+                                return Promise.resolve(true);
+                              })
+                              .catch(function(error) {
+                                logger.error('AccountRemove:NSONE DNS Zone not deleted (' + JSON.stringify(nsoneZoneInfo) + ')');
+                                throw error;
+                              });
+                          })
+                          .catch(function(error) {
+                            throw error;
+                          });
+                      })
+                      .then(function() {
+                        // Delete zone from DNSZone collection
+                        return dnsZones.removeAsync(zone_.id);
+                      })
+                      .then(function(removedDnsZone_) {
+                        // TODO: prepare information for audit logger and store it
+                        // zone_.ttl = nsoneZoneInfo.ttl;
+                        // zone_.refresh = nsoneZoneInfo.refresh;
+                        // zone_.retry = nsoneZoneInfo.retry;
+                        // zone_.expiry = nsoneZoneInfo.expiry;
+                        // zone_.nx_ttl = nsoneZoneInfo.nx_ttl;
+                        logger.info('Account::removeAccount: AuditLogger removedDnsZone ' + JSON.stringify(zone_));
+                        // TODO: Требуются обязательные параметры для логирования удаления из Azure
+                        //  AuditLogger.store({
+                        //    activity_type: 'delete',
+                        //    activity_target: 'dnszone',
+                        //    target_id: zone_.id,
+                        //    target_name: zone_.zone,
+                        //    target_object: zone_, // NOTE: save info about already deleted object
+                        //    operation_status: 'success'
+                        // }, request);
+                        return Promise.resolve(removedDnsZone_);
+                      })
+                      .then(function successRemoveOneDNSZone(data) {
+                        logger.info('Account::removeAccount:removedDnsZone:AuditLogger data ' + JSON.stringify(zone_));
+                        callbackData_(null, {
+                          isDeleted: true,
+                          zone: zone_
+                        });
+                      })
+                      .catch(function errorRemoveOneDNSZone(err) {
+                        logger.error('Account::removeAccount:removedDnsZone: Error delete DNS Zone ' + JSON.stringify(zone_));
+                        callbackData_(null, {
+                          isDeleted: false,
+                          zone: zone_
+                        });
+                      });
+                  },
+                  function(err, resultRemoveAll) {
+                    async.eachSeries(resultRemoveAll, function(logDel, cb_) {
+                      if (logDel.isDeleted) {
+                        logger.info('Account::removeAccount: Deleted DNS Zone  ' + logDel.zone.id);
+                      } else {
+                        logger.error('Account::removeAccount: Failed to delete domain ID ' + logDel.zone.id + ' ');
+                      }
+                      cb_(null);
+                    }, function(err) {
+                      logger.info('Account::removeAccount: Delete all DNS Zones finished ');
+                    });
+                    cb(null);
+                  });
               } else {
                 //badRequest
                 err_ = new Error('There are active DNS Zones registered for the account - please remove the DNS Zones before removing the account');
                 cb(err_);
               }
             } else {
-              cb(null);
+              cb(err_);
             }
           }
         });
@@ -483,9 +556,6 @@ exports.removeAccount = function(accountId, options, callback) {
     ],
     // Final callback
     function(err) {
-      if (err) {
-        callback(err);
-      }
       callback(err, removedAccount_);
     });
 };
