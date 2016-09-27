@@ -22,6 +22,7 @@
 
 var boom = require('boom');
 var mongoose = require('mongoose');
+var async = require('async');
 var AuditLogger = require('../lib/audit');
 var config = require('config');
 var Promise = require('bluebird');
@@ -49,7 +50,7 @@ var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getCon
 var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mongoConnection.getConnectionPortal()));
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 var usersService = require('../services/users.js');
-
+var accountsService = require('../services/accounts.js');
 var provider = 'RevAPM.MobileCDN';
 var providerForOperationsResponse = 'RevAPM MobileCDN';
 
@@ -189,7 +190,16 @@ exports.createResource = function(request, reply) {
             createdBy: 'Azure Subscription ' + subscriptionId,
             // TODO add billing plan
           };
-          accounts.add(newAccount, function(error, account) {
+          var loggerData = {
+            user_name: newAccount.createdBy,
+            user_type: 'system',
+            user_id: '00000', //
+            activity_type: 'add',
+            activity_target: 'account',
+            operation_status: 'success',
+            // request: request
+          };
+          accountsService.createAccount(newAccount, { loggerData: loggerData }, function(error, account) {
             if (error || !account) {
               return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(newAccount)));
@@ -214,7 +224,7 @@ exports.createResource = function(request, reply) {
               }
 
               // TODO: add code to send email notifications about new Azure resources registered in the system
-              // TODO: add code to add audit records for new subscription, resource, account, user
+              // TODO: add code to add audit records for new subscription, resource, user
 
               var newResource = {
                 subscription_id: subscriptionId,
@@ -505,16 +515,53 @@ exports.deleteResource = function(request, reply) {
         if (!resource) {
           return reply('No Content').code(204);
         } else {
-          // TODO implement actual removal of the resource: domains, apps, keys, dashboards, etc
-          resource.deleted = true;
+          // TODO: implement actual removal of the resource: domains, apps, keys, dashboards, etc
+          // !!! NOTE: not finished
+          async.waterfall([
+              function updateAzureResources(cb) {
+                resource.deleted = true;
+                azureResources.update(resource, function(error, result) {
+                  var err_ = null;
+                  if (error || !result) {
+                    err_ = new Error('Failed to mark as deleted Azure resource for subscription ID ' + subscriptionId +
+                      ', payload ' + JSON.stringify(resource));
+                  }
+                  cb(err_);
+                });
+              },
+              function tryRemoveAccount(cb) {
+                var remoteIP_ = utils.getAPIUserRealIP(request);
+                var deletedBy = 'Azure Subscription ' + subscriptionId;
+                var loggerInfo = {
+                  user_type: 'system',
+                  user_name: deletedBy,
+                  ip_address: remoteIP_
+                };
+                accountsService.removeAccount(resource.account_id, {
+                  autoRemove: false, // TODO: set to True after implementation !!!
+                  deletedBy: deletedBy,
+                  loggerInfo: loggerInfo,
+                  remoteIP: remoteIP_
+                }, function(err, result) {
+                  if (err) {
+                    logger.error('Azure::deleteResource: error removeAccount with accountID ' + resource.account_id);
+                  }
+                  cb(err);
+                });
+              },
+            ],
+            function(error) {
+              if (error) {
+                if (error.message) {
+                  return reply(boom.badRequest(error.message, error));
+                }
+                return reply(boom.badImplementation('Failed to mark as deleted Azure resource for subscription ID ' + subscriptionId +
+                  ', payload ' + JSON.stringify(resource)));
+              }
+              renderJSON(request, reply, error, '');
 
-          azureResources.update(resource, function(error, result) {
-            if (error || !result) {
-              return reply(boom.badImplementation('Failed to mark as deleted Azure resource for subscription ID ' + subscriptionId +
-                ', payload ' + JSON.stringify(resource)));
-            }
-            renderJSON(request, reply, error, '');
-          });
+            });
+
         }
       });
   });

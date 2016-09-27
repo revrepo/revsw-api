@@ -32,6 +32,7 @@ var _ = require('lodash');
 
 var emailService = require('../services/email.js');
 var dashboardService = require('../services/dashboards.js');
+var accountsService = require('../services/accounts.js');
 var usersService = require('../services/users.js');
 
 
@@ -59,7 +60,7 @@ Promise.promisifyAll(chargifyProduct);
 Promise.promisifyAll(chargifyCustomer);
 
 Promise.promisifyAll(usersService);
-
+Promise.promisifyAll(accountsService,{multiArgs: true});
 
 var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
@@ -229,7 +230,7 @@ exports.signup = function(req, reply) {
         },
         self_registered: true
       };
-      return accounts.addAsync(newCompany);
+      return accountsService.createAccountAsync(newCompany, {});
     })
     .then(function createNewAdminUser(account) {
       _newAccount = publicRecordFields.handle(account, 'account');
@@ -491,8 +492,17 @@ exports.signup2 = function(req, reply) {
         },
         self_registered: true //NOTE: Important for self registration account
       };
-      return accounts.addAsync(newCompany);
+      //    var loggerData = {
+      //     user_name: newAccount.createdBy,
+      //     activity_type: 'add',
+      //     activity_target: 'account',
+      //     operation_status: 'success',
+      //     request: request
+      // };
+      // NOTE:
+      return accountsService.createAccountAsync(newCompany, {});
     })
+
     // NOTE:  create new Admin User
     .then(function createNewAdminUser(account) {
       _newAccount = publicRecordFields.handle(account, 'account');
@@ -511,7 +521,7 @@ exports.signup2 = function(req, reply) {
         .then(function successUserCreated(user) {
           _newUser = user;
           logger.info('signup2:: User ' + user.email + ' created with account ID ' + _newAccount.id);
-          // NOTE: not yet add information in AuditLogger. Do it after full registration cjmplite
+          // NOTE: not yet add information in AuditLogger. Do it after full registration complite
           return Promise.resolve(user);
         });
     })
@@ -548,14 +558,6 @@ exports.signup2 = function(req, reply) {
           user_id: user.user_id
         });
         return user;
-      },
-      function onErrorCreateUser(dataError) {
-        // TODO: add more detais about error
-        throw {
-          statusCode: 403,
-          message: 'User can not be created.'
-        };
-
       })
     .then(function createChargifyAccount() {
       return new Promise(function(resolve, reject) {
@@ -606,7 +608,7 @@ exports.signup2 = function(req, reply) {
       reply(statusResponse);
     })
     .catch(function replyErrorSignUp(err) {
-      if (err.statusCode === 406) {
+      if (err.statusCode === 406 || err.statusCode === 402) {
         reply(boom.notImplemented(err.message || 'Error signup process', err));
       } else {
         reply(boom.badImplementation(err.message || 'Error signup process', err));
