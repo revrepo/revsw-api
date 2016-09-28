@@ -490,7 +490,7 @@ exports.removeAccount = function(accountId, options, callback) {
                   //badImplementation
                   err_ = new Error('Failed to update user ID ' + user.user_id + ' while removing account ID ' + accountId);
                 }
-                callback(err_, user);
+                callback_(err_, user);
               });
             }
           },
