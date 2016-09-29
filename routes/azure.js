@@ -144,7 +144,7 @@ module.exports = [
           name: Joi.string().trim(),
           type: Joi.string().trim(),
           plan: Joi.object({
-            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze2', 'gold'),
             publisher: Joi.string(),
             product: Joi.string(),
             promotioncode: Joi.string().allow(null, ''),
@@ -194,14 +194,14 @@ module.exports = [
           type: Joi.string().trim(),
           Type: Joi.string().trim(),
           plan: Joi.object({
-            name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            name: Joi.string().valid('free', 'developer', 'silver', 'bronze2', 'gold'),
             publisher: Joi.string(),
             product: Joi.string(),
             promotioncode: Joi.string().allow(null, ''),
             promotionCode: Joi.string().allow(null, '')
           }),
           Plan: Joi.object({
-            Name: Joi.string().valid('free', 'developer', 'silver', 'bronze', 'gold'),
+            Name: Joi.string().valid('free', 'developer', 'silver', 'bronze2', 'gold'),
             Publisher: Joi.string(),
             Product: Joi.string(),
             PromotionCode: Joi.string().allow(null, '')
