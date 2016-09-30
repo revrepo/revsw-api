@@ -538,7 +538,7 @@ exports.deleteResource = function(request, reply) {
                   ip_address: remoteIP_
                 };
                 accountsService.removeAccount(resource.account_id, {
-                  autoRemove: false, // TODO: set to True after implementation !!!
+                  autoRemove: true,
                   deletedBy: deletedBy,
                   loggerInfo: loggerInfo,
                   remoteIP: remoteIP_
