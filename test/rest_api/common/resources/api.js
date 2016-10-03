@@ -35,6 +35,7 @@ var ResetResource = require('./reset');
 var SdkConfigsResource = require('./sdkConfigs');
 var SignUpResource = require('./signUp');
 var SSLCerts = require('./sslCerts');
+var SSLNames = require('./sslNames');
 var StagingServers = require('./stagingServers');
 var StatsResource = require('./stats');
 var StatsSDKResource = require('./stats-sdk');
@@ -63,6 +64,7 @@ module.exports = {
   sdkConfigs: SdkConfigsResource,
   signUp: SignUpResource,
   sslCerts: SSLCerts,
+  sslNames: SSLNames,
   stagingServers: StagingServers,
   stats: StatsResource,
   stats_sdk: StatsSDKResource,
