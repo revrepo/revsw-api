@@ -256,7 +256,7 @@ exports.addSSLName = function (request, reply) {
             sendStatusReport(request, reply, error, 400, 'GS failed to add new SSL name ' + SSLName);
           } else {
             // check error in Response message
-            if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
+            if (data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
               // console.log(data.output.message);
               if (verificationMethod === 'url') {
                 verificationObject = data.output.message.Response.CloudOVSANInfo.MetaTag;
@@ -344,7 +344,7 @@ exports.verifySSLName = function (request, reply) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to verify for SSL name ID ' + sslNameId);
         } else {
-          if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
+          if (data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
             setStatusVerified(request, reply, result);
           } else {
             sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors.Error, 400, 'Failed to verify SSL name ID ' + sslNameId);
@@ -358,7 +358,7 @@ exports.verifySSLName = function (request, reply) {
         if (error) {
           sendStatusReport(request, reply, error, 400, 'Failed to verify for SSL name ID ' + sslNameId);
         } else {
-          if (data.output.message.Response.OrderResponseHeader.Errors === null && data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
+          if (data.output.message.Response.OrderResponseHeader.SuccessCode === 0) {
             setStatusVerified(request, reply, result);
           } else {
             sendStatusReport(request, reply, data.output.message.Response.OrderResponseHeader.Errors.Error, 400, 'Failed to verify SSL name ID ' + sslNameId);
