@@ -49,28 +49,12 @@ describe('Setup', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                if (user.role === Constants.API.USERS.ROLES.ADMIN) {
-                  return API.resources.users
-                    .myself()
-                    .getOne();
-                }
-                return API.helpers.accounts.createOne();
-              })
-              .then(function (response) {
-
                 var sslNamesNeeded = [];
                 var prefix = buildPrefix(user);
-                var accountId;
-
-                if (user.role === Constants.API.USERS.ROLES.ADMIN) {
-                  accountId = response.body.companyId[0];
-                }
-                else {
-                  accountId = response.id;
-                }
 
                 for (var i = 10; i < 40; i++) {
-                  sslNamesNeeded.push(SSLNameDP.generateOne(accountId, prefix + i));
+                  sslNamesNeeded.push(SSLNameDP
+                    .generateOne(user.account.id, prefix + i));
                 }
 
                 API.resources.sslNames
