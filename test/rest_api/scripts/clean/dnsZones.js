@@ -21,54 +21,48 @@ var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
-    // Changing default mocha's timeout (Default is 2 seconds).
-    this.timeout(config.api.request.maxTimeout);
+  // Changing default mocha's timeout (Default is 2 seconds).
+  this.timeout(config.get('api.request.maxTimeout'));
 
-    var reseller = config.get('api.users.revAdmin');
-    var namePattern = /[0-9]{13}/;
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
+  ];
+  var namePattern = /[0-9]{13}/;
 
-    before(function (done) {
-        done();
-    });
+  describe('DNS Zones', function () {
 
-    after(function (done) {
-        done();
-    });
+    users.forEach(function (user) {
 
-    describe('DNS Zones resource', function () {
-
-        beforeEach(function (done) {
-            done();
-        });
-
-        afterEach(function (done) {
-            done();
-        });
+      describe('With user: ' + user.role, function () {
 
         it('should clean DNS Zones created for testing.',
-            function (done) {
-                API.helpers
-                    .authenticateUser(reseller)
-                    .then(function () {
-                        API.resources.dnsZones
-                            .getAll()
-                            .expect(200)
-                            .then(function (res) {
-                                var ids = [];
-                                var dnsZones = res.body;
-                                dnsZones.forEach(function (dnsZone) {
-                                    if (namePattern.test(dnsZone.zone)) {
-                                        ids.push(dnsZone.id);
-                                    }
-                                });
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.dnsZones
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var dnsZones = res.body;
+                    dnsZones.forEach(function (dnsZone) {
+                      if (namePattern.test(dnsZone.zone)) {
+                        ids.push(dnsZone.id);
+                      }
+                    });
 
-                                API.resources.dnsZones
-                                    .deleteManyIfExist(ids)
-                                    .finally(done);
-                            })
-                            .catch(done);
-                    })
-                    .catch(done);
-            });
+                    API.resources.dnsZones
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+      });
     });
+  });
 });

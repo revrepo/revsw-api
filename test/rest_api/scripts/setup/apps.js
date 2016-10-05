@@ -23,7 +23,7 @@ var Constants = require('./../../common/constants');
 describe('Setup', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
     config.get('api.users.revAdmin'),

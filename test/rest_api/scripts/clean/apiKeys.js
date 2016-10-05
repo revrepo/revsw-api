@@ -26,58 +26,52 @@ describe('Clean up', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
+  ];
   var namePattern = /[0-9]{13}/;
 
-  before(function (done) {
-    done();
-  });
+  describe('API Keys', function () {
 
-  after(function (done) {
-    done();
-  });
+    users.forEach(function (user) {
 
-  describe('API Keys resource', function () {
+      describe('With user: ' + user.role, function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should clean API Keys created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.resources.apiKeys
-              .getAll()
-              .expect(200);
-          })
-          .then(function (res) {
-            var apiKeys = res.body;
-            var idsForApiKeysToDelete = [];
-            return Promise
-              .each(apiKeys, function (apiKey) { // One promise after other
-                return API.resources.accounts
-                  .getOne(apiKey.account_id)
-                  .then(function (res) {
-                    var account = res.body;
-                    if (namePattern.test(account.companyName) ||
-                      namePattern.test(account.contact_email)) {
-                      idsForApiKeysToDelete.push(apiKey.id);
-                    }
+        it('should clean API Keys created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.apiKeys
+                  .getAll()
+                  .expect(200);
+              })
+              .then(function (res) {
+                var apiKeys = res.body;
+                var idsForApiKeysToDelete = [];
+                return Promise
+                  .each(apiKeys, function (apiKey) { // One promise after other
+                    return API.resources.accounts
+                      .getOne(apiKey.account_id)
+                      .then(function (res) {
+                        var account = res.body;
+                        if (namePattern.test(account.companyName) ||
+                          namePattern.test(account.contact_email)) {
+                          idsForApiKeysToDelete.push(apiKey.id);
+                        }
+                      });
+                  })
+                  .then(function () {
+                    API.resources.apiKeys
+                      .deleteManyIfExist(idsForApiKeysToDelete)
+                      .finally(done);
                   });
               })
-              .then(function () {
-                API.resources.apiKeys
-                  .deleteManyIfExist(idsForApiKeysToDelete)
-                  .finally(done);
-              });
-          })
-          .catch(done);
+              .catch(done);
+          });
       });
+    });
   });
 });

@@ -24,50 +24,44 @@ describe('Clean up', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
+  ];
   var namePattern = /[0-9]{13}/;
 
-  before(function (done) {
-    done();
-  });
+  describe('SSL Certificates', function () {
 
-  after(function (done) {
-    done();
-  });
+    users.forEach(function (user) {
 
-  describe('SSL Certificates resource', function () {
+      describe('With user: ' + user.role, function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should clean SSL Certificates created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslCerts
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var certificates = res.body;
-                certificates.forEach(function (certificate) {
-                  if (namePattern.test(certificate.cert_name)) {
-                    ids.push(certificate.id);
-                  }
-                });
+        it('should clean SSL Certificates created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.sslCerts
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var certificates = res.body;
+                    certificates.forEach(function (certificate) {
+                      if (namePattern.test(certificate.cert_name)) {
+                        ids.push(certificate.id);
+                      }
+                    });
+                    API.resources.sslCerts
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

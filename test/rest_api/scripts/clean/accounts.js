@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,54 +22,48 @@ var API = require('./../../common/api');
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+    // config.get('api.users.admin') // ADMIN user cannot create account
+  ];
   var pattern = /[0-9]{13}/;
 
-  before(function (done) {
-    done();
-  });
+  describe('Accounts', function () {
 
-  after(function (done) {
-    done();
-  });
+    users.forEach(function (user) {
 
-  describe('Accounts resource', function () {
+      describe('With user: ' + user.role, function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should clean Accounts created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.accounts
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var accounts = res.body;
-                accounts.forEach(function (account) {
-                  if (pattern.test(account.companyName) ||
-                    pattern.test(account.createdBy)) {
-                    ids.push(account.id);
-                  }
-                });
-
+        it('should clean Accounts created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.accounts
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var accounts = res.body;
+                    accounts.forEach(function (account) {
+                      if (pattern.test(account.companyName) ||
+                        pattern.test(account.createdBy)) {
+                        ids.push(account.id);
+                      }
+                    });
+
+                    API.resources.accounts
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

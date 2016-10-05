@@ -26,9 +26,9 @@ describe('Setup', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
-    // config.get('api.users.admin') // ADMIN user cannot create account
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller')
+    // config.get('api.users.admin') // ADMIN user cannot create account
   ];
 
   var buildPrefix = function (user) {

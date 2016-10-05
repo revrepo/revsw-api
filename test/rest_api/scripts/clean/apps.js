@@ -22,55 +22,49 @@ var API = require('./../../common/api');
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
+  ];
   var namePattern = /API_TEST_APP_[0-9]{13}/;
   var namePattern2 = /[0-9]{13}/;
 
-  before(function (done) {
-    done();
-  });
+  describe('Apps', function () {
 
-  after(function (done) {
-    done();
-  });
+    users.forEach(function (user) {
 
-  describe('Apps resource', function () {
+      describe('With user: ' + user.role, function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should clean Apps created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.apps
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var apps = res.body;
-                apps.forEach(function (app) {
-                  if (namePattern.test(app.app_name) ||
-                      namePattern2.test(app.app_name)) {
-                    ids.push(app.id);
-                  }
-                });
-
+        it('should clean Apps created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.apps
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var apps = res.body;
+                    apps.forEach(function (app) {
+                      if (namePattern.test(app.app_name) ||
+                        namePattern2.test(app.app_name)) {
+                        ids.push(app.id);
+                      }
+                    });
+
+                    API.resources.apps
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });
