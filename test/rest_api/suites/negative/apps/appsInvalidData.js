@@ -101,7 +101,7 @@ describe('Negative check', function () {
           it('should return `bad request` response when deleting app using ' +
             'invalid id.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+              var newApp = AppsDP.generateOne(testAccount.id);
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
