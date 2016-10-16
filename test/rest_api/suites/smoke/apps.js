@@ -104,7 +104,7 @@ describe('Smoke check', function () {
 
         it('should return a response when creating an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = AppsDP.generateOne(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
@@ -124,9 +124,8 @@ describe('Smoke check', function () {
 
         it('should return a response when updating an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = AppsDP.generateOne(testAccount.id);
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
@@ -143,7 +142,7 @@ describe('Smoke check', function () {
 
         it('should return a response when deleting an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = AppsDP.generateOne(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
