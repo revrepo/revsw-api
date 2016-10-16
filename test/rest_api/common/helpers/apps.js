@@ -24,8 +24,13 @@ var APITestError = require('./../apiTestError');
 // Abstracts common functionality for the related resource.
 module.exports = {
 
-  createOne: function (accountId) {
-    var app = AppsDP.generateOne(accountId);
+  /**
+   * Create a new App using the account ID and the data provided.
+   * @param {Number} accountId, account ID
+   * @param {Object} data, app data
+   */
+  createOne: function (accountId, data) {
+    var app = AppsDP.generateOne(accountId, data);
     return AppsResource
       .createOneAsPrerequisite(app)
       .catch(function (error) {

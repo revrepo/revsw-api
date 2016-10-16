@@ -44,11 +44,11 @@ var AppsDataProvider = {
    *         app_platform: String
    *     }
    */
-  generateOne: function (accountId, prefix) {
+  generateOne: function (accountId, data) {
     return {
       account_id: accountId,
-      app_name: (prefix ? prefix + '_' : '' ) + this.prefix + Date.now(),
-      app_platform: 'iOS'
+      app_name: this.prefix + Date.now(),
+      app_platform: data.platform || 'iOS'
     };
   },
 
