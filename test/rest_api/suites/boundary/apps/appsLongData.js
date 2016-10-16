@@ -100,7 +100,7 @@ describe('Boundary check', function () {
           it('should return `bad request` response when deleting an app with ' +
             '`long` app id.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+              var newApp = AppsDP.generateOne(testAccount.id);
               API.helpers
                 .authenticateUser(user)
                 .then(function () {

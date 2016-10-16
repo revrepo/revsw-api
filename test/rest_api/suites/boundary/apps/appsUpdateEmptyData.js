@@ -36,7 +36,7 @@ describe('Boundary check', function () {
 
       var testAccount;
       var testApp;
-      var fullTestApp = AppsDP.generateOneForUpdate(0, 'UPDATED');
+      var fullTestApp = AppsDP.generateOneForUpdate(0);
 
       before(function (done) {
         API.helpers
