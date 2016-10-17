@@ -84,7 +84,6 @@ describe('Setup', function () {
                       }
                     }
 
-                    console.log('sslNamesToCreate', sslNamesToCreate);
                     //TODO: We have limitation with SSL cert (50 names)
                     //API.resources.sslNames
                     //  .createManyIfNotExist(sslNamesToCreate)
