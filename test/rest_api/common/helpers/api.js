@@ -39,7 +39,7 @@ var LogShippingJobsHelper = require('./logShippingJobs');
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
 // Abstracts common functionality for the API.
-module.exports = {
+var APIHelpers = {
 
   accounts: AccountsHelper,
   apps: AppsHelper,
@@ -124,3 +124,5 @@ module.exports = {
       });
   }
 };
+
+module.exports = APIHelpers;

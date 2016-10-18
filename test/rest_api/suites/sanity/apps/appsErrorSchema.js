@@ -110,7 +110,7 @@ describe('Sanity check', function () {
           it('should return data applying `error response` schema when ' +
             'creating specific app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id);
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.session.reset();
               API.resources.apps
                 .createOne(newApp)
@@ -140,7 +140,7 @@ describe('Sanity check', function () {
           it('should return data applying `error response` schema when ' +
             'deleting an app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id);
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.session.reset();
               API.resources.apps
                 .deleteOne(testApp.id)

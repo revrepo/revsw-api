@@ -121,7 +121,7 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'creating specific app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id);
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
@@ -147,7 +147,7 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'updating specific app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id);
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
               API.helpers
                 .authenticateUser(user)
@@ -169,7 +169,7 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'deleting an app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id);
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.helpers
                 .authenticateUser(user)
                 .then(function () {

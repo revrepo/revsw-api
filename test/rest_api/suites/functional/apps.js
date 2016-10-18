@@ -127,7 +127,7 @@ describe('Functional check', function () {
 
         it('should not allow to update an app from other user.',
           function (done) {
-            var newApp = AppsDP.generateOne(secondTestAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: secondTestAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(secondTestAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -149,7 +149,7 @@ describe('Functional check', function () {
 
         it('should not allow to delete an app from other user.',
           function (done) {
-            var newApp = AppsDP.generateOne(secondTestAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: secondTestAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
@@ -209,7 +209,7 @@ describe('Functional check', function () {
         it('should allow to verify an app config.',
           function (done) {
             var options = {options: 'verify_only'};
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -235,7 +235,7 @@ describe('Functional check', function () {
         it('should allow to publish an app config.',
           function (done) {
             var options = {options: 'publish'};
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -261,7 +261,7 @@ describe('Functional check', function () {
         it('should set `staging status` to `InProgress` right after ' +
           'updating an app',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -316,7 +316,7 @@ describe('Functional check', function () {
                 .catch(done);
             };
 
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -340,7 +340,7 @@ describe('Functional check', function () {
           'publishing an app',
           function (done) {
             var options = {options: 'publish'};
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -396,7 +396,7 @@ describe('Functional check', function () {
             };
 
             var options = {options: 'publish'};
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -417,7 +417,7 @@ describe('Functional check', function () {
           });
 
          it('should allow to create apps with same data for two different account.', function(done) {
-          var newApp = AppsDP.generateOne(testAccount.id);
+          var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
           API.helpers
             .authenticateUser(user)
             .then(function() {
@@ -450,7 +450,7 @@ describe('Functional check', function () {
 
         it('should allow to get app data after updating it.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var ts = Date.now();
             var updatedApp = {
               account_id: testAccount.id,

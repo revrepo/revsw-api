@@ -46,7 +46,7 @@ var LogShippingJobsResource = require('./logShippingJobs');
 var DNSZonesResource = require('./dnsZones');
 
 // Set of all resources that the REST API service provides..
-module.exports = {
+var APIResources = {
 
   accounts: AccountsResource,
   activity: ActivityResource,
@@ -74,3 +74,5 @@ module.exports = {
   logShippingJobs: LogShippingJobsResource,
   dnsZones: DNSZonesResource
 };
+
+module.exports = APIResources;

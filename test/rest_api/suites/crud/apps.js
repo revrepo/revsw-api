@@ -130,7 +130,7 @@ describe('CRUD check', function () {
 
         it('should allow to create an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
@@ -154,7 +154,7 @@ describe('CRUD check', function () {
 
         it('should allow to update an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
@@ -179,7 +179,7 @@ describe('CRUD check', function () {
 
         it('should allow to delete an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id);
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {

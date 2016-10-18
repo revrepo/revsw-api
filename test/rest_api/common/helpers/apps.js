@@ -25,6 +25,8 @@ var APITestError = require('./../apiTestError');
 var AppsHelper = {
 
   /**
+   * ### AppsHelper.create()
+   *
    * Creates a new App using the account ID and the data provided.
    *
    * @param {Object} data, mobile app data with the following structure:
@@ -34,7 +36,7 @@ var AppsHelper = {
    *    }
    */
   create: function (data) {
-    var app = AppsDP.generateOne(accountId, data);
+    var app = AppsDP.generate(data);
     return AppsResource
       .createOneAsPrerequisite(app)
       .catch(function (error) {

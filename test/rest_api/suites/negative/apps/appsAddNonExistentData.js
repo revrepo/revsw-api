@@ -36,7 +36,7 @@ describe('Negative check', function () {
 
       var testAccount;
       var testApp;
-      var fullTestApp = AppsDP.generateOne(0);
+      var fullTestApp = API.providers.data.apps.generate({});
 
       before(function (done) {
         API.helpers

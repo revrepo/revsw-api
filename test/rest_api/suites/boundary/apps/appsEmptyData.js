@@ -82,7 +82,7 @@ describe('Boundary check', function () {
           it('should return `not found` response when deleting an app with ' +
             '`empty` app id.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id);
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
