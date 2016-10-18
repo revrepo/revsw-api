@@ -46,12 +46,7 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('DNS Zones resource', function () {

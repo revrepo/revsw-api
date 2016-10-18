@@ -27,7 +27,7 @@ module.exports = {
   createOne: function (accountId) {
     var domainConfig = DomainConfigsDP.generateOne(accountId);
     return DomainConfigsResource
-      .createOneAsPrerequisite(domainConfig)
+      .createOne(domainConfig)
       .catch(function(error){
         throw new APITestError('Creating Domain Config' ,
           error.response.body, domainConfig);

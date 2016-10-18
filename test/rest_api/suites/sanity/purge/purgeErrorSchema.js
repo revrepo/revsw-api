@@ -59,9 +59,6 @@ describe('Sanity check', function () {
       .then(function () {
         return API.resources.domainConfigs.deleteOne(domainConfig.id);
       })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
       .catch(done);
   });
 

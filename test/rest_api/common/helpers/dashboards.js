@@ -32,7 +32,7 @@ module.exports = {
   createOne: function () {
     var dashboard = DashboardsDP.generateOne();
     return DashboardsResource
-      .createOneAsPrerequisite(dashboard)
+      .createOne(dashboard)
       .catch(function (error) {
         throw new APITestError('Creating Dashboard', error.response.body,
           dashboard);

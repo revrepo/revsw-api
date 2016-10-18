@@ -49,12 +49,7 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        API.resources.sslCerts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('SSL Certificates resource', function () {

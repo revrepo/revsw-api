@@ -35,7 +35,7 @@ module.exports = {
   createOne: function (data) {
     var user = UsersDP.generateToSignUp(data);
     return SignUpResource
-      .createOneAsPrerequisite(user)
+      .createOne(user)
       .catch(function (error) {
         throw new APITestError('Creating Account', error.response.body, user);
       })

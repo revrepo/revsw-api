@@ -38,7 +38,7 @@ var AppsHelper = {
   create: function (data) {
     var app = AppsDP.generate(data);
     return AppsResource
-      .createOneAsPrerequisite(app)
+      .createOne(app)
       .catch(function (error) {
         throw new APITestError('Creating App', error.response.body, app);
       })

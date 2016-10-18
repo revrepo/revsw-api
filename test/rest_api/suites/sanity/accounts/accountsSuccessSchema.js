@@ -41,7 +41,7 @@ describe('Sanity check', function () {
       .authenticateUser(resellerUser)
       .then(function () {
         API.resources.accounts
-          .createOneAsPrerequisite(accountSample)
+          .createOne(accountSample)
           .then(function (response) {
             accountSample.id = response.body.object_id;
             done();
@@ -52,12 +52,7 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
-      .then(function () {
-        API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('Accounts resource', function () {
@@ -131,7 +126,6 @@ describe('Sanity check', function () {
                       if (error) {
                         return done(error);
                       }
-                      // TODO: register prerequisite
                       API.resources.accounts
                         .deleteOne(data.object_id)
                         .end(done);
@@ -151,7 +145,7 @@ describe('Sanity check', function () {
             .authenticateUser(resellerUser)
             .then(function () {
               API.resources.accounts
-                .createOneAsPrerequisite(newAccount)
+                .createOne(newAccount)
                 .then(function (response) {
                   API.resources.accounts
                     .update(response.body.object_id, updatedAccount)
@@ -175,7 +169,7 @@ describe('Sanity check', function () {
             .authenticateUser(resellerUser)
             .then(function () {
               API.resources.accounts
-                .createOneAsPrerequisite(newProject)
+                .createOne(newProject)
                 .then(function (response) {
                   API.resources.accounts
                     .deleteOne(response.body.object_id)

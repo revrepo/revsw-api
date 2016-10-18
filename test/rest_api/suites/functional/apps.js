@@ -132,7 +132,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -153,7 +153,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -214,7 +214,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -240,7 +240,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -266,7 +266,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 var appId = response.body.id;
@@ -321,7 +321,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 appId = response.body.id;
@@ -345,7 +345,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 var appId = response.body.id;
@@ -401,7 +401,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 appId = response.body.id;
@@ -421,7 +421,7 @@ describe('Functional check', function () {
           API.helpers
             .authenticateUser(user)
             .then(function() {
-              return API.resources.apps.createOneAsPrerequisite(newApp)
+              return API.resources.apps.createOne(newApp)
                 .then(function() {
                   return API.resources.apps
                     .createOne(newApp)
@@ -477,7 +477,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 var appId = response.body.id;

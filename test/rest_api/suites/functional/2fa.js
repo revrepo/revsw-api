@@ -59,12 +59,7 @@ describe('Functional check', function () {
     });
 
     afterEach(function (done) {
-      API.helpers
-        .authenticateUser(reseller)
-        .then(function () {
-          return API.resources.users.deleteAllPrerequisites(done);
-        })
-        .catch(done);
+      done();
     });
 
     it('should fail to enable 2fa for user before calling init',

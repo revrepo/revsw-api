@@ -32,7 +32,7 @@ module.exports = {
   createOne: function () {
     var account = AccountsDP.generateOne();
     return AccountsResource
-      .createOneAsPrerequisite(account)
+      .createOne(account)
       .catch(function (error) {
         throw new APITestError('Creating Account', error.response.body,
           account);

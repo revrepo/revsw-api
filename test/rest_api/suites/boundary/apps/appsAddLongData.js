@@ -56,13 +56,8 @@ describe('Boundary check', function () {
           .catch(done);
       });
 
-      after(function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apps.deleteAllPrerequisites(done);
-          })
-          .catch(done);
+      afterEach(function (done) {
+        done();
       });
 
       var getLongDataCheckCallBack = function () {

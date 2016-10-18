@@ -34,7 +34,7 @@ describe('Negative check', function () {
       .authenticateUser(resellerUser)
       .then(function () {
         API.resources.accounts
-          .createOneAsPrerequisite(accountSample)
+          .createOne(accountSample)
           .then(function (response) {
             accountSample.id = response.body.object_id;
             done();
@@ -44,13 +44,8 @@ describe('Negative check', function () {
       .catch(done);
   });
 
-  after(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
-      .then(function () {
-        API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+  afterEach(function (done) {
+    done();
   });
 
   describe('Accounts resource', function () {

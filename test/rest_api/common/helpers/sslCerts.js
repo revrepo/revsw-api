@@ -36,7 +36,7 @@ var SSLCertsHelper = {
       .then(function (account) {
         var sslCert = SSLCertDP.generateOne(account.id);
         return SSLCertsResource
-          .createOneAsPrerequisite(sslCert)
+          .createOne(sslCert)
           .catch(function (error) {
             throw new APITestError('Creating SSL Certificate',
               error.response.body,

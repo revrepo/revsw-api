@@ -65,9 +65,6 @@ describe('Smoke check', function () {
       .then(function () {
         return API.resources.logShippingJobs.deleteOne(firstLsJ.id);
       })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
       .catch(done);
   });
 

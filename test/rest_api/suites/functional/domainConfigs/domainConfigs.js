@@ -76,18 +76,6 @@ describe('Domain configs functional test', function () {
       .then(function () {
         return API.resources.accounts.deleteOne(otherAccount.id);
       })
-      .then(function () {
-        API.helpers
-          .authenticateUser(user)
-          // TODO: BUG? Cannot delete DomainConfig right after updating it.
-          //.then(function () {
-          //  return API.resources.domainConfigs.deleteOne(firstDc.id);
-          //})
-          .then(function () {
-            return API.resources.accounts.deleteAllPrerequisites(done);
-          })
-          .catch(done);
-      })
       .catch(done);
   });
 

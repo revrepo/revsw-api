@@ -38,7 +38,7 @@ var APIKeysHelper = {
       .then(function (account) {
         var apiKey = APIKeyDP.generateOne(account.id);
         return APIKeysResource
-          .createOneAsPrerequisite(apiKey)
+          .createOne(apiKey)
           .catch(function (error) {
             throw new APITestError('Creating API Key',
               error.response.body,

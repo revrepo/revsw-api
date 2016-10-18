@@ -60,12 +60,7 @@ describe('Smoke check', function () {
         });
 
         after(function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.apps.deleteAllPrerequisites(done);
-            })
-            .catch(done);
+          done();
         });
 
         beforeEach(function (done) {
@@ -129,7 +124,7 @@ describe('Smoke check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -146,7 +141,7 @@ describe('Smoke check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps

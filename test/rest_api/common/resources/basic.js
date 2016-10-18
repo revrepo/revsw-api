@@ -124,13 +124,9 @@ var getResourceBuilder = function (nestedResource, path, parentIdKey) {
  *         getAll: Function,
  *         getOne: Function,
  *         createOne: Function,
- *         createOneAsPrerequisite: Function,
  *         update: Function,
  *         deleteOne: Function,
- *         deleteMany: Function,
- *         deleteAllPrerequisites: Function,
- *         rememberAsPrerequisite: Function,
- *         forgetPrerequisite: Function
+ *         deleteMany: Function
  *     }
  *
  * @constructor
@@ -222,28 +218,6 @@ var BasicResource = function (data) {
         .query(query)
         .send(object);
       return setUserToRequest(request);
-    };
-  }
-
-  if (_contains(data.methods, Methods.CREATE)) {
-    /**
-     * ### BasicResource.createOneAsPrerequisite()
-     *
-     * Creates a new object form the requested type and stores its ID in the
-     * _cache object property (which stores all IDs from all pre-requisite
-     * objects created). all of this is to make sure application under testing
-     * does not become messed up after the testing.
-     *
-     * @param {object} object, the supertest-as-promised instance
-     *
-     * @returns {object} the supertest-as-promised instance
-     */
-    _resource.createOneAsPrerequisite = function (object) {
-      return this.createOne(object)
-        .then(function (res) {
-          _cache.push(res.body.object_id);
-          return res;
-        });
     };
   }
 
@@ -429,57 +403,6 @@ var BasicResource = function (data) {
       });
     };
   }
-
-  if (_contains(data.methods, Methods.DELETE)) {
-    /**
-     * ### BasicResource.deleteAllPrerequisites()
-     *
-     * @returns {object} the supertest-as-promised instance
-     */
-    _resource.deleteAllPrerequisites = function (done) {
-      return done();
-      /*
-       return this.deleteMany(_cache)
-       .then(function () {
-       // What to do in case a pre-requisite is deleted successfully?
-       return done();
-       })
-       .catch(function () {
-       // What to do in case a pre-requisite is NOT deleted successfully?
-       return done();
-       });*/
-    };
-  }
-
-  /**
-   * ### BasicResource.rememberAsPrerequisite()
-   *
-   * Register an ID in order to handle it later (while cleaning up the
-   * application) as a pre-requisite.
-   *
-   * @param {string} id, the uui of the object
-   */
-  _resource.rememberAsPrerequisite = function (id) {
-    var index = _cache.indexOf(id);
-    if (index === -1) {
-      _cache.push(id);
-    }
-  };
-
-  /**
-   * ### BasicResource.forgetPrerequisite()
-   *
-   * Forgets an ID in order to avoid handling it later (while cleaning up the
-   * application) as a pre-requisite.
-   *
-   * @param {string} id, the uui of the object
-   */
-  _resource.forgetPrerequisite = function (id) {
-    var index = _cache.indexOf(id);
-    if (index > -1) {
-      _cache.splice(index, 1);
-    }
-  };
 
   return _resource;
 };

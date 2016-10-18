@@ -56,9 +56,6 @@ describe('Negative check', function () {
       .then(function () {
         return API.resources.logShippingJobs.deleteOne(logShippingJob.id);
       })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
       .catch(done);
   });
 

@@ -27,7 +27,7 @@ module.exports = {
   createOne: function (domainName) {
     var purgeData = PurgeDP.generateOne(domainName);
     return PurgeResource
-      .createOneAsPrerequisite(purgeData)
+      .createOne(purgeData)
       .catch(function (error) {
         throw new APITestError('Creating Purge Request' , error.response.body,
           purgeData);

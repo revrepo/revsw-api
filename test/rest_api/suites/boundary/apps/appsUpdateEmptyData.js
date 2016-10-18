@@ -57,12 +57,7 @@ describe('Boundary check', function () {
       });
 
       after(function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apps.deleteAllPrerequisites(done);
-          })
-          .catch(done);
+        done();
       });
 
       var getEmptyDataCheckCallBack = function () {

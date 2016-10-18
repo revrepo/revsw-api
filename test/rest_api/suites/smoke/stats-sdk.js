@@ -76,16 +76,7 @@ describe('Smoke check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        console.log( '\n    ### cleanup' );
-        console.log( '    ### application to be deleted: ' + app_id );
         return API.resources.apps.deleteOne(app_id);
-      })
-      .then(function () {
-        console.log( '    ### account to be deleted: ' + account_id );
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .then(function () {
-        console.log( '    ### done' );
       })
       .catch(done);
   });

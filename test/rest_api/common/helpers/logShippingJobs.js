@@ -27,7 +27,7 @@ module.exports = {
   createOne: function (accountId) {
     var logShippingJob = LogShippingJobsDP.generateOne(accountId);
     return LogShippingJobsResource
-      .createOneAsPrerequisite(logShippingJob)
+      .createOne(logShippingJob)
       .catch(function(error){
         throw new APITestError('Creating LogShipping Job' ,
           error.response.body, logShippingJob);

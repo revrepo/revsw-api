@@ -103,20 +103,9 @@ describe('StatsSDK Functional check:', function () {
     API.helpers
       .authenticateUser(user)
       .then(function () {
-        console.log( '\n   "after all" hook, cleanup' );
         if ( application ) {
-          console.log( ok_prefix + 'new application to be deleted' );
           return API.resources.apps.deleteOne(application.id);
         }
-      })
-      .then(function () {
-        if ( account_id ) {
-          console.log( ok_prefix + 'new account to be deleted' );
-          return API.resources.accounts.deleteAllPrerequisites(done);
-        }
-      })
-      .then(function () {
-        console.log( ok_prefix + 'done' );
       })
       .catch(done);
   });

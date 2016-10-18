@@ -43,7 +43,7 @@ var UsersHelper = {
   create: function (data) {
     var user = UsersDP.generate(data);
     return UsersResource
-      .createOneAsPrerequisite(user)
+      .createOne(user)
       .catch(function(error){
         throw new APITestError('Creating User' , error.response.body,
           user);
