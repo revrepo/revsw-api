@@ -64,7 +64,7 @@ describe('StatsSDK Functional check:', function () {
         account_id = newAccount.id;
         console.log( ok_prefix + 'account created: ' +
           Utils.colored( 'LightCyan', account_id ) );
-        return API.helpers.apps.createOne(account_id);
+        return API.helpers.apps.create({accountId: account_id});
       })
       .then(function (newApp) {
         application = newApp;

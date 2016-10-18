@@ -22,14 +22,18 @@ var APITestError = require('./../apiTestError');
 
 // # Apps Helper
 // Abstracts common functionality for the related resource.
-module.exports = {
+var AppsHelper = {
 
   /**
-   * Create a new App using the account ID and the data provided.
-   * @param {Number} accountId, account ID
-   * @param {Object} data, app data
+   * Creates a new App using the account ID and the data provided.
+   *
+   * @param {Object} data, mobile app data with the following structure:
+   *    {
+   *      accountId: Number
+   *      platform: String (iOS, Android, Windows_Mobile)
+   *    }
    */
-  createOne: function (accountId, data) {
+  create: function (data) {
     var app = AppsDP.generateOne(accountId, data);
     return AppsResource
       .createOneAsPrerequisite(app)
@@ -43,3 +47,5 @@ module.exports = {
       });
   }
 };
+
+module.exports  = AppsHelper;

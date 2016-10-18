@@ -54,7 +54,7 @@ describe('Functional check', function () {
             })
             .then(function (newAccount) {
               testAccount = newAccount;
-              return API.helpers.apps.createOne(testAccount.id);
+              return API.helpers.apps.create({accountId: testAccount.id});
             })
             .then(function (app) {
               testApp = app;
@@ -65,7 +65,7 @@ describe('Functional check', function () {
                 })
                 .then(function (newAccount) {
                   secondTestAccount = newAccount;
-                  return API.helpers.apps.createOne(secondTestAccount.id);
+                  return API.helpers.apps.create({accountId: secondTestAccount.id});
                 })
                 .then(function (app) {
                   secondTestApp = app;

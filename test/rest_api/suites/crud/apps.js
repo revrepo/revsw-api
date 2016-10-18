@@ -65,7 +65,7 @@ describe('CRUD check', function () {
             })
             .then(function (newAccount) {
               testAccount = newAccount;
-              return API.helpers.apps.createOne(testAccount.id);
+              return API.helpers.apps.create({accountId: testAccount.id});
             })
             .then(function (app) {
               testApp = app;

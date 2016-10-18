@@ -62,7 +62,7 @@ describe('Smoke check', function () {
       .then(function (newAccount) {
         account_id = newAccount.id;
         console.log( '    ### account created: ' + account_id );
-        return API.helpers.apps.createOne(account_id);
+        return API.helpers.apps.create({accountId: account_id});
       })
       .then(function (newApp) {
         app_id = newApp.id;
