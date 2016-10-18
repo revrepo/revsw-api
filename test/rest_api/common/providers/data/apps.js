@@ -25,7 +25,7 @@
 // depending on your test needs.
 var AppsDataProvider = {
 
-  prefix: 'API_TEST_APP_',
+  prefix: 'test-app-',
 
   /**
    * ### AppsDataProvider.generate()

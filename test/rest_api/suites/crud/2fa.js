@@ -66,7 +66,7 @@ describe('CRUD check', function () {
               if (user.role === 'Rev Admin') {
                 newUserData.companyId = [newAccount.id];
               }
-              return API.helpers.users.createOne(newUserData);
+              return API.helpers.users.create(newUserData);
             })
             .then(function (createdUser) {
               newUser = createdUser;

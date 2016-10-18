@@ -44,7 +44,7 @@ describe('Smoke check', function () {
       API.helpers
         .authenticateUser(reseller)
         .then(function () {
-          return API.helpers.users.createOne({
+          return API.helpers.users.create({
             firstName: 'Tom',
             lastName: 'Smith'
           });

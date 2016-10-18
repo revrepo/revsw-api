@@ -25,13 +25,15 @@ var APITestError = require('./../apiTestError');
 module.exports = {
 
   /**
-   * SignUpHelper.createOne()
+   * ### SignUpHelper.createOne()
    *
    * Creates a registration for a auto generated user data.
+   *
+   * @param {Object} data, user information to use
    * @returns {Object} user data which was registered
    */
-  createOne: function () {
-    var user = UsersDP.generateOneToSignUp();
+  createOne: function (data) {
+    var user = UsersDP.generateToSignUp(data);
     return SignUpResource
       .createOneAsPrerequisite(user)
       .catch(function (error) {
@@ -44,7 +46,7 @@ module.exports = {
   },
 
   /**
-   * SignUpHelper.verify()
+   * ### SignUpHelper.verify()
    *
    * Verifies user registration given a Token key.
    *

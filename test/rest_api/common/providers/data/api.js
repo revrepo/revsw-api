@@ -17,9 +17,11 @@
  */
 
 var AppsDataProvider = require('./apps');
+var UsersDataProvider = require('./users');
 
 var APIDataProviders = {
-  apps: AppsDataProvider
+  apps: AppsDataProvider,
+  users: UsersDataProvider
 };
 
 module.exports = APIDataProviders;
