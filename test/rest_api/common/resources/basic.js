@@ -217,7 +217,10 @@ var BasicResource = function (data) {
         .post(location)
         .query(query)
         .send(object);
-      return setUserToRequest(request);
+      return setUserToRequest(request)
+        .then(function (res) {
+          return res;
+        });
     };
   }
 
