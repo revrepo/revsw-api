@@ -42,9 +42,9 @@ var AppsDataProvider = {
    *         app_platform: String
    *     }
    */
-  generate: function (accountId, data) {
+  generate: function (data) {
     return {
-      account_id: accountId,
+      account_id: data.accountId,
       app_name: this.prefix + Date.now(),
       app_platform: data.platform || 'iOS'
     };
