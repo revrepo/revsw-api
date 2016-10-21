@@ -16,8 +16,6 @@
  * from Rev Software, Inc.
  */
 
-var Promise = require('bluebird');
-
 var config = require('config');
 var API = require('./../../common/api');
 
@@ -31,44 +29,36 @@ describe('Clean up', function () {
     config.get('api.users.reseller'),
     config.get('api.users.admin')
   ];
-  var namePattern = /[0-9]{13}/;
+  var namePattern = /Test/;
 
-  describe('API Keys', function () {
+  describe('Log Shipping Jobs resource', function () {
 
     users.forEach(function (user) {
 
       describe('With user: ' + user.role, function () {
 
-        it('should clean API Keys created for testing.',
+        it('should clean-up log-shipping-jobs created for testing.',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apiKeys
+                API.resources.logShippingJobs
                   .getAll()
-                  .expect(200);
-              })
-              .then(function (res) {
-                var apiKeys = res.body;
-                var idsForApiKeysToDelete = [];
-                return Promise
-                  .each(apiKeys, function (apiKey) { // One promise after other
-                    return API.resources.accounts
-                      .getOne(apiKey.account_id)
-                      .then(function (res) {
-                        var account = res.body;
-                        if (namePattern.test(apiKey.key_name) ||
-                          namePattern.test(account.companyName) ||
-                          namePattern.test(account.contact_email)) {
-                          idsForApiKeysToDelete.push(apiKey.id);
-                        }
-                      });
-                  })
-                  .then(function () {
-                    API.resources.apiKeys
-                      .deleteManyIfExist(idsForApiKeysToDelete)
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var logShippingJobs = res.body;
+                    logShippingJobs.forEach(function (logShippingJob) {
+                      if (namePattern.test(logShippingJob.job_name)) {
+                        ids.push(logShippingJob.id);
+                      }
+                    });
+
+                    API.resources.logShippingJobs
+                      .deleteManyIfExist(ids)
                       .finally(done);
-                  });
+                  })
+                  .catch(done);
               })
               .catch(done);
           });
