@@ -29,6 +29,7 @@ var AppsHelper = require('./apps');
 var APIKeysHelper = require('./apiKeys');
 var BillingPlansHelper = require('./billingPlans');
 var Dashboards = require('./dashboards');
+var DNSZonesHelper = require('./dnsZones');
 var DomainConfigsHelper = require('./domainConfigs');
 var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
@@ -46,6 +47,7 @@ var APIHelpers = {
   apiKeys: APIKeysHelper,
   billingPlans: BillingPlansHelper,
   dashboards: Dashboards,
+  dnsZones: DNSZonesHelper,
   domainConfigs: DomainConfigsHelper,
   purge: PurgeHelper,
   signUp: SignUpHelper,

@@ -42,23 +42,9 @@ describe('Clean up', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.dnsZones
-                  .getAll()
-                  .expect(200)
-                  .then(function (res) {
-                    var ids = [];
-                    var dnsZones = res.body;
-                    dnsZones.forEach(function (dnsZone) {
-                      if (namePattern.test(dnsZone.zone)) {
-                        ids.push(dnsZone.id);
-                      }
-                    });
-
-                    API.resources.dnsZones
-                      .deleteManyIfExist(ids)
-                      .finally(done);
-                  })
-                  .catch(done);
+                API.helpers.dnsZones
+                  .cleanup(namePattern)
+                  .finally(done);
               })
               .catch(done);
           });
