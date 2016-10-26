@@ -1,7 +1,8 @@
 {
-  "name": "rest-api-testing",
+  "name": "revsw-api-test",
   "version": "1.0.0",
   "description": "Testing frmework and suites for REVW API.",
+  "main": "common/api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
