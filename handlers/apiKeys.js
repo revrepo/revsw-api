@@ -219,6 +219,18 @@ exports.updateApiKey = function (request, reply) {
   if (!updatedApiKey.account_id || !utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
       return reply(boom.badRequest('Company ID not found'));
   }
+  // NOTE: check  user access permission to account for manage
+  if (!!updatedApiKey.managed_account_ids && updatedApiKey.managed_account_ids.length > 0) {
+    var hasError = false;
+    updatedApiKey.managed_account_ids.forEach(function(itemAccountId) {
+      if (!utils.checkUserAccessPermissionToAccount(request, itemAccountId)) {
+        hasError = true;
+      }
+    });
+    if (hasError === true) {
+      return reply(boom.badRequest('Company ID not found'));
+    }
+  }
 
   apiKeys.get({_id: id}, function (error, result) {
     if (error) {
