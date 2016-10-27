@@ -157,6 +157,7 @@ module.exports = [
         payload: {
           key_name        : Joi.string().required().min(1).max(30).description('Name of the API key'),
           account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
+          managed_account_ids : Joi.array().optional().items(Joi.objectId().description('IDs of companies the API key is allowed to manage')),
           domains         : Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
           allowed_ops     : Joi.object({
             read_config     : Joi.boolean().required(),
