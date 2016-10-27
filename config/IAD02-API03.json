@@ -1,4 +1,8 @@
 {
+
+  "password_reset_portal_domain": "iad02-portal03.revsw.net",
+  "user_verify_portal_domain" : "iad02-portal03.revsw.net",
+
   "azure_marketplace": {
     "sso_endpoint": "https://iad02-portal03.revsw.net/#/azure-sso"
   }
