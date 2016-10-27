@@ -24,7 +24,7 @@ var mongoose = require('mongoose');
 var boom = require('boom');
 var AuditLogger = require('../lib/audit');
 var uuid = require('node-uuid');
-
+var _ = require('lodash');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
@@ -222,6 +222,7 @@ exports.updateApiKey = function (request, reply) {
   // NOTE: check  user access permission to account for manage
   if (!!updatedApiKey.managed_account_ids && updatedApiKey.managed_account_ids.length > 0) {
     var hasError = false;
+    updatedApiKey.managed_account_ids = _.unique(updatedApiKey.managed_account_ids);
     updatedApiKey.managed_account_ids.forEach(function(itemAccountId) {
       if (!utils.checkUserAccessPermissionToAccount(request, itemAccountId)) {
         hasError = true;
