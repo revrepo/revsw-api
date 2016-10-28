@@ -23,7 +23,6 @@ var APITestError = require('./../apiTestError');
 
 // # API Keys Helper
 // Abstracts common functionality for the related resource.
-
 var APIKeysHelper = {
   /**
    * ### APIKeysHelper.createOneForAccount()
