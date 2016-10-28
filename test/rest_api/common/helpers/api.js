@@ -22,6 +22,9 @@ var Session = require('./../session');
 
 // Requiring resources to use in these Helpers.
 var AuthenticateRes = require('./../resources/authenticate');
+var APIKeysRes = require('./../resources/apiKeys');
+
+
 
 // Required Helpers to attach to main API helper object
 var AccountsHelper = require('./accounts');
@@ -78,7 +81,27 @@ module.exports = {
         throw new Error('Authenticating user', error.response.body, user);
       });
   },
-
+  /**
+   * ### API.helpers.authenticateAPIKey()
+   *
+   * Helper method to Authenticate user as API KEY type before doing any type of request to
+   * the REST API services.
+   *
+   * @param  keyId
+   *
+   * @returns {Promise}
+   */
+  authenticateAPIKey: function (keyId) {
+    return APIKeysRes
+      .getOne(keyId)
+      .then(function (response) {
+        user  = response.body;
+        Session.setCurrentUser(user);
+      })
+      .catch(function (error) {
+        throw new Error('Authenticating user as API KEY ', error.response.body, keyId);
+      });
+  },
   /**
    * ### API.helpers.attemptToAuthenticateUser()
    *
