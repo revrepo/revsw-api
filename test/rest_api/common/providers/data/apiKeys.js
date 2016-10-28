@@ -57,6 +57,7 @@ var APIKeyDataProvider = {
    *
    *    {
    *      account_id: String,
+   *      managed_account_ids: [String],
    *      key_name: String,
    *      domains: Array,
    *      allowed_ops: {
@@ -75,6 +76,7 @@ var APIKeyDataProvider = {
     var prefix = Date.now();
     return {
       account_id: accountId,
+      managed_account_ids: [],
       key_name: prefix + ': ' + faker.lorem.words()[0],
       domains: [],
       allowed_ops: {
