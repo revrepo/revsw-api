@@ -61,7 +61,7 @@ describe('Sanity check', function () {
       });
 
       afterEach(function (done) {
-        done()
+        done();
       });
 
       it('should return error response schema when initializing 2fa without ' +

@@ -71,7 +71,6 @@ describe('Setup', function () {
                       isSSLNameNeeded = true;
 
                       for (var j = 0; j < existingSSLNames.length; j++) {
-                        existingSSLNames[j].ssl_name
                         if (sslNamesNeeded[i].ssl_name ===
                           existingSSLNames[j].ssl_name) {
                           isSSLNameNeeded = false;
