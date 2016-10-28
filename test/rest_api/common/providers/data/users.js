@@ -68,7 +68,7 @@ var UsersDataProvider = {
         reports: true,
         configure: true,
         test: true,
-        readOnly: true
+        readOnly: false
       },
       role: data.role || 'user',
       theme: 'light'
