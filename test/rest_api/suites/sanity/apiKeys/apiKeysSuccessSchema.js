@@ -91,8 +91,8 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var apiKeys = response.body;
-                  apiKeys.forEach(function (app) {
-                    Joi.validate(app, SchemaProvider.getAPIKey(), function (err) {
+                  apiKeys.forEach(function (apiKey) {
+                    Joi.validate(apiKey, SchemaProvider.getAPIKey(), function (err) {
                       if (err) {
                         return done(err);
                       }
@@ -189,7 +189,134 @@ describe('Sanity check', function () {
                 })
                 .catch(done);
             });
+//==== X-API-KEY call =======
+          it('should return data applying apiKeys schema when getting all apiKeys '+
+            'with X-API-KEY',
+            function (done) {
+              API.helpers
+                .authenticateUser(user)
+                .then(function(){
+                  return API.helpers.authenticateAPIKey(testAPIKey.id);
+                })
+                .then(function (key) {
+                  return API.resources.apiKeys
+                    .getAll()
+                    .expect(200);
+                })
+                .then(function (response) {
+                  var apiKeys = response.body;
+                  apiKeys.forEach(function (apiKey) {
+                    Joi.validate(apiKey, SchemaProvider.getAPIKey(), function (err) {
+                      if (err) {
+                        return done(err);
+                      }
+                    });
+                  });
+                  done();
+                })
+                .catch(done);
+            });
+        it('should return data applying apiKey schema when getting specific ' +
+            'apiKey with X-API-KEY',
+            function (done) {
+              API.helpers
+                .authenticateUser(user)
+                .then(function(){
+                  return API.helpers.authenticateAPIKey(testAPIKey.id);
+                })
+                .then(function () {
+                  return API.resources.apiKeys
+                    .getOne(testAPIKey.id)
+                    .expect(200);
+                })
+                .then(function (response) {
+                  var apiKey = response.body;
+                  Joi.validate(apiKey, SchemaProvider.getAPIKey(), done);
+                })
+                .catch(done);
+            });
 
+          it('should return data applying `success response` schema when ' +
+            'creating specific apiKey '+
+            'with X-API-KEY',
+            function (done) {
+              var newAPIKey = APIKeyDP.generateOne(testAccount.id);
+              API.helpers
+                .authenticateUser(user)
+                .then(function(){
+                  return API.helpers.authenticateAPIKey(testAPIKey.id);
+                })
+                .then(function () {
+                  return API.resources.apiKeys
+                    .createOne(newAPIKey)
+                    .expect(200);
+                })
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, SchemaProvider.getCreateAPIKeyStatus(),
+                    function (error) {
+                      if (error) {
+                        return done(error);
+                      }
+                      API.resources.apiKeys
+                        .deleteOne(data.object_id)
+                        .end(done);
+                    });
+                })
+                .catch(done);
+            });
+
+          it('should return data applying `success response` schema when ' +
+            'updating specific apiKey '+
+            'with X-API-KEY',
+            function (done) {
+              var newAPIKey = APIKeyDP.generateOne(testAccount.id);
+              var updatedApp = APIKeyDP
+                .generateCompleteOne(testAccount.id, 'UPDATED');
+              API.helpers
+                .authenticateUser(user)
+                .then(function(){
+                  return API.helpers.authenticateAPIKey(testAPIKey.id);
+                })
+                .then(function () {
+                  return API.resources.apiKeys.createOneAsPrerequisite(newAPIKey);
+                })
+                .then(function (response) {
+                  return API.resources.apiKeys
+                    .update(response.body.object_id, updatedApp)
+                    .expect(200);
+                })
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, SchemaProvider.getSuccessResponse(), done);
+                })
+                .catch(done);
+            });
+
+          it('should return data applying `success response` schema when ' +
+            'deleting an apiKey '+
+            'with X-API-KEY',
+            function (done) {
+              var newAPIKey = APIKeyDP.generateOne(testAccount.id);
+              API.helpers
+                .authenticateUser(user)
+                .then(function(){
+                  return API.helpers.authenticateAPIKey(testAPIKey.id);
+                })
+                .then(function () {
+                  return API.resources.apiKeys.createOneAsPrerequisite(newAPIKey);
+                })
+                .then(function (response) {
+                  return API.resources.apiKeys
+                    .deleteOne(response.body.object_id)
+                    .expect(200);
+                })
+                .then(function (response) {
+                  var data = response.body;
+                  Joi.validate(data, SchemaProvider.getAPIKeyStatus(), done);
+                })
+                .catch(done);
+            });
         });
       });
     });
