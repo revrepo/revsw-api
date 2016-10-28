@@ -28,13 +28,13 @@ module.exports = {
     var domainConfig = DomainConfigsDP.generateOne(accountId);
     return DomainConfigsResource
       .createOne(domainConfig)
-      .catch(function(error){
-        throw new APITestError('Creating Domain Config' ,
-          error.response.body, domainConfig);
-      })
       .then(function (res) {
         domainConfig.id = res.body.object_id;
         return domainConfig;
+      })
+      .catch(function(error){
+        throw new APITestError('Creating Domain Config' ,
+          error.response.body, domainConfig);
       });
   }
 };

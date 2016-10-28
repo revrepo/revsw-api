@@ -33,13 +33,13 @@ module.exports = {
     var dashboard = DashboardsDP.generateOne();
     return DashboardsResource
       .createOne(dashboard)
-      .catch(function (error) {
-        throw new APITestError('Creating Dashboard', error.response.body,
-          dashboard);
-      })
       .then(function (res) {
         dashboard.id = res.body.object_id;
         return dashboard;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating Dashboard', error.response.body,
+          dashboard);
       });
   }
 };

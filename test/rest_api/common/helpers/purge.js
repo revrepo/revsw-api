@@ -28,13 +28,13 @@ module.exports = {
     var purgeData = PurgeDP.generateOne(domainName);
     return PurgeResource
       .createOne(purgeData)
-      .catch(function (error) {
-        throw new APITestError('Creating Purge Request' , error.response.body,
-          purgeData);
-      })
       .then(function (res) {
         purgeData.id = res.body.request_id;
         return purgeData;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating Purge Request' , error.response.body,
+          purgeData);
       });
   }
 };

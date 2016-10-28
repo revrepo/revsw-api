@@ -51,13 +51,13 @@ module.exports = {
     var dashboard = BillingPlansDP.generateOne();
     return BillingPlansResource
       .createOne(dashboard)
-      .catch(function (error) {
-        throw new APITestError('Creating Dashboard', error.response.body,
-          dashboard);
-      })
       .then(function (res) {
         dashboard.id = res.body.object_id;
         return dashboard;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating Dashboard', error.response.body,
+          dashboard);
       });
   }
 };

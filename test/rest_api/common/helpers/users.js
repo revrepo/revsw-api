@@ -44,13 +44,13 @@ var UsersHelper = {
     var user = UsersDP.generate(data);
     return UsersResource
       .createOne(user)
-      .catch(function(error){
-        throw new APITestError('Creating User' , error.response.body,
-          user);
-      })
       .then(function (res) {
         user.id = res.body.object_id;
         return user;
+      })
+      .catch(function(error){
+        throw new APITestError('Creating User' , error.response.body,
+          user);
       });
   },
 

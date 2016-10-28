@@ -28,13 +28,13 @@ module.exports = {
     var logShippingJob = LogShippingJobsDP.generateOne(accountId);
     return LogShippingJobsResource
       .createOne(logShippingJob)
-      .catch(function(error){
-        throw new APITestError('Creating LogShipping Job' ,
-          error.response.body, logShippingJob);
-      })
       .then(function (res) {
         logShippingJob.id = res.body.object_id;
         return logShippingJob;
+      })
+      .catch(function(error){
+        throw new APITestError('Creating LogShipping Job' ,
+          error.response.body, logShippingJob);
       });
   }
 };

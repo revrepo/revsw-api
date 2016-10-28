@@ -36,12 +36,12 @@ module.exports = {
     var user = UsersDP.generateToSignUp(data);
     return SignUpResource
       .createOne(user)
-      .catch(function (error) {
-        throw new APITestError('Creating Account', error.response.body, user);
-      })
       .then(function (res) {
         user.id = res.body.object_id;
         return user;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating Account', error.response.body, user);
       });
   },
 

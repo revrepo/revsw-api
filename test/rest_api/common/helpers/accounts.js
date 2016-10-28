@@ -33,13 +33,13 @@ module.exports = {
     var account = AccountsDP.generateOne();
     return AccountsResource
       .createOne(account)
-      .catch(function (error) {
-        throw new APITestError('Creating Account', error.response.body,
-          account);
-      })
       .then(function (res) {
         account.id = res.body.object_id;
         return account;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating Account', error.response.body,
+          account);
       });
   },
 

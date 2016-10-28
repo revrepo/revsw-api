@@ -39,13 +39,13 @@ var AppsHelper = {
     var app = AppsDP.generate(data);
     return AppsResource
       .createOne(app)
-      .catch(function (error) {
-        throw new APITestError('Creating App', error.response.body, app);
-      })
       .then(function (res) {
         app.id = res.body.id;
         app.sdkKey = res.body.sdk_key;
         return app;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating App', error.response.body, app);
       });
   }
 };
