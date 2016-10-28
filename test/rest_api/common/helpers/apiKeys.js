@@ -23,8 +23,29 @@ var APITestError = require('./../apiTestError');
 
 // # API Keys Helper
 // Abstracts common functionality for the related resource.
-var APIKeysHelper = {
 
+var APIKeysHelper = {
+  /**
+   * ### APIKeysHelper.createOneForAccount()
+   *
+   * Creates a new API Key for specific Account.
+   *
+   * @returns {Object} API Key data.
+   */
+  createOneForAccount: function(account) {
+    var apiKey = APIKeyDP.generateOne(account.id);
+    return APIKeysResource
+      .createOneAsPrerequisite(apiKey)
+      .catch(function(error) {
+        throw new APITestError('Creating API Key',
+          error.response.body,
+          apiKey);
+      })
+      .then(function(respose) {
+        apiKey.id = respose.body.object_id;
+        return apiKey;
+      });
+  },
   /**
    * ### APIKeysHelper.createOne()
    *
