@@ -21,7 +21,6 @@ var Joi = require('joi');
 
 var config = require('config');
 var API = require('./../../../common/api');
-var AppsDP = require('./../../../common/providers/data/apps');
 var APIKeysDP = require('./../../../common/providers/data/apiKeys');
 
 var SchemaProvider = require('./../../../common/providers/schema');
