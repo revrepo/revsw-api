@@ -39,14 +39,14 @@ var APIKeysHelper = {
         var apiKey = APIKeyDP.generateOne(account.id);
         return APIKeysResource
           .createOne(apiKey)
+          .then(function (respose) {
+            apiKey.id = respose.body.object_id;
+            return apiKey;
+          })
           .catch(function (error) {
             throw new APITestError('Creating API Key',
               error.response.body,
               apiKey);
-          })
-          .then(function (respose) {
-            apiKey.id = respose.body.object_id;
-            return apiKey;
           });
       });
   }

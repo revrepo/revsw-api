@@ -104,7 +104,8 @@ describe('StatsSDK Functional check:', function () {
       .authenticateUser(user)
       .then(function () {
         if ( application ) {
-          return API.resources.apps.deleteOne(application.id);
+          API.resources.apps.deleteOne(application.id);
+          done();
         }
       })
       .catch(done);

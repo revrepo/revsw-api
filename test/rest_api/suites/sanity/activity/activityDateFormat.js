@@ -72,7 +72,8 @@ describe('Sanity check', function () {
     API.helpers
       .authenticateUser(user)
       .then(function () {
-        return API.resources.domainConfigs.deleteOne(domainConfig.id);
+        API.resources.domainConfigs.deleteOne(domainConfig.id);
+        done();
       })
       .catch(done);
   });

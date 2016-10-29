@@ -74,7 +74,8 @@ describe('Domain configs functional test', function () {
     API.helpers
       .authenticateUser(secondReseller)
       .then(function () {
-        return API.resources.accounts.deleteOne(otherAccount.id);
+        API.resources.accounts.deleteOne(otherAccount.id);
+        done();
       })
       .catch(done);
   });

@@ -89,6 +89,9 @@ var UsersDataProvider = {
    * @returns {Object} user data.
    */
   generateToSignUp: function (data) {
+    if (data === undefined) {
+      data = {};
+    }
     if (!data.billingPlan) {
       data.billingPlan = 'billing-plan-gold';
     }

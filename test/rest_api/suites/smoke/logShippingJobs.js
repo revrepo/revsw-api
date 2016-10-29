@@ -63,7 +63,8 @@ describe('Smoke check', function () {
         return API.resources.domainConfigs.deleteOne(firstDc.id);
       })
       .then(function () {
-        return API.resources.logShippingJobs.deleteOne(firstLsJ.id);
+        API.resources.logShippingJobs.deleteOne(firstLsJ.id);
+        done();
       })
       .catch(done);
   });

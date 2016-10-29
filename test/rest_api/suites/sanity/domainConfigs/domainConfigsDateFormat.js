@@ -53,7 +53,8 @@ describe('Sanity check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        return API.resources.domainConfigs.deleteOne(firstDc.id);
+        API.resources.domainConfigs.deleteOne(firstDc.id);
+        done();
       })
       .catch(done);
   });

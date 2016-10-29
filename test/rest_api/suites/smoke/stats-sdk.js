@@ -76,7 +76,8 @@ describe('Smoke check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        return API.resources.apps.deleteOne(app_id);
+        API.resources.apps.deleteOne(app_id);
+        done();
       })
       .catch(done);
   });
