@@ -160,12 +160,12 @@
         <div class="swagger-ui-wrap">
             <font color="white">
                 Authenticate via
-                <select id="authType" class="parameter" style="font-size: 15px;" onchange="onAuthTypeChange()">
+                <select id="authType" class="parameter" onchange="onAuthTypeChange()">
                     <option value="1">Username/Password</option>
                     <option value="2">API Key</option>
                 </select>
             </font>
-            <form id="api_selector" style="margin: -1px 0 0 0; width: 485px;">
+            <form id="api_selector" style="margin: 0 0 0 0; width: 485px;">
                 <div id='authUserPass'>
                     <div class='input'><input placeholder="user" id="input_user" name="user" type="text" size="10"/></div>
                     <div class='input'><input placeholder="pass" id="input_pass" name="pass" type="password" size="10"/></div>
@@ -174,7 +174,7 @@
                     <input placeholder="api key" id="input_api_key" name="api_key" type="text" size="30" style="width: 345px;"/>
                 </div>
 
-                <button type="button" onclick="authenticate()" style="font-size: 17px;">Authenticate</button>
+                <button type="button" id="authBtn" class="" onclick="authenticate()">Authenticate</button>
             </form>
             <div id="otp" style="margin-left: 332px; display: none">
                 <font color="white">
