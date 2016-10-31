@@ -27,6 +27,7 @@ var faker = require('faker');
 // depending on your test needs.
 var APIKeyDataProvider = {
 
+  prefix: 'TEST_API_KEY_',
   /**
    * ### APIKeyDataProvider.generateOne()
    *
@@ -53,10 +54,12 @@ var APIKeyDataProvider = {
    * end points accept.
    *
    * @param {String} accountId, account ID
+   * @param {String} prefix, a prefix value to put in the name
    * @returns {Object} API Key info with the following schema
    *
    *    {
    *      account_id: String,
+   *      managed_account_ids: [String],
    *      key_name: String,
    *      domains: Array,
    *      allowed_ops: {
@@ -71,10 +74,11 @@ var APIKeyDataProvider = {
    *      active: Boolean
    *    }
    */
-  generateCompleteOne: function (accountId) {
-    var prefix = Date.now();
+  generateCompleteOne: function (accountId, prefix) {
+    var prefix = (prefix ? prefix + '_' : this.prefix )  + Date.now();
     return {
       account_id: accountId,
+      managed_account_ids: [],
       key_name: prefix + ': ' + faker.lorem.words()[0],
       domains: [],
       allowed_ops: {

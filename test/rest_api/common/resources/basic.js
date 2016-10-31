@@ -60,6 +60,10 @@ var setUserToRequest = function (request) {
   var user = Session.getCurrentUser();
   if (user && user.token) {
     return request.set('Authorization', 'Bearer ' + user.token);
+  }else{
+    if(user && !!user.key){
+      return request.set('Authorization', 'X-API-KEY ' + user.key);
+    }
   }
   return request;
 };

@@ -300,7 +300,7 @@ form p{
   margin: 0 0 8px 0;
 }
 
-input[type="text"]{
+input[type="text"],input[type="password"]{
   width: 325px;
   padding: 7px;
   border: 1px solid #999;
@@ -308,7 +308,9 @@ input[type="text"]{
    font-size: 12px;
    color: #333;
 }
-
+input[type="password"]{
+  width: auto;
+}
 input[type="submit"], input[type="button"]{
   margin-top: 10px;
   font-size: 2em;
@@ -579,3 +581,30 @@ div.footer{
     color:#444;
   }
 }
+div.swagger-ui-wrap{
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
+div.swagger-ui-wrap #authType {
+  font-size: 0.8rem; 
+  clear: none;
+  -webkit-appearance:none;
+  padding: 3px 3px;
+  border: 1px solid #999;
+  border-radius: 3px 3px 3px 3px; 
+
+}
+
+div.swagger-ui-wrap #authBtn {
+  font-size: 0.8rem;
+  display: block;
+  clear: none;
+  float: left;
+  padding: 3px 20px;
+  border: 1px solid #999;
+  border-radius: 3px 3px 3px 3px; 
+}
+    
+

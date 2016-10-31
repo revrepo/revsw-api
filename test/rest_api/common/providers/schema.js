@@ -304,5 +304,17 @@ module.exports = {
       updated_at: Joi.date(),
       app_published_version: Joi.number().integer()
     });
+  },
+
+  getAPIKey: function(){
+    return models.APIKeyModel;
+  },
+
+  getCreateAPIKeyStatus: function(){
+    return models.APIKeyStatusModel;
+  },
+
+  getAPIKeyStatus: function () {
+    return models.statusModel;
   }
 };
