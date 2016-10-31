@@ -25,12 +25,12 @@ var faker = require('faker');
 //
 // From there, you can modify and get bogus, invalid or other type of data
 // depending on your test needs.
-var UserDataProvider = {
+var UsersDataProvider = {
 
-  prefix: 'api-test',
+  prefix: 'test-user-',
 
   /**
-   * ### UserDataProvider.generateOne()
+   * ### UserDataProvider.generate()
    *
    * Generates valid data that represents a user and the user REST API
    * end points accept.
@@ -53,19 +53,22 @@ var UserDataProvider = {
    *      theme: String
    *    }
    */
-  generateOne: function (data) {
-    var prefix = data.firstName ? data.firstName + '_' : '';
+  generate: function (data) {
+    var firstName = data.firstName || faker.name.firstName();
+    var lastName = data.lastName || faker.name.lastName();
     var user = {
-      email: prefix + 'API_TEST_USER_' + Date.now() + '@revsw.com',
-      firstname: data.firstName || 'Super',
-      lastname: data.lastName || 'Man',
+      firstname: firstName,
+      lastname: lastName,
+      email: [firstName, Date.now() + '@mailinator.com']
+        .join('-')
+        .toLowerCase(),
       password: 'password1',
       access_control_list: {
         dashBoard: true,
         reports: true,
         configure: true,
         test: true,
-        readOnly: true
+        readOnly: false
       },
       role: data.role || 'user',
       theme: 'light'
@@ -77,20 +80,23 @@ var UserDataProvider = {
   },
 
   /**
-   * ### UserDataProvider.generateOneToSignUp()
+   * ### UserDataProvider.generateToSignUp()
    *
    * Generates valid data that represents a user (the sign-up REST API
    * end-point accepts) that is going to be registered.
    *
-   * @param {String} billingPlan, billing plan info to use
+   * @param {Object} data, for user to sign up
    * @returns {Object} user data.
    */
-  generateOneToSignUp: function (billingPlan) {
-    if (!billingPlan) {
-      billingPlan = 'billing-plan-gold';
+  generateToSignUp: function (data) {
+    if (data === undefined) {
+      data = {};
     }
-    var firstName = faker.name.firstName();
-    var lastName = faker.name.lastName();
+    if (!data.billingPlan) {
+      data.billingPlan = 'billing-plan-gold';
+    }
+    var firstName = data.firstName || faker.name.firstName();
+    var lastName = data.lastName || faker.name.lastName();
     var user = {
       first_name: firstName,
       last_name: lastName,
@@ -108,10 +114,10 @@ var UserDataProvider = {
       //state: faker.address.state(),
       //city: faker.address.city(),
       //zipcode: faker.address.zipCode(),
-      billing_plan: billingPlan
+      billing_plan: data.billingPlan
     };
     return user;
   }
 };
 
-module.exports = UserDataProvider;
+module.exports = UsersDataProvider;

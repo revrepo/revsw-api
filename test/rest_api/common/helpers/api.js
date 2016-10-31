@@ -32,6 +32,7 @@ var AppsHelper = require('./apps');
 var APIKeysHelper = require('./apiKeys');
 var BillingPlansHelper = require('./billingPlans');
 var Dashboards = require('./dashboards');
+var DNSZonesHelper = require('./dnsZones');
 var DomainConfigsHelper = require('./domainConfigs');
 var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
@@ -42,13 +43,14 @@ var LogShippingJobsHelper = require('./logShippingJobs');
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
 // Abstracts common functionality for the API.
-module.exports = {
+var APIHelpers = {
 
   accounts: AccountsHelper,
   apps: AppsHelper,
   apiKeys: APIKeysHelper,
   billingPlans: BillingPlansHelper,
   dashboards: Dashboards,
+  dnsZones: DNSZonesHelper,
   domainConfigs: DomainConfigsHelper,
   purge: PurgeHelper,
   signUp: SignUpHelper,
@@ -147,3 +149,5 @@ module.exports = {
       });
   }
 };
+
+module.exports = APIHelpers;

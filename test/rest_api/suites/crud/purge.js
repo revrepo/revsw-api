@@ -71,10 +71,8 @@ describe('CRUD check', function () {
           API.helpers
             .authenticateUser(revAdmin)
             .then(function () {
-              return API.resources.domainConfigs.deleteOne(domainConfig.id);
-            })
-            .then(function () {
-              return API.resources.accounts.deleteAllPrerequisites(done);
+              API.resources.domainConfigs.deleteOne(domainConfig.id);
+              done();
             })
             .catch(done);
         });

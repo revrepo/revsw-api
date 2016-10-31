@@ -40,7 +40,7 @@ describe('Sanity check', function () {
       .authenticateUser(resellerUser)
       .then(function () {
         API.resources.accounts
-          .createOneAsPrerequisite(accountSample)
+          .createOne(accountSample)
           .then(function (response) {
             accountSample.id = response.body.object_id;
             done();
@@ -51,12 +51,7 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
-      .then(function () {
-        API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('Accounts resource', function () {

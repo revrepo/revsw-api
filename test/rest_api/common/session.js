@@ -23,7 +23,7 @@
 // information. Re-setting means as if no user was authenticated
 var currentUser;
 
-module.exports = {
+var Session = {
   reset: function(){
     currentUser = undefined;
   },
@@ -34,3 +34,5 @@ module.exports = {
     return currentUser;
   }
 };
+
+module.exports = Session;

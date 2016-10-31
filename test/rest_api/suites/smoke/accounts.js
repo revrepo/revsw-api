@@ -96,7 +96,7 @@ describe('Smoke check', function () {
         // the validation. Meaning this that we should not apply any validation
         // to its data result.
         API.resources.accounts
-          .createOneAsPrerequisite(accountSample)
+          .createOne(accountSample)
           .then(function (response) {
             accountSample.id = response.body.object_id;
             done();
@@ -109,21 +109,7 @@ describe('Smoke check', function () {
   // This block is run after a suite run all their tests. Same idea applies
   // here in regards to the `done` parameter.
   after(function (done) {
-    // ### Using our `API` object
-
-    // Again, we set the user for the following API calls. This is to make sure
-    // that we are using the right user account (in case any other test run
-    // changed it to a different value)
-    API.helpers
-      .authenticateUser(resellerUser)
-      .then(function () {
-        // Note also here that we use `account resource` but in this time to
-        // `remove` or `delete` all pre-requisites that were created before. All
-        // of this is done to make sure we don;t leave garbage data in our
-        // application being tested.
-        API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('Accounts resource', function () {
@@ -219,7 +205,7 @@ describe('Smoke check', function () {
             API.resources.accounts
               // Creating one account as pre-requisite since it is need to do a
               // `update` REST API call. Note, no validations after it.
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 // Since account was created, we can `update` it
                 API.resources.accounts
@@ -242,7 +228,7 @@ describe('Smoke check', function () {
           API.resources.accounts
             // Creating one account as pre-requisite since it is need to do a
             // `delete` REST API call. Note, no validations after it.
-            .createOneAsPrerequisite(newProject)
+            .createOne(newProject)
             .then(function (response) {
               // Since account was created, we can `delete` it
               var objectId = response.body.object_id;

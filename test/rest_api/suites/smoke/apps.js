@@ -50,7 +50,7 @@ describe('Smoke check', function () {
             })
             .then(function (newAccount) {
               testAccount = newAccount;
-              return API.helpers.apps.createOne(testAccount.id);
+              return API.helpers.apps.create({accountId: testAccount.id});
             })
             .then(function (app) {
               testApp = app;
@@ -60,12 +60,7 @@ describe('Smoke check', function () {
         });
 
         after(function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.apps.deleteAllPrerequisites(done);
-            })
-            .catch(done);
+          done();
         });
 
         beforeEach(function (done) {
@@ -104,7 +99,7 @@ describe('Smoke check', function () {
 
         it('should return a response when creating an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
@@ -124,13 +119,12 @@ describe('Smoke check', function () {
 
         it('should return a response when updating an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -143,11 +137,11 @@ describe('Smoke check', function () {
 
         it('should return a response when deleting an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps

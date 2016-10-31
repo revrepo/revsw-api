@@ -25,17 +25,15 @@
 // depending on your test needs.
 var AppsDataProvider = {
 
-  prefix: 'API_TEST_APP_',
+  prefix: 'test-app-',
 
   /**
-   * ### AppsDataProvider.generateOne()
+   * ### AppsDataProvider.generate()
    *
    * Generates valida data that represents an APP which APPS REST API
    * end points accept.
    *
-   * @param {String} accountId, which will be used in the app data.
-   * @param {String} prefix, a prefix value to put in the name
-   *
+   * @param {Object} data, mobile app data
    * @returns {Object} app info with the following schema
    *
    *     {
@@ -44,11 +42,11 @@ var AppsDataProvider = {
    *         app_platform: String
    *     }
    */
-  generateOne: function (accountId, prefix) {
+  generate: function (data) {
     return {
-      account_id: accountId,
-      app_name: (prefix ? prefix + '_' : '' ) + this.prefix + Date.now(),
-      app_platform: 'iOS'
+      account_id: data.accountId,
+      app_name: this.prefix + Date.now(),
+      app_platform: data.platform || 'iOS'
     };
   },
 

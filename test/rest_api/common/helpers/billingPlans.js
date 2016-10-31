@@ -50,14 +50,14 @@ module.exports = {
   createOne: function () {
     var dashboard = BillingPlansDP.generateOne();
     return BillingPlansResource
-      .createOneAsPrerequisite(dashboard)
-      .catch(function (error) {
-        throw new APITestError('Creating Dashboard', error.response.body,
-          dashboard);
-      })
+      .createOne(dashboard)
       .then(function (res) {
         dashboard.id = res.body.object_id;
         return dashboard;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating Dashboard', error.response.body,
+          dashboard);
       });
   }
 };

@@ -36,7 +36,7 @@ describe('Boundary check', function () {
       .authenticateUser(reseller)
       .then(function () {
         API.resources.accounts
-          .createOneAsPrerequisite(AccountsDP.generateOne())
+          .createOne(AccountsDP.generateOne())
           .then(function (res) {
             accountId = res.body.object_id;
             done();
@@ -46,7 +46,7 @@ describe('Boundary check', function () {
   });
 
   after(function (done) {
-    API.resources.accounts.deleteAllPrerequisites(done);
+    done();
   });
 
   describe('Domain Configs resource', function () {

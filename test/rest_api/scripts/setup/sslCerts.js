@@ -50,28 +50,11 @@ describe('Setup', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                if (user.role === Constants.API.USERS.ROLES.ADMIN) {
-                  return API.resources.users
-                    .myself()
-                    .getOne();
-                }
-                return API.helpers.accounts.createOne();
-              })
-              .then(function (response) {
-
                 var sslCertsNeeded = [];
                 var prefix = buildPrefix(user);
-                var accountId;
-
-                if (user.role === Constants.API.USERS.ROLES.ADMIN) {
-                  accountId = response.body.companyId[0];
-                }
-                else {
-                  accountId = response.id;
-                }
 
                 for (var i = 10; i < 40; i++) {
-                  var cert = SSLCertDP.generateOne(accountId);
+                  var cert = SSLCertDP.generateOne(user.account.id);
                   cert.cert_name = prefix + i;
                   sslCertsNeeded.push(cert);
                 }
@@ -101,16 +84,6 @@ describe('Setup', function () {
                         sslCertsToCreate.push(sslCertsNeeded[i]);
                       }
                     }
-
-                    //console.log('SSL Certs to create');
-                    //sslCertsToCreate.forEach(function (item) {
-                    //  console.log('    >', item.app_name);
-                    //});
-                    //
-                    //console.log('Existing SSL Certs');
-                    //existingSSLCerts.forEach(function (app) {
-                    //  console.log('    >', app.app_name);
-                    //});
 
                     API.resources.sslCerts
                       .createManyIfNotExist(sslCertsToCreate)

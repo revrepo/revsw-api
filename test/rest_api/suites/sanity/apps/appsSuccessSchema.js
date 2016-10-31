@@ -52,7 +52,7 @@ describe('Sanity check', function () {
               })
               .then(function (newAccount) {
                 testAccount = newAccount;
-                return API.helpers.apps.createOne(testAccount.id);
+                return API.helpers.apps.create({accountId: testAccount.id});
               })
               .then(function (app) {
                 testApp = app;
@@ -62,12 +62,7 @@ describe('Sanity check', function () {
           });
 
           after(function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.apps.deleteAllPrerequisites(done);
-              })
-              .catch(done);
+            done();
           });
 
           beforeEach(function (done) {
@@ -121,7 +116,7 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'creating specific app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
@@ -147,13 +142,12 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'updating specific app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-              var updatedApp = AppsDP
-                .generateOneForUpdate(testAccount.id, 'UPDATED');
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+              var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
-                  return API.resources.apps.createOneAsPrerequisite(newApp);
+                  return API.resources.apps.createOne(newApp);
                 })
                 .then(function (response) {
                   return API.resources.apps
@@ -170,11 +164,11 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'deleting an app.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
-                  return API.resources.apps.createOneAsPrerequisite(newApp);
+                  return API.resources.apps.createOne(newApp);
                 })
                 .then(function (response) {
                   return API.resources.apps

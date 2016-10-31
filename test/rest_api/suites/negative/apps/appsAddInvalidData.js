@@ -36,7 +36,7 @@ describe('Negative check', function () {
 
       var testAccount;
       var testApp;
-      var fullTestApp = AppsDP.generateOne(0, 'NEW');
+      var fullTestApp = API.providers.data.apps.generate({});
 
       before(function (done) {
         API.helpers
@@ -47,7 +47,7 @@ describe('Negative check', function () {
           .then(function (newAccount) {
             testAccount = newAccount;
             fullTestApp.account_id = newAccount.id;
-            return API.helpers.apps.createOne(testAccount.id);
+            return API.helpers.apps.create({accountId: testAccount.id});
           })
           .then(function (app) {
             testApp = app;
@@ -57,12 +57,7 @@ describe('Negative check', function () {
       });
 
       after(function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apps.deleteAllPrerequisites(done);
-          })
-          .catch(done);
+        done();
       });
 
       var getInvalidDataCheckCallBack = function () {

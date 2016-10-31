@@ -47,7 +47,7 @@ describe('Negative check', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            return API.helpers.users.createOne({
+            return API.helpers.users.create({
               firstName: 'Tom',
               lastName: 'Smith'
             });
@@ -60,12 +60,7 @@ describe('Negative check', function () {
       });
 
       afterEach(function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            return API.resources.users.deleteAllPrerequisites(done);
-          })
-          .catch(done);
+        done();
       });
 
       it('should return `bad request` when enabling 2fa for user with bogus ' +

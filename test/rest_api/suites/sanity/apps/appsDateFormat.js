@@ -50,7 +50,7 @@ describe('Sanity check', function () {
               })
               .then(function (newAccount) {
                 testAccount = newAccount;
-                return API.helpers.apps.createOne(testAccount.id);
+                return API.helpers.apps.create({accountId: testAccount.id});
               })
               .then(function (app) {
                 testApp = app;
@@ -60,12 +60,7 @@ describe('Sanity check', function () {
           });
 
           after(function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.apps.deleteAllPrerequisites(done);
-              })
-              .catch(done);
+            done();
           });
 
           beforeEach(function (done) {

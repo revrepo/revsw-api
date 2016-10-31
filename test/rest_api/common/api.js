@@ -18,16 +18,19 @@
 
 // # API object
 
+// API dependencies
 var Session = require('./session');
 var APIHelpers = require('./helpers/api');
 var APIResources = require('./resources/api');
+var APIDataProviders = require('./providers/data/api');
+var APISchemaProviders = require('./providers/schema/api');
 
 // This allows to overpass SSL certificate check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // `API` object that abstracts all functionality from the REST API being tested.
 // Defines all resources and other components needed for testing.
-module.exports = {
+var API = {
 
   // Session, will help us to _remember_ which user is currently being used.
   session: Session,
@@ -35,6 +38,14 @@ module.exports = {
   // A set of all helpers for the REST API service.
   helpers: APIHelpers,
 
+  // A set of all data/schema providers for the REST API service.
+  providers: {
+    data: APIDataProviders,
+    schema: APISchemaProviders
+  },
+
   // A set of all resources that the REST API service provides.
   resources: APIResources
 };
+
+module.exports =  API;

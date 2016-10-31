@@ -35,6 +35,7 @@ var ResetResource = require('./reset');
 var SdkConfigsResource = require('./sdkConfigs');
 var SignUpResource = require('./signUp');
 var SSLCerts = require('./sslCerts');
+var SSLNames = require('./sslNames');
 var StagingServers = require('./stagingServers');
 var StatsResource = require('./stats');
 var StatsSDKResource = require('./stats-sdk');
@@ -45,7 +46,7 @@ var LogShippingJobsResource = require('./logShippingJobs');
 var DNSZonesResource = require('./dnsZones');
 
 // Set of all resources that the REST API service provides..
-module.exports = {
+var APIResources = {
 
   accounts: AccountsResource,
   activity: ActivityResource,
@@ -63,6 +64,7 @@ module.exports = {
   sdkConfigs: SdkConfigsResource,
   signUp: SignUpResource,
   sslCerts: SSLCerts,
+  sslNames: SSLNames,
   stagingServers: StagingServers,
   stats: StatsResource,
   stats_sdk: StatsSDKResource,
@@ -72,3 +74,5 @@ module.exports = {
   logShippingJobs: LogShippingJobsResource,
   dnsZones: DNSZonesResource
 };
+
+module.exports = APIResources;

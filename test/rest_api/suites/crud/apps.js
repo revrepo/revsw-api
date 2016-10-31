@@ -65,7 +65,7 @@ describe('CRUD check', function () {
             })
             .then(function (newAccount) {
               testAccount = newAccount;
-              return API.helpers.apps.createOne(testAccount.id);
+              return API.helpers.apps.create({accountId: testAccount.id});
             })
             .then(function (app) {
               testApp = app;
@@ -75,12 +75,7 @@ describe('CRUD check', function () {
         });
 
         after(function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.apps.deleteAllPrerequisites(done);
-            })
-            .catch(done);
+          done();
         });
 
         beforeEach(function (done) {
@@ -130,7 +125,7 @@ describe('CRUD check', function () {
 
         it('should allow to create an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
@@ -154,13 +149,12 @@ describe('CRUD check', function () {
 
         it('should allow to update an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -180,11 +174,11 @@ describe('CRUD check', function () {
 
         it('should allow to delete an app.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps

@@ -53,7 +53,9 @@ describe('Smoke check', function () {
           })
           .then(function (bPlan) {
             API.session.reset();
-            var newUser = UsersDP.generateOneToSignUp(bPlan.chargify_handle);
+            var newUser = API.providers.data.users.generateToSignUp({
+              billingPlan: bPlan.chargify_handle
+            });
             API.resources.signUp
               .createOne(newUser)
               .expect(200)

@@ -64,7 +64,7 @@ describe('StatsSDK Functional check:', function () {
         account_id = newAccount.id;
         console.log( ok_prefix + 'account created: ' +
           Utils.colored( 'LightCyan', account_id ) );
-        return API.helpers.apps.createOne(account_id);
+        return API.helpers.apps.create({accountId: account_id});
       })
       .then(function (newApp) {
         application = newApp;
@@ -103,20 +103,10 @@ describe('StatsSDK Functional check:', function () {
     API.helpers
       .authenticateUser(user)
       .then(function () {
-        console.log( '\n   "after all" hook, cleanup' );
         if ( application ) {
-          console.log( ok_prefix + 'new application to be deleted' );
-          return API.resources.apps.deleteOne(application.id);
+          API.resources.apps.deleteOne(application.id);
+          done();
         }
-      })
-      .then(function () {
-        if ( account_id ) {
-          console.log( ok_prefix + 'new account to be deleted' );
-          return API.resources.accounts.deleteAllPrerequisites(done);
-        }
-      })
-      .then(function () {
-        console.log( ok_prefix + 'done' );
       })
       .catch(done);
   });

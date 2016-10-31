@@ -26,20 +26,31 @@ var APITestError = require('./../apiTestError');
 
 // # Users Helper
 // Abstracts common functionality for the related resource.
-module.exports = {
+var UsersHelper = {
 
-  createOne: function (data) {
-    var user = UsersDP.generateOne(data);
-    // TODO: this should be changed to the new way to create a resource
+  /**
+   * ### UsersHelper.create()
+   *
+   * Creates a new App using the account ID and the data provided.
+   *
+   * @param {Object} data, mobile app data with the following structure:
+   *    {
+   *      email: String,
+   *      firstName: String,
+   *      lastName: String
+   *    }
+   */
+  create: function (data) {
+    var user = UsersDP.generate(data);
     return UsersResource
-      .createOneAsPrerequisite(user)
-      .catch(function(error){
-        throw new APITestError('Creating User' , error.response.body,
-          user);
-      })
+      .createOne(user)
       .then(function (res) {
         user.id = res.body.object_id;
         return user;
+      })
+      .catch(function(error){
+        throw new APITestError('Creating User' , error.response.body,
+          user);
       });
   },
 
@@ -57,3 +68,5 @@ module.exports = {
       });
   }
 };
+
+module.exports = UsersHelper;

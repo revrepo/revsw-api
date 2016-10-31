@@ -1,7 +1,8 @@
 {
-  "name": "rest-api-testing",
+  "name": "revsw-api-test",
   "version": "1.0.0",
   "description": "Testing frmework and suites for REVW API.",
+  "main": "common/api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,6 +16,7 @@
     "bluebird": "^2.10.2",
     "config": "^1.16.0",
     "chai": "1.9.x",
+    "faker": "^3.0.1",
     "grunt": "0.4.x",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
@@ -30,6 +32,7 @@
     "should": "^7.1.0",
     "should-http": "0.0.4",
     "supertest": "^1.1.0",
+    "supertest-as-promised": "^2.0.2",
     "lodash": "^3.10.1"
   }
 }

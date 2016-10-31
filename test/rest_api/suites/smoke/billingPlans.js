@@ -128,7 +128,7 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 return API.resources.billingPlans
-                  .createOneAsPrerequisite(newBillingPlan);
+                  .createOne(newBillingPlan);
               })
               .then(function (response) {
                 API.resources.billingPlans
@@ -147,7 +147,7 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 return API.resources.billingPlans
-                  .createOneAsPrerequisite(newBillingPlan);
+                  .createOne(newBillingPlan);
               })
               .then(function (response) {
                 API.resources.billingPlans

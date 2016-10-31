@@ -62,7 +62,7 @@ describe('Smoke check', function () {
       .then(function (newAccount) {
         account_id = newAccount.id;
         console.log( '    ### account created: ' + account_id );
-        return API.helpers.apps.createOne(account_id);
+        return API.helpers.apps.create({accountId: account_id});
       })
       .then(function (newApp) {
         app_id = newApp.id;
@@ -76,16 +76,8 @@ describe('Smoke check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        console.log( '\n    ### cleanup' );
-        console.log( '    ### application to be deleted: ' + app_id );
-        return API.resources.apps.deleteOne(app_id);
-      })
-      .then(function () {
-        console.log( '    ### account to be deleted: ' + account_id );
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .then(function () {
-        console.log( '    ### done' );
+        API.resources.apps.deleteOne(app_id);
+        done();
       })
       .catch(done);
   });
