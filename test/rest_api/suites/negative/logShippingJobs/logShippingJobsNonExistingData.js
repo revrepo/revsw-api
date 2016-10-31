@@ -54,10 +54,8 @@ describe('Negative check', function () {
     API.helpers
       .authenticateUser(revAdmin)
       .then(function () {
-        return API.resources.logShippingJobs.deleteOne(logShippingJob.id);
-      })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
+        API.resources.logShippingJobs.deleteOne(logShippingJob.id);
+        done();
       })
       .catch(done);
   });

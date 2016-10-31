@@ -61,16 +61,7 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      // TODO: BUG? Cannot delete DomainConfig right after updating it.
-      //.then(function () {
-      //  return API.resources.domainConfigs.deleteOne(firstDc.id);
-      //})
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('Domain Configs resource', function () {

@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,13 +22,13 @@ var API = require('./../../common/api');
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  // Defining set of users for which all below tests will be run
   var users = [
-    config.get('api.users.revAdmin')
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
   ];
-
   var namePattern = /portal-ui-test-email|api-qa-user-14|test-user-14/;
   var secondNamePattern = /API_TEST_USER_1|[0-9]{13}/;
 
@@ -37,22 +37,6 @@ describe('Clean up', function () {
     users.forEach(function (user) {
 
       describe('With user: ' + user.role, function () {
-
-        before(function (done) {
-          done();
-        });
-
-        after(function (done) {
-          done();
-        });
-
-        beforeEach(function (done) {
-          done();
-        });
-
-        afterEach(function (done) {
-          done();
-        });
 
         it('should clean-up Users created for testing.',
           function (done) {

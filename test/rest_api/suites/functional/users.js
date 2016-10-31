@@ -36,7 +36,7 @@ describe('Functional check', function () {
     API.helpers
       .authenticateUser(resellerUser)
       .then(function () {
-        return API.resources.accounts.createOneAsPrerequisite(accountSample);
+        return API.resources.accounts.createOne(accountSample);
       })
       .then(function (response) {
         accountSample.id = response.body.object_id;
@@ -44,7 +44,7 @@ describe('Functional check', function () {
       .then(function () {
         userSample.access_control_list.readOnly = false;
         userSample.companyId = [accountSample.id + ''];
-        return API.resources.users.createOneAsPrerequisite(userSample);
+        return API.resources.users.createOne(userSample);
       })
       .then(function (response) {
         userSample.id = response.body.object_id;
@@ -63,15 +63,7 @@ describe('Functional check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
-      .then(function () {
-        API.resources.users.deleteAllPrerequisites(
-          function () {
-            API.resources.accounts.deleteAllPrerequisites(done);
-          });
-      })
-      .catch(done);
+    done();
   });
 
   describe('Users resource', function () {
@@ -119,7 +111,7 @@ describe('Functional check', function () {
           .authenticateUser(userSample)
           .then(function() {
             var resellerAccountSample = AccountsDP.generateOne();
-            return API.resources.accounts.createOneAsPrerequisite(resellerAccountSample);
+            return API.resources.accounts.createOne(resellerAccountSample);
           })
           .then(function () {
             API.resources.users

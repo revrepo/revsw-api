@@ -23,7 +23,7 @@ var Constants = require('./../../common/constants');
 describe('Setup', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
     config.get('api.users.revAdmin'),
@@ -56,29 +56,13 @@ describe('Setup', function () {
                 API.helpers
                   .authenticateUser(user)
                   .then(function () {
-                    if (user.role === Constants.API.USERS.ROLES.ADMIN) {
-                      return API.resources.users
-                        .myself()
-                        .getOne();
-                    }
-                    return API.helpers.accounts.createOne();
-                  })
-                  .then(function (response) {
 
                     var appsNeeded = [];
                     var prefix = buildPrefix(user, platform);
-                    var accountId;
-
-                    if (user.role === Constants.API.USERS.ROLES.ADMIN) {
-                      accountId = response.body.companyId[0];
-                    }
-                    else {
-                      accountId = response.id;
-                    }
 
                     for (var i = 10; i < 40; i++) {
                       appsNeeded.push({
-                        account_id: accountId,
+                        account_id: user.account.id,
                         app_name: prefix + i,
                         app_platform: platform
                       });
@@ -109,16 +93,6 @@ describe('Setup', function () {
                             appsToCreate.push(appsNeeded[i]);
                           }
                         }
-
-                        //console.log('Apps to create');
-                        //appsToCreate.forEach(function (item) {
-                        //  console.log('    >', item.app_name);
-                        //});
-                        //
-                        //console.log('Existing Apps');
-                        //existingApps.forEach(function (app) {
-                        //  console.log('    >', app.app_name);
-                        //});
 
                         API.resources.apps
                           .createManyIfNotExist(appsToCreate)

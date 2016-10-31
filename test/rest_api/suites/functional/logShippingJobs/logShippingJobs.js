@@ -93,10 +93,8 @@ describe('LogShipping Jobs functional test', function () {
         return API.resources.domainConfigs.deleteOne(secondDc.id);
       })
       .then(function () {
-        return API.resources.logShippingJobs.deleteOne(firstLsJ.id);
-      })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
+        API.resources.logShippingJobs.deleteOne(firstLsJ.id);
+        done();
       })
       .catch(done);
   });

@@ -54,7 +54,7 @@ describe('Negative check', function () {
               })
               .then(function (newAccount) {
                 testAccount = newAccount;
-                return API.helpers.apps.createOne(testAccount.id);
+                return API.helpers.apps.create({accountId: testAccount.id});
               })
               .then(function (app) {
                 testApp = app;
@@ -64,12 +64,7 @@ describe('Negative check', function () {
           });
 
           after(function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.apps.deleteAllPrerequisites(done);
-              })
-              .catch(done);
+            done();
           });
 
           beforeEach(function (done) {
@@ -101,11 +96,11 @@ describe('Negative check', function () {
           it('should return `bad request` response when deleting app using ' +
             'bogus id.',
             function (done) {
-              var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+              var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
-                  return API.resources.apps.createOneAsPrerequisite(newApp);
+                  return API.resources.apps.createOne(newApp);
                 })
                 .then(function () {
                   API.resources.apps

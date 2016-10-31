@@ -121,7 +121,7 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 return API.resources.dashboards
-                  .createOneAsPrerequisite(newDashboard);
+                  .createOne(newDashboard);
               })
               .then(function (response) {
                 API.resources.dashboards
@@ -139,7 +139,7 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 return API.resources.dashboards
-                  .createOneAsPrerequisite(newDashboard);
+                  .createOne(newDashboard);
               })
               .then(function (response) {
                 API.resources.dashboards

@@ -54,7 +54,7 @@ describe('Functional check', function () {
             })
             .then(function (newAccount) {
               testAccount = newAccount;
-              return API.helpers.apps.createOne(testAccount.id);
+              return API.helpers.apps.create({accountId: testAccount.id});
             })
             .then(function (app) {
               testApp = app;
@@ -65,7 +65,7 @@ describe('Functional check', function () {
                 })
                 .then(function (newAccount) {
                   secondTestAccount = newAccount;
-                  return API.helpers.apps.createOne(secondTestAccount.id);
+                  return API.helpers.apps.create({accountId: secondTestAccount.id});
                 })
                 .then(function (app) {
                   secondTestApp = app;
@@ -127,13 +127,12 @@ describe('Functional check', function () {
 
         it('should not allow to update an app from other user.',
           function (done) {
-            var newApp = AppsDP.generateOne(secondTestAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(secondTestAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: secondTestAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(secondTestAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -150,11 +149,11 @@ describe('Functional check', function () {
 
         it('should not allow to delete an app from other user.',
           function (done) {
-            var newApp = AppsDP.generateOne(secondTestAccount.id, 'NEW');
+            var newApp = API.providers.data.apps.generate({accountId: secondTestAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -210,13 +209,12 @@ describe('Functional check', function () {
         it('should allow to verify an app config.',
           function (done) {
             var options = {options: 'verify_only'};
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -237,13 +235,12 @@ describe('Functional check', function () {
         it('should allow to publish an app config.',
           function (done) {
             var options = {options: 'publish'};
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 API.resources.apps
@@ -264,13 +261,12 @@ describe('Functional check', function () {
         it('should set `staging status` to `InProgress` right after ' +
           'updating an app',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 var appId = response.body.id;
@@ -320,13 +316,12 @@ describe('Functional check', function () {
                 .catch(done);
             };
 
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 appId = response.body.id;
@@ -345,13 +340,12 @@ describe('Functional check', function () {
           'publishing an app',
           function (done) {
             var options = {options: 'publish'};
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 var appId = response.body.id;
@@ -402,13 +396,12 @@ describe('Functional check', function () {
             };
 
             var options = {options: 'publish'};
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
-            var updatedApp = AppsDP
-              .generateOneForUpdate(testAccount.id, 'UPDATED');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
+            var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 appId = response.body.id;
@@ -424,11 +417,11 @@ describe('Functional check', function () {
           });
 
          it('should allow to create apps with same data for two different account.', function(done) {
-          var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+          var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
           API.helpers
             .authenticateUser(user)
             .then(function() {
-              return API.resources.apps.createOneAsPrerequisite(newApp)
+              return API.resources.apps.createOne(newApp)
                 .then(function() {
                   return API.resources.apps
                     .createOne(newApp)
@@ -457,7 +450,7 @@ describe('Functional check', function () {
 
         it('should allow to get app data after updating it.',
           function (done) {
-            var newApp = AppsDP.generateOne(testAccount.id, 'NEW');
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var ts = Date.now();
             var updatedApp = {
               account_id: testAccount.id,
@@ -484,7 +477,7 @@ describe('Functional check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                return API.resources.apps.createOneAsPrerequisite(newApp);
+                return API.resources.apps.createOne(newApp);
               })
               .then(function (response) {
                 var appId = response.body.id;

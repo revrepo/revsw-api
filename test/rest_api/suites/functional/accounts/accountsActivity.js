@@ -56,7 +56,7 @@ describe('Functional check', function () {
         })
         .then(function () {
           API.resources.accounts
-            .createOneAsPrerequisite(accountSample)
+            .createOne(accountSample)
             .then(function (response) {
               accountSample.id = response.body.object_id;
               done();
@@ -67,12 +67,7 @@ describe('Functional check', function () {
     });
 
     afterEach(function (done) {
-      API.helpers
-        .authenticateUser(resellerUser)
-        .then(function () {
-          API.resources.accounts.deleteAllPrerequisites(done);
-        })
-        .catch(done);
+      done();
     });
 
     it('should return activity data after creating an account.',
@@ -143,7 +138,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             return API.resources.accounts
-              .createOneAsPrerequisite(newProject)
+              .createOne(newProject)
               .then(function (response) {
                 return response.body.object_id;
               })

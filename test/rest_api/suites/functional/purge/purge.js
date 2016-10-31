@@ -58,10 +58,8 @@ describe('Functional check', function () {
     API.helpers
       .authenticateUser(reseller)
       .then(function () {
-        return API.resources.domainConfigs.deleteOne(domainConfig.id);
-      })
-      .then(function () {
-        return API.resources.accounts.deleteAllPrerequisites(done);
+        API.resources.domainConfigs.deleteOne(domainConfig.id);
+        done();
       })
       .catch(done);
   });

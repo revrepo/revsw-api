@@ -39,7 +39,7 @@ describe('Functional check', function () {
       .authenticateUser(resellerUser)
       .then(function () {
         API.resources.users
-          .createOneAsPrerequisite(userSample)
+          .createOne(userSample)
           .then(function (response) {
             userSample.id = response.body.object_id;
             userSample.name = userSample.email;
@@ -59,12 +59,7 @@ describe('Functional check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
-      .then(function () {
-        API.resources.users.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('Accounts resource', function () {
@@ -84,7 +79,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.accounts
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 API.helpers
                   .authenticateUser(anotherResellerUser)
@@ -110,7 +105,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.accounts
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 API.helpers
                   .authenticateUser(anotherResellerUser)
@@ -135,7 +130,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.accounts
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 API.helpers
                   .authenticateUser(anotherResellerUser)
@@ -160,7 +155,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.accounts
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 var id = response.body.object_id;
                 API.resources.accounts
@@ -190,7 +185,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.accounts
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 var id = response.body.object_id;
                 API.resources.accounts
@@ -219,7 +214,7 @@ describe('Functional check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.accounts
-              .createOneAsPrerequisite(newAccount)
+              .createOne(newAccount)
               .then(function (response) {
                 var id = response.body.object_id;
                 API.resources.accounts

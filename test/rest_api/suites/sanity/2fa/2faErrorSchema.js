@@ -48,7 +48,7 @@ describe('Sanity check', function () {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {
-            return API.helpers.users.createOne({
+            return API.helpers.users.create({
               firstName: 'Tom',
               lastName: 'Smith'
             });
@@ -61,12 +61,7 @@ describe('Sanity check', function () {
       });
 
       afterEach(function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            return API.resources.users.deleteAllPrerequisites(done);
-          })
-          .catch(done);
+        done();
       });
 
       it('should return error response schema when initializing 2fa without ' +

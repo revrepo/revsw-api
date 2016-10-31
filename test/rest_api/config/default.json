@@ -35,27 +35,47 @@
       "revAdmin": {
         "email": "qa_user_with_rev-admin_perm@revsw.com",
         "password": "password1",
-        "role": "Rev Admin"
+        "role": "Rev Admin",
+        "account": {
+          "id": "55b706a57957012304a49d0b",
+          "companyName": "API QA Reseller Company"
+        }
       },
       "reseller": {
         "email": "api_qa_user_with_reseller_perm@revsw.com",
         "password": "password1",
-        "role": "Reseller"
+        "role": "Reseller",
+        "account": {
+          "id": "55b706a57957012304a49d0b",
+          "companyName": "API QA Reseller Company"
+        }
       },
       "secondReseller": {
         "email": "api_qa_user_2_with_reseller_perm@revsw.com",
         "password": "password1",
-        "role": "Reseller"
+        "role": "Reseller",
+        "account": {
+          "id": "55b6ff6a7957012304a49d04",
+          "companyName": "API QA Account"
+        }
       },
       "admin": {
         "email": "api_qa_user_with_admin_perm@revsw.com",
         "password": "password1",
-        "role": "Admin"
+        "role": "Admin",
+        "account": {
+          "id": "55b6ff6a7957012304a49d04",
+          "companyName": "API QA Account"
+        }
       },
       "user": {
         "email": "qa_user_with_user_perm@revsw.com",
         "password": "password1",
-        "role": "Normal User"
+        "role": "Normal User",
+        "account": {
+          "id": "5588869fbde7a0d00338ce8f",
+          "companyName": "Rev Test"
+        }
       },
       "admin2": {
         "email": "qa_user_with_admin_perm@revsw.com",

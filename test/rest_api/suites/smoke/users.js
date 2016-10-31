@@ -36,7 +36,7 @@ describe('Smoke check', function () {
       .authenticateUser(resellerUser)
       .then(function () {
         API.resources.users
-          .createOneAsPrerequisite(userSample)
+          .createOne(userSample)
           .then(function (response) {
             userSample.id = response.body.object_id;
             userSample.name = userSample.email;
@@ -56,12 +56,7 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
-      .then(function () {
-        API.resources.users.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('Users resource', function () {
@@ -117,7 +112,7 @@ describe('Smoke check', function () {
           .authenticateUser(resellerUser)
           .then(function () {
             API.resources.users
-              .createOneAsPrerequisite(newUser)
+              .createOne(newUser)
               .then(function (response) {
                 newUser.firstName = 'John';
                 newUser.lastName = 'Doe';
@@ -137,7 +132,7 @@ describe('Smoke check', function () {
         .authenticateUser(resellerUser)
         .then(function () {
           API.resources.users
-            .createOneAsPrerequisite(newUser)
+            .createOne(newUser)
             .then(function (response) {
               var objectId = response.body.object_id;
               API.resources.users

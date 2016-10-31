@@ -37,7 +37,7 @@ describe('Boundary check', function () {
       .authenticateUser(reseller)
       .then(function () {
         API.resources.accounts
-          .createOneAsPrerequisite(AccountsDP.generateOne())
+          .createOne(AccountsDP.generateOne())
           .then(function (res) {
             accountId = res.body.object_id;
             done();
@@ -47,12 +47,7 @@ describe('Boundary check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
-      .then(function () {
-        API.resources.accounts.deleteAllPrerequisites(done);
-      })
-      .catch(done);
+    done();
   });
 
   describe('LogShipping Jobs resource', function () {

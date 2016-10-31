@@ -22,53 +22,47 @@ var API = require('./../../common/api');
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.reseller');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
+  ];
   var namePattern = /[0-9]{13}/;
 
-  before(function (done) {
-    done();
-  });
+  describe('Dashboards', function () {
 
-  after(function (done) {
-    done();
-  });
+    users.forEach(function (user) {
 
-  describe('Dashboards resource', function () {
+      describe('With user: ' + user.role, function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should clean Dashboards created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dashboards
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var dashboards = res.body;
-                dashboards.forEach(function (dashboard) {
-                  if (namePattern.test(dashboard.title)) {
-                    ids.push(dashboard.id);
-                  }
-                });
-
+        it('should clean Dashboards created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.dashboards
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var dashboards = res.body;
+                    dashboards.forEach(function (dashboard) {
+                      if (namePattern.test(dashboard.title)) {
+                        ids.push(dashboard.id);
+                      }
+                    });
+
+                    API.resources.dashboards
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

@@ -66,7 +66,7 @@ describe('CRUD check', function () {
               if (user.role === 'Rev Admin') {
                 newUserData.companyId = [newAccount.id];
               }
-              return API.helpers.users.createOne(newUserData);
+              return API.helpers.users.create(newUserData);
             })
             .then(function (createdUser) {
               newUser = createdUser;
@@ -76,12 +76,7 @@ describe('CRUD check', function () {
         });
 
         afterEach(function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              return API.resources.users.deleteAllPrerequisites(done);
-            })
-            .catch(done);
+          done();
         });
 
         it('should initialize 2fa for specific user',

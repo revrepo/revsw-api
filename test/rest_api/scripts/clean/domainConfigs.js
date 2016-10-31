@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -18,58 +18,50 @@
 
 var config = require('config');
 var API = require('./../../common/api');
-var DomainConfigDP = require('./../../common/providers/data/domainConfigs');
 
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var reseller = config.get('api.users.revAdmin');
-  var namePattern = new RegExp(DomainConfigDP.prefix +
-    '-[0-9]{13}|[0-9]{13}-portal-ui-test');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin')
+  ];
+  var namePattern = /[0-9]{13}/;
 
-  before(function (done) {
-    done();
-  });
+  describe('Domains', function () {
 
-  after(function (done) {
-    done();
-  });
+    users.forEach(function (user) {
 
-  describe('Domain Configs resource', function () {
+      describe('With user: ' + user.role, function () {
 
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should clean DomainConfigs created for testing.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var ids = [];
-                var domainConfigs = res.body;
-                domainConfigs.forEach(function (domainConfig) {
-                  if (namePattern.test(domainConfig.domain_name)) {
-                    ids.push(domainConfig.id);
-                  }
-                });
+        it('should clean Domains created for testing.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.domainConfigs
-                  .deleteManyIfExist(ids)
-                  .finally(done);
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    var ids = [];
+                    var domainConfigs = res.body;
+                    domainConfigs.forEach(function (domainConfig) {
+                      if (namePattern.test(domainConfig.domain_name)) {
+                        ids.push(domainConfig.id);
+                      }
+                    });
+                    API.resources.domainConfigs
+                      .deleteManyIfExist(ids)
+                      .finally(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

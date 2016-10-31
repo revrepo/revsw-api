@@ -47,7 +47,7 @@ describe('CRUD check', function () {
             .authenticateUser(user)
             .then(function () {
               API.resources.accounts
-                .createOneAsPrerequisite(accountSample)
+                .createOne(accountSample)
                 .then(function (response) {
                   accountSample.id = response.body.object_id;
                   done();
@@ -58,12 +58,7 @@ describe('CRUD check', function () {
         });
 
         after(function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.accounts.deleteAllPrerequisites(done);
-            })
-            .catch(done);
+          done();
         });
 
         beforeEach(function (done) {
@@ -129,7 +124,6 @@ describe('CRUD check', function () {
                     newAccount.statusCode.should.equal(200);
                     newAccount.message.should.equal('Successfully created new account');
                     newAccount.object_id.should.not.be.empty();
-                    // TODO: register prerequisite
                     API.resources.accounts
                       .deleteOne(newAccount.object_id)
                       .end(done);
@@ -147,7 +141,7 @@ describe('CRUD check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.accounts
-                  .createOneAsPrerequisite(newAccount)
+                  .createOne(newAccount)
                   .then(function (response) {
                     API.resources.accounts
                       .update(response.body.object_id, updatedAccount)
@@ -171,7 +165,7 @@ describe('CRUD check', function () {
             .authenticateUser(user)
             .then(function () {
               API.resources.accounts
-                .createOneAsPrerequisite(newProject)
+                .createOne(newProject)
                 .then(function (response) {
                   API.resources.accounts
                     .deleteOne(response.body.object_id)
