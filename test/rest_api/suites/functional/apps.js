@@ -294,7 +294,7 @@ describe('Functional check', function () {
           'updating an app',
           function (done) {
             var appId;
-            var counter = 180000; // 3 mins
+            var counter = 360000; // 6 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
