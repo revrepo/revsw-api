@@ -66,7 +66,6 @@ describe('Sanity check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                // API.resources.apiKeys.deleteAllPrerequisites(done); // TODO-NOTE: don't use decause   BasicResource.deleteAllPrerequisites not works
                 API.resources.apiKeys.deleteOne(testAPIKey.id).end(done);
               })
               .catch(done);
@@ -155,7 +154,7 @@ describe('Sanity check', function () {
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
-                  return API.resources.apiKeys.createOneAsPrerequisite(newAPIKey);
+                  return API.resources.apiKeys.createOne(newAPIKey);
                 })
                 .then(function (response) {
                   return API.resources.apiKeys
@@ -176,7 +175,7 @@ describe('Sanity check', function () {
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
-                  return API.resources.apiKeys.createOneAsPrerequisite(newAPIKey);
+                  return API.resources.apiKeys.createOne(newAPIKey);
                 })
                 .then(function (response) {
                   return API.resources.apiKeys
@@ -279,7 +278,7 @@ describe('Sanity check', function () {
                   return API.helpers.authenticateAPIKey(testAPIKey.id);
                 })
                 .then(function () {
-                  return API.resources.apiKeys.createOneAsPrerequisite(newAPIKey);
+                  return API.resources.apiKeys.createOne(newAPIKey);
                 })
                 .then(function (response) {
                   return API.resources.apiKeys
@@ -304,7 +303,7 @@ describe('Sanity check', function () {
                   return API.helpers.authenticateAPIKey(testAPIKey.id);
                 })
                 .then(function () {
-                  return API.resources.apiKeys.createOneAsPrerequisite(newAPIKey);
+                  return API.resources.apiKeys.createOne(newAPIKey);
                 })
                 .then(function (response) {
                   return API.resources.apiKeys
