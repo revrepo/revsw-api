@@ -36,10 +36,12 @@ module.exports = function (grunt) {
           'scripts/clean/billingPlans.js',
           'scripts/clean/dashboards.js',
           'scripts/clean/domainConfigs.js',
+          'scripts/clean/dnsZones.js',
+          'scripts/clean/logShippingJobs.js',
+          'scripts/clean/sslNames.js',
           'scripts/clean/sslCerts.js',
           'scripts/clean/accounts.js',
-          'scripts/clean/users.js',
-          'scripts/clean/dnsZones.js'
+          'scripts/clean/users.js'
         ]
       },
       setup: {
