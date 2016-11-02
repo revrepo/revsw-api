@@ -21,13 +21,13 @@ var API = require('./../../common/api');
 
 describe('Clean up', function () {
 
-  // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.get('api.request.maxTimeout'));
+  // Since the SSL Names delete operations take a lot of time setting the test timeout value to 60 minutes
+  this.timeout(3600000);
 
   var users = [
-    config.get('api.users.revAdmin'),
+    config.get('api.users.admin'),
     config.get('api.users.reseller'),
-    config.get('api.users.admin')
+    config.get('api.users.revAdmin')
   ];
   var namePattern = /[0-9]{13}/;
 
