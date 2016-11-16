@@ -70,5 +70,29 @@ module.exports = [
         }
       }
     }
-  }
+  },
+  {
+    method : 'POST',
+    path   : '/v1/authenticate/google',
+    config : {
+      handler     : authenticate.authenticateOAuthGoogle,
+      auth        : false,
+      description : 'An internal portal call for user authentication by Google',
+     // tags        : ['api', 'web'],
+      plugins     : {
+        'hapi-swagger' : {
+          responseMessages : routeModels.standardHTTPErrors
+        }
+      },
+      validate    : {
+        payload : {
+          clientId    : Joi.string().required().description('clientId'),
+          code : Joi.string().required().description('code '),
+          redirectUri: Joi.string().required().description('redirectUri'),
+          state : Joi.string().required().description('state'),
+
+        }
+      }
+    }
+  },
 ];

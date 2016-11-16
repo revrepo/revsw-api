@@ -234,3 +234,66 @@ exports.authenticateSSOAzure = function(request, reply) {
     }
   });
 };
+
+exports.authenticateOAuthGoogle = function(request, reply) {
+  var req = require('request');
+  var accessTokenUrl = 'https://accounts.google.com/o/oauth2/token';
+  var peopleApiUrl = 'https://www.googleapis.com/plus/v1/people/me/openIdConnect';
+  var params = {
+    code: request.payload.code,
+    client_id: request.payload.clientId,
+    client_secret: config.get('oauth.google_secret'),
+    redirect_uri: request.payload.redirectUri,
+    grant_type: 'authorization_code'
+  };
+
+  // Step 1. Exchange authorization code for access token.
+  req.post(accessTokenUrl, {
+    json: true,
+    form: params
+  }, function(err, response, token) {
+    console.log(token);
+    var accessToken = token.access_token;
+    var headers = {
+      Authorization: 'Bearer ' + accessToken
+    };
+    // Step 2. Retrieve profile information about the current user.
+    req.get({
+      url: peopleApiUrl,
+      headers: headers,
+      json: true
+    }, function(err, response, profile) {
+      if (profile.error) {
+        return reply(boom.badImplementation('Authenticate::google: Failed to retrieve user profile from Google Plus'), profile.error);
+      }
+      var email = profile.email;
+      users.getValidation({
+        email: email
+      }, function(error, user) {
+
+        if (error) {
+          logger.error('Authenticate::authenticate: Failed to retrieve user details for' + ' email: ' + email);
+          return reply(boom.badImplementation('Authenticate::google: Failed to retrieve user details for' +
+            ' email: ' + email));
+        }
+        if (!user) {
+          logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
+          return reply(boom.unauthorized());
+        } else {
+          // TODO need to fix the code to do the actual verification of provided token and resourceId
+          var authPassed = true;
+          var sendResultChecks = function sendResultChecks(authPassed) {
+            if (authPassed) {
+              onAuthPassed(user, request, reply, error);
+            } else {
+              return reply(boom.unauthorized());
+            }
+          };
+          sendResultChecks(authPassed);
+        }
+      });
+    });
+  });
+};
+
+
