@@ -67,5 +67,6 @@
   "azure_marketplace": {
     "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
     "api_token": "the_correct_value_is_in_local_json"
-  }
+  },
+  "register_new_accounts_in_crm": "no"
 }
