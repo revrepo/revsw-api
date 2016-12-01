@@ -68,5 +68,10 @@
     "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
     "api_token": "the_correct_value_is_in_local_json"
   },
-  "register_new_accounts_in_crm": "no"
+  "register_new_accounts_in_crm": "yes",
+  "register_new_users_for_network_status_updates":"yes",
+  "statuspage":{
+    "page_id": "2pjglhj418gn",
+    "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
+  }
 }

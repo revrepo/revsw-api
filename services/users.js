@@ -35,7 +35,9 @@ var User = require('../models/User');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
-var dashboardService = require('./dashboards.js');
+var dashboardService = require('./dashboards');
+var statuspageService = require('./statuspage');
+
 
 /**
  * @name  createUser
@@ -97,6 +99,16 @@ exports.createUser = function(newUser, callback) {
             logger.info('UserService::createUser:success add default dashboard for User with id ' + _createdUser_.user_id);
           }
         });
+        // 2.  add new user account (self-registered or not) to RevAPM statuspage.io notification list
+        if (config.get('register_new_users_for_network_status_updates') === 'yes') {
+          statuspageService.subscribe(newUser, function(err, data) {
+            if (err) {
+              logger.error('UserService::statuspage.subscribe:error create subscription: ' + JSON.stringify(err));
+            } else {
+              logger.info('UserService::statuspage.subscribe:success create subscription for user Id ' + _createdUser_.user_id);
+            }
+          });
+        }
         cb();
       }
     ],
@@ -137,6 +149,15 @@ exports.removeUser = function(userId, callback) {
         dashboardService.deleteDashboardsWithUserId(_removedUser_.user_id, function(err, result) {
           if (err) {
             logger.error('removeUser:removeUserDashboards:error ' + JSON.stringify(err));
+          }
+          cb(null);
+        });
+      },
+      function removeStatusPageSubscription(cb) {
+        // TODO: is need to add check "register_new_users_for_network_status_updates" ?
+        statuspageService.unSubscribe(_removedUser_, function(err, result) {
+          if (err) {
+            logger.error('removeUser:statuspageService.unSubscribe:error ' + JSON.stringify(err));
           }
           cb(null);
         });
