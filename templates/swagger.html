@@ -24,123 +24,167 @@
     {{> head}}
 
 
-    <script type="text/javascript">
-        $(function () {
-            window.swaggerUi = new SwaggerUi({
-                url: window.location.protocol + '//' + window.location.host + '{{hapiSwagger.endpoint}}?tags=api',
-                dom_id: "swagger-ui-container",
-                supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
-                onComplete: function(swaggerApi, swaggerUi){
-                    log("Loaded SwaggerUI")
-                    $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-                },
-                onFailure: function(data) {
-                    log("Unable to Load SwaggerUI");
-                },
-                docExpansion: "list"
-            });
-            window.swaggerUi.load();
-        });
+<script type="text/javascript">
+$(function() {
+  window.swaggerUi = new SwaggerUi({
+    url: window.location.protocol + '//' + window.location.host + '{{hapiSwagger.endpoint}}?tags=api',
+    dom_id: "swagger-ui-container",
+    supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+    onComplete: function(swaggerApi, swaggerUi) {
+      log("Loaded SwaggerUI")
+      $('pre code').each(function(i, e) {
+        hljs.highlightBlock(e)
+      });
+    },
+    onFailure: function(data) {
+      log("Unable to Load SwaggerUI");
+    },
+    docExpansion: "list"
+  });
+  var $form = $('#api_selector');
+  $form.on('submit', function(e) {
+    e.preventDefault();
+    authenticate();
+  });
+  window.swaggerUi.load();
+});
 
-        var apiUrl = window.location.protocol + '//' + window.location.host + '/v1';
+var apiUrl = window.location.protocol + '//' + window.location.host + '/v1';
 
-        function onAuthTypeChange() {
-            var type = $('#authType').val();
+function onAuthTypeChange() {
+  var type = $('#authType').val();
 
-            switch (type){
-                case '1':
-                    $('#authApiKey').hide();
-                    $('#authUserPass').show();
-                    $('#input_api_key').val('');
-                break;
-                case '2':
-                    $('#authUserPass').hide();
-                    $('#authApiKey').show();
-                    $('#input_user').val('');
-                    $('#input_pass').val('');
-                break;
-            }
-        }
+  switch (type) {
+    case '1':
+      $('#authApiKey').hide();
+      $('#authUserPass').show();
+      $('#input_api_key').val('');
+      break;
+    case '2':
+      $('#authUserPass').hide();
+      $('#authApiKey').show();
+      $('#input_user').val('');
+      $('#input_pass').val('');
+      break;
+  }
+}
 
-        function authenticate(){
-            var type = $('#authType').val();
+function authenticate() {
+  var type = $('#authType').val();
+  window.authorizations.remove('token');
+  window.authorizations.remove('apiKey');
 
-            window.authorizations.remove('token');
-            window.authorizations.remove('apiKey');
+  switch (type) {
+    case '1':
+      authUserPassword();
+      break;
+    case '2':
+      authApiKey();
+      break;
+  }
+  console.log(e);
 
-            switch (type){
-                case '1':
-                    authUserPassword();
-                break;
-                case '2':
-                    authApiKey();
-                break;
-            }
-        }
+}
 
-        function authUserPassword(){
-            var data = {
-                email: $('#input_user').val(),
-                password: $('#input_pass').val()
-            };
+function authUserPassword() {
+  var data = {
+    email: $('#input_user').val(),
+    password: $('#input_pass').val()
+  };
 
-            if($('#input_otp').val()){
-                data.oneTimePassword = $('#input_otp').val();
-            }
+  if ($('#input_otp').val()) {
+    data.oneTimePassword = $('#input_otp').val();
+  }
 
-            $.post(apiUrl + '/authenticate', data).done(function(response) {
-                var token = 'Bearer ' + response.token;
-                window.authorizations.add('token', new ApiKeyAuthorization("Authorization", token, "header"));
-                showMessage('Authenticated OK', 'green');
-            }).error(function(err){
-                switch(err.status){
-                    case 401:
-                        showMessage('Authentication Failed!', 'red');
-                    break;
-                    case 403:
-                        $('#otp').css('display', 'block');
-                    break;
-                }
-            });
+  $.post(apiUrl + '/authenticate', data).done(function(response) {
+    var token = 'Bearer ' + response.token;
+    window.authorizations.add('token', new ApiKeyAuthorization("Authorization", token, "header"));
+    showMessage('Authenticated OK', 'green');
+  }).error(function(err, data) {
+    console.log(err, err.data);
+    switch (err.status) {
+      case 401:
+        showMessage('Authentication Failed!', 'red');
+        break;
+      case 400:
+        showMessage('Please check fields!', 'red'); 
+        break;
+      case 403:
+        $('#otp').css('display', 'flex');
+        break;
+    }
+  });
 
-            $('#input_otp').val('');
-        }
+  $('#input_otp').val('');
+}
 
-        function authApiKey(){
-            var key = 'X-API-KEY ' + $('#input_api_key').val();
+function authApiKey() {
+  var key = 'X-API-KEY ' + $('#input_api_key').val();
 
-            $.ajax({
-                type: 'GET',
-                url: apiUrl + '/accounts',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', key);
-                },
-                success: function (response){
-                    window.authorizations.add('apiKey', new ApiKeyAuthorization("Authorization", key, "header"));
-                    showMessage('Authenticated OK', 'green');
-                },
-                error: function(error){
-                    showMessage('Authentication Failed!', 'red');
-                }
-            });
-        }
+  $.ajax({
+    type: 'GET',
+    url: apiUrl + '/accounts',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('Authorization', key);
+    },
+    success: function(response) {
+      window.authorizations.add('apiKey', new ApiKeyAuthorization("Authorization", key, "header"));
+      showMessage('Authenticated OK', 'green');
+    },
+    error: function(error) {
+      showMessage('Authentication Failed!', 'red');
+    }
+  });
+}
 
-        function showMessage(message, color){
-            $('#message').css('display', 'block');
-            $('#message').css('color', color);
-            $('#message').html(message);
-            setTimeout(function(){ $('#message').css('display', 'none');}, 3000);
+function showMessage(message, color) {
+  $('#message').css('display', 'block');
+  $('#message').css('color', color);
+  $('#message').html(message);
+  setTimeout(function() {
+    $('#message').css('display', 'none');
+  }, 3000);
 
-            $('#otp').css('display', 'none');
-        }
-    </script>
+  $('#otp').css('display', 'none');
+}
+</script>
 
-    <style>
-        /* for custom page remove swaggers api info section */
-        #api_info{
-            display: none;
-        }
-    </style>
+  <style>
+  /* for custom page remove swaggers api info section */
+  
+  #api_info {
+    display: none;
+  }
+  
+  .col {
+    justify-content: flex-end;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+  }
+  
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .col-60 {
+    width: 60%;
+  }
+  
+  .col-20 {
+    width: 20%;
+  }
+  
+  .parameter {
+    align-self: stretch;
+  }
+  
+  .white {
+    color: white;
+  }
+  </style>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -156,37 +200,46 @@
 </head>
 <body>
 <div class="wrapper">
-    <div id='header'>
-        <div class="swagger-ui-wrap">
-            <font color="white">
-                Authenticate via
-                <select id="authType" class="parameter" onchange="onAuthTypeChange()">
-                    <option value="2">API Key</option>
-                    <option value="1">Username/Password</option>
-                </select>
-            </font>
-            <form id="api_selector" style="margin: 0 0 0 0; width: 485px;">
-                <div class='input' id='authApiKey'>
-                    <input placeholder="api key" id="input_api_key" name="api_key" type="text" size="30" style="width: 345px;"/>
-                </div>
-                <div id='authUserPass' style="display: none">
-                    <div class='input'><input placeholder="user" id="input_user" name="user" type="text" size="10"/></div>
-                    <div class='input'><input placeholder="pass" id="input_pass" name="pass" type="password" size="10"/></div>
-                </div>
-
-                <button type="button" id="authBtn" class="" onclick="authenticate()">Authenticate</button>
-            </form>
-            <div id="otp" style="margin-left: 332px; display: none">
-                <font color="white">
-                    Enter One Time Password:
-                    <div class='input' style="display: inline-block"><input placeholder="one time pass" id="input_otp" name="otp" type="password" size="10" style="font-size: 0.9em; padding: 3px;"/></div>
-                </font>
+<div id='header'>
+  <div class="swagger-ui-wrap">
+    <form id="api_selector" style="display: flex;width: 100%;" _style="margin: 0 0 0 0; width: 485px;" __onsubmit="authenticate()">
+      <div class="col col-20" color="white" style=" display: flex; justify-content: center; align-items: center;">
+        <label class="white"> Authenticate via</label>
+        <select id="authType" class="parameter" onchange="onAuthTypeChange()">
+          <option value="2">API Key</option>
+          <option value="1">Username/Password</option>
+        </select>
+      </div>
+      <div class="col col-60" style="">
+        <div class="row">
+          <div class='input' id='authApiKey' style="width: 100%;">
+            <input placeholder="api key" id="input_api_key" name="api_key" type="text" size="30" style="width: 100%;" />
+          </div>
+          <div id='authUserPass' style="display: none">
+            <div class='input'>
+              <input placeholder="user" id="input_user" name="user" type="text" size="10" />
             </div>
+            <div class='input'>
+              <input placeholder="pass" id="input_pass" name="password" type="password" size="10" />
+            </div>
+          </div>
         </div>
-
-    </div>
-
-    <div id="message" style="text-align: center; display: none"></div>
+        <div class="row" id="otp" style="display: none" _style="margin-left: 332px; display: none">
+          <div class="white input" style="width: 220px;padding: 5px 4px;">
+            Enter One Time Password:
+          </div>
+          <div class='input' style="display: inline-block;float: none;">
+            <input placeholder="one time pass" id="input_otp" name="otp" type="password" size="10" style="font-size: 0.9em; padding: 3px;" />
+          </div>
+        </div>
+      </div>
+      <div class="col col-20" style="">
+        <button type="submit" id="authBtn" class="" _onclick="authenticate()">Authenticate</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="message" style="text-align: center; display: none"></div>
 
     <!--
             <header>

@@ -337,14 +337,13 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
  * @return
  */
 exports.getAccountSubscriptionSummary = function(request, reply) {
-
-  var account_id = request.params.account_id;
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  var accountId = request.params.account_id;
+  if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
   accounts.get({
-    _id: account_id
+    _id: accountId
   }, function(error, result) {
     if (result) {
       result = publicRecordFields.handle(result, 'account');
@@ -357,22 +356,80 @@ exports.getAccountSubscriptionSummary = function(request, reply) {
         if (err) {
           return reply(boom.badRequest('Subscription info error '));
         } else {
-          // NOTE: delete information not for send
-          info.subscription.product_name = info.subscription.product.name;
-          info.subscription.billing_portal_link = result.billing_portal_link;
-          delete info.subscription.product;
-          if (!!info.subscription.credit_card) {
-            delete info.subscription.credit_card.current_vault;
-            delete info.subscription.credit_card.customer_id;
-          } else {
-            info.subscription.credit_card = false;
-          }
-          delete info.subscription.customer;
-          renderJSON(request, reply, error, info);
+          var customerId = info.subscription.customer.id;
+
+          async.waterfall([
+              // check/update billing_portal_link
+              function checkBillingPortalLink(cb) {
+                if (!!result.billing_portal_link && !!result.billing_portal_link.expires_at) {
+                  var nowDate = moment();
+                  var expiresAt = moment(result.billing_portal_link.expires_at);
+                  var isExpire = nowDate.isAfter(expiresAt);
+                  if (isExpire === true) {
+                    var updatedAccount = {
+                      account_id: accountId,
+                      billing_portal_link: result.billing_portal_link
+                    };
+                    // NOTE: get new link
+                    Customer.getBillingPortalLink(customerId, function(err, link) {
+                      if (err || !link) {
+                        // NOTE: if error or link is empty don`t generate exeption
+                        cb(null, result);
+                        return;
+                      }
+                      // Update Account info with
+                      updatedAccount.billing_portal_link = {
+                        url: link.url,
+                        expires_at: link.expires_at // NOTE: When this link expires (65 days from when it was created)
+                      };
+
+                      accounts.update(updatedAccount, function(error, result) {
+                        if (error) {
+                          cb(error); //
+                          return reply(boom.badImplementation('Failed to update the account ', error));
+                        }
+                        // account info
+                        result = publicRecordFields.handle(result, 'account');
+                        cb(null, result);
+                      });
+                    });
+                  } else {
+                    // NOTE: link is not expire
+                    cb(null, result);
+                  }
+                } else { // billing_portal_link not exists
+                  cb(null, result);
+                }
+              },
+              //
+              function makeReply(result, cb) {
+                // NOTE: delete information not for send
+                info.subscription.product_name = info.subscription.product.name;
+                info.subscription.billing_portal_link = result.billing_portal_link;
+                delete info.subscription.product;
+                if (!!info.subscription.credit_card) {
+                  delete info.subscription.credit_card.current_vault;
+                  delete info.subscription.credit_card.customer_id;
+                } else {
+                  info.subscription.credit_card = false;
+                }
+                delete info.subscription.customer;
+                renderJSON(request, reply, error, info);
+                cb(null, info);
+              }
+            ],
+            function (err, info) {
+              if (err) {
+                logger.error('Account::getAccountSubscriptionSummary: Error get Subscription Summary for account with id ' + accountId);
+                return;
+              }
+              logger.info('Account::getAccountSubscriptionSummary: Successfully get Subscription Summary for account with id ' + accountId);
+            }); // end async.waterfall
         }
       });
 
     } else {
+      // Account not found
       return reply(boom.badRequest('Account ID not found'));
     }
   });
@@ -492,6 +549,7 @@ exports.getAccountStatement = function(request, reply) {
       statement.payments_total = payments.reduce(function(sum, p) {
         return sum + p.amount_in_cents;
       }, 0);
+         console.log(statements);
       var result = publicRecordFields.handle(statement, 'statement');
       renderJSON(request, reply, error, result);
     });
@@ -702,7 +760,7 @@ exports.deleteAccount = function(request, reply) {
     accountService.removeAccount(accountId, options,
       function(err, result) {
         if (err) {
-          logger.error('Account::deleteAccount: erro r in remove process ' + JSON.stringify(err));
+          logger.error('Account::deleteAccount: error in remove process ' + err.message);
           if (err.message) {
             // NOTE: show error message from accountService.removeAccount
             return reply(boom.badRequest(err.message, err));
