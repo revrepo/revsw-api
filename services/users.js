@@ -101,13 +101,16 @@ exports.createUser = function(newUser, callback) {
         });
         // 2.  add new user account (self-registered or not) to RevAPM statuspage.io notification list
         if (config.get('register_new_users_for_network_status_updates') === 'yes') {
-          statuspageService.subscribe(newUser, function(err, data) {
-            if (err) {
-              logger.error('UserService::statuspage.subscribe:error create subscription: ' + JSON.stringify(err));
-            } else {
-              logger.info('UserService::statuspage.subscribe:success create subscription for user Id ' + _createdUser_.user_id);
-            }
-          });
+          // NOTE: not subscribe Azure users
+          if (newUser.email.match('@' + config.get('azure_marketplace.user_email_domain')) === null) {
+            statuspageService.subscribe(newUser, function(err, data) {
+              if (err) {
+                logger.error('UserService::statuspage.subscribe:error create subscription: ' + JSON.stringify(err));
+              } else {
+                logger.info('UserService::statuspage.subscribe:success create subscription for user Id ' + _createdUser_.user_id);
+              }
+            });
+          }
         }
         cb();
       }
@@ -154,13 +157,17 @@ exports.removeUser = function(userId, callback) {
         });
       },
       function removeStatusPageSubscription(cb) {
-        // TODO: is need to add check "register_new_users_for_network_status_updates" ?
-        statuspageService.unSubscribe(_removedUser_, function(err, result) {
-          if (err) {
-            logger.error('removeUser:statuspageService.unSubscribe:error ' + JSON.stringify(err));
+        if (config.get('register_new_users_for_network_status_updates') === 'yes') {
+          // NOTE: Azure users do not subscribe
+          if (_removedUser_.email.match('@' + config.get('azure_marketplace.user_email_domain')) === null) {
+            statuspageService.unSubscribe(_removedUser_, function(err, result) {
+              if (err) {
+                logger.error('removeUser:statuspageService.unSubscribe:error ' + JSON.stringify(err));
+              }
+            });
           }
-          cb(null);
-        });
+        }
+        cb(null);
       },
       // In this place can be added another operations
       function deleteUserFromSystem(cb) {
