@@ -24,5 +24,11 @@
     "https_port": 443
   },
   "key_path": "./config/ssl_certs/server.key",
-  "cert_path": "./config/ssl_certs/server.crt"
+  "cert_path": "./config/ssl_certs/server.crt",
+  "register_new_accounts_in_crm": "no",
+  "register_new_users_for_network_status_updates":"no",
+  "statuspage":{
+    "page_id": "not-for-qa",
+    "api_key": "not-for-qa"
+  }
 }

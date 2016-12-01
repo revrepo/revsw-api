@@ -126,5 +126,11 @@
   },
   "oauth":{
     "google_secret": "tp9USq8-fjnDOX0xZ3Y4VyBE"
+  },
+  "register_new_accounts_in_crm": "no",
+  "register_new_users_for_network_status_updates":"no",
+  "statuspage":{
+    "page_id": "21mtcbv5tvch",
+    "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
   }
 }
