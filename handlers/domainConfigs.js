@@ -703,7 +703,7 @@ exports.checkIntegration = function(request, reply) {
                     warningCount++;
                   }
                 });
-                if (warningCount === results.length) {
+                if ((warningCount === results.length) && (warningCount > 0)) {
                   response_.message = 'All domain aliases cannot be resolved';
                   response_.check_status_code = checkStatusCode.ERROR;
                 }
