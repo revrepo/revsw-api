@@ -85,7 +85,7 @@ exports.getStats = function(request, reply) {
               min_doc_count: 0,
               extended_bounds : {
                 min: span.start,
-                max: ( span.end - 1 )
+                max: span.end
               },
               offset: ( '' + ( span.end % span.interval ) )
             },
