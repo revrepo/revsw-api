@@ -657,31 +657,34 @@ exports.checkIntegration = function(request, reply) {
           if (utils.isArray(domainAliases_) && domainAliases_.length !== 0) {
             var validatePointsCNAME = [];
             domainAliases_.forEach(function(item) {
-              validatePointsCNAME.push(
-                (function(item) {
-                  var domainName_ = item; // NOTE: domain from array aliases
-                  var domainCNAME_ = domainConfig.cname;
-                  return function(cb) {
-                    var resultCheck = {
-                      domain_name: domainName_,
-                      cname: domainCNAME_,
-                      data: []
-                    };
-                    dnsResolve.checkDomainCNAMEsIncludeCname(domainName_, domainCNAME_, function prepare(err, info) {
-                      if (!err) {
-                        resultCheck.check_status_code = checkStatusCode.OK;
-                        resultCheck.message = 'Domain name ' + domainName_ + ' can be resolved';
-                        resultCheck.data.push(info);
-                      } else {
-                        resultCheck.check_status_code = checkStatusCode.ERROR;
-                        resultCheck.message = 'Cannot resolve domain name ' + domainName_;
-                        resultCheck.data.push(err);
-                      }
-                      cb(null, resultCheck);
-                    });
-                  };
-                })(item)
-              );
+                // NOTE: skip checking if  "domain Name" equal "domain CNAME"
+                if(item !== domainConfig.cname) {
+                  validatePointsCNAME.push(
+                    (function(item) {
+                      var domainName_ = item; // NOTE: domain from array aliases
+                      var domainCNAME_ = domainConfig.cname;
+                      return function(cb) {
+                        var resultCheck = {
+                          domain_name: domainName_,
+                          cname: domainCNAME_,
+                          data: []
+                        };
+                        dnsResolve.checkDomainCNAMEsIncludeCname(domainName_, domainCNAME_, function prepare(err, info) {
+                          if (!err) {
+                            resultCheck.check_status_code = checkStatusCode.OK;
+                            resultCheck.message = 'Domain name ' + domainName_ + ' can be resolved';
+                            resultCheck.data.push(info);
+                          } else {
+                            resultCheck.check_status_code = checkStatusCode.ERROR;
+                            resultCheck.message = 'Cannot resolve domain name ' + domainName_;
+                            resultCheck.data.push(err);
+                          }
+                          cb(null, resultCheck);
+                        });
+                      };
+                    })(item)
+                  );
+                }
             });
             async.parallel(validatePointsCNAME, function(err, results) {
               if (err) {
@@ -700,7 +703,7 @@ exports.checkIntegration = function(request, reply) {
                     warningCount++;
                   }
                 });
-                if (warningCount === results.length) {
+                if ((warningCount === results.length) && (warningCount > 0)) {
                   response_.message = 'All domain aliases cannot be resolved';
                   response_.check_status_code = checkStatusCode.ERROR;
                 }
@@ -842,7 +845,7 @@ exports.checkIntegration = function(request, reply) {
             // 3. prepare total result
             function totalStatusAndMessage(cb) {
               response_.check_status_code = checkStatusCode.OK;
-              response_.message = 'Successfully tested the domain on a staging server'; 
+              response_.message = 'Successfully tested the domain on a staging server';
               var warningCount = 0;
               response_.data.forEach(function(item) {
                 if (!!item.check_status_code && (item.check_status_code === checkStatusCode.ERROR || item.check_status_code === checkStatusCode.WARNING)) {
