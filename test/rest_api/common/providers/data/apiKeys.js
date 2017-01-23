@@ -75,7 +75,7 @@ var APIKeyDataProvider = {
    *    }
    */
   generateCompleteOne: function (accountId, prefix) {
-    var prefix = (prefix ? prefix + '_' : this.prefix )  + Date.now();
+    prefix = (prefix ? prefix + '_' : this.prefix )  + Date.now();
     return {
       account_id: accountId,
       managed_account_ids: [],

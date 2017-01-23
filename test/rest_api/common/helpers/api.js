@@ -97,7 +97,7 @@ var APIHelpers = {
     return APIKeysRes
       .getOne(keyId)
       .then(function (response) {
-        user  = response.body;
+        var user  = response.body;
         Session.setCurrentUser(user);
       })
       .catch(function (error) {
