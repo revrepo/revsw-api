@@ -6,7 +6,8 @@ module.exports = {
       READ_ONE: 'read-one',
       UPDATE: 'update',
       DELETE: 'delete',
-      DELETE_DATA: 'delete-by-data'
+      DELETE_DATA: 'delete-by-data',
+      PATCH: 'patch'
     },
     USERS: {
       ROLES: {
