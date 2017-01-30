@@ -73,7 +73,7 @@ module.exports = [
     path: '/v1/purge',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: purges.getPurgeJobs,
       description: 'Get list purge requests',
@@ -102,7 +102,7 @@ module.exports = [
     path: '/v1/purge/{request_id}',
     config: {
       auth: {
-        scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: purges.getPurgeJobStatus,
       description: 'Get the status of a previously submitted purge request',
