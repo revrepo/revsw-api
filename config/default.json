@@ -132,5 +132,16 @@
   "statuspage":{
     "page_id": "21mtcbv5tvch",
     "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
+  },
+
+  "vendor_profiles": {
+    "revapm": {
+      "support_email": "",
+      "password_reset_portal_domain": ""
+    },
+    "telia": {
+      "support_email": "",
+      "password_reset_portal_domain": ""
+    }
   }
 }
