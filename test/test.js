@@ -990,22 +990,6 @@ describe('Rev API Admin User', function() {
       });
   });
 
-  it('should get a list of vendor profile names', function(done) {
-    request(testAPIUrl)
-        .get('/v1/vendor_profiles')
-        .set('Authorization', 'Bearer ' + jwtTokenWithAdminPerm)
-        .expect(200)
-        .end(function(err, res) {
-            if (err) {
-                throw err;
-            }
-            var response_json = JSON.parse(res.text);
-            response_json.length.should.be.above(0);
-
-            done();
-        });
-  });
-
 
   xit('should fail to create a new domain with existing domain name ' + newDomainName, function(done) {
     this.timeout(120000);
