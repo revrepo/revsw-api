@@ -31,12 +31,12 @@ module.exports = [{
     path: '/v1/vendor_profiles',
     config: {
       auth: {
-        scope: ['admin']
+        scope: ['revadmin']
       },
       handler: vendorProfile.getVendorProfiles,
       description: 'Get a list of vendor profile names',
       notes: 'Use this function to get a list of vendor profile names',
-      tags: ['api', 'vendor_profiles'],
+      //tags: ['api', 'vendor_profiles'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
