@@ -20,6 +20,7 @@
 
 // Requiring all resources to apply/attach to main `API` object.
 var AccountsResource = require('./accounts');
+var VendorProfilesResource = require('./vendorProfiles');
 var ActivityResource = require('./activity');
 var APIKeysResource = require('./apiKeys');
 var AppsResource = require('./apps');
@@ -49,6 +50,7 @@ var DNSZonesResource = require('./dnsZones');
 var APIResources = {
 
   accounts: AccountsResource,
+  vendorProfiles: VendorProfilesResource,
   activity: ActivityResource,
   apiKeys: APIKeysResource,
   apps: AppsResource,

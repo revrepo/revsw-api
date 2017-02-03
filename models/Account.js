@@ -34,6 +34,7 @@ function Account(mongoose, connection, options) {
     // TODO need to rename to account_name
     'companyName' : String,
     'status'      : {type : Boolean, default : true},
+    'vendor_profile': String,
     // TODO need to rename to created_by
     'createdBy'   : String,
     'id'          : String,
