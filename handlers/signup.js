@@ -228,7 +228,8 @@ exports.signup = function(req, reply) {
           city: data.city,
           zipcode: data.zipcode
         },
-        self_registered: true
+        self_registered: true,
+        vendor_profile: 'revapm'
       };
       return accountsService.createAccountAsync(newCompany, {});
     })
@@ -239,6 +240,7 @@ exports.signup = function(req, reply) {
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true,
+        vendor_profile: 'revapm',
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
@@ -490,7 +492,8 @@ exports.signup2 = function(req, reply) {
           city: data.city || '',
           zipcode: data.zipcode || ''
         },
-        self_registered: true //NOTE: Important for self registration account
+        self_registered: true, //NOTE: Important for self registration account
+        vendor_profile: 'revapm'
       };
       //    var loggerData = {
       //     user_name: newAccount.createdBy,
@@ -511,6 +514,7 @@ exports.signup2 = function(req, reply) {
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true, // NOTE: Important for self registration user
+        vendor_profile: 'revapm',
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
