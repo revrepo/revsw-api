@@ -33,6 +33,7 @@ var BillingPlanSchema = new Schema({
   description: String,
   chargify_handle: String,
   hosted_page: String,
+  brand: String,
 
   type: {
     type: String,
@@ -131,7 +132,7 @@ BillingPlanSchema.statics = {
 
   list: function (request, callback) {
     callback = callback || _.noop;
-    return this.find({deleted: false}).exec(function(err, billingPlans) {
+    return this.find({deleted: false, brand: request.auth.credentials.vendor_profile}).exec(function(err, billingPlans) {
       if (err) {
         return callback(err);
       }
