@@ -53,6 +53,8 @@ var billing_plans = require('../models/BillingPlan');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+var defaultSignupVendorProfile = config.get('default_signup_vendor_profile');
+
 Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
@@ -229,7 +231,7 @@ exports.signup = function(req, reply) {
           zipcode: data.zipcode
         },
         self_registered: true,
-        vendor_profile: config.get('default_signup_vendor_profile')
+        vendor_profile: defaultSignupVendorProfile
       };
       return accountsService.createAccountAsync(newCompany, {});
     })
@@ -240,7 +242,7 @@ exports.signup = function(req, reply) {
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true,
-        vendor_profile: config.get('default_signup_vendor_profile'),
+        vendor_profile: defaultSignupVendorProfile,
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
@@ -493,7 +495,7 @@ exports.signup2 = function(req, reply) {
           zipcode: data.zipcode || ''
         },
         self_registered: true, //NOTE: Important for self registration account
-        vendor_profile: config.get('default_signup_vendor_profile')
+        vendor_profile: defaultSignupVendorProfile
       };
       //    var loggerData = {
       //     user_name: newAccount.createdBy,
@@ -514,7 +516,7 @@ exports.signup2 = function(req, reply) {
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true, // NOTE: Important for self registration user
-        vendor_profile: config.get('default_signup_vendor_profile'),
+        vendor_profile: defaultSignupVendorProfile,
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,

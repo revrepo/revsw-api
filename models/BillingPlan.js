@@ -23,6 +23,7 @@
 
 var utils = require('../lib/utilities.js');
 var _ = require('lodash');
+var config = require('config');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var mongoConnection = require('../lib/mongoConnections');
@@ -33,7 +34,10 @@ var BillingPlanSchema = new Schema({
   description: String,
   chargify_handle: String,
   hosted_page: String,
-  brand: String,
+  brand: {
+      type: String,
+      default: config.get('default_signup_vendor_profile')
+  },
 
   type: {
     type: String,
