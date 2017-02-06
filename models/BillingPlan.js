@@ -134,9 +134,11 @@ BillingPlanSchema.statics = {
     this.create(item, callback);
   },
 
-  list: function (request, callback) {
+  list: function (options, callback) {
     callback = callback || _.noop;
-    return this.find({deleted: false, brand: request.auth.credentials.vendor_profile}).exec(function(err, billingPlans) {
+    var vendorProfile = (!!options.vendor_profile) ? options.vendor_profile : config.get('default_signup_vendor_profile');
+    // TODO: add "brand: vendorProfile" after update DB
+    return this.find({deleted: false}).exec(function(err, billingPlans) {
       if (err) {
         return callback(err);
       }
