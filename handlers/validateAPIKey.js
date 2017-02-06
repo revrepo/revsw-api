@@ -71,7 +71,8 @@ exports.validateAPIKey = function (request, key, callback) {
         logger.error('DB inconsitency for API keys: cannot find account ID ' + accountId + ' (API key ' + key + ')');
         return callback(error, false, result);
       }
-      
+
+      result.vendor_profile = account.vendor_profile;
       result.user_type = 'apikey';
       result.scope = [ 'apikey' ];
       if (result.read_only_status === false) {
