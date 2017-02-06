@@ -69,6 +69,10 @@ exports.createAccount = function(request, reply) {
   var newAccount = request.payload;
   newAccount.createdBy = utils.generateCreatedByField(request);
 
+  if (request.auth.credentials.role === 'reseller' || request.auth.credentials.user_type === 'apikey') {
+    newAccount.vendor_profile = request.auth.credentials.vendor_profile;
+  }
+
   // TODO: Make it able to use user_type apikey to create accounts
   if (request.auth.credentials.user_type === 'apikey') {
     return reply(boom.badRequest('Cannot create account with API key'));

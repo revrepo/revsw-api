@@ -143,5 +143,7 @@
       "support_email": "",
       "password_reset_portal_domain": ""
     }
-  }
+  },
+  "default_signup_vendor_profile": "revapm"
+
 }
