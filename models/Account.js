@@ -22,7 +22,7 @@
 //	data access layer
 
 var _ = require('lodash');
-var utils = require('../lib/utilities.js')
+var utils = require('../lib/utilities.js');
 var config = require('config');
 
 function Account(mongoose, connection, options) {
