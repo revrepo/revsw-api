@@ -35,7 +35,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: locations.getFirstMileLocations,
-      description: 'Get a list of Rev first mile locations',
+      description: 'Get a list of first mile network locations',
       tags: ['api', 'locations'],
       plugins: {
         'hapi-swagger': {
@@ -56,7 +56,7 @@ module.exports = [
         scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: locations.getLastMileLocations,
-      description: 'Get a list of Rev last mile locations',
+      description: 'Get a list of last mile (edge) network locations',
       tags: ['api', 'locations'],
       plugins: {
         'hapi-swagger': {
@@ -76,10 +76,10 @@ module.exports = [
     path: '/v1/locations/billing_zones',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller', 'revadmin'  ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin', 'apikey' ]
       },
       handler: locations.getBillingZones,
-      description: 'Get a list of Rev billing zones',
+      description: 'Get a list of last mile (edge) locations and assignment to billing zones',
       tags: ['api', 'locations'],
       plugins: {
         'hapi-swagger': {

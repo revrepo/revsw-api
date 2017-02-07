@@ -127,6 +127,7 @@ module.exports = {
     var accountSchema = Joi.object()
       .keys({
         companyName: Joi.string().required(),
+        vendor_profile: Joi.string(),
         country: Joi.string(),
         createdBy: Joi.string().required(),
         id: Joi.string().regex(idFormatPattern).required(),
