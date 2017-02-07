@@ -59,29 +59,28 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
     if (!result.access_control_list.readOnly) {
       result.scope.push(result.role + '_rw');
     }
-    return callback(error, true, result);
-    // NOTE: code not work
-    // var accountId = result.companyId.length && result.companyId[0];
-    // if(!accountId){
-    //    result.vendor_profile = config.get('default_signup_vendor_profile');
 
-    //   return callback(error, true, result);
-    // }
+    var accountId = result.companyId && result.companyId.length && result.companyId[0];
+    if(!accountId){
+       result.vendor_profile = config.get('default_signup_vendor_profile');
 
-    // accounts.get( { _id: accountId }, function (error, account) {
-    //   if (error) {
-    //       logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (User ' + user_id + ')');
-    //       return callback(error, false, result);
-    //   }
+      return callback(error, true, result);
+    }
 
-    //   if (!account) {
-    //       logger.error('DB inconsitency for Users: cannot find account ID ' + accountId + ' (User ' + user_id + ')');
-    //       return callback(error, false, result);
-    //   }
+    accounts.get( { _id: accountId }, function (error, account) {
+      if (error) {
+          logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (User ' + user_id + ')');
+          return callback(error, false, result);
+      }
 
-    //   result.vendor_profile = account.vendor_profile;
+      if (!account) {
+          logger.error('DB inconsitency for Users: cannot find account ID ' + accountId + ' (User ' + user_id + ')');
+          return callback(error, false, result);
+      }
 
-    //   return callback(error, true, result);
-    // });
+      result.vendor_profile = account.vendor_profile;
+
+      return callback(error, true, result);
+    });
   });
 };
