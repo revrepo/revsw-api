@@ -20,6 +20,7 @@
 
 'use strict';
 //	data access layer
+var _ = require('lodash');
 
 // var utils = require('../lib/utilities.js');
 
@@ -83,8 +84,26 @@ Location.prototype = {
         });
         return map;
       });
-  }
+  },
 
+  listBillingZones: function(options, callback) {
+    var conditions = { status: 'online', visibility: 'public' };
+    return this.model.find(conditions, 'id site_code_name city state country billing_zone')
+      .exec(
+        function(err, results) {
+          results = _.map(results, function(result) {
+            return {
+              id: result._id.toString(),
+              site_code_name: result.site_code_name,
+              city: result.city,
+              state: result.state,
+              country: result.country,
+              billing_zone: result.billing_zone
+            };
+          });
+          callback(err, results);
+        });
+  }
 
 };
 

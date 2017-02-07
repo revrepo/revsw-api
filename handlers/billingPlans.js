@@ -24,6 +24,7 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var boom = require('boom');
 var AuditLogger = require('../lib/audit');
+var config = require('config');
 var uuid = require('node-uuid');
 
 var mongoConnection = require('../lib/mongoConnections');
@@ -38,7 +39,13 @@ var utils = require('../lib/utilities.js');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.list = function (request, reply) {
-  BillingPlan.list(request, function (err, billingPlans) {
+  var options = {
+    vendor_profile: config.get('default_signup_vendor_profile')
+  };
+  if(request.auth.isAuthenticated === true){
+    options.vendor_profile = request.auth.credentials.vendor_profile;
+  }
+  BillingPlan.list(options, function (err, billingPlans) {
     billingPlans = publicRecordFields.handle(billingPlans, 'billingPlans');
     renderJSON(request, reply, err, billingPlans);
   });

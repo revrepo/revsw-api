@@ -20,13 +20,19 @@
 
 'use strict';
 
+var config = require('config');
+var logger = require('revsw-logger')(config.log_config);
+
 var mongoose = require('mongoose');
 
 var mongoConnection = require('../lib/mongoConnections');
 
 var User = require('../models/User');
+var Account = require('../models/Account');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+
 
 exports.validateJWTToken = function (request, decodedToken, callback) {
   var user_id = decodedToken.user_id,
@@ -54,6 +60,27 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
       result.scope.push(result.role + '_rw');
     }
 
-    return callback(error, true, result);
+    var accountId = result.companyId && result.companyId.length && result.companyId[0];
+    if(!accountId){
+       result.vendor_profile = config.get('default_signup_vendor_profile');
+
+      return callback(error, true, result);
+    }
+
+    accounts.get( { _id: accountId }, function (error, account) {
+      if (error) {
+          logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (User ' + user_id + ')');
+          return callback(error, false, result);
+      }
+
+      if (!account) {
+          logger.error('DB inconsitency for Users: cannot find account ID ' + accountId + ' (User ' + user_id + ')');
+          return callback(error, false, result);
+      }
+
+      result.vendor_profile = account.vendor_profile;
+
+      return callback(error, true, result);
+    });
   });
 };

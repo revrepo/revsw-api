@@ -389,12 +389,14 @@ exports.deleteUser = function (request, reply) {
 
 exports.init2fa = function (request, reply) {
   var user_id = request.auth.credentials.user_id;
+  var email_ = request.auth.credentials.email;
   users.get({
     _id: user_id
   }, function (error, user) {
     if (user) {
       var account_id = user.companyId[0];
-      var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true});
+      var name =  'RevAPM:'+email_;
+      var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true, name: name});
       user.two_factor_auth_secret_base32 = secretKey.base32;
       delete user.password;
       users.update(user, function (error, result) {

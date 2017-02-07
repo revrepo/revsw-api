@@ -16,38 +16,31 @@
  * from Rev Software, Inc.
  */
 
-// # Locations Resource object
+// # Accounts Resource object
 
+// Requiring `BaseResource`
 var BasicResource = require('./basic');
+// Requiring constants
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
+// Config for resource
 var resourceConfig = {
-  idKey: null,
-  name: 'locations',
-  path: '/locations',
-  methods: [],
+  name: 'vendorProfiles',
+  path: '/vendorProfiles',
+  methods: [
+    Methods.CREATE,
+    Methods.READ_ALL,
+    Methods.READ_ONE,
+    Methods.UPDATE,
+    Methods.DELETE
+  ],
   nestedResources: [
     {
-      idKey: null,
-      name: 'firstMile',
-      path: '/firstmile',
+      name: 'vendorProfiles',
+      path: '/',
       methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      idKey: null,
-      name: 'lastMile',
-      path: '/lastmile',
-      methods: [
-        Methods.READ_ONE
-      ]
-    }, {
-      idKey: null,
-      name: 'billingZones',
-      path: '/billing_zones',
-      methods: [
+        Methods.READ_ALL,
         Methods.READ_ONE
       ]
     }
@@ -55,5 +48,5 @@ var resourceConfig = {
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `locations resource`
+// `vendor profiles resource`
 module.exports = new BasicResource(resourceConfig);

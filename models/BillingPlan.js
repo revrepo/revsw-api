@@ -23,6 +23,7 @@
 
 var utils = require('../lib/utilities.js');
 var _ = require('lodash');
+var config = require('config');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var mongoConnection = require('../lib/mongoConnections');
@@ -33,6 +34,10 @@ var BillingPlanSchema = new Schema({
   description: String,
   chargify_handle: String,
   hosted_page: String,
+  brand: {
+      type: String,
+      default: config.get('default_signup_vendor_profile')
+  },
 
   type: {
     type: String,
@@ -129,9 +134,10 @@ BillingPlanSchema.statics = {
     this.create(item, callback);
   },
 
-  list: function (request, callback) {
+  list: function (options, callback) {
     callback = callback || _.noop;
-    return this.find({deleted: false}).exec(function(err, billingPlans) {
+    var vendorProfile = (!!options.vendor_profile) ? options.vendor_profile : config.get('default_signup_vendor_profile');
+    return this.find({deleted: false, brand: vendorProfile}).exec(function(err, billingPlans) {
       if (err) {
         return callback(err);
       }

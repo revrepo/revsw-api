@@ -23,6 +23,7 @@
 
 var _ = require('lodash');
 var utils = require('../lib/utilities.js');
+var config = require('config');
 
 function Account(mongoose, connection, options) {
   this.options = options;
@@ -34,6 +35,7 @@ function Account(mongoose, connection, options) {
     // TODO need to rename to account_name
     'companyName' : String,
     'status'      : {type : Boolean, default : true},
+    'vendor_profile': { type: String, default: config.get('default_signup_vendor_profile')},
     // TODO need to rename to created_by
     'createdBy'   : String,
     'id'          : String,
