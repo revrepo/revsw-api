@@ -81,28 +81,16 @@ exports.getLastMileLocations = function(request, reply) {
   });
 };
 
-/*
-
 exports.getBillingZones = function(request, reply) {
-
-  locations.listLastMileLocations(function(error, result) {
+  var options = {};
+  locations.listBillingZones(options, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrive from the database a list of last mile locations for billing zones report'));
+      return reply(boom.badImplementation('Failed to retrive from the database a Billing Zones'));
     }
     if (result) {
-      var listOfBillingZones = [];
-      for (var i = 0; i < result.length; i++) {
-        if
-        listOfSites.push({
-          locationName: result[i].publicName,
-          id: result[i]._id.toString()
-        });
-      }
-      renderJSON(request, reply, error, listOfSites);
+      renderJSON(request, reply, error, result);
     } else {
-      return reply(boom.badRequest('No last mile locations are registered in the system'));
+      return reply(boom.badRequest('No Billing Zones are registered in the system'));
     }
   });
 };
-
-*/
