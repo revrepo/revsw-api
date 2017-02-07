@@ -43,6 +43,13 @@ var resourceConfig = {
       methods: [
         Methods.READ_ONE
       ]
+    }, {
+      idKey: null,
+      name: 'billingZones',
+      path: '/billing_zones',
+      methods: [
+        Methods.READ_ONE
+      ]
     }
   ]
 };

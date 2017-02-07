@@ -69,14 +69,14 @@ module.exports = [
     }
   },
 
-/*
+
 
   {
     method: 'GET',
     path: '/v1/locations/billing_zones',
     config: {
       auth: {
-        scope: [ 'user', 'admin', 'reseller' ]
+        scope: [ 'user', 'admin', 'reseller', 'revadmin'  ]
       },
       handler: locations.getBillingZones,
       description: 'Get a list of Rev billing zones',
@@ -91,7 +91,5 @@ module.exports = [
       }
     }
   }
-
-*/
 
 ];
