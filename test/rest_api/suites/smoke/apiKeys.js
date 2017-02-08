@@ -118,6 +118,28 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
+    it('should return a success response when updating with property '+
+      ' "managed_account_ids".',
+      function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            return API.helpers.apiKeys.createOne();
+          })
+          .then(function (key) {
+            var apiKeyId = key.id;
+            var updatedKey = APIKeyDataProvider
+              .generateCompleteOne(key.account_id);
+            updatedKey.managed_account_ids = [key.account_id];
+            API.resources.apiKeys
+              .update(apiKeyId, updatedKey)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+
     it('should return a success response when deleting an API Key.',
       function (done) {
         API.helpers
