@@ -64,5 +64,19 @@ describe('Smoke check', function () {
           })
           .catch(done);
       });
+
+    it('should return a response when getting `billing_zones`.',
+      function (done) {
+        API.helpers
+          .authenticateUser(resellerUser)
+          .then(function () {
+            API.resources.locations
+              .billingZones()
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
   });
 });
