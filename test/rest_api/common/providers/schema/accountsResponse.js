@@ -49,6 +49,7 @@ var AccountsResponseSP = {
     var accountSchema = Joi.object()
       .keys({
         companyName: Joi.string().required(),
+        vendor_profile: Joi.string(),
         createdBy: Joi.string().required(),
         id: Joi.string().regex(idFormatPattern).required(),
         created_at: Joi.string().regex(dateFormatPattern).required(),
