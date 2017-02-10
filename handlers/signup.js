@@ -71,9 +71,9 @@ var sendVerifyToken = function(user, token, cb) {
     subject: currentVendorProfile.signup_user_verify_email_subject,
     text: currentVendorProfile.signup_user_verify_email_text.toString().replace('{{tokenPlace}}', token)
   };
-  var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
-  if (bcc_email !== '') {
-    mailOptions.bcc = bcc_email;
+  var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+  if (bccEmail !== '') {
+    mailOptions.bcc = bccEmail;
   }
   mail.sendMail(mailOptions, cb);
 };
@@ -103,9 +103,9 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
         .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
   };
 
-  var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
-  if (bcc_email !== '') {
-    mailOptions.bcc = bcc_email;
+  var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+  if (bccEmail !== '') {
+    mailOptions.bcc = bccEmail;
   }
 
   // NOTE: when we send email we do not control success or error. We only create log
@@ -324,9 +324,9 @@ exports.signup = function(req, reply) {
                 .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
         };
 
-        var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
-        if (bcc_email !== '') {
-          mailOptions.bcc = bcc_email;
+        var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+        if (bccEmail !== '') {
+          mailOptions.bcc = bccEmail;
         }
 
         // NOTE: when we send email we do not control success or error. We only create log

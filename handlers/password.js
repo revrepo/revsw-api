@@ -41,7 +41,7 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var vendorProfiles = config.get('vendor_profiles');
-var currentVendorProfile = vendorProfiles[config.get('default_signup_vendor_profile')];
+var currentVendorProfile = vendorProfiles[config.get('default_system_vendor_profile')];
 
 //
 // Password reset functions

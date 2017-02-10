@@ -46,7 +46,7 @@ Promise.promisifyAll(users);
 Promise.promisifyAll(chargify);
 
 var vendorProfiles = config.get('vendor_profiles');
-var currentVendorProfile = vendorProfiles[config.get('default_signup_vendor_profile')];
+var currentVendorProfile = vendorProfiles[config.get('default_system_vendor_profile')];
 
 /**
  * @name webhookHandler
@@ -125,7 +125,7 @@ exports.webhookHandler = function(request, reply) {
             return users.updateValidationAsync(adminUser)
               .then(
                 function sendWelcomeEmail() {
-                  var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+                  var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
                   var mailOptions = {
                     to: adminUser.email,
                     subject: currentVendorProfile.chargify_user_welocme_email_subject,
@@ -133,8 +133,8 @@ exports.webhookHandler = function(request, reply) {
                         .replace('{{firstname}}', adminUser.firstname)
                   };
 
-                  if (bcc_email !== '') {
-                    mailOptions.bcc = bcc_email;
+                  if (bccEmail !== '') {
+                    mailOptions.bcc = bccEmail;
                   }
                   mail.sendMail(mailOptions, function reportLog(err, data) {
                     if (err) {

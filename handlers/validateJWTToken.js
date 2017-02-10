@@ -62,7 +62,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
 
     var accountId = result.companyId && result.companyId.length && result.companyId[0];
     if(!accountId){
-       result.vendor_profile = config.get('default_signup_vendor_profile');
+       result.vendor_profile = config.get('default_system_vendor_profile');
 
       return callback(error, true, result);
     }
