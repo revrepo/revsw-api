@@ -130,7 +130,7 @@ module.exports = [{
   }, {
     method: 'GET',
     path: '/v1/domain_configs/{domain_id}/check_integration/{check_type}', // TODO please move "check_type" from path to query
-    // string parameter and make it optional.
+    // string parameter and make it optional. 
     config: {
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -232,9 +232,9 @@ module.exports = [{
           config_command_options: Joi.string().allow('').max(150),
           tolerance: Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
           '3rd_party_rewrite': Joi.object({
-            '3rd_party_root_rewrite_domains': Joi.array().items(Joi.string().allow('').max(1500)).required().default([]),
-            '3rd_party_runtime_domains': Joi.array().items(Joi.string().allow('').max(1500)).required().default([]),
-            '3rd_party_urls': Joi.array().items(Joi.string().allow('').max(1500)).required().default([]),
+            '3rd_party_root_rewrite_domains': Joi.string().allow('').max(1500).required(),
+            '3rd_party_runtime_domains': Joi.string().allow('').max(1500).required(),
+            '3rd_party_urls': Joi.string().allow('').max(1500).required(),
             enable_3rd_party_rewrite: Joi.boolean().required(),
             enable_3rd_party_root_rewrite: Joi.boolean().required(),
             enable_3rd_party_runtime_rewrite: Joi.boolean().required()
