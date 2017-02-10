@@ -51,12 +51,17 @@ exports.forgotPassword = function(request, reply) {
   var email = request.payload.email;
 
   function passwordChange(error,user){
-      accounts.get({
-          _id: user.companyId
-      }, function(error, account) {
-          currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
 
           async.waterfall([
+              function(done) {
+                  accounts.get({
+                      _id: user.companyId
+                  }, function(error, account) {
+                      currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
+                      done();
+                  });
+              },
+
               function (done) {
                   crypto.randomBytes(20, function (err, buf) {
                       var token = buf.toString('hex');
@@ -100,7 +105,6 @@ exports.forgotPassword = function(request, reply) {
                   return reply(boom.badImplementation('Failed to execute password reset procedure for email ' + email));
               }
           });
-      });
   }
 
   // Start work-flow
