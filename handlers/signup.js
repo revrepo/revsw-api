@@ -54,6 +54,7 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var defaultSignupVendorProfile = config.get('default_signup_vendor_profile');
+var currentVendorProfile = config.get('vendor_profiles')[defaultSignupVendorProfile];
 
 Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
@@ -67,15 +68,10 @@ Promise.promisifyAll(accountsService,{multiArgs: true});
 var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
-    subject: config.get('user_verify_subject'),
-    text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n' +
-      'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-      'https://' + config.get('user_verify_portal_domain') + '/#/profile/verify/' + token + '\n\n' +
-      'If you did not request this, please ignore this email.\n\n' +
-      'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-      'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+    subject: currentVendorProfile.signup_user_verify_email_subject,
+    text: currentVendorProfile.signup_user_verify_email_text.toString().replace('{{tokenPlace}}', token)
   };
-  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+  var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
   if (bcc_email !== '') {
     mailOptions.bcc = bcc_email;
   }
@@ -100,21 +96,14 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
 
   var mailOptions = {
     to: user.email,
-    subject: config.get('user_verify_subject'),
-    html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
-      '<p>Hello ' + user.firstname + ',</p>' +
-      '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
-      '<p>Please click on ' +
-      '<a href="' + billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
-      '</a> link to complete the process.' +
-      '</p>' +
-      '<p>If you did not request this, please ignore this email.</p>\n\n' +
-      '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
-      '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
-      '</div>'
+    subject: currentVendorProfile.signup_user_verify_email_subject,
+    html: currentVendorProfile.signup_user_verify_email_html.toString()
+        .replace('{{firstName}}', user.firstname)
+        .replace('{{hosted_page}}', _billing_plan.hosted_page)
+        .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
   };
 
-  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+  var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
   if (bcc_email !== '') {
     mailOptions.bcc = bcc_email;
   }
@@ -149,7 +138,7 @@ exports.signup = function(req, reply) {
     data.company_name = data.first_name + ' ' + data.last_name + '\'s Company';
   }
   // TODO:
-  if (!config.get('enable_self_registration')) {
+  if (!currentVendorProfile.enable_self_registration) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
   // NOTE: get internal information about Billing Plan by handler name
@@ -327,22 +316,15 @@ exports.signup = function(req, reply) {
         };
 
         var mailOptions = {
-          to: _newUser.email,
-          subject: config.get('user_verify_subject'),
-          html: '<div style="font-family: arial,sans-serif;font-size: 1em;">' +
-            '<p>Hello ' + _newUser.firstname + ',</p>' +
-            '<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>' +
-            '<p>Please click on ' +
-            '<a href="' + _billing_plan.hosted_page + '?' + qs.stringify(_customer_chargify) + '">this' +
-            '</a> link to complete the process.' +
-            '</p>' +
-            '<p>If you did not request this, please ignore this email.</p>\n\n' +
-            '<p>Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.</p><br><br>' +
-            '<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>' +
-            '</div>'
+            to: _newUser.email,
+            subject: currentVendorProfile.signup_user_verify_email_subject,
+            html: currentVendorProfile.signup_user_verify_email_html.toString()
+                .replace('{{firstName}}', _newUser.firstname)
+                .replace('{{hosted_page}}', _billing_plan.hosted_page)
+                .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
         };
 
-        var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+        var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
         if (bcc_email !== '') {
           mailOptions.bcc = bcc_email;
         }
@@ -358,12 +340,12 @@ exports.signup = function(req, reply) {
     // NOTE:  Send to Rev Ops an Email about new signup process
     .then(function sendRevOpsEmailAboutNewSignup() {
       var remoteIP = utils.getAPIUserRealIP(req);
-      var email = config.get('notify_admin_by_email_on_user_self_registration');
+      var email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
       if (email !== '') {
         var mailOptions = {
           to: email,
           subject: 'Portal new signup event for user ' + _newUser.email,
-          text: 'RevAPM new signup event for user ' + _newUser.email +
+          text: 'New signup event for user ' + _newUser.email +
             '\n\nRemote IP address: ' + remoteIP +
             '\nRole: ' + _newUser.role
         };
@@ -409,10 +391,10 @@ exports.signup2 = function(req, reply) {
   var _newAccount = {};
   var _newUser = {};
 
-  if (!config.get('enable_self_registration')) {
+  if (!currentVendorProfile.enable_self_registration) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
-  if (!config.get('enable_simplified_signup_process')) {
+  if (!currentVendorProfile.enable_simplified_signup_process) {
     return reply(boom.badRequest('Simple user self-registration is temporary disabled'));
   }
 
@@ -689,10 +671,10 @@ exports.resendRegistrationEmail = function(req, reply) {
         _billing_plan = billing_plan;
         return new Promise(function(resolve, reject) {
           // NOTE: Choose two different type registration
-          if (config.get('enable_simplified_signup_process')) {
+          if (currentVendorProfile.enable_simplified_signup_process) {
             var token = utils.generateToken();
             user.validation = {
-              expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+              expiredAt: Date.now() + currentVendorProfile.user_verify_token_lifetime,
               token: token
             };
             // NOTE: delete not updated fields
@@ -748,7 +730,7 @@ exports.resendRegistrationEmail = function(req, reply) {
 exports.verify = function(req, reply) {
   var token = req.params.token;
   var remoteIP = utils.getAPIUserRealIP(req);
-  if (!config.get('enable_simplified_signup_process')) {
+  if (!currentVendorProfile.enable_simplified_signup_process) {
     return reply(boom.badRequest('User verification is temporary disabled'));
   }
 

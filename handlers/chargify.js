@@ -45,6 +45,9 @@ Promise.promisifyAll(accounts);
 Promise.promisifyAll(users);
 Promise.promisifyAll(chargify);
 
+var vendorProfiles = config.get('vendor_profiles');
+var currentVendorProfile = vendorProfiles[config.get('default_signup_vendor_profile')];
+
 /**
  * @name webhookHandler
  * @description
@@ -83,6 +86,7 @@ exports.webhookHandler = function(request, reply) {
         })
         .then(function updateAccount(account) {
           _account = account;
+          currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
 
           return chargify.getBillingPortalLinkAsync(_customer.id)
             .then(function(link) {
@@ -112,7 +116,7 @@ exports.webhookHandler = function(request, reply) {
           return users.getValidationAsync(account_admin);
         })
         .then(function verifyAdminUser(adminUser) {
-          if (config.get('enable_simplified_signup_process')) {
+          if (currentVendorProfile.enable_simplified_signup_process) {
             // NOTE: if enable_simplified_signup_process==true - no auto verify user
             // TODO: send email admin ???
             return Promise.resolve();
@@ -121,16 +125,12 @@ exports.webhookHandler = function(request, reply) {
             return users.updateValidationAsync(adminUser)
               .then(
                 function sendWelcomeEmail() {
-                  var bcc_email = config.get('notify_admin_by_email_on_user_self_registration');
+                  var bcc_email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
                   var mailOptions = {
                     to: adminUser.email,
-                    subject: config.get('user_welcome_subject'),
-                    text: 'Hello ' + adminUser.firstname + ',\n\n' +
-                      'We\'ve completed setting up your new RevAPM account!\n\n' +
-                      'Your are welcome to visit our customer portal at https://' + config.get('user_verify_portal_domain') + '\n' +
-                      'and start managing your configuration!' + '\n\n' +
-                      'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-                      'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
+                    subject: currentVendorProfile.chargify_user_welocme_email_subject,
+                    text: currentVendorProfile.chargify_user_welocme_email_text.toString()
+                        .replace('{{firstname}}', adminUser.firstname)
                   };
 
                   if (bcc_email !== '') {
