@@ -99,7 +99,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
     subject: currentVendorProfile.signup_user_verify_email_subject,
     html: currentVendorProfile.signup_user_verify_email_html.toString()
         .replace('{{firstName}}', user.firstname)
-        .replace('{{hosted_page}}', _billing_plan.hosted_page)
+        .replace('{{hosted_page}}', billing_plan.hosted_page)
         .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
   };
 
