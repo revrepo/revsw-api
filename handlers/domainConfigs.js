@@ -207,7 +207,18 @@ exports.getDomainConfig = function(request, reply) {
             code: lua.code
           };
         }) : [];
-
+        // TODO: delete after update in DB
+        if (!!response['3rd_party_rewrite']) {
+          if (response['3rd_party_rewrite']['3rd_party_root_rewrite_domains'] === '') {
+            response['3rd_party_rewrite']['3rd_party_root_rewrite_domains'] = [];
+          }
+          if (response['3rd_party_rewrite']['3rd_party_runtime_domains'] === '') {
+            response['3rd_party_rewrite']['3rd_party_runtime_domains'] = [];
+          }
+          if (response['3rd_party_rewrite']['3rd_party_urls'] === '') {
+            response['3rd_party_rewrite']['3rd_party_urls'] = [];
+          }
+        }
       renderJSON(request, reply, err, response);
     });
   });
