@@ -21,62 +21,74 @@ var config = require('config');
 
 var API = require('./../../common/api');
 
-describe('Smoke check', function () {
+describe('Smoke check', function() {
   this.timeout(config.get('api.request.maxTimeout'));
 
   // Retrieving information about specific user that later we will use for
   // our API requests.
   var resellerUser = config.get('api.users.reseller');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user'),
+    config.get('api.users.roUser')
+  ]
+  users.forEach(function(user) {
 
-  before(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function() {
 
-  after(function (done) {
-    done();
-  });
-
-  describe('Locations resource', function () {
-    it('should return a response when getting `first-mile`.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .firstMile()
-              .getOne()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      before(function(done) {
+        done();
       });
 
-    it('should return a response when getting `last-mile`.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .lastMile()
-              .getOne()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      after(function(done) {
+        done();
       });
 
-    it('should return a response when getting `billing_zones`.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .billingZones()
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      describe('Locations resource', function() {
+        it('should return a response when getting `first-mile`.',
+          function(done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function() {
+                API.resources.locations
+                  .firstMile()
+                  .getOne()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return a response when getting `last-mile`.',
+          function(done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function() {
+                API.resources.locations
+                  .lastMile()
+                  .getOne()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return a response when getting `billing_zones`.',
+          function(done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function() {
+                API.resources.locations
+                  .billingZones()
+                  .getAll()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
+    });
   });
 });
