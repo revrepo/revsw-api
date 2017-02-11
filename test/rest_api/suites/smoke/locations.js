@@ -31,9 +31,11 @@ describe('Smoke check', function() {
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller'),
     config.get('api.users.admin'),
-    config.get('api.users.user'),
-    config.get('api.users.roUser')
-  ]
+    config.get('api.users.user')
+//    config.get('api.users.roUser')   // TODO: need to add RO users for every role. 
+// Or better we need to automatically create necessary test users...
+  ];
+
   users.forEach(function(user) {
 
     describe('With user: ' + user.role, function() {
