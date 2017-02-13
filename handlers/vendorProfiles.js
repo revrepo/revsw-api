@@ -44,3 +44,14 @@ exports.getVendorProfiles = function getAccounts(request, reply) {
 
     renderJSON(request, reply, null, names);
 };
+
+exports.getVendorProfile = function getAccounts(request, reply) {
+  var vendorName = request.params.vendor;
+  var vendorProfilesConfig = config.get('vendor_profiles');
+  var vendor = vendorProfilesConfig[vendorName] || vendorProfilesConfig[config.get('default_system_vendor_profile')];
+
+  var result = publicRecordFields.handle(vendor, 'vendorProfiles');
+  result.vendor = vendorName;
+
+  renderJSON(request, reply, null, result);
+};
