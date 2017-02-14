@@ -93,7 +93,7 @@
       ]
     },
     "nuubit": {
-      "vendorUrl": "https://portal.nuubit.net",
+      "vendorUrl": "https://testsjc20-portal-nuubit.revsw.net",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "user_verify_token_lifetime" : 86400000,
