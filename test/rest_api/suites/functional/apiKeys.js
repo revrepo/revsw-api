@@ -116,7 +116,7 @@ describe('Functional check', function () {
         .catch(done);
     });
 
-    it('should have no access to anothe account', function (done) {
+    it('should have no access to another account', function (done) {
       API.helpers.authenticateAPIKey(apiKey.id)
         .then(function () {
           API.resources.accounts
