@@ -17,6 +17,12 @@
  */
 
 var faker = require('faker');
+var Joi = require('joi');
+var joiGenerator = new require('joi-generate').Generator();
+
+var APIRoutesProvider = require('./../../../common/providers/APIRoutesProvider');
+
+var apiKeyRouteConfig = APIRoutesProvider.get('apiKeys');
 
 // # API Keys Data Provider object
 //
@@ -28,6 +34,14 @@ var faker = require('faker');
 var APIKeyDataProvider = {
 
   prefix: 'TEST_API_KEY_',
+
+  generate: function (type, callback) {
+    var validation = apiKeyRouteConfig.getValidation('PUT', '/v1/api_keys/{key_id}');
+    joiGenerator.generateAll(Joi.object(validation.payload), function (err, data) {
+      callback(err, data[type]);
+    });
+  },
+
   /**
    * ### APIKeyDataProvider.generateOne()
    *
@@ -75,7 +89,7 @@ var APIKeyDataProvider = {
    *    }
    */
   generateCompleteOne: function (accountId, prefix) {
-    prefix = (prefix ? prefix + '_' : this.prefix )  + Date.now();
+    prefix = (prefix ? prefix + '_' : this.prefix ) + Date.now();
     return {
       account_id: accountId,
       managed_account_ids: [],
