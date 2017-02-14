@@ -50,7 +50,7 @@ module.exports = [{
 
   {
     method: 'GET',
-    path: '/v1/vendor_profiles/{vendor}',
+    path: '/v1/vendor_profiles/{vendorUrl}',
     config: {
       auth: false,
       handler: vendorProfile.getVendorProfile,
@@ -58,7 +58,7 @@ module.exports = [{
       notes: 'Use this function to get a vendor profil by name',
       validate: {
         params: {
-          vendor: Joi.string().required().description('Vendor')
+          vendorUrl: Joi.string().required().description('Vendor')
         }
       },
       response: {

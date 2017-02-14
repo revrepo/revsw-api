@@ -31,7 +31,7 @@ describe('Functional check', function () {
   var reseller = config.get('api.users.reseller');
   var secondReseller = config.get('api.users.secondReseller');
   var users = [
-    //config.get('api.users.revAdmin'),
+    //config.get('api.users.revAdmin'), // TODO need to use all user roles
     reseller
   ];
 
@@ -384,7 +384,7 @@ describe('Functional check', function () {
                 .configStatus(appId)
                 .getOne()
                 .then(function (res) {
-                  if (res.body.staging_status !== 'Published') {
+                  if (res.body.global_status !== 'Published') {
                     setTimeout(cb, interval);
                     return;
                   }
