@@ -79,7 +79,7 @@
   "default_signup_vendor_profile": "revapm",
   "vendor_profiles": {
     "revapm": {
-      "vendorUrl": "http://localhost:30004",
+      "vendorUrl": "https://portal.revapm.net",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "user_verify_token_lifetime" : 86400000,
@@ -136,7 +136,7 @@
       ]
     },
     "nuubit": {
-      "vendorUrl": "http://localhost:3000d",
+      "vendorUrl": "https://portal.nuubit.net",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "user_verify_token_lifetime" : 86400000,
