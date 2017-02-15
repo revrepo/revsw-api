@@ -95,7 +95,11 @@ describe('Functional check', function () {
           API.resources.accounts
             .getOne(accountFirst.id)
             .expect(200)
-            .end(done);
+            .then(function (response) {
+              var accountObject = response.body;
+              accountObject.id.should.equal(accountFirst.id);
+              done();
+            });
         })
         .catch(done);
     });
@@ -107,8 +111,11 @@ describe('Functional check', function () {
             .getAll()
             .expect(200)
             .then(function (response) {
-              var accountsObject = response.body;
-              accountsObject.length.should.equal(1);
+              var accountsArray = response.body;
+              accountsArray.length.should.equal(1);
+              accountsArray.forEach(function (account) {
+                account.id.should.equal(accountFirst.id);
+              });
               done();
             })
             .catch(done);
@@ -122,7 +129,10 @@ describe('Functional check', function () {
           API.resources.accounts
             .getOne(accountSecond.id)
             .expect(400)
-            .end(done);
+            .end(function (err, res) {
+              res.body.message.should.equal('Account ID not found');
+              done();
+            });
         })
         .catch(done);
     });
@@ -154,7 +164,11 @@ describe('Functional check', function () {
             API.resources.accounts
               .getOne(accountSecond.id)
               .expect(200)
-              .end(done);
+              .then(function (response) {
+                var accountObject = response.body;
+                accountObject.id.should.equal(accountSecond.id);
+                done();
+              });
           })
           .catch(done);
       });
@@ -166,8 +180,10 @@ describe('Functional check', function () {
               .getAll()
               .expect(200)
               .then(function (response) {
-                var accountsObject = response.body;
-                accountsObject.length.should.equal(2);
+                var accountsArray = response.body;
+                accountsArray.length.should.equal(2);
+                accountsArray[0].id.should.equal(accountFirst.id);
+                accountsArray[1].id.should.equal(accountSecond.id);
                 done();
               })
               .catch(done);
@@ -218,7 +234,10 @@ describe('Functional check', function () {
               API.resources.accounts
                 .getOne(accountSecond.id)
                 .expect(400)
-                .end(done);
+                .end(function (err, res) {
+                  res.body.message.should.equal('Account ID not found');
+                  done();
+                });
             })
             .catch(done);
         });
@@ -230,8 +249,11 @@ describe('Functional check', function () {
                 .getAll()
                 .expect(200)
                 .then(function (response) {
-                  var accountsObject = response.body;
-                  accountsObject.length.should.equal(1);
+                  var accountsArray = response.body;
+                  accountsArray.length.should.equal(1);
+                  accountsArray.forEach(function (account) {
+                    account.id.should.equal(accountFirst.id);
+                  });
                   done();
                 })
                 .catch(done);
