@@ -118,15 +118,19 @@ describe('Smoke check', function () {
             var apiKeyId = key.id;
             var updatedKey = APIKeyDataProvider
               .generateCompleteOne(key.account_id);
-            API.resources.apiKeys
+            return API.resources.apiKeys
               .update(apiKeyId, updatedKey)
-              .expect(200)
-              .end(done);
+              .expect(200);
+          })
+          .then(function (res) {
+            res.body.statusCode.should.equal(200);
+            res.body.message.should.equal('Successfully updated the API key');
+            done();
           })
           .catch(done);
       });
 
-    xit('should allow to delete an API Key.',
+    it('should allow to delete an API Key.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -134,10 +138,14 @@ describe('Smoke check', function () {
             return API.helpers.apiKeys.createOne();
           })
           .then(function (key) {
-            API.resources.apiKeys
+            return API.resources.apiKeys
               .deleteOne(key.id)
-              .expect(200)
-              .end(done);
+              .expect(200);
+          })
+          .then(function (res) {
+            res.body.statusCode.should.equal(200);
+            res.body.message.should.equal('Successfully deleted the API key');
+            done();
           })
           .catch(done);
       });
