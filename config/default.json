@@ -138,7 +138,13 @@
   "default_signup_vendor_profile": "revapm",
   "vendor_profiles": {
     "revapm": {
-      "vendorUrl": "http://localhost:3000s",
+      "vendorUrl": "http://localhost:3000",
+      "apiUrl": "https://api.revapm.net",
+      "contactPhone": "+1 (408) 477-1738",
+      "networkStatusUrl": "http://status.revapm.net",
+      "companyNameShort": "RevAPM",
+      "companyNameFull": "RevAPM",
+      "contactUsLink": "https://revapm.zendesk.com/hc/en-us/requests/new",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "user_verify_token_lifetime" : 86400000,
@@ -171,7 +177,7 @@
         "<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>",
         "</div>"
         ],
-      "chargify_user_welocme_email_text": [
+      "chargify_user_welcome_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new RevAPM account!\n\n",
         "Your are welcome to visit our customer portal at {{portalUrl}}\n",
@@ -195,14 +201,20 @@
       ]
     },
     "nuubit": {
-      "vendorUrl": "http://localhost:3000",
+      "vendorUrl": "http://localhost:4000",
+      "apiUrl": "https://api.nuubit.net",
+      "contactPhone": "+1 (408) 477-1738",
+      "networkStatusUrl": "http://status.nuubit.net",
+      "companyNameShort": "NUU:BIT",
+      "companyNameFull": "NUU:BIT, INC",
+      "contactUsLink": "https://revapm.zendesk.com/hc/en-us/requests/new",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
-      "support_email" : "support@revapm.com",
+      "support_email" : "support@nuubit.com",
       "user_verify_token_lifetime" : 86400000,
       "password_reset_token_lifespan": 3600000,
       "password_reset_email_subject": "nuu:bit Customer Portal Password Reset",
       "password_reset_confirmation_email_subject": "Your nuu:bit Customer Portal password has been changed",
-      "chargify_user_welocme_email_subject": "Welcome to nuu:bit",
+      "chargify_user_welcome_email_subject": "Welcome to nuu:bit",
       "signup_user_verify_email_subject": "nuu:bit New User Email Verification Request",
       "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
       "enable_self_registration": true,
@@ -228,7 +240,7 @@
         "<p>Kind regards,<br/>nuu:bit Customer Support Team<br>http://www.revapm.com/<br/></p>",
         "</div>"
       ],
-      "chargify_user_welocme_email_text": [
+      "chargify_user_welcome_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new nuu:bit account!\n\n",
         "Your are welcome to visit our customer portal at https://testsjc20-portal01.revsw.net\n",

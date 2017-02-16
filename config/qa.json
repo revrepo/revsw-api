@@ -32,8 +32,6 @@
     "api_key": "not-for-qa"
   },
 
-  "default_system_vendor_profile": "revapm",
-  "default_signup_vendor_profile": "revapm",
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "https://testsjc20-portal01.revsw.net",

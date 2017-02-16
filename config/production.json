@@ -75,8 +75,6 @@
     "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
   },
 
-  "default_system_vendor_profile": "revapm",
-  "default_signup_vendor_profile": "revapm",
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "https://portal.revapm.net",
