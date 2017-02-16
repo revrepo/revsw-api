@@ -46,5 +46,24 @@ module.exports = [{
         schema: routeModels.listOfVendorProfileNamesModel
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/vendor_profiles/{vendorUrl}',
+    config: {
+      auth: false,
+      handler: vendorProfile.getVendorProfile,
+      description: 'Get a vendor profile by name',
+      notes: 'Use this function to get a vendor profile by name',
+      validate: {
+        params: {
+          vendorUrl: Joi.string().required().description('Vendor')
+        }
+      },
+      response: {
+        schema: routeModels.vendorProfileConfig
+      }
+    }
   }
 ];

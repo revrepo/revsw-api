@@ -30,5 +30,16 @@
   "statuspage":{
     "page_id": "not-for-qa",
     "api_key": "not-for-qa"
+  },
+
+  "vendor_profiles": {
+    "revapm": {
+      "vendorUrl": "https://testsjc20-portal01.revsw.net",
+      "password_reset_portal_domain": "testsjc20-portal01.revsw.net"
+    },
+    "nuubit": {
+      "vendorUrl": "https://testsjc20-portal-nuubit.revsw.net",
+      "password_reset_portal_domain": "testsjc20-portal-nuubit.revsw.net"
+    }
   }
 }
