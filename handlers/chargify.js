@@ -131,6 +131,8 @@ exports.webhookHandler = function(request, reply) {
                     subject: currentVendorProfile.chargify_user_welocme_email_subject,
                     text: currentVendorProfile.chargify_user_welocme_email_text.toString()
                         .replace('{{firstname}}', adminUser.firstname)
+                        .replace('{{portalUrl}}', currentVendorProfile.vendorUrl)
+                        .replace('{{supportEmail}}', currentVendorProfile.support_email)
                   };
 
                   if (bccEmail !== '') {

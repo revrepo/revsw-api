@@ -138,7 +138,7 @@
   "default_signup_vendor_profile": "revapm",
   "vendor_profiles": {
     "revapm": {
-      "vendorUrl": "http://localhost:30004",
+      "vendorUrl": "http://localhost:3000s",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "user_verify_token_lifetime" : 86400000,
@@ -153,9 +153,9 @@
       "signup_user_verify_email_text" : [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n\n",
         "Please click on the following link, or paste this into your browser to complete the process:\n\n",
-        "https://testsjc20-portal01.revsw.net/#/profile/verify/{{tokenPlace}}\n\n",
+        "{{vendorUrl}}/#/profile/verify/{{tokenPlace}}\n\n",
         "If you did not request this, please ignore this email.\n\n",
-        "Should you have any questions please contact us 24x7 at support@revapm.com.\n\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}.\n\n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
       "signup_user_verify_email_html": [
@@ -167,35 +167,35 @@
         "</a> link to complete the process.",
         "</p>",
         "<p>If you did not request this, please ignore this email.</p>\n\n",
-        "<p>Should you have any questions please contact us 24x7 at support@revapm.com.</p><br><br>",
+        "<p>Should you have any questions please contact us 24x7 at {{supportEmail}}.</p><br><br>",
         "<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>",
         "</div>"
         ],
       "chargify_user_welocme_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new RevAPM account!\n\n",
-        "Your are welcome to visit our customer portal at https://testsjc20-portal01.revsw.net\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}\n",
         "and start managing your configuration!\n\n",
-        "Should you have any questions please contact us 24x7 at support@revapm.com\n\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}\n\n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
       "password_reset_email_text": [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n",
         "Please click on the following link, or paste this into your browser to complete the process:\n\n",
-        "https://testsjc20-portal01.revsw.net/#/password/reset/{{token}}\n\n",
+        "{{resetPasswordUrl}}/#/password/reset/{{token}}\n\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n\n",
-        "Should you have any questions please contact us 24x7 at support@revapm.com .\n\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n\n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n\n",
-        "Should you have any questions please contact us 24x7 at support@revapm.com \n\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} \n\n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ]
     },
     "nuubit": {
-      "vendorUrl": "http://localhost:3000d",
+      "vendorUrl": "http://localhost:3000",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "user_verify_token_lifetime" : 86400000,

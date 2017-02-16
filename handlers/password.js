@@ -87,7 +87,9 @@ exports.forgotPassword = function(request, reply) {
                       to: user.email,
                       subject: currentVendorProfile.password_reset_email_subject,
                       text: currentVendorProfile.password_reset_email_text.toString()
-                          .replace('{{token}}', token)
+                        .replace('{{resetPasswordUrl}}', currentVendorProfile.password_reset_portal_domain)
+                        .replace('{{supportEmail}}', currentVendorProfile.support_email)
+                        .replace('{{token}}', token)
                   };
                   logger.info('Sending password reset email to user ' + user.email);
                   mail.sendMail(mailOptions, function (err) {
@@ -235,7 +237,8 @@ exports.resetPassword = function(request, reply) {
                 to: user.email,
                 subject: currentVendorProfile.password_reset_confirmation_email_subject,
                 text: currentVendorProfile.password_reset_confirmation_email_text.toString()
-                      .replace('{{email}}', user.email)
+                  .replace('{{email}}', user.email)
+                  .replace('{{supportEmail}}', currentVendorProfile.support_email)
             };
             logger.info('Sending password reset/change confirmation email to user ' + user.email);
             mail.sendMail(mailOptions, function(err) {

@@ -69,7 +69,10 @@ var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
     subject: currentVendorProfile.signup_user_verify_email_subject,
-    text: currentVendorProfile.signup_user_verify_email_text.toString().replace('{{tokenPlace}}', token)
+    text: currentVendorProfile.signup_user_verify_email_text.toString()
+      .replace('{{vendorUrl}}', currentVendorProfile.vendorUrl)
+      .replace('{{supportEmail}}', currentVendorProfile.support_email)
+      .replace('{{tokenPlace}}', token)
   };
   var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
   if (bccEmail !== '') {
@@ -101,6 +104,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
         .replace('{{firstName}}', user.firstname)
         .replace('{{hosted_page}}', billing_plan.hosted_page)
         .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
+        .replace('{{supportEmail}}', currentVendorProfile.support_email)
   };
 
   var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
@@ -322,6 +326,7 @@ exports.signup = function(req, reply) {
                 .replace('{{firstName}}', _newUser.firstname)
                 .replace('{{hosted_page}}', _billing_plan.hosted_page)
                 .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
+                .replace('{{supportEmail}}', currentVendorProfile.support_email)
         };
 
         var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
