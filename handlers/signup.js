@@ -69,7 +69,7 @@ var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
     subject: currentVendorProfile.signup_user_verify_email_subject,
-    text: currentVendorProfile.signup_user_verify_email_text.toString()
+    text: currentVendorProfile.signup_user_verify_email_text.join('\n')
       .replace('{{vendorUrl}}', currentVendorProfile.vendorUrl)
       .replace('{{supportEmail}}', currentVendorProfile.support_email)
       .replace('{{tokenPlace}}', token)

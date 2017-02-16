@@ -129,7 +129,7 @@ exports.webhookHandler = function(request, reply) {
                   var mailOptions = {
                     to: adminUser.email,
                     subject: currentVendorProfile.chargify_user_welcome_email_subject,
-                    text: currentVendorProfile.chargify_user_welcome_email_text.toString()
+                    text: currentVendorProfile.chargify_user_welcome_email_text.join('\n')
                         .replace('{{firstname}}', adminUser.firstname)
                         .replace('{{portalUrl}}', currentVendorProfile.vendorUrl)
                         .replace('{{supportEmail}}', currentVendorProfile.support_email)

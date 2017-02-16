@@ -55,7 +55,7 @@ module.exports = [{
       auth: false,
       handler: vendorProfile.getVendorProfile,
       description: 'Get a vendor profile by name',
-      notes: 'Use this function to get a vendor profil by name',
+      notes: 'Use this function to get a vendor profile by name',
       validate: {
         params: {
           vendorUrl: Joi.string().required().description('Vendor')

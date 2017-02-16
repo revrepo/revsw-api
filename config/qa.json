@@ -39,7 +39,7 @@
     },
     "nuubit": {
       "vendorUrl": "https://testsjc20-portal-nuubit.revsw.net",
-      "password_reset_portal_domain": "testsjc20-portal01.revsw.net"
+      "password_reset_portal_domain": "testsjc20-portal-nuubit.revsw.net"
     }
   }
 }
