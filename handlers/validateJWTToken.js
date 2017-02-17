@@ -33,6 +33,8 @@ var Account = require('../models/Account');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 
+var defaultSystemVendorProfile = config.get('default_system_vendor_profile');
+
 
 exports.validateJWTToken = function (request, decodedToken, callback) {
   var user_id = decodedToken.user_id,
@@ -62,7 +64,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
 
     var accountId = result.companyId && result.companyId.length && result.companyId[0];
     if(!accountId){
-       result.vendor_profile = config.get('default_system_vendor_profile');
+       result.vendor_profile = defaultSystemVendorProfile;
 
       return callback(error, true, result);
     }
@@ -78,7 +80,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
           return callback(error, false, result);
       }
 
-      result.vendor_profile = account.vendor_profile;
+      result.vendor_profile = account.vendor_profile || defaultSystemVendorProfile;
 
       return callback(error, true, result);
     });

@@ -179,7 +179,7 @@ module.exports = {
         var aggs = {};
         var fields = {
           status_code: { field: 'status_code', keys: {} },
-          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'RevAPM' } },
+          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'CDN' } },
           transport: { field: 'edge_transport', keys: { 'standard': 'Standard', 'quic': 'QUIC' } },
           status: { field: 'success_status', keys: { '0': 'Error', '1': 'Success' } },
           cache: { field: 'x-rev-cache', keys: { 'HIT': 'HIT', 'MISS': 'MISS' } }
@@ -248,7 +248,7 @@ module.exports = {
         var aggs = {};
         var fields = {
           status_code: { field: 'status_code', keys: {} },
-          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'RevAPM' } },
+          destination: { field: 'destination', keys: { 'origin': 'Origin', 'rev_edge': 'CDN' } },
           transport: { field: 'edge_transport', keys: { 'standard': 'Standard', 'quic': 'QUIC' } },
           status: { field: 'success_status', keys: { '0': 'Error', '1': 'Success' } },
           cache: { field: 'x-rev-cache', keys: { 'HIT': 'HIT', 'MISS': 'MISS' } },

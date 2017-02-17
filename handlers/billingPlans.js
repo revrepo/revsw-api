@@ -40,7 +40,7 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.list = function (request, reply) {
   var options = {
-    vendor_profile: config.get('default_system_vendor_profile')
+    vendor_profile: config.get('default_signup_vendor_profile')
   };
   if(request.auth.isAuthenticated === true){
     options.vendor_profile = request.auth.credentials.vendor_profile;

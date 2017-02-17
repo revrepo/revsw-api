@@ -87,7 +87,7 @@ exports.forgotPassword = function(request, reply) {
                       to: user.email,
                       subject: currentVendorProfile.password_reset_email_subject,
                       text: currentVendorProfile.password_reset_email_text.join('\n')
-                        .replace('{{resetPasswordUrl}}', currentVendorProfile.password_reset_portal_domain)
+                        .replace('{{resetPasswordUrl}}', currentVendorProfile.vendorUrl)
                         .replace('{{supportEmail}}', currentVendorProfile.support_email)
                         .replace('{{token}}', token)
                   };
