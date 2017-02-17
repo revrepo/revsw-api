@@ -153,25 +153,10 @@ exports.getMyUser = function (request, reply) {
         return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
       }
       if (result) {
+        result = publicRecordFields.handle(result, 'user');
+        result.vendor = request.auth.credentials.vendor_profile;
 
-        if (result.companyId && result.companyId.length){
-          accounts.get({
-            _id: result.companyId[0]
-          }, function(error, account) {
-
-            result = publicRecordFields.handle(result, 'user');
-
-            if (account) {
-              result.vendor = account.vendor_profile;
-            }
-
-            renderJSON(request, reply, error, result);
-          });
-        } else {
-          result = publicRecordFields.handle(result, 'user');
-
-          renderJSON(request, reply, error, result);
-        }
+        renderJSON(request, reply, error, result);
       } else {
         return reply(boom.badRequest('User ID not found'));
       }
