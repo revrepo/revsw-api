@@ -23,8 +23,8 @@
 var Joi = require('joi');
 
 var apiKey = require('../handlers/apiKeys');
-
 var routeModels = require('../lib/routeModels');
+var ROUTE_ID = require('./ids.json');
 
 module.exports = [
   {
@@ -35,6 +35,7 @@ module.exports = [
         scope: ['admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: apiKey.getApiKeys,
+      id: ROUTE_ID.API_KEYS.GET.ALL,
       description: 'Get a list of API keys registered for a company',
       notes: 'Use this function to get a list of API keys registered on your company account',
       tags: ['api'],
@@ -62,6 +63,7 @@ module.exports = [
         scope: ['apikey']
       },
       handler: apiKey.getMyApiKey,
+      id: ROUTE_ID.API_KEYS.GET.MYSELF,
       description: 'Get your API key information',
       notes: 'Use the call to get the details of your API key.',
       tags: ['api'],
@@ -84,6 +86,7 @@ module.exports = [
         scope: ['admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: apiKey.getApiKey,
+      id: ROUTE_ID.API_KEYS.GET.ONE,
       description: 'Get API key details',
       notes: 'Use this function to get details of an API key',
       tags: ['api'],
@@ -111,6 +114,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.createApiKey,
+      id: ROUTE_ID.API_KEYS.POST.NEW,
       description: 'Create a new API key',
       notes: 'Use the call to create a new API key for your company. ' +
         'After creating a new API key you can use a PUT call to /v1/api_keys/{key_id} to configure the key.',
@@ -139,6 +143,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.updateApiKey,
+      id: ROUTE_ID.API_KEYS.PUT.ONE,
       description: 'Update a customer API key',
       notes: 'Use this function to update API key details',
       tags: ['api'],
@@ -185,6 +190,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.activateApiKey,
+      id: ROUTE_ID.API_KEYS.POST.ACTIVATE,
       description: 'Activate an API key',
       notes: 'Use the call to activate an API key for your company in the system',
       tags: ['api', 'accounts'],
@@ -212,6 +218,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.deactivateApiKey,
+      id: ROUTE_ID.API_KEYS.POST.DEACTIVATE,
       description: 'Deactive an API key',
       notes: 'Use the call to deactivate an API key. The key\' configuration will be stored in the system but it will be not ' +
         'possible to use the key to access the customer API service',
@@ -240,6 +247,7 @@ module.exports = [
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       handler: apiKey.deleteApiKey,
+      id: ROUTE_ID.API_KEYS.DELETE.ONE,
       description: 'Delete a customer API key',
       notes: 'This function should be used by a company admin to delete an API key',
       tags: ['api'],
