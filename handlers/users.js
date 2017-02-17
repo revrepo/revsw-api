@@ -154,6 +154,7 @@ exports.getMyUser = function (request, reply) {
       }
       if (result) {
         result = publicRecordFields.handle(result, 'user');
+        result.vendor = request.auth.credentials.vendor_profile;
 
         renderJSON(request, reply, error, result);
       } else {
