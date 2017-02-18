@@ -5,5 +5,16 @@
 
   "azure_marketplace": {
     "sso_endpoint": "https://iad02-portal03.revsw.net/#/azure-sso"
+  },
+
+  "vendor_profiles": {
+    "revapm": {
+      "vendorUrl": "https://portal-staging.revapm.net",
+      "password_reset_portal_domain": "portal-staging.revapm.net"
+    },
+    "nuubit": {
+      "vendorUrl": "https://portal-staging.nuubit.net",
+      "password_reset_portal_domain": "portal-staging.nuubit.net"
+    }
   }
 }

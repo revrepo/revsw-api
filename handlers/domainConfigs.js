@@ -256,7 +256,7 @@ exports.createDomainConfig = function(request, reply) {
     }
 
     if (!result) {
-      return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
+      return reply(boom.badRequest('Specified first mile location ID cannot be found'));
     }
 
     newDomainJson.created_by = utils.generateCreatedByField(request);
@@ -383,7 +383,7 @@ exports.createDomainConfig = function(request, reply) {
         }
 
         if (!result) {
-          return reply(boom.badRequest('Specified Rev first mile location ID cannot be found'));
+          return reply(boom.badRequest('Specified first mile location ID cannot be found'));
         }
         newDomainJson.created_by = utils.generateCreatedByField(request);
         if (!newDomainJson.tolerance) {
@@ -636,11 +636,11 @@ exports.checkIntegration = function(request, reply) {
           dnsResolve.checkDomainCNAMEsIncludeCname(name_, cname_, function prepare(err, info) {
             if (!err) {
               response_.check_status_code = checkStatusCode.OK;
-              response_.message = 'The domain name is pointing to the assigned RevAPM CNAME record';
+              response_.message = 'The domain name is pointing to the assigned CNAME record';
               response_.data.push(info);
             } else {
               response_.check_status_code = checkStatusCode.ERROR;
-              response_.message = 'The domain is not pointing to the assigned RevAPM CNAME record or could not be resolved';
+              response_.message = 'The domain is not pointing to the assigned CNAME record or could not be resolved';
               response_.data.push(err);
             }
             cb(null);

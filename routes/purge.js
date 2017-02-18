@@ -39,8 +39,8 @@ module.exports = [
         scope: [ 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw' ]
       },
       handler: purges.purgeObject,
-      description: 'Purge objects cached on Rev edge servers',
-      notes: 'Use the function to purge objects from Rev edge caching servers. You can specify several "url" objects to purge multiple cached ' +
+      description: 'Purge objects cached on CDN edge servers',
+      notes: 'Use the function to purge objects from CDN edge caching servers. You can specify several "url" objects to purge multiple cached ' +
       'objects at once. After a purge request is submitted to the system you should remember received "request_id" ID and use it to check ' +
       'the status of the request using /v1/purge/{request_id} GET call.',
       tags: ['api', 'purge'],

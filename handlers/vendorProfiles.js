@@ -44,3 +44,36 @@ exports.getVendorProfiles = function getAccounts(request, reply) {
 
     renderJSON(request, reply, null, names);
 };
+
+exports.getVendorProfile = function getAccounts(request, reply) {
+  var vendorUrl = request.params.vendorUrl;
+  var vendorProfiles = config.get('vendor_profiles');
+  var systemVendor = config.get('default_system_vendor_profile');
+  var result = vendorProfiles[systemVendor];
+  var vendorName = '';
+
+  for(var vendorKey in vendorProfiles) {
+    var vendorConfig = vendorProfiles[vendorKey];
+
+    if (vendorConfig.vendorUrl === vendorUrl) {
+      result = vendorConfig;
+      vendorName = vendorKey;
+      continue;
+    }
+  }
+
+  result = publicRecordFields.handle(result, 'vendorProfiles');
+  result.vendor = vendorName || systemVendor;
+
+  renderJSON(request, reply, null, result);
+};
+
+exports.getVendorProfileByName = function getAccounts(request, reply) {
+  var vendor = request.params.vendor;
+  var vendorProfiles = config.get('vendor_profiles');
+  var result = vendorProfiles[vendor];
+
+  result = publicRecordFields.handle(result, 'vendorProfiles');
+
+  renderJSON(request, reply, null, result);
+};

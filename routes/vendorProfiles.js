@@ -46,5 +46,45 @@ module.exports = [{
         schema: routeModels.listOfVendorProfileNamesModel
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/vendor_profiles/{vendorUrl}',
+    config: {
+      auth: false,
+      handler: vendorProfile.getVendorProfile,
+      description: 'Get a vendor profile by url',
+      notes: 'Use this function to get a vendor profile by url',
+      validate: {
+        params: {
+          vendorUrl: Joi.string().required().description('Vendor url')
+        }
+      },
+      response: {
+        schema: routeModels.vendorProfileConfig
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/vendor_profiles/name/{vendor}',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: vendorProfile.getVendorProfileByName,
+      description: 'Get a vendor profile by name',
+      notes: 'Use this function to get a vendor profile by name',
+      validate: {
+        params: {
+          vendor: Joi.string().required().description('Vendor name')
+        }
+      },
+      response: {
+        schema: routeModels.vendorProfileConfig
+      }
+    }
   }
 ];

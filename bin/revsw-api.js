@@ -117,7 +117,7 @@ var swaggerOptions = {
   },
   tags: {
     'purge': 'Purging of cached objects',
-    'users': 'Management of Rev portal users',
+    'users': 'Management of customer portal users',
     'portal': 'Internal portal calls'
   },
   authorizations: {
@@ -128,7 +128,7 @@ var swaggerOptions = {
     }
   },
   info: {
-    title: 'RevAPM API Guide',
+    title: 'CDN API Guide',
     // description: 'This API provides full control on Rev\'s global acceleration platform. For detailed information about the interface please see below.',
     contact: 'support@revsw.com'
   }

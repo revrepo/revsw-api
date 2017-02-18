@@ -40,6 +40,9 @@ var User = require('../models/User');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+var vendorProfiles = config.get('vendor_profiles');
+var currentVendorProfile = vendorProfiles[config.get('default_system_vendor_profile')];
+
 //
 // Password reset functions
 //
@@ -48,54 +51,62 @@ exports.forgotPassword = function(request, reply) {
   var email = request.payload.email;
 
   function passwordChange(error,user){
-      async.waterfall([
-        function(done) {
-          crypto.randomBytes(20, function(err, buf) {
-            var token = buf.toString('hex');
-            done(err, token);
+
+          async.waterfall([
+              function(done) {
+                  accounts.get({
+                      _id: user.companyId
+                  }, function(error, account) {
+                      currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
+                      done();
+                  });
+              },
+
+              function (done) {
+                  crypto.randomBytes(20, function (err, buf) {
+                      var token = buf.toString('hex');
+                      done(err, token);
+                  });
+              },
+
+              function (token, done) {
+                  delete user.password;
+                  user.resetPasswordToken = token;
+                  user.resetPasswordExpires = Date.now() + currentVendorProfile.password_reset_token_lifespan;
+
+                  users.update(user, function (error, result) {
+                      if (error) {
+                          return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user.user_id));
+                      }
+                      done(error, token, user);
+                  });
+              },
+
+              function (token, user, done) {
+                  var mailOptions = {
+                      to: user.email,
+                      subject: currentVendorProfile.password_reset_email_subject,
+                      text: currentVendorProfile.password_reset_email_text.join('\n')
+                        .replace('{{resetPasswordUrl}}', currentVendorProfile.vendorUrl)
+                        .replace('{{supportEmail}}', currentVendorProfile.support_email)
+                        .replace('{{token}}', token)
+                  };
+                  logger.info('Sending password reset email to user ' + user.email);
+                  mail.sendMail(mailOptions, function (err) {
+                      if (err) {
+                          return reply(boom.badImplementation('Failed to send password reset email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
+                              ', error message: ' + err));
+                      } else {
+                          renderJSON(request, reply, error, {message: 'An e-mail has been sent to ' + user.email + ' with further instructions'});
+                      }
+                  });
+              }
+
+          ], function (err) {
+              if (err) {
+                  return reply(boom.badImplementation('Failed to execute password reset procedure for email ' + email));
+              }
           });
-        },
-
-        function(token, done) {
-          delete user.password;
-          user.resetPasswordToken   = token;
-          user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan');
-
-          users.update(user, function(error, result) {
-            if (error) {
-              return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user.user_id));
-            }
-            done(error, token, user);
-          });
-        },
-
-        function(token, user, done) {
-          var mailOptions = {
-            to: user.email,
-            subject: config.get('password_reset_email_subject'),
-            text: 'Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
-            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'https://' + config.get('password_reset_portal_domain') + '/#/password/reset/' + token + '\n\n' +
-            'If you did not request this, please ignore this email and your password will remain unchanged.\n\n' +
-            'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-            'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
-          };
-          logger.info('Sending password reset email to user ' + user.email);
-          mail.sendMail(mailOptions, function(err) {
-            if (err) {
-              return reply(boom.badImplementation('Failed to send password reset email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
-                ', error message: ' + err));
-            } else {
-              renderJSON(request, reply, error, { message: 'An e-mail has been sent to ' + user.email + ' with further instructions' } );
-            }
-          });
-        }
-
-      ], function(err) {
-        if (err) {
-          return reply(boom.badImplementation('Failed to execute password reset procedure for email ' + email));
-        }
-      });
   }
 
   // Start work-flow
@@ -217,23 +228,29 @@ exports.resetPassword = function(request, reply) {
     },
 
     function(user, done) {
-      var mailOptions = {
-        to: user.email,
-        subject: config.get('password_reset_confirmation_email_subject'),
-        text: 'Hello,\n\n' +
-        'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n\n' +
-        'Should you have any questions please contact us 24x7 at ' + config.get('support_email') + '.\n\n' +
-        'Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n'
-      };
-      logger.info('Sending password reset/change confirmation email to user ' + user.email);
-      mail.sendMail(mailOptions, function(err) {
-        if (err) {
-          return reply(boom.badImplementation('Failed to send password reset/change confirmation email ' + JSON.stringify(mailOptions) + ' to user ' + user.email +
-            ', error message: ' + err));
-        } else {
-         renderJSON(request, reply, err, { message: 'Your password has been changed' } );
-        }
-      });
+        accounts.get({
+            _id: user.companyId
+        }, function(error, account) {
+            currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
+
+            var mailOptions = {
+                to: user.email,
+                subject: currentVendorProfile.password_reset_confirmation_email_subject,
+                text: currentVendorProfile.password_reset_confirmation_email_text.join('\n')
+                  .replace('{{email}}', user.email)
+                  .replace('{{supportEmail}}', currentVendorProfile.support_email)
+            };
+            logger.info('Sending password reset/change confirmation email to user ' + user.email);
+            mail.sendMail(mailOptions, function(err) {
+                if (err) {
+                    return reply(boom.badImplementation('Failed to send password reset/change confirmation email ' +
+                        JSON.stringify(mailOptions) + ' to user ' + user.email +
+                        ', error message: ' + err));
+                } else {
+                    renderJSON(request, reply, err, { message: 'Your password has been changed' } );
+                }
+            });
+        });
     }
   ], function(err) {
     if (err) {
