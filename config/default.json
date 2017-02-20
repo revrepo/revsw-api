@@ -60,11 +60,9 @@
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
 
-  "user_verify_portal_domain" : "testsjc20-portal01.revsw.net",
   "user_verify_token_lifetime" : 86400000,
 
   "password_reset_token_lifespan": 3600000,     // 1 hour
-  "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
   "support_email" : "support@revapm.com",
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
@@ -140,7 +138,6 @@
       "companyNameFull": "RevAPM",
       "contactUsLink": "https://revapm.zendesk.com/hc/en-us/requests/new",
       "knowledgeBaseLink": "https://revapm.zendesk.com/hc/en-us",
-      "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@revapm.com",
       "support_name" : "RevAPM Support Team",
       "user_verify_subject" : "RevAPM New User Email Verification Request",
@@ -199,15 +196,12 @@
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
 
-      "styles": {
-        "apps_btn_download": {
-          "background-color": "#9bbb5a",
-          "border-color": "#9bbb5a"
+      "sdk": {
+        "download_links": {
+          "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
         },
-
-        "apps_btn_introduction": {
-          "background-color": "#9bbb5a",
-          "border-color": "#9bbb5a"
+        "introduction_video_youtube_ids": {
+          "iOS": "s0xDOPg_Wts"
         }
       }
     },
@@ -220,7 +214,6 @@
       "companyNameFull": "nuu:bit, Inc.",
       "contactUsLink": "https://nuubit.zendesk.com/hc/en-us/requests/new",
       "knowledgeBaseLink": "https://nuubit.zendesk.com/hc/en-us",
-      "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
       "support_email" : "support@nuubit.com",
       "support_name" : "nuu:bit Support Team",
       "user_verify_subject" : "nuu:bit New User Email Verification Request",
@@ -279,15 +272,12 @@
         "Kind regards,\nNUU:BIT Customer Support Team\nhttp://www.nuubit.com/\n"
       ],
 
-      "styles": {
-        "apps_btn_download": {
-          "background-color": "#97C93D",
-          "border-color": "#97C93D"
+      "sdk": {
+        "download_links": {
+          "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
         },
-
-        "apps_btn_introduction": {
-          "background-color": "#97C93D",
-          "border-color": "#97C93D"
+        "introduction_video_youtube_ids": {
+          "iOS": "s0xDOPg_Wts"
         }
       }
     }
