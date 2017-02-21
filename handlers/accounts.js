@@ -73,13 +73,13 @@ exports.createAccount = function(request, reply) {
     newAccount.vendor_profile = request.auth.credentials.vendor_profile;
   }
 
-  if (newAccount.vendor_profile && request.auth.credentials.role !== 'revadmin') {
-    return reply(boom.badRequest('Vendor_profile attribute is not correct'));
-  }
-
   // TODO: Make it able to use user_type apikey to create accounts
   if (request.auth.credentials.user_type === 'apikey') {
     return reply(boom.badRequest('Cannot create account with API key'));
+  }
+
+  if (newAccount.vendor_profile && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('vendor_profile attribute is not correct'));
   }
 
   // Update the user who created the new company account with details of the new account ID
