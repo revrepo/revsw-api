@@ -78,7 +78,8 @@ exports.createAccount = function(request, reply) {
     return reply(boom.badRequest('Cannot create account with API key'));
   }
 
-  if (newAccount.vendor_profile && request.auth.credentials.role !== 'revadmin') {
+  if (newAccount.vendor_profile && request.auth.credentials.role !== 'revadmin' &&
+    newAccount.vendor_profile !== request.auth.credentials.vendor_profile) {
     return reply(boom.badRequest('vendor_profile attribute is not correct'));
   }
 
@@ -661,7 +662,8 @@ exports.updateAccount = function(request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
-    if (account.vendor_profile !== updatedAccount.vendor_profile && request.auth.credentials.role !== 'revadmin') {
+    if (updatedAccount.vendor_profile && account.vendor_profile !== updatedAccount.vendor_profile &&
+      request.auth.credentials.role !== 'revadmin') {
       return reply(boom.badRequest('Vendor profile not found'));
     }
 
