@@ -54,11 +54,11 @@ module.exports = [{
     config: {
       auth: false,
       handler: vendorProfile.getVendorProfile,
-      description: 'Get a vendor profile by url',
-      notes: 'Use this function to get a vendor profile by url',
+      description: 'Get a vendor profile by customer portal URL',
+      notes: 'Use this function to get a vendor profile by customer portal URL',
       validate: {
         params: {
-          vendorUrl: Joi.string().required().description('Vendor url')
+          vendorUrl: Joi.string().required().description('Customer Portal URL')
         }
       },
       response: {
