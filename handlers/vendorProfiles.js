@@ -84,6 +84,12 @@ exports.getVendorProfileByName = function getAccounts(request, reply) {
 exports.updateAccountVendor = function getAccounts(request, reply) {
   var account_id = request.params.account_id;
   var vendor_profile = request.payload.vendor_profile;
+  var vendorProfiles = config.get('vendor_profiles');
+
+  if (!vendorProfiles[vendor_profile]) {
+    return reply(boom.badRequest('Vendor profile not found'));
+  }
+
 
   accounts.get({
     _id: account_id
