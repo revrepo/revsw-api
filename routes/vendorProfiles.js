@@ -86,5 +86,29 @@ module.exports = [{
         schema: routeModels.vendorProfileConfig
       }
     }
+  },
+
+  {
+    method: 'PUT',
+    path: '/v1/vendor_profiles/{account_id}',
+    config: {
+      auth: {
+        scope: ['revadmin']
+      },
+      handler: vendorProfile.updateAccountVendor,
+      description: 'Update vendor for account',
+      notes: 'Use this function to update vendor for account',
+      validate: {
+        params: {
+          account_id: Joi.string().required().description('Account ID')
+        },
+        payload: {
+          vendor_profile: Joi.string().required().description('Vendor profile')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
   }
 ];
