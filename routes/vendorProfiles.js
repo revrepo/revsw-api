@@ -54,11 +54,11 @@ module.exports = [{
     config: {
       auth: false,
       handler: vendorProfile.getVendorProfile,
-      description: 'Get a vendor profile by url',
-      notes: 'Use this function to get a vendor profile by url',
+      description: 'Get a vendor profile by customer portal URL',
+      notes: 'Use this function to get a vendor profile by customer portal URL',
       validate: {
         params: {
-          vendorUrl: Joi.string().required().description('Vendor url')
+          vendorUrl: Joi.string().required().description('Customer Portal URL')
         }
       },
       response: {
@@ -84,6 +84,30 @@ module.exports = [{
       },
       response: {
         schema: routeModels.vendorProfileConfig
+      }
+    }
+  },
+
+  {
+    method: 'PUT',
+    path: '/v1/vendor_profiles/{account_id}',
+    config: {
+      auth: {
+        scope: ['revadmin']
+      },
+      handler: vendorProfile.updateAccountVendor,
+      description: 'Update vendor for account',
+      notes: 'Use this function to update vendor for account',
+      validate: {
+        params: {
+          account_id: Joi.string().required().description('Account ID')
+        },
+        payload: {
+          vendor_profile: Joi.string().required().description('Vendor profile')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
       }
     }
   }

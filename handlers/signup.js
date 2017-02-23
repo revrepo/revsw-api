@@ -68,6 +68,8 @@ Promise.promisifyAll(accountsService,{multiArgs: true});
 var sendVerifyToken = function(user, token, cb) {
   var mailOptions = {
     to: user.email,
+    fromname: currentVendorProfile.support_name,
+    from: currentVendorProfile.support_email,
     subject: currentVendorProfile.signup_user_verify_email_subject,
     text: currentVendorProfile.signup_user_verify_email_text.join('\n')
       .replace('{{vendorUrl}}', currentVendorProfile.vendorUrl)
@@ -99,6 +101,8 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
 
   var mailOptions = {
     to: user.email,
+    fromname: currentVendorProfile.support_name,
+    from: currentVendorProfile.support_email,
     subject: currentVendorProfile.signup_user_verify_email_subject,
     html: currentVendorProfile.signup_user_verify_email_html.toString()
         .replace('{{firstName}}', user.firstname)
@@ -321,6 +325,8 @@ exports.signup = function(req, reply) {
 
         var mailOptions = {
             to: _newUser.email,
+            fromname: currentVendorProfile.support_name,
+            from: currentVendorProfile.support_email,
             subject: currentVendorProfile.signup_user_verify_email_subject,
             html: currentVendorProfile.signup_user_verify_email_html.toString()
                 .replace('{{firstName}}', _newUser.firstname)
