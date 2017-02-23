@@ -66,6 +66,7 @@ exports.getAccounts = function getAccounts(request, reply) {
 };
 
 exports.createAccount = function(request, reply) {
+  var vendorProfiles = config.get('vendor_profiles');
   var newAccount = request.payload;
   newAccount.createdBy = utils.generateCreatedByField(request);
 
@@ -77,6 +78,12 @@ exports.createAccount = function(request, reply) {
   if (request.auth.credentials.user_type === 'apikey') {
     return reply(boom.badRequest('Cannot create account with API key'));
   }
+
+
+  if (newAccount.vendor_profile && !vendorProfiles[newAccount.vendor_profile]) {
+    return reply(boom.badRequest('Vendor profile not found'));
+  }
+
 
   if (newAccount.vendor_profile && request.auth.credentials.role !== 'revadmin' &&
     newAccount.vendor_profile !== request.auth.credentials.vendor_profile) {
