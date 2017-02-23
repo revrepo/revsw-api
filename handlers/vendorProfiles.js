@@ -34,6 +34,9 @@ var renderJSON = require('../lib/renderJSON');
 var publicRecordFields = require('../lib/publicRecordFields');
 var logger = require('revsw-logger')(config.log_config);
 
+var Account = require('../models/Account');
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+
 exports.getVendorProfiles = function getAccounts(request, reply) {
     var vendorProfilesConfig = config.get('vendor_profiles');
     var names = [];
@@ -76,4 +79,39 @@ exports.getVendorProfileByName = function getAccounts(request, reply) {
   result = publicRecordFields.handle(result, 'vendorProfiles');
 
   renderJSON(request, reply, null, result);
+};
+
+exports.updateAccountVendor = function getAccounts(request, reply) {
+  var account_id = request.params.account_id;
+  var vendor_profile = request.payload.vendor_profile;
+
+  accounts.get({
+    _id: account_id
+  }, function(error, account) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
+    }
+
+    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+
+    var updateParams = {
+      account_id: account_id,
+      vendor_profile: vendor_profile
+    };
+
+    accounts.update(updateParams, function(error, result) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to update the account', error));
+      }
+
+      var statusResponse = {
+        statusCode: 200,
+        message: 'Successfully updated the account vendor'
+      };
+
+      renderJSON(request, reply, error, statusResponse);
+    });
+  });
 };
