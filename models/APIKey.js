@@ -88,8 +88,8 @@ APIKey.prototype = {
     var options  = {};
     var filter_ = request.query.filters;
     if(!!filter_){
-      if(!!filter_.accountId){
-        options.account_id = {$regex: filter_.accountId, $options: 'i'};
+      if(!!filter_.account_id){
+        options.account_id = {$regex: filter_.account_id, $options: 'i'};
       }
     }
     this.model.find(options, function (err, api_keys) {

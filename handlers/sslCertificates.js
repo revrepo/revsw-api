@@ -95,9 +95,9 @@ exports.listSSLCertificates = function(request, reply) {
         }
       }
       // DOTO: ??? make refactoring - send filter to CDS ???
-      if(!!filters_ && !!filters_.accountId){
+      if(!!filters_ && !!filters_.account_id){
         response = _.filter(response,function(item){
-          return item.account_id === filters_.accountId;
+          return item.account_id === filters_.account_id;
         });
       }
       renderJSON(request, reply, err, response);

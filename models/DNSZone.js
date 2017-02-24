@@ -74,8 +74,8 @@ DNSZone.prototype = {
     } else {
       var filter_ = where.filters;
       if(!!filter_){
-        if(!!filter_.accountId){
-          options.account_id = {$regex: filter_.accountId, $options: 'i'};
+        if(!!filter_.account_id){
+          options.account_id = {$regex: filter_.account_id, $options: 'i'};
         }
       }
     }

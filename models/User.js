@@ -293,8 +293,8 @@ User.prototype = {
     var options = {};
     if(!!request.query && !!request.query.filters){
       var filter_ = request.query.filters;
-      if(!!filter_.accountId){
-         options.companyId = {$regex: filter_.accountId, $options: 'i'};// /.*filter_.accountId.*/;
+      if(!!filter_.account_id){
+         options.companyId = {$regex: filter_.account_id, $options: 'i'};
       }
      }
     this.model.find(options, function (err, users) {
