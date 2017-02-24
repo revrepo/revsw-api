@@ -37,6 +37,14 @@ module.exports = [
       handler: logShippingJobHandlers.listLogShippingJobs,
       description: 'List configured log shipping jobs',
       tags: ['api'],
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            accountId: Joi.string().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
