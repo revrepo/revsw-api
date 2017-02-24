@@ -114,7 +114,7 @@ exports.getDomainConfigStatus = function(request, reply) {
 
 
 exports.getDomainConfigs = function(request, reply) {
-
+  var filters_ = request.query.filters;
   cdsRequest({
     url: config.get('cds_url') + '/v1/domain_configs',
     headers: authHeader
@@ -134,6 +134,12 @@ exports.getDomainConfigs = function(request, reply) {
         if (utils.checkUserAccessPermissionToDomain(request, response_json[i])) {
           response.push(response_json[i]);
         }
+      }
+      // TODO: ??? make refactoring - send filter to CDS ???
+      if(!!filters_ && !!filters_.accountId){
+        response = _.filter(response,function(item){
+          return item.account_id === filters_.accountId;
+        });
       }
       renderJSON(request, reply, err, response);
     }
