@@ -93,7 +93,7 @@ var sendStatusReport = function (request, reply, error, statusCode, message, obj
 };
 
 exports.listSSLNames = function (request, reply) {
-
+  var filters_ = request.query.filters;
   sslNames.list(function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve from the DB a list of SSL names', error));
@@ -106,7 +106,12 @@ exports.listSSLNames = function (request, reply) {
         response2.push(generateVerificationNames(response[i]));
       }
     }
-
+    // NOTE: filter from UI
+    if(!!filters_ && !!filters_.account_id){
+        response2 = _.filter(response2,function(item){
+          return item.account_id === filters_.account_id;
+        });
+    }
     renderJSON(request, reply, error, response2);
   });
 
