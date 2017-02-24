@@ -29,7 +29,7 @@ describe('Clean up', function () {
     config.get('api.users.reseller'),
     config.get('api.users.admin')
   ];
-  var namePattern = /Test/;
+  var namePattern = /[0-9]{13}/;
 
   describe('Log Shipping Jobs resource', function () {
 
