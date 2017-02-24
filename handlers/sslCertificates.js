@@ -74,7 +74,7 @@ exports.getSSLCertificateStatus = function(request, reply) {
 
 
 exports.listSSLCertificates = function(request, reply) {
-
+  var filters_ = request.query.filters;
   cds_request( { url: config.get('cds_url') + '/v1/ssl_certs',
     headers: authHeader
   }, function (err, res, body) {
@@ -93,6 +93,12 @@ exports.listSSLCertificates = function(request, reply) {
         if (utils.checkUserAccessPermissionToSSLCertificate(request,response_json[i])) {
           response.push(publicRecordFields.handle(response_json[i], 'sslCertificates'));
         }
+      }
+      // DOTO: ??? make refactoring - send filter to CDS ???
+      if(!!filters_ && !!filters_.accountId){
+        response = _.filter(response,function(item){
+          return item.account_id === filters_.accountId;
+        });
       }
       renderJSON(request, reply, err, response);
     }
@@ -240,11 +246,11 @@ exports.deleteSSLCertificate = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL certificate ID ' + sslCertId));
     }
-    
+
     if (!result || !utils.checkUserAccessPermissionToSSLCertificate(request,result)) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
-  
+
     domainConfigs.query( { 'ssl_cert_id': sslCertId, deleted: false }, function(error,res) {
       if (error) {
         return reply(boom.badImplementation('Failed to validate that certificate ' + sslCertId + ' is not in use by a domain configuration'));
@@ -256,7 +262,7 @@ exports.deleteSSLCertificate = function(request, reply) {
       var deleted_by = utils.generateCreatedByField(request);
 
       logger.info('Calling CDS to delete SSL certificate ID ' + sslCertId);
-  
+
       cds_request( { url: config.get('cds_url') + '/v1/ssl_certs/' + sslCertId + '?deleted_by="' + deleted_by + '"',
         method: 'DELETE',
         headers: authHeader,
