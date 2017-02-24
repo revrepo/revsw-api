@@ -32,8 +32,10 @@ var apps               = new App(mongoose, mongoConnection.getConnectionPortal()
 var logger             = require('revsw-logger')(config.log_config);
 var utils              = require('../lib/utilities.js');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
+var _ = require('lodash');
 
 exports.getApps = function(request, reply) {
+  var filters_ = request.query.filters;
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
@@ -50,6 +52,12 @@ exports.getApps = function(request, reply) {
         listOfApps = response_json.filter(function(app) {
           return utils.checkUserAccessPermissionToApps(request, app);
         });
+      }
+      // TODO: ??? make refactoring - send filter then call CDS
+      if(!!filters_ && !!filters_.accountId){
+          listOfApps = _.filter(listOfApps,function(item){
+            return item.account_id === filters_.accountId;
+          });
       }
       renderJSON(request, reply, err, listOfApps);
     } else {

@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -37,6 +37,14 @@ module.exports = [
       handler: app.getApps,
       description: 'Get a list of currently registered mobile applications',
       tags: ['api'],
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            accountId: Joi.string().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
