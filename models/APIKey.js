@@ -85,7 +85,14 @@ APIKey.prototype = {
   },
 
   list: function (request, callback) {
-    this.model.find(function (err, api_keys) {
+    var options  = {};
+    var filter_ = request.query.filters;
+    if(!!filter_){
+      if(!!filter_.accountId){
+        options.account_id = {$regex: filter_.accountId, $options: 'i'};
+      }
+    }
+    this.model.find(options, function (err, api_keys) {
       if (api_keys) {
         // TODO need to move the accesss control stuff out of the database model
         var keys = utils.clone(api_keys);

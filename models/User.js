@@ -290,7 +290,14 @@ User.prototype = {
 
     // console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
 
-    this.model.find(function (err, users) {
+    var options = {};
+    if(!!request.query && !!request.query.filters){
+      var filter_ = request.query.filters;
+      if(!!filter_.accountId){
+         options.companyId = {$regex: filter_.accountId, $options: 'i'};// /.*filter_.accountId.*/;
+      }
+     }
+    this.model.find(options, function (err, users) {
       if (users) {
 
         users = utils.clone(users);
