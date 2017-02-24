@@ -27,7 +27,9 @@ describe('Clean up', function () {
   var users = [
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller'),
-    config.get('api.users.admin')
+    config.get('api.users.secondReseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
   ];
   var namePattern = /[0-9]{13}/;
 
