@@ -17,12 +17,8 @@
  */
 
 var faker = require('faker');
-var Joi = require('joi');
-var joiGenerator = new require('joi-generate').Generator();
 
-var APIRoutesProvider = require('./../../../common/providers/APIRoutesProvider');
-
-var apiKeyRouteConfig = APIRoutesProvider.get('apiKeys');
+var APIKeysDataDrivenHelper = require('./../../helpers/data_driven/apiKeys');
 
 // # API Keys Data Provider object
 //
@@ -31,19 +27,12 @@ var apiKeyRouteConfig = APIRoutesProvider.get('apiKeys');
 //
 // From there, you can modify and get bogus, invalid or other type of data
 // depending on your test needs.
-var APIKeyDataProvider = {
+var APIKeysDataProvider = {
 
   prefix: 'TEST_API_KEY_',
 
-  generate: function (type, callback) {
-    var validation = apiKeyRouteConfig.getValidation('PUT', '/v1/api_keys/{key_id}');
-    joiGenerator.generateAll(Joi.object(validation.payload), function (err, data) {
-      callback(err, data[type]);
-    });
-  },
-
   /**
-   * ### APIKeyDataProvider.generateOne()
+   * ### APIKeysDataProvider.generateOne()
    *
    * Generates valid data that represents a API Key and the REST API
    * end points accept.
@@ -62,7 +51,7 @@ var APIKeyDataProvider = {
   },
 
   /**
-   * ### APIKeyDataProvider.generateCompleteOne()
+   * ### APIKeysDataProvider.generateCompleteOne()
    *
    * Generates valid data that represents a complete API Key and the REST API
    * end points accept.
@@ -106,7 +95,9 @@ var APIKeyDataProvider = {
       read_only_status: true,
       active: true
     };
-  }
+  },
+
+  DataDrivenHelper: APIKeysDataDrivenHelper
 };
 
-module.exports = APIKeyDataProvider;
+module.exports = APIKeysDataProvider;
