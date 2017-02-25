@@ -17,7 +17,7 @@
  */
 
 var ROUTES_DIR = './../../../../routes/';
-var ROUTES_IDS = require('./../../../../config/routes/ids.json');
+var ROUTES_IDS = require('./../../../../config/routes/ids.js');
 
 var APIRoutesProvider = {
 
@@ -27,14 +27,16 @@ var APIRoutesProvider = {
    * @param name, of the route/resrouce
    *
    * @returns {Object}, route config info object
+   *
+   * TODO: Apply Factory or Singleton pattern to return the providers
    */
   get: function (name) {
 
-    var routes = {};
-    routes[ROUTES_IDS.API_KEYS.BASE_PATH] = 'apiKeys';
+    var routesFileNames = {};
+    routesFileNames[ROUTES_IDS.API_KEYS.BASE_PATH] = 'apiKeys';
 
     // Importing route config from API project.
-    var routes = require(ROUTES_DIR + routes[name]);
+    var routes = require(ROUTES_DIR + routesFileNames[name]);
 
     return {
 
@@ -59,7 +61,7 @@ var APIRoutesProvider = {
   },
 
   getIds: function () {
-    return require(ROUTES_DIR + 'ids.json');
+    return require(ROUTES_DIR + 'ids.js');
   }
 };
 
