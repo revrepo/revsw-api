@@ -16,6 +16,15 @@ module.exports = {
         ADMIN: 'Admin',
         USER: 'Normal User'
       }
+    },
+    TEST_DATA_TYPES: {
+      VALID: 'valid',
+      INVALID: 'invalid',
+      NIL: 'nil',
+      EMPTY: 'empty',
+      LONG: 'long',
+      SHORT: 'short',
+      BOGUS: 'bogus'
     }
   }
 };
