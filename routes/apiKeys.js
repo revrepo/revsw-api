@@ -24,7 +24,7 @@ var Joi = require('joi');
 
 var apiKey = require('../handlers/apiKeys');
 var routeModels = require('../lib/routeModels');
-var ROUTE_IDS = require('./../config/routes/ids.json');
+var ROUTE_IDS = require('./../config/routes/ids.js');
 
 module.exports = [
   {

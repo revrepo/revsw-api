@@ -1,4 +1,4 @@
-{
+module.exports = {
   "API_KEYS": {
     "BASE_PATH": "apiKeys",
     "GET": {
