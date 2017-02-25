@@ -42,6 +42,14 @@ module.exports = [{
           responseMessages: routeModels.standardHTTPErrors
         }
       },
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            account_id: Joi.objectId().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       response: {
         schema: routeModels.listOfDomainsModel
       }
@@ -130,7 +138,7 @@ module.exports = [{
   }, {
     method: 'GET',
     path: '/v1/domain_configs/{domain_id}/check_integration/{check_type}', // TODO please move "check_type" from path to query
-    // string parameter and make it optional. 
+    // string parameter and make it optional.
     config: {
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']

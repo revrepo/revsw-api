@@ -73,5 +73,16 @@
   "statuspage":{
     "page_id": "2pjglhj418gn",
     "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
+  },
+
+  "vendor_profiles": {
+    "revapm": {
+      "vendorUrl": "https://portal.revapm.net",
+      "password_reset_portal_domain": "portal.revapm.net"
+    },
+    "nuubit": {
+      "vendorUrl": "https://portal.nuubit.net",
+      "password_reset_portal_domain": "portal.nuubit.net"
+    }
   }
 }

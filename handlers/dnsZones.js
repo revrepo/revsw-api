@@ -66,8 +66,9 @@ var CHECK_STATUS_CODES = {
 
 //'DNS service unable to process your request now, try again later'
 exports.getDnsZones = function(request, reply) {
+  var filters_ = request.query.filters;
   return Promise.try(function() {
-      return dnsZones.listAsync();
+      return dnsZones.listAsync({filters:filters_});
     })
     .then(function(zones) {
       var responseZones = [];

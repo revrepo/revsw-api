@@ -103,7 +103,7 @@ describe('Domain configs functional test', function () {
     it('should return staging and global status as `In Progress` right after ' +
       'create a domain config',
       function (done) {
-        var counter = 180000; // 3 mins
+        var counter = 300000; // 5 mins
         var interval = 1000;
         var cb = function () {
           if (counter < 0) {
@@ -115,7 +115,7 @@ describe('Domain configs functional test', function () {
             .getOne()
             .expect(200)
             .then(function (response) {
-              if (response.body.staging_status !== 'InProgress') {
+              if (response.body.global_status !== 'InProgress') {
                 setTimeout(cb, interval);
                 return;
               }
@@ -391,7 +391,7 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            var counter = 180000; // 3 mins
+            var counter = 300000; // 5 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {

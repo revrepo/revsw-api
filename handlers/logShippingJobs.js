@@ -71,6 +71,7 @@ exports.getLogShippingJobStatus = function(request, reply) {
 
 
 exports.listLogShippingJobs = function(request, reply) {
+  var filters_ = request.query.filters;
   logShippingJobs.list(function (error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve from the DB a list of log shipping jobs'));
@@ -81,6 +82,12 @@ exports.listLogShippingJobs = function(request, reply) {
       if (utils.checkUserAccessPermissionToLogShippingJob(request,result[i])) {
         response.push(result[i]);
       }
+    }
+    // TODO: ??? make refactoring - apply filter like option in logShippingJobs.list ???
+    if(!!filters_ && !!filters_.account_id){
+      response = _.filter(response,function(item){
+        return item.account_id === filters_.account_id;
+      });
     }
     var response2 = publicRecordFields.handle(response, 'logShippingJobs');
     renderJSON(request, reply, error, response2);

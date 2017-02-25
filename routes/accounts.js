@@ -71,6 +71,7 @@ module.exports = [{
         payload: {
           companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
             .trim().description('Company name of newly registered customer account'),
+          vendor_profile: Joi.string().max(20).allow('').description('Vendor profile name'),
           comment: Joi.string().max(300).trim().allow('').description('Free-text comment about the company')
         }
       },
@@ -133,6 +134,8 @@ module.exports = [{
         payload: {
           companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
             .trim().description('Company name of newly registered customer account'),
+          vendor_profile: Joi.string().allow('').max(20)
+            .description('Vendor profile name'),
           comment: Joi.string().allow('').max(300).trim()
             .description('Free-text comment about the company'),
           first_name: Joi.string().optional().min(1).max(150).trim()

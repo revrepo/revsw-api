@@ -46,5 +46,69 @@ module.exports = [{
         schema: routeModels.listOfVendorProfileNamesModel
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/vendor_profiles/{vendorUrl}',
+    config: {
+      auth: false,
+      handler: vendorProfile.getVendorProfile,
+      description: 'Get a vendor profile by customer portal URL',
+      notes: 'Use this function to get a vendor profile by customer portal URL',
+      validate: {
+        params: {
+          vendorUrl: Joi.string().required().description('Customer Portal URL')
+        }
+      },
+      response: {
+        schema: routeModels.vendorProfileConfig
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/vendor_profiles/name/{vendor}',
+    config: {
+      auth: {
+        scope: ['admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: vendorProfile.getVendorProfileByName,
+      description: 'Get a vendor profile by name',
+      notes: 'Use this function to get a vendor profile by name',
+      validate: {
+        params: {
+          vendor: Joi.string().required().description('Vendor name')
+        }
+      },
+      response: {
+        schema: routeModels.vendorProfileConfig
+      }
+    }
+  },
+
+  {
+    method: 'PUT',
+    path: '/v1/vendor_profiles/{account_id}',
+    config: {
+      auth: {
+        scope: ['revadmin']
+      },
+      handler: vendorProfile.updateAccountVendor,
+      description: 'Update vendor for account',
+      notes: 'Use this function to update vendor for account',
+      validate: {
+        params: {
+          account_id: Joi.string().required().description('Account ID')
+        },
+        payload: {
+          vendor_profile: Joi.string().required().description('Vendor profile')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
   }
 ];

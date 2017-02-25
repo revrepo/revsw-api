@@ -38,6 +38,14 @@ module.exports = [
       description: 'Get a list of DNS zones',
       notes: 'Use this function to get a list of DNS zones registered for your company account',
       tags: ['api'],
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            account_id: Joi.objectId().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

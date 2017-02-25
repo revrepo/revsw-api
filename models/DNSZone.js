@@ -67,8 +67,19 @@ DNSZone.prototype = {
       callback(err, doc);
     });
   },
-  list: function(callback) {
-    this.model.find({}, function(err, dnsZones) {
+  list: function(where,callback) {
+    var options ={};
+    if( typeof(where) === 'function'){
+      callback = where;
+    } else {
+      var filter_ = where.filters;
+      if(!!filter_){
+        if(!!filter_.account_id){
+          options.account_id = {$regex: filter_.account_id, $options: 'i'};
+        }
+      }
+    }
+    this.model.find(options, function(err, dnsZones) {
       if (dnsZones) {
         dnsZones = utils.clone(dnsZones).map(function(dnsZone) {
           return {

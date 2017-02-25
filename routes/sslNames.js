@@ -37,6 +37,14 @@ module.exports = [
       handler: sslNameHandlers.listSSLNames,
       description: 'Get a list of configured SSL names',
       tags: ['api'],
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            account_id: Joi.objectId().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

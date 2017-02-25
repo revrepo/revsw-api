@@ -96,7 +96,7 @@ describe('Negative check', function () {
         'with `non-existing` host server location id.',
         function (done) {
           var nonExistingLocationId = 'aaaafaaaafaaaafaaaaf1234';
-          var expMsg = 'Specified Rev first mile location ID cannot be found';
+          var expMsg = 'Specified first mile location ID cannot be found';
           API.helpers
             .authenticateUser(reseller)
             .then(function () {

@@ -37,6 +37,14 @@ module.exports = [
       handler: sslCertificateHandlers.listSSLCertificates,
       description: 'List all configured SSL certificates',
       tags: ['api'],
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            account_id: Joi.objectId().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

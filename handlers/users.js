@@ -43,13 +43,14 @@ var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getCon
 var usersService = require('../services/users.js');
 
 exports.getUsers = function getUsers(request, reply) {
+  var filters_ = request.query.filters;
   // TODO: move the user list filtering from the user DB model to this function
   users.list(request, function (error, listOfUsers) {
     if (error || !listOfUsers) {
       return reply(boom.badImplementation('Failed to get a list of users'));
     }
 
-    if (listOfUsers.length === 0) {
+    if (listOfUsers.length === 0 && !filters_) {
       return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
     }
 
@@ -154,6 +155,7 @@ exports.getMyUser = function (request, reply) {
       }
       if (result) {
         result = publicRecordFields.handle(result, 'user');
+        result.vendor = request.auth.credentials.vendor_profile;
 
         renderJSON(request, reply, error, result);
       } else {
@@ -390,12 +392,14 @@ exports.deleteUser = function (request, reply) {
 exports.init2fa = function (request, reply) {
   var user_id = request.auth.credentials.user_id;
   var email_ = request.auth.credentials.email;
+  var vendorProfiles = config.get('vendor_profiles');
+  var currentVendor = vendorProfiles[request.auth.credentials.vendor_profile] || vendorProfiles[config.get('default_system_vendor_profile')];
   users.get({
     _id: user_id
   }, function (error, user) {
     if (user) {
       var account_id = user.companyId[0];
-      var name =  'RevAPM:'+email_;
+      var name = currentVendor.companyNameShort + ':' + email_;
       var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true, name: name});
       user.two_factor_auth_secret_base32 = secretKey.base32;
       delete user.password;

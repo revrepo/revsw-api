@@ -44,6 +44,14 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
+      validate:{
+        query: {
+          filters: Joi.object().keys({
+            account_id: Joi.objectId().optional().trim().description('ID of a company')
+          })
+         .optional().description('Filters parameters')
+        }
+      },
       response: {
         schema: routeModels.listOfAPIKeysModel
       }

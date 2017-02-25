@@ -513,7 +513,7 @@ exports.getAggFlowReport = function( request, reply ) {
         field = 'requests.destination';
         keys = {
           'origin': 'Origin',
-          'rev_edge': 'RevAPM'
+          'rev_edge': 'CDN'
         };
         break;
       case 'transport':
@@ -1257,7 +1257,7 @@ exports.getDistributions = function( request, reply ) {
         field = 'requests.destination';
         keys = {
           'origin': 'Origin',
-          'rev_edge': 'RevAPM'
+          'rev_edge': 'CDN'
         };
         break;
       case 'transport':

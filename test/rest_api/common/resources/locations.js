@@ -48,7 +48,7 @@ var resourceConfig = {
       name: 'billingZones',
       path: '/billing_zones',
       methods: [
-        Methods.READ_ONE
+        Methods.READ_ALL
       ]
     }
   ]
