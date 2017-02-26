@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+var Promise = require('bluebird');
+
 // # Utils object
 //
 // Defines some common methods to use in any test script.
@@ -137,6 +139,11 @@ var Utils = {
     return prop[path[i]];
   },
 
+  /**
+   * Removes specific value from Json
+   * @param {Object} json
+   * @param pathString
+   */
   removeValueByPath: function (obj, pathString) {
     var prop = obj;
     var path = pathString.split('.');
@@ -147,6 +154,16 @@ var Utils = {
       }
     }
     delete prop[path[i]];
+  },
+
+  /**
+   * Returns the last key from the given path
+   * @param path
+   * @returns {String} key
+   */
+  getLastKeyFromPath: function (path) {
+    var keys = path.split('.');
+    return keys[keys.length - 1];
   },
 
   /**
@@ -247,6 +264,24 @@ var Utils = {
       White: 97
     };
     return '\u001b[' + colors[color] + 'm' + str + '\u001b[0m';
+  },
+
+  /**
+   * Iterates the set of data and run function [fn] for each of them. The, runs the
+   * callback [cb]
+   * @param {Array} set of data
+   * @param {Function} fn
+   * @param {Function} cb
+   */
+  forEach: function (set, fn, cb) {
+    Promise
+      .each(set, fn)
+      .then(function () {
+        cb();
+      })
+      .catch(function () {
+        cb(new Error('Cannot create api-keys'));
+      });
   }
 };
 
