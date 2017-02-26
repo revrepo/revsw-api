@@ -93,8 +93,8 @@
   "usage_report_regen_age_ms": 600000,
 
   "sendgrid_api_key": "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",
-  "notify_developers_by_email_about_uncaught_exceptions": "leo.fcx@gmail.com",
-  "notify_developers_by_email_about_bad_implementation": "leo.fcx@gmail.com",
+  "notify_developers_by_email_about_uncaught_exceptions": "eng@revsw.com",
+  "notify_developers_by_email_about_bad_implementation": "eng@revsw.com",
 
   "purge_job_environments": ["staging_only", "global_only", "global_and_staging"],
   "purge_job_default_environment": "global_and_staging",
