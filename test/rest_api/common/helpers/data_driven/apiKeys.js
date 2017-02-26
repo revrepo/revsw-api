@@ -28,7 +28,8 @@ var APIKeysDataDrivenHelper = {
   generateToAdd: function (type, callback) {
     var validation = routeConfig.getValidation(ROUTE_IDS.API_KEYS.POST.NEW);
     joiGen.generateAll(Joi.object(validation.payload), function (err, data) {
-      callback(err, data[type]);
+      var dataSet = data[type] || [];
+      callback(err, dataSet);
     });
   },
 

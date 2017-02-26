@@ -35,8 +35,8 @@ var APIKeysHelper = {
     var apiKey = APIKeyDP.generateOne(account.id);
     return APIKeysResource
       .createOne(apiKey)
-      .then(function(respose) {
-        apiKey.id = respose.body.object_id;
+      .then(function(response) {
+        apiKey.id = response.body.object_id;
         return apiKey;
       })
       .catch(function(error) {
@@ -59,8 +59,8 @@ var APIKeysHelper = {
         var apiKey = APIKeyDP.generateOne(account.id);
         return APIKeysResource
           .createOne(apiKey)
-          .then(function (respose) {
-            apiKey.id = respose.body.object_id;
+          .then(function (response) {
+            apiKey.id = response.body.object_id;
             return apiKey;
           })
           .catch(function (error) {
