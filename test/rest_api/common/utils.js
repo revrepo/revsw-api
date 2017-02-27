@@ -280,7 +280,7 @@ var Utils = {
         cb();
       })
       .catch(function () {
-        cb(new Error('Cannot create api-keys'));
+        cb(new Error('Error triggered while running cb for item.'));
       });
   }
 };
