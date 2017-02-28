@@ -209,7 +209,8 @@
       "terms_of_service_link": "https://www.revapm.com/tos/",
       "acceptable_use_policy_link": "https://www.revapm.com/aup/",
       "privacy_policy_link": "https://www.revapm.com/privacy/",
-      "zendesk_support_site": "nuubit.zendesk.com"
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright RevAPM 2015-2017"
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -291,7 +292,8 @@
       "terms_of_service_link": "https://www.nuubit.com/tos/",
       "acceptable_use_policy_link": "https://www.nuubit.com/aup/",
       "privacy_policy_link": "https://www.nuubit.com/privacy/",
-      "zendesk_support_site": "nuubit.zendesk.com"
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright nuu:bit, Inc. 2017"
     }
   }
 }
