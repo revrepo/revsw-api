@@ -8,7 +8,7 @@ Build something great!
 This interface will allow you to learn a detailed specification of our customer API
 service and also easily try available functions using your CDN  customer portal account.
 
-For general information about the service please see [CDN Customer API](https://revapm.zendesk.com/hc/en-us/categories/200833373-RevAPM-API)
+For general information about the service please see [CDN Customer API](https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API)
 section on our Help Center site.
 
 

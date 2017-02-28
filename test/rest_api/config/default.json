@@ -17,7 +17,7 @@
       "port": 8000
     },
     "zenDesk": {
-      "url": "https://revapm.zendesk.com"
+      "url": "https://support.nuubit.net"
     },
     "version": "v1",
     "resources": {

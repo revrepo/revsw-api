@@ -16,6 +16,10 @@
  * from Rev Software, Inc.
  */
 
+// TODO: need to figure out why mocha cannot authorize SSL cert deployed
+// on support.nuubit.net
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 var request = require('supertest-as-promised');
 var should = require('should');
 
@@ -40,7 +44,7 @@ describe('Smoke check', function () {
       function (done) {
         request = request(zenDeskUrl);
         request
-          .get('/hc/en-us/categories/200833373-RevAPM-API')
+          .get('/hc/en-us/categories/200833373-nuu-bit-API')
           .expect(200)
           .end(function (err, res) {
             if (err) {
