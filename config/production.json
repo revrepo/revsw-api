@@ -78,11 +78,15 @@
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "https://portal.revapm.net",
-      "password_reset_portal_domain": "portal.revapm.net"
+      "password_reset_portal_domain": "portal.revapm.net",
+      "googleAnalyticsAccount": "UA-68856309-3",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7"
     },
     "nuubit": {
       "vendorUrl": "https://portal.nuubit.net",
-      "password_reset_portal_domain": "portal.nuubit.net"
+      "password_reset_portal_domain": "portal.nuubit.net",
+      "googleAnalyticsAccount": "UA-92590791-3",
+      "apiGoogleAnalyticsAccount": "UA-92590791-4"
     }
   }
 }
