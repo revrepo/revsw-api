@@ -131,7 +131,7 @@
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "http://localhost:3000",
-      "apiUrl": "https://api.revapm.net",
+      "apiUrl": "https://localhost:8001",
       "companyWebsiteURL": "https://www.revapm.com",
       "contactSalesLink": "https://www.revapm.com/contact-us/",
       "contactPhone": "+1 (408) 477-1738",
@@ -210,11 +210,15 @@
       "acceptable_use_policy_link": "https://www.revapm.com/aup/",
       "privacy_policy_link": "https://www.revapm.com/privacy/",
       "zendesk_support_site": "nuubit.zendesk.com",
-      "copyright": "Copyright RevAPM 2015-2017"
+      "copyright": "Copyright RevAPM 2015-2017",
+      "googleAnalyticsAccount": "UA-68856309-2",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "swaggerUIPageTitle": "RevAPM Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API"
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
-      "apiUrl": "https://api.nuubit.net",
+      "apiUrl": "https://localhost:8000",
       "companyWebsiteURL": "https://www.nuubit.com",
       "contactSalesLink": "https://www.nuubit.com/contact-us/",
       "contactPhone": "+1 (408) 477-1738",
@@ -293,7 +297,11 @@
       "acceptable_use_policy_link": "https://www.nuubit.com/aup/",
       "privacy_policy_link": "https://www.nuubit.com/privacy/",
       "zendesk_support_site": "nuubit.zendesk.com",
-      "copyright": "Copyright nuu:bit, Inc. 2017"
+      "copyright": "Copyright nuu:bit, Inc. 2017",
+      "googleAnalyticsAccount": "UA-92590791-3",
+      "apiGoogleAnalyticsAccount": "UA-92590791-4",
+      "swaggerUIPageTitle": "nuubit Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API"
     }
   }
 }
