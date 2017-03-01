@@ -75,6 +75,7 @@ exports.webhookHandler = function(request, reply) {
    * @return {Promise}
    */
   var onSignupSuccess = function(subscription) {
+    var accountVendorProfile = currentVendorProfile;
     return new Promise(function(resolve, reject) {
       var _subscription = subscription;
       var _customer = _subscription.customer;
@@ -86,7 +87,7 @@ exports.webhookHandler = function(request, reply) {
         })
         .then(function updateAccount(account) {
           _account = account;
-          currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
+          accountVendorProfile = vendorProfiles[_account.vendor_profile] || currentVendorProfile;
 
           return chargify.getBillingPortalLinkAsync(_customer.id)
             .then(function(link) {
@@ -116,24 +117,25 @@ exports.webhookHandler = function(request, reply) {
           return users.getValidationAsync(account_admin);
         })
         .then(function verifyAdminUser(adminUser) {
-          if (currentVendorProfile.enable_simplified_signup_process) {
-            // NOTE: if enable_simplified_signup_process==true - no auto verify user
+          if (accountVendorProfile.enable_simplified_signup_process) {
+             // NOTE: if enable_simplified_signup_process==true - no auto verify user
             // TODO: send email admin ???
             return Promise.resolve();
           } else {
+            // NOTE: user registred with full CC
             adminUser.validation.verified = true;
             return users.updateValidationAsync(adminUser)
               .then(
                 function sendWelcomeEmail() {
-                  var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+                  var bccEmail = accountVendorProfile.notify_admin_by_email_on_user_self_registration;
                   var mailOptions = {
                     to: adminUser.email,
-                    fromname: currentVendorProfile.support_name,
-                    subject: currentVendorProfile.chargify_user_welcome_email_subject,
-                    text: currentVendorProfile.chargify_user_welcome_email_text.join('\n')
+                    fromname: accountVendorProfile.support_name,
+                    subject: accountVendorProfile.chargify_user_welcome_email_subject,
+                    text: accountVendorProfile.chargify_user_welcome_email_text.join('\n')
                         .replace('{{firstname}}', adminUser.firstname)
-                        .replace('{{portalUrl}}', currentVendorProfile.vendorUrl)
-                        .replace('{{supportEmail}}', currentVendorProfile.support_email)
+                        .replace('{{portalUrl}}', accountVendorProfile.vendorUrl)
+                        .replace('{{supportEmail}}', accountVendorProfile.support_email)
                   };
 
                   if (bccEmail !== '') {
