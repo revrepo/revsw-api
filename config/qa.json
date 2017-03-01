@@ -35,10 +35,12 @@
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "https://testsjc20-portal01.revsw.net",
+      "apiUrl": "https://testsjc20-api01.revsw.net",
       "password_reset_portal_domain": "testsjc20-portal01.revsw.net"
     },
     "nuubit": {
       "vendorUrl": "https://testsjc20-portal-nuubit.revsw.net",
+      "apiUrl": "https://testsjc20-api-nuubit.revsw.net",
       "password_reset_portal_domain": "testsjc20-portal-nuubit.revsw.net"
     }
   }

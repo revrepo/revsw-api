@@ -58,7 +58,7 @@ exports.getVendorProfile = function getAccounts(request, reply) {
   for(var vendorKey in vendorProfiles) {
     var vendorConfig = vendorProfiles[vendorKey];
 
-    if (vendorConfig.vendorUrl === vendorUrl) {
+    if (vendorConfig.vendorUrl === vendorUrl || vendorConfig.apiUrl === vendorUrl) {
       result = vendorConfig;
       vendorName = vendorKey;
       continue;

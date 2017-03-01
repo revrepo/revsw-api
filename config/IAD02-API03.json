@@ -10,10 +10,12 @@
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "https://portal-staging.revapm.net",
+      "apiUrl": "https://api-staging.revapm.net",
       "password_reset_portal_domain": "portal-staging.revapm.net"
     },
     "nuubit": {
       "vendorUrl": "https://portal-staging.nuubit.net",
+      "apiUrl": "https://api-staging.nuubit.net",
       "password_reset_portal_domain": "portal-staging.nuubit.net"
     }
   }
