@@ -690,7 +690,8 @@ exports.resendRegistrationEmail = function(req, reply) {
       })
       .then(function(billing_plan) {
         _billing_plan = billing_plan;
-        vendorProfileForRegistrationEmail = vendorProfileList[accounts.vendor_profile];
+
+        vendorProfileForRegistrationEmail = vendorProfileList[_account.vendor_profile];
         return new Promise(function(resolve, reject) {
           // NOTE: Choose two different type registration
           if (vendorProfileForRegistrationEmail.enable_simplified_signup_process) {
