@@ -53,7 +53,8 @@ module.exports = [
           state: Joi.string().min(1).max(150).trim().description('State').required(),
           city: Joi.string().min(1).max(150).trim().description('City').required(),
           zipcode: Joi.string().min(1).max(30).trim().description('Zip Code').required(),
-          billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required()
+          billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required(),
+          vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name')
         }
       },
       response: {
@@ -89,7 +90,8 @@ module.exports = [
           // state: Joi.string().min(1).max(150).trim().description('State').required(),
           // city: Joi.string().min(1).max(150).trim().description('City').required(),
           // zipcode: Joi.string().min(1).max(30).trim().description('Zip Code').required(),
-          billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required()
+          billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required(),
+          vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name')
         }
       },
       response: {

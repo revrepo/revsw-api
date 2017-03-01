@@ -54,7 +54,8 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var defaultSignupVendorProfile = config.get('default_signup_vendor_profile');
-var currentVendorProfile = config.get('vendor_profiles')[defaultSignupVendorProfile];
+var vendorProfileList = config.get('vendor_profiles');
+var currentVendorProfile = vendorProfileList[defaultSignupVendorProfile];
 
 Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
@@ -65,7 +66,9 @@ Promise.promisifyAll(chargifyCustomer);
 Promise.promisifyAll(usersService);
 Promise.promisifyAll(accountsService,{multiArgs: true});
 
-var sendVerifyToken = function(user, token, cb) {
+var sendVerifyToken = function(user, account, token, cb) {
+  var vendorSlug = account.vendor_profile;
+  var currentVendorProfile = vendorProfileList[vendorSlug];
   var mailOptions = {
     to: user.email,
     fromname: currentVendorProfile.support_name,
@@ -84,6 +87,9 @@ var sendVerifyToken = function(user, token, cb) {
 };
 
 function sendEmailForRegistration(user, account, billing_plan, cb) {
+  var vendorSlug = account.vendor_profile;
+  var currentVendorProfile = vendorProfileList[vendorSlug];
+
   var _customer_chargify = {
     first_name: user.firstname,
     last_name: user.lastname,
@@ -104,7 +110,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
     fromname: currentVendorProfile.support_name,
     from: currentVendorProfile.support_email,
     subject: currentVendorProfile.signup_user_verify_email_subject,
-    html: currentVendorProfile.signup_user_verify_email_html.toString()
+    html: currentVendorProfile.signup_user_verify_email_html.join('')
         .replace('{{firstName}}', user.firstname)
         .replace('{{hosted_page}}', billing_plan.hosted_page)
         .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
@@ -137,7 +143,8 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
 exports.signup = function(req, reply) {
   var data = req.payload;
   delete data.passwordConfirm;
-
+  var vendorSlug = data.vendor || defaultSignupVendorProfile ;
+  var vendorProfileForRegistration = vendorProfileList[vendorSlug];
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
@@ -146,7 +153,7 @@ exports.signup = function(req, reply) {
     data.company_name = data.first_name + ' ' + data.last_name + '\'s Company';
   }
   // TODO:
-  if (!currentVendorProfile.enable_self_registration) {
+  if (!vendorProfileForRegistration.enable_self_registration) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
   // NOTE: get internal information about Billing Plan by handler name
@@ -228,7 +235,7 @@ exports.signup = function(req, reply) {
           zipcode: data.zipcode
         },
         self_registered: true,
-        vendor_profile: defaultSignupVendorProfile
+        vendor_profile: vendorSlug
       };
       return accountsService.createAccountAsync(newCompany, {});
     })
@@ -239,7 +246,7 @@ exports.signup = function(req, reply) {
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true,
-        vendor_profile: defaultSignupVendorProfile,
+        vendor_profile: vendorSlug,
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
@@ -325,17 +332,17 @@ exports.signup = function(req, reply) {
 
         var mailOptions = {
             to: _newUser.email,
-            fromname: currentVendorProfile.support_name,
-            from: currentVendorProfile.support_email,
-            subject: currentVendorProfile.signup_user_verify_email_subject,
-            html: currentVendorProfile.signup_user_verify_email_html.toString()
+            fromname: vendorProfileForRegistration.support_name,
+            from: vendorProfileForRegistration.support_email,
+            subject: vendorProfileForRegistration.signup_user_verify_email_subject,
+            html: vendorProfileForRegistration.signup_user_verify_email_html.toString()
                 .replace('{{firstName}}', _newUser.firstname)
                 .replace('{{hosted_page}}', _billing_plan.hosted_page)
                 .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
-                .replace('{{supportEmail}}', currentVendorProfile.support_email)
+                .replace('{{supportEmail}}', vendorProfileForRegistration.support_email)
         };
 
-        var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+        var bccEmail = vendorProfileForRegistration.notify_admin_by_email_on_user_self_registration;
         if (bccEmail !== '') {
           mailOptions.bcc = bccEmail;
         }
@@ -351,7 +358,7 @@ exports.signup = function(req, reply) {
     // NOTE:  Send to Rev Ops an Email about new signup process
     .then(function sendRevOpsEmailAboutNewSignup() {
       var remoteIP = utils.getAPIUserRealIP(req);
-      var email = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+      var email = vendorProfileForRegistration.notify_admin_by_email_on_user_self_registration;
       if (email !== '') {
         var mailOptions = {
           to: email,
@@ -398,14 +405,16 @@ exports.signup = function(req, reply) {
  */
 exports.signup2 = function(req, reply) {
   var data = req.payload;
+  var vendorSlug = data.vendor || defaultSignupVendorProfile ;
+  var vendorProfileForRegistration = vendorProfileList[vendorSlug];
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
 
-  if (!currentVendorProfile.enable_self_registration) {
+  if (!vendorProfileForRegistration.enable_self_registration) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
-  if (!currentVendorProfile.enable_simplified_signup_process) {
+  if (!vendorProfileForRegistration.enable_simplified_signup_process) {
     return reply(boom.badRequest('Simple user self-registration is temporary disabled'));
   }
 
@@ -488,7 +497,7 @@ exports.signup2 = function(req, reply) {
           zipcode: data.zipcode || ''
         },
         self_registered: true, //NOTE: Important for self registration account
-        vendor_profile: defaultSignupVendorProfile
+        vendor_profile: vendorSlug
       };
       //    var loggerData = {
       //     user_name: newAccount.createdBy,
@@ -509,7 +518,7 @@ exports.signup2 = function(req, reply) {
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true, // NOTE: Important for self registration user
-        vendor_profile: defaultSignupVendorProfile,
+        vendor_profile: vendorSlug,
         firstname: data.first_name,
         lastname: data.last_name,
         password: data.password,
@@ -589,7 +598,7 @@ exports.signup2 = function(req, reply) {
     //- Send a confirmation link by email
     .then(function sendEmailForVerifySimpleRegistration() {
       return new Promise(function(resolve, reject) {
-        sendVerifyToken(_newUser, _newUser.validation.token, function(err, res) {
+        sendVerifyToken(_newUser, _newAccount, _newUser.validation.token, function(err, res) {
           if (err) {
             logger.error('sendEmailForSelfRegistratedUser:sendVerifyToken:error ' + JSON.stringify(err));
            }
@@ -631,7 +640,8 @@ exports.signup2 = function(req, reply) {
  */
 exports.resendRegistrationEmail = function(req, reply) {
   var email = req.params.email;
-
+  var vendorSlug = defaultSignupVendorProfile ;
+  var vendorProfileForRegistrationEmail = vendorProfileList[vendorSlug];
   users.getValidation({
     email: email
   }, function(err, user) {
@@ -680,12 +690,14 @@ exports.resendRegistrationEmail = function(req, reply) {
       })
       .then(function(billing_plan) {
         _billing_plan = billing_plan;
+
+        vendorProfileForRegistrationEmail = vendorProfileList[_account.vendor_profile];
         return new Promise(function(resolve, reject) {
           // NOTE: Choose two different type registration
-          if (currentVendorProfile.enable_simplified_signup_process) {
+          if (vendorProfileForRegistrationEmail.enable_simplified_signup_process) {
             var token = utils.generateToken();
             user.validation = {
-              expiredAt: Date.now() + currentVendorProfile.user_verify_token_lifetime,
+              expiredAt: Date.now() + vendorProfileForRegistrationEmail.user_verify_token_lifetime,
               token: token
             };
             // NOTE: delete not updated fields
@@ -695,7 +707,7 @@ exports.resendRegistrationEmail = function(req, reply) {
               if (err) {
                 reject(err);
               } else {
-                sendVerifyToken(result, token, function sendVerifyTokenResult(err, data) {
+                sendVerifyToken(result, _account, token, function sendVerifyTokenResult(err, data) {
                   // TODO: send  email to admin?
                   if (err) {
                     logger.error('resendRegistrationEmail::sendVerifyToken:error');
@@ -741,6 +753,7 @@ exports.resendRegistrationEmail = function(req, reply) {
 exports.verify = function(req, reply) {
   var token = req.params.token;
   var remoteIP = utils.getAPIUserRealIP(req);
+  // TODO: Check currentVendorProfile - need add check parameter vendor
   if (!currentVendorProfile.enable_simplified_signup_process) {
     return reply(boom.badRequest('User verification is temporary disabled'));
   }
