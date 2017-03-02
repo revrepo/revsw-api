@@ -335,7 +335,7 @@ exports.signup = function(req, reply) {
             fromname: vendorProfileForRegistration.support_name,
             from: vendorProfileForRegistration.support_email,
             subject: vendorProfileForRegistration.signup_user_verify_email_subject,
-            html: vendorProfileForRegistration.signup_user_verify_email_html.toString()
+            html: vendorProfileForRegistration.signup_user_verify_email_html.join('')
                 .replace('{{firstName}}', _newUser.firstname)
                 .replace('{{hosted_page}}', _billing_plan.hosted_page)
                 .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))

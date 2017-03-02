@@ -130,6 +130,7 @@ exports.webhookHandler = function(request, reply) {
                   var bccEmail = accountVendorProfile.notify_admin_by_email_on_user_self_registration;
                   var mailOptions = {
                     to: adminUser.email,
+                    from: accountVendorProfile.support_email,
                     fromname: accountVendorProfile.support_name,
                     subject: accountVendorProfile.chargify_user_welcome_email_subject,
                     text: accountVendorProfile.chargify_user_welcome_email_text.join('\n')
