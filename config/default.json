@@ -175,7 +175,7 @@
       "chargify_user_welcome_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new RevAPM account!\n",
-        "Your are welcome to visit our customer portal at {{portalUrl}}\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
         "and start managing your configuration!\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
@@ -262,7 +262,7 @@
       "chargify_user_welcome_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new nuu:bit account!\n",
-        "Your are welcome to visit our customer portal at {{portalUrl}}\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
         "and start managing your configuration!\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
         "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
