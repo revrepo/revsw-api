@@ -31,11 +31,11 @@ module.exports = [
     method: 'GET',
     path: '/v1/billing_plans',
     config: {
-      auth: false,
+      auth: { mode: 'try'}, // @see https://hapijs.com/tutorials/auth#mode
       handler: billingPlanHandler.list,
       description: 'Get a list of Billing Plans registered in system',
       notes: 'Use this function to get a list of Billing Plans registered in system',
-//      tags: ['api', 'web'],
+ //      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -92,7 +92,6 @@ module.exports = [
           type: Joi.string().valid('public', 'private').description('Type of the billing plan'),
           monthly_fee: Joi.number().required().description('Monthly fee of the billing plan'),
           chargify_handle: Joi.string().description('Product handler within EBS'),
-          hosted_page: Joi.string().description('Chargify hosted signup page'),
           services: Joi.array().items({
             code_name: Joi.string().description('Name of the service'),
             description: Joi.string().description('Description of the service'),
@@ -151,7 +150,6 @@ module.exports = [
           type: Joi.string().valid('public', 'private').description('Type of the billing plan'),
           monthly_fee: Joi.number().required().description('Monthly fee of the billing plan'),
           chargify_handle: Joi.string().description('Product handler within EBS'),
-          hosted_page: Joi.string().description('Chargify hosted signup page'),
           services: Joi.array().items({
             code_name: Joi.string().description('Name of the service'),
             description: Joi.string().description('Description of the service'),

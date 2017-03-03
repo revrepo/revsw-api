@@ -74,9 +74,6 @@
     "Android": [ 1, 4, 5 ],
     "Windows_Mobile": [ 1, 2, 5 ]
   },
-
-  "enable_self_registration": true,
-  "enable_simplified_signup_process": true,
   "report_about_unknown_domains": "ops@revsw.com",
   "report_daily_activity_logs": "ops@revsw.com",
 
@@ -131,15 +128,15 @@
   "vendor_profiles": {
     "revapm": {
       "vendorUrl": "http://localhost:3000",
-      "apiUrl": "https://api.revapm.net",
+      "apiUrl": "https://localhost:8001",
       "companyWebsiteURL": "https://www.revapm.com",
       "contactSalesLink": "https://www.revapm.com/contact-us/",
       "contactPhone": "+1 (408) 477-1738",
-      "networkStatusUrl": "http://status.revapm.net",
+      "networkStatusUrl": "http://www.nuubitstatus.net",
       "companyNameShort": "RevAPM",
       "companyNameFull": "RevAPM",
-      "contactUsLink": "https://revapm.zendesk.com/hc/en-us/requests/new",
-      "knowledgeBaseLink": "https://revapm.zendesk.com/hc/en-us",
+      "contactUsLink": "https://support.nuubit.net/hc/en-us/requests/new",
+      "knowledgeBaseLink": "https://support.nuubit.net/hc/en-us",
       "support_email" : "support@revapm.com",
       "support_name" : "RevAPM Support Team",
       "user_verify_subject" : "RevAPM New User Email Verification Request",
@@ -167,10 +164,10 @@
         "<p>Hello {{firstName}},</p>",
         "<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>",
         "<p>Please click on ",
-        "<a href='{{hosted_page}}?{{customer_chargify}}>this",
+        "<a href='{{hosted_page}}?{{customer_chargify}}'>this",
         "</a> link to complete the process.",
         "</p>",
-        "<p>If you did not request this, please ignore this email.</p>\n",
+        "<p>If you did not request this, please ignore this email.</p>",
         "<p>Should you have any questions please contact us 24x7 at {{supportEmail}}.</p><br><br>",
         "<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>",
         "</div>"
@@ -178,7 +175,7 @@
       "chargify_user_welcome_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new RevAPM account!\n",
-        "Your are welcome to visit our customer portal at {{portalUrl}}\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
         "and start managing your configuration!\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
@@ -209,19 +206,24 @@
       "terms_of_service_link": "https://www.revapm.com/tos/",
       "acceptable_use_policy_link": "https://www.revapm.com/aup/",
       "privacy_policy_link": "https://www.revapm.com/privacy/",
-      "zendesk_support_site": "revapm.zendesk.com"
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright RevAPM 2013-2017",
+      "googleAnalyticsAccount": "UA-68856309-2",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "swaggerUIPageTitle": "RevAPM Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API"
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
-      "apiUrl": "https://api.nuubit.net",
+      "apiUrl": "https://localhost:8000",
       "companyWebsiteURL": "https://www.nuubit.com",
       "contactSalesLink": "https://www.nuubit.com/contact-us/",
       "contactPhone": "+1 (408) 477-1738",
-      "networkStatusUrl": "http://status.nuubit.net",
+      "networkStatusUrl": "http://www.nuubitstatus.net",
       "companyNameShort": "nuu:bit",
       "companyNameFull": "nuu:bit, Inc.",
-      "contactUsLink": "https://nuubit.zendesk.com/hc/en-us/requests/new",
-      "knowledgeBaseLink": "https://nuubit.zendesk.com/hc/en-us",
+      "contactUsLink": "https://support.nuubit.net/hc/en-us/requests/new",
+      "knowledgeBaseLink": "https://support.nuubit.net/hc/en-us",
       "support_email" : "support@nuubit.com",
       "support_name" : "nuu:bit Support Team",
       "user_verify_subject" : "nuu:bit New User Email Verification Request",
@@ -235,7 +237,7 @@
       "signup_user_verify_email_subject": "nuu:bit New User Email Verification Request",
       "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
       "enable_self_registration": true,
-      "enable_simplified_signup_process": true,
+      "enable_simplified_signup_process": false,
       "signup_user_verify_email_text" : [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a nuu:bit account.\n",
         "Please click on the following link, or paste this into your browser to complete the process:\n",
@@ -249,21 +251,21 @@
         "<p>Hello {{firstName}},</p>",
         "<p>You are receiving this email because you (or someone else) have requested the creation of a nuu:bit account.</p>",
         "<p>Please click on ",
-        "<a href='{{hosted_page}}?{{customer_chargify}}>this",
+        "<a href='{{hosted_page}}?{{customer_chargify}}'>this",
         "</a> link to complete the process.",
         "</p>",
-        "<p>If you did not request this, please ignore this email.</p>\n",
+        "<p>If you did not request this, please ignore this email.</p>",
         "<p>Should you have any questions please contact us 24x7 at {{supportEmail}}.</p><br><br>",
-        "<p>Kind regards,<br/>nuu:bit Customer Support Team<br>http://www.revapm.com/<br/></p>",
+        "<p>Kind regards,<br/>nuu:bit Customer Support Team<br>http://www.nuubit.com/<br/></p>",
         "</div>"
       ],
       "chargify_user_welcome_email_text": [
         "Hello {{firstname}},\n\n",
         "We've completed setting up your new nuu:bit account!\n",
-        "Your are welcome to visit our customer portal at {{portalUrl}}\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
         "and start managing your configuration!\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
-        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
       ],
       "password_reset_email_text": [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n",
@@ -282,16 +284,21 @@
 
       "sdk": {
         "download_links": {
-          "iOS": "https://github.com/nuubit/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
+          "iOS": "https://github.com/nuubit/SDK/archive/v1.0.5.zip"
         },
         "introduction_video_youtube_ids": {
-          "iOS": "K-GtAM70K4Y"
+          "iOS": "s0xDOPg_Wts"
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/tos/",
       "acceptable_use_policy_link": "https://www.nuubit.com/aup/",
       "privacy_policy_link": "https://www.nuubit.com/privacy/",
-      "zendesk_support_site": "nuubit.zendesk.com"
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright nuu:bit, Inc. 2017",
+      "googleAnalyticsAccount": "UA-68856309-2",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "swaggerUIPageTitle": "nuu:bit Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API"
     }
   }
 }

@@ -36,14 +36,20 @@ var BillingPlan = require('../models/BillingPlan');
 var Chargify = require('../lib/chargify');
 var utils = require('../lib/utilities.js');
 
+var defaultSignupVendorProfile = config.get('default_signup_vendor_profile');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 exports.list = function (request, reply) {
+  var vendorSlug = request.query.vendor;
   var options = {
-    vendor_profile: config.get('default_signup_vendor_profile')
+    vendor_profile: vendorSlug || defaultSignupVendorProfile
   };
-  if(request.auth.isAuthenticated === true){
-    options.vendor_profile = request.auth.credentials.vendor_profile;
+
+  if(request.auth.isAuthenticated === true) {
+    // NOTE: default vendor_profile if not exist  "request.query.vendor"
+    if(!vendorSlug){
+      options.vendor_profile = request.auth.credentials.vendor_profile || defaultSignupVendorProfile;
+    }
   }
   BillingPlan.list(options, function (err, billingPlans) {
     billingPlans = publicRecordFields.handle(billingPlans, 'billingPlans');

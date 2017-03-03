@@ -33,12 +33,10 @@ var BillingPlanSchema = new Schema({
   name: String,
   description: String,
   chargify_handle: String,
-  hosted_page: String,
   brand: {
       type: String,
       default: config.get('default_signup_vendor_profile')
   },
-
   type: {
     type: String,
     enum: ['public', 'private'],
@@ -136,8 +134,11 @@ BillingPlanSchema.statics = {
 
   list: function (options, callback) {
     callback = callback || _.noop;
-    var vendorProfile = (!!options.vendor_profile) ? options.vendor_profile : config.get('default_signup_vendor_profile');
-    return this.find({deleted: false, brand: vendorProfile}).exec(function(err, billingPlans) {
+    if(!options.vendor_profile){
+      // NOTE: method must return billing plans only for one brand
+      return callback(new Error('Property "vendor_profile" is not set'));
+    }
+    return this.find({deleted: false, brand: options.vendor_profile}).exec(function(err, billingPlans) {
       if (err) {
         return callback(err);
       }
