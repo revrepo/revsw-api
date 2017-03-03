@@ -59,7 +59,7 @@ describe('API Keys resource: pre-requisites', function () {
      * @returns {string}
      */
     var getSpecName = function (type, field, value) {
-      return 'should return error response when creating `ApiKey` with ' +
+      return 'should return error response when updating `ApiKey` with ' +
         type + ' `' + field + '`: ' + value;
     };
     /**
@@ -90,7 +90,7 @@ describe('API Keys resource: pre-requisites', function () {
       }
     };
 
-    ApiKeysDP.DataDrivenHelper.generateToUpdate(type, function (err, data) {
+    ApiKeysDP.DataDrivenHelper.payload.genToUpdate(type, function (err, data) {
 
       users.forEach(function (user) {
         describe('Boundary check', function () {

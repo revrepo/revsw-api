@@ -71,7 +71,7 @@ describe('API Keys resource: pre-requisites', function () {
       }
     };
 
-    ApiKeysDP.DataDrivenHelper.generateToAdd(type, function (err, data) {
+    ApiKeysDP.DataDrivenHelper.payload.genToAdd(type, function (err, data) {
 
       users.forEach(function (user) {
         describe('Boundary check', function () {
@@ -79,7 +79,7 @@ describe('API Keys resource: pre-requisites', function () {
           this.timeout(config.get('api.request.maxTimeout'));
           describe('API Keys resource', function () {
             describe('With user: ' + user.role, function () {
-              describe('Update with `' + type + '` data', function () {
+              describe('Add with `' + type + '` data', function () {
 
                 data.forEach(function (apiKey) {
                   var field = apiKey.field;

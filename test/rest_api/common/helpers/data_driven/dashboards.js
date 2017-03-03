@@ -17,22 +17,22 @@
  */
 
 var APIRoutesProvider = require('./../../providers/APIRoutesProvider');
-var API_KEYS = require('./../../../../../config/routes/ids').API_KEYS;
-var routeConfig = APIRoutesProvider.get(API_KEYS.BASE_PATH);
+var DASHBOARDS = require('./../../../../../config/routes/ids').DASHBOARDS;
+var routeConfig = APIRoutesProvider.get(DASHBOARDS.BASE_PATH);
 var Base = require('./base');
 
-var APIKeysDataDrivenHelper = {
+var DashboardsDataDrivenHelper = {
 
   payload: {
 
     genToAdd: function (type, callback) {
-      Base.genPayload(type, routeConfig.getValidation(API_KEYS.POST.NEW), callback);
+      Base.genPayload(type, routeConfig.getValidation(DASHBOARDS.POST.NEW), callback);
     },
 
     genToUpdate: function (type, callback) {
-      Base.genPayload(type, routeConfig.getValidation(API_KEYS.PUT.ONE), callback);
+      Base.genPayload(type, routeConfig.getValidation(DASHBOARDS.PUT.ONE), callback);
     }
   }
 };
 
-module.exports = APIKeysDataDrivenHelper;
+module.exports = DashboardsDataDrivenHelper;

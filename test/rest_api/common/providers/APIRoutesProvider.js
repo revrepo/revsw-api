@@ -34,6 +34,7 @@ var APIRoutesProvider = {
 
     var routesFileNames = {};
     routesFileNames[ROUTES_IDS.API_KEYS.BASE_PATH] = 'apiKeys';
+    routesFileNames[ROUTES_IDS.DASHBOARDS.BASE_PATH] = 'dashboards';
 
     // Importing route config from API project.
     var routes = require(ROUTES_DIR + routesFileNames[name]);
