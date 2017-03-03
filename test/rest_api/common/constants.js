@@ -1,4 +1,4 @@
-module.exports = {
+var Constants = {
   API: {
     METHODS: {
       CREATE: 'create',
@@ -28,3 +28,5 @@ module.exports = {
     }
   }
 };
+
+module.exports = Constants;

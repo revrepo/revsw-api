@@ -1,4 +1,4 @@
-module.exports = {
+var IDS = {
   API_KEYS: {
     BASE_PATH: 'apiKeys',
     GET: {
@@ -35,3 +35,5 @@ module.exports = {
     }
   }
 };
+
+module.exports = IDS;
