@@ -44,10 +44,11 @@ exports.list = function (request, reply) {
   var options = {
     vendor_profile: vendorSlug || defaultSignupVendorProfile
   };
-  // TODO: ??? request.auth == TRUE ???
-  if(request.auth.isAuthenticated === true){
+
+  if(request.auth.isAuthenticated === true) {
+    // NOTE: default vendor_profile if not exist  "request.query.vendor"
     if(!vendorSlug){
-      options.vendor_profile = request.auth.credentials.vendor_profile;
+      options.vendor_profile = request.auth.credentials.vendor_profile || defaultSignupVendorProfile;
     }
   }
   BillingPlan.list(options, function (err, billingPlans) {

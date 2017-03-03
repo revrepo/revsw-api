@@ -52,7 +52,6 @@ var BillingPlanDataProvider = {
       type: 'private',
       monthly_fee: 100,
       chargify_handle: 'API-QA-' + now,
-      hosted_page: faker.lorem.words()[0],
       services: [],
       prepay_discounts: [{
         period: 1,
