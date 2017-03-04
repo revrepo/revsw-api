@@ -93,7 +93,7 @@ describe('API Keys resource: pre-requisites', function () {
     ApiKeysDP.DataDrivenHelper.payload.genToUpdate(type, function (err, data) {
 
       users.forEach(function (user) {
-        describe('Boundary check', function () {
+        describe('Negative check', function () {
           // Changing default mocha's timeout (Default is 2 seconds).
           this.timeout(config.get('api.request.maxTimeout'));
           describe('API Keys resource', function () {
