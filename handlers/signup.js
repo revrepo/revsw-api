@@ -102,7 +102,8 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
     billing_city: account.billing_info.city,
     billing_zip: account.billing_info.zipcode,
     billing_country: account.billing_info.country,
-    billing_state: account.billing_info.state
+    billing_state: account.billing_info.state,
+    coupon_code: account.promocode,
   };
 
   var mailOptions = {
@@ -235,7 +236,8 @@ exports.signup = function(req, reply) {
           zipcode: data.zipcode
         },
         self_registered: true,
-        vendor_profile: vendorSlug
+        vendor_profile: vendorSlug,
+        promocode: data.promocode
       };
       return accountsService.createAccountAsync(newCompany, {});
     })
@@ -313,42 +315,9 @@ exports.signup = function(req, reply) {
           }
         });
     })
-    .then(
-      function sendEmailForChargifyRegistration() {
-        var _customer_chargify = {
-          first_name: _newUser.firstname,
-          last_name: _newUser.lastname,
-          email: _newUser.email,
-          phone: _newAccount.phone_number,
-          reference: _newAccount.id, // NOTE: Chargify`s custoners it is our Accounts
-          organization: _newAccount.companyName,
-          billing_address: _newAccount.billing_info.address1,
-          billing_address_2: _newAccount.billing_info.address2,
-          billing_city: _newAccount.billing_info.city,
-          billing_zip: _newAccount.billing_info.zipcode,
-          billing_country: _newAccount.billing_info.country,
-          billing_state: _newAccount.billing_info.state
-        };
-
-        var mailOptions = {
-            to: _newUser.email,
-            fromname: vendorProfileForRegistration.support_name,
-            from: vendorProfileForRegistration.support_email,
-            subject: vendorProfileForRegistration.signup_user_verify_email_subject,
-            html: vendorProfileForRegistration.signup_user_verify_email_html.join('')
-                .replace('{{firstName}}', _newUser.firstname)
-                .replace('{{hosted_page}}', _billing_plan.hosted_page)
-                .replace('{{customer_chargify}}', qs.stringify(_customer_chargify))
-                .replace('{{supportEmail}}', vendorProfileForRegistration.support_email)
-        };
-
-        var bccEmail = vendorProfileForRegistration.notify_admin_by_email_on_user_self_registration;
-        if (bccEmail !== '') {
-          mailOptions.bcc = bccEmail;
-        }
-
-        // NOTE: when we send email we do not control success or error. We only create log
-        mail.sendMail(mailOptions, function(err, data) {
+    .then(function sendEmailForChargifyRegistration() {
+        _newAccount.promocode = data.promocode;
+        sendEmailForRegistration(_newUser, _newAccount, _billing_plan, function(err,data){
           if (err) {
             logger.error('Signup:SendEmailNewUser:error: ' + JSON.stringify(err));
           }
@@ -686,6 +655,22 @@ exports.resendRegistrationEmail = function(req, reply) {
         _account = account;
         return billing_plans.getAsync({
           _id: account.billing_plan
+        })
+        .then(function successFindInternalBullingPlan(internal_data) {
+          _billing_plan = internal_data;
+          // NOTE: get current Cahrgify Product Information
+          return chargifyProduct
+            .getHostedPageAsync(_billing_plan.chargify_handle)
+            .then(function(billin_plan_info) {
+              _billing_plan.hosted_page = billin_plan_info.url;
+              return _billing_plan;
+            }, function onError(err) {
+              logger.error('resendRegistrationEmail::billing_plans: External Billing Plan information for ' + _account.chargify_handle + ' is not found.');
+              throw {
+                message: 'Billing Plan \'' + _account.chargify_handle + '\' no more exists',
+                statusCode: 404
+              };
+            });
         });
       })
       .then(function(billing_plan) {
