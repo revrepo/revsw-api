@@ -54,7 +54,8 @@ module.exports = [
           city: Joi.string().min(1).max(150).trim().description('City').required(),
           zipcode: Joi.string().min(1).max(30).trim().description('Zip Code').required(),
           billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required(),
-          vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name')
+          vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name'),
+          promocode: Joi.string().min(1).max(30).trim().optional().description('Promocode')
         }
       },
       response: {

@@ -82,7 +82,7 @@ function Account(mongoose, connection, options) {
         type: Boolean,
         default: false
     },
-
+    'promocode': {type: String, default: null},
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
