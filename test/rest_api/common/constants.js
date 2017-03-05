@@ -1,3 +1,6 @@
+
+var ROUTE_IDS = require('./../../../config/routes/ids');
+
 var Constants = {
   API: {
     METHODS: {
@@ -25,7 +28,8 @@ var Constants = {
       LONG: 'long',
       SHORT: 'short',
       BOGUS: 'bogus'
-    }
+    },
+    ROUTES: ROUTE_IDS
   }
 };
 

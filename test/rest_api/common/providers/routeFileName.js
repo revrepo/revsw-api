@@ -16,24 +16,21 @@
  * from Rev Software, Inc.
  */
 
-var BaseDDP = require('./base');
-var SchemaDP = require('./../../providers/schema');
-var DASHBOARDS = require('./../../../common/constants').API.ROUTES.DASHBOARDS;
+var APITestError = require('./../apiTestError');
 
-var DashboardsDataDrivenHelper = {
+var RouteFileNameProvider = {
 
-  payload: {
+  get: function (routeId) {
 
-    genToAdd: function (type, callback) {
-      BaseDDP
-        .genPayload(type, SchemaDP.get(DASHBOARDS.POST.NEW).request, callback);
-    },
+    if (/::API_KEYS::/.test(routeId))
+      return 'apiKeys';
 
-    genToUpdate: function (type, callback) {
-      BaseDDP
-        .genPayload(type, SchemaDP.get(DASHBOARDS.PUT.ONE).request, callback);
-    }
+    if (/::DASHBOARDS::/.test(routeId))
+      return 'dashboards';
+
+    throw new APITestError('Could not find route config file with the ' +
+      'specified route ID: "' + routeId);
   }
 };
 
-module.exports = DashboardsDataDrivenHelper;
+module.exports = RouteFileNameProvider;

@@ -27,6 +27,7 @@
 // Requiring Joi library to define some Schema objects
 var Joi = require('joi');
 
+var routeConfigDP = require('./routeConfig');
 var models = require('./../../../../lib/routeModels');
 
 // Defining common variables
@@ -43,7 +44,29 @@ var maxTimestamp = 9999999999999;
 //
 // From there, you can modify and get bugs, invalid or other type of data
 // depending on your test needs.
-module.exports = {
+var SchemaProvider = {
+
+
+  /**
+   * Returns the object schema related to the specified route ID
+   *
+   * @param routeId
+   * @returns {Object} which represent the schem for the request/input and
+   * response/output from the specified route ID. Structure is as follows
+   *    {
+   *      request: {Object} Schema,
+   *      response: {Object} Schema
+   *    }
+   */
+  get: function (routeId) {
+
+    var config = routeConfigDP.get(routeId);
+
+    return {
+      request: config.validation,
+      response: config.response
+    }
+  },
 
   /**
    * ### SchemaProvider.getSuccessResponse()
@@ -262,9 +285,9 @@ module.exports = {
         user_id: Joi.string().regex(idFormatPattern).required(),
         account_id: Joi.array().items(Joi.string().regex(idFormatPattern)).min(1),
         /*.allow([
-          Joi.string().regex(idFormatPattern),
-          Joi.array().items(Joi.string().regex(idFormatPattern))
-        ])*/
+         Joi.string().regex(idFormatPattern),
+         Joi.array().items(Joi.string().regex(idFormatPattern))
+         ])*/
         start_time: Joi.number().min(minTimestamp).max(maxTimestamp).required(),
         end_time: Joi.number().min(minTimestamp).max(maxTimestamp).required()
       }),
@@ -307,11 +330,11 @@ module.exports = {
     });
   },
 
-  getAPIKey: function(){
+  getAPIKey: function () {
     return models.APIKeyModel;
   },
 
-  getCreateAPIKeyStatus: function(){
+  getCreateAPIKeyStatus: function () {
     return models.APIKeyStatusModel;
   },
 
@@ -319,3 +342,5 @@ module.exports = {
     return models.statusModel;
   }
 };
+
+module.exports = SchemaProvider;

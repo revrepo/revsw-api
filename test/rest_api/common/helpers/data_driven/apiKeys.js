@@ -16,21 +16,22 @@
  * from Rev Software, Inc.
  */
 
-var APIRoutesProvider = require('./../../providers/APIRoutesProvider');
-var API_KEYS = require('./../../../../../config/routes/ids').API_KEYS;
-var routeConfig = APIRoutesProvider.get(API_KEYS.BASE_PATH);
-var Base = require('./base');
+var BaseDDP = require('./base');
+var SchemaDP = require('./../../providers/schema');
+var API_KEYS = require('./../../../common/constants').API.ROUTES.API_KEYS;
 
 var APIKeysDataDrivenHelper = {
 
   payload: {
 
     genToAdd: function (type, callback) {
-      Base.genPayload(type, routeConfig.getValidation(API_KEYS.POST.NEW), callback);
+      BaseDDP
+        .genPayload(type, SchemaDP.get(API_KEYS.POST.NEW).request, callback);
     },
 
     genToUpdate: function (type, callback) {
-      Base.genPayload(type, routeConfig.getValidation(API_KEYS.PUT.ONE), callback);
+      BaseDDP
+        .genPayload(type, SchemaDP.get(API_KEYS.PUT.ONE).request, callback);
     }
   }
 };
