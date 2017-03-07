@@ -16,23 +16,30 @@
  * from Rev Software, Inc.
  */
 
-var BaseDDP = require('./base');
-var SchemaDP = require('./../../providers/schema/api');
+var BaseSP = require('./base');
+var DASHBOARDS = require('./../../../common/constants').API.ROUTES.DASHBOARDS;
 
-var DashboardsDataDrivenHelper = {
+var DashboardsSchemaProvider = {
 
-  payload: {
+  getForGetAll: function () {
+    return BaseSP.get(DASHBOARDS.GET.ALL);
+  },
 
-    genToAdd: function (type, callback) {
-      BaseDDP
-        .genPayload(type, SchemaDP.dashboards.getForCreate().request, callback);
-    },
+  getForGetOne: function () {
+    return BaseSP.get(DASHBOARDS.GET.ONE);
+  },
 
-    genToUpdate: function (type, callback) {
-      BaseDDP
-        .genPayload(type, SchemaDP.dashboards.getForUpdate().request, callback);
-    }
+  getForCreate: function () {
+    return BaseSP.get(DASHBOARDS.POST.NEW);
+  },
+
+  getForUpdate: function () {
+    return BaseSP.get(DASHBOARDS.PUT.ONE);
+  },
+
+  getForDelete: function () {
+    return BaseSP.get(DASHBOARDS.DELETE.ONE);
   }
 };
 
-module.exports = DashboardsDataDrivenHelper;
+module.exports = DashboardsSchemaProvider;
