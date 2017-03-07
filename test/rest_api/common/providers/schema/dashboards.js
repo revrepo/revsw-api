@@ -22,23 +22,23 @@ var DASHBOARDS = require('./../../../common/constants').API.ROUTES.DASHBOARDS;
 var DashboardsSchemaProvider = {
 
   getForGetAll: function () {
-    return BaseSP.get(DASHBOARDS.GET.ALL);
+    return BaseSP.get(DASHBOARDS.GET.ALL).response;
   },
 
   getForGetOne: function () {
-    return BaseSP.get(DASHBOARDS.GET.ONE);
+    return BaseSP.get(DASHBOARDS.GET.ONE).response;
   },
 
   getForCreate: function () {
-    return BaseSP.get(DASHBOARDS.POST.NEW);
+    return BaseSP.get(DASHBOARDS.POST.NEW).response;
   },
 
   getForUpdate: function () {
-    return BaseSP.get(DASHBOARDS.PUT.ONE);
+    return BaseSP.get(DASHBOARDS.PUT.ONE).response;
   },
 
   getForDelete: function () {
-    return BaseSP.get(DASHBOARDS.DELETE.ONE);
+    return BaseSP.get(DASHBOARDS.DELETE.ONE).response;
   }
 };
 
