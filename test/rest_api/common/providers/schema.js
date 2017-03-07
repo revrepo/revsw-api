@@ -63,7 +63,7 @@ var SchemaProvider = {
     var config = routeConfigDP.get(routeId);
 
     return {
-      request: config.validation,
+      request: config.validate,
       response: config.response
     }
   },
