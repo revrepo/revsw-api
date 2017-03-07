@@ -24,7 +24,7 @@ var API = require('./../../../common/api');
 var Utils = require('./../../../common/utils');
 var ActivityDP = require('./../../../common/providers/data/activity');
 var ActivityDDHelper = ActivityDP.DataDrivenHelper;
-var SchemaProvider = require('./../../../common/providers/schema');
+var SchemaProvider = require('./../../../common/providers/schema/api');
 
 describe('Sanity check', function () {
 
