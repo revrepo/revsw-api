@@ -16,23 +16,18 @@
  * from Rev Software, Inc.
  */
 
-var BaseDDP = require('./base');
-var SchemaDP = require('./../../providers/schema/api');
+var BaseSP = require('./base');
+var API_KEYS = require('./../../../common/constants').API.ROUTES.API_KEYS;
 
-var APIKeysDataDrivenHelper = {
+var APIKeysSchemaProvider = {
 
-  payload: {
+  getForCreate: function () {
+    return BaseSP.get(API_KEYS.POST.NEW);
+  },
 
-    genToAdd: function (type, callback) {
-      BaseDDP
-        .genPayload(type, SchemaDP.apiKeys.getForCreate().request, callback);
-    },
-
-    genToUpdate: function (type, callback) {
-      BaseDDP
-        .genPayload(type, SchemaDP.apiKeys.getForUpdate().request, callback);
-    }
+  getForUpdate: function () {
+    return BaseSP.get(API_KEYS.PUT.ONE);
   }
 };
 
-module.exports = APIKeysDataDrivenHelper;
+module.exports = APIKeysSchemaProvider;

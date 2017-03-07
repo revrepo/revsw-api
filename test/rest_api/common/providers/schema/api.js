@@ -29,6 +29,7 @@ var Joi = require('joi');
 
 var models = require('./../../../../../lib/routeModels');
 
+var APIKeysSchemaProvider = require('./apiKeys');
 var DashboardsSchemaProvider = require('./dashboards');
 
 // Defining common variables
@@ -47,6 +48,7 @@ var maxTimestamp = 9999999999999;
 // depending on your test needs.
 var APISchemaProviders = {
 
+  apiKeys: APIKeysSchemaProvider,
   dashboards: DashboardsSchemaProvider,
 
   /**
