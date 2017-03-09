@@ -79,7 +79,7 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var dashboards = response.body;
-                  var schema = API.providers.schema.dashboards.getForGetAll();
+                  var schema = API.providers.schema.dashboards.getForGetAll().response;
                   Joi.validate(dashboards, schema, done);
                 })
                 .catch(done);
@@ -97,7 +97,7 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var dashboard = response.body;
-                  var schema = API.providers.schema.dashboards.getForGetOne();
+                  var schema = API.providers.schema.dashboards.getForGetOne().response;
                   Joi.validate(dashboard, schema, done);
                 })
                 .catch(done);
@@ -115,7 +115,7 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var dashboard = response.body;
-                  var schema = API.providers.schema.dashboards.getForCreate();
+                  var schema = API.providers.schema.dashboards.getForCreate().response;
                   Joi.validate(dashboard, schema, done);
                 })
                 .catch(done);
@@ -138,7 +138,7 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var data = response.body;
-                  var schema = API.providers.schema.dashboards.getForUpdate();
+                  var schema = API.providers.schema.dashboards.getForUpdate().response;
                   Joi.validate(data, schema, done);
                 })
                 .catch(done);
@@ -159,7 +159,7 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var data = response.body;
-                  var schema = API.providers.schema.dashboards.getForDelete();
+                  var schema = API.providers.schema.dashboards.getForDelete().response;
                   Joi.validate(data, schema, done);
                 })
                 .catch(done);

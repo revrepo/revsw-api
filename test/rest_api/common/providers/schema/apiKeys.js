@@ -22,11 +22,11 @@ var API_KEYS = require('./../../../common/constants').API.ROUTES.API_KEYS;
 var APIKeysSchemaProvider = {
 
   getForCreate: function () {
-    return BaseSP.get(API_KEYS.POST.NEW).response;
+    return BaseSP.get(API_KEYS.POST.NEW);
   },
 
   getForUpdate: function () {
-    return BaseSP.get(API_KEYS.PUT.ONE).response;
+    return BaseSP.get(API_KEYS.PUT.ONE);
   }
 };
 
