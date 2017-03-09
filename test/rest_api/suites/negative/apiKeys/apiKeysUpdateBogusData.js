@@ -70,20 +70,26 @@ describe('API Keys resource: pre-requisites', function () {
      * @returns {Function}
      */
     var getSpecFn = function (user, field, model) {
+      var fieldName = Utils.getLastKeyFromPath(field);
       return function (done) {
         API.helpers
           .authenticateUser(user)
           .then(function () {
             var apiKey = apiKeys[user.role];
-            model.account_id = apiKey.account_id;
-            // TODO: Make ApiKey creation with full/complete data
-            model.managed_account_ids = [];
-            model.domains = [];
+            if (fieldName !== 'account_id') {
+              model.account_id = apiKey.account_id;
+            }
+            if (fieldName !== 'managed_account_ids') {
+              model.managed_account_ids = [];
+            }
+            if (fieldName !== 'domains') {
+              model.domains = [];
+            }
             return API.resources.apiKeys.update(apiKey.id, model);
           })
           .then(function (res) {
             res.body.statusCode.should.equal(400);
-            res.body.message.should.containEql(Utils.getLastKeyFromPath(field));
+            res.body.message.should.containEql(fieldName);
             done();
           })
           .catch(done);
