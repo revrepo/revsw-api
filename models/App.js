@@ -203,6 +203,71 @@ App.prototype = {
         });
         return dist;
       });
+  },
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  accountPlatformsData: function(account_id) {
+    var pipline = [];
+    // TODO: add default array of result data
+    if (account_id) {
+      var accountId = (_.isArray(account_id) ? { $in: account_id } : account_id /*string*/ );
+      pipline.push({ $match: { account_id: accountId } });
+    }
+    //
+    pipline.push({
+      $project: {
+        account_id: 1,
+        app_platform: 1,
+        deleted: 1
+      }
+    });
+    //
+    pipline.push({
+      $group: {
+        _id: { account_id: '$account_id', app_platform: '$app_platform' },
+        deleted: { $sum: { $cond: [{ $ne: ['$deleted', true] }, 1, 0] } },
+        active: { $sum: { $cond: [{ $ne: ['$deleted', false] }, 1, 0] } },
+        total: { $sum: 1 }
+      }
+    });
+    //
+    pipline.push({
+      $project: {
+        _id: '$_id.account_id',
+        account_id: '$_id.account_id',
+        name: '$_id.app_platform',
+        deleted: 1,
+        active: 1,
+        total: 1
+      }
+    });
+    return this.model.aggregate(pipline)
+      .exec()
+      .then(function(data) {
+        var dist = {};
+        data.forEach(function(item) {
+          if (!dist[item.account_id]) {
+            dist[item.account_id] = {
+              Windows_Mobile: {
+                total: 0,
+                active: 0,
+                deleted: 0
+              },
+              Android: {
+                total: 0,
+                active: 0,
+                deleted: 0
+              },
+              iOS: {
+                total: 0,
+                active: 0,
+                deleted: 0
+              }
+            };
+          }
+          dist[item.account_id][item.name] = { total: item.total, deleted: item.deleted, active: item.active };
+        });
+        return dist;
+      });
   }
 
 };
