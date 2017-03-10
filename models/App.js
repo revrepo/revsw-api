@@ -26,7 +26,24 @@ var utils = require('../lib/utilities.js');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var mongoose = require('mongoose');
-
+// NOTE: default data about # of Mobile apps per platform
+var PLATFORMS_DEFAULT_DATA_OBJECT = {
+  Windows_Mobile: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  Android: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  iOS: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  }
+};
 function App(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -246,23 +263,7 @@ App.prototype = {
         var dist = {};
         data.forEach(function(item) {
           if (!dist[item.account_id]) {
-            dist[item.account_id] = {
-              Windows_Mobile: {
-                total: 0,
-                active: 0,
-                deleted: 0
-              },
-              Android: {
-                total: 0,
-                active: 0,
-                deleted: 0
-              },
-              iOS: {
-                total: 0,
-                active: 0,
-                deleted: 0
-              }
-            };
+            dist[item.account_id] = PLATFORMS_DEFAULT_DATA_OBJECT;
           }
           dist[item.account_id][item.name] = { total: item.total, deleted: item.deleted, active: item.active };
         });
