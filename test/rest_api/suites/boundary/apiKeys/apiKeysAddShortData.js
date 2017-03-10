@@ -68,7 +68,7 @@ describe('API Keys resource: pre-requisites', function () {
             done();
           })
           .catch(done);
-      }
+      };
     };
 
     ApiKeysDP.DataDrivenHelper.payload.genToAdd(type, function (err, data) {
@@ -88,14 +88,15 @@ describe('API Keys resource: pre-requisites', function () {
 
                   if (field === 'account_id' && value === undefined) {
                     Utils.setValueByPath(model, field, '0febD50d02');
-                    value = Utils.getValueByPath(model, field)
+                    value = Utils.getValueByPath(model, field);
                   }
 
-                  if (value === undefined || value === null)
+                  if (value === undefined || value === null) {
                     return;
+                  }
 
                   it(getSpecName(type, field, value), getSpecFn(user, field, model));
-                })
+                });
               });
             });
           });

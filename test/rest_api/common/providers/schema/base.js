@@ -38,7 +38,7 @@ var BaseSchemaProvider = {
     return {
       request: config.validate,
       response: config.response.schema
-    }
+    };
   }
 };
 

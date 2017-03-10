@@ -22,11 +22,13 @@ var RouteFileNameProvider = {
 
   get: function (routeId) {
 
-    if (/::API_KEYS::/.test(routeId))
+    if (/::API_KEYS::/.test(routeId)) {
       return 'apiKeys';
+    }
 
-    if (/::DASHBOARDS::/.test(routeId))
+    if (/::DASHBOARDS::/.test(routeId)) {
       return 'dashboards';
+    }
 
     throw new APITestError('Could not find route config file with the ' +
       'specified route ID: "' + routeId);

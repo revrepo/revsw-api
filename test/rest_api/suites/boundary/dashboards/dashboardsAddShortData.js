@@ -68,7 +68,7 @@ describe('Dashboards resource: pre-requisites', function () {
             done();
           })
           .catch(done);
-      }
+      };
     };
 
     DashboardsDP.DataDrivenHelper.payload.genToAdd(type, function (err, data) {
@@ -86,11 +86,12 @@ describe('Dashboards resource: pre-requisites', function () {
                   var model = dashboard.model;
                   var value = Utils.getValueByPath(model, field);
 
-                  if (value === undefined || value === null)
+                  if (value === undefined || value === null) {
                     return;
+                  }
 
                   it(getSpecName(type, field, value), getSpecFn(user, field, model));
-                })
+                });
               });
             });
           });

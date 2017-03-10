@@ -93,7 +93,7 @@ describe('API Keys resource: pre-requisites', function () {
             done();
           })
           .catch(done);
-      }
+      };
     };
 
     ApiKeysDP.DataDrivenHelper.payload.genToUpdate(type, function (err, data) {
@@ -111,11 +111,12 @@ describe('API Keys resource: pre-requisites', function () {
                   var model = apiKey.model;
                   var value = Utils.getValueByPath(model, field);
 
-                  if (value === undefined)
+                  if (value === undefined) {
                     return;
+                  }
 
                   it(getSpecName(type, field, value), getSpecFn(user, field, model));
-                })
+                });
               });
             });
           });
