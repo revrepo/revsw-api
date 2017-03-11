@@ -23,7 +23,23 @@
 var _ = require('lodash'),
   config = require('config'),
   promise = require('bluebird');
-
+var APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT = {
+  Windows_Mobile: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  Android: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  iOS: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  }
+};
 function UsageReport( mongoose, connection, options ) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -34,6 +50,7 @@ function UsageReport( mongoose, connection, options ) {
     'account_id'                : String,
     'report_for_day'            : Date,
     'created_at'                : Date,
+    'apps_per_platform'         : {type: this.Schema.Types.Mixed, default: APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT },
     'domains'                   : this.Schema.Types.Mixed,
     'domains_usage'             : this.Schema.Types.Mixed,
     'traffic_per_billing_zone'  : this.Schema.Types.Mixed
