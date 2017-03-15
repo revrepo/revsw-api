@@ -26,7 +26,24 @@ var utils = require('../lib/utilities.js');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 var mongoose = require('mongoose');
-
+// NOTE: default data about # of Mobile apps per platform
+var APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT = {
+  Windows_Mobile: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  Android: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  iOS: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  }
+};
 function App(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -58,7 +75,7 @@ function App(mongoose, connection, options) {
     app_name: String,
     account_id: String,
     // TODO add allowed app platforms
-    app_platform: String, // (“iOS” or “Android”)
+    app_platform: String, // (“iOS” or “Android” or "Windows_Mobile")
     deleted: {type: Boolean, default: false},
     deleted_at: {type: Date, default : null},
     deleted_by: String,
@@ -200,6 +217,77 @@ App.prototype = {
             ++dist[item.account_id].active;
           }
           ++dist[item.account_id].total;
+        });
+        return dist;
+      });
+  },
+  // Get data about apps_per_platform on moment call function or custom day
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  accountAppsPerPlatformData: function(account_id, day) {
+    var pipline = [];
+    var from, to ;
+    if(!day){
+      day = new Date();
+    }
+    if(!!day){
+      from = day.setUTCHours( 0, 0, 0, 0 );
+      to = day.setUTCHours( 24, 0, 0, 0 );
+    }
+    // NOTE: get total sum all apps on end of day
+    var match_ = {
+      $match: {
+        $and: [
+          { created_at: { $lt: new Date(to) } }, {
+            $or: [
+              { deleted: { $ne: true } },
+              { deleted: { $ne: false } }
+            ]
+          }
+        ]
+      }
+    };
+    if (account_id) {
+      var accountId = (_.isArray(account_id) ? { $in: account_id } : account_id /*string*/ );
+      match_.$match.$and.push({ account_id: accountId });
+    }
+    pipline.push(match_);
+    //
+    pipline.push({
+      $project: {
+        account_id: 1,
+        app_platform: 1,
+        deleted: 1
+      }
+    });
+    // Group and get tatal sum for active and deleted apps
+    pipline.push({
+      $group: {
+        _id: { account_id: '$account_id', app_platform: '$app_platform' },
+        deleted: { $sum: { $cond: [{ $ne: ['$deleted', false] }, 1, 0] } },
+        active: { $sum: { $cond: [{ $ne: ['$deleted', true] }, 1, 0] } },
+        total: { $sum: 1 }
+      }
+    });
+    //
+    pipline.push({
+      $project: {
+        _id: '$_id.account_id',
+        account_id: '$_id.account_id',
+        name: '$_id.app_platform',
+        deleted: 1,
+        active: 1,
+        total: 1
+      }
+    });
+    return this.model.aggregate(pipline)
+      .exec()
+      .then(function(data) {
+        var dist = {};
+        data.forEach(function(item) {
+          if (!dist[item.account_id]) {
+            dist[item.account_id] = _.defaultsDeep({}, APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT);
+          }
+          dist[item.account_id][item.name] = { total: item.total, deleted: item.deleted, active: item.active };
         });
         return dist;
       });
