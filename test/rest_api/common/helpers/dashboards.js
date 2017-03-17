@@ -22,7 +22,7 @@ var APITestError = require('./../apiTestError');
 
 // # Dashboards Helper
 // Abstracts common functionality for the related resource.
-module.exports = {
+var DashboardsHelper = {
 
   /**
    * Creates a new dashboard.
@@ -43,3 +43,5 @@ module.exports = {
       });
   }
 };
+
+module.exports = DashboardsHelper;

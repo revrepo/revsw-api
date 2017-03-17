@@ -17,6 +17,7 @@
  */
 
 var faker = require('faker');
+var DashboardsDataDrivenHelper = require('./../../helpers/data_driven/dashboards');
 
 // # Dashboards Data Provider object
 //
@@ -74,7 +75,9 @@ var DashboardDataProvider = {
   generateOneForUpdate: function (dashboard) {
     dashboard.title = 'UPDATED ' + dashboard.title;
     return dashboard;
-  }
+  },
+
+  DataDrivenHelper: DashboardsDataDrivenHelper
 };
 
 module.exports = DashboardDataProvider;

@@ -1,4 +1,14 @@
 {
+  "portal_mongo": {
+    "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
+  },
+  "purge_mongo": {
+    "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
+  },
+  "mongoose_debug_logging": true,
+  "default_system_vendor_profile": "revapm",
+  "default_signup_vendor_profile": "revapm",
+  "sendgrid_api_key": "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",
   "log_config": {
     "transports": {
       "Console": {
