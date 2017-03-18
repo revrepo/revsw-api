@@ -40,6 +40,20 @@ var APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT = {
     deleted: 0
   }
 };
+
+var SSL_CERTIFICATES_DEFAULT_DATA_OBJECT = {
+  private: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  },
+  shared: {
+    total: 0,
+    active: 0,
+    deleted: 0
+  }
+};
+
 function UsageReport( mongoose, connection, options ) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -51,6 +65,8 @@ function UsageReport( mongoose, connection, options ) {
     'report_for_day'            : Date,
     'created_at'                : Date,
     'apps_per_platform'         : {type: this.Schema.Types.Mixed, default: APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT },
+    'ssl_certs'                 : {type: this.Schema.Types.Mixed},
+    'ssl_certs_per_type'        : {type: this.Schema.Types.Mixed, default: SSL_CERTIFICATES_DEFAULT_DATA_OBJECT },
     'domains'                   : this.Schema.Types.Mixed,
     'domains_usage'             : this.Schema.Types.Mixed,
     'traffic_per_billing_zone'  : this.Schema.Types.Mixed
