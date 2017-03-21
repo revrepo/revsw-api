@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -46,6 +46,9 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var billing_plans = require('../models/BillingPlan');
 var authHeader = { Authorization: 'Bearer ' + config.get('cds_api_token') };
+
+var vendorProfiles = config.get('vendor_profiles');
+var deafultVendorProfile = vendorProfiles[config.get('default_system_vendor_profile')];
 
 var checkDomainsLimit = function(companyId, callback) {
   accounts.get({ _id: companyId }, function(err, account) {
@@ -248,6 +251,14 @@ exports.getDomainConfigVersions = function(request, reply) {
   });
 };
 
+/**
+ * @name  createDomainConfig
+ * @description check and create Domain Configuration
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
@@ -355,7 +366,9 @@ exports.createDomainConfig = function(request, reply) {
     if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
-
+    // NOTE: Account has property "vendor_profile". We need get additional parameter 'cname_domain' from them
+    var accountVendorProfile = vendorProfiles[ account.vendor_profile ] || deafultVendorProfile;
+    newDomainJson.cname_domain = accountVendorProfile.cname_domain; //
     if (false /* TODO need to restore a check for status of account.billing_plan */ ) {
       isSubscriptionActive(newDomainJson.account_id, function(err, res) {
         if (err) {
