@@ -17,16 +17,16 @@
  */
 
 var BaseSP = require('./base');
-var API_KEYS = require('./../../../common/constants').API.ROUTES.API_KEYS;
+var ROUTE_IDS = require('./routes/ids');
 
 var APIKeysSchemaProvider = {
 
   getForCreate: function () {
-    return BaseSP.get(API_KEYS.POST.NEW);
+    return BaseSP.get(ROUTE_IDS.API_KEYS.POST.NEW);
   },
 
   getForUpdate: function () {
-    return BaseSP.get(API_KEYS.PUT.ONE);
+    return BaseSP.get(ROUTE_IDS.API_KEYS.PUT.ONE);
   }
 };
 

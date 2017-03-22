@@ -17,28 +17,28 @@
  */
 
 var BaseSP = require('./base');
-var DASHBOARDS = require('./../../../common/constants').API.ROUTES.DASHBOARDS;
+var ROUTE_IDS = require('./routes/ids');
 
 var DashboardsSchemaProvider = {
 
   getForGetAll: function () {
-    return BaseSP.get(DASHBOARDS.GET.ALL);
+    return BaseSP.get(ROUTE_IDS.DASHBOARDS.GET.ALL);
   },
 
   getForGetOne: function () {
-    return BaseSP.get(DASHBOARDS.GET.ONE);
+    return BaseSP.get(ROUTE_IDS.DASHBOARDS.GET.ONE);
   },
 
   getForCreate: function () {
-    return BaseSP.get(DASHBOARDS.POST.NEW);
+    return BaseSP.get(ROUTE_IDS.DASHBOARDS.POST.NEW);
   },
 
   getForUpdate: function () {
-    return BaseSP.get(DASHBOARDS.PUT.ONE);
+    return BaseSP.get(ROUTE_IDS.DASHBOARDS.PUT.ONE);
   },
 
   getForDelete: function () {
-    return BaseSP.get(DASHBOARDS.DELETE.ONE);
+    return BaseSP.get(ROUTE_IDS.DASHBOARDS.DELETE.ONE);
   }
 };
 
