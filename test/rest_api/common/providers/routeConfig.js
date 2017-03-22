@@ -21,7 +21,7 @@ var RouteFileNameProvider = require('./routeFileName');
 
 var RouteConfigProvider = (function () {
 
-  var ROUTES_DIR = './../../../../routes/';
+  var ROUTES_DIR = './schema/routes/config/';
   var routeConfig = {};
 
   return {

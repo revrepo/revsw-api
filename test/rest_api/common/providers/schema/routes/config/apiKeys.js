@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,8 +22,8 @@
 
 var Joi = require('joi');
 
-var apiKey = require('../handlers/apiKeys');
-var routeModels = require('../lib/routeModels');
+var routeModels = require('../models');
+var ROUTE_IDS = require('../ids');
 
 module.exports = [
   {
@@ -33,7 +33,7 @@ module.exports = [
       auth: {
         scope: ['admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: apiKey.getApiKeys,
+      id: ROUTE_IDS.API_KEYS.GET.ALL,
       description: 'Get a list of API keys registered for a company',
       notes: 'Use this function to get a list of API keys registered on your company account',
       tags: ['api'],
@@ -42,12 +42,12 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      validate:{
+      validate: {
         query: {
           filters: Joi.object().keys({
             account_id: Joi.objectId().optional().trim().description('ID of a company')
           })
-         .optional().description('Filters parameters')
+            .optional().description('Filters parameters')
         }
       },
       response: {
@@ -68,7 +68,7 @@ module.exports = [
       auth: {
         scope: ['apikey']
       },
-      handler: apiKey.getMyApiKey,
+      id: ROUTE_IDS.API_KEYS.GET.MYSELF,
       description: 'Get your API key information',
       notes: 'Use the call to get the details of your API key.',
       tags: ['api'],
@@ -90,7 +90,7 @@ module.exports = [
       auth: {
         scope: ['admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: apiKey.getApiKey,
+      id: ROUTE_IDS.API_KEYS.GET.ONE,
       description: 'Get API key details',
       notes: 'Use this function to get details of an API key',
       tags: ['api'],
@@ -117,10 +117,10 @@ module.exports = [
       auth: {
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
-      handler: apiKey.createApiKey,
+      id: ROUTE_IDS.API_KEYS.POST.NEW,
       description: 'Create a new API key',
       notes: 'Use the call to create a new API key for your company. ' +
-        'After creating a new API key you can use a PUT call to /v1/api_keys/{key_id} to configure the key.',
+      'After creating a new API key you can use a PUT call to /v1/api_keys/{key_id} to configure the key.',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -129,7 +129,7 @@ module.exports = [
       },
       validate: {
         payload: {
-          account_id      : Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
+          account_id: Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
         }
       },
       response: {
@@ -145,7 +145,7 @@ module.exports = [
       auth: {
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
-      handler: apiKey.updateApiKey,
+      id: ROUTE_IDS.API_KEYS.PUT.ONE,
       description: 'Update a customer API key',
       notes: 'Use this function to update API key details',
       tags: ['api'],
@@ -162,20 +162,20 @@ module.exports = [
           key_id: Joi.string().required().description('ID of the API key to be updated')
         },
         payload: {
-          key_name        : Joi.string().required().min(1).max(150).description('Name of the API key'),
-          account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
-          managed_account_ids : Joi.array().optional().items(Joi.objectId().description('IDs of companies the API key is allowed to manage')),
-          domains         : Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
-          allowed_ops     : Joi.object({
-            read_config     : Joi.boolean().required(),
-            modify_config   : Joi.boolean().required(),
-            delete_config   : Joi.boolean().required(),
-            purge           : Joi.boolean().required(),
-            reports         : Joi.boolean().required(),
-            admin           : Joi.boolean().required(),
+          key_name: Joi.string().required().min(1).max(150).description('Name of the API key'),
+          account_id: Joi.objectId().required().description('ID of a company that the API key belongs to'),
+          managed_account_ids: Joi.array().optional().items(Joi.objectId().description('IDs of companies the API key is allowed to manage')),
+          domains: Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
+          allowed_ops: Joi.object({
+            read_config: Joi.boolean().required(),
+            modify_config: Joi.boolean().required(),
+            delete_config: Joi.boolean().required(),
+            purge: Joi.boolean().required(),
+            reports: Joi.boolean().required(),
+            admin: Joi.boolean().required(),
           }),
           read_only_status: Joi.boolean().required().description('Tells if the API key is read-only or read/write'),
-          active          : Joi.boolean().required().description('Tells if the API key is active or not')
+          active: Joi.boolean().required().description('Tells if the API key is active or not')
         }
       },
       response: {
@@ -191,7 +191,7 @@ module.exports = [
       auth: {
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
-      handler: apiKey.activateApiKey,
+      id: ROUTE_IDS.API_KEYS.POST.ACTIVATE,
       description: 'Activate an API key',
       notes: 'Use the call to activate an API key for your company in the system',
       tags: ['api', 'accounts'],
@@ -218,10 +218,10 @@ module.exports = [
       auth: {
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
-      handler: apiKey.deactivateApiKey,
+      id: ROUTE_IDS.API_KEYS.POST.DEACTIVATE,
       description: 'Deactive an API key',
       notes: 'Use the call to deactivate an API key. The key\' configuration will be stored in the system but it will be not ' +
-        'possible to use the key to access the customer API service',
+      'possible to use the key to access the customer API service',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -246,7 +246,7 @@ module.exports = [
       auth: {
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
-      handler: apiKey.deleteApiKey,
+      id: ROUTE_IDS.API_KEYS.DELETE.ONE,
       description: 'Delete a customer API key',
       notes: 'This function should be used by a company admin to delete an API key',
       tags: ['api'],

@@ -27,7 +27,7 @@
 // Requiring Joi library to define some Schema objects
 var Joi = require('joi');
 
-var models = require('./../../../../../lib/routeModels');
+var models = require('./routes/models');
 
 var APIKeysSchemaProvider = require('./apiKeys');
 var DashboardsSchemaProvider = require('./dashboards');

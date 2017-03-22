@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,19 +22,18 @@
 
 var Joi = require('joi');
 
-var dashboars = require('../handlers/dashboards');
-var routeModels = require('../lib/routeModels');
+var routeModels = require('../models');
+var ROUTE_IDS = require('../ids');
 
 module.exports = [{
   method: 'GET',
   path: '/v1/dashboards',
   config: {
+    id: ROUTE_IDS.DASHBOARDS.GET.ALL,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
-    handler: dashboars.getDashboards,
     description: 'Get a list of dashboards',
-//    tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -48,12 +47,11 @@ module.exports = [{
   method: 'POST',
   path: '/v1/dashboards',
   config: {
+    id: ROUTE_IDS.DASHBOARDS.POST.NEW,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
-    handler: dashboars.createDashboard,
     description: 'Create a new dashboard',
-//    tags: ['api', 'dashboars'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -80,12 +78,11 @@ module.exports = [{
   method: 'GET',
   path: '/v1/dashboards/{dashboard_id}',
   config: {
+    id: ROUTE_IDS.DASHBOARDS.GET.ONE,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
-    handler: dashboars.getDashboard,
     description: 'Get a dashboard',
-//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -104,13 +101,12 @@ module.exports = [{
   method: 'PUT',
   path: '/v1/dashboards/{dashboard_id}',
   config: {
+    id: ROUTE_IDS.DASHBOARDS.PUT.ONE,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
-    handler: dashboars.updateDashboard,
     description: 'Update a dashboard',
     notes: 'Use this function to update dashboard information',
-//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -133,13 +129,12 @@ module.exports = [{
   method: 'DELETE',
   path: '/v1/dashboards/{dashboard_id}',
   config: {
+    id: ROUTE_IDS.DASHBOARDS.DELETE.ONE,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
-    handler: dashboars.deleteDashboard,
     description: 'Remove a dashboard',
     notes: 'This function should be used  to delete a dashboard',
-//    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
