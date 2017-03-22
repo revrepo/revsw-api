@@ -22,16 +22,13 @@
 
 var Joi = require('joi');
 
-var getDashboarsList = require('../handlers/getCountriesList');
 var dashboars = require('../handlers/dashboards');
 var routeModels = require('../lib/routeModels');
-var ROUTE_IDS = require('./../config/routes/ids.js');
 
 module.exports = [{
   method: 'GET',
   path: '/v1/dashboards',
   config: {
-    id: ROUTE_IDS.DASHBOARDS.GET.ALL,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
@@ -51,7 +48,6 @@ module.exports = [{
   method: 'POST',
   path: '/v1/dashboards',
   config: {
-    id: ROUTE_IDS.DASHBOARDS.POST.NEW,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
@@ -84,7 +80,6 @@ module.exports = [{
   method: 'GET',
   path: '/v1/dashboards/{dashboard_id}',
   config: {
-    id: ROUTE_IDS.DASHBOARDS.GET.ONE,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
@@ -109,7 +104,6 @@ module.exports = [{
   method: 'PUT',
   path: '/v1/dashboards/{dashboard_id}',
   config: {
-    id: ROUTE_IDS.DASHBOARDS.PUT.ONE,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
@@ -139,7 +133,6 @@ module.exports = [{
   method: 'DELETE',
   path: '/v1/dashboards/{dashboard_id}',
   config: {
-    id: ROUTE_IDS.DASHBOARDS.DELETE.ONE,
     auth: {
       scope: ['user', 'admin', 'reseller', 'revadmin']
     },
