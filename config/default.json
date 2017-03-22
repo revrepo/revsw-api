@@ -300,7 +300,7 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "nuu:bit Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "nuubitcn.net"
+      "cname_domain": "nuubitqa.net"
     },
     "hooli": {
       "vendorUrl": "http://localhost:5000",
