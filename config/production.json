@@ -81,21 +81,24 @@
       "apiUrl": "https://api.revapm.net",
       "password_reset_portal_domain": "portal.revapm.net",
       "googleAnalyticsAccount": "UA-68856309-3",
-      "apiGoogleAnalyticsAccount": "UA-68856309-7"
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "cname_domain": "revdn.net"
     },
     "nuubit": {
       "vendorUrl": "https://portal.nuubit.net",
       "apiUrl": "https://api.nuubit.net",
       "password_reset_portal_domain": "portal.nuubit.net",
       "googleAnalyticsAccount": "UA-92590791-3",
-      "apiGoogleAnalyticsAccount": "UA-92590791-4"
+      "apiGoogleAnalyticsAccount": "UA-92590791-4",
+      "cname_domain": "nuubitcn.net"
     },
     "hooli": {
       "vendorUrl": "https://hooli.nuubit.net",
       "apiUrl": "https://api.revapm.net",
       "password_reset_portal_domain": "portal.revapm.net",
       "googleAnalyticsAccount": "UA-68856309-3",
-      "apiGoogleAnalyticsAccount": "UA-68856309-7"
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "cname_domain": "revdn.net"
     }
   }
 }
