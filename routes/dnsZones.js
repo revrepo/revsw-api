@@ -23,6 +23,7 @@
 var Joi = require('joi');
 
 var dnsZone = require('../handlers/dnsZones');
+var dnsZoneStatistics = require('../handlers/dnsZoneStatistics');
 
 var routeModels = require('../lib/routeModels');
 
@@ -75,6 +76,38 @@ module.exports = [
       response: {
         schema: routeModels.listOfDNSZonesModel
       }
+    }
+  },
+  // TODO:
+    {
+    method: 'GET',
+    path: '/v1/dns_zones/stats/usage/{zone}',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZoneStatistics.getDnsZonesStatsUsageZone,
+      description: 'Get usage stats for one DNS zone',
+      notes: 'Use this function to get usage stats for one DNS zone registered for your account',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+           zone: Joi.string().required().default('gerzhan.ru').description('DNS zone ')
+          // TODO: ?? use dns_zone_id: Joi.objectId().required().description('DNS zone ID')
+        },
+        query:{
+           period: Joi.string().required().default('24h').description('period: one of 1h, 24h, or 30d; default 24h'),
+        }
+      },
+      // TODO: fix response
+      // response: {
+      //   schema: routeModels.listOfDNSZonesStatUsageModel
+      // }
     }
   },
   {
