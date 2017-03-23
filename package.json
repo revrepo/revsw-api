@@ -73,6 +73,7 @@
     "node-schedule": "^1.1.1",
     "node-uuid": "^1.4.3",
     "nodemailer": "^1.4.0",
+    "ns1": "^0.1.11",
     "object-assign": "~4.1.0",
     "qs": "^6.1.0",
     "request": "^2.60.0",
