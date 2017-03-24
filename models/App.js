@@ -247,14 +247,7 @@ App.prototype = {
       }
     };
     if (account_id) {
-      var accountId ;
-       if ( _.isArray( account_id ) ) {
-        accountId = { $in: account_id.map( function( id ) {
-          return mongoose.Types.ObjectId( id );
-        }) };
-      } else {
-        accountId = mongoose.Types.ObjectId( account_id );
-      }
+      var accountId  = _.isArray( account_id ) ? { $in: account_id } : account_id;
       match_.$match.$and.push({ account_id: accountId });
     }
     pipline.push(match_);
