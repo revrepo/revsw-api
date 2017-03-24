@@ -41,6 +41,8 @@ var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getCon
 
 var Nsone = require('../lib/nsone.js');
 
+var DNS_ZONE_NOT_FOUND = 'DNS zone not found';
+
 var ERROR_UNHANDLED_INTERNAL_SERVER_ERROR = 'Unhandled Internal Server Error';
 var ERROR_DNS_SERVICE_UNABLE = 'The DNS service is currently unable to process your request. Please try again later.';
 
@@ -53,25 +55,39 @@ var ERROR_DNS_SERVICE_UNABLE = 'The DNS service is currently unable to process y
  * @return {[type]}         [description]
  */
 module.exports.getDnsZonesStatsUsageZone = function(request, reply) {
-  var zoneName = request.params.zone;
-  var filterPeriod = request.query.period;
-  //If expand=true, stats will be returned for all records in the zone.
-
+  var zoneId = request.params.dns_zone_id;
+  var foundDnsZone;
+  var filterPeriod = request.query.period || '1h';
+  var intervalSec = 3 * 60;
+  // NOTE: default interval for period
+  switch (filterPeriod){
+    case '1h':
+      intervalSec = 3 * 60; // 3 min
+      break;
+    case '24h':
+      intervalSec = 3 * 60 * 60; // 30 min
+      break;
+    case '30d':
+      intervalSec = 12 * 60 * 60; // 14 hours
+      break;
+  }
   Promise.resolve()
-    // TODO: find zone in system
-    // TODO: check permissions
-    // .then(function(zones) {
-    //     var responseZones = [];
-    //     zones.forEach(function(zone) {
-    //       if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
-    //         responseZones.push(zone);
-    //       }
-    //     });
-    //     return responseZones;
-    //   })
+    .then(function() {
+      return dnsZones.getAsync(zoneId);
+    })
+    .then(function(dnsZone) {
+      // Check if dns_zone owned by any user
+      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+        throw new Error(DNS_ZONE_NOT_FOUND);
+      } else {
+        foundDnsZone = dnsZone;
+        return true;
+      }
+    })
     // make request to NSONE
     .then(function() {
-      return Nsone.getDnsZonesStatsUsageZone(zoneName, { period: filterPeriod }).then(function(data) {
+      return Nsone.getDnsZonesStatsUsageZone(foundDnsZone.zone, { period: filterPeriod })
+        .then(function(data) {
         return data[0];
       });
     })
@@ -81,18 +97,18 @@ module.exports.getDnsZonesStatsUsageZone = function(request, reply) {
       var to = (statUsageInfo.graph.length!==0)?statUsageInfo.graph[statUsageInfo.graph.length - 1][0] * 1000: null;
       response = {
         metadata: {
-          zone: zoneName,
+          zone: foundDnsZone.zone,
+          account_id: foundDnsZone.account_id,
           period: response.period,
           queries: response.queries,
           records: response.records,
-          interval_sec: 30 * 60 * 1000, // 1800
-          // dns_zone_id: request.params.dns_zone_id,
+          interval_sec: intervalSec,
           from: from,
           from_datetime: new Date(from),
           to: to,
           to_datetime: new Date(to)
         },
-        data:  _.map(statUsageInfo.graph, function(item) {
+        data: _.map(statUsageInfo.graph, function(item) {
           if (_.isArray(item) === true) {
             return [item[0]*1000, item[1]];
           } else {

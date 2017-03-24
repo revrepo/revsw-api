@@ -78,10 +78,9 @@ module.exports = [
       }
     }
   },
-  // TODO:
-    {
+  {
     method: 'GET',
-    path: '/v1/dns_zones/stats/usage/{zone}',
+    path: '/v1/dns_zones/{dns_zone_id}/stats/usage',
     config: {
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
@@ -97,8 +96,7 @@ module.exports = [
       },
       validate: {
         params: {
-           zone: Joi.string().required().default('gerzhan.ru').description('DNS zone ')
-          // TODO: ?? use dns_zone_id: Joi.objectId().required().description('DNS zone ID')
+           dns_zone_id: Joi.objectId().required().description('DNS zone ID')
         },
         query:{
            period: Joi.string().required().default('24h').description('period: one of 1h, 24h, or 30d; default 24h'),
