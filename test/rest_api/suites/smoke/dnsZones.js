@@ -195,4 +195,43 @@ describe('Smoke check', function () {
           .catch(done);
     });
   });
+
+  describe('DNS Analytics:', function() {
+    var testDnsZone;
+    before(function(done) {
+      testDnsZone = DNSZonesDP.generateOne(account.id);
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function() {
+          API.resources.dnsZones
+            .createOne(testDnsZone)
+            .expect(200)
+            .then(function(res) {
+              var responseJson = res.body;
+              testDnsZone._id = responseJson.object_id;
+              done();
+            })
+            .catch(done);
+        })
+        .catch(done);
+    });
+
+    it('should return success response code when get DNS zone stats usage', function(done) {
+
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function() {
+          API.resources.dnsZones
+            .stats_usage({ period: '1h' })
+            .getOne(testDnsZone._id)
+            .expect(200)
+            .then(function(res) {
+              var responseJson = res.body;
+              done();
+            })
+            .catch(done);
+        })
+        .catch(done);
+    });
+  });
 });

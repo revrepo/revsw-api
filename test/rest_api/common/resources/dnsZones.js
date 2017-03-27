@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -26,7 +26,7 @@ var Methods = Constants.API.METHODS;
 var dnsZoneKey = 'dnsZoneId';
 var resourceConfig = {
   idKey: dnsZoneKey,
-  name: 'logShippingJobs',
+  name: 'ndsZones',
   path: '/dns_zones/{' + dnsZoneKey + '}',
   methods: [
     Methods.CREATE,
@@ -48,6 +48,13 @@ var resourceConfig = {
       path: '/stats/usage',
       methods: [
         Methods.READ_ALL
+      ]
+    },
+    {
+      name: 'stats_usage',
+      path: '/stats/usage',
+      methods: [
+        Methods.READ_ONE
       ]
     }
   ]
