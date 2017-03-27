@@ -39,7 +39,7 @@ describe('UsageReport Functional check:', function () {
     estimated = UsageDP.countEstimations(),
     test_data_timespan = 12 * 3600,
     report;
-    // console.log( estimated );
+   // console.log( estimated );
 
   //  ---------------------------------
   it( 'UsageReport downloaded successfully', function ( done ) {
@@ -87,6 +87,27 @@ describe('UsageReport Functional check:', function () {
     estimated.sent_bytes *= report.records_processed;
     test_data_timespan *= report.records_processed;
   });
+
+  it( 'UsageReport contains Mobile Apps data', function () {
+    report.should.be.ok();
+    report.applications.should.have.property( 'total' );
+    report.applications.should.have.property( 'active' );
+    report.applications.should.have.property( 'deleted' );
+  });
+
+  it( 'UsageReport contains Mobile Apps Per Platforms data', function () {
+    report.should.be.ok();
+    report.apps_per_platform.should.have.property( 'Windows_Mobile' );
+    report.apps_per_platform.should.have.property( 'Android' );
+    report.apps_per_platform.should.have.property( 'iOS' );
+  });
+
+  it( 'UsageReport contains SSL Certificates data', function () {
+    report.should.be.ok();
+    report.ssl_certs.should.have.property( 'total' );
+    report.ssl_certs.should.have.property( 'active' );
+    report.ssl_certs.should.have.property( 'deleted' );
+   });
 
   it( 'UsageReport contains domain(' + domain + ') data', function () {
     report.should.be.ok();
