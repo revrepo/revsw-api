@@ -26,7 +26,7 @@ var Methods = Constants.API.METHODS;
 var dnsZoneKey = 'dnsZoneId';
 var resourceConfig = {
   idKey: dnsZoneKey,
-  name: 'ndsZones',
+  name: 'dnsZones',
   path: '/dns_zones/{' + dnsZoneKey + '}',
   methods: [
     Methods.CREATE,
