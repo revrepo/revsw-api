@@ -397,8 +397,7 @@ module.exports = [{
             approve: Joi.boolean().default(false)
               .description('Approve lua code/location posted by user (Replaces effective params if true)')
           }),
-          co_lua_enable_all: Joi.boolean().optional(),
-          enable_enhanced_analytics: Joi.boolean().required().description('Enhanced Traffic Analytics')
+          co_lua_enable_all: Joi.boolean().optional()
         }
       },
       //      response    : {

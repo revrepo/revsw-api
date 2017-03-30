@@ -490,8 +490,6 @@ exports.updateDomainConfig = function(request, reply) {
       delete newDomainJson.bp_lua_enable_all;
       var _coLuaEnabled = newDomainJson.co_lua_enable_all || false;
       delete newDomainJson.co_lua_enable_all;
-      var _enableEnhancedAnalytics = newDomainJson.enable_enhanced_analytics;
-      delete newDomainJson.enable_enhanced_analytics;
 
       var newDomainJson2 = {
         updated_by: utils.generateCreatedByField(request),
@@ -507,8 +505,7 @@ exports.updateDomainConfig = function(request, reply) {
         bp_lua: bpLua,
         bp_lua_enable_all: _bpLuaEnabled,
         co_lua: coLua,
-        co_lua_enable_all: _coLuaEnabled,
-        enable_enhanced_analytics: _enableEnhancedAnalytics
+        co_lua_enable_all: _coLuaEnabled
       };
 
       logger.info('Calling CDS to update configuration for domain ID: ' + domain_id + ', optionsFlag: ' + optionsFlag + ', request body: ' +

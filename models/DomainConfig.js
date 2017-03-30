@@ -66,8 +66,7 @@ function DomainConfig(mongoose, connection, options) {
     'bp_lua_enable_all': {type: Boolean, default: false},
     'bp_lua': [luaSchema],
     'co_lua_enable_all': {type: Boolean, default: false},
-    'co_lua': [luaSchema],
-    'enable_enhanced_analytics': {type: Boolean, default: false}
+    'co_lua': [luaSchema]
   });
 
   this.model = connection.model('DomainConfig', this.DomainConfigSchema, 'DomainConfig');
@@ -368,10 +367,9 @@ DomainConfig.prototype = {
       .then( function( data ) {
         var res = {};
 
-        // console.log('domainsListForAccountGrouped',data );
+        console.log( data );
 
         data.forEach( function( item ) {
-
           if ( !item.proxy_config || !item.proxy_config.account_id ) {
             return;
           }
