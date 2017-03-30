@@ -258,6 +258,7 @@ SSLName.prototype = {
       .exec()
       .then( function( docs ) {
         var hash = {};
+        // console.log('=======',docs)
         if ( docs ) {
           docs.forEach( function( doc ) {
             hash[doc._id.toString()] = doc.count;

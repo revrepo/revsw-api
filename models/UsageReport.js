@@ -67,6 +67,7 @@ function UsageReport( mongoose, connection, options ) {
     'apps_per_platform'         : {type: this.Schema.Types.Mixed, default: APP_PER_PLATFORMS_DEFAULT_DATA_OBJECT },
     'ssl_certs'                 : {type: this.Schema.Types.Mixed},
     'ssl_certs_per_type'        : {type: this.Schema.Types.Mixed, default: SSL_CERTIFICATES_DEFAULT_DATA_OBJECT },
+    'ssl_names'                 : {type : Number, default : 0},
     'domains'                   : this.Schema.Types.Mixed,
     'domains_usage'             : this.Schema.Types.Mixed,
     'traffic_per_billing_zone'  : this.Schema.Types.Mixed
