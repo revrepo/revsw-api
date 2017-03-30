@@ -31,8 +31,10 @@ describe('Functional check', function () {
   var reseller = config.get('api.users.reseller');
   var secondReseller = config.get('api.users.secondReseller');
   var users = [
-    //config.get('api.users.revAdmin'), // TODO need to use all user roles
-    reseller
+    config.get('api.users.revAdmin'), // TODO need to use all user roles
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
   ];
 
   users.forEach(function (user) {

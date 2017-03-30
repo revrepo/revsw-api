@@ -86,6 +86,15 @@
           "id": "5588869fbde7a0d00338ce8f",
           "companyName": "Rev Test"
         }
+      }, 
+      "roUser": {
+        "email": "qa_user_with_ro_perm@revsw.com",
+        "password": "password1",
+        "role": "RO User",
+        "account": {
+          "id": "5588869fbde7a0d00338ce8f",
+          "companyName": "Rev Test"
+        }
       },
       "admin2": {
         "email": "qa_user_with_admin_perm@revsw.com",

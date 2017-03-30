@@ -1,0 +1,13 @@
+{
+  "api": {
+    "host": {
+      "protocol": "https",
+      "name": "127.0.0.1",
+      "port": 8000
+    }
+  },
+  "stats_api": {
+    "server": "https://127.0.0.1:3000",
+    "version": "v1"
+  }
+}

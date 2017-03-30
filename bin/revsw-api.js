@@ -18,7 +18,7 @@
 
 /*jslint node: true */
 
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 'use strict';
 
@@ -220,7 +220,7 @@ var goodOptions = {
   responseEvent: 'response',
   reporters: [{
     reporter: require('good-console'),
-      events: { log: '*', response: '*', ops: '*', error: '*', request: '*' }
+      events: { log: '*', /*response: '*', */ops: '*', error: '*', request: '*' }
   },
   {
     reporter: require('good-file'),
