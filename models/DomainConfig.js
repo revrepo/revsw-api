@@ -66,7 +66,8 @@ function DomainConfig(mongoose, connection, options) {
     'bp_lua_enable_all': {type: Boolean, default: false},
     'bp_lua': [luaSchema],
     'co_lua_enable_all': {type: Boolean, default: false},
-    'co_lua': [luaSchema]
+    'co_lua': [luaSchema],
+    'enable_enhanced_analytics': {type: Boolean, default: false}
   });
 
   this.model = connection.model('DomainConfig', this.DomainConfigSchema, 'DomainConfig');
@@ -367,7 +368,7 @@ DomainConfig.prototype = {
       .then( function( data ) {
         var res = {};
 
-        console.log( data );
+        // console.log( data );
 
         data.forEach( function( item ) {
           if ( !item.proxy_config || !item.proxy_config.account_id ) {
@@ -378,7 +379,6 @@ DomainConfig.prototype = {
             res[aid] = [];
           }
           if ( item.proxy_config.domain_aliases ) {
-            console.log('domainsListForAccountGrouped::item.proxy_config.domain_aliases',item.proxy_config.domain_aliases );
             res[aid] = res[aid].concat( item.proxy_config.domain_aliases.map( function( alias ) {
               return { name: alias, deleted: item.deleted };
             }) );
