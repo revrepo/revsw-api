@@ -30,12 +30,11 @@ function migrate() {
           cb(null)
         } else {
           item.domainId = domainList[0]._id;
-          console.log(item);
-          // auditevents.changePurgeActivityTargetOnDomainActivityTarget(
-          //   item,
-          //   function(error, activity) {
-          //     cb(null,   activity)
-          //   })
+          auditevents.changePurgeActivityTargetOnDomainActivityTarget(
+            item,
+            function(error, activity) {
+              cb(null,   activity)
+            })
         }
       })
     }, function(err, res) {

@@ -43,7 +43,7 @@ var logShippingJobs = new LogShippingJob(mongoose, mongoConnection.getConnection
  * @return {[type]}             [description]
  */
 exports.deleteJobsWithAccountId = function(accountId, cb) {
-  logger.info('deleteJobsWithAccountId:Account Id' + accountId);
+  logger.info('deleteJobsWithAccountId:Accotin Id' + accountId);
 
   logShippingJobs.query({
     account_id: accountId

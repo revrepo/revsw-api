@@ -378,6 +378,7 @@ DomainConfig.prototype = {
             res[aid] = [];
           }
           if ( item.proxy_config.domain_aliases ) {
+            console.log('domainsListForAccountGrouped::item.proxy_config.domain_aliases',item.proxy_config.domain_aliases );
             res[aid] = res[aid].concat( item.proxy_config.domain_aliases.map( function( alias ) {
               return { name: alias, deleted: item.deleted };
             }) );
