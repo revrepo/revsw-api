@@ -25,11 +25,10 @@ var Joi = require('joi');
 
 module.exports = [{
   method: 'GET',
-  path: '/curl',
+  path: '/v1/curl',
   config: {
-    auth: {
-      scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
-    },
+    auth: false,
+    // TODO: !!! fix security to call from iframe ->  { scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw'] },
     description: 'Proxy for custom urls',
     notes: 'Use this function for proxy call custom urls',
   },
