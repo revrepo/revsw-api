@@ -61,14 +61,14 @@ module.exports = [{
     },
     validate: {
       options: {
-        // TODO: do we need to statement?
+        // TODO: do we need the statement?
         stripUnknown: true
       },
       payload: {
-        title: Joi.string().required().min(1).max(150)
+        title: Joi.string().required().regex(routeModels.dashboardNameRegex).min(1).max(150)
           .trim().description('Dashboard title for screen display'),
         options: Joi.object().description('Options dashboard'),
-        structure: Joi.string().max(50).trim().description('Name type dashboard structure'),
+        structure: Joi.string().valid('12', '8-4', '6-6', '4-4-4', '3-3-3-3').description('Name type dashboard structure'),
         rows: Joi.array().description('Dashboard rows content')
       }
     },

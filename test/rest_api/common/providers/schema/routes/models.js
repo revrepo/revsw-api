@@ -77,7 +77,7 @@ exports.dashboardModel = Joi.object({
   id: Joi.string().required().description('Dashboard ID'),
   user_id: Joi.objectId().required().description('User ID'),
   title: Joi.string().required().description('Dashboard title'),
-  structure: Joi.string().description('Name dashboard structure'),
+  structure: Joi.string().valid('12', '8-4', '6-6', '4-4-4', '3-3-3-3').description('Name type dashboard structure'),
   options: Joi.object().description('Options dashboard'),
   rows: Joi.array().description('Rows in dashboard'),
   created_at: Joi.date().description('Dashboard creation date/time'),

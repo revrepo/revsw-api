@@ -51,7 +51,7 @@ var DashboardDataProvider = {
       options: {
         stripUnknown: true
       },
-      structure: faker.lorem.words()[0],
+      structure: '12',
       rows: []
     };
   },
