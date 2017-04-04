@@ -162,7 +162,7 @@ module.exports = [
           key_id: Joi.string().required().description('ID of the API key to be updated')
         },
         payload: {
-          key_name        : Joi.string().required().min(1).max(150).description('Name of the API key'),
+          key_name        : Joi.string().required().regex(routeModels.apiKeyNameRegex).min(1).max(150).description('Name of the API key'),
           account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
           managed_account_ids : Joi.array().optional().items(Joi.objectId().description('IDs of companies the API key is allowed to manage')),
           domains         : Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
