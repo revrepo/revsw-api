@@ -100,5 +100,10 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "cname_domain": "revdn.net"
     }
-  }
+  },
+  "proxy_white_referer_urls": [
+    "https://portal.revapm.net",
+    "https://portal.nuubit.net",
+    "https://hooli.nuubit.net"
+  ]
 }
