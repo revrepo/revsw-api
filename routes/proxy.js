@@ -39,7 +39,8 @@ module.exports = [{
       mapUri: function(request, callback) {
         var referer = request.headers.referer;
         if (_.find(proxyWhiteRefererURLs, function(item) {
-            return item === referer;
+            var hostRegExp = new RegExp(item);
+            return hostRegExp.test(referer);
           })) {
           var url = request.query.url || 'https://www.statuspage.io/';
           callback(null, url);
