@@ -21,22 +21,31 @@
 'use strict';
 
 var Joi = require('joi');
+var _ = require('lodash');
+var config = require('config');
 
+var proxyWhiteRefererURLs = config.get('proxy_white_referer_urls');
 
 module.exports = [{
   method: 'GET',
   path: '/v1/curl',
   config: {
     auth: false,
-    // TODO: !!! fix security to call from iframe ->  { scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw'] },
     description: 'Proxy for custom urls',
     notes: 'Use this function for proxy call custom urls',
   },
   handler: {
     proxy: {
-      mapUri: function (request, callback) {
-        var url = request.query.url || 'https://www.statuspage.io/';
-        callback(null, url);
+      mapUri: function(request, callback) {
+        var referer = request.headers.referer;
+        if (_.find(proxyWhiteRefererURLs, function(item) {
+            return item === referer;
+          })) {
+          var url = request.query.url || 'https://www.statuspage.io/';
+          callback(null, url);
+        } else {
+          callback(new Error('Bad request'));
+        }
       }
     }
   }
