@@ -51,6 +51,12 @@ var IDS = {
     DELETE: {
       ONE: 'DELETE::DASHBOARDS::{ID}'
     }
+  },
+  HEALTH_CHECK: {
+    BASE_PATH: 'healthcheck',
+    GET: {
+      ALL: 'GET::HEALTH_CHECK::ALL'
+    }
   }
 };
 
