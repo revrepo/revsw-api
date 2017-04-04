@@ -104,6 +104,8 @@
   "proxy_white_referer_urls": [
     "https://portal.revapm.net",
     "https://portal.nuubit.net",
-    "https://hooli.nuubit.net"
+    "https://hooli.nuubit.net",
+    "https://portal-staging.revapm.net",
+    "https://portal-staging.nuubit.net"
   ]
 }
