@@ -35,10 +35,12 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      response: Joi.object({
-        message: Joi.string(),
-        version: Joi.string()
-      })
+      response: {
+        schema: Joi.object({
+          message: Joi.string().required(),
+          version: Joi.string().required()
+        })
+      }
     }
   }
 ];

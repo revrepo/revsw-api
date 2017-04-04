@@ -31,6 +31,7 @@ var models = require('./routes/models');
 
 var APIKeysSchemaProvider = require('./apiKeys');
 var DashboardsSchemaProvider = require('./dashboards');
+var HealthCheckSchemaProvider = require('./healthCheck');
 
 // Defining common variables
 var dateFormatPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
@@ -50,6 +51,7 @@ var APISchemaProviders = {
 
   apiKeys: APIKeysSchemaProvider,
   dashboards: DashboardsSchemaProvider,
+  healthCheck: HealthCheckSchemaProvider,
 
   /**
    * ### SchemaProvider.getSuccessResponse()
