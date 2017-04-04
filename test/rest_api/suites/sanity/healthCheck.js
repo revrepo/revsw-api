@@ -17,11 +17,12 @@
  */
 
 require('should-http');
+var Joi = require('joi');
 
 var config = require('config');
 var API = require('./../../common/api');
 
-describe('Functional check', function () {
+describe('Sanity check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -31,6 +32,7 @@ describe('Functional check', function () {
     //config.get('api.users.revAdmin'),
     config.get('api.users.reseller')
   ];
+  var responseSchema = API.providers.schema.healthCheck.getForRead().response;
 
   users.forEach(function (user) {
 
@@ -38,7 +40,8 @@ describe('Functional check', function () {
 
       describe('HealthCheck resource', function () {
 
-        it('should return a response when getting health-check info.',
+        it('should return data applying HealthCheck schema when getting ' +
+          'health-check info.',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -48,9 +51,7 @@ describe('Functional check', function () {
                   .expect(200);
               })
               .then(function (response) {
-                response.body.message.should.not.be.undefined();
-                response.body.version.should.not.be.undefined();
-                done();
+                Joi.validate(response.body, responseSchema, done);
               })
               .catch(done);
           });
@@ -62,15 +63,14 @@ describe('Functional check', function () {
 
     describe('HealthCheck resource', function () {
 
-      it('should return a response when getting health-check info.',
+      it('should return data applying HealthCheck schema when getting ' +
+        'health-check info.',
         function (done) {
           API.resources.healthCheck
             .getAll()
             .expect(200)
             .then(function (response) {
-              response.body.message.should.not.be.undefined();
-              response.body.version.should.not.be.undefined();
-              done();
+              Joi.validate(response.body, responseSchema, done);
             })
             .catch(done);
         });
