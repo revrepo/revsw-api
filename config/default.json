@@ -390,5 +390,9 @@
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
       "cname_domain": "revqa.net"
     }
-  }
+  },
+  "proxy_white_referer_urls": [
+    "http://localhost:3000/",
+    "http://localhost:4000/"
+  ]
 }
