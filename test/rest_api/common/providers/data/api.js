@@ -17,10 +17,12 @@
  */
 
 var AppsDataProvider = require('./apps');
+var DashboardsDataProvider = require('./dashboards');
 var UsersDataProvider = require('./users');
 
 var APIDataProviders = {
   apps: AppsDataProvider,
+  dashboards: DashboardsDataProvider,
   users: UsersDataProvider
 };
 

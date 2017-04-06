@@ -18,6 +18,8 @@
 
 var faker = require('faker');
 
+var APIKeysDataDrivenHelper = require('./../../helpers/data_driven/apiKeys');
+
 // # API Keys Data Provider object
 //
 // Defines some methods to generate valid and common API key. test data.
@@ -25,11 +27,12 @@ var faker = require('faker');
 //
 // From there, you can modify and get bogus, invalid or other type of data
 // depending on your test needs.
-var APIKeyDataProvider = {
+var APIKeysDataProvider = {
 
   prefix: 'TEST_API_KEY_',
+
   /**
-   * ### APIKeyDataProvider.generateOne()
+   * ### APIKeysDataProvider.generateOne()
    *
    * Generates valid data that represents a API Key and the REST API
    * end points accept.
@@ -48,7 +51,7 @@ var APIKeyDataProvider = {
   },
 
   /**
-   * ### APIKeyDataProvider.generateCompleteOne()
+   * ### APIKeysDataProvider.generateCompleteOne()
    *
    * Generates valid data that represents a complete API Key and the REST API
    * end points accept.
@@ -75,7 +78,7 @@ var APIKeyDataProvider = {
    *    }
    */
   generateCompleteOne: function (accountId, prefix) {
-    var prefix = (prefix ? prefix + '_' : this.prefix )  + Date.now();
+    prefix = (prefix ? prefix + '_' : this.prefix ) + Date.now();
     return {
       account_id: accountId,
       managed_account_ids: [],
@@ -92,7 +95,9 @@ var APIKeyDataProvider = {
       read_only_status: true,
       active: true
     };
-  }
+  },
+
+  DataDrivenHelper: APIKeysDataDrivenHelper
 };
 
-module.exports = APIKeyDataProvider;
+module.exports = APIKeysDataProvider;

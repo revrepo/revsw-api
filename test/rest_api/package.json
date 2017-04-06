@@ -14,8 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^2.10.2",
-    "config": "^1.16.0",
     "chai": "1.9.x",
+    "config": "^1.16.0",
     "faker": "^3.0.1",
     "grunt": "0.4.x",
     "grunt-cli": "^0.1.13",
@@ -25,14 +25,16 @@
     "grunt-env": "^0.4.4",
     "grunt-mocha-test": "^0.12.7",
     "joi": "^6.1.2",
+    "joi-generate": "https://github.com/leo-fcx/joi-generate.git#joi-generate-test-data",
+    "joi-objectid": "~1.1.0",
     "jshint": "^2.8.0",
     "jshint-html-reporter": "^0.2.4",
+    "lodash": "^3.10.1",
     "mocha": "^2.3.3",
     "mocha.parallel": "^0.11.2",
     "should": "^7.1.0",
     "should-http": "0.0.4",
     "supertest": "^1.1.0",
-    "supertest-as-promised": "^2.0.2",
-    "lodash": "^3.10.1"
+    "supertest-as-promised": "^2.0.2"
   }
 }

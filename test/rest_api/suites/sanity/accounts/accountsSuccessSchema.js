@@ -23,7 +23,7 @@ var config = require('config');
 var accounts = require('./../../../common/resources/accounts');
 var API = require('./../../../common/api');
 var AccountsDP = require('./../../../common/providers/data/accounts');
-var SchemaProvider = require('./../../../common/providers/schema');
+var SchemaProvider = require('./../../../common/providers/schema/api');
 
 describe('Sanity check', function () {
 
