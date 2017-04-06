@@ -32,6 +32,7 @@ var resourceConfig = {
     Methods.CREATE,
     Methods.READ_ONE,
     Methods.READ_ALL,
+    Methods.UPDATE,
     Methods.DELETE
   ],
   nestedResources: [
@@ -40,7 +41,32 @@ var resourceConfig = {
       path: '/records',
       methods: [
         Methods.CREATE,
-        Methods.DELETE_DATA
+        Methods.READ_ONE,
+        Methods.READ_ALL,
+        Methods.UPDATE,
+        Methods.DELETE,
+        Methods.DELETE_DATA // TODO: Do we still need this?
+      ]
+    },
+    {
+      name: 'checkIntegration',
+      path: '/checkintegration',
+      methods: [],
+      nestedResources: [
+        {
+          name: 'dnsServers',
+          path: '/dns_servers',
+          methods: [
+            Methods.READ_ALL
+          ]
+        },
+        {
+          name: 'records',
+          path: '/records',
+          methods: [
+            Methods.READ_ALL
+          ]
+        }
       ]
     },
     {
