@@ -59,7 +59,8 @@ describe('Smoke check', function () {
       done();
     });
 
-    it('should return success response code when getting a list of DNS zones', function (done) {
+    it('should return success response code when getting a list of DNS zones',
+      function (done) {
         API.helpers
           .authenticateUser(reseller)
           .then(function () {

@@ -52,6 +52,10 @@ var IDS = {
       ONE: 'DELETE::DASHBOARDS::{ID}'
     }
   },
+  DNS_ZONES: {
+    BASE_PATH: 'dns_zones',
+
+  },
   HEALTH_CHECK: {
     BASE_PATH: 'healthcheck',
     GET: {
