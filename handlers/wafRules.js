@@ -94,7 +94,15 @@ exports.listWAFRules = function(request, reply) {
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
-          response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+        // TODO: Need better performance ???
+         if(response_json[i].rule_type === 'customer' && !isRevAdmin){
+           // NOTE: user can get access to 'customer' WAF Rule if it created for user account(s)
+           if (utils.checkUserAccessPermissionToAccount(request,response_json[i].account_id)) {
+              response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+           }
+         }else{
+           response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+         }
       }
 
       renderJSON(request, reply, err, response);
