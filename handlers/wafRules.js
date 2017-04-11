@@ -49,30 +49,40 @@ var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 /**
  * @name listWAFRules
  * @description get List WAF Rules
+ * All users have access to all public WAF Rule
+ *
  */
 exports.listWAFRules = function(request, reply) {
   var filters_ = request.query.filters;
   var isRevAdmin = utils.isUserRevAdmin(request);
   var options = {};
+
  // NOTE: add additional filters for send to CDS
-   if(!!filters_){
-     if(!!filters_.account_id){
+  if(!!filters_){
+    if(!!filters_.account_id){
+        if (!utils.checkUserAccessPermissionToAccount(request,filters_.account_id)) {
+            return reply(boom.badRequest('WAF Rules not found'));
+        }
         options.account_id = filters_.account_id;
-     }
-     if(!!filters_.rule_type){
-        options.rule_type = filters_.rule_type;
-     }
-      if(isRevAdmin !== true){
-        // NOTE: if user not RevAdmin he can`t see  'private' (only 'public')
-        options.visibility = 'public';
-     }
-   }
+        options.visibility = 'public'; // NOTE: rules for Account Id
+      if(!!filters_.rule_type && filters_.rule_type === 'builtin'){
+          options.rule_type = filters_.rule_type;
+      }
+    } else {
+        if(!!filters_.rule_type){
+            options.rule_type = filters_.rule_type;
+        }
+        if(isRevAdmin !== true){
+            // NOTE: if user not RevAdmin he can`t see  'private' (only 'public')
+            options.visibility = 'public';
+        }
+    }
+  }
 
   cds_request( { url: config.get('cds_url') + '/v1/waf_rules?'+queryString.stringify(options),
     headers: authHeader
   }, function (err, res, body) {
     if (err) {
-      console.log(err);
       return reply(boom.badImplementation('Failed to get from CDS a list of WAF Rules'));
     }
     var response_json = JSON.parse(body);
@@ -84,9 +94,15 @@ exports.listWAFRules = function(request, reply) {
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
-        //if (utils.checkUserAccessPermissionToSSLCertificate(request,response_json[i])) {
-          response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
-        // }
+        // TODO: Need better performance ???
+         if(response_json[i].rule_type === 'customer' && !isRevAdmin){
+           // NOTE: user can get access to 'customer' WAF Rule if it created for user account(s)
+           if (utils.checkUserAccessPermissionToAccount(request,response_json[i].account_id)) {
+              response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+           }
+         }else{
+           response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+         }
       }
 
       renderJSON(request, reply, err, response);
