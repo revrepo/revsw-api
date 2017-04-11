@@ -339,7 +339,26 @@ module.exports = [{
               cookies_cache_bypass: Joi.array().items(Joi.string().max(150))
             }).required(),
             enable_security: Joi.boolean().required(),
+
+            // TODO need to remove the attribute
             web_app_firewall: Joi.string().valid('off', 'detect', 'block', 'block_all').required(),
+
+            // WAF-related configuration
+            // TODO need to add required() statements, description and proper validation of input
+            enable_waf             : Joi.boolean(),
+            waf                    : Joi.array().items({
+              location                  : Joi.string(),
+              enable_waf                : Joi.boolean(),
+              enable_learning_mode      : Joi.boolean(),
+              enable_sql_injection_lib  : Joi.boolean(),
+              enable_xss_injection_lib  : Joi.boolean(),
+              waf_rules                 : Joi.array().items(Joi.objectId()),
+              waf_actions               : Joi.array().items({
+                condition     : Joi.string(),
+                action        : Joi.string().valid('DROP','BLOCK','LOG','ALLOW')
+              })
+            }),
+
             acl: Joi.object({
               enabled: Joi.boolean().required(),
               action: Joi.string().valid('deny_except', 'allow_except').required(),
