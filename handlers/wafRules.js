@@ -265,8 +265,10 @@ exports.deleteWAFRule = function(request, reply) {
         return reply(boom.badImplementation('Failed to validate that WAF Rule ' + wafRuleId + ' is not in use by a domain configuration'));
       }
       if (res && res.length > 0) {
-        // TODO: add all domain ids for send on UI
-        return reply(boom.badRequest('The WAF Rule is in use by active domain(s) - please update the domain(s) before removing the WAF Rule'));
+        var domainNamesWithRule = _.map(res, function(itemDomainConfig){
+          return itemDomainConfig.domain_name;
+        });
+        return reply(boom.badRequest('The WAF Rule is in use by active domain(s) - please update the domain(s)('+domainNamesWithRule+') before removing the WAF Rule'));
       }
 
       var deleted_by = utils.generateCreatedByField(request);
