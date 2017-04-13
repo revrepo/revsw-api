@@ -72,7 +72,7 @@ module.exports = [{
     path: '/v1/vendor_profiles/name/{vendor}',
     config: {
       auth: {
-        scope: ['admin', 'reseller', 'revadmin', 'apikey']
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: vendorProfile.getVendorProfileByName,
       description: 'Get a vendor profile by name',
