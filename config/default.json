@@ -200,9 +200,7 @@
           "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
         },
         "introduction_video_youtube_ids": {
-          "iOS": "s0xDOPg_Wts",
-          "Android": "",
-          "Windows_Mobile": ""
+          "iOS": "s0xDOPg_Wts"
         },
         "quick_start_guide":{
           "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
@@ -295,9 +293,7 @@
           "iOS": "https://github.com/nuubit/SDK/archive/v1.0.5.zip"
         },
         "introduction_video_youtube_ids": {
-          "iOS": "s0xDOPg_Wts", 
-          "Android": "",
-          "Windows_Mobile": ""
+          "iOS": "s0xDOPg_Wts"
         },
         "quick_start_guide":{
           "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
@@ -390,9 +386,7 @@
           "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
         },
         "introduction_video_youtube_ids": {
-          "iOS": "s0xDOPg_Wts",
-          "Android": "",
-          "Windows_Mobile": ""
+          "iOS": "s0xDOPg_Wts"
         },
         "quick_start_guide":{
           "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
