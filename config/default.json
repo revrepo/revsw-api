@@ -201,6 +201,11 @@
         },
         "introduction_video_youtube_ids": {
           "iOS": "s0xDOPg_Wts"
+        },
+        "quick_start_guide":{
+          "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
+          "Android": "",
+          "Windows_Mobile": ""
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/termsofservice",
@@ -289,6 +294,11 @@
         },
         "introduction_video_youtube_ids": {
           "iOS": "s0xDOPg_Wts"
+        },
+        "quick_start_guide":{
+          "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
+          "Android": "",
+          "Windows_Mobile": ""
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/termsofservice",
@@ -377,6 +387,11 @@
         },
         "introduction_video_youtube_ids": {
           "iOS": "s0xDOPg_Wts"
+        },
+        "quick_start_guide":{
+          "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
+          "Android": "",
+          "Windows_Mobile": ""
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/termsofservice",
