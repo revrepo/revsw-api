@@ -152,6 +152,38 @@ DNSZone.prototype = {
     }, function (err, data) {
       callback(err, data.result);
     });
+  },
+  /**
+   * @name accountDNSZonesCount
+   *
+   */
+  accountDNSZonesCount : function ( account_id ) {
+
+    var where = { deleted: { $ne:true } };
+    if ( account_id ) {
+      if ( _.isArray( account_id ) ) {
+        where.account_id = { $in: account_id.map( function( id ) {
+          return   id ;
+        }) };
+      } else {
+        where.account_id =   account_id ;
+      }
+    }
+
+    return this.model.aggregate([
+        { $match: where },
+        { $group: { _id: '$account_id', count: { $sum: 1 }, zones: {$push:{dns_zone_id: '$_id', dns_zone: '$zone' }} } }
+      ])
+      .exec()
+      .then( function( docs ) {
+        var hash = {};
+        if ( docs ) {
+          docs.forEach( function( doc ) {
+            hash[doc._id.toString()] = {count: doc.count, zones:doc.zones};
+          });
+        }
+        return hash;
+      });
   }
 };
 

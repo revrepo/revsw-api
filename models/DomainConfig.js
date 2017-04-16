@@ -263,7 +263,14 @@ DomainConfig.prototype = {
     return promise.all([
         this.model.aggregate([
           { $match: _.assign({ deleted: { $ne:true } }, where ) },
-          { $group: { _id: '$account_id', count: { $sum: 1 } } }
+          { $group: {
+            _id: '$account_id',
+            count: { $sum: 1 },
+            'total_enhanced_web_analytics':{$sum:{$cond:[{$eq:['$enable_enhanced_analytics', true]},1,0]}},
+            'total_custom_vcl_feature':{$sum:{$cond:[{$eq:['$proxy_config.rev_component_bp.custom_vcl.enabled', true]},1,0]}},
+            'ssl_enabled': {$sum:{$cond:[{$eq:['$enable_ssl', true]},1,0]}},
+            }
+          }
         ]).exec(),
         this.model.aggregate([
           { $match: where },
@@ -278,6 +285,9 @@ DomainConfig.prototype = {
         counts[0].forEach( function( doc ) {
           hash[doc._id.toString()].active = doc.count;
           hash[doc._id.toString()].deleted = hash[doc._id.toString()].total - doc.count;
+          hash[doc._id.toString()].total_enhanced_web_analytics = doc.total_enhanced_web_analytics;
+          hash[doc._id.toString()].total_custom_vcl_feature = doc.total_custom_vcl_feature;
+          hash[doc._id.toString()].ssl_enabled = doc.ssl_enabled;
         });
         return hash;
       });
