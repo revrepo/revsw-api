@@ -19,7 +19,6 @@
 /*jslint node: true */
 'use strict';
 var queryString = require('querystring');
-var async = require('async');
 var mongoose    = require('mongoose');
 var boom        = require('boom');
 var AuditLogger = require('../lib/audit');
@@ -80,8 +79,7 @@ exports.listWAFRules = function(request, reply) {
         }
     }
   }
-  var cdsRequests = [];
-  // async.paralle
+
   cds_request( { url: config.get('cds_url') + '/v1/waf_rules?'+queryString.stringify(options),
     headers: authHeader
   }, function (err, res, body) {
