@@ -104,7 +104,7 @@ exports.listWAFRules = function(request, reply) {
             return reply(boom.badImplementation('Failed to get information about used by domains the WAF Rules'));
         }
 
-        response = _.map(response_json, function(itemResponse){
+        response_json = _.map(response_json, function(itemResponse){
             itemResponse.domains = [];
             var findInfo = _.find(dataUsedDomain,function(itemInfoUsedDomain){
               return itemInfoUsedDomain._id === itemResponse.id;
@@ -113,9 +113,8 @@ exports.listWAFRules = function(request, reply) {
             if (!!findInfo){
               _.forEach(findInfo.domain_configs,function(domainInfo){
                 domainInfo.account_id = domainInfo.account_id.toString();
-                if(isRevAdmin){
-                  itemResponse.domains.push(domainInfo);
-                }else if((request.auth.credentials.domain.indexOf(domainInfo.domain_name) !== -1) && utils.checkUserAccessPermissionToDomain(request,domainInfo)){
+                // NOTE: is used the common rule for check access to domain info
+                if(utils.checkUserAccessPermissionToDomain(request,domainInfo)){
                   itemResponse.domains.push(domainInfo);
                 }
               });
