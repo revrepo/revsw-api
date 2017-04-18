@@ -166,6 +166,42 @@ LogShippingJob.prototype = {
       callback(null, doc);
     });
   },
+  /**
+   * @name accountLogShippingJobsCount
+   * @description Count the number of per-account records in LogShippingJob collection
+   * @param {String|Array} accountId
+   */
+  accountLogShippingJobsCount: function(accountId){
+    var self = this;
+    var where = {$and:[{ deleted: { $ne: true }, account_id: { $ne: null } }]};
+    if ( !!accountId ) {
+      if ( _.isArray( accountId ) ) {
+        where.account_id = { $in: accountId.map( function( id ) {
+          return  id ;
+        }) };
+      } else {
+        where.account_id =  accountId ;
+      }
+    }
+
+    return this.model.aggregate([
+        { $match: where },
+        { $group: {
+            _id: '$account_id',
+            count: { $sum: 1 }
+         } }
+      ])
+      .exec()
+      .then( function( docs ) {
+        var hash = {};
+        if ( docs ) {
+          docs.forEach( function( doc ) {
+            hash[doc._id.toString()] = doc;
+          });
+        }
+        return hash;
+      });
+  }
 };
 
 module.exports = LogShippingJob;

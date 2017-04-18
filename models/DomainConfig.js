@@ -269,6 +269,7 @@ DomainConfig.prototype = {
             'total_enhanced_web_analytics':{$sum:{$cond:[{$eq:['$enable_enhanced_analytics', true]},1,0]}},
             'total_custom_vcl_feature':{$sum:{$cond:[{$eq:['$proxy_config.rev_component_bp.custom_vcl.enabled', true]},1,0]}},
             'ssl_enabled': {$sum:{$cond:[{$eq:['$enable_ssl', true]},1,0]}},
+            'total_waf_feature': {$sum:{$cond:[{$eq:['$proxy_config.rev_component_bp.enable_waf', true]},1,0]}},
             }
           }
         ]).exec(),
@@ -288,6 +289,7 @@ DomainConfig.prototype = {
           hash[doc._id.toString()].total_enhanced_web_analytics = doc.total_enhanced_web_analytics;
           hash[doc._id.toString()].total_custom_vcl_feature = doc.total_custom_vcl_feature;
           hash[doc._id.toString()].ssl_enabled = doc.ssl_enabled;
+          hash[doc._id.toString()].total_waf_feature = doc.total_waf_feature;
         });
         return hash;
       });
