@@ -20,7 +20,8 @@
 
 'use strict';
 //	data access layer
-
+var _ = require('lodash');
+var mongoose = require('mongoose');
 var utils = require('../lib/utilities.js'),
   autoIncrement = require('mongoose-auto-increment');
 
@@ -55,6 +56,7 @@ function PurgeJob(mongoose, connection, options) {
       type : Date, default : Date()
     },
     'retry_proxy_list'     : {type : String, default : ''},
+    'account_id': {type: this.ObjectId, default : null }
   });
 
   autoIncrement.initialize(connection);
@@ -80,6 +82,42 @@ PurgeJob.prototype = {
     } else {
       callback(utils.buildError('400', 'No purge job ID passed to find item'), null);
     }
+  },
+  /**
+   * @name accountPurgeJobsCount
+   * @description Count the total number of records per account per domain
+   */
+  accountPurgeJobsCount: function(accountId){
+    var self = this;
+    var where = {$and:[{ deleted: { $ne: true }, account_id: { $ne: null } }]};
+    if ( !!accountId ) {
+      if ( _.isArray( accountId ) ) {
+        where.account_id = { $in: accountId.map( function( id ) {
+          return mongoose.Types.ObjectId( id );
+        }) };
+      } else {
+        where.account_id = mongoose.Types.ObjectId( accountId );
+      }
+    }
+
+    return this.model.aggregate([
+        { $match: where },
+        { $group: {
+            _id: '$account_id',
+            count: { $sum: 1 },
+            req_domain: {$push:'$req_domain'}
+         } }
+      ])
+      .exec()
+      .then( function( docs ) {
+        var hash = {};
+        if ( docs ) {
+          docs.forEach( function( doc ) {
+            hash[doc._id.toString()] = doc;
+          });
+        }
+        return hash;
+      });
   }
 
 };

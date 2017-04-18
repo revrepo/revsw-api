@@ -50,11 +50,12 @@ var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
  * @name listWAFRules
  * @description get List WAF Rules
  * All users have access to all public WAF Rule
- *
+ * but Used By Domains only
  */
 exports.listWAFRules = function(request, reply) {
   var filters_ = request.query.filters;
   var isRevAdmin = utils.isUserRevAdmin(request);
+  var accountIds = utils.getAccountID(request);
   var options = {};
 
  // NOTE: add additional filters for send to CDS
@@ -93,19 +94,40 @@ exports.listWAFRules = function(request, reply) {
         return reply(boom.badImplementation('Recevied a strange CDS response for a list of WAF Rules: ' + response_json));
       }
       var response = [];
+      // Extend information about Used WAF Rules into Domain Configs
+      var listWAFRulesIds = _.map(response_json,'id');
+      // NOTE: RevAdmin has access to all domain config
+      var accounts = (isRevAdmin === true)? null : accountIds;
+      return  domainConfigs.infoUsedWAFRulesInDomainConfigs( accounts ,listWAFRulesIds,
+        function(err,dataUsedDomain){
+        if(err){
+            return reply(boom.badImplementation('Failed to get information about used by domains the WAF Rules'));
+        }
+
+        response_json = _.map(response_json, function(itemResponse){
+            itemResponse.domains = [];
+            var findInfo = _.find(dataUsedDomain,function(itemInfoUsedDomain){
+              return itemInfoUsedDomain._id === itemResponse.id;
+            });
+
+            if (!!findInfo){
+              _.forEach(findInfo.domain_configs,function(domainInfo){
+                domainInfo.account_id = domainInfo.account_id.toString();
+                // NOTE: is used the common rule for check access to domain info
+                if(utils.checkUserAccessPermissionToDomain(request,domainInfo)){
+                  itemResponse.domains.push(domainInfo);
+                }
+              });
+            }
+            return itemResponse ;
+          });
+
       for (var i=0; i < response_json.length; i++) {
-        // TODO: Need better performance ???
-         if(response_json[i].rule_type === 'customer' && !isRevAdmin){
-           // NOTE: user can get access to 'customer' WAF Rule if it created for user account(s)
-           if (utils.checkUserAccessPermissionToAccount(request,response_json[i].account_id)) {
-              response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
-           }
-         }else{
            response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
-         }
       }
 
       renderJSON(request, reply, err, response);
+        });
     }
   });
 

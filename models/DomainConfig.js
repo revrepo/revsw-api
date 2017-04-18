@@ -263,7 +263,14 @@ DomainConfig.prototype = {
     return promise.all([
         this.model.aggregate([
           { $match: _.assign({ deleted: { $ne:true } }, where ) },
-          { $group: { _id: '$account_id', count: { $sum: 1 } } }
+          { $group: {
+            _id: '$account_id',
+            count: { $sum: 1 },
+            'total_enhanced_web_analytics':{$sum:{$cond:[{$eq:['$enable_enhanced_analytics', true]},1,0]}},
+            'total_custom_vcl_feature':{$sum:{$cond:[{$eq:['$proxy_config.rev_component_bp.custom_vcl.enabled', true]},1,0]}},
+            'ssl_enabled': {$sum:{$cond:[{$eq:['$enable_ssl', true]},1,0]}},
+            }
+          }
         ]).exec(),
         this.model.aggregate([
           { $match: where },
@@ -278,6 +285,9 @@ DomainConfig.prototype = {
         counts[0].forEach( function( doc ) {
           hash[doc._id.toString()].active = doc.count;
           hash[doc._id.toString()].deleted = hash[doc._id.toString()].total - doc.count;
+          hash[doc._id.toString()].total_enhanced_web_analytics = doc.total_enhanced_web_analytics;
+          hash[doc._id.toString()].total_custom_vcl_feature = doc.total_custom_vcl_feature;
+          hash[doc._id.toString()].ssl_enabled = doc.ssl_enabled;
         });
         return hash;
       });
@@ -388,6 +398,94 @@ DomainConfig.prototype = {
         });
         return res;
       });
+  },
+  /**
+   * @name  infoUsedDomainConfigsInWAFRules
+   * @description method get information about used WAF Rules in domain configuration
+   * Group By WAF Rule ID
+   * @param  {String} accountId
+   * @param  {String|Array}   wafRulesId
+   * @param  {Function} callback
+   * @return {[type]}
+   */
+  infoUsedWAFRulesInDomainConfigs: function(accountId, wafRulesId, callback) {
+    var context = this;
+    var pipline = [];
+    var $match = {
+      'proxy_config.rev_component_bp.waf': { $exists: true },
+      'proxy_config.rev_component_bp.waf.waf_rules': { $exists: true }
+    };
+    if (accountId) {
+      if (_.isArray(accountId)) {
+        $match.account_id = {
+          $in: accountId.map(function(id) {
+            return mongoose.Types.ObjectId(id);
+          })
+        };
+      } else {
+        $match.account_id = mongoose.Types.ObjectId(accountId);
+      }
+    }
+    if (!!wafRulesId && wafRulesId.lenght > 0) {
+      if (_.isArray(wafRulesId)) {
+        $match._id = {
+          $in: wafRulesId.map(function(id) {
+            return mongoose.Types.ObjectId(id);
+          })
+        };
+      } else {
+        $match._id = mongoose.Types.ObjectId(wafRulesId);
+      }
+    }
+    pipline.push({ $match: $match });
+    pipline.push({
+      $project: {
+        'id': 1,
+        account_id: '$account_id',
+        domain_name: '$domain_name',
+        domain_id: '$_id',
+        waf_rules: '$proxy_config.rev_component_bp.waf.waf_rules'
+      }
+    });
+    pipline.push({ $unwind: '$waf_rules' });
+    pipline.push({ $unwind: '$waf_rules' });
+    pipline.push({
+      $group: {
+        _id: {
+          _id: '$waf_rules',
+          account_id: '$account_id',
+          domain_id: '$domain_id',
+          domain_name: '$domain_name'
+        },
+        count: { '$sum': 1 }
+      }
+    });
+    pipline.push({
+      $project: {
+        _id: 0,
+        waf_rules: '$_id._id',
+        domain_id: '$_id.domain_id',
+        domain_name: '$_id.domain_name',
+        account_id: '$_id.account_id',
+        count: 1
+      }
+    });
+    pipline.push({
+      $group: {
+        _id: '$waf_rules',
+        count: { $sum: '$count' },
+        domain_configs: {
+          $push: { 'id': '$domain_id', account_id: '$account_id', domain_name: '$domain_name' }
+        }
+      }
+    });
+    this.model.aggregate(pipline, function(err, doc) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, doc);
+      }
+    });
   }
 
 };
