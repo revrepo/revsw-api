@@ -123,7 +123,10 @@ exports.listWAFRules = function(request, reply) {
           });
 
       for (var i=0; i < response_json.length; i++) {
-           response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+        if(utils.checkUserAccessPermissionToAccount(request,response_json[i].account_id) ||
+          response_json[i].rule_type==='builtin'){
+          response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+        }
       }
 
       renderJSON(request, reply, err, response);
