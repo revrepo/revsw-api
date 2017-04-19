@@ -383,6 +383,7 @@ User.prototype = {
       if (doc) {
 
         if (utils.isArray(item.domain)) {
+          item.domain = _.uniq(item.domain);
           item.domain = item.domain.join(',').toLowerCase();
         }
 
