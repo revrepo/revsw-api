@@ -49,30 +49,41 @@ var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 /**
  * @name listWAFRules
  * @description get List WAF Rules
+ * All users have access to all public WAF Rule
+ * but Used By Domains only
  */
 exports.listWAFRules = function(request, reply) {
   var filters_ = request.query.filters;
   var isRevAdmin = utils.isUserRevAdmin(request);
+  var accountIds = utils.getAccountID(request);
   var options = {};
+
  // NOTE: add additional filters for send to CDS
-   if(!!filters_){
-     if(!!filters_.account_id){
+  if(!!filters_){
+    if(!!filters_.account_id){
+        if (!utils.checkUserAccessPermissionToAccount(request,filters_.account_id)) {
+            return reply(boom.badRequest('WAF Rules not found'));
+        }
         options.account_id = filters_.account_id;
-     }
-     if(!!filters_.rule_type){
-        options.rule_type = filters_.rule_type;
-     }
-      if(isRevAdmin !== true){
-        // NOTE: if user not RevAdmin he can`t see  'private' (only 'public')
-        options.visibility = 'public';
-     }
-   }
+        options.visibility = 'public'; // NOTE: rules for Account Id
+      if(!!filters_.rule_type && filters_.rule_type === 'builtin'){
+          options.rule_type = filters_.rule_type;
+      }
+    } else {
+        if(!!filters_.rule_type){
+            options.rule_type = filters_.rule_type;
+        }
+        if(isRevAdmin !== true){
+            // NOTE: if user not RevAdmin he can`t see  'private' (only 'public')
+            options.visibility = 'public';
+        }
+    }
+  }
 
   cds_request( { url: config.get('cds_url') + '/v1/waf_rules?'+queryString.stringify(options),
     headers: authHeader
   }, function (err, res, body) {
     if (err) {
-      console.log(err);
       return reply(boom.badImplementation('Failed to get from CDS a list of WAF Rules'));
     }
     var response_json = JSON.parse(body);
@@ -83,13 +94,43 @@ exports.listWAFRules = function(request, reply) {
         return reply(boom.badImplementation('Recevied a strange CDS response for a list of WAF Rules: ' + response_json));
       }
       var response = [];
+      // Extend information about Used WAF Rules into Domain Configs
+      var listWAFRulesIds = _.map(response_json,'id');
+      // NOTE: RevAdmin has access to all domain config
+      var accounts = (isRevAdmin === true)? null : accountIds;
+      return  domainConfigs.infoUsedWAFRulesInDomainConfigs( accounts ,listWAFRulesIds,
+        function(err,dataUsedDomain){
+        if(err){
+            return reply(boom.badImplementation('Failed to get information about used by domains the WAF Rules'));
+        }
+
+        response_json = _.map(response_json, function(itemResponse){
+            itemResponse.domains = [];
+            var findInfo = _.find(dataUsedDomain,function(itemInfoUsedDomain){
+              return itemInfoUsedDomain._id === itemResponse.id;
+            });
+
+            if (!!findInfo){
+              _.forEach(findInfo.domain_configs,function(domainInfo){
+                domainInfo.account_id = domainInfo.account_id.toString();
+                // NOTE: is used the common rule for check access to domain info
+                if(utils.checkUserAccessPermissionToDomain(request,domainInfo)){
+                  itemResponse.domains.push(domainInfo);
+                }
+              });
+            }
+            return itemResponse ;
+          });
+
       for (var i=0; i < response_json.length; i++) {
-        //if (utils.checkUserAccessPermissionToSSLCertificate(request,response_json[i])) {
+        if(utils.checkUserAccessPermissionToAccount(request,response_json[i].account_id) ||
+          response_json[i].rule_type==='builtin'){
           response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
-        // }
+        }
       }
 
       renderJSON(request, reply, err, response);
+        });
     }
   });
 
@@ -249,8 +290,10 @@ exports.deleteWAFRule = function(request, reply) {
         return reply(boom.badImplementation('Failed to validate that WAF Rule ' + wafRuleId + ' is not in use by a domain configuration'));
       }
       if (res && res.length > 0) {
-        // TODO: add all domain ids for send on UI
-        return reply(boom.badRequest('The WAF Rule is in use by active domain(s) - please update the domain(s) before removing the WAF Rule'));
+        var domainNamesWithRule = _.map(res, function(itemDomainConfig){
+          return itemDomainConfig.domain_name;
+        });
+        return reply(boom.badRequest('The WAF Rule is in use by active domain(s) - please update the domain(s)('+domainNamesWithRule+') before removing the WAF Rule'));
       }
 
       var deleted_by = utils.generateCreatedByField(request);
