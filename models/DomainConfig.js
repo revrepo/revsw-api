@@ -251,12 +251,13 @@ DomainConfig.prototype = {
 
     var where = {};
     if ( account_id ) {
-      if ( _.isArray( account_id ) ) {
-        where.account_id = { $in: account_id.map( function( id ) {
-          return mongoose.Types.ObjectId( id );
+     // NOTE: IMPORTANT!!! for find records used property "proxy_config.account_id" (not "account_id" in root )
+     if ( _.isArray( account_id ) ) {
+        where['proxy_config.account_id' ]= { $in: account_id.map( function( id ) {
+          return  id ;
         }) };
       } else {
-        where.account_id = mongoose.Types.ObjectId( account_id );
+        where.account_id =   account_id ;
       }
     }
 
@@ -264,7 +265,7 @@ DomainConfig.prototype = {
         this.model.aggregate([
           { $match: _.assign({ deleted: { $ne:true } }, where ) },
           { $group: {
-            _id: '$account_id',
+            _id: '$proxy_config.account_id',
             count: { $sum: 1 },
             'total_enhanced_web_analytics':{$sum:{$cond:[{$eq:['$enable_enhanced_analytics', true]},1,0]}},
             'total_custom_vcl_feature':{$sum:{$cond:[{$eq:['$proxy_config.rev_component_bp.custom_vcl.enabled', true]},1,0]}},
@@ -275,7 +276,7 @@ DomainConfig.prototype = {
         ]).exec(),
         this.model.aggregate([
           { $match: where },
-          { $group: { _id: '$account_id', count: { $sum: 1 } } }
+          { $group: { _id: '$proxy_config.account_id', count: { $sum: 1 } } }
         ]).exec()
       ])
       .then( function( counts ) {
@@ -419,13 +420,13 @@ DomainConfig.prototype = {
     };
     if (accountId) {
       if (_.isArray(accountId)) {
-        $match.account_id = {
+        $match['proxy_config.account_id']= {
           $in: accountId.map(function(id) {
-            return mongoose.Types.ObjectId(id);
+            return id;
           })
         };
       } else {
-        $match.account_id = mongoose.Types.ObjectId(accountId);
+        $match['proxy_confi.account_id'] = accountId;
       }
     }
     if (!!wafRulesId && wafRulesId.lenght > 0) {
@@ -443,7 +444,7 @@ DomainConfig.prototype = {
     pipline.push({
       $project: {
         'id': 1,
-        account_id: '$account_id',
+        account_id: '$proxy_config.account_id',
         domain_name: '$domain_name',
         domain_id: '$_id',
         waf_rules: '$proxy_config.rev_component_bp.waf.waf_rules'
@@ -455,7 +456,7 @@ DomainConfig.prototype = {
       $group: {
         _id: {
           _id: '$waf_rules',
-          account_id: '$account_id',
+          account_id: '$account_id', // NOTE: see $project step. In this place '$account_id' means field '$proxy_config.account_id'
           domain_id: '$domain_id',
           domain_name: '$domain_name'
         },
@@ -468,7 +469,7 @@ DomainConfig.prototype = {
         waf_rules: '$_id._id',
         domain_id: '$_id.domain_id',
         domain_name: '$_id.domain_name',
-        account_id: '$_id.account_id',
+        account_id: '$_id.account_id', // NOTE: account_id equal 'proxy_config.account_id'(not 'account_id' from root )
         count: 1
       }
     });
