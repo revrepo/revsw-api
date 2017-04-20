@@ -133,7 +133,7 @@ exports.listWAFRules = function(request, reply) {
         var optionsCustomer = {
           rule_type: 'customer'
         };
-        if ((options.rule_type === 'customer') || !!options.account_id) {
+        if ((options.rule_type !== 'builtin') || !!options.account_id) {
           // NOTE: Only one CDS call
           if (!!options.account_id) {
             optionsCustomer.account_id = options.account_id;
