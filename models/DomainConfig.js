@@ -257,7 +257,7 @@ DomainConfig.prototype = {
           return  id ;
         }) };
       } else {
-        where.account_id =   account_id ;
+        where['proxy_config.account_id'] =   account_id ;
       }
     }
 
