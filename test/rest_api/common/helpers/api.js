@@ -39,6 +39,7 @@ var SignUpHelper = require('./signUp');
 var SSLCertsHelper = require('./sslCerts');
 var UsersHelper = require('./users');
 var LogShippingJobsHelper = require('./logShippingJobs');
+var WAFRulesHelper = require('./wafRules');
 
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
@@ -57,6 +58,7 @@ var APIHelpers = {
   sslCerts: SSLCertsHelper,
   users: UsersHelper,
   logShippingJobs: LogShippingJobsHelper,
+  wafRules: WAFRulesHelper,
 
   /**
    * ### API.helpers.authenticateUser()

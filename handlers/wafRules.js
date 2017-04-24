@@ -21,6 +21,7 @@
 var queryString = require('querystring');
 var mongoose    = require('mongoose');
 var boom        = require('boom');
+var async       = require('async');
 var AuditLogger = require('../lib/audit');
 var config      = require('config');
 var cds_request = require('request');
@@ -47,94 +48,176 @@ var wafRules = new WAFRule(mongoose, mongoConnection.getConnectionPortal());
 
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 /**
+ * @name  callCDSWAFRules
+ * @description internal method for call CDS - WAF Rules
+ * @param  {Object}   options Query parameters
+ * @param  {Function} cb      Callback function
+ * @return
+ */
+function callCDSWAFRules(options, cb) {
+  logger.info('callCDSWAFRules::Calling CDS to get a list WAF Rules with query paramaters: ' + JSON.stringify(options));
+  cds_request({
+    url: config.get('cds_url') + '/v1/waf_rules?' + queryString.stringify(options),
+    headers: authHeader
+  }, function(err, res, body) {
+    if (err) {
+      return cb(boom.badImplementation('Failed to get from CDS a list of WAF Rules'));
+    }
+    var response_json = JSON.parse(body);
+    if (res.statusCode === 400) {
+      return cb(boom.badRequest(response_json.message));
+    } else {
+      if (!response_json || !utils.isArray(response_json)) {
+        return cb(boom.badImplementation('Recevied a strange CDS response for a list of WAF Rules: ' + response_json));
+      }
+    }
+    cb(null, response_json);
+  });
+}
+
+/**
  * @name listWAFRules
- * @description get List WAF Rules
+ * @description get available for User list of WAF Rules
  * All users have access to all public WAF Rule
- * but Used By Domains only
+ * but full information about Used By Domains available only RevAdmin
  */
 exports.listWAFRules = function(request, reply) {
   var filters_ = request.query.filters;
   var isRevAdmin = utils.isUserRevAdmin(request);
   var accountIds = utils.getAccountID(request);
   var options = {};
+  var cdsCalls = [];
+  var totalListWAFRules = [];
 
- // NOTE: add additional filters for send to CDS
-  if(!!filters_){
-    if(!!filters_.account_id){
-        if (!utils.checkUserAccessPermissionToAccount(request,filters_.account_id)) {
-            return reply(boom.badRequest('WAF Rules not found'));
-        }
-        options.account_id = filters_.account_id;
-        options.visibility = 'public'; // NOTE: rules for Account Id
-      if(!!filters_.rule_type && filters_.rule_type === 'builtin'){
-          options.rule_type = filters_.rule_type;
-      }
-    } else {
-        if(!!filters_.rule_type){
+  // NOTE: Start main work-flow
+  async.waterfall([
+      function validationRequestOptions(cb) {
+        if (!!filters_) {
+          if (!!filters_.rule_type) {
             options.rule_type = filters_.rule_type;
+          }
+          if (!!filters_.account_id) {
+            if (!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+              return cb(boom.badRequest('WAF Rules not found'));
+            }
+            options.account_id = filters_.account_id;
+          }
         }
-        if(isRevAdmin !== true){
-            // NOTE: if user not RevAdmin he can`t see  'private' (only 'public')
-            options.visibility = 'public';
+        cb(null);
+      },
+      // NOTE: get part of data - Built-In WAF Rules
+      function getListWAFRulesBuiltinType(cb) {
+        var optionsBuiltin = {
+          rule_type: 'builtin'
+        };
+        // NOTE: Skip get data if to need only 'customer' WAF Rules
+        if (options.rule_type === 'customer') {
+          return cb(null);
         }
-    }
-  }
-
-  cds_request( { url: config.get('cds_url') + '/v1/waf_rules?'+queryString.stringify(options),
-    headers: authHeader
-  }, function (err, res, body) {
-    if (err) {
-      return reply(boom.badImplementation('Failed to get from CDS a list of WAF Rules'));
-    }
-    var response_json = JSON.parse(body);
-    if ( res.statusCode === 400 ) {
-        return reply(boom.badRequest(response_json.message));
-    } else {
-      if (!response_json || !utils.isArray(response_json)) {
-        return reply(boom.badImplementation('Recevied a strange CDS response for a list of WAF Rules: ' + response_json));
-      }
-      var response = [];
-      // Extend information about Used WAF Rules into Domain Configs
-      var listWAFRulesIds = _.map(response_json,'id');
-      // NOTE: RevAdmin has access to all domain config
-      var accounts = (isRevAdmin === true)? null : accountIds;
-      return  domainConfigs.infoUsedWAFRulesInDomainConfigs( accounts ,listWAFRulesIds,
-        function(err,dataUsedDomain){
-        if(err){
-            return reply(boom.badImplementation('Failed to get information about used by domains the WAF Rules'));
+        // NOTE: Only RevAdmin has access to all 'builtin' WAF Rules
+        if (isRevAdmin !== true) {
+          optionsBuiltin.visibility = 'public';
         }
-
-        response_json = _.map(response_json, function(itemResponse){
-            itemResponse.domains = [];
-            var findInfo = _.find(dataUsedDomain,function(itemInfoUsedDomain){
-              return itemInfoUsedDomain._id === itemResponse.id;
+        // Get all built-in WAF Rules
+        callCDSWAFRules(optionsBuiltin, function(err, data) {
+          if (!!data && data.length > 0) {
+            _.forEach(data, function(item) {
+              totalListWAFRules.push(item);
             });
-
-            if (!!findInfo){
-              _.forEach(findInfo.domain_configs,function(domainInfo){
-                domainInfo.account_id = domainInfo.account_id.toString();
-                // NOTE: is used the common rule for check access to domain info
-                if(utils.checkUserAccessPermissionToDomain(request,domainInfo)){
-                  itemResponse.domains.push(domainInfo);
-                }
+          }
+          cb(err);
+        });
+      },
+      // NOTE: Get part available data - Customer WAF Rules
+      function getListWAFRulesCustomerType(cb) {
+        var optionsCustomer = {
+          rule_type: 'customer'
+        };
+        if ((options.rule_type !== 'builtin') || !!options.account_id) {
+          // NOTE: Only one CDS call
+          if (!!options.account_id) {
+            optionsCustomer.account_id = options.account_id;
+            cdsCalls.push(function(cb_) {
+              callCDSWAFRules(optionsCustomer, function(err, data) {
+                cb_(err, data);
+              });
+            });
+          } else { //start:without account_id
+            if (isRevAdmin === true) {
+              cdsCalls.push(function(cb_) {
+                callCDSWAFRules(optionsCustomer, cb_);
               });
             }
-            return itemResponse ;
-          });
-
-      for (var i=0; i < response_json.length; i++) {
-        if(utils.checkUserAccessPermissionToAccount(request,response_json[i].account_id) ||
-          response_json[i].rule_type==='builtin'){
-          response.push(publicRecordFields.handle(response_json[i], 'wafRule'));
+            if (isRevAdmin !== true) {
+              if (!_.isArray(accountIds)) {
+                accountIds = [accountIds];
+              }
+              // Get all WAF Rules for Each accountId
+              _.forEach(accountIds, function(itemAccountId) {
+                cdsCalls.push(function(cb_) {
+                  var accountOptions = _.merge({}, optionsCustomer, { account_id: itemAccountId });
+                  callCDSWAFRules(accountOptions, cb_);
+                });
+              });
+            }
+          } // end:without account_id
+          // Call all prepared requests
+          async.parallel(cdsCalls,
+            function(err, dataAll) {
+              _.forEach(dataAll, function(itemResponse) {
+                _.forEach(itemResponse, function(item) {
+                  totalListWAFRules.push(item);
+                });
+              });
+              cb(err);
+            });
+        } else {
+          // skip get WAF Rules Customer types
+          cb(null);
         }
-      }
+      },
+      //NOTE:  Extend information about Used WAF Rules into Domain Configs
+      function addDomainUsageInformation(cb) {
+        var listWAFRulesIds = _.map(totalListWAFRules, 'id');
+        // NOTE: RevAdmin has access to all domain config
+        var accounts = (isRevAdmin === true) ? null : accountIds;
+        domainConfigs.infoUsedWAFRulesInDomainConfigs(accounts, listWAFRulesIds,
+          function(err, dataUsedDomain) {
+            if (err) {
+              return cb(boom.badImplementation('Failed to get information about used by domains the WAF Rules'));
+            }
+            //
+            totalListWAFRules = _.map(totalListWAFRules, function(itemWAFRuleIfo) {
+              itemWAFRuleIfo.domains = [];
+              var findInfo = _.find(dataUsedDomain, function(itemInfoUsedDomain) {
+                return itemInfoUsedDomain._id === itemWAFRuleIfo.id;
+              });
 
+              if (!!findInfo) {
+                _.forEach(findInfo.domain_configs, function(domainInfo) {
+                  domainInfo.account_id = domainInfo.account_id.toString();
+                  // NOTE: is used the common rule for check access to domain info
+                  if (utils.checkUserAccessPermissionToDomain(request, domainInfo)) {
+                    itemWAFRuleIfo.domains.push(domainInfo);
+                  }
+                });
+              }
+              return itemWAFRuleIfo;
+            });
+            cb(null);
+          });
+      },
+      function finalTransformRespons(cb) {
+        logger.info('listWAFRules:: Return total records '+ totalListWAFRules.lenght);
+        cb(null, totalListWAFRules);
+      }
+    ],
+    function(err, response) {
       renderJSON(request, reply, err, response);
-        });
-    }
-  });
+    });
 
 };
+
 
 exports.getWAFRule = function(request, reply) {
 

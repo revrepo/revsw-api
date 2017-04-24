@@ -41,7 +41,8 @@ module.exports = function (grunt) {
           'scripts/clean/sslNames.js',
           'scripts/clean/sslCerts.js',
           'scripts/clean/accounts.js',
-          'scripts/clean/users.js'
+          'scripts/clean/users.js',
+          'scripts/clean/wafRules.js',
         ]
       },
       setup: {
@@ -105,7 +106,8 @@ module.exports = function (grunt) {
           'suites/**/stat*.js',
           'suites/**/stats-sdk*.js',
           'suites/**/user*.js',
-          'suites/**/zenDeskArticle*.js'
+          'suites/**/zenDeskArticle*.js',
+          'suites/**/wafRules*.js'
         ]
       }
     },

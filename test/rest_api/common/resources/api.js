@@ -46,6 +46,7 @@ var UsersResource = require('./users');
 var UsageReportResource = require('./usage-report');
 var LogShippingJobsResource = require('./logShippingJobs');
 var DNSZonesResource = require('./dnsZones');
+var WAFRulesResource = require('./wafRules');
 
 // Set of all resources that the REST API service provides..
 var APIResources = {
@@ -76,7 +77,8 @@ var APIResources = {
   users: UsersResource,
   usage_report: UsageReportResource,
   logShippingJobs: LogShippingJobsResource,
-  dnsZones: DNSZonesResource
+  dnsZones: DNSZonesResource,
+  wafRules: WAFRulesResource
 };
 
 module.exports = APIResources;
