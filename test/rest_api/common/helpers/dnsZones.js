@@ -17,12 +17,34 @@
  */
 
 var DNSZonesResource = require('./../resources/dnsZones');
-var AppsDP = require('./../providers/data/apps');
+var DNSZonesDP = require('./../providers/data/dnsZones');
 var APITestError = require('./../apiTestError');
 
-// # Apps Helper
+// # DNS Zones Helper
 // Abstracts common functionality for the related resource.
 var DNSZonesHelper = {
+
+  /**
+   * ### DNSZonesHelper.create()
+   *
+   * Creates a new DNS Zone using the account ID provided.
+   *
+   * @param {String} accountId
+   */
+  create: function (accountId) {
+    var dnsZone = DNSZonesDP.generateOne(accountId);
+    return DNSZonesResource
+      .createOne(dnsZone)
+      .then(function (res) {
+        dnsZone.id = res.body.object_id;
+        return dnsZone;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating DNS Zone', error.response.body,
+          dnsZone);
+      });
+  },
+
 
   /**
    * ### DNSZonesHelper.cleanup(namePattern)

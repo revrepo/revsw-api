@@ -16,10 +16,10 @@
  * from Rev Software, Inc.
  */
 
-// # Domain Configs Data Provider object
+// # DNS Zone Data Provider object
 //
-// Defines some methods to generate valid and common domain-configs test data.
-// With common we mean it oes not have anything special on it.
+// Defines some methods to generate valid and common DNS Zone test data.
+// With common we mean it does not have anything special on it.
 //
 // From there, you can modify and get bogus, invalid or other type of data
 // depending on your test needs.
@@ -49,6 +49,22 @@ var DNSZonesDataProvider = {
       'zone': (_prefix + '-' + Date.now() + '.net').toLowerCase(),
       'account_id': accountId
     };
+  },
+
+  /**
+   * ### DNSZonesDataProvider.generateOne()
+   *
+   * Generates valid DNS ZONE updated data that dns_zones REST API end
+   * points accept.
+   */
+  generateToUpdate: function () {
+    return {
+      refresh: 0,
+      retry: 0,
+      expiry: 0,
+      nx_ttl: 0,
+      ttl: 0
+    }
   },
 
   generateRecordOne: function (zone) {
