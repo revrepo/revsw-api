@@ -88,11 +88,23 @@ var DNSZonesDataProvider = {
   },
 
   records: {
-    generateOne: function (dnsZoneId, prefix) {
-      var _prefix = prefix || this.prefix;
+    generateOne: function (zone) {
+      var subDomain = 'test';
       return {
-        'zone': (_prefix + '-' + Date.now() + '.net').toLowerCase(),
-        'account_id': accountId
+        'type': 'NS',
+        'domain': subDomain + '.' + zone,
+        'record': {
+          'type': 'NS',
+          'zone':  zone,
+          'domain': subDomain + '.' + zone,
+          'answers': [
+            {
+              'answer': [
+                'ns1.' + zone
+              ]
+            }
+          ]
+        }
       };
     },
   }
