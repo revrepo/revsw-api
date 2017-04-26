@@ -67,29 +67,46 @@ var DNSZonesDataProvider = {
     }
   },
 
-  generateRecordOne: function (zone) {
-    return {
-      'type': 'A',
-      'domain': 'domain-' + Date.now() + '.' + zone,
-      'record': {
-        'type': 'A',
-        'domain': 'domain-' + Date.now() + '.' + zone,
-        'ttl': 200,
-        'answers': [
-          {
-            'answer': ['1.1.1.1']
-          },
-          {
-            'answer': ['1.2.3.4']
-          }
-        ]
-      }
-    };
+  /**
+   * ### DNSZonesDataProvider.getRecordAt()
+   *
+   * Returns record data object from Record at specific position/index from a
+   * DNS Zone object.
+   *
+   * @param {Object} dnsZone, DNS Zone object data
+   * @param {Number} index, position of the required record
+   * @returns {Object} DNS Zone Record object data
+   */
+  getRecordAt: function (dnsZone, index) {
+    return dnsZone.records[index];
+  },
+
+  /**
+   * ### DNSZonesDataProvider.getLastRecord()
+   *
+   * Returns record data object from last Record from a DNS Zone object.
+   *
+   * @param {Object} dnsZone, DNS Zone object data
+   * @returns {Object} DNS Zone Record object data
+   */
+  getLastRecord: function (dnsZone) {
+    return this.getRecordAt(dnsZone, dnsZone.records.length - 1)
   },
 
   records: {
+
+    /**
+     * ### DNSZonesDataProvider.records.generateOne()
+     *
+     * Generates valid data that represents a DNS Zone Record which the
+     * dns_zones/records REST API end points accepts.
+     *
+     * @param {String} zone
+     *
+     * @returns {Object} DNS Zone Record data
+     */
     generateOne: function (zone) {
-      var subDomain = 'test';
+      var subDomain = 'sub-domain-' + Date.now();
       return {
         'type': 'NS',
         'domain': subDomain + '.' + zone,
@@ -107,6 +124,23 @@ var DNSZonesDataProvider = {
         }
       };
     },
+
+    /**
+     * ### DNSZonesDataProvider.records.generateOneForUpdate()
+     *
+     * Generates valid data that represents a DNS Zone Record for update request.
+     *
+     * @param {Object} dnsZoneRecord data retrieved from API side
+     *
+     * @returns {Object} DNS Zone Record data for update action/request
+     */
+    generateOneForUpdate: function (dnsZoneRecord) {
+      var clone = JSON.parse(JSON.stringify(dnsZoneRecord));
+      clone['use_client_subnet'] = false;
+      delete clone.id;
+      delete clone.short_answers;
+      return clone;
+    }
   }
 };
 
