@@ -55,7 +55,7 @@ describe('Smoke check', function () {
             })
             .then(function (dnsZone) {
               firstDnsZone = dnsZone;
-              // return API.helpers.dnsZoneRecords.create(testAccount.id);
+              // return API.helpers.dnsZones.records.create(testAccount.id);
             })
             // .then(function (dnsZoneRecord) {
             //   firstDnsZoneRecord = dnsZoneRecord;
@@ -162,33 +162,60 @@ describe('Smoke check', function () {
               })
               .catch(done);
           });
+/*
+        describe('DNS Zone Records', function () {
 
+          it('should return a response when getting all DNS Zone Records',
+            function (done) {
+              API.helpers
+                .authenticateUser(user)
+                .then(function () {
+                  API.resources.dnsZones
+                    .records(firstDnsZone.id)
+                    .getAll()
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            });
 
+          it('should return a response when getting specific DNS Zone Record',
+            function (done) {
+              API.helpers
+                .authenticateUser(user)
+                .then(function () {
+                  API.resources.dnsZones
+                    .records(firstDnsZone.id)
+                    .getOne(firstDnsZoneRecord.id)
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            });
 
-      });
+          it('should return a response when creating a new DNS Zone Record',
+            function (done) {
+              var dnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.zone);
+              API.helpers
+                .authenticateUser(user)
+                .then(function () {
+                  API.resources.dnsZones
+                    .records(firstDnsZone.id)
+                    .createOne(dnsZoneRecord)
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            });
+
+        });
+  */    });
     });
   });
 });
 
 /*
     describe('DNS Zones resource', function () {
-
-      it('should return response when creating a new DNS zone record', function (done) {
-        firstDnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.zone);
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dnsZones
-              .records(firstDnsZone._id)
-              .createOne(firstDnsZoneRecord)
-              .expect(200)
-              .then(function (res) {
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
 
       it('should return a recently created DNS zone records when getting a specific DNS zone', function (done) {
         API.helpers
