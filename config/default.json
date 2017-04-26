@@ -206,7 +206,7 @@
         },
         "quick_start_guide":{
           "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
-          "Android": "",
+          "Android": "https://support.nuubit.net/hc/en-us/articles/115001861983-Android-SDK-Quick-Start-Guide",
           "Windows_Mobile": ""
         }
       },
@@ -301,7 +301,7 @@
         },
         "quick_start_guide":{
           "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
-          "Android": "",
+          "Android": "https://support.nuubit.net/hc/en-us/articles/115001861983-Android-SDK-Quick-Start-Guide",
           "Windows_Mobile": ""
         }
       },
@@ -396,7 +396,7 @@
         },
         "quick_start_guide":{
           "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
-          "Android": "",
+          "Android": "https://support.nuubit.net/hc/en-us/articles/115001861983-Android-SDK-Quick-Start-Guide",
           "Windows_Mobile": ""
         }
       },
@@ -414,6 +414,8 @@
   },
   "proxy_white_referer_urls": [
     "http://localhost:3000/",
-    "http://localhost:4000/"
+    "http://localhost:4000/",
+    "http://testsjc20-victordev01.revsw.net:3000/",
+    "http://testsjc20-victordev01.revsw.net:4000/"
   ]
 }
