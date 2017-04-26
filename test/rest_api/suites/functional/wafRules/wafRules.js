@@ -81,7 +81,6 @@ describe('Functional check', function () {
       });
 
       it('should have access to WAF Rule for user with same account', function (done) {
-        console.log('firstUser', firstUser)
         API.helpers.authenticateUser(firstUser)
           .then(function () {
             return API.resources.wafRules
@@ -117,7 +116,6 @@ describe('Functional check', function () {
                   .getOne(firstWAFRule.id)
                   .expect(400)
                   .then(function (response) {
-                    console.log('message', response.body)
                     response.body.message.should.equal('WAF Rule ID not found');
                     return;
                   });
