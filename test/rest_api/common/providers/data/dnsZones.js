@@ -85,6 +85,16 @@ var DNSZonesDataProvider = {
         ]
       }
     };
+  },
+
+  records: {
+    generateOne: function (dnsZoneId, prefix) {
+      var _prefix = prefix || this.prefix;
+      return {
+        'zone': (_prefix + '-' + Date.now() + '.net').toLowerCase(),
+        'account_id': accountId
+      };
+    },
   }
 };
 
