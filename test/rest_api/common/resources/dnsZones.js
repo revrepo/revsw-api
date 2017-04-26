@@ -24,6 +24,7 @@ var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
 var dnsZoneKey = 'dnsZoneId';
+var dnsZoneRecordKey = 'dnsZoneRecordId';
 var resourceConfig = {
   idKey: dnsZoneKey,
   name: 'dnsZones',
@@ -37,8 +38,9 @@ var resourceConfig = {
   ],
   nestedResources: [
     {
+      idKey: dnsZoneRecordKey,
       name: 'records',
-      path: '/records',
+      path: '/records/{' + dnsZoneRecordKey + '}',
       methods: [
         Methods.CREATE,
         Methods.READ_ONE,
