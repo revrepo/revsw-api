@@ -69,6 +69,30 @@ var DNSZonesHelper = {
         return DNSZonesResource
           .deleteManyIfExist(ids);
       });
+  },
+
+  records: {
+
+    /**
+     * ### DNSZonesHelper.records.create()
+     *
+     * Creates a new DNS Zone Record using the DNS Zone ID provided.
+     *
+     * @param {String} dnsZoneId
+     */
+    create: function (dnsZoneId) {
+      var dnsZoneRecord = DNSZonesDP.generateOne(accountId);
+      return DNSZonesResource
+        .createOne(dnsZoneRecord)
+        .then(function (res) {
+          dnsZoneRecord.id = res.body.object_id;
+          return dnsZoneRecord;
+        })
+        .catch(function (error) {
+          throw new APITestError('Creating DNS Zone', error.response.body,
+            dnsZoneRecord);
+        });
+    }
   }
 };
 
