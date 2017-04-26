@@ -33,6 +33,7 @@ var WAFRulesHelper = {
    */
   createOneForAccount: function(account) {
     var wafRule = WAFRulesDP.generateOne({accountId: account.id});
+    wafRule.comment += ' (Account ID: "'+account.id+'")';
     return WAFRulesResource
       .createOne(wafRule)
       .then(function(response) {
