@@ -163,6 +163,38 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
+        it('should return a response when checking integration with dns ' +
+          'servers for specific DNS Zone',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.dnsZones
+                  .checkIntegration(firstDnsZone.id)
+                  .dnsServers()
+                  .getAll()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return a response when checking integration with records ' +
+          ' for specific DNS Zone',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.dnsZones
+                  .checkIntegration(firstDnsZone.id)
+                  .records()
+                  .getAll()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
         describe('DNS Zone Records', function () {
 
           it('should return a response when getting all DNS Zone Records',
@@ -195,7 +227,7 @@ describe('Smoke check', function () {
 
           it('should return a response when creating a new DNS Zone Record',
             function (done) {
-              var dnsZoneRecord = DNSZonesDP.generateRecordOne(firstDnsZone.zone);
+              var dnsZoneRecord = DNSZonesDP.records.generateOne(firstDnsZone.zone);
               API.helpers
                 .authenticateUser(user)
                 .then(function () {
@@ -208,114 +240,51 @@ describe('Smoke check', function () {
                 .catch(done);
             });
 
+          it('should return a response when updating specific DNS Zone Record',
+            function (done) {
+              API.helpers
+                .authenticateUser(user)
+                .then(function () {
+                  return API.helpers.dnsZones.records.create(firstDnsZone);
+                })
+                .then(function () {
+                  return API.resources.dnsZones.getOne(firstDnsZone.id)
+                })
+                .then(function (res) {
+                  var dnsZoneRecord = DNSZonesDP.getLastRecord(res.body);
+                  var updateData = DNSZonesDP.records
+                    .generateOneForUpdate(dnsZoneRecord);
+                  API.resources.dnsZones
+                    .records(firstDnsZone.id)
+                    .update(dnsZoneRecord.id, updateData)
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            });
+
+          it('should return a response when deleting specific DNS Zone Record',
+            function (done) {
+              API.helpers
+                .authenticateUser(user)
+                .then(function () {
+                  return API.helpers.dnsZones.records.create(firstDnsZone);
+                })
+                .then(function () {
+                  return API.resources.dnsZones.getOne(firstDnsZone.id)
+                })
+                .then(function (res) {
+                  var dnsZoneRecordId = DNSZonesDP.getLastRecord(res.body).id;
+                  API.resources.dnsZones
+                    .records(firstDnsZone.id)
+                    .deleteOne(dnsZoneRecordId)
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            });
         });
       });
     });
   });
 });
-
-/*
-    describe('DNS Zones resource', function () {
-
-      it('should return a recently created DNS zone records when getting a specific DNS zone', function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dnsZones
-              .getOne(firstDnsZone._id)
-              .expect(200)
-              .then(function (res) {
-                res.body.records.length.should.equal(2); // 1 NS and recently created A record
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-      xit('should return success response code when deleting a DNS zone record', function (done) {
-        delete firstDnsZoneRecord.record;
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dnsZones
-              .records(firstDnsZone._id)
-              .deleteOne(firstDnsZoneRecord)
-              .expect(200)
-              .then(function (res) {
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-      xit('should return DNS records when getting a specific DNS zone after deleting DNS zone record',
-        function (done) {
-          API.helpers
-            .authenticateUser(reseller)
-            .then(function () {
-              API.resources.dnsZones
-                .getOne(firstDnsZone._id)
-                .expect(200)
-                .then(function (res) {
-                  res.body.records.length.should.equal(1); // 1 NS
-                  done();
-                })
-                .catch(done);
-            })
-            .catch(done);
-        });
-
-      it('should return success response code when deleting a DNS zone', function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dnsZones
-              .deleteOne(firstDnsZone._id)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-    });
-
-    describe('DNS Analytics:', function () {
-      var testDnsZone;
-      before(function (done) {
-        testDnsZone = DNSZonesDP.generateOne(account.id);
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dnsZones
-              .createOne(testDnsZone)
-              .expect(200)
-              .then(function (res) {
-                var responseJson = res.body;
-                testDnsZone._id = responseJson.object_id;
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-      it('should return success response code when get DNS zone stats usage', function (done) {
-
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.dnsZones
-              .stats_usage({period: '1h'})
-              .getOne(testDnsZone._id)
-              .expect(200)
-              .then(function (res) {
-                var responseJson = res.body;
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-    });
-*/
