@@ -28,7 +28,7 @@ var WAFRulesHelper = {
    * ### WAFRulesHelper.createOneForAccount()
    *
    * Creates a new WAF Rule for specific Account
-   *
+   * @param {Object} account {id: string}
    * @returns {Object} WAF Rule data
    */
   createOneForAccount: function(account) {
