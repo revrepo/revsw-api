@@ -55,11 +55,11 @@ describe('Smoke check', function () {
             })
             .then(function (dnsZone) {
               firstDnsZone = dnsZone;
-              // return API.helpers.dnsZones.records.create(testAccount.id);
+              return API.helpers.dnsZones.records.create(firstDnsZone);
             })
-            // .then(function (dnsZoneRecord) {
-            //   firstDnsZoneRecord = dnsZoneRecord;
-            // })
+            .then(function (dnsZoneRecord) {
+              firstDnsZoneRecord = dnsZoneRecord;
+            })
             .then(done)
             .catch(done);
         });
@@ -162,7 +162,7 @@ describe('Smoke check', function () {
               })
               .catch(done);
           });
-/*
+
         describe('DNS Zone Records', function () {
 
           it('should return a response when getting all DNS Zone Records',
@@ -209,7 +209,7 @@ describe('Smoke check', function () {
             });
 
         });
-  */    });
+      });
     });
   });
 });
