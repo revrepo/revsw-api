@@ -80,16 +80,16 @@ var DNSZonesHelper = {
      *
      * @param {String} dnsZoneId
      */
-    create: function (dnsZoneId) {
-      var dnsZoneRecord = DNSZonesDP.generateOne(accountId);
+    create: function (dnsZone) {
+      var dnsZoneRecord = DNSZonesDP.records.generateOne(dnsZone.zone);
       return DNSZonesResource
+        .records(dnsZone.id)
         .createOne(dnsZoneRecord)
-        .then(function (res) {
-          dnsZoneRecord.id = res.body.object_id;
+        .then(function () {
           return dnsZoneRecord;
         })
         .catch(function (error) {
-          throw new APITestError('Creating DNS Zone', error.response.body,
+          throw new APITestError('Creating DNS Zone Record', error.response.body,
             dnsZoneRecord);
         });
     }
