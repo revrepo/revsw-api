@@ -19,11 +19,13 @@
 var AppsDataProvider = require('./apps');
 var DashboardsDataProvider = require('./dashboards');
 var UsersDataProvider = require('./users');
+var WAFRulesDataProvider = require('./wafRules');
 
 var APIDataProviders = {
   apps: AppsDataProvider,
   dashboards: DashboardsDataProvider,
-  users: UsersDataProvider
+  users: UsersDataProvider,
+  wafRules: WAFRulesDataProvider
 };
 
 module.exports = APIDataProviders;

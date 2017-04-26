@@ -227,10 +227,10 @@ exports.getWAFRule = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for WAF Rule ID ' + wafRuleId));
     }
-    // TODO: add check permission
-    // if (!result || !utils.checkUserAccessPermissionToWAFRule(request,result)) {
-    //   return reply(boom.badRequest('WAF Rule ID not found'));
-    // }
+
+    if (!result || !utils.checkUserAccessPermissionToWAFRule(request,result)) {
+      return reply(boom.badRequest('WAF Rule ID not found'));
+    }
 
     logger.info('Calling CDS to get configuration for WAF Rule ID ' + wafRuleId);
     cds_request( { url: config.get('cds_url') + '/v1/waf_rules/' + wafRuleId,

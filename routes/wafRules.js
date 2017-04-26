@@ -114,7 +114,7 @@ module.exports = [
       validate: {
         payload : {
           account_id: Joi.objectId().required().description('Account ID of the account the WAF Rule should be created for'),
-          rule_name: Joi.string().min(1).max(150).required().description('WAF rule name'),
+          rule_name: Joi.string().min(1).max(150).regex(routeModels.wafRuleNameRegex).required().description('WAF rule name'),
           rule_type: Joi.string().valid('builtin','customer').required().description('WAF rule type'),
           visibility: Joi.string().valid('public', 'hidden').required().description('WAF rule visibility scope'),
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
@@ -152,7 +152,7 @@ module.exports = [
         },
         payload: {
           account_id: Joi.objectId().required().description('Account ID of the account the domain should be created for'),
-          rule_name: Joi.string().min(1).max(150).required().description('WAF rule name'),
+          rule_name: Joi.string().min(1).max(150).regex(routeModels.wafRuleNameRegex).required().description('WAF rule name'),
           rule_type: Joi.string().valid('builtin','customer').required().description('WAF rule type'),
           visibility: Joi.string().valid('public', 'hidden').required().description('WAF rule visibility scope'),
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
