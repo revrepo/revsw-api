@@ -125,6 +125,26 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
+        it('should allow to get status of exists WAF Rule',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.wafRules
+                  .status(testWAFRule.id)
+                  .getOne()
+                  .expect(200)
+                  .then(function (response) {
+                    var dataItem = response.body;
+                    dataItem.staging_status.should.not.be.undefined();
+                    dataItem.global_status.should.not.be.undefined();
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
         it('should allow to create an Customer WAF Rule',
           function (done) {
             var params = {
