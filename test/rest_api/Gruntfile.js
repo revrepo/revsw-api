@@ -31,6 +31,7 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [ // NOTE: Execution order is really IMPORTANT
+          'scripts/clean/chargify.js',
           'scripts/clean/apiKeys.js',
           'scripts/clean/apps.js',
           'scripts/clean/billingPlans.js',

@@ -155,5 +155,10 @@
     "api": {
       "token": "998031df8b2e4558a4b7e8f33a6566c0"
     }
+  },
+  "chargify": {
+    "domain": "https://nuubit-test.chargify.com",
+    "api_key": "0WMnGbZ6E5aFtNMjeI2oGjWWpjfjTIu7Y1OCTWjs",
+    "shared_key": "KGXNkhdMAEjgosppDso5vm9xWfx5449b0vkfgII2Yug"
   }
 }
