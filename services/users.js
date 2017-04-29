@@ -72,7 +72,7 @@ exports.createUser = function(newUser, callback) {
             newUser.role = 'admin'; // NOTE: salf registred user can be only with Admin role
             // NOTE: only self registred user must to verify account
             newUser.validation = {
-              expiredAt: Date.now() + config.get('user_verify_token_lifetime'),
+              expiredAt: Date.now() + config.get('user_verify_token_lifetime_ms'),
               token: token,
               verified: false
             };

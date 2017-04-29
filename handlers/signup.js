@@ -682,7 +682,7 @@ exports.resendRegistrationEmail = function(req, reply) {
           if (vendorProfileForRegistrationEmail.enable_simplified_signup_process) {
             var token = utils.generateToken();
             user.validation = {
-              expiredAt: Date.now() + vendorProfileForRegistrationEmail.user_verify_token_lifetime,
+              expiredAt: Date.now() + config.get('user_verify_token_lifetime_ms'),
               token: token
             };
             // NOTE: delete not updated fields

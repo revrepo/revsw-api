@@ -60,9 +60,9 @@
   "log_dir": "./log/",
   "audit_log": "revsw-audit.log",
 
-  "user_verify_token_lifetime" : 86400000,
-
-  "password_reset_token_lifespan": 3600000,     // 1 hour
+  "user_verify_token_lifetime_ms":  604800000, // 7 day 
+  "password_reset_token_lifespan_ms": 3600000,     // 1 hour
+  
   "support_email" : "support@revapm.com",
 
   "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
@@ -142,8 +142,6 @@
       "user_verify_subject" : "RevAPM New User Email Verification Request",
       "user_registration_instruction_subject" : "RevAPM New User Registration",
       "user_welcome_subject" : "Welcome to RevAPM",
-      "user_verify_token_lifetime" : 86400000,
-      "password_reset_token_lifespan": 3600000,
       "password_reset_email_subject": "RevAPM Customer Portal Password Reset",
       "password_reset_confirmation_email_subject": "Your RevAPM Customer Portal password has been changed",
       "chargify_user_welcome_email_subject": "Welcome to RevAPM",
@@ -237,8 +235,6 @@
       "user_verify_subject" : "nuu:bit New User Email Verification Request",
       "user_registration_instruction_subject" : "nuu:bit New User Registration",
       "user_welcome_subject" : "Welcome to nuu:bit",
-      "user_verify_token_lifetime" : 86400000,
-      "password_reset_token_lifespan": 3600000,
       "password_reset_email_subject": "nuu:bit Customer Portal Password Reset",
       "password_reset_confirmation_email_subject": "Your nuu:bit Customer Portal password has been changed",
       "chargify_user_welcome_email_subject": "Welcome to nuu:bit",
@@ -332,8 +328,6 @@
       "user_verify_subject" : "Hooli New User Email Verification Request",
       "user_registration_instruction_subject" : "Hooli New User Registration",
       "user_welcome_subject" : "Welcome to Hooli",
-      "user_verify_token_lifetime" : 86400000,
-      "password_reset_token_lifespan": 3600000,
       "password_reset_email_subject": "Hooli Customer Portal Password Reset",
       "password_reset_confirmation_email_subject": "Your Hooli Customer Portal password has been changed",
       "chargify_user_welcome_email_subject": "Welcome to Hooli",
