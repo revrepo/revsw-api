@@ -20,13 +20,13 @@
 
 'use strict';
 
-var boom     = require('boom');
+var boom = require('boom');
 var mongoose = require('mongoose');
-
-var utils           = require('../lib/utilities.js');
-var renderJSON      = require('../lib/renderJSON');
+var _ = require('lodash');
+var utils = require('../lib/utilities.js');
+var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
-var elasticSearch   = require('../lib/elasticSearch');
+var elasticSearch = require('../lib/elasticSearch');
 
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
@@ -37,22 +37,22 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 //
 // Handler for Top Objects report WAF
 //
-exports.getTopObjects = function(request, reply) {
+exports.getTopObjectsWAF = function (request, reply) {
 
   var domainID = request.params.domain_id;
   var domainName,
-      metadataFilterField;
+    metadataFilterField;
 
-  domainConfigs.get(domainID, function(error, domainConfig) {
+  domainConfigs.get(domainID, function (error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
       domainName = domainConfig.domain_name;
-      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
-      if ( span.error ) {
-        return reply(boom.badRequest( span.error ));
+      var span = utils.query2Span(request.query, 1 /*def start in hrs*/ ,30 * 24 /*allowed period in hrs*/ );
+      if (span.error) {
+        return reply(boom.badRequest(span.error));
       }
 
       metadataFilterField = elasticSearch.buildMetadataFilterString(request);
@@ -78,7 +78,7 @@ exports.getTopObjects = function(request, reply) {
         aggs: {
           results: {
             terms: {
-              field: 'request',
+              field: request.query.report_type, // NOTE:  'uri' or 'ip'
               size: request.query.count || 30,
               order: {
                 _count: 'desc'
@@ -89,23 +89,34 @@ exports.getTopObjects = function(request, reply) {
       };
 
       //  update query
-      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
+      elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
+      // NOTE: fix term name for NAXSI
+      _.forEach(requestBody.query.filtered.filter.bool.must, function (itemMust) {
+        if (!!itemMust.terms) {
+          itemMust.terms.server = _.clone(itemMust.terms.domain);
+          delete itemMust.terms.domain;
+        }
+        if (!!itemMust.term && !!itemMust.term['geoip.country_code2']) {
+          itemMust.term.country = _.clone(itemMust.term['geoip.country_code2']);
+          delete itemMust.term['geoip.country_code2'];
+        }
+      });
 
-      var indicesList = utils.buildIndexList(span.start, span.end);
-      elasticSearch.getClientURL().search({
+      var indicesList = utils.buildIndexList(span.start, span.end, 'naxsi-');
+      elasticSearch.getClient().search({
         index: indicesList,
         ignoreUnavailable: true,
         timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
-      }).then(function(body) {
-        if ( !body.aggregations ) {
+      }).then(function (body) {
+        if (!body.aggregations) {
           return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
+            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
         }
         var dataArray = [];
-        for ( var i = 0; i < body.aggregations.results.buckets.length; i++ ) {
+        for (var i = 0; i < body.aggregations.results.buckets.length; i++) {
           dataArray[i] = {
-            path: body.aggregations.results.buckets[i].key,
+            key: body.aggregations.results.buckets[i].key,
             count: body.aggregations.results.buckets[i].doc_count
           };
         }
@@ -124,7 +135,7 @@ exports.getTopObjects = function(request, reply) {
           data: dataArray
         };
         renderJSON(request, reply, error, response);
-      }, function(error) {
+      }, function (error) {
         return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
       });
 

@@ -71,7 +71,7 @@ module.exports = [{
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: getTopObjects.getTopObjects,
+      handler: getTopObjects.getTopObjectsWAF,
       description: 'Get a list of top  object requests for a domain',
       tags: ['api'],
       plugins: {
@@ -83,7 +83,14 @@ module.exports = [{
         params: {
           domain_id: Joi.objectId().required().description('Domain ID')
         },
-        query: commonQueryParamsStatsWAF
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
+          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
+          count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
+          report_type: Joi.string().required().valid('uri', 'ip')
+            .description('Type of requested report (defaults to "country")'),
+          country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter')
+        }
       }
     }
   },

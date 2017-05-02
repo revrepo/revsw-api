@@ -22,7 +22,7 @@
 
 var boom = require('boom');
 var mongoose = require('mongoose');
-
+var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -96,13 +96,13 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
     requestBody.aggs.results.aggs = {
       regions: {
         terms: {
-          field: 'geoip.region_name',
+          field: 'country', // 'geoip.region_name',
           size: 0
         }
       },
       missing_regions: {
         missing: {
-          field: 'geoip.region_name',
+          field: 'country' // 'geoip.region_name',
         }
       }
     };
@@ -110,9 +110,15 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
 
   //  update query
   elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, req, domainConfig);
-
-  var indicesList = utils.buildIndexList(span.start, span.end);
-  return elasticSearch.getClientURL().search({
+  // NOTE: change property name for NAXSI
+  _.forEach(requestBody.query.filtered.filter.bool.must, function (itemMust) {
+    if (!!itemMust.terms) {
+      itemMust.terms.server = _.clone(itemMust.terms.domain);
+      delete itemMust.terms.domain;
+    }
+  });
+  var indicesList = utils.buildIndexList(span.start, span.end, 'naxsi-');
+  return elasticSearch.getClient().search({
       index: indicesList,
       ignoreUnavailable: true,
       timeout: config.get('elasticsearch_timeout_ms'),
@@ -159,19 +165,19 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
       }
 
       //  special treatment for cache report type to avoid garbage like "-" or just missing field
-      if (field === 'cache') {
-        data = [{
-          key: 'HIT',
-          count: data.reduce(function (prev, curr) {
-            return prev + (curr.key === 'HIT' ? curr.count : 0);
-          }, 0)
-        }, {
-          key: 'MISS',
-          count: data.reduce(function (prev, curr) {
-            return prev + (curr.key !== 'HIT' ? curr.count : 0);
-          }, 0)
-        }];
-      }
+      // if (field === 'cache') {
+      //   data = [{
+      //     key: 'HIT',
+      //     count: data.reduce(function (prev, curr) {
+      //       return prev + (curr.key === 'HIT' ? curr.count : 0);
+      //     }, 0)
+      //   }, {
+      //     key: 'MISS',
+      //     count: data.reduce(function (prev, curr) {
+      //       return prev + (curr.key !== 'HIT' ? curr.count : 0);
+      //     }, 0)
+      //   }];
+      // }
 
       var response = {
         metadata: {
@@ -210,7 +216,7 @@ exports.getTopReports = function (request, reply) {
 
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      var span = utils.query2Span(request.query, 1 /*def start in hrs*/ , 24 /*allowed period in hrs*/ );
+      var span = utils.query2Span(request.query, 1 /*def start in hrs*/ , 30 * 24 /*allowed period in hrs*/ );
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
