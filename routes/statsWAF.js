@@ -101,8 +101,7 @@ module.exports = [{
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      // TODO: change names
-      handler: getTopReports.getTopReports,
+      handler: getTopReports.getTopReportsWAF,
       description: 'Get a list of top traffic properties for a domain',
       tags: ['api'],
       plugins: {

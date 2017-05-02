@@ -37,7 +37,7 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 //  ---------------------------------
 var topReportsWAF_ = function (req, reply, domainConfig, span) {
 
-  req.query.report_type = req.query.report_type || 'referer';
+  req.query.report_type = req.query.report_type || 'country';
   var domainName = domainConfig.domain_name,
     field;
 
@@ -164,21 +164,6 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
         });
       }
 
-      //  special treatment for cache report type to avoid garbage like "-" or just missing field
-      // if (field === 'cache') {
-      //   data = [{
-      //     key: 'HIT',
-      //     count: data.reduce(function (prev, curr) {
-      //       return prev + (curr.key === 'HIT' ? curr.count : 0);
-      //     }, 0)
-      //   }, {
-      //     key: 'MISS',
-      //     count: data.reduce(function (prev, curr) {
-      //       return prev + (curr.key !== 'HIT' ? curr.count : 0);
-      //     }, 0)
-      //   }];
-      // }
-
       var response = {
         metadata: {
           domain_name: domainName,
@@ -201,10 +186,10 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
 };
 
 /**
- * @name getTopReports
+ * @name getTopReportsWAF
  * @desc method
  */
-exports.getTopReports = function (request, reply) {
+exports.getTopReportsWAF = function (request, reply) {
 
   var domainID = request.params.domain_id;
 
