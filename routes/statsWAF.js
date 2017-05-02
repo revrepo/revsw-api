@@ -33,8 +33,8 @@ var commonQueryParamsStatsWAF = {
   from_timestamp: Joi.string().description('Report period start timestamp'),
   to_timestamp: Joi.string().description('Report period end timestamp'),
   country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
-  rule_id: Joi.number().integer().min(0).max(100000).description('NAXSI rule ID'),
-  zone: Joi.string().valid('args', 'header', 'body', 'url')
+  rule_id: Joi.number().integer().min(0).max(100000).description('WAF Internal Rule ID'),
+  zone: Joi.string().valid('ARGS', 'HEADER', 'BODY', 'URL')
     .description('Request Zone value to filter')
 };
 var paginationParams = {
@@ -49,7 +49,7 @@ module.exports = [{
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: getStatsWAF.getStatsWAF,
-      description: 'Get traffic stats for a domain',
+      description: 'Get time-series report of WAF events for a domain',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -72,7 +72,7 @@ module.exports = [{
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: getTopObjects.getTopObjectsWAF,
-      description: 'Get a list of top  object requests for a domain',
+      description: 'Get a list of most WAF-active URLs or attacker IP addresses',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
@@ -135,7 +135,7 @@ module.exports = [{
       // TODO: change method. Implement a way to request a specific page
       // should return a pageable list of WAF events
       handler: getStatsWAF.getStatsWAF,
-      description: 'Get traffic stats for a domain',
+      description: 'Get a list of raw WAF events for a domain',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
