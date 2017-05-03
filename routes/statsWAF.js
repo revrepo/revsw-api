@@ -34,7 +34,7 @@ var commonQueryParamsStatsWAF = {
   to_timestamp: Joi.string().description('Report period end timestamp'),
   country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
   rule_id: Joi.number().integer().min(0).max(100000).description('WAF Internal Rule ID'),
-  zone: Joi.string().valid('ARGS', 'HEADER', 'BODY', 'URL')
+  zone: Joi.string().valid('ARGS', 'HEADERS', 'BODY', 'URL')
     .description('Request Zone value to filter')
 };
 var paginationParams = {
