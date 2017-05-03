@@ -38,8 +38,8 @@ var commonQueryParamsStatsWAF = {
     .description('Request Zone value to filter')
 };
 var paginationParams = {
-  page: Joi.number().integer().min(0).max(100000).description('Page'),
-  limit: Joi.number().integer().min(0).max(100000).description('Limit'),
+  page: Joi.number().integer().min(1).max(100000).default(1).description('Page number'),
+  count: Joi.number().integer().min(0).max(200).default(25).description('Count records'),
 };
 module.exports = [{
     method: 'GET',
@@ -131,9 +131,7 @@ module.exports = [{
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      // TODO: change method. Implement a way to request a specific page
-      // should return a pageable list of WAF events
-      handler: getStatsWAF.getStatsWAF,
+      handler: getStatsWAF.getWAFEventsList,
       description: 'Get a list of raw WAF events for a domain',
       tags: ['api'],
       plugins: {
