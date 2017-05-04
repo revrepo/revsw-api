@@ -37,7 +37,7 @@
   "portal_url": "https://testsjc20-portal01.revsw.net",
   // by default use QA instance of ES service
   "elasticsearch_url": "testsjc20-es01.revsw.net:9200",
-  "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200",
+  "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200", 
   "elasticsearch_log_level": false,
   "elasticsearch_timeout_ms": 120000,
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
@@ -411,5 +411,6 @@
     "http://localhost:4000/",
     "http://testsjc20-victordev01.revsw.net:3000/",
     "http://testsjc20-victordev01.revsw.net:4000/"
-  ]
+  ],
+  "notify_admin_by_email_on_customer_activities":""
 }

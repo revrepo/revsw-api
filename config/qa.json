@@ -54,5 +54,6 @@
     "https://testsjc20-portal01.revsw.net",
     "https://testsjc20-portal-nuubit.revsw.net",
     "https://testsjc20-portal-hooli.revsw.net"
-  ]
+  ],
+    "notify_admin_by_email_on_customer_activities":"nikolay.gerzhan@yandex.ru"
 }
