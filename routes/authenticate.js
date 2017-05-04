@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -52,18 +52,23 @@ module.exports = [
 
   {
     method : 'POST',
-    path   : '/v1/authenticate-sso-azure',
+    path   : '/v1/authenticate-sso-azure/{provider}',
     config : {
       handler     : authenticate.authenticateSSOAzure,
       auth        : false,
       description : 'An internal portal call for Azure SSO authentication',
-//      tags        : ['api', 'web'],
+    //      tags        : ['api', 'web'],
       plugins     : {
         'hapi-swagger' : {
           responseMessages : routeModels.standardHTTPErrors
         }
       },
       validate    : {
+        params:{
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name')
+        },
         payload : {
           token: Joi.string().required().description('Encrypted and signed SSO token'),
           resourceId: Joi.string().required().description('Base64-encoded resource ID')

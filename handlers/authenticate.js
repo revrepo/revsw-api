@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -40,6 +40,7 @@ var AuditLogger = require('../lib/audit');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
+var vendorProfileList = config.get('vendor_profiles');
 var onAuthPassed = function(user, request, reply, error) {
   var token = utils.generateJWT(user);
   var statusResponse;
@@ -192,6 +193,20 @@ exports.authenticate = function(request, reply) {
 exports.authenticateSSOAzure = function(request, reply) {
 
   var tokenEncrypted = request.payload.token;
+  // NOTE: find vendor profile
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
+
+  if(!brandName){
+      reply(boom.badRequest('authenticate::authenticateSSOAzure: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
+
   var token = utils.decodeSSOToken(tokenEncrypted);
   logger.info('authenticateSSOAzure: SSO token = ', token);
   if (!token || !token.providerData || !token.expirationTimestamp) {
@@ -205,8 +220,8 @@ exports.authenticateSSOAzure = function(request, reply) {
       token.expirationTimestamp);
     return reply(boom.unauthorized());
   }
-
-  var email = token.providerData + '@' + config.get('azure_marketplace.user_email_domain');
+  // NOTE: user email for Brand (vendor profile)
+  var email = token.providerData + '@' + azureMarketplace.user_email_domain;
   users.getValidation({
     email: email
   }, function(error, user) {

@@ -217,7 +217,12 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "RevAPM Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "revqa.net"
+      "cname_domain": "revqa.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -310,7 +315,12 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "nuu:bit Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "nuubitqa.net"
+      "cname_domain": "nuubitqa.net", 
+      "azure_marketplace": {
+        "provider_name": "nuubit.CDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.portal.nuubit.net"
+      }
     },
     "hooli": {
       "vendorUrl": "http://localhost:5000",
@@ -403,7 +413,12 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "Hooli Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "revqa.net"
+      "cname_domain": "revqa.net",
+      "azure_marketplace": {
+        "provider_name": "nuubit.CDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
     }
   },
   "proxy_white_referer_urls": [
