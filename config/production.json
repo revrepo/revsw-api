@@ -119,5 +119,5 @@
     "https://portal-staging.nuubit.net"
   ],
   "notify_admin_by_email_on_customer_activities":"victor@revapm.com",
-  "accounts_to_ignore_for_activity_porting":["5472e0be5e4ac42646bdffeb"/*Rev Software*/]
+  "accounts_to_ignore_for_activity_reporting":["5472e0be5e4ac42646bdffeb"/*Rev Software*/]
 }
