@@ -319,7 +319,7 @@
       "azure_marketplace": {
         "provider_name": "nuubit.nextgencdn",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
-        "user_email_domain": "azure-user.portal.nuubit.net"
+        "user_email_domain": "azure-user.nuubit.net"
       }
     },
     "hooli": {
