@@ -43,6 +43,8 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var azureResources = new AzureResource(mongoose, mongoConnection.getConnectionPortal());
 
 var vendorProfileList = config.get('vendor_profiles');
+var defaultVendorProfile = config.get('default_signup_vendor_profile');
+
 var onAuthPassed = function(user, request, reply, error) {
   var token = utils.generateJWT(user);
   var statusResponse;
@@ -196,46 +198,31 @@ exports.authenticateSSOAzure = function(request, reply) {
 
   var tokenEncrypted = request.payload.token;
   var resourceId = request.payload.resourceId;
-  // NOTE: find vendor profile for get value from "user_email_domain"
-  azureResources.get({
-    resource_id: resourceId
-  }, function(error, result) {
+  var token = utils.decodeSSOToken(tokenEncrypted);
+  logger.info('authenticateSSOAzure: SSO token = ', token);
+  if (!token || !token.providerData || !token.expirationTimestamp) {
+    logger.warn('authenticateSSOAzure:: Missing or incorrect SSO token');
+    return reply(boom.unauthorized());
+  }
+
+  var currentTimestamp = new Date().getTime();
+  if (token.expirationTimestamp < currentTimestamp) {
+    logger.warn('authenticateSSOAzure:: Expired SSO token. currentTimestamp = ' + currentTimestamp + ', expirationTimestamp = ' +
+      token.expirationTimestamp);
+    return reply(boom.unauthorized());
+  }
+  // NOTE: token.providerData is equal AccountId and first parts of user email
+  accounts.get({
+    _id: token.providerData
+  }, function(error, account) {
     if (error) {
-      return reply(boom.badImplementation('Failed to retrive from the DB an Azure resource with ID ' + resourceId));
+      return reply(boom.badImplementation('Failed to retrive from the DB an Account with ID ' + token.providerData));
     }
-    if (!result) {
-      // return 404 status code if the requested resource does not exist in our records
-      return reply(boom.notFound('The resource ID is not exists'));
+    if (!account) {
+      return reply(boom.notFound('The Account ID is not exists'));
     }
-    if (!result.plan || !result.plan.publisher) {
-      return reply(boom.conflict('The requested resource ID is not have Provider information'));
-    }
-    var providerName = result.plan.publisher;
-    var brandName = _.findKey(vendorProfileList, function(itemProfile) {
-      if (!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name) {
-        return false;
-      }
-      return (itemProfile.azure_marketplace.provider_name === providerName);
-    });
-
-    if (!brandName) {
-      reply(boom.badRequest('authenticate::authenticateSSOAzure: Not found provider information'));
-    }
-    var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
-
-    var token = utils.decodeSSOToken(tokenEncrypted);
-    logger.info('authenticateSSOAzure: SSO token = ', token);
-    if (!token || !token.providerData || !token.expirationTimestamp) {
-      logger.warn('authenticateSSOAzure:: Missing or incorrect SSO token');
-      return reply(boom.unauthorized());
-    }
-
-    var currentTimestamp = new Date().getTime();
-    if (token.expirationTimestamp < currentTimestamp) {
-      logger.warn('authenticateSSOAzure:: Expired SSO token. currentTimestamp = ' + currentTimestamp + ', expirationTimestamp = ' +
-        token.expirationTimestamp);
-      return reply(boom.unauthorized());
-    }
+    var profileName = account.vendor_profile || defaultVendorProfile;
+    var azureMarketplace = vendorProfileList[profileName].azure_marketplace;
     // NOTE: user email for Brand (vendor profile)
     var email = token.providerData + '@' + azureMarketplace.user_email_domain;
     users.getValidation({
