@@ -317,7 +317,7 @@
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
       "cname_domain": "nuubitqa.net", 
       "azure_marketplace": {
-        "provider_name": "nuubit.CDN",
+        "provider_name": "nuubit.nextgencdn",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.portal.nuubit.net"
       }
@@ -415,7 +415,7 @@
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
       "cname_domain": "revqa.net",
       "azure_marketplace": {
-        "provider_name": "nuubit.CDN",
+        "provider_name": "RevAPM.MobileCDN",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
       }
