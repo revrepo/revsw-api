@@ -427,5 +427,6 @@
     "http://testsjc20-victordev01.revsw.net:3000/",
     "http://testsjc20-victordev01.revsw.net:4000/"
   ],
-  "notify_admin_by_email_on_customer_activities":""
+  "notify_admin_by_email_on_customer_activities":"",
+  "accounts_to_ignore_for_activity_porting": []
 }
