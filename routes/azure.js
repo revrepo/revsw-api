@@ -134,7 +134,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -151,7 +151,7 @@ module.exports = [
               .when('publisher',{is: 'RevAPM.MobileCDN',
                 then: Joi.valid('developer', 'silver', 'bronze2', 'gold'),
                 otherwise: Joi.valid('free', 'developer', 'startup', 'enterprise')}),
-            publisher: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN'),
+            publisher: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn'),
             product: Joi.string(),
             promotioncode: Joi.string().allow(null, ''),
             promotionCode: Joi.string().allow(null, '')
@@ -186,7 +186,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -248,7 +248,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -284,7 +284,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -316,7 +316,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -380,7 +380,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -415,7 +415,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -446,7 +446,7 @@ module.exports = [
       },
       validate: {
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name')
         },
@@ -480,7 +480,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -523,7 +523,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -544,7 +544,7 @@ module.exports = [
       handler: azure.regenerateKey,
       description: 'Regenerate key',
       notes: 'Regenerate key',
-//      tags: ['api'],
+   //  tags: ['api'],
       auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
@@ -556,7 +556,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
@@ -578,8 +578,8 @@ module.exports = [
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
       notes: 'List SSL token',
-//      tags: ['api'],
-      auth: 'azure-token',
+     tags: ['api','web'],
+      auth: false,//'azure-token',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -590,7 +590,7 @@ module.exports = [
           stripUnknown: false
         },
         params: {
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.nextgencdn')
             .default('RevAPM.MobileCDN')
             .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),

@@ -52,7 +52,7 @@ module.exports = [
 
   {
     method : 'POST',
-    path   : '/v1/authenticate-sso-azure/{provider}',
+    path   : '/v1/authenticate-sso-azure',
     config : {
       handler     : authenticate.authenticateSSOAzure,
       auth        : false,
@@ -64,11 +64,6 @@ module.exports = [
         }
       },
       validate    : {
-        params:{
-          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
-            .default('RevAPM.MobileCDN')
-            .description('Provider name')
-        },
         payload : {
           token: Joi.string().required().description('Encrypted and signed SSO token'),
           resourceId: Joi.string().required().description('Base64-encoded resource ID')

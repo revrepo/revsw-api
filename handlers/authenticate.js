@@ -41,6 +41,8 @@ var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var vendorProfileList = config.get('vendor_profiles');
+var defaultVendorProfile = config.get('default_signup_vendor_profile');
+
 var onAuthPassed = function(user, request, reply, error) {
   var token = utils.generateJWT(user);
   var statusResponse;
@@ -193,20 +195,6 @@ exports.authenticate = function(request, reply) {
 exports.authenticateSSOAzure = function(request, reply) {
 
   var tokenEncrypted = request.payload.token;
-  // NOTE: find vendor profile
-  var providerName = request.params.provider;
-  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
-    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
-      return false;
-    }
-    return (itemProfile.azure_marketplace.provider_name === providerName);
-  });
-
-  if(!brandName){
-      reply(boom.badRequest('authenticate::authenticateSSOAzure: Not found provider information'));
-  }
-  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
-
   var token = utils.decodeSSOToken(tokenEncrypted);
   logger.info('authenticateSSOAzure: SSO token = ', token);
   if (!token || !token.providerData || !token.expirationTimestamp) {
@@ -220,33 +208,46 @@ exports.authenticateSSOAzure = function(request, reply) {
       token.expirationTimestamp);
     return reply(boom.unauthorized());
   }
-  // NOTE: user email for Brand (vendor profile)
-  var email = token.providerData + '@' + azureMarketplace.user_email_domain;
-  users.getValidation({
-    email: email
-  }, function(error, user) {
-
+  // NOTE: token.providerData is equal AccountId and first parts of user email
+  accounts.get({
+    _id: token.providerData
+  }, function(error, account) {
     if (error) {
-      logger.error('Authenticate::authenticate: Failed to retrieve user details for' + ' email: ' + email);
-      return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
-        ' email: ' + email));
+      return reply(boom.badImplementation('Failed to retrive from the DB an Account with ID ' + token.providerData));
     }
+    if (!account) {
+      return reply(boom.notFound('The Account ID is not exists'));
+    }
+    var profileName = account.vendor_profile || defaultVendorProfile;
+    var azureMarketplace = vendorProfileList[profileName].azure_marketplace;
+    // NOTE: user email for Brand (vendor profile)
+    var email = token.providerData + '@' + azureMarketplace.user_email_domain;
+    users.getValidation({
+      email: email
+    }, function(error, user) {
 
-    if (!user) {
-      logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
-      return reply(boom.unauthorized());
-    } else {
-      // TODO need to fix the code to do the actual verification of provided token and resourceId
-      var authPassed = true;
-      var sendResultChecks = function sendResultChecks(authPassed) {
-        if (authPassed) {
-          onAuthPassed(user, request, reply, error);
-        } else {
-          return reply(boom.unauthorized());
-        }
-      };
-      sendResultChecks(authPassed);
-    }
+      if (error) {
+        logger.error('Authenticate::authenticate: Failed to retrieve user details for' + ' email: ' + email);
+        return reply(boom.badImplementation('Authenticate::authenticate: Failed to retrieve user details for' +
+          ' email: ' + email));
+      }
+
+      if (!user) {
+        logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
+        return reply(boom.unauthorized());
+      } else {
+        // TODO need to fix the code to do the actual verification of provided token and resourceId
+        var authPassed = true;
+        var sendResultChecks = function sendResultChecks(authPassed) {
+          if (authPassed) {
+            onAuthPassed(user, request, reply, error);
+          } else {
+            return reply(boom.unauthorized());
+          }
+        };
+        sendResultChecks(authPassed);
+      }
+    });
   });
 };
 
@@ -310,5 +311,3 @@ exports.authenticateOAuthGoogle = function(request, reply) {
     });
   });
 };
-
-
