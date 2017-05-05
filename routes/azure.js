@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -117,12 +117,12 @@ module.exports = [
   // Create Resource
   {
     method: 'PUT',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}',
     config: {
       handler: azure.createResource,
       description: 'Create a resource',
       notes: 'Create a resource',
-//      tags: ['api'],
+      //      tags: ['api'],
       auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
@@ -134,6 +134,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
@@ -144,8 +147,11 @@ module.exports = [
           name: Joi.string().trim(),
           type: Joi.string().trim(),
           plan: Joi.object({
-            name: Joi.string().required().valid('free', 'developer', 'silver', 'bronze2', 'gold'),
-            publisher: Joi.string(),
+            name: Joi.string().required()
+              .when('publisher',{is: 'RevAPM.MobileCDN',
+                then: Joi.valid('developer', 'silver', 'bronze2', 'gold'),
+                otherwise: Joi.valid('free', 'developer', 'startup', 'enterprise')}),
+            publisher: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN'),
             product: Joi.string(),
             promotioncode: Joi.string().allow(null, ''),
             promotionCode: Joi.string().allow(null, '')
@@ -163,7 +169,7 @@ module.exports = [
   // Update (PATCH) a Resource
   {
     method: 'PATCH',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}',
     config: {
       handler: azure.patchResource,
       description: 'Patch a resource',
@@ -180,6 +186,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
@@ -222,7 +231,7 @@ module.exports = [
   // Get All Resources in Resource Group
   {
     method: 'GET',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts',
     config: {
       handler: azure.listAllResourcesInResourceGroup,
       description: 'Get all resources in a Resource Group',
@@ -239,6 +248,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
         }
@@ -252,7 +264,7 @@ module.exports = [
   // Get All Resources in Subscription
   {
     method: 'GET',
-    path: '/subscriptions/{subscription_id}/providers/' + provider + '/accounts',
+    path: '/subscriptions/{subscription_id}/providers/{provider}/accounts',
     config: {
       handler: azure.listAllResourcesInSubscription,
       description: 'Get all resources in a Subscription',
@@ -272,6 +284,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         }
       },
@@ -284,7 +299,7 @@ module.exports = [
   // Get a Resource
   {
     method: 'GET',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}',
     config: {
       handler: azure.getResource,
       description: 'Get a Resource',
@@ -301,6 +316,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
@@ -345,7 +363,7 @@ module.exports = [
   // Delete a Resource
   {
     method: 'DELETE',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}',
     config: {
       handler: azure.deleteResource,
       description: 'Delete a Resource',
@@ -362,6 +380,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
@@ -377,7 +398,7 @@ module.exports = [
   // List Secrets
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSecrets',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}/listSecrets',
     config: {
       handler: azure.listSecrets,
       description: 'List secrets',
@@ -394,6 +415,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
@@ -408,12 +432,12 @@ module.exports = [
   // List supported Operations
   {
     method: 'GET',
-    path: '/providers/' + provider + '/operations',
+    path: '/providers/{provider}/operations',
     config: {
       handler: azure.listOperations,
       description: 'List supported RP operations',
       notes: 'List supported RP operations',
-//      tags: ['api'],
+    //      tags: ['api'],
       auth: 'azure-token',
       plugins: {
         'hapi-swagger': {
@@ -421,6 +445,11 @@ module.exports = [
         }
       },
       validate: {
+        params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name')
+        },
         options: {
           stripUnknown: false
         },
@@ -434,7 +463,7 @@ module.exports = [
   // Update Communication Preference
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/providers/' + provider + '/updateCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/{provider}/updateCommunicationPreference',
     config: {
       handler: azure.updateCommunicationPreference,
       description: 'Update Communication Preference',
@@ -451,6 +480,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         },
         payload: {
@@ -473,7 +505,7 @@ module.exports = [
   // List Communication Preference
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/providers/' + provider + '/listCommunicationPreference',
+    path: '/subscriptions/{subscription_id}/providers/{provider}/listCommunicationPreference',
     // path: '/subscriptions/{subscription_id}/providers/' + provider + '/{empty}/listCommunicationPreference', // Use this line for MockTool testing
     config: {
       handler: azure.listCommunicationPreference,
@@ -491,6 +523,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
         }
       },
@@ -504,7 +539,7 @@ module.exports = [
   // Regenerate Keys
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/RegenerateKey',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}/RegenerateKey',
     config: {
       handler: azure.regenerateKey,
       description: 'Regenerate key',
@@ -521,6 +556,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')
@@ -535,7 +573,7 @@ module.exports = [
   // List Single Sign On Authorization
   {
     method: 'POST',
-    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/' + provider + '/accounts/{resource_name}/listSingleSignOnToken',
+    path: '/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}/providers/{provider}/accounts/{resource_name}/listSingleSignOnToken',
     config: {
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
@@ -552,6 +590,9 @@ module.exports = [
           stripUnknown: false
         },
         params: {
+          provider: Joi.string().valid('RevAPM.MobileCDN','nuubit.CDN')
+            .default('RevAPM.MobileCDN')
+            .description('Provider name'),
           subscription_id: Joi.string().required().lowercase().description('Azure Subscription ID'),
           resource_group_name: Joi.string().required().lowercase().description('Azure Resource Group name'),
           resource_name: Joi.string().required().lowercase().description('Azure Resource name')

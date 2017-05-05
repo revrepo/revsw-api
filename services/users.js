@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -37,6 +37,7 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var dashboardService = require('./dashboards');
 var statuspageService = require('./statuspage');
+var vendorProfiles = config.get('vendor_profiles');
 
 
 /**
@@ -102,7 +103,12 @@ exports.createUser = function(newUser, callback) {
         // 2.  add new user account (self-registered or not) to RevAPM statuspage.io notification list
         if (config.get('register_new_users_for_network_status_updates') === 'yes') {
           // NOTE: not subscribe Azure users
-          if (newUser.email.match('@' + config.get('azure_marketplace.user_email_domain')) === null) {
+          // NOTE: find profile with Azure 'user_email_domain'
+          var userEmainDomainName = newUser.email.split('@')[1];
+          var profileAzureMarketplace = _.findKey(vendorProfiles, function(key){
+              return (key.azure_marketplace.user_email_domain === userEmainDomainName);
+          });
+          if (!profileAzureMarketplace) {
             statuspageService.subscribe(newUser, function(err, data) {
               if (err) {
                 logger.error('UserService::statuspage.subscribe:error create subscription: ' + JSON.stringify(err));

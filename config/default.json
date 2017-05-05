@@ -37,7 +37,7 @@
   "portal_url": "https://testsjc20-portal01.revsw.net",
   // by default use QA instance of ES service
   "elasticsearch_url": "testsjc20-es01.revsw.net:9200",
-  "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200",
+  "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200", 
   "elasticsearch_log_level": false,
   "elasticsearch_timeout_ms": 120000,
   "cds_url": "https://testsjc20-cds01.revsw.net:9000",
@@ -217,7 +217,12 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "RevAPM Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "revqa.net"
+      "cname_domain": "revqa.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -310,7 +315,12 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "nuu:bit Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "nuubitqa.net"
+      "cname_domain": "nuubitqa.net", 
+      "azure_marketplace": {
+        "provider_name": "nuubit.CDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.portal.nuubit.net"
+      }
     },
     "hooli": {
       "vendorUrl": "http://localhost:5000",
@@ -403,7 +413,12 @@
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "Hooli Platform API Documentation",
       "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
-      "cname_domain": "revqa.net"
+      "cname_domain": "revqa.net",
+      "azure_marketplace": {
+        "provider_name": "nuubit.CDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
     }
   },
   "proxy_white_referer_urls": [
@@ -411,5 +426,7 @@
     "http://localhost:4000/",
     "http://testsjc20-victordev01.revsw.net:3000/",
     "http://testsjc20-victordev01.revsw.net:4000/"
-  ]
+  ],
+  "notify_admin_by_email_on_customer_activities":"",
+  "accounts_to_ignore_for_activity_reporting": []
 }
