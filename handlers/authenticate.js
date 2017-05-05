@@ -36,11 +36,9 @@ var User = require('../models/User');
 var Account = require('../models/Account');
 var publicRecordFields = require('../lib/publicRecordFields');
 var AuditLogger = require('../lib/audit');
-var AzureResource = require('../models/AzureResource');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-var azureResources = new AzureResource(mongoose, mongoConnection.getConnectionPortal());
 
 var vendorProfileList = config.get('vendor_profiles');
 var defaultVendorProfile = config.get('default_signup_vendor_profile');
@@ -197,7 +195,6 @@ exports.authenticate = function(request, reply) {
 exports.authenticateSSOAzure = function(request, reply) {
 
   var tokenEncrypted = request.payload.token;
-  var resourceId = request.payload.resourceId;
   var token = utils.decodeSSOToken(tokenEncrypted);
   logger.info('authenticateSSOAzure: SSO token = ', token);
   if (!token || !token.providerData || !token.expirationTimestamp) {
