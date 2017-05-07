@@ -792,6 +792,22 @@ exports.verify = function(req, reply) {
         });
         result = publicRecordFields.handle(fields, 'verify');
         // NOTE: user verify and auto-login
+        // Audit verify
+        AuditLogger.store({
+          ip_address: remoteIP,
+          datetime: Date.now(),
+          user_id: user.user_id,
+          user_name: user.email,
+          user_type: 'user',
+          account_id: companyId,
+          activity_type: 'verify_email',
+          activity_target: 'user',
+          target_id: user.user_id,
+          target_name: result.email,
+          target_object: publicRecordFields.handle(fields, 'user'),
+          operation_status: 'success'
+        });
+        // Audit auto-login information
         AuditLogger.store({
           ip_address: remoteIP,
           datetime: Date.now(),
