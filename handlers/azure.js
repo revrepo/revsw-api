@@ -202,20 +202,24 @@ exports.createResource = function(request, reply) {
             vendor_profile: brandName
             // TODO add billing plan
           };
-          var loggerData = {
-            user_name: newAccount.createdBy,
-            user_type: 'system',
-            user_id: '00000', //
-            activity_type: 'add',
-            activity_target: 'account',
-            operation_status: 'success',
-            // request: request
-          };
-          accountsService.createAccount(newAccount, { loggerData: loggerData }, function(error, account) {
+
+          accountsService.createAccount(newAccount, {}, function(error, account) {
             if (error || !account) {
               return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(newAccount)));
             }
+            var resultAccountData = publicRecordFields.handle(account, 'account');
+            var loggerDataAccount = {
+              user_name: newAccount.createdBy,
+              user_type: 'system',
+              user_id: '00000', // NOTE: will be changed after create new user for this account
+              activity_type: 'add',
+              activity_target: 'account',
+              operation_status: 'success',
+              target_id: resultAccountData.id,
+              target_name: resultAccountData.companyName,
+              target_object: resultAccountData
+            };
 
             var email = account.id + '@' + azureMarketplace.user_email_domain;
             var password = crypto.randomBytes(8).toString('hex');
@@ -235,6 +239,8 @@ exports.createResource = function(request, reply) {
                   ', payload ' + JSON.stringify(newUser)));
               }
 
+              loggerDataAccount.user_id = user.user_id;
+              AuditLogger.store(loggerDataAccount);
               // TODO: add code to send email notifications about new Azure resources registered in the system
               // TODO: add code to add audit records for new subscription, resource, user
               AuditLogger.store({
