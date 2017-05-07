@@ -245,7 +245,10 @@ exports.createResource = function(request, reply) {
                 target_name: user.email,
                 target_object: user,
                 operation_status: 'success',
-                user_type: 'system'
+                user_type: 'system',
+                // NOTE: additional information
+                user_id:user.user_id,
+                user_name: user.email
               });
               var newResource = {
                 subscription_id: subscriptionId,
