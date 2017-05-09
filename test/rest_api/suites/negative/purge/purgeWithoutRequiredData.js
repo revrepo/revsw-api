@@ -20,7 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../../common/api');
-var purgeSchema = require('./../../../common/providers/schema/purge.json');
+var purgeSchema = require('./../../../common/providers/schema/json/purge.json');
 var AccountsDP = require('./../../../common/providers/data/accounts');
 var PurgeDP = require('./../../../common/providers/data/purge');
 var Utils = require('./../../../common/utils');

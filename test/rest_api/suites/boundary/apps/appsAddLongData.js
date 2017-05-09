@@ -19,7 +19,7 @@
 require('should-http');
 
 var config = require('config');
-var appsSchema = require('./../../../common/providers/schema/appsAdd.json');
+var appsSchema = require('./../../../common/providers/schema/json/appsAdd.json');
 var API = require('./../../../common/api');
 var AppsDP = require('./../../../common/providers/data/apps');
 var AppsDDHelper = AppsDP.DataDrivenHelper;
