@@ -86,6 +86,10 @@ var DNSZonesHelper = {
         .records(dnsZone.id)
         .createOne(dnsZoneRecord)
         .then(function () {
+          return DNSZonesResource.getOne(dnsZone.id)
+        })
+        .then(function (res) {
+          dnsZoneRecord.id = DNSZonesDP.getLastRecord(res.body).id;
           return dnsZoneRecord;
         })
         .catch(function (error) {

@@ -94,7 +94,7 @@ describe('CRUD check', function () {
           done();
         });
 
-        xit('should return response when getting all of DNS zones',
+        it('should return response when getting all of DNS zones',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -112,7 +112,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return response when getting all DNS zones with usage stats',
+        it('should return response when getting all DNS zones with usage stats',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -131,7 +131,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return a response when getting a specific DNS zone',
+        it('should return a response when getting a specific DNS zone',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -148,7 +148,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return a response when creating specific DNS zone',
+        it('should return a response when creating specific DNS zone',
           function (done) {
             var dnsZone = DNSZonesDP.generateOne(account.id);
             API.helpers
@@ -169,7 +169,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return a response when updating specific DNS zone',
+        it('should return a response when updating specific DNS zone',
           function (done) {
             var updatedDnsZone = DNSZonesDP.generateToUpdate();
             API.helpers
@@ -192,7 +192,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return a response when deleting specific DNS zone',
+        it('should return a response when deleting specific DNS zone',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -213,7 +213,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return a response when checking integration with dns ' +
+        it('should return a response when checking integration with dns ' +
           'servers for specific DNS Zone',
           function (done) {
             API.helpers
@@ -232,7 +232,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should return a response when checking integration with records ' +
+        it('should return a response when checking integration with records ' +
           ' for specific DNS Zone',
           function (done) {
             API.helpers
@@ -253,7 +253,7 @@ describe('CRUD check', function () {
 
         describe('DNS Zone Records', function () {
 
-          xit('should return a response when getting all DNS Zone Records',
+          it('should return a response when getting all DNS Zone Records',
             function (done) {
               API.helpers
                 .authenticateUser(user)
@@ -282,10 +282,7 @@ describe('CRUD check', function () {
                     .getOne(firstDnsZoneRecord.id)
                     .expect(200)
                     .then(function (response) {
-                      console.log('------ ', response.body);
-                      console.log('------ ', firstDnsZone.id);
-                      console.log('------ ', firstDnsZoneRecord);
-                      var dnsZoneRecord = response.body[0];
+                      var dnsZoneRecord = response.body;
                       dnsZoneRecord.id.should.equal(firstDnsZoneRecord.id);
                       done();
                     });
@@ -314,7 +311,7 @@ describe('CRUD check', function () {
                 .catch(done);
             });
 
-          xit('should return a response when updating specific DNS Zone Record',
+          it('should return a response when updating specific DNS Zone Record',
             function (done) {
               API.helpers
                 .authenticateUser(user)
@@ -343,7 +340,7 @@ describe('CRUD check', function () {
                 .catch(done);
             });
 
-          xit('should return a response when deleting specific DNS Zone Record',
+          it('should return a response when deleting specific DNS Zone Record',
             function (done) {
               API.helpers
                 .authenticateUser(user)
