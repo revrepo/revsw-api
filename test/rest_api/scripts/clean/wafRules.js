@@ -31,7 +31,7 @@ describe('Clean up', function () {
     config.get('api.users.reseller'),
     config.get('api.users.admin')
   ];
-  var namePattern = /^qa-test-wafrule-[0-9]{13}/;
+  var namePattern = /qa-test-wafrule-[0-9]{13}/;
 
   describe('WAF Rules', function () {
 

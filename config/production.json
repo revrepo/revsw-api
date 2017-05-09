@@ -82,7 +82,12 @@
       "password_reset_portal_domain": "portal.revapm.net",
       "googleAnalyticsAccount": "UA-68856309-3",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
-      "cname_domain": "revdn.net"
+      "cname_domain": "revdn.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
     },
     "nuubit": {
       "vendorUrl": "https://portal.nuubit.net",
@@ -90,7 +95,12 @@
       "password_reset_portal_domain": "portal.nuubit.net",
       "googleAnalyticsAccount": "UA-92590791-3",
       "apiGoogleAnalyticsAccount": "UA-92590791-4",
-      "cname_domain": "nuubitcn.net"
+      "cname_domain": "nuubitcn.net",
+      "azure_marketplace": {
+        "provider_name": "nuubit.nextgencdn",
+        "sso_endpoint": "https://portal.nuubit.net/#/azure-sso",
+        "user_email_domain": "azure-user.nuubit.net"
+      }
     },
     "hooli": {
       "vendorUrl": "https://hooli.nuubit.net",
@@ -98,7 +108,12 @@
       "password_reset_portal_domain": "portal.revapm.net",
       "googleAnalyticsAccount": "UA-68856309-3",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
-      "cname_domain": "revdn.net"
+      "cname_domain": "revdn.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
     }
   },
   "proxy_white_referer_urls": [
@@ -107,5 +122,7 @@
     "https://hooli.nuubit.net",
     "https://portal-staging.revapm.net",
     "https://portal-staging.nuubit.net"
-  ]
+  ],
+  "notify_admin_by_email_on_customer_activities":"victor@revapm.com",
+  "accounts_to_ignore_for_activity_reporting":["5472e0be5e4ac42646bdffeb"/*Rev Software*/]
 }

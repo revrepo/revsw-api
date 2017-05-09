@@ -72,7 +72,7 @@ exports.forgotPassword = function(request, reply) {
               function (token, done) {
                   delete user.password;
                   user.resetPasswordToken = token;
-                  user.resetPasswordExpires = Date.now() + currentVendorProfile.password_reset_token_lifespan;
+                  user.resetPasswordExpires = Date.now() + config.get('password_reset_token_lifespan_ms');
 
                   users.update(user, function (error, result) {
                       if (error) {

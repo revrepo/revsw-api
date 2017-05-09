@@ -35,7 +35,14 @@ var resourceConfig = {
     Methods.CREATE,
     Methods.UPDATE,
     Methods.DELETE
-  ]
+  ],
+  nestedResources: [{
+    name: 'status',
+    path: '/config_status',
+    methods: [
+      Methods.READ_ONE
+    ]
+  }]
 };
 
 // Creating new instance of BaseResource which is going to represent the API

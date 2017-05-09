@@ -31,18 +31,19 @@ module.exports = function (grunt) {
           clearRequireCache: false
         },
         src: [ // NOTE: Execution order is really IMPORTANT
+          'scripts/clean/dashboards.js',
           'scripts/clean/apiKeys.js',
           'scripts/clean/apps.js',
           'scripts/clean/billingPlans.js',
-          'scripts/clean/dashboards.js',
           'scripts/clean/domainConfigs.js',
-          'scripts/clean/dnsZones.js',
-          'scripts/clean/logShippingJobs.js',
           'scripts/clean/sslNames.js',
           'scripts/clean/sslCerts.js',
+          'scripts/clean/dnsZones.js',
+          'scripts/clean/logShippingJobs.js',
+          'scripts/clean/wafRules.js',
           'scripts/clean/accounts.js',
           'scripts/clean/users.js',
-          'scripts/clean/wafRules.js',
+          'scripts/clean/chargify.js',
         ]
       },
       setup: {

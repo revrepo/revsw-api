@@ -53,8 +53,9 @@ module.exports = [{
           .description('Target type  (\'user\', \'account\', \'domain\', \'object\', \'apikey\', \'logshippingjob\', \'app\', \'sslcert\', \'sslname\','+
           ' \'dnszone\',\'dnsrecord\',\'wafrule\''),
         activity_type: Joi.string().valid('login', 'add', 'modify', 'delete', 'publish', 'purge', 'init2fa', 'enable2fa',
-          'disable2fa', 'resetpassword', 'signup', 'verify').description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\','+
-          ' \'init2fa\', \'enable2fa\', \'disable2fa\', \'resetpassword\', \'signup\', \'verify\')')
+          'disable2fa', 'resetpassword', 'signup', 'verify','verify_email')
+            .description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\','+
+            ' \'init2fa\', \'enable2fa\', \'disable2fa\', \'resetpassword\', \'signup\', \'verify\', \'verify_email\')')
       }
     }
   }

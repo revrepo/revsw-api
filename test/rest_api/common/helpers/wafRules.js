@@ -28,11 +28,12 @@ var WAFRulesHelper = {
    * ### WAFRulesHelper.createOneForAccount()
    *
    * Creates a new WAF Rule for specific Account
-   *
+   * @param {Object} account {id: string}
    * @returns {Object} WAF Rule data
    */
   createOneForAccount: function(account) {
     var wafRule = WAFRulesDP.generateOne({accountId: account.id});
+    wafRule.comment += ' (Account ID: "'+account.id+'")';
     return WAFRulesResource
       .createOne(wafRule)
       .then(function(response) {

@@ -51,16 +51,47 @@ var WAFRuleDataProvider = {
    */
   generateOne: function (data, prefix) {
 
-    if (prefix === undefined) {
-      prefix = (prefix ? prefix + '_' : this.prefix ) + Date.now();
-    }
+    prefix = (prefix ? prefix + '_' + this.prefix : this.prefix) + Date.now();
     return {
       account_id: data.accountId,
       rule_name: prefix,
-      rule_type: data.rule_type || 'customer',
+      rule_type: data.ruleType || 'customer',
       visibility: data.visibility || 'public',
-      rule_body: data.rule_body || '# QA Test WAF Rule',
+      rule_body: data.ruleBody || '# QA Test WAF Rule',
       comment: data.comment || 'QA Test'
+    };
+  },
+  /**
+   * ### WAFRuleDataProvider.generateOneForUpdate()
+   *
+   * Generates valid data that represents a WAF Rule and the REST API
+   * end points accept. By default properties contain word "Update"
+   *
+   * @param {Object} data, WAF Rule info
+   * @param {String} prefix, provide a prefix if not required timestamp
+   * in the name
+   * @returns {Object} WAF Rule info with the following schema
+   *
+   *    {
+   *       account_id: String,
+   *       rule_name: String,
+   *       rule_type: String,
+   *       rule_body: String,
+   *       visibility: String,
+   *       comment: Strting
+   *    }
+   */
+  generateOneForUpdate: function (data, prefix) {
+
+    prefix = (prefix ? prefix + '_' + this.prefix : this.prefix) + Date.now();
+
+    return {
+      account_id: data.accountId,
+      rule_name: prefix,
+      rule_type: data.ruleType || 'customer',
+      visibility: data.visibility || 'public',
+      rule_body: data.ruleBody || '# QA Test WAF Rule - Update data',
+      comment: data.comment || 'QA Test - Update data'
     };
   }
 };

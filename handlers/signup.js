@@ -682,7 +682,7 @@ exports.resendRegistrationEmail = function(req, reply) {
           if (vendorProfileForRegistrationEmail.enable_simplified_signup_process) {
             var token = utils.generateToken();
             user.validation = {
-              expiredAt: Date.now() + vendorProfileForRegistrationEmail.user_verify_token_lifetime,
+              expiredAt: Date.now() + config.get('user_verify_token_lifetime_ms'),
               token: token
             };
             // NOTE: delete not updated fields
@@ -792,6 +792,22 @@ exports.verify = function(req, reply) {
         });
         result = publicRecordFields.handle(fields, 'verify');
         // NOTE: user verify and auto-login
+        // Audit verify
+        AuditLogger.store({
+          ip_address: remoteIP,
+          datetime: Date.now(),
+          user_id: user.user_id,
+          user_name: user.email,
+          user_type: 'user',
+          account_id: companyId,
+          activity_type: 'verify_email',
+          activity_target: 'user',
+          target_id: user.user_id,
+          target_name: result.email,
+          target_object: publicRecordFields.handle(fields, 'user'),
+          operation_status: 'success'
+        });
+        // Audit auto-login information
         AuditLogger.store({
           ip_address: remoteIP,
           datetime: Date.now(),

@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -51,8 +51,7 @@ var azureSubscriptions = Promise.promisifyAll(new AzureSubscription(mongoose, mo
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 var usersService = require('../services/users.js');
 var accountsService = require('../services/accounts.js');
-var provider = 'RevAPM.MobileCDN';
-var providerForOperationsResponse = 'RevAPM MobileCDN';
+var vendorProfileList = config.get('vendor_profiles');
 
 exports.listSubscriptions = function(request, reply) {
 
@@ -140,6 +139,18 @@ exports.createSubscription = function(request, reply) {
 };
 
 exports.createResource = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
+
+  if(!brandName){
+      reply(boom.badRequest('azure::createResource: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
 
   var resource = request.payload;
   resource.tags = resource.tags ? resource.tags : {};
@@ -147,12 +158,12 @@ exports.createResource = function(request, reply) {
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
     tags = resource.tags,
-    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + provider + '/accounts/' + resourceName,
+    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + providerName + '/accounts/' + resourceName,
     properties = resource.properties,
     plan = resource.plan;
 
   resource.id = resourceId;
-  resource.type = 'RevAPM.MobileCDN/accounts';
+  resource.type = providerName+'/accounts';
   resource.name = resourceName;
 
   azureSubscriptions.get({
@@ -188,24 +199,29 @@ exports.createResource = function(request, reply) {
           var newAccount = {
             companyName: 'Azure Resource ' + resourceName, // TODO add resource group name too?
             createdBy: 'Azure Subscription ' + subscriptionId,
+            vendor_profile: brandName
             // TODO add billing plan
           };
-          var loggerData = {
-            user_name: newAccount.createdBy,
-            user_type: 'system',
-            user_id: '00000', //
-            activity_type: 'add',
-            activity_target: 'account',
-            operation_status: 'success',
-            // request: request
-          };
-          accountsService.createAccount(newAccount, { loggerData: loggerData }, function(error, account) {
+
+          accountsService.createAccount(newAccount, {}, function(error, account) {
             if (error || !account) {
               return reply(boom.badImplementation('Failed to add new account record for Azure subscription ID ' + subscriptionId +
                 ', payload ' + JSON.stringify(newAccount)));
             }
+            var resultAccountData = publicRecordFields.handle(account, 'account');
+            var loggerDataAccount = {
+              user_name: newAccount.createdBy,
+              user_type: 'system',
+              user_id: '00000', // NOTE: will be changed after create new user for this account
+              activity_type: 'add',
+              activity_target: 'account',
+              operation_status: 'success',
+              target_id: resultAccountData.id,
+              target_name: resultAccountData.companyName,
+              target_object: resultAccountData
+            };
 
-            var email = account.id + '@' + config.get('azure_marketplace.user_email_domain');
+            var email = account.id + '@' + azureMarketplace.user_email_domain;
             var password = crypto.randomBytes(8).toString('hex');
 
             var newUser = {
@@ -223,9 +239,23 @@ exports.createResource = function(request, reply) {
                   ', payload ' + JSON.stringify(newUser)));
               }
 
+              loggerDataAccount.user_id = user.user_id;
+              AuditLogger.store(loggerDataAccount);
               // TODO: add code to send email notifications about new Azure resources registered in the system
               // TODO: add code to add audit records for new subscription, resource, user
-
+              AuditLogger.store({
+                account_id: newUser.companyId,
+                activity_type: 'add',
+                activity_target: 'user',
+                target_id: user.user_id,
+                target_name: user.email,
+                target_object: user,
+                operation_status: 'success',
+                user_type: 'system',
+                // NOTE: additional information
+                user_id:user.user_id,
+                user_name: user.email
+              });
               var newResource = {
                 subscription_id: subscriptionId,
                 resource_name: resourceName,
@@ -253,13 +283,24 @@ exports.createResource = function(request, reply) {
 };
 
 exports.patchResource = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::patchResource: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name,
     tags = resource.Tags ? resource.Tags : resource.tags,
-    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + provider + '/accounts/' + resourceName,
+    resourceId = '/subscriptions/' + subscriptionId + '/resourcegroups/' + resourceGroupName + '/providers/' + providerName + '/accounts/' + resourceName,
     properties = resource.Properties ? resource.Properties : resource.properties,
     plan = resource.Plan ? resource.Plan : resource.plan;
 
@@ -323,7 +364,18 @@ exports.patchResource = function(request, reply) {
 };
 
 exports.listAllResourcesInResourceGroup = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listAllResourcesInResourceGroup: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name;
 
@@ -369,7 +421,18 @@ exports.listAllResourcesInResourceGroup = function(request, reply) {
 };
 
 exports.listAllResourcesInSubscription = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listAllResourcesInSubscription: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var subscriptionId = request.params.subscription_id;
 
   azureSubscriptions.get({
@@ -409,7 +472,18 @@ exports.listAllResourcesInSubscription = function(request, reply) {
 };
 
 exports.getResource = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::getResource: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
@@ -483,7 +557,18 @@ exports.moveResources = function(request, reply) {
 };
 
 exports.deleteResource = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::deleteResource: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
@@ -568,7 +653,18 @@ exports.deleteResource = function(request, reply) {
 };
 
 exports.listSecrets = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listSecrets: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
     resourceName = request.params.resource_name;
@@ -607,10 +703,22 @@ exports.listSecrets = function(request, reply) {
 };
 
 exports.listOperations = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listOperations: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
+  var providerForOperationsResponse = providerName.replace('.', ' ');
   var operations = {
     'value': [{
-      'name': provider + '/operations/read',
+      'name': providerName+ '/operations/read',
       'display': {
         'operation': 'Read Operations',
         'resource': 'Operations',
@@ -618,7 +726,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/updateCommunicationPreference/action',
+      'name': providerName+ '/updateCommunicationPreference/action',
       'display': {
         'operation': 'Update Communication Preferences',
         'resource': 'Update Communication Preferences',
@@ -626,7 +734,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/listCommunicationPreference/action',
+      'name': providerName+ '/listCommunicationPreference/action',
       'display': {
         'operation': 'List Communication Preferences',
         'resource': 'List Communication Preferences',
@@ -634,7 +742,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/accounts/read',
+      'name': providerName+ '/accounts/read',
       'display': {
         'operation': 'Read accounts',
         'resource': 'accounts',
@@ -642,7 +750,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/accounts/write',
+      'name': providerName+ '/accounts/write',
       'display': {
         'operation': 'Create or Update accounts',
         'resource': 'accounts',
@@ -650,7 +758,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/accounts/delete',
+      'name': providerName+ '/accounts/delete',
       'display': {
         'operation': 'Delete accounts',
         'resource': 'accounts',
@@ -658,7 +766,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/accounts/listSecrets/action',
+      'name': providerName+ '/accounts/listSecrets/action',
       'display': {
         'operation': 'List Secrets',
         'resource': 'accounts',
@@ -666,7 +774,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/accounts/regenerateKeys/action',
+      'name': providerName+ '/accounts/regenerateKeys/action',
       'display': {
         'operation': 'Regenerate Keys',
         'resource': 'accounts',
@@ -674,7 +782,7 @@ exports.listOperations = function(request, reply) {
         'provider': providerForOperationsResponse
       }
     }, {
-      'name': provider + '/accounts/listSingleSignOnToken/action',
+      'name': providerName+ '/accounts/listSingleSignOnToken/action',
       'display': {
         'operation': 'List Single Sign On Tokens',
         'resource': 'accounts',
@@ -690,7 +798,18 @@ exports.listOperations = function(request, reply) {
 };
 
 exports.updateCommunicationPreference = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listCommunicationPreference: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var payload = request.payload,
     subscriptionId = request.params.subscription_id,
     firstName = payload.FirstName ? payload.FirstName : payload.firstName,
@@ -727,7 +846,18 @@ exports.updateCommunicationPreference = function(request, reply) {
 };
 
 exports.listCommunicationPreference = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listCommunicationPreference: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var subscriptionId = request.params.subscription_id;
 
   azureSubscriptions.get({
@@ -757,7 +887,18 @@ exports.listCommunicationPreference = function(request, reply) {
 };
 
 exports.regenerateKey = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::regenerateKey: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var keys = request.payload,
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
@@ -802,7 +943,18 @@ exports.regenerateKey = function(request, reply) {
 };
 
 exports.listSingleSignOnToken = function(request, reply) {
+  var providerName = request.params.provider;
+  var brandName =  _.findKey(vendorProfileList,function(itemProfile){
+    if(!itemProfile.azure_marketplace || !itemProfile.azure_marketplace.provider_name){
+      return false;
+    }
+    return (itemProfile.azure_marketplace.provider_name === providerName);
+  });
 
+  if(!brandName){
+      reply(boom.badRequest('azure::listSingleSignOnToken: Not found provider information'));
+  }
+  var azureMarketplace = vendorProfileList[brandName].azure_marketplace;
   var resource = request.payload,
     subscriptionId = request.params.subscription_id,
     resourceGroupName = request.params.resource_group_name,
@@ -896,7 +1048,7 @@ exports.listSingleSignOnToken = function(request, reply) {
             var resourceEncoded = utils.webURLEncoding(resourceIdCompressed);
 
             var response = {
-              'url': config.get('azure_marketplace.sso_endpoint'),
+              'url': azureMarketplace.sso_endpoint,
               'resourceId': resourceEncoded,
               'token': tokenEncoded
             };
