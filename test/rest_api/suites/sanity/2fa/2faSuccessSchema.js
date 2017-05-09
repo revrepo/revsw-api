@@ -22,8 +22,8 @@ var Joi = require('joi');
 var config = require('config');
 var API = require('./../../../common/api');
 var TwoFADP = require('./../../../common/providers/data/2fa');
-var CommonRespSP = require('./../../../common/providers/schema/commonResponse');
-var TwoFARespSP = require('./../../../common/providers/schema/2faResponse');
+var CommonRespSP = require('./../../../common/providers/schema/response/commonResponse');
+var TwoFARespSP = require('./../../../common/providers/schema/response/2faResponse');
 
 describe('Sanity check', function () {
 
