@@ -117,7 +117,11 @@ module.exports = function (grunt) {
       test: {
         src: ['Gruntfile.js', '**/*.js'],
         options: {
-          ignores: ['node_modules/**/*.js'],
+          ignores: [
+            'node_modules/**/*.js',
+            'common/providers/schema/routes/config/*.js',
+            'common/providers/schema/routes/models.js'
+          ],
           reporter: require('jshint-html-reporter'),
           reporterOutput: 'results/jshint.html',
           jshintrc: '../.jshintrc'

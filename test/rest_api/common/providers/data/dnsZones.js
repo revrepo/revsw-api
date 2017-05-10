@@ -64,7 +64,7 @@ var DNSZonesDataProvider = {
       expiry: 0,
       nx_ttl: 0,
       ttl: 0
-    }
+    };
   },
 
   /**
@@ -90,7 +90,7 @@ var DNSZonesDataProvider = {
    * @returns {Object} DNS Zone Record object data
    */
   getLastRecord: function (dnsZone) {
-    return this.getRecordAt(dnsZone, dnsZone.records.length - 1)
+    return this.getRecordAt(dnsZone, dnsZone.records.length - 1);
   },
 
   records: {
@@ -136,7 +136,7 @@ var DNSZonesDataProvider = {
      */
     generateOneForUpdate: function (dnsZoneRecord) {
       var clone = JSON.parse(JSON.stringify(dnsZoneRecord));
-      clone['use_client_subnet'] = false;
+      clone.use_client_subnet = false;
       delete clone.id;
       delete clone.short_answers;
       return clone;

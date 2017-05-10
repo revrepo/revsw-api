@@ -248,7 +248,7 @@ describe('Smoke check', function () {
                   return API.helpers.dnsZones.records.create(firstDnsZone);
                 })
                 .then(function () {
-                  return API.resources.dnsZones.getOne(firstDnsZone.id)
+                  return API.resources.dnsZones.getOne(firstDnsZone.id);
                 })
                 .then(function (res) {
                   var dnsZoneRecord = DNSZonesDP.getLastRecord(res.body);
@@ -271,7 +271,7 @@ describe('Smoke check', function () {
                   return API.helpers.dnsZones.records.create(firstDnsZone);
                 })
                 .then(function () {
-                  return API.resources.dnsZones.getOne(firstDnsZone.id)
+                  return API.resources.dnsZones.getOne(firstDnsZone.id);
                 })
                 .then(function (res) {
                   var dnsZoneRecordId = DNSZonesDP.getLastRecord(res.body).id;
