@@ -428,5 +428,6 @@
     "http://testsjc20-victordev01.revsw.net:4000/"
   ],
   "notify_admin_by_email_on_customer_activities":"",
-  "accounts_to_ignore_for_activity_reporting": []
+  "accounts_to_ignore_for_activity_reporting": [],
+  "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE"]
 }
