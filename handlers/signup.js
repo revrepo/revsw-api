@@ -258,8 +258,11 @@ exports.signup = function(req, reply) {
       return accountsService.createAccountAsync(newCompany, {});
     })
     .then(function createNewAdminUser(account) {
-      _newAccount = publicRecordFields.handle(account, 'account');
-
+      _newAccount =  account;
+      var auditTargetObjectAccount = publicRecordFields.handle(_newAccount, 'account');
+        if (!!promoCode){
+          auditTargetObjectAccount.promocode = promoCode;
+      }
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
@@ -278,13 +281,13 @@ exports.signup = function(req, reply) {
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
             user_type: 'user',
-            user_name: data.email,
+            user_name: user.email,
             account_id: _newAccount.id,
-            activity_type: 'add',
-            activity_target: 'account',
-            target_id: _newAccount.id,
-            target_name: _newAccount.companyName,
-            target_object: _newAccount,
+            activity_type: 'signup',
+            activity_target: 'user',
+            target_id: user.user_id,
+            target_name: user.email,
+            target_object: publicRecordFields.handle(user, 'user'),
             operation_status: 'success',
             user_id: user.user_id
           });
@@ -293,13 +296,13 @@ exports.signup = function(req, reply) {
             ip_address: utils.getAPIUserRealIP(req),
             datetime: Date.now(),
             user_type: 'user',
-            user_name: user.email,
-            account_id: user.companyId[0],
-            activity_type: 'signup',
-            activity_target: 'user',
-            target_id: user.user_id,
-            target_name: user.email,
-            target_object: publicRecordFields.handle(user, 'user'),
+            user_name: data.email,
+            account_id: _newAccount.id,
+            activity_type: 'add',
+            activity_target: 'account',
+            target_id: _newAccount.id,
+            target_name: _newAccount.companyName,
+            target_object: auditTargetObjectAccount,
             operation_status: 'success',
             user_id: user.user_id
           });
@@ -504,8 +507,7 @@ exports.signup2 = function(req, reply) {
 
     // NOTE:  create new Admin User
     .then(function createNewAdminUser(account) {
-      _newAccount = publicRecordFields.handle(account, 'account');
-
+      _newAccount = account;
       var newUser = {
         companyId: _newAccount.id,
         role: 'admin',
@@ -527,8 +529,10 @@ exports.signup2 = function(req, reply) {
     })
     // NOTE:  update Admin User Data about account Id
     .then(function logSelfRegistrationOperation(user) {
-        // TODO: user_id is not specified - we need to read the value from newUser response
-        // also, the user object does not consist the whole user object - just a short status
+        var auditTargetObjectAccount = publicRecordFields.handle(_newAccount, 'account');
+        if (!!promoCode){
+          auditTargetObjectAccount.promocode = promoCode;
+        }
         AuditLogger.store({
           ip_address: utils.getAPIUserRealIP(req),
           datetime: Date.now(),
@@ -553,18 +557,18 @@ exports.signup2 = function(req, reply) {
           activity_target: 'account',
           target_id: _newAccount.id,
           target_name: _newAccount.companyName,
-          target_object: publicRecordFields.handle(_newAccount, 'account'),
+          target_object: auditTargetObjectAccount,
           operation_status: 'success',
-          user_id: user.user_id,
-          promocode: promoCode
+          user_id: user.user_id
         });
         return user;
       })
     .then(function createChargifyAccount() {
+      // TODO: discus !!! auto confirm user accoutn ????
       // NOTE: If Promo Code exists - sign up cycle without Chargify
-      if(!!promoCode){
-        return Promise.resolve();
-      }
+      // if(!!promoCode){
+      //   return Promise.resolve();
+      // }
       return new Promise(function(resolve, reject) {
         chargifyCustomer.createBySubscription(_newAccount, data.billing_plan, function(err, data) {
           if (err) {

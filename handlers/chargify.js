@@ -119,9 +119,13 @@ exports.webhookHandler = function(request, reply) {
         .then(function verifyAdminUser(adminUser) {
           if (accountVendorProfile.enable_simplified_signup_process) {
              // NOTE: if enable_simplified_signup_process==true - no auto verify user
-            // TODO: send email admin ???
+             // TODO: send email admin ???
             return Promise.resolve();
           } else {
+            // NOTE: if account registry with Promo Code - user must verify by email
+            if (!!_account.promocode && _account.promocode.length > 0){
+              return Promise.resolve();
+            }
             // NOTE: user registred with full CC
             adminUser.validation.verified = true;
             return users.updateValidationAsync(adminUser)
