@@ -295,7 +295,7 @@ exports.signup = function(req, reply) {
             user_type: 'user',
             user_name: user.email,
             account_id: user.companyId[0],
-            activity_type: 'add',
+            activity_type: 'signup',
             activity_target: 'user',
             target_id: user.user_id,
             target_name: user.email,
