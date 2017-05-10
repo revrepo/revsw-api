@@ -564,11 +564,6 @@ exports.signup2 = function(req, reply) {
         return user;
       })
     .then(function createChargifyAccount() {
-      // TODO: discus !!! auto confirm user accoutn ????
-      // NOTE: If Promo Code exists - sign up cycle without Chargify
-      // if(!!promoCode){
-      //   return Promise.resolve();
-      // }
       return new Promise(function(resolve, reject) {
         chargifyCustomer.createBySubscription(_newAccount, data.billing_plan, function(err, data) {
           if (err) {
@@ -843,7 +838,7 @@ exports.verify = function(req, reply) {
         // Audit auto-login information
         AuditLogger.store({
           ip_address: remoteIP,
-          datetime: Date.now(),
+          datetime: Date.now() + 1000,
           user_id: user.user_id,
           user_name: user.email,
           user_type: 'user',
