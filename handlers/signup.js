@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -57,6 +57,8 @@ var defaultSignupVendorProfile = config.get('default_signup_vendor_profile');
 var vendorProfileList = config.get('vendor_profiles');
 var currentVendorProfile = vendorProfileList[defaultSignupVendorProfile];
 
+var promoCodesList = config.get('promo_codes');
+
 Promise.promisifyAll(billing_plans);
 Promise.promisifyAll(users);
 Promise.promisifyAll(accounts);
@@ -85,7 +87,15 @@ var sendVerifyToken = function(user, account, token, cb) {
   }
   mail.sendMail(mailOptions, cb);
 };
-
+/**
+ * @name sendEmailForRegistration
+ * @desc method send to user`s email with link to Chargify
+ *
+ * @param {any} user
+ * @param {any} account
+ * @param {any} billing_plan
+ * @param {any} cb
+ */
 function sendEmailForRegistration(user, account, billing_plan, cb) {
   var vendorSlug = account.vendor_profile;
   var currentVendorProfile = vendorProfileList[vendorSlug];
@@ -136,6 +146,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
  * @description
  *
  * Signup new Admin User and create new Account
+ * This method send to new user link to Chargify for finish registration
  *
  * @param  {[type]} req   [description]
  * @param  {[type]} reply [description]
@@ -149,6 +160,7 @@ exports.signup = function(req, reply) {
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
+  var promoCode = (!!data.promocode)? data.promocode.toUpperCase(): undefined;
 
   if (!data.company_name) {
     data.company_name = data.first_name + ' ' + data.last_name + '\'s Company';
@@ -156,6 +168,10 @@ exports.signup = function(req, reply) {
   // TODO:
   if (!vendorProfileForRegistration.enable_self_registration) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
+  }
+  // NOTE: if promocode exists - run short signup process
+  if(!!promoCode){
+    return exports.signup2(req, reply);
   }
   // NOTE: get internal information about Billing Plan by handler name
   users.getAsync({
@@ -237,7 +253,7 @@ exports.signup = function(req, reply) {
         },
         self_registered: true,
         vendor_profile: vendorSlug,
-        promocode: data.promocode
+        promocode: promoCode
       };
       return accountsService.createAccountAsync(newCompany, {});
     })
@@ -316,7 +332,7 @@ exports.signup = function(req, reply) {
         });
     })
     .then(function sendEmailForChargifyRegistration() {
-        _newAccount.promocode = data.promocode;
+        _newAccount.promocode = promoCode;
         sendEmailForRegistration(_newUser, _newAccount, _billing_plan, function(err,data){
           if (err) {
             logger.error('Signup:SendEmailNewUser:error: ' + JSON.stringify(err));
@@ -367,7 +383,9 @@ exports.signup = function(req, reply) {
 /**
  * @name  signup2
  * @description
- *  Simple signup process
+ *  Simple signup process (short form)
+ *  This method create account and send to new user a verification link for confirm registration
+ *  Chargify account will be created aitomaticly (user don`t go to site Chargify) if
  * @param  {[type]} req   [description]
  * @param  {[type]} reply [description]
  * @return {[type]}       [description]
@@ -379,14 +397,18 @@ exports.signup2 = function(req, reply) {
   var _billing_plan = {};
   var _newAccount = {};
   var _newUser = {};
-
+  var promoCode = (!!data.promocode)? data.promocode.toUpperCase(): undefined;
   if (!vendorProfileForRegistration.enable_self_registration) {
     return reply(boom.badRequest('User self-registration is temporary disabled'));
   }
-  if (!vendorProfileForRegistration.enable_simplified_signup_process) {
+
+  if (!vendorProfileForRegistration.enable_simplified_signup_process && !promoCode) {
     return reply(boom.badRequest('Simple user self-registration is temporary disabled'));
   }
-
+  // NOTE: Simple process registration only for valid promo code
+  if(!!promoCode && promoCodesList.indexOf(promoCode) < 0){
+      return reply(boom.badRequest('The specified promo code is not correct. Please double-check the code and try again.'));
+  }
   // 1. Check existing user
   users.getAsync({
       email: data.email
@@ -466,7 +488,8 @@ exports.signup2 = function(req, reply) {
           zipcode: data.zipcode || ''
         },
         self_registered: true, //NOTE: Important for self registration account
-        vendor_profile: vendorSlug
+        vendor_profile: vendorSlug,
+        promocode: promoCode
       };
       //    var loggerData = {
       //     user_name: newAccount.createdBy,
@@ -504,20 +527,6 @@ exports.signup2 = function(req, reply) {
     })
     // NOTE:  update Admin User Data about account Id
     .then(function logSelfRegistrationOperation(user) {
-        AuditLogger.store({
-          ip_address: utils.getAPIUserRealIP(req),
-          datetime: Date.now(),
-          user_type: 'user',
-          user_name: data.email,
-          account_id: _newAccount.id,
-          activity_type: 'signup',
-          activity_target: 'account',
-          target_id: _newAccount.id,
-          target_name: _newAccount.companyName,
-          target_object: _newAccount,
-          operation_status: 'success',
-          user_id: user.user_id
-        });
         // TODO: user_id is not specified - we need to read the value from newUser response
         // also, the user object does not consist the whole user object - just a short status
         AuditLogger.store({
@@ -525,7 +534,7 @@ exports.signup2 = function(req, reply) {
           datetime: Date.now(),
           user_type: 'user',
           user_name: user.email,
-          account_id: user.companyId[0],
+          account_id: _newAccount.id,
           activity_type: 'signup',
           activity_target: 'user',
           target_id: user.user_id,
@@ -534,9 +543,28 @@ exports.signup2 = function(req, reply) {
           operation_status: 'success',
           user_id: user.user_id
         });
+        AuditLogger.store({
+          ip_address: utils.getAPIUserRealIP(req),
+          datetime: Date.now(),
+          user_type: 'user',
+          user_name: user.email,
+          account_id: _newAccount.id,
+          activity_type: 'add',
+          activity_target: 'account',
+          target_id: _newAccount.id,
+          target_name: _newAccount.companyName,
+          target_object: publicRecordFields.handle(_newAccount, 'account'),
+          operation_status: 'success',
+          user_id: user.user_id,
+          promocode: promoCode
+        });
         return user;
       })
     .then(function createChargifyAccount() {
+      // NOTE: If Promo Code exists - sign up cycle without Chargify
+      if(!!promoCode){
+        return Promise.resolve();
+      }
       return new Promise(function(resolve, reject) {
         chargifyCustomer.createBySubscription(_newAccount, data.billing_plan, function(err, data) {
           if (err) {
@@ -679,7 +707,8 @@ exports.resendRegistrationEmail = function(req, reply) {
         vendorProfileForRegistrationEmail = vendorProfileList[_account.vendor_profile];
         return new Promise(function(resolve, reject) {
           // NOTE: Choose two different type registration
-          if (vendorProfileForRegistrationEmail.enable_simplified_signup_process) {
+          // NOTE: if account created with promo code when user must only verify email
+          if (vendorProfileForRegistrationEmail.enable_simplified_signup_process || !!_account.promocode) {
             var token = utils.generateToken();
             user.validation = {
               expiredAt: Date.now() + config.get('user_verify_token_lifetime_ms'),

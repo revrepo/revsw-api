@@ -56,5 +56,6 @@
     "https://testsjc20-portal-hooli.revsw.net"
   ],
   "notify_admin_by_email_on_customer_activities":"",
-  "accounts_to_ignore_for_activity_reporting":["55b6ff6a7957012304a49d04"/*API QA Account*/]
+  "accounts_to_ignore_for_activity_reporting":["55b6ff6a7957012304a49d04"/*API QA Account*/],
+  "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE"]
 }

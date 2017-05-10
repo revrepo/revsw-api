@@ -32,7 +32,7 @@ module.exports = [
       handler: handler.signup,
       auth: false,
       description: 'An internal portal call for user signup',
-//      tags        : ['api', 'web'],
+    //      tags        : ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -44,18 +44,18 @@ module.exports = [
           last_name: Joi.string().min(1).max(150).trim().description('Last name').required(),
           email: Joi.string().email().description('Email address').required(),
           company_name: Joi.string().min(1).max(150).allow('').trim().description('Company name').optional(),
-          phone_number: Joi.string().min(1).max(30).trim().description('Phone number').required(),
+          phone_number: Joi.string().min(1).max(30).trim().description('Phone number').optional(),
           password: Joi.string().min(8).max(15).description('Password').required(),
           passwordConfirm: Joi.string().min(8).max(15).description('Password confirmation').required(),
-          address1: Joi.string().min(1).max(150).trim().description('Address 1').required(),
+          address1: Joi.string().min(1).max(150).trim().description('Address 1').optional(),
           address2: Joi.string().min(1).max(150).allow('').trim().description('Address 2').optional(),
-          country: Joi.string().min(1).max(150).trim().description('Country').required(),
-          state: Joi.string().min(1).max(150).trim().description('State').required(),
-          city: Joi.string().min(1).max(150).trim().description('City').required(),
-          zipcode: Joi.string().min(1).max(30).trim().description('Zip Code').required(),
+          country: Joi.string().min(1).max(150).trim().description('Country').optional(),
+          state: Joi.string().min(1).max(150).trim().description('State').optional(),
+          city: Joi.string().min(1).max(150).trim().description('City').optional(),
+          zipcode: Joi.string().min(1).max(30).trim().description('Zip Code').optional(),
           billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required(),
           vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name'),
-          promocode: Joi.string().min(1).max(30).trim().optional().description('Promocode')
+          promocode: Joi.string().empty('').min(1).max(30).trim().optional().description('Promocode')
         }
       },
       response: {
@@ -70,7 +70,7 @@ module.exports = [
       handler: handler.signup2,
       auth: false,
       description: 'An internal portal call for user signup (short)',
-//      tags        : ['api', 'web'],
+    //      tags        : ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -92,7 +92,8 @@ module.exports = [
           // city: Joi.string().min(1).max(150).trim().description('City').required(),
           // zipcode: Joi.string().min(1).max(30).trim().description('Zip Code').required(),
           billing_plan: Joi.string().min(1).max(150).trim().description('Billing plan ID').required(),
-          vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name')
+          vendor: Joi.string().min(1).max(150).trim().optional().description('Vendor Slug Name'),
+          promocode: Joi.string().empty('').min(1).max(30).trim().optional().description('Promocode')
         }
       },
       response: {
