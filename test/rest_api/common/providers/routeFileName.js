@@ -30,6 +30,10 @@ var RouteFileNameProvider = {
       return 'dashboards';
     }
 
+    if (/::DNS_ZONES::/.test(routeId)) {
+      return 'dnsZones';
+    }
+
     if (/::HEALTH_CHECK::/.test(routeId)) {
       return 'healthCheck';
     }
