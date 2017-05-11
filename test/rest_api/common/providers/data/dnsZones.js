@@ -16,6 +16,8 @@
  * from Rev Software, Inc.
  */
 
+var DNSZonesDataDriverHelper = require('./../../helpers/data_driven/dnsZones');
+
 // # DNS Zone Data Provider object
 //
 // Defines some methods to generate valid and common DNS Zone test data.
@@ -141,7 +143,9 @@ var DNSZonesDataProvider = {
       delete clone.short_answers;
       return clone;
     }
-  }
+  },
+
+  DataDrivenHelper: DNSZonesDataDriverHelper
 };
 
 module.exports = DNSZonesDataProvider;
