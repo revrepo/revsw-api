@@ -31,6 +31,7 @@ var models = require('./routes/models');
 
 var APIKeysSchemaProvider = require('./apiKeys');
 var DashboardsSchemaProvider = require('./dashboards');
+var DNSZonesSchemaProvider = require('./dnsZones');
 var HealthCheckSchemaProvider = require('./healthCheck');
 
 // Defining common variables
@@ -51,6 +52,7 @@ var APISchemaProviders = {
 
   apiKeys: APIKeysSchemaProvider,
   dashboards: DashboardsSchemaProvider,
+  dnsZones: DNSZonesSchemaProvider,
   healthCheck: HealthCheckSchemaProvider,
 
   /**
