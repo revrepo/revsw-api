@@ -18,8 +18,6 @@
 
 var Joi = require('joi');
 
-var dnsZoneStatistics = require('../handlers/dnsZoneStatistics');
-
 var routeModels = require('../models');
 var ROUTE_IDS = require('../ids');
 
@@ -28,6 +26,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.GET.ALL,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
@@ -101,6 +100,7 @@ module.exports = [
     method: 'POST',
     path: '/v1/dns_zones',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.POST.NEW,
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
@@ -129,6 +129,7 @@ module.exports = [
     method: 'DELETE',
     path: '/v1/dns_zones/{dns_zone_id}',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.DELETE.ONE,
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
@@ -154,6 +155,7 @@ module.exports = [
     method: 'PUT',
     path: '/v1/dns_zones/{dns_zone_id}',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.PUT.ONE,
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
@@ -187,6 +189,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.GET.ONE,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },

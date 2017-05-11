@@ -54,7 +54,19 @@ var IDS = {
   },
   DNS_ZONES: {
     BASE_PATH: 'dns_zones',
-
+    GET: {
+      ALL: 'GET::DNS_ZONES::ALL',
+      ONE: 'GET::DNS_ZONES::{ID}'
+    },
+    POST: {
+      NEW: 'POST::DNS_ZONES::NEW'
+    },
+    PUT: {
+      ONE: 'PUT::DNS_ZONES::{ID}'
+    },
+    DELETE: {
+      ONE: 'DELETE::DNS_ZONES::{ID}'
+    }
   },
   HEALTH_CHECK: {
     BASE_PATH: 'healthcheck',
