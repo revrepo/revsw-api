@@ -258,6 +258,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.RECORDS.GET.ALL,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
@@ -284,6 +285,7 @@ module.exports = [
     method: 'POST',
     path: '/v1/dns_zones/{dns_zone_id}/records',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.RECORDS.POST.NEW,
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
@@ -327,6 +329,7 @@ module.exports = [
     method: 'DELETE',
     path: '/v1/dns_zones/{dns_zone_id}/records/{dns_zone_record_id}',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.RECORDS.DELETE.ONE,
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
@@ -353,6 +356,7 @@ module.exports = [
     method: 'PUT',
     path: '/v1/dns_zones/{dns_zone_id}/records/{dns_zone_record_id}',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.RECORDS.PUT.ONE,
       auth: {
         scope: ['user_rw', 'admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
@@ -392,6 +396,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}/records/{dns_zone_record_id}',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.RECORDS.GET.ONE,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
