@@ -36,8 +36,11 @@ describe('DNS Zones resource: pre-requisites', function () {
   var users = [
     config.get('api.users.reseller')
   ];
+  var accounts = {};
+  var dnsZones = {};
 
   dataTypes.forEach(function (type) {
+
     before(function (done) {
 
       /**
@@ -69,7 +72,8 @@ describe('DNS Zones resource: pre-requisites', function () {
             })
             .then(function (res) {
               res.body.statusCode.should.equal(400);
-              res.body.message.should.containEql(Utils.getLastKeyFromPath(field));
+              res.body.message.should
+                .containEql(Utils.getLastKeyFromPath(field));
               done();
             })
             .catch(done);
@@ -80,8 +84,10 @@ describe('DNS Zones resource: pre-requisites', function () {
 
         users.forEach(function (user) {
           describe('Boundary check', function () {
+
             // Changing default mocha's timeout (Default is 2 seconds).
             this.timeout(config.get('api.request.maxTimeout'));
+
             describe('DNS Zones resource', function () {
               describe('With user: ' + user.role, function () {
                 describe('Add with `' + type + '` data', function () {
@@ -95,7 +101,10 @@ describe('DNS Zones resource: pre-requisites', function () {
                       return;
                     }
 
-                    it(getSpecName(type, field, value), getSpecFn(user, field, model));
+                    it(
+                      getSpecName(type, field, value),
+                      getSpecFn(user, field, model)
+                    );
                   });
                 });
               });
@@ -104,6 +113,107 @@ describe('DNS Zones resource: pre-requisites', function () {
         });
         done();
       });
+    });
+
+    before(function (done) {
+
+      Utils.forEach(users, function (user) {
+        return API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (newAccount) {
+            accounts[user.role] = newAccount;
+            return API.helpers.dnsZones.create(newAccount.id);
+          })
+          .then(function (newDnsZone) {
+            dnsZones[user.role] = newDnsZone;
+          });
+      }, done);
+    });
+
+    before(function (done) {
+
+      /**
+       * Generates Spec name for the given data.
+       *
+       * @param type
+       * @param field
+       * @param value
+       * @returns {string}
+       */
+      var getSpecName = function (type, field, value) {
+        return 'should return error response when creating `DNS Zone Record` ' +
+          'with ' + type + ' `' + field + '`: ' + value;
+      };
+      /**
+       * Generates Spec function for the given data.
+       *
+       * @param user
+       * @param field
+       * @param model
+       * @returns {Function}
+       */
+      var getSpecFn = function (user, field, model) {
+        var key = Utils.getLastKeyFromPath(field);
+        return function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              var dnsZone = dnsZones[user.role];
+              if (key !== 'zone') {
+                model.record.zone = dnsZone.zone;
+              }
+              return API.resources.dnsZones
+                .records(dnsZone.id)
+                .createOne(model);
+            })
+            .then(function (res) {
+              res.body.statusCode.should.equal(400);
+              res.body.message.should.containEql(key);
+              done();
+            })
+            .catch(done);
+        };
+      };
+
+      DNSZonesDP.DataDrivenHelper.records.payload.genToAdd(type,
+        function (err, data) {
+
+          users.forEach(function (user) {
+            describe('Boundary check', function () {
+
+              // Changing default mocha's timeout (Default is 2 seconds).
+              this.timeout(config.get('api.request.maxTimeout'));
+
+              describe('DNS Zones resource', function () {
+                describe('DNS Zone Records', function () {
+                  describe('With user: ' + user.role, function () {
+                    describe('Add with `' + type + '` data', function () {
+
+                      data.forEach(function (record) {
+                        var field = record.field;
+                        var model = record.model;
+                        var value = Utils.getValueByPath(model, field);
+
+                        if (value === undefined || value === null) {
+                          return;
+                        }
+
+                        it(
+                          getSpecName(type, field, value),
+                          getSpecFn(user, field, model)
+                        );
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+          done();
+        });
     });
 
     it('Generating `add-' + type + '-data` specs ...', function () {
