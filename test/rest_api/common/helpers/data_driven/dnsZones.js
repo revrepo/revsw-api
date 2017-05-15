@@ -32,6 +32,29 @@ var DNSZonesDataDrivenHelper = {
       BaseDDP
         .genPayload(type, SchemaDP.dnsZones.getForUpdate().request, callback);
     }
+  },
+
+  records: {
+
+    payload: {
+
+      genToAdd: function (type, callback) {
+        BaseDDP
+          .genPayload(
+            type,
+            SchemaDP.dnsZones.records.getForCreate().request,
+            callback
+          );
+      },
+
+      genToUpdate: function (type, callback) {
+        BaseDDP
+          .genPayload(type,
+            SchemaDP.dnsZones.records.getForUpdate().request,
+            callback
+          );
+      }
+    }
   }
 };
 
