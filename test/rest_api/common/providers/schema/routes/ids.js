@@ -66,7 +66,23 @@ var IDS = {
     },
     DELETE: {
       ONE: 'DELETE::DNS_ZONES::{ID}'
-    }
+    },
+    RECORDS: {
+      BASE_PATH: 'records',
+      GET: {
+        ALL: 'GET::DNS_ZONES::RECORDS::ALL',
+        ONE: 'GET::DNS_ZONES::RECORDS::{ID}'
+      },
+      POST: {
+        NEW: 'POST::DNS_ZONES::RECORDS::NEW'
+      },
+      PUT: {
+        ONE: 'PUT::DNS_ZONES::RECORDS::{ID}'
+      },
+      DELETE: {
+        ONE: 'DELETE::DNS_ZONES::RECORDS::{ID}'
+      }
+    },
   },
   HEALTH_CHECK: {
     BASE_PATH: 'healthcheck',
