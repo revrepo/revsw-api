@@ -417,7 +417,13 @@ module.exports = [{
               .description('Approve lua code/location posted by user (Replaces effective params if true)')
           }),
           co_lua_enable_all: Joi.boolean().optional(),
-          enable_enhanced_analytics: Joi.boolean().optional().description('Enhanced Traffic Analytics')
+          enable_enhanced_analytics: Joi.boolean().optional().description('Enhanced Traffic Analytics'),
+          image_engine: Joi.object({
+            enable_image_engine: Joi.boolean().default(false).description('Enabled ImageEngine'),
+            image_engine_token: Joi.string().allow('').default('nnml').description('Used to access SM’s backend'),
+            image_engine_api_key: Joi.string().allow('').optional().default('').description('API Key to access SM’s purge API'),
+            image_engine_origin_server: Joi.string().allow('').optional().default('').description('A temporary field - will be removed ')
+          })
         }
       },
       //      response    : {
