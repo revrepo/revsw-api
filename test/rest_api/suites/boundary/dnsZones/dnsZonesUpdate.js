@@ -33,10 +33,10 @@ describe('DNS Zones resource: pre-requisites', function () {
     Constants.API.TEST_DATA_TYPES.LONG,
     Constants.API.TEST_DATA_TYPES.SHORT
   ];
-  var dnsZones = {};
   var users = [
     config.get('api.users.reseller')
   ];
+  var dnsZones = {};
 
   dataTypes.forEach(function (type) {
 
@@ -96,34 +96,38 @@ describe('DNS Zones resource: pre-requisites', function () {
         };
       };
 
-      DNSZonesDP.DataDrivenHelper.payload.genToUpdate(type, function (err, data) {
+      DNSZonesDP.DataDrivenHelper.payload.genToUpdate(type,
+        function (err, data) {
 
-        users.forEach(function (user) {
-          describe('Boundary check', function () {
-            // Changing default mocha's timeout (Default is 2 seconds).
-            this.timeout(config.get('api.request.maxTimeout'));
-            describe('DNS Zones resource', function () {
-              describe('With user: ' + user.role, function () {
-                describe('Update with `' + type + '` data', function () {
+          users.forEach(function (user) {
+            describe('Boundary check', function () {
+              // Changing default mocha's timeout (Default is 2 seconds).
+              this.timeout(config.get('api.request.maxTimeout'));
+              describe('DNS Zones resource', function () {
+                describe('With user: ' + user.role, function () {
+                  describe('Update with `' + type + '` data', function () {
 
-                  data.forEach(function (dnsZone) {
-                    var field = dnsZone.field;
-                    var model = dnsZone.model;
-                    var value = Utils.getValueByPath(model, field);
+                    data.forEach(function (dnsZone) {
+                      var field = dnsZone.field;
+                      var model = dnsZone.model;
+                      var value = Utils.getValueByPath(model, field);
 
-                    if (value === undefined || value === null) {
-                      return;
-                    }
-                    console.log(model);
-                    it(getSpecName(type, field, value), getSpecFn(user, field, model));
+                      if (value === undefined || value === null) {
+                        return;
+                      }
+
+                      it(
+                        getSpecName(type, field, value),
+                        getSpecFn(user, field, model)
+                      );
+                    });
                   });
                 });
               });
             });
           });
+          done();
         });
-        done();
-      });
     });
 
     it('Generating `update-' + type + '-data` specs ...', function () {
