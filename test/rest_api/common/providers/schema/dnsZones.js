@@ -39,6 +39,29 @@ var DNSZonesSchemaProvider = {
 
   getForDelete: function () {
     return BaseSP.get(ROUTE_IDS.DNS_ZONES.DELETE.ONE);
+  },
+
+  records: {
+
+    getForGetAll: function () {
+      return BaseSP.get(ROUTE_IDS.DNS_ZONES.RECORDS.GET.ALL);
+    },
+
+    getForGetOne: function () {
+      return BaseSP.get(ROUTE_IDS.DNS_ZONES.RECORDS.GET.ONE);
+    },
+
+    getForCreate: function () {
+      return BaseSP.get(ROUTE_IDS.DNS_ZONES.RECORDS.POST.NEW);
+    },
+
+    getForUpdate: function () {
+      return BaseSP.get(ROUTE_IDS.DNS_ZONES.RECORDS.PUT.ONE);
+    },
+
+    getForDelete: function () {
+      return BaseSP.get(ROUTE_IDS.DNS_ZONES.RECORDS.DELETE.ONE);
+    }
   }
 };
 
