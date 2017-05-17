@@ -300,6 +300,7 @@ module.exports = [
               ttl: Joi.number().integer(),
               tier: Joi.number().integer(),
               type: Joi.string(),
+              link: Joi.string(),
               id: Joi.string()
             })),
             meta: Joi.object(),
