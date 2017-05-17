@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -55,7 +55,7 @@ function DomainConfig(mongoose, connection, options) {
     'updated_at': {type: Date, default: Date.now},
     'created_at': {type: Date, default: Date.now},
     'created_by': {type: String},
-    'domain_name': {type: String, lowercase: true},
+    'domain_name': {type: String, lowercase: true, index: true},
     'deleted': {type: Boolean, default: false},
     'deleted_at': {type: Date},
     'deleted_by': {type: String},
