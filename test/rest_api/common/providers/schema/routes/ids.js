@@ -67,6 +67,18 @@ var IDS = {
     DELETE: {
       ONE: 'DELETE::DNS_ZONES::{ID}'
     },
+    CHECK_INTEGRATION: {
+      DNS_SERVERS: {
+        GET: {
+          ALL: 'GET::DNS_ZONES::CHECK_INTEGRATION::DNS_SERVERS::ALL',
+        }
+      },
+      RECORDS: {
+        GET: {
+          ALL: 'GET::DNS_ZONES::CHECK_INTEGRATION::RECORDS::ALL',
+        }
+      }
+    },
     RECORDS: {
       BASE_PATH: 'records',
       GET: {
@@ -83,6 +95,14 @@ var IDS = {
         ONE: 'DELETE::DNS_ZONES::RECORDS::{ID}'
       }
     },
+    STATS: {
+      USAGE: {
+        GET: {
+          ALL: 'GET::DNS_ZONES::STATS::USAGE::ALL',
+          ONE: 'GET::DNS_ZONES::STATS::USAGE::{ID}'
+        }
+      }
+    }
   },
   HEALTH_CHECK: {
     BASE_PATH: 'healthcheck',
