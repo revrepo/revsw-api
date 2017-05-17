@@ -50,6 +50,9 @@ module.exports = [
         }
       },
       validate: {
+        query:{
+          enable_purge_image_engine: Joi.boolean().default(true).description('Set "true" if need to clear the secondary cache storage')
+        },
         payload: {
           domainName: Joi.string().lowercase().regex(routeModels.domainRegex).required().description('Domain name to purge objects for'),
           purges: Joi.array().items({
