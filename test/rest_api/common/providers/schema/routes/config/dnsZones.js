@@ -55,6 +55,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/stats/usage',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.STATS.USAGE.GET.ALL,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
@@ -75,6 +76,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}/stats/usage',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.STATS.USAGE.GET.ONE,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
@@ -215,6 +217,7 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}/checkintegration/dns_servers',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.CHECK_INTEGRATION.DNS_SERVERS.GET.ALL,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
@@ -230,12 +233,27 @@ module.exports = [
         params: {
           dns_zone_id: Joi.objectId().required().description('DNS zone ID')
         }
+      },
+      // NOTE: This (response.schema) was added for Automation
+      response: {
+        schema: {
+          root_zone: Joi.string().required(),
+          check_reports: Joi.array().items({
+            type_check: Joi.string().required(),
+            hostname: Joi.string().required(),
+            check_status_code: Joi.string().required(),
+            message: Joi.string().required()
+          }),
+          check_status_code: Joi.string().required(),
+          message: Joi.string().required()
+        }
       }
     }
   }, {
     method: 'GET',
     path: '/v1/dns_zones/{dns_zone_id}/checkintegration/records',
     config: {
+      id: ROUTE_IDS.DNS_ZONES.CHECK_INTEGRATION.RECORDS.GET.ALL,
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
@@ -250,6 +268,57 @@ module.exports = [
       validate: {
         params: {
           dns_zone_id: Joi.objectId().required().description('DNS zone ID')
+        }
+      },
+      // NOTE: This (response.schema) was added for Automation
+      response: {
+        schema: {
+          zone: Joi.object().keys({
+            zone: Joi.string(),
+            account_id: Joi.string(),
+            updated_by: Joi.string().email(),
+            updated_at: Joi.string(),
+            created_by: Joi.string().email(),
+            created_at: Joi.string(),
+            id: Joi.string()
+          }),
+          nsone_zone: Joi.object().keys({
+            nx_ttl: Joi.number().integer(),
+            retry: Joi.number().integer(),
+            zone: Joi.string(),
+            network_pools: Joi.array().items(Joi.string()),
+            primary: Joi.object().keys({
+              enabled: Joi.boolean(),
+              secondaries: Joi.array()
+            }),
+            refresh: Joi.number().integer(),
+            expiry: Joi.number().integer(),
+            dns_servers: Joi.array().items(Joi.string()),
+            records: Joi.array().items(Joi.object().keys({
+              domain: Joi.string(),
+              short_answers: Joi.array().items(Joi.string()),
+              ttl: Joi.number().integer(),
+              tier: Joi.number().integer(),
+              type: Joi.string(),
+              id: Joi.string()
+            })),
+            meta: Joi.object(),
+            link: Joi.any(),
+            serial: Joi.number().integer(),
+            ttl: Joi.number().integer(),
+            id: Joi.string(),
+            hostmaster: Joi.string().email(),
+            networks: Joi.array().items(Joi.number().integer()),
+            pool: Joi.string()
+          }),
+          dns_server_ip: Joi.string(),
+          check_reports: Joi.array().items(Joi.object().keys({
+            type_check: Joi.string(),
+            check_status_code: Joi.string(),
+            message: Joi.string()
+          })),
+          check_status_code: Joi.string(),
+          message: Joi.string()
         }
       }
     }
@@ -408,9 +477,23 @@ module.exports = [
           responseMessages: routeModels.standardHTTPErrors
         }
       },
-      // response: {
-      //   schema: routeModels.listOfDNSZonesModel
-      // }
+      // NOTE: This (response.schema) was added for Automation
+      response: {
+        schema: {
+          id: Joi.objectId().required().description('DNS Record ID'),
+          domain: Joi.string().required().trim().lowercase()//.regex(routeModels.domainRegex)
+            .description('DNS zone record domain to be updated'),
+          zone: Joi.string().optional()
+            .description('DNS zone'),
+          type: Joi.string().required()
+            .description('DNS zone record type to be updated'),
+          link: Joi.string().optional().allow(null).allow(''),
+          use_client_subnet: Joi.boolean().required(),
+          answers: Joi.array().optional().description('DNS zone record answers'),
+          ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter'),
+          tier: Joi.number().integer().optional().allow(null).description('DNS zone record tier parameter')
+        }
+      }
     }
   },
 ];
