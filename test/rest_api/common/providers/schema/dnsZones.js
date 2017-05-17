@@ -41,6 +41,26 @@ var DNSZonesSchemaProvider = {
     return BaseSP.get(ROUTE_IDS.DNS_ZONES.DELETE.ONE);
   },
 
+  checkIntegration: {
+
+    dnsServers: {
+
+      getForGetAll: function () {
+        return BaseSP
+          .get(ROUTE_IDS.DNS_ZONES.CHECK_INTEGRATION.DNS_SERVERS.GET.ALL);
+      }
+    },
+
+    records: {
+
+      getForGetAll: function () {
+        return BaseSP
+          .get(ROUTE_IDS.DNS_ZONES.CHECK_INTEGRATION.RECORDS.GET.ALL);
+      }
+    },
+
+  },
+
   records: {
 
     getForGetAll: function () {
@@ -61,6 +81,20 @@ var DNSZonesSchemaProvider = {
 
     getForDelete: function () {
       return BaseSP.get(ROUTE_IDS.DNS_ZONES.RECORDS.DELETE.ONE);
+    }
+  },
+
+  stats: {
+
+    usage: {
+
+      getForGetAll: function () {
+        return BaseSP.get(ROUTE_IDS.DNS_ZONES.STATS.USAGE.GET.ALL);
+      },
+
+      getForGetOne: function () {
+        return BaseSP.get(ROUTE_IDS.DNS_ZONES.STATS.USAGE.GET.ONE);
+      }
     }
   }
 };
