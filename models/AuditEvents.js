@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -45,7 +45,7 @@ function AuditEvents(mongoose, connection, options) {
       target_object    : {type : Object, default : {}}
     }
   });
-
+  this.AuditEventsSchema.path('meta.datetime').index(true);
   this.model = connection.model('audit_events', this.AuditEventsSchema, 'audit_events');
 }
 
