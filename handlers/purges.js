@@ -46,7 +46,7 @@ exports.purgeObject = function(request, reply) {
   var domainName = request.payload.domainName;
   var requestedEnvironment = request.payload.environment;
   var purges = request.payload.purges;
-  var enablePurgeImageEngine = request.query.enable_purge_image_engine;
+  var purgeImageEngineSecondaryCache = request.query.purge_image_engine_secondary_cache;
   var accountId;
   var domainId;
 
@@ -73,7 +73,7 @@ exports.purgeObject = function(request, reply) {
       purges: purges
     };
     var options ={
-      enable_purge_image_engine: enablePurgeImageEngine
+      purge_image_engine_secondary_cache: purgeImageEngineSecondaryCache
     };
 
     cds_request.post( {
