@@ -79,18 +79,20 @@ describe('DNS Zones resource: pre-requisites', function () {
        * @returns {Function}
        */
       var getSpecFn = function (user, field, model) {
-        var fieldName = Utils.getLastKeyFromPath(field);
+        var key = Utils.getLastKeyFromPath(field);
         return function (done) {
           API.helpers
             .authenticateUser(user)
             .then(function () {
               var dnsZone = dnsZones[user.role];
-              console.log(model);
+              if (key !== 'nx_ttl') {
+                model.nx_ttl = 0;
+              }
               return API.resources.dnsZones.update(dnsZone.id, model);
             })
             .then(function (res) {
               res.body.statusCode.should.equal(400);
-              res.body.message.should.containEql(fieldName);
+              res.body.message.should.containEql(key);
               done();
             })
             .catch(done);
