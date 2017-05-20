@@ -98,6 +98,7 @@ module.exports = function (grunt) {
           'suites/**/billingStatement*.js',
           'suites/**/countr*.js',
           'suites/**/dashboard*.js',
+          'suites/**/dnsZones*.js',
           'suites/**/*omainConfig*.js',
           'suites/**/forgot*.js',
           'suites/**/location*.js',
