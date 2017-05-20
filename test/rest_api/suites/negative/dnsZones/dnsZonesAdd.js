@@ -162,10 +162,23 @@ describe('DNS Zones resource: pre-requisites', function () {
             .authenticateUser(user)
             .then(function () {
               var dnsZone = dnsZones[user.role];
+              if (field !== 'type') {
+                model.type = 'NS';
+              }
+              if (field !== 'record.type') {
+                model.record.type = 'NS';
+              }
+              if (key !== 'ttl') {
+                model.record.ttl = 0;
+              }
               if (key !== 'zone') {
                 model.record.zone = dnsZone.zone;
               }
-              console.log(model);
+              if (key !== 'domain') {
+                var subDomain = 'sd' + Date.now() + '.' + dnsZone.zone;
+                model.domain = subDomain;
+                model.record.domain = subDomain;
+              }
               return API.resources.dnsZones
                 .records(dnsZone.id)
                 .createOne(model);
@@ -183,7 +196,7 @@ describe('DNS Zones resource: pre-requisites', function () {
         function (err, data) {
 
           users.forEach(function (user) {
-            describe('Boundary check', function () {
+            describe('Negative check', function () {
 
               // Changing default mocha's timeout (Default is 2 seconds).
               this.timeout(config.get('api.request.maxTimeout'));
