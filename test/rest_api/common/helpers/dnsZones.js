@@ -17,12 +17,34 @@
  */
 
 var DNSZonesResource = require('./../resources/dnsZones');
-var AppsDP = require('./../providers/data/apps');
+var DNSZonesDP = require('./../providers/data/dnsZones');
 var APITestError = require('./../apiTestError');
 
-// # Apps Helper
+// # DNS Zones Helper
 // Abstracts common functionality for the related resource.
 var DNSZonesHelper = {
+
+  /**
+   * ### DNSZonesHelper.create()
+   *
+   * Creates a new DNS Zone using the account ID provided.
+   *
+   * @param {String} accountId
+   */
+  create: function (accountId) {
+    var dnsZone = DNSZonesDP.generateOne(accountId);
+    return DNSZonesResource
+      .createOne(dnsZone)
+      .then(function (res) {
+        dnsZone.id = res.body.object_id;
+        return dnsZone;
+      })
+      .catch(function (error) {
+        throw new APITestError('Creating DNS Zone', error.response.body,
+          dnsZone);
+      });
+  },
+
 
   /**
    * ### DNSZonesHelper.cleanup(namePattern)
@@ -47,6 +69,34 @@ var DNSZonesHelper = {
         return DNSZonesResource
           .deleteManyIfExist(ids);
       });
+  },
+
+  records: {
+
+    /**
+     * ### DNSZonesHelper.records.create()
+     *
+     * Creates a new DNS Zone Record using the DNS Zone ID provided.
+     *
+     * @param {String} dnsZoneId
+     */
+    create: function (dnsZone) {
+      var dnsZoneRecord = DNSZonesDP.records.generateOne(dnsZone.zone);
+      return DNSZonesResource
+        .records(dnsZone.id)
+        .createOne(dnsZoneRecord)
+        .then(function () {
+          return DNSZonesResource.getOne(dnsZone.id);
+        })
+        .then(function (res) {
+          dnsZoneRecord.id = DNSZonesDP.getLastRecord(res.body).id;
+          return dnsZoneRecord;
+        })
+        .catch(function (error) {
+          throw new APITestError('Creating DNS Zone Record', error.response.body,
+            dnsZoneRecord);
+        });
+    }
   }
 };
 
