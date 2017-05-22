@@ -22,7 +22,7 @@ var request = require('supertest-as-promised');
 // Requiring config.
 var config = require('config');
 
-var BASE_URL = 'https://api.mailinator.com/api/';
+var BASE_URL = 'https://api.mailinator.com/api';
 var API_TOKEN = config.get('mailinator.api.token');
 
 // # Mailinator Resource object
