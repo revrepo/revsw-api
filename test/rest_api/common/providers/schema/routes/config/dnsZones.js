@@ -178,7 +178,7 @@ module.exports = [
           retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
           expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
           nx_ttl: Joi.number().integer().min(0).max(10800).optional().description('DNS zone NX TTL parameter'),
-          ttl: Joi.number().integer().min(0).max(10800).optional().description('DNS zone TTL parameter'),
+          ttl: Joi.number().integer().min(0).max(999999999).optional().description('DNS zone TTL parameter'),
           link: Joi.string().optional().allow(null).description('Link')
         }
       },
