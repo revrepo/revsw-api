@@ -24,6 +24,7 @@ var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
 var dnsZoneKey = 'dnsZoneId';
+var dnsZoneRecordKey = 'dnsZoneRecordId';
 var resourceConfig = {
   idKey: dnsZoneKey,
   name: 'dnsZones',
@@ -32,15 +33,42 @@ var resourceConfig = {
     Methods.CREATE,
     Methods.READ_ONE,
     Methods.READ_ALL,
+    Methods.UPDATE,
     Methods.DELETE
   ],
   nestedResources: [
     {
+      idKey: dnsZoneRecordKey,
       name: 'records',
-      path: '/records',
+      path: '/records/{' + dnsZoneRecordKey + '}',
       methods: [
         Methods.CREATE,
-        Methods.DELETE_DATA
+        Methods.READ_ONE,
+        Methods.READ_ALL,
+        Methods.UPDATE,
+        Methods.DELETE,
+        Methods.DELETE_DATA // TODO: Do we still need this?
+      ]
+    },
+    {
+      name: 'checkIntegration',
+      path: '/checkintegration',
+      methods: [],
+      nestedResources: [
+        {
+          name: 'dnsServers',
+          path: '/dns_servers',
+          methods: [
+            Methods.READ_ALL
+          ]
+        },
+        {
+          name: 'records',
+          path: '/records',
+          methods: [
+            Methods.READ_ALL
+          ]
+        }
       ]
     },
     {

@@ -24,7 +24,7 @@ var API = require('./../../../common/api');
 var DomainConfigsDP = require('./../../../common/providers/data/domainConfigs');
 var PurgeDP = require('./../../../common/providers/data/purge');
 var CommonResponseSP =
-  require('./../../../common/providers/schema/commonResponse');
+  require('./../../../common/providers/schema/response/commonResponse');
 
 describe('Sanity check', function () {
 

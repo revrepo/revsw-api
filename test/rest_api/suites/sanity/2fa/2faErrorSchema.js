@@ -22,7 +22,7 @@ var Joi = require('joi');
 var config = require('config');
 var API = require('./../../../common/api');
 var TwoFADP = require('./../../../common/providers/data/2fa');
-var CommonRespSP = require('./../../../common/providers/schema/commonResponse');
+var CommonRespSP = require('./../../../common/providers/schema/response/commonResponse');
 
 describe('Sanity check', function () {
 

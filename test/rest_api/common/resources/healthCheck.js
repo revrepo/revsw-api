@@ -16,31 +16,20 @@
  * from Rev Software, Inc.
  */
 
-var APITestError = require('./../apiTestError');
+// # HealthCheck Resource object
 
-var RouteFileNameProvider = {
+var BasicResource = require('./basic');
+var Constants = require('./../../common/constants');
+var Methods = Constants.API.METHODS;
 
-  get: function (routeId) {
-
-    if (/::API_KEYS::/.test(routeId)) {
-      return 'apiKeys';
-    }
-
-    if (/::DASHBOARDS::/.test(routeId)) {
-      return 'dashboards';
-    }
-
-    if (/::DNS_ZONES::/.test(routeId)) {
-      return 'dnsZones';
-    }
-
-    if (/::HEALTH_CHECK::/.test(routeId)) {
-      return 'healthCheck';
-    }
-
-    throw new APITestError('Could not find route config file with the ' +
-      'specified route ID: "' + routeId);
-  }
+var resourceConfig = {
+  name: 'healthCheck',
+  path: '/healthcheck',
+  methods: [
+    Methods.READ_ALL
+  ]
 };
 
-module.exports = RouteFileNameProvider;
+// Creating new instance of BaseResource which is going to represent the API
+// `health-check resource`
+module.exports = new BasicResource(resourceConfig);

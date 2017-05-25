@@ -20,7 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API= require('./../../../common/api');
-var dcSchema= require('./../../../common/providers/schema/domainConfigs.json');
+var dcSchema= require('./../../../common/providers/schema/json/domainConfigs.json');
 var AccountsDP= require('./../../../common/providers/data/accounts');
 var DomainConfigsDP= require('./../../../common/providers/data/domainConfigs');
 

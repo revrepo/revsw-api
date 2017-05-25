@@ -16,31 +16,14 @@
  * from Rev Software, Inc.
  */
 
-var APITestError = require('./../apiTestError');
+var BaseSP = require('./base');
+var ROUTE_IDS = require('./routes/ids');
 
-var RouteFileNameProvider = {
+var HealthCheckSchemaProvider = {
 
-  get: function (routeId) {
-
-    if (/::API_KEYS::/.test(routeId)) {
-      return 'apiKeys';
-    }
-
-    if (/::DASHBOARDS::/.test(routeId)) {
-      return 'dashboards';
-    }
-
-    if (/::DNS_ZONES::/.test(routeId)) {
-      return 'dnsZones';
-    }
-
-    if (/::HEALTH_CHECK::/.test(routeId)) {
-      return 'healthCheck';
-    }
-
-    throw new APITestError('Could not find route config file with the ' +
-      'specified route ID: "' + routeId);
+  getForRead: function () {
+    return BaseSP.get(ROUTE_IDS.HEALTH_CHECK.GET.ALL);
   }
 };
 
-module.exports = RouteFileNameProvider;
+module.exports = HealthCheckSchemaProvider;

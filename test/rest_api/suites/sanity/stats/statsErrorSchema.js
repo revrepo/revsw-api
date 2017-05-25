@@ -23,8 +23,8 @@ var Joi = require('joi');
 var config = require('config');
 var API= require('./../../../common/api');
 var Utils= require('./../../../common/utils');
-var CommonRespSP= require('./../../../common/providers/schema/commonResponse');
-var StatsSP= require('./../../../common/providers/schema/statsResponse');
+var CommonRespSP= require('./../../../common/providers/schema/response/commonResponse');
+var StatsSP= require('./../../../common/providers/schema/response/statsResponse');
 var StatsDP= require('./../../../common/providers/data/stats');
 var StatsDDHelper = StatsDP.DataDrivenHelper;
 

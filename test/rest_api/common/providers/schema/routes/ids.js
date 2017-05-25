@@ -51,6 +51,64 @@ var IDS = {
     DELETE: {
       ONE: 'DELETE::DASHBOARDS::{ID}'
     }
+  },
+  DNS_ZONES: {
+    BASE_PATH: 'dns_zones',
+    GET: {
+      ALL: 'GET::DNS_ZONES::ALL',
+      ONE: 'GET::DNS_ZONES::{ID}'
+    },
+    POST: {
+      NEW: 'POST::DNS_ZONES::NEW'
+    },
+    PUT: {
+      ONE: 'PUT::DNS_ZONES::{ID}'
+    },
+    DELETE: {
+      ONE: 'DELETE::DNS_ZONES::{ID}'
+    },
+    CHECK_INTEGRATION: {
+      DNS_SERVERS: {
+        GET: {
+          ALL: 'GET::DNS_ZONES::CHECK_INTEGRATION::DNS_SERVERS::ALL',
+        }
+      },
+      RECORDS: {
+        GET: {
+          ALL: 'GET::DNS_ZONES::CHECK_INTEGRATION::RECORDS::ALL',
+        }
+      }
+    },
+    RECORDS: {
+      BASE_PATH: 'records',
+      GET: {
+        ALL: 'GET::DNS_ZONES::RECORDS::ALL',
+        ONE: 'GET::DNS_ZONES::RECORDS::{ID}'
+      },
+      POST: {
+        NEW: 'POST::DNS_ZONES::RECORDS::NEW'
+      },
+      PUT: {
+        ONE: 'PUT::DNS_ZONES::RECORDS::{ID}'
+      },
+      DELETE: {
+        ONE: 'DELETE::DNS_ZONES::RECORDS::{ID}'
+      }
+    },
+    STATS: {
+      USAGE: {
+        GET: {
+          ALL: 'GET::DNS_ZONES::STATS::USAGE::ALL',
+          ONE: 'GET::DNS_ZONES::STATS::USAGE::{ID}'
+        }
+      }
+    }
+  },
+  HEALTH_CHECK: {
+    BASE_PATH: 'healthcheck',
+    GET: {
+      ALL: 'GET::HEALTH_CHECK::ALL'
+    }
   }
 };
 

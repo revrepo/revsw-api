@@ -16,31 +16,31 @@
  * from Rev Software, Inc.
  */
 
-var APITestError = require('./../apiTestError');
+var Joi = require('joi');
 
-var RouteFileNameProvider = {
+var routeModels = require('../models');
+var ROUTE_IDS = require('../ids');
 
-  get: function (routeId) {
-
-    if (/::API_KEYS::/.test(routeId)) {
-      return 'apiKeys';
+module.exports = [
+  {
+    method: 'GET',
+    path: '/v1/healthcheck',
+    config: {
+      auth: false,
+      id: ROUTE_IDS.HEALTH_CHECK.GET.ALL,
+      description: 'Run a quick system health check ',
+      tags: [],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: Joi.object({
+          message: Joi.string().required(),
+          version: Joi.string().required()
+        })
+      }
     }
-
-    if (/::DASHBOARDS::/.test(routeId)) {
-      return 'dashboards';
-    }
-
-    if (/::DNS_ZONES::/.test(routeId)) {
-      return 'dnsZones';
-    }
-
-    if (/::HEALTH_CHECK::/.test(routeId)) {
-      return 'healthCheck';
-    }
-
-    throw new APITestError('Could not find route config file with the ' +
-      'specified route ID: "' + routeId);
   }
-};
-
-module.exports = RouteFileNameProvider;
+];

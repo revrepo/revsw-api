@@ -30,6 +30,7 @@ var CountriesResource = require('./countries');
 var Dashboards = require('./dashboards');
 var DomainConfigsResource = require('./domainConfigs');
 var ForgotResource = require('./forgot');
+var HealthCheckResource = require('./healthCheck');
 var LocationsResource = require('./locations');
 var PurgeResource = require('./purge');
 var ResetResource = require('./reset');
@@ -61,6 +62,7 @@ var APIResources = {
   dashboards: Dashboards,
   domainConfigs: DomainConfigsResource,
   forgot: ForgotResource,
+  healthCheck: HealthCheckResource,
   locations: LocationsResource,
   purge: PurgeResource,
   reset: ResetResource,

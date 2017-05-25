@@ -23,8 +23,8 @@ var config = require('config');
 var API = require('./../../../common/api');
 var DomainConfigsDP = require('./../../../common/providers/data/domainConfigs');
 var PurgeDP = require('./../../../common/providers/data/purge');
-var CommonRespSP = require('./../../../common/providers/schema/commonResponse');
-var PurgeRespSP = require('./../../../common/providers/schema/purgeResponse');
+var CommonRespSP = require('./../../../common/providers/schema/response/commonResponse');
+var PurgeRespSP = require('./../../../common/providers/schema/response/purgeResponse');
 
 describe('Sanity check', function () {
 
