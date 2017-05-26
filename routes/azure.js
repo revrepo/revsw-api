@@ -581,7 +581,7 @@ module.exports = [
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
       notes: 'List SSL token',
-     tags: ['api','web'],
+//     tags: ['api','web'],
       auth: false,//'azure-token',
       plugins: {
         'hapi-swagger': {
