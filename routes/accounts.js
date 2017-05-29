@@ -90,7 +90,7 @@ module.exports = [{
       },
       handler: account.createBillingProfile,
       description: 'Create a billing profile',
-      tags: ['api', 'accounts'],
+//      tags: ['api', 'accounts'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors

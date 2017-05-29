@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -422,7 +422,11 @@ module.exports = [{
             enable_image_engine: Joi.boolean().default(false).description('Enabled ImageEngine'),
             image_engine_token: Joi.string().allow('').default('nnml').description('Used to access SM’s backend'),
             image_engine_api_key: Joi.string().allow('').optional().default('').description('API Key to access SM’s purge API'),
-            image_engine_origin_server: Joi.string().allow('').optional().default('').description('A temporary field - will be removed ')
+            image_engine_origin_server: Joi.string().allow('').optional().default('').description('A temporary field - will be removed '),
+            refresh_image_engine_configuration: Joi.boolean().default(false)
+              .description('Refresh Image Engine Configuration - update the custom VCL code with the current master VCL code. PROPERTY NOT BE STORED'),
+            custom_configuration_present: Joi.boolean().optional()
+              .description('compare the configured master IE VCL code with current custom VCL code set for a domain. PROPERTY NOT BE STORED')
           })
         }
       },
