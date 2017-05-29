@@ -46,6 +46,32 @@ var WAFRulesHelper = {
           wafRule);
       });
   },
+    /**
+   * ### WAFRulesHelper.createCustomForAccount()
+   *
+   * Creates a new WAF Rule for specific Account with custom properties
+   * @param {Object} account {id: string}
+   * @param {Object} data {ruleName: string,ruleType: string}
+   * @returns {Object} WAF Rule data
+   */
+    createCustomForAccount: function(account,data) {
+      var wafRule = WAFRulesDP.generateOne({accountId: account.id});
+      wafRule.rule_type = data.rule_type || '';
+      wafRule.visibility = data.visibility || '';
+
+      wafRule.comment += ' (Account ID: "'+account.id+'")';
+      return WAFRulesResource
+        .createOne(wafRule)
+        .then(function(response) {
+          wafRule.id = response.body.id;
+          return wafRule;
+        })
+        .catch(function(error) {
+          throw new APITestError('Creating WAF Rule',
+            error.response.body,
+            wafRule);
+        });
+    },
   /**
    * ### WAFRulesHelper.createOne()
    *
