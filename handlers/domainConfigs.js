@@ -441,7 +441,12 @@ exports.updateDomainConfig = function(request, reply) {
     if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
-
+    // NOTE: validation dependencies values of properties
+    if(!!newDomainJson.image_engine && newDomainJson.image_engine.enable_image_engine === true){
+      if(newDomainJson.rev_component_bp.enable_cache === false){
+        return reply(boom.badRequest('If ImageEngine is "ON" then Edge Caching must be "ON" too'));
+      }
+    }
     var bpLua = newDomainJson.bp_lua;
     delete newDomainJson.bp_lua;
     var coLua = newDomainJson.co_lua;
