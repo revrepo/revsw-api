@@ -36,6 +36,7 @@ describe('DNS Zones resource: pre-requisites', function () {
   var users = [
     config.get('api.users.reseller')
   ];
+  var accounts = {};
   var dnsZones = {};
 
   dataTypes.forEach(function (type) {
@@ -94,22 +95,18 @@ describe('DNS Zones resource: pre-requisites', function () {
                   describe('Update with `' + type + '` data', function () {
 
                     before(function (done) {
-                      API.helpers
-                        .authenticateUser(reseller)
+                      return API.helpers
+                        .authenticateUser(user)
                         .then(function () {
-                          return API.helpers
-                            .authenticateUser(user)
-                            .then(function () {
-                              return API.helpers.accounts.createOne();
-                            })
-                            .then(function (newAccount) {
-                              accounts[user.role] = newAccount;
-                              return API.helpers.dnsZones.create(newAccount.id);
-                            })
-                            .then(function (newDnsZone) {
-                              dnsZones[user.role] = newDnsZone;
-                              done();
-                            });
+                          return API.helpers.accounts.createOne();
+                        })
+                        .then(function (newAccount) {
+                          accounts[user.role] = newAccount;
+                          return API.helpers.dnsZones.create(newAccount.id);
+                        })
+                        .then(function (newDnsZone) {
+                          dnsZones[user.role] = newDnsZone;
+                          done();
                         })
                         .catch(done);
                     });
