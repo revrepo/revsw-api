@@ -25,7 +25,7 @@
     "grunt-env": "^0.4.4",
     "grunt-mocha-test": "^0.12.7",
     "joi": "^6.1.2",
-    "joi-generate": "https://github.com/leo-fcx/joi-generate.git#a16bf92d3dc46667865c39ebb77278d84354f102",
+    "joi-generate": "https://github.com/leo-fcx/joi-generate.git#8013451e284dd7237c8a99f440946ef0b936fc96",
     "joi-objectid": "~1.1.0",
     "jshint": "^2.8.0",
     "jshint-html-reporter": "^0.2.4",
