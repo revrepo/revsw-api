@@ -137,7 +137,6 @@ describe('Sanity check', function () {
 
           it('should return a response when creating specific DNS zone',
             function (done) {
-              var originalDnsZone;
               var dnsZone = DNSZonesDP.generateOne(account.id);
               API.helpers
                 .authenticateUser(user)
@@ -148,7 +147,6 @@ describe('Sanity check', function () {
                 })
                 .then(function (response) {
                   var dnsZone = response.body;
-                  originalDnsZone = dnsZone;
                   var schema = API.providers.schema.dnsZones
                     .getForCreate()
                     .response;
@@ -157,7 +155,7 @@ describe('Sanity check', function () {
                 })
                 .then(function () {
                   API.helpers.dnsZones
-                    .cleanup(new RegExp(originalDnsZone.zone))
+                    .cleanup(new RegExp(dnsZone.zone))
                     .finally(done);
                 })
                 .catch(done);
