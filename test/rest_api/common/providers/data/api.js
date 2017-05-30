@@ -18,12 +18,14 @@
 
 var AppsDataProvider = require('./apps');
 var DashboardsDataProvider = require('./dashboards');
+var DNSZonesDataProvider = require('./dnsZones');
 var UsersDataProvider = require('./users');
 var WAFRulesDataProvider = require('./wafRules');
 
 var APIDataProviders = {
   apps: AppsDataProvider,
   dashboards: DashboardsDataProvider,
+  dnsZones: DNSZonesDataProvider,
   users: UsersDataProvider,
   wafRules: WAFRulesDataProvider
 };
