@@ -83,7 +83,9 @@ describe('CRUD check', function () {
         });
 
         after(function (done) {
-          done();
+          API.helpers.dnsZones
+            .cleanup(new RegExp(firstDnsZone.zone))
+            .finally(done);
         });
 
         beforeEach(function (done) {
@@ -163,14 +165,19 @@ describe('CRUD check', function () {
                     newDNSZone.object_id.should.not.be.empty();
                     newDNSZone.message.should
                       .equal('Successfully created new DNS zone');
-                    done();
                   });
+              })
+              .then(function () {
+                API.helpers.dnsZones
+                  .cleanup(new RegExp(dnsZone.zone))
+                  .finally(done);
               })
               .catch(done);
           });
 
         it('should return a response when updating specific DNS zone',
           function (done) {
+            var originalDnsZone;
             var updatedDnsZone = DNSZonesDP.generateToUpdate();
             API.helpers
               .authenticateUser(user)
@@ -178,6 +185,7 @@ describe('CRUD check', function () {
                 return API.helpers.dnsZones.create(account.id);
               })
               .then(function (dnsZone) {
+                originalDnsZone = dnsZone;
                 return API.resources.dnsZones
                   .update(dnsZone.id, updatedDnsZone)
                   .expect(200)
@@ -186,8 +194,12 @@ describe('CRUD check', function () {
                     updatedDNSZone.statusCode.should.equal(200);
                     updatedDNSZone.message.should
                       .equal('Successfully updated the DNS zone');
-                    done();
                   });
+              })
+              .then(function () {
+                API.helpers.dnsZones
+                  .cleanup(new RegExp(originalDnsZone.zone))
+                  .finally(done);
               })
               .catch(done);
           });
