@@ -55,6 +55,12 @@ var DNSZonesHelper = {
    * for and delete.
    */
   cleanup: function (namePattern) {
+    if (typeof namePattern === 'string') {
+      namePattern = new RegExp(namePattern);
+    }
+    if (namePattern === undefined) {
+      namePattern = /[0-9]{13}/;
+    }
     return DNSZonesResource
       .getAll()
       .expect(200)
