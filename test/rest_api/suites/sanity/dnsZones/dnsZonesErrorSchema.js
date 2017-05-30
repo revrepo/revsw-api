@@ -87,9 +87,14 @@ describe('Sanity check', function () {
           });
 
           after(function (done) {
-            API.helpers.dnsZones
-              .cleanup(new RegExp(firstDnsZone.zone))
-              .finally(done);
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.helpers.dnsZones
+                  .cleanup(new RegExp(firstDnsZone.zone))
+                  .finally(done);
+              })
+              .catch(done);
           });
 
           beforeEach(function (done) {
