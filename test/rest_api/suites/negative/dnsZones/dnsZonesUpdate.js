@@ -42,23 +42,6 @@ describe('DNS Zones resource: pre-requisites', function () {
 
     before(function (done) {
 
-      Utils.forEach(users, function (user) {
-        return API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.helpers.accounts.createOne();
-          })
-          .then(function (account) {
-            return API.helpers.dnsZones.create(account.id);
-          })
-          .then(function (key) {
-            dnsZones[user.role] = key;
-          });
-      }, done);
-    });
-
-    before(function (done) {
-
       /**
        * Generates Spec name for the given data.
        *
@@ -109,6 +92,38 @@ describe('DNS Zones resource: pre-requisites', function () {
               describe('DNS Zones resource', function () {
                 describe('With user: ' + user.role, function () {
                   describe('Update with `' + type + '` data', function () {
+
+                    before(function (done) {
+                      API.helpers
+                        .authenticateUser(reseller)
+                        .then(function () {
+                          return API.helpers
+                            .authenticateUser(user)
+                            .then(function () {
+                              return API.helpers.accounts.createOne();
+                            })
+                            .then(function (newAccount) {
+                              accounts[user.role] = newAccount;
+                              return API.helpers.dnsZones.create(newAccount.id);
+                            })
+                            .then(function (newDnsZone) {
+                              dnsZones[user.role] = newDnsZone;
+                              done();
+                            });
+                        })
+                        .catch(done);
+                    });
+
+                    after(function (done) {
+                      return API.helpers
+                        .authenticateUser(user)
+                        .then(function () {
+                          API.helpers.dnsZones
+                            .cleanup(dnsZones[user.role].zone)
+                            .finally(done);
+                        })
+                        .catch(done);
+                    });
 
                     data.forEach(function (dnsZone) {
                       var field = dnsZone.field;
