@@ -147,7 +147,6 @@ describe('DNS Zones resource: pre-requisites', function () {
 
     it('Generating `update-' + type + '-data` specs ...', function () {
       // Do not remove this spec as it is required to auto-generate other specs.
-      Object.keys(dnsZones).length.should.be.above(0); // Pre-requisites check
     });
   });
 });
