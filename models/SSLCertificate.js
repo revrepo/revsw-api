@@ -125,7 +125,8 @@ SSLCertificate.prototype = {
   },
   // Get data about ssl_certs on moment call function or custom day
   //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
-  accountSSLCertificateData: function(account_id, day) {
+  accountSSLCertificateData: function(account_id, day_) {
+    var day = _.clone(day_);
     var pipline = [];
     var from, to ;
     if(!day){
@@ -202,7 +203,8 @@ SSLCertificate.prototype = {
 
   // Get data about ssl_certs_per_type on moment call function or custom day
   //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
-  accountSSLCertificatePerTypeData: function(account_id, day) {
+  accountSSLCertificatePerTypeData: function(account_id, day_) {
+    var day = _.clone(day_);
     var pipline = [];
     var from, to ;
     if(!day){

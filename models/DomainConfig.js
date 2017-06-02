@@ -167,8 +167,8 @@ DomainConfig.prototype = {
    *    domain_to_acc_id_wildcards: [{account_id,regex}]
    *  })}
    */
-  accountDomainsData: function( account_id, day ) {
-
+  accountDomainsData: function( account_id, day_ ) {
+    var day = _.clone(day_);
     day = day || new Date();
     day.setUTCHours( 0, 0, 0, 0 );  //  very begin of the day
     var where = {
