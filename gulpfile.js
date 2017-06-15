@@ -18,12 +18,7 @@ config.appName = 'revsw-api';
 //];
 
 // Server handler
-var server = new forever.Monitor('bin/revsw-api.js', {
-  env: {DEBUG: config.appName + '*', DEBUG_COLORS: 1},
-  killSignal: 'SIGINT',
-  watch: false
-}).start();
-
+var server;
 
 // Error handling
 // Command line option:
@@ -58,6 +53,20 @@ function onWarning(error) {
 // Gulp tasks
 
 gulp.task('serve', function (cb) {
+  server = new forever.Monitor('bin/revsw-api.js', {
+    env: {DEBUG: config.appName + '*', DEBUG_COLORS: 1},
+    killSignal: 'SIGINT',
+    watch: false
+  }).start();
+  setTimeout(cb, 3000);
+});
+
+gulp.task('serve:coverage', function (cb) {
+  server = new forever.Monitor('bin/coverage/index.js', {
+    env: {DEBUG: config.appName + '*', DEBUG_COLORS: 1},
+    killSignal: 'SIGINT',
+    watch: false
+  }).start();
   setTimeout(cb, 3000);
 });
 
