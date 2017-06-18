@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,18 +16,16 @@
  * from Rev Software, Inc.
  */
 
-var AppsDataProvider = require('./apps');
-var DashboardsDataProvider = require('./dashboards');
-var DNSZonesDataProvider = require('./dnsZones');
-var UsersDataProvider = require('./users');
-var WAFRulesDataProvider = require('./wafRules');
+var istanbulMiddleware = require('istanbul-middleware');
+var port = 8888;
 
-var APIDataProviders = {
-  apps: AppsDataProvider,
-  dashboards: DashboardsDataProvider,
-  dnsZones: DNSZonesDataProvider,
-  users: UsersDataProvider,
-  wafRules: WAFRulesDataProvider
-};
+istanbulMiddleware.hookLoader(function (path) {
+  if ( /node_modules/.test(path) ||
+       /bin\/coverage/.test(path) ) {
+    return false;
+  }
+  console.info('COVERAGE::Instrumenting file::', path);
+  return true;
+}, {verbose: true});
 
-module.exports = APIDataProviders;
+require('./server').start(port);

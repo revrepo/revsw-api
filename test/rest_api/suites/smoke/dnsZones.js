@@ -62,7 +62,9 @@ describe('Smoke check', function () {
         });
 
         after(function (done) {
-          done();
+          API.helpers.dnsZones
+            .cleanup(new RegExp(firstDnsZone.zone))
+            .finally(done);
         });
 
         beforeEach(function (done) {
@@ -119,16 +121,21 @@ describe('Smoke check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.dnsZones
+                return API.resources.dnsZones
                   .createOne(dnsZone)
-                  .expect(200)
-                  .end(done);
+                  .expect(200);
+              })
+              .then(function () {
+                API.helpers.dnsZones
+                  .cleanup(new RegExp(dnsZone.zone))
+                  .finally(done);
               })
               .catch(done);
           });
 
         it('should return a response when updating specific DNS zone',
           function (done) {
+            var originalDnsZone;
             var updatedDnsZone = DNSZonesDP.generateToUpdate();
             API.helpers
               .authenticateUser(user)
@@ -136,10 +143,15 @@ describe('Smoke check', function () {
                 return API.helpers.dnsZones.create(account.id);
               })
               .then(function (dnsZone) {
-                API.resources.dnsZones
+                originalDnsZone = dnsZone;
+                return API.resources.dnsZones
                   .update(dnsZone.id, updatedDnsZone)
-                  .expect(200)
-                  .end(done);
+                  .expect(200);
+              })
+              .then(function () {
+                API.helpers.dnsZones
+                  .cleanup(new RegExp(originalDnsZone.zone))
+                  .finally(done);
               })
               .catch(done);
           });
