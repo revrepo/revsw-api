@@ -1,12 +1,24 @@
-/opt/revsw-api/log/*.log
+# Rotate old API log files
+/opt/revsw-api/log/api.log /opt/revsw-api/log/revsw-api.log /opt/revsw-api/log/revsw-audit.log
 {
     copytruncate
     create 755 root root
-    weekly
-    rotate 4
+    daily
+    rotate 7
     compress
     missingok
     notifempty
-    copytruncate
+    # A hack to remove old API "good" log files
+    postrotate
+        /usr/bin/find /opt/revsw-api/log/ -name "good-file-*.log" -type f -mtime +7 -exec rm {} \;
+    endscript
 }
 
+# Truncate all forever log files
+/root/.forever/*.log /home/robot/.forever/*.log /home/victor/.forever/*.log
+{
+    copytruncate
+    daily
+    rotate 0
+    missingok
+}
