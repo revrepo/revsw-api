@@ -324,7 +324,7 @@ module.exports = [
 
         payload: {
           type: Joi.string().required()
-            .allow('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
+            .valid('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
             .description('DNS zone record type to be created'),
           domain: Joi.string().required().trim().lowercase()
             .description('DNS zone record domain to be used in record'),
@@ -332,7 +332,7 @@ module.exports = [
             zone: Joi.string().optional()
               .regex(/^(\*\.){0,1}(?=.{1,254}$)((?=[a-z0-9-]{1,63}\.)(xn--+)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}$/i),
             type: Joi.string().required()
-              .allow('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
+              .valid('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
               .description('DNS zone record type to be created'),
             domain: Joi.string().required().trim().lowercase()
               .description('DNS zone record domain to be used in record'),
@@ -402,6 +402,7 @@ module.exports = [
           zone: Joi.string().optional()
            .description('DNS zone'),
           type: Joi.string().required()
+            .valid('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
             .description('DNS zone record type to be updated'),
           link: Joi.string().optional().allow(null).allow(''),
           use_client_subnet: Joi.boolean().required(),
