@@ -374,12 +374,18 @@ module.exports = [
 
         payload: {
           type: Joi.string().required()
+            // TODO: check generator values
+            //.valid('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
             .description('DNS zone record type to be created'),
           domain: Joi.string().required().trim().lowercase()
             .description('DNS zone record domain to be used in record'),
           record: Joi.object().keys({
             zone: Joi.string().optional(),
+              // TODO: check generator values
+              // .regex(/^(\*\.){0,1}(?=.{1,254}$)((?=[a-z0-9-]{1,63}\.)(xn--+)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}$/i),
             type: Joi.string().required()
+              // TODO: check generator values
+              //.allow('A','AAAA','ALIAS','CNAME','DNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
               .description('DNS zone record type to be created'),
             domain: Joi.string().required().trim().lowercase()
               .description('DNS zone record domain to be used in record'),
