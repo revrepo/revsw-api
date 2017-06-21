@@ -20,4 +20,4 @@ if [ -d $API_DIR ]; then
   cd $API_DIR
 fi
 
-nodejs --expose-gc utils/usage_report.js --date -12h
+nodejs --expose-gc utils/usage_report.js --date -12h --CLI_MODE
