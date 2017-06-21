@@ -43,7 +43,10 @@ var showHelp = function() {
   console.log('    --verbose, -v :');
   console.log('        show collected data');
   console.log('    -h, --help :');
-  console.log('        this message\n\n');
+  console.log('        this message');
+  console.log('    --CLI_MODE :');
+  console.log('        used CLI mode logging \n\n');
+
   process.exit(0);
 };
 
@@ -59,7 +62,9 @@ for (var i = 0; i < parslen; ++i) {
     return;
   }
 
-  if (pars[i] === '--date') {
+  if (pars[i] === '--CLI_MODE') {
+    conf.cli_mode = true;
+  } else if (pars[i] === '--date') {
     curr_par = 'date';
   } else if (pars[i] === '--dry-run') {
     conf.dry = true;
