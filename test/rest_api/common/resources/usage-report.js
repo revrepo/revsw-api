@@ -30,7 +30,13 @@ module.exports = new BaseResource({
   path: '/usage_reports/web',
   methods: [
     Methods.READ_ALL
-  ]
+  ],
+  nestedResources: [{
+    name: 'stats',
+    idKey: null,
+    path: '/stats',
+    methods: [
+      Methods.READ_ALL
+    ]
+  }]
 });
-
-

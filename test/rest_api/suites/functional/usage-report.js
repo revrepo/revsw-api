@@ -21,7 +21,7 @@ require('should-http');
 var config = require('config');
 var API = require('./../../common/api');
 var Utils = require('./../../common/utils');
-
+var moment = require('moment');
 var dp = require('./../../common/providers/statsData');
 var UsageDP = new dp();
 
@@ -40,7 +40,75 @@ describe('UsageReport Functional check:', function () {
     test_data_timespan = 12 * 3600,
     report;
    // console.log( estimated );
+  describe( 'UsageReport Stats ', function ( ) {
+      describe( 'Current month', function ( ) {
+        var usageReportData;
+        var startDate = moment().utc().startOf('M').startOf('d');
+        var endDate = moment().utc().endOf('M').endOf('d');
+        var currentStartDate = moment().utc().startOf('day');
+        var currentEndDate = moment().utc().endOf('day');
+        var daysInMonth = endDate.diff(startDate,'days') + 1;// NOTE: count days include last
+        var params = {
+            from_timestamp: startDate.valueOf(),
+            to_timestamp: endDate.valueOf(),
+            account_id: account_id
+          };
+        before(function(done){
+              API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.usage_report
+                .stats()
+                .getAll(params)
+                .expect(200)
+                .then( function( data ) {
+                  usageReportData = JSON.parse(data.text);
+                  // console.log( JSON.stringify(usageReportData,null,4));
+                  done();
+                });
+            })
+            .catch(done);
+        });
 
+        it('stats data should contain data for each '+ daysInMonth+' days in month ',function(){
+          usageReportData.should.be.ok();
+          usageReportData.data.length.should.be.equal(daysInMonth);
+        }) ;
+      });
+
+     describe( 'Before month', function ( ) {
+        var usageReportData;
+        var startDate = moment().utc().subtract(1,'M').startOf('M').startOf('d');
+        var endDate = moment().utc().subtract(1,'M').endOf('M').endOf('d');
+        var daysInMonth = endDate.diff(startDate,'days') + 1;// NOTE: count days include last
+        var params = {
+          from_timestamp: startDate.valueOf(),
+          to_timestamp: endDate.valueOf(),
+          account_id: account_id
+        };
+        before(function(done){
+              API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.usage_report
+                .stats()
+                .getAll(params)
+                .expect(200)
+                .then( function( data ) {
+                  usageReportData = JSON.parse(data.text);
+                  // console.log( JSON.stringify(usageReportData,null,4));
+                  done();
+                });
+            })
+            .catch(done);
+        });
+
+        it('stats data should contain data for each '+ daysInMonth+' days in last month ',function(){
+          usageReportData.should.be.ok();
+          usageReportData.data.length.should.be.equal(daysInMonth);
+        }) ;
+      });
+  });
   //  ---------------------------------
   it( 'UsageReport downloaded successfully', function ( done ) {
 
@@ -56,7 +124,7 @@ describe('UsageReport Functional check:', function () {
           .expect(200)
           .then( function( data ) {
             report = data.body.data;
-            // console.log( report );
+            // console.log( JSON.stringify(report,null,2));
             done();
           });
       })
