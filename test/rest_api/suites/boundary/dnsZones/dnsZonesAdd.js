@@ -144,6 +144,12 @@ describe('DNS Zones resource: pre-requisites', function () {
             .authenticateUser(user)
             .then(function () {
               var dnsZone = dnsZones[user.role];
+              if (field !== 'type') {
+                model.type = 'NS';
+              }
+              if (field !== 'record.type') {
+                model.record.type = 'NS';
+              }
               if (key !== 'zone') {
                 model.record.zone = dnsZone.zone;
               }
