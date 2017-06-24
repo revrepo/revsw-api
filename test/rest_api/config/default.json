@@ -39,7 +39,7 @@
       "activity": "activity"
     },
     "request": {
-      "maxTimeout": 300000
+      "maxTimeout": 600000
     },
     "users": {
       "revAdmin": {
