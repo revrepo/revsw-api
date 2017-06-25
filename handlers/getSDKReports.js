@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -33,6 +33,7 @@ var mongoConnection = require('../lib/mongoConnections');
 var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
 
+var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
 //  ---------------------------------
 // TODO Need to move the function to "utils" module
 var checkAppAccessPermissions_ = function( request, reply, callback ) {
@@ -82,7 +83,7 @@ exports.getAppReport = function( request, reply ) {
 
   checkAppAccessPermissions_( request, reply, function() {
 
-    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+    var span = utils.query2Span(request.query, 24 /*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/);
     if ( span.error ) {
       return reply( boom.badRequest( span.error ) );
     }
@@ -155,7 +156,7 @@ exports.getAccountReport = function( request, reply ) {
 
   checkAppAccessPermissions_( request, reply, function() {
 
-    var span = utils.query2Span( request.query, 24 /*def start in hrs*/ , 24 * 31 /*allowed period - month*/ );
+    var span = utils.query2Span(request.query, 24 /*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/);
     if ( span.error ) {
       return reply( boom.badRequest( span.error ) );
     }

@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -34,6 +34,7 @@ var logger = require('revsw-logger')(config.log_config);
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
+var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
 //
 // Get traffic stats
 //
@@ -52,7 +53,7 @@ exports.getStats = function(request, reply) {
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
       domainName = domainConfig.domain_name;
 
-      var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
+      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
@@ -167,7 +168,7 @@ exports.getStatsImageEngine = function (request, reply) {
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
       domainName = domainConfig.domain_name;
 
-      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * 31/*allowed period - month*/);
+      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays/*allowed period - max count days*/);
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
@@ -278,7 +279,7 @@ exports.getMobileDesktopDistribution = function(request, reply) {
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
       domainName = domainConfig.domain_name;
 
-      var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*31/*allowed period - month*/ );
+      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays/*allowed period - max count days*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
