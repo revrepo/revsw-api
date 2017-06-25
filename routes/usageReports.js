@@ -70,8 +70,8 @@ module.exports = [{
         params: {},
         query: {
           account_id: Joi.objectId().allow('').default('').description('Account ID, optional'),
-          from_timestamp: Joi.string().description('Report period start timestamp (defaults to 24 hours ago from now)'),
-          to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)')
+          from_timestamp: Joi.number().unit('milliseconds').description('Report period start timestamp (defaults to 24 hours ago from now)'),
+          to_timestamp: Joi.number().unit('milliseconds').description('Report period end timestamp (defaults to now)')
         }
       }
     }
