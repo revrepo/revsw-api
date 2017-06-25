@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -34,6 +34,7 @@ var logger = require('revsw-logger')(config.log_config);
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
+var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
 //  ---------------------------------
 var topReports_ = function( req, reply, domainConfig, span ) {
 
@@ -328,14 +329,14 @@ var top5XX_ = function( req, reply, domainConfig, span ) {
     });
 };
 /**
- * @name topImageEngineChangen_
+ * @name topImageEngineChanges_
  *
  * @param {*} req
  * @param {*} reply
  * @param {*} domainConfig
  * @param {*} span
  */
-var topImageEngineChangen_ = function (req, reply, domainConfig, span){
+var topImageEngineChanges_ = function (req, reply, domainConfig, span){
   var reportType_ = req.query.report_type;
   var countSize_ = req.query.count || 30;
   var domainName = domainConfig.domain_name,
@@ -477,7 +478,7 @@ exports.getTopReports = function( request, reply ) {
           if (spanLimit31days.error) {
             return reply(boom.badRequest(spanLimit31days.error));
           }
-          return topImageEngineChangen_(request, reply, domainConfig, span);
+          return topImageEngineChanges_(request, reply, domainConfig, span);
         case 'top5xx':
           if (span.error) {
             return reply(boom.badRequest(span.error));
@@ -509,7 +510,7 @@ exports.getTopLists = function( request, reply ) {
 
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
-      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 31 * 24/*allowed period in hrs*/ );
+      var span = utils.query2Span(request.query, 1/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days */);
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
