@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -61,7 +61,10 @@ var checkAccountAccessPermissions_ = function( request ) {
 };
 
 //  ----------------------------------------------------------------------------------------------//
-
+/**
+ * @name getAccountReport
+ * @description Get Usage Report Date for an Account(s)
+ */
 exports.getAccountReport = function( request, reply ) {
 
   var accountID = checkAccountAccessPermissions_( request );
@@ -69,20 +72,20 @@ exports.getAccountReport = function( request, reply ) {
     reply(boom.badRequest( 'Account ID not found' ));
     return false;
   }
+  var from = new Date(), to = new Date();// NOTE: default report period
+  var from_ = request.query.from,
+    to_ = request.query.to;
 
-  var from = request.query.from,
-    to = request.query.to;
-
-  if ( !from ) {
-    from = new Date();
-    from.setUTCDate(1);             //  the very beginning of the month
-    from.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+  if ( !!from_ ) {
+    from = new Date(from_);
   }
-
-  if ( !to ) {
-    to = new Date();
-    to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+  from.setUTCDate(1);             //  the very beginning of the month
+  from.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+  if ( !!to_ ) {
+    to = new Date(to_);
   }
+  to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+
 
   reports.checkLoadReports( from, to, accountID, request.query.only_overall, request.query.keep_samples )
     .then( function( response ) {
@@ -90,10 +93,10 @@ exports.getAccountReport = function( request, reply ) {
       response = {
         metadata: {
           account_id: request.params.account_id,
-          from: from,
-          from_datetime: new Date(from),
-          to: to,
-          to_datetime: new Date(to),
+          from: from.valueOf(),
+          from_datetime: from,
+          to: to.valueOf(),
+          to_datetime: to,
           data_points_count: response.length
         },
         data: response
@@ -109,7 +112,10 @@ exports.getAccountReport = function( request, reply ) {
     });
 };
 
-//  ---------------------------------
+/**
+ * @name getAccountStats
+ * @description Get Usage Date Histogram for an Account(s)
+ */
 exports.getAccountStats = function( request, reply ) {
 
   var accountID = checkAccountAccessPermissions_( request );
