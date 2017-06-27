@@ -161,7 +161,7 @@ exports.authenticate = function(request, reply) {
               return reply(boom.create(418, 'Your registration not finished'));
             }
             accounts.get({
-              _id: user.companyId
+              _id: user.companyId[0]
             }, function(error, account) {
               if (error) {
                 logger.error('Authenticate::authenticate: Failed to find an account associated with user' +
