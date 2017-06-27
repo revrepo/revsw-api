@@ -51,11 +51,11 @@ exports.forgotPassword = function(request, reply) {
   var email = request.payload.email;
 
   function passwordChange(error,user){
-
+          logger.info('forgotPassword:passwordChange');
           async.waterfall([
               function(done) {
                   accounts.get({
-                      _id: user.companyId
+                      _id: user.companyId[0]
                   }, function(error, account) {
                       currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
                       done();
@@ -124,7 +124,7 @@ exports.forgotPassword = function(request, reply) {
       }
 
       if (user.self_registered) {
-          logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+          logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId[0]);
           // NOTE: User not verify
           if (user.validation === undefined  || user.validation.verified===false) {
               logger.error('forgotPassword::authenticate: User with ' +
@@ -132,7 +132,7 @@ exports.forgotPassword = function(request, reply) {
               return reply(boom.create(418, 'Your registration not finished'));
           }
           accounts.get({
-            _id: user.companyId
+            _id: user.companyId[0]
           }, function(error, account) {
             if (error) {
               logger.error('forgotPassword::authenticate: Failed to find an account associated with user' +
@@ -180,6 +180,9 @@ exports.checkPasswordResetToken = function(request, reply) {
 };
 
 
+/**
+ * @name resetPassword
+ */
 exports.resetPassword = function(request, reply) {
 
   var token = request.params.token;
@@ -206,7 +209,12 @@ exports.resetPassword = function(request, reply) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user ' + user.email + ' with new password'));
           }
-
+          // NOTE: method users.update not convert "companyId" to Array
+          if(result.companyId) {
+            result.companyId = result.companyId.split(',');
+          } else {
+            result.companyId = [];
+          }
           result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({
@@ -224,17 +232,19 @@ exports.resetPassword = function(request, reply) {
             operation_status : 'success'
           });
 
-          done(error, user);
+          done(error, result);
         });
       });
     },
 
     function(user, done) {
         accounts.get({
-            _id: user.companyId
+            _id: user.companyId[0]
         }, function(error, account) {
-            currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
-
+          if(error || !account) {
+            return reply(boom.badImplementation('Failed to find account for user  ' + user.email + ' with companyId ' + user.companyId[0]));
+          }
+          currentVendorProfile = (!!account.vendor_profile) ? vendorProfiles[account.vendor_profile] : currentVendorProfile;
             var mailOptions = {
                 to: user.email,
                 fromname: currentVendorProfile.support_name,
