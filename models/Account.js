@@ -140,7 +140,11 @@ Account.prototype = {
       callback(err, accounts);
     });
   },
-
+  /**
+   * @name listSubscribers
+   * @description method for get list accounts with subscription_id
+   * and witch subscription_state not 'canceled'
+   */
   listSubscribers : function (filters, callback) {
     var filter = {
           deleted: {
@@ -159,7 +163,7 @@ Account.prototype = {
     if(filters.account_id){
       filter._id = filters.account_id;
     }
-    console.log('filter ',filters);
+
     this.model.find(filter,function (err, accounts) {
       if(accounts) {
         accounts = utils.clone(accounts);
@@ -339,6 +343,34 @@ Account.prototype = {
       });
   },
 
+ /**
+   *  return array of all account IDs, non-deleted or deleted in the given day
+   *
+   *  @param {Date|nothing} - ignore accounts deleted before this date and created after, default today
+   *  @return promise([id,id,...])
+   */
+  listActiveAccointIDs: function( day_ ) {
+    var day = new Date();
+    if(_.isDate(day_)){
+        day = _.clone(day_);
+    }
+    day.setUTCHours( 0, 0, 0, 0 );  //  very begin of the day
+    var where = {
+      $or: [
+        { deleted_at: { $gte: day } },
+        { deleted: { $ne: true } }
+      ],
+      created_at: { $lte: ( new Date( day.valueOf() + 86400000/*day in ms*/ ) ) }
+    };
+
+    return this.model.find( where, { _id: 1 } )
+      .exec()
+      .then( function( data ) {
+        return data.map( function( item ) {
+          return item._id.toString();
+        });
+      });
+  },
 
 };
 

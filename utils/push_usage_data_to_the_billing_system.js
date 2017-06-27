@@ -58,7 +58,9 @@ var showHelp = function() {
   console.log('    --dry-run :');
   console.log('        show collected data, does not store anything (debug mode)');
   console.log('    -h, --help :');
-  console.log('        this message\n\n');
+  console.log('        this message');
+  console.log('    --CLI_MODE :');
+  console.log('        used CLI mode logging \n\n');
   process.exit(0);
 };
 
@@ -75,7 +77,9 @@ for (var i = 0; i < parslen; ++i) {
     showHelp();
     return;
   }
-  if (pars[i] === '-a' || pars[i] === '--account') {
+  if(pars[i] === '--CLI_MODE') {
+    conf.cli_mode = true;
+  } else if (pars[i] === '-a' || pars[i] === '--account') {
     curr_par = 'accountId';
   } else if (pars[i] === '-s' || pars[i] === '--subscription') {
     curr_par = 'subscriptionId';
@@ -101,6 +105,7 @@ billingSystemReport.getListAccountsForReport(conf)
     return data;
   })
   .map(function(item) {
+    log_('billingSystemReport:oneBillingReport:call');
     return billingSystemReport.oneBillingReport((conf.date || 'now'), item.id /* Account ID*/ , conf.dry /*do not save, return collected data*/ )
       .then(function infoResultReporting() {
         return {

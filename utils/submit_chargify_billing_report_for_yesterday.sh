@@ -20,4 +20,4 @@ if [ -d $API_DIR ]; then
   cd $API_DIR
 fi
 
-nodejs utils/push_usage_data_to_the_billing_system.js --date -12h
+nodejs utils/push_usage_data_to_the_billing_system.js --date -12h --CLI_MODE
