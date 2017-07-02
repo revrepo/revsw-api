@@ -450,5 +450,7 @@
   "notify_admin_by_email_on_customer_activities":"",
   "accounts_to_ignore_for_activity_reporting": [],
   "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE"],
-  "max_time_period_for_traffic_graphs_days": 7
+  "max_time_period_for_traffic_graphs_days": 7,
+  "notification_window_for_expiring_ssl_cert_days": 60,
+  "notify_admin_by_email_on_ssl_cert_expiration": ""
 }
