@@ -284,15 +284,19 @@ SSLCertificate.prototype = {
    /**
    * @name getExpiringSSLCertificatesByTimePeriod
    * @description method get information about expiring SSL Certificates witch will expire on time period
+   * time period between actual day and date in future (all dates is included)
    * @param {{Object}} options {actualDay?:date,expireDate?:date }
    * @return {{Function}}
    */
   getExpiringSSLCertificatesByTimePeriod: function(options,cb){
-    var countDays = 30; //NOTE: default count days for time period
+    var countDays = 60; //NOTE: default count days for time period
     var actualDay = moment(options.actualDate).utc();
     var expireDate = moment(options.expireDate) || new moment(actualDay).utc().add(countDays,'days').endOf('day');
     var where =  {
-      expires_at: { $lte: expireDate.toDate()},
+      $and: [
+        { expires_at: { $gte: actualDay.startOf('day').toDate() } }, // NOTE: Don’t get already expired certs
+        { expires_at: { $lte: expireDate.toDate()}}
+      ],
       deleted: { $ne: true }
     };
     var fields = 'id account_id cert_name cert_type domains expires_at';
