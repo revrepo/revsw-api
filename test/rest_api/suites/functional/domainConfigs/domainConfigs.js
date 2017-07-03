@@ -103,7 +103,7 @@ describe('Domain configs functional test', function () {
     it('should return staging and global status as `In Progress` right after ' +
       'create a domain config',
       function (done) {
-        var counter = 300000; // 5 mins
+        var counter = 600000; // 5 mins
         var interval = 1000;
         var cb = function () {
           if (counter < 0) {
@@ -141,7 +141,7 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            var counter = 360000; // 6 mins
+            var counter = 600000; // 6 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
@@ -257,7 +257,7 @@ describe('Domain configs functional test', function () {
                 delete firstFdc.cname;
                 delete firstFdc.published_domain_version;
                 delete firstFdc.last_published_domain_version;
-                var counter = 180000; // 3 mins
+                var counter = 600000; // 3 mins
                 var interval = 1000;
                 var cb = function () {
                   if (counter < 0) {
@@ -315,7 +315,7 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            var counter = 180000; // 3 mins
+            var counter = 600000; // 3 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
@@ -391,7 +391,7 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            var counter = 300000; // 5 mins
+            var counter = 600000; // 5 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
@@ -467,7 +467,7 @@ describe('Domain configs functional test', function () {
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            var counter = 180000; // 3 mins
+            var counter = 600000; // 3 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
@@ -568,7 +568,7 @@ describe('Domain configs functional test', function () {
       function (done) {
         var updatedDc = DomainConfigsDP.cloneForUpdate(firstFdc);
         updatedDc.account_id = secondAccount.id;
-        var counter = 180000; // 3 mins
+        var counter = 600000; // 3 mins
         var interval = 1000;
         var callBack = function () {
           if (counter < 0) {
@@ -623,7 +623,7 @@ describe('Domain configs functional test', function () {
       function (done) {
         var updatedDc = DomainConfigsDP.cloneForUpdate(firstFdc);
         updatedDc.account_id = otherAccount.id;
-        var counter = 180000; // 3 mins
+        var counter = 600000; // 3 mins
         var interval = 1000;
         var callBack = function () {
           if (counter < 0) {
