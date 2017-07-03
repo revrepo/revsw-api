@@ -25,6 +25,7 @@ var _ = require('lodash'),
   utils = require('../lib/utilities.js'),
   config = require('config'),
   mongoose = require('mongoose');
+var moment = require('moment');
 var logger = require('revsw-logger')(config.log_config);
 
 var SSL_CERTIFICATES_DEFAULT_DATA_OBJECT = {
@@ -279,6 +280,39 @@ SSLCertificate.prototype = {
         });
         return dist;
       });
+  },
+   /**
+   * @name getExpiringSSLCertificatesByTimePeriod
+   * @description method get information about expiring SSL Certificates witch will expire on time period
+   * @param {{Object}} options {actualDay?:date,expireDate?:date }
+   * @return {{Function}}
+   */
+  getExpiringSSLCertificatesByTimePeriod: function(options,cb){
+    var countDays = 30; //NOTE: default count days for time period
+    var actualDay = moment(options.actualDate).utc();
+    var expireDate = moment(options.expireDate) || new moment(actualDay).utc().add(countDays,'days').endOf('day');
+    var where =  {
+      expires_at: { $lte: expireDate.toDate()},
+      deleted: { $ne: true }
+  };
+    var fields = ['id', 'account_id', 'cert_name', 'cert_type', 'domains','expires_at'];
+    this.model.find(where, fields, { lean: true })
+      .lean() // NOTE: return as JSON withot model methods
+      .exec()
+      .then(function(data){
+        data.forEach(function(itemData) {
+          itemData.cert_id = itemData._id.toString();
+          delete itemData._id;
+          if(itemData.domains.length>0){
+            itemData.domains = itemData.domains.split(',');
+            itemData.domains = _.uniq(itemData.domains,true);
+          }else{
+            itemData.domains = [];
+          }
+        });
+        cb(null,data);
+      })
+      .catch(cb);
   }
 };
 
