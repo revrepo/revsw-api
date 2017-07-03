@@ -16,7 +16,7 @@
  * from Rev Software, Inc.
  */
 
-//  USAGE REPORT COLLECT AND STORE
+//  CHECK EXPIRING SSL CERTIFICATES AND SEND NOTIFICATION EMAILS TO USERS
 //  ----------------------------------------------------------------------------------------------//
 'use strict';
 
