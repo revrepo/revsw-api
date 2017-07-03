@@ -294,10 +294,10 @@ SSLCertificate.prototype = {
     var where =  {
       expires_at: { $lte: expireDate.toDate()},
       deleted: { $ne: true }
-  };
-    var fields = ['id', 'account_id', 'cert_name', 'cert_type', 'domains','expires_at'];
-    this.model.find(where, fields, { lean: true })
-      .lean() // NOTE: return as JSON withot model methods
+    };
+    var fields = 'id account_id cert_name cert_type domains expires_at';
+    this.model.find(where, fields)
+      .lean() // NOTE: return plain javascript objects
       .exec()
       .then(function(data){
         data.forEach(function(itemData) {

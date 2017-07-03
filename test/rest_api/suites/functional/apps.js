@@ -294,7 +294,7 @@ describe('Functional check', function () {
           'updating an app',
           function (done) {
             var appId;
-            var counter = 600000; // 6 mins
+            var counter = 600000; // NOTE: 10 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
@@ -373,7 +373,7 @@ describe('Functional check', function () {
           'publishing an app',
           function (done) {
             var appId;
-            var counter = 600000; // 6 mins
+            var counter = 600000; // NOTE: 10 mins
             var interval = 1000;
             var cb = function () {
               if (counter < 0) {
