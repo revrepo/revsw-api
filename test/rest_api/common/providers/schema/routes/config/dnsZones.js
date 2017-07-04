@@ -178,7 +178,7 @@ module.exports = [
           retry: Joi.number().integer().optional().description('DNS zone retry parameter'),
           expiry: Joi.number().integer().optional().description('DNS zone expiry parameter'),
           nx_ttl: Joi.number().integer().min(0).max(10800).optional().description('DNS zone NX TTL parameter'),
-          ttl: Joi.number().integer().min(0).max(999999999).optional().description('DNS zone TTL parameter'),
+          ttl: Joi.number().integer().min(0).max(2147483647).optional().description('DNS zone TTL parameter'),
           link: Joi.string().optional().allow(null).description('Link')
         }
       },
@@ -297,7 +297,7 @@ module.exports = [
             records: Joi.array().items(Joi.object().keys({
               domain: Joi.string(),
               short_answers: Joi.array().items(Joi.string()),
-              ttl: Joi.number().integer(),
+              ttl: Joi.number().min(0).max(2147483647).integer(),
               tier: Joi.number().integer(),
               type: Joi.string(),
               link: Joi.any(),
@@ -390,7 +390,7 @@ module.exports = [
             domain: Joi.string().required().trim().lowercase()
               .description('DNS zone record domain to be used in record'),
             answers: Joi.array().required().description('DNS zone record answers'),
-            ttl: Joi.number().integer().optional().description('DNS zone record TTL parameter'),
+            ttl: Joi.number().integer().min(0).max(2147483647).optional().description('DNS zone record TTL parameter'),
             link: Joi.string().optional().allow(null).description('Link')
           }).required()
             .description('DNS zone record body')
@@ -497,7 +497,7 @@ module.exports = [
           link: Joi.string().optional().allow(null).allow(''),
           use_client_subnet: Joi.boolean().required(),
           answers: Joi.array().optional().description('DNS zone record answers'),
-          ttl: Joi.number().integer().optional().description('DNS zone record ttl parameter'),
+          ttl: Joi.number().integer().min().max(2147483647).optional().description('DNS zone record ttl parameter'),
           tier: Joi.number().integer().optional().allow(null).description('DNS zone record tier parameter')
         }
       }
