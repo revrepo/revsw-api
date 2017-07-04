@@ -220,7 +220,7 @@ exports.DNSZoneModel = Joi.object({
   retry: Joi.number().integer().description('DNS zone retry parameter'),
   expiry: Joi.number().integer().description('DNS zone expiry parameter'),
   nx_ttl: Joi.number().integer().description('DNS zone nx ttl parameter'),
-  ttl: Joi.number().integer().description('DNS zone ttl parameter'),
+  ttl: Joi.number().integer().min(0).max(2147483647).description('DNS zone ttl parameter'),
   dns_servers: Joi.array().optional().description('List of DNS servers')
 }).meta({
   className: 'DNS zone'
