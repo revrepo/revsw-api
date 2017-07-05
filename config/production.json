@@ -126,5 +126,6 @@
   "notify_admin_by_email_on_customer_activities":"customer-activity-events@nuubit.com",
   "accounts_to_ignore_for_activity_reporting":["5472e0be5e4ac42646bdffeb"/*Rev Software*/, "585296f11ea9bb3c3f90e05b" /*SDK Tests*/],
   "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE"],
+  "notification_window_for_expiring_ssl_cert_days": 60,
   "notify_admin_by_email_on_ssl_cert_expiration": "ops@revsw.com"
 }
