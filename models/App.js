@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -223,8 +223,9 @@ App.prototype = {
   },
   // Get data about apps_per_platform on moment call function or custom day
   //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
-  accountAppsPerPlatformData: function(account_id, day) {
+  accountAppsPerPlatformData: function(account_id, day_) {
     var pipline = [];
+    var day = _.clone(day_);
     var from, to ;
     if(!day){
       day = new Date();
