@@ -47,9 +47,9 @@ var showHelp = function() {
   console.log('    --alert_on_traffic_changes :');
   console.log('        a traffic change alerting');
   console.log('    --traffic_alerting_threshold :');
-  console.log('        a traffic change alerting');
+  console.log('        a threshold of traffic change for alerting');
   console.log('     --traffic_alerting_email :');
-  console.log('        a traffic change alerting');
+  console.log('        an email user who will get traffic change alerting');
   console.log('    --dry-run :');
   console.log('        does not store anything (debug mode)');
   console.log('    --verbose, -v :');
@@ -64,6 +64,7 @@ var showHelp = function() {
 
 var conf = {
     alert_on_traffic_changes: false,
+    traffic_alerting_threshold: 80,
     accountId: false, // NOTE: "false" is means what all accounts will used
     dry: false // NOTE: by default save data to storage
   },
@@ -92,7 +93,7 @@ for (var i = 0; i < parslen; ++i) {
     curr_par = 'traffic_alerting_email';
   } else if (pars[i] === '--dry-run') {
     conf.dry = true;
-  } else if (pars[i] === '--verbose' || pars[i] === '-v' ) {
+  } else if (pars[i] === '--verbose' || pars[i] === '-v') {
     conf.verbose = true;
   } else if (curr_par) {
     conf[curr_par] = pars[i];
@@ -104,24 +105,83 @@ for (var i = 0; i < parslen; ++i) {
   }
 }
 
-//  here we go ... -------------------------------------------------------------------------------//
+// console.log('conf', conf)
 
-require( '../lib/usageReport.js' ).collectDayReport(
-    ( conf.date || 'now' ),
-    conf.accountId, //  no particular id(s)
-    conf.dry,     //  do not save, return collected data
-    true          //  collect orphans
-  )
-    .then( function( data ) {
-      if ( conf.verbose ) {
-        log_( data, 2 );
-      }
-      console.log( 'done.\n' );
-    })
-  .catch( function( err ) {
-    console.log( err );
+//  here we go ... -------------------------------------------------------------------------------//
+var usageReportTraffic = require('../lib/usageReportTraffic.js');
+promise.promisifyAll(usageReportTraffic);
+var countSends = 0;
+promise.resolve()
+  .then(function() {
+    return require('../lib/usageReport.js').collectDayReport(
+        (conf.date || 'now'),
+        conf.accountId, //  no particular id(s)
+        conf.dry, //  do not save, return collected data
+        true //  collect orphans
+      )
+      .then(function(data) {
+        if (conf.verbose) {
+          log_(data, 2);
+        }
+        console.log('collectDayReport done.\n');
+      });
   })
-  .finally( function() {
+  .then(function() {
+    if (conf.alert_on_traffic_changes === false || !conf.traffic_alerting_email) {
+      return promise.resolve();
+    }
+    var options = {
+      current_day: (conf.date || undefined),
+      accountId: conf.accountId,
+      test_mode: conf.dry,
+      traffic_threshold: conf.traffic_alerting_threshold
+    };
+    return usageReportTraffic.getDomainsTrafficChangesFromUsageReportsAsync(options)
+      .then(function(data) {
+        log_('getDomainsTrafficChangesFromUsageReports:success - count ' + data.length);
+        var options = {
+          domains_traffic: data,
+          main_alerting_email: conf.traffic_alerting_email,
+          traffic_threshold: parseInt(conf.traffic_alerting_threshold)
+        };
+        return usageReportTraffic.prepareDomainsTrafficChangesEmailOptionsAsync(options)
+          .then(function(data) {
+            log_('prepareDomainsTrafficChangesEmailOptions:success - count ' + data.length);
+            return data;
+          })
+          // NOTE: start send emails
+          .map(function(item) {
+            var options = item;
+            if (conf.dry !== true) {
+              return usageReportTraffic.sendDomainTrafficChangesEmailsAsync(options)
+                .then(function infoResultSendEmail(data) {
+                  countSends = countSends + 1;
+                  log_('Success send #' + countSends + '. Send email to "' + item.to + '" with subject "' + item.subject + '"');
+                  return item;
+                })
+                .catch(function(err) {
+                  log_('Error send email to' + item.to);
+                  return item;
+                });
+            } else {
+              log_('Not send email to ' + item.to + '"' + item.to + '" with subject "' + item.subject + '"');
+              //NOTE: if conf.dry === true - not send email
+              return promise.resolve(item);
+            }
+          }, {
+            concurrency: 10 // NOTE: speed send emails
+          });
+      })
+      .then(function(data) {
+        // TODO: send emails
+        log_('End send emails ');
+      });
+  })
+  .catch(function(err) {
+    console.log(err);
+  })
+  .finally(function() {
+    log_('Script end to work');
     process.exit(0);
     return;
   });

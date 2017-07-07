@@ -202,7 +202,98 @@ UsageReport.prototype = {
         return ids;
       });
   },
+  /**
+   * @name aggregateDomainTrafficByDays
+   * @description get traffic data for doamins
+   */
+  aggregateDomainTrafficByDays: function(options){
+    var currentDay = options.current_date.toISOString().slice(0, 10);
+    var previousDay =  options.previous_date.toISOString().slice(0,10);
+    var match_ =  {
+        $or: [
+          { _id: { $regex: new RegExp(previousDay + '$') } },
+          { _id: { $regex: new RegExp(currentDay + '$') } }
+        ]
+    };
+    // NOTE: only one account
+    if(options.account_id){
+      match_.account_id = options.account_id;
+    }
+    return this.model.aggregate([
+        {
+          $match:  match_
+        },
+        {
+          $project: {
+            _id: 0,
+            'report_for_day': '$report_for_day',
+            'domains_usage': '$domains_usage',
+          }
+        },
+        { $unwind: '$domains_usage' },
+        {
+          $project: {
+            // _id: 1,
+            'report_for_day': '$report_for_day',
+            'domain': '$domains_usage.name',
+            'traffic_per_billing_zone': '$domains_usage.traffic_per_billing_zone',
+          }
+        },
+        {
+          $group: {
+            _id: '$domain',
+            'traffics_day': {
+              $push: {
+                report_for_day: '$report_for_day',
+                traffic_per_billing_zone: '$traffic_per_billing_zone'
+              }
+            },
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            'domain': '$_id',
+            'traffics_day': 1
+          }
+        }
+      ])
 
+      .exec()
+      .then(function(data){
+        // NOTE: return information about total traffic in GB
+        return _.map(data,function(doc) {
+          doc.traffics_day.forEach(function(item) {
+            var traffic_bites = Object.keys(item.traffic_per_billing_zone)
+              .map(function(key) { return item.traffic_per_billing_zone[key].sent_bytes; });
+            item.total_traffic_gb = ( traffic_bites.reduceRight(function(a, b) { return a + b; }) / 1073741824/*1024^3*/).toFixed(2) * 1;
+            item.day = item.report_for_day.toISOString().slice(0, 10);
+          });
+          // NOTE: check data for each of days
+          if(doc.traffics_day.length !== 2) {
+            if(!_.find(doc.traffics_day, function(item){
+              return item.day === currentDay;
+            })){
+              doc.traffics_day.push({
+                total_traffic_gb: 0,
+                day :currentDay,
+                report_for_day: new Date(currentDay).setUTCHours(0,0,0,0)
+              });
+            }
+            if(!_.find(doc.traffics_day, function(item) {
+              return item.day === previousDay;
+            })) {
+              doc.traffics_day.push({
+                total_traffic_gb: 0,
+                day: currentDay,
+                report_for_day: new Date(previousDay).setUTCHours(0, 0, 0, 0)
+              });
+            }
+          }
+          return doc;
+        });
+      });
+  }
 };
 
 module.exports = UsageReport;
