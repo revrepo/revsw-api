@@ -132,13 +132,20 @@ BillingPlanSchema.statics = {
     this.create(item, callback);
   },
 
+  /**
+   * @name list
+   * @description get list all not deleted Billing Plans
+   * // NOTE: can be filtred by brand(options.vendor_profile)
+   *
+   * @param {Object} options {vendor_profile: String}
+   */
   list: function (options, callback) {
     callback = callback || _.noop;
-    if(!options.vendor_profile){
-      // NOTE: method must return billing plans only for one brand
-      return callback(new Error('Property "vendor_profile" is not set'));
+    var params = { deleted: false };
+    if(!!options.vendor_profile){
+      params.brand = options.vendor_profile;
     }
-    return this.find({deleted: false, brand: options.vendor_profile}).exec(function(err, billingPlans) {
+    return this.find(params).exec(function(err, billingPlans) {
       if (err) {
         return callback(err);
       }

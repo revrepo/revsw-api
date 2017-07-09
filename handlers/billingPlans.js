@@ -50,6 +50,10 @@ exports.list = function (request, reply) {
     if(!vendorSlug){
       options.vendor_profile = request.auth.credentials.vendor_profile || defaultSignupVendorProfile;
     }
+    // NOTE: RevAdmin must see all billing plans if not set "vendorSlug"
+    if(!vendorSlug && utils.isUserRevAdmin(request) === true){
+      delete options.vendor_profile;
+    }
   }
   BillingPlan.list(options, function (err, billingPlans) {
     billingPlans = publicRecordFields.handle(billingPlans, 'billingPlans');
