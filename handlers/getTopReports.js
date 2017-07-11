@@ -35,14 +35,15 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
+var GEO_COUNTRIES_REGIONS = require('../config/geo_countries_regions');
 //  ---------------------------------
 var topReports_ = function( req, reply, domainConfig, span ) {
 
-  req.query.report_type = req.query.report_type || 'referer';
+  var reportType = req.query.report_type || 'referer';
   var domainName = domainConfig.domain_name,
     field;
 
-  switch (req.query.report_type) {
+  switch (reportType) {
     case 'referer':
       field = 'referer';
       break;
@@ -89,7 +90,7 @@ var topReports_ = function( req, reply, domainConfig, span ) {
       field = 'name';
       break;
     default:
-      return reply(boom.badImplementation('Received bad report_type value ' + req.query.report_type));
+      return reply(boom.badImplementation('Received bad report_type value ' + reportType));
   }
 
   var requestBody = {
@@ -129,7 +130,7 @@ var topReports_ = function( req, reply, domainConfig, span ) {
   };
 
   //  add 2 sub-aggregations for country
-  if ( req.query.report_type === 'country' ) {
+  if ( reportType === 'country' ) {
     requestBody.aggs.results.aggs = {
       regions: {
         terms: {
@@ -168,10 +169,23 @@ var topReports_ = function( req, reply, domainConfig, span ) {
         };
         if ( res.regions && res.regions.buckets.length ) {
           item.regions = res.regions.buckets.map( function( region ) {
-            return {
+            var region_ = {
               key: region.key,
-              count: region.doc_count,
+              count: region.doc_count
             };
+            // NOTE: add 'hc-key' for show data on highcharts map
+            var countryInfo = _.find(GEO_COUNTRIES_REGIONS, function(item) {
+                return item.code_iso2 === res.key;
+            });
+            if(!!countryInfo) {
+              var i = _.find(countryInfo.regions, function(itm) {
+                return itm.code === region.key;
+              });
+              if(!!i) {
+                region_['hc-key'] = i['hc-key'];
+              }
+            }
+            return region_ ;
           });
         }
         if ( res.missing_regions && res.missing_regions.doc_count ) {
