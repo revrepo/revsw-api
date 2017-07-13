@@ -133,4 +133,36 @@
     { "code": "23", "hc-key": "ar-tf", "name": "Tierra del Fuego" },
     { "code": "24", "hc-key": "ar-tm", "name": "Tucuman" }
   ]
+}, {
+  "title": "Brazil",
+  "code_iso2": "BR",
+  "regions": [
+    { "code": "01", "hc-key": "br-ac", "name": "Acre" },
+    { "code": "02", "hc-key": "br-al", "name": "Alagoas" },
+    { "code": "03", "hc-key": "br-ap", "name": "Amapa" },
+    { "code": "04", "hc-key": "br-am", "name": "Amazonas" },
+    { "code": "05", "hc-key": "br-ba", "name": "Bahia" },
+    { "code": "06", "hc-key": "br-ce", "name": "Ceara" },
+    { "code": "07", "hc-key": "br-df", "name": "Distrito Federal" },
+    { "code": "08", "hc-key": "br-es", "name": "Espirito Santo" },
+    { "code": "11", "hc-key": "br-ms", "name": "Mato Grosso do Sul" },
+    { "code": "13", "hc-key": "br-ma", "name": "Maranhao" },
+    { "code": "14", "hc-key": "br-mt", "name": "Mato Grosso" },
+    { "code": "15", "hc-key": "br-mg", "name": "Minas Gerais" },
+    { "code": "16", "hc-key": "br-pa", "name": "Para" },
+    { "code": "17", "hc-key": "br-pb", "name": "Paraiba" },
+    { "code": "18", "hc-key": "br-pr", "name": "Parana" },
+    { "code": "20", "hc-key": "br-pi", "name": "Piaui" },
+    { "code": "21", "hc-key": "br-rj", "name": "Rio de Janeiro" },
+    { "code": "22", "hc-key": "br-rn", "name": "Rio Grande do Norte" },
+    { "code": "23", "hc-key": "br-rs", "name": "Rio Grande do Sul" },
+    { "code": "24", "hc-key": "br-ro", "name": "Rondonia" },
+    { "code": "25", "hc-key": "br-rr", "name": "Roraima" },
+    { "code": "26", "hc-key": "br-sc", "name": "Santa Catarina" },
+    { "code": "27", "hc-key": "br-sp", "name": "Sao Paulo" },
+    { "code": "28", "hc-key": "br-se", "name": "Sergipe" },
+    { "code": "29", "hc-key": "br-go", "name": "Goias" },
+    { "code": "30", "hc-key": "br-pe", "name": "Pernambuco" },
+    { "code": "31", "hc-key": "br-to", "name": "Tocantins" }
+  ]
 }]
