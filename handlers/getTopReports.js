@@ -179,15 +179,15 @@ var topReports_ = function( req, reply, domainConfig, span ) {
                 key: itemRegion.code,
                 count: 0 // NOTE: set default value
               };
+              // NOTE: add 'hc-key' for correct show data on highcharts map
+              if(!!itemRegion['hc-key']) {
+                region_['hc-key'] = itemRegion['hc-key'];
+              }
               var i = _.find(res.regions.buckets, function(itm) {
                 return itemRegion.code === itm.key;
               });
-               // NOTE: add 'hc-key' for correct show data on highcharts map
               if(!!i) {
                 region_.count = i.doc_count;
-                if(!!i['hc-key']){
-                  region_['hc-key'] = i['hc-key'];
-                }
               }
               return region_;
             });
