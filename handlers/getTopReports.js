@@ -183,6 +183,10 @@ var topReports_ = function( req, reply, domainConfig, span ) {
               if(!!itemRegion['hc-key']) {
                 region_['hc-key'] = itemRegion['hc-key'];
               }
+              // NOTE: add additional information about including region data to another region
+              if(!!itemRegion['in-key']) {
+                region_['in-key'] = itemRegion['in-key'];
+              }
               var i = _.find(res.regions.buckets, function(itm) {
                 return itemRegion.code === itm.key;
               });
