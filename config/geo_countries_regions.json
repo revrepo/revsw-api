@@ -196,4 +196,40 @@
     { "code": "SK", "hc-key": "ca-sk", "name": "Saskatchewan" },
     { "code": "YT", "hc-key": "ca-yt", "name": "Yukon Territory" }
   ]
+}, {
+  "title": "China",
+  "code_iso2": "CN",
+  "regions": [
+    { "code": "01", "hc-key": "cn-ah", "name": "Anhui" },
+    { "code": "02", "hc-key": "cn-zj", "name": "Zhejiang" },
+    { "code": "03", "hc-key": "cn-jx", "name": "Jiangxi" },
+    { "code": "04", "hc-key": "cn-js", "name": "Jiangsu" },
+    { "code": "05", "hc-key": "cn-jl", "name": "Jilin" },
+    { "code": "06", "hc-key": "cn-qh", "name": "Qinghai" },
+    { "code": "07", "hc-key": "cn-fj", "name": "Fujian" },
+    { "code": "08", "hc-key": "cn-hl", "name": "Heilongjiang" },
+    { "code": "09", "hc-key": "cn-he", "name": "Henan" },
+    { "code": "10", "hc-key": "cn-hb", "name": "Hebei" },
+    { "code": "11", "hc-key": "cn-hn", "name": "Hunan" },
+    { "code": "12", "hc-key": "cn-hu", "name": "Hubei" },
+    { "code": "13", "hc-key": "cn-xj", "name": "Xinjiang" },
+    { "code": "14", "hc-key": "cn-xz", "name": "Xizang" },
+    { "code": "15", "hc-key": "cn-gs", "name": "Gansu" },
+    { "code": "16", "hc-key": "cn-gx", "name": "Guangxi" },
+    { "code": "18", "hc-key": "cn-gz", "name": "Guizhou" },
+    { "code": "19", "hc-key": "cn-ln", "name": "Liaoning" },
+    { "code": "20", "hc-key": "cn-nm", "name": "Nei Mongol" },
+    { "code": "21", "hc-key": "cn-nx", "name": "Ningxia" },
+    { "code": "22", "hc-key": "cn-bj", "name": "Beijing" },
+    { "code": "23", "hc-key": "cn-sh", "name": "Shanghai" },
+    { "code": "24", "hc-key": "cn-sx", "name": "Shanxi" },
+    { "code": "25", "hc-key": "cn-sd", "name": "Shandong" },
+    { "code": "26", "hc-key": "cn-sa", "name": "Shaanxi" },
+    { "code": "28", "hc-key": "cn-tj", "name": "Tianjin" },
+    { "code": "29", "hc-key": "cn-yn", "name": "Yunnan" },
+    { "code": "30", "hc-key": "cn-gd", "name": "Guangdong" },
+    { "code": "31", "hc-key": "cn-ha", "name": "Hainan" },
+    { "code": "32", "hc-key": "cn-sc", "name": "Sichuan" },
+    { "code": "33", "hc-key": "cn-cq", "name": "Chongqing" }
+  ]
 }]
