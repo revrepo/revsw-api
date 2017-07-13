@@ -178,4 +178,22 @@
     { "code": "07", "hc-key": "au-vi", "name": "Victoria" },
     { "code": "08", "hc-key": "au-wa", "name": "Western Australia" }
   ]
+}, {
+  "title": "Canada",
+  "code_iso2": "CA",
+  "regions": [
+    { "code": "AB", "hc-key": "ca-ab", "name": "Alberta" },
+    { "code": "BC", "hc-key": "ca-bc", "name": "British Columbia" },
+    { "code": "MB", "hc-key": "ca-mb", "name": "Manitoba" },
+    { "code": "NB", "hc-key": "ca-nb", "name": "New Brunswick" },
+    { "code": "NL", "hc-key": "ca-nl", "name": "Newfoundland" },
+    { "code": "NS", "hc-key": "ca-ns", "name": "Nova Scotia" },
+    { "code": "NT", "hc-key": "ca-nt", "name": "Northwest Territories" },
+    { "code": "NU", "hc-key": "ca-nu", "name": "Nunavut" },
+    { "code": "ON", "hc-key": "ca-on", "name": "Ontario" },
+    { "code": "PE", "hc-key": "ca-pe", "name": "Prince Edward Island" },
+    { "code": "QC", "hc-key": "ca-qc", "name": "Quebec" },
+    { "code": "SK", "hc-key": "ca-sk", "name": "Saskatchewan" },
+    { "code": "YT", "hc-key": "ca-yt", "name": "Yukon Territory" }
+  ]
 }]
