@@ -1,4 +1,5 @@
 [{
+  "title":"United States of America",
   "code_iso2": "US",
   "regions": [
     { "code": "AA", "hc-key": "us-aa", "name": "Armed Forces Americas" },
@@ -64,6 +65,7 @@
     { "code": "WY", "hc-key": "us-wy", "name": "Wyoming" }
   ]
 }, {
+  "title": "India",
   "code_iso2": "IN",
   "regions": [
     { "code": "01", "hc-key": "in-an", "name": "Andaman and Nicobar Islands" },
@@ -99,8 +101,36 @@
     { "code": "35", "hc-key": "in-mp", "name": "Madhya Pradesh" },
     { "code": "36", "hc-key": "in-up", "name": "Uttar Pradesh" },
     { "code": "37", "hc-key": "in-ct", "name": "Chhattisgarh" },
-    { "code": "38", "hc-key": "in-jh", "name": "Jharkhand" }, 
-    { "code": "39", "hc-key": "in-ut", "name": "Uttarakhand"
-    }
+    { "code": "38", "hc-key": "in-jh", "name": "Jharkhand" },
+    { "code": "39", "hc-key": "in-ut", "name": "Uttarakhand" }
+  ]
+}, {
+  "title": "Argentina",
+  "code_iso2": "AR",
+  "regions": [
+    { "code": "01", "hc-key": "ar-ba", "name": "Buenos Aires" },
+    { "code": "02", "hc-key": "ar-ct", "name": "Catamarca" },
+    { "code": "03", "hc-key": "ar-cc", "name": "Chaco" },
+    { "code": "04", "hc-key": "ar-ch", "name": "Chubut" },
+    { "code": "05", "hc-key": "ar-cb", "name": "Cordoba" },
+    { "code": "06", "hc-key": "ar-cn", "name": "Corrientes" },
+    { "code": "07", "hc-key": "ar-df", "name": "Distrito Federal" },
+    { "code": "08", "hc-key": "ar-er", "name": "Entre Rios" },
+    { "code": "09", "hc-key": "ar-fm", "name": "Formosa" },
+    { "code": "10", "hc-key": "ar-jy", "name": "Jujuy" },
+    { "code": "11", "hc-key": "ar-lp", "name": "La Pampa" },
+    { "code": "12", "hc-key": "ar-lr", "name": "La Rioja" },
+    { "code": "13", "hc-key": "ar-mz", "name": "Mendoza" },
+    { "code": "14", "hc-key": "ar-mn", "name": "Misiones" },
+    { "code": "15", "hc-key": "ar-nq", "name": "Neuquen" },
+    { "code": "16", "hc-key": "ar-rn", "name": "Rio Negro" },
+    { "code": "17", "hc-key": "ar-sa", "name": "Salta" },
+    { "code": "18", "hc-key": "ar-sj", "name": "San Juan" },
+    { "code": "19", "hc-key": "ar-sl", "name": "San Luis" },
+    { "code": "20", "hc-key": "ar-sc", "name": "Santa Cruz" },
+    { "code": "21", "hc-key": "ar-sf", "name": "Santa Fe" },
+    { "code": "22", "hc-key": "ar-se", "name": "Santiago del Estero" },
+    { "code": "23", "hc-key": "ar-tf", "name": "Tierra del Fuego" },
+    { "code": "24", "hc-key": "ar-tm", "name": "Tucuman" }
   ]
 }]
