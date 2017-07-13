@@ -166,27 +166,40 @@ var topReports_ = function( req, reply, domainConfig, span ) {
         var item = {
           key: res.key,
           count: res.doc_count,
+          regions: []
         };
         if ( res.regions && res.regions.buckets.length ) {
-          item.regions = res.regions.buckets.map( function( region ) {
-            var region_ = {
-              key: region.key,
-              count: region.doc_count
-            };
-            // NOTE: add 'hc-key' for show data on highcharts map
-            var countryInfo = _.find(GEO_COUNTRIES_REGIONS, function(item) {
-                return item.code_iso2 === res.key;
-            });
-            if(!!countryInfo) {
-              var i = _.find(countryInfo.regions, function(itm) {
-                return itm.code === region.key;
-              });
-              if(!!i) {
-                region_['hc-key'] = i['hc-key'];
-              }
-            }
-            return region_ ;
+          var countryInfo = _.find(GEO_COUNTRIES_REGIONS, function(item) {
+            return item.code_iso2 === res.key;
           });
+          if(!!countryInfo) {
+            // NOTE: prepare return data for all regions in country
+            item.regions = _.map(countryInfo.regions, function(itemRegion) {
+              var region_ = {
+                key: itemRegion.code,
+                count: 0 // NOTE: set default value
+              };
+              var i = _.find(res.regions.buckets, function(itm) {
+                return itemRegion.code === itm.key;
+              });
+               // NOTE: add 'hc-key' for correct show data on highcharts map
+              if(!!i) {
+                region_.count = i.doc_count;
+                if(!!i['hc-key']){
+                  region_['hc-key'] = i['hc-key'];
+                }
+              }
+              return region_;
+            });
+          } else {
+            item.regions = res.regions.buckets.map(function(region) {
+              var region_ = {
+                key: region.key,
+                count: region.doc_count
+              };
+              return region_;
+            });
+          }
         }
         if ( res.missing_regions && res.missing_regions.doc_count ) {
           if ( !item.regions ) {
