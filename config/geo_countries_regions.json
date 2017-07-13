@@ -1,5 +1,5 @@
 [{
-  "title":"United States of America",
+  "title": "United States of America",
   "code_iso2": "US",
   "regions": [
     { "code": "AA", "hc-key": "us-aa", "name": "Armed Forces Americas" },
@@ -164,5 +164,18 @@
     { "code": "29", "hc-key": "br-go", "name": "Goias" },
     { "code": "30", "hc-key": "br-pe", "name": "Pernambuco" },
     { "code": "31", "hc-key": "br-to", "name": "Tocantins" }
+  ]
+}, {
+  "title": "Australia",
+  "code_iso2": "AU",
+  "regions": [
+    { "code": "01", "hc-key": "au-ct", "name": "Australian Capital Territory" },
+    { "code": "02", "hc-key": "au-ns", "name": "New South Wales" },
+    { "code": "03", "hc-key": "au-nt", "name": "Northern Territory" },
+    { "code": "04", "hc-key": "au-ql", "name": "Queensland" },
+    { "code": "05", "hc-key": "au-sa", "name": "South Australia" },
+    { "code": "06", "hc-key": "au-ts", "name": "Tasmania" },
+    { "code": "07", "hc-key": "au-vi", "name": "Victoria" },
+    { "code": "08", "hc-key": "au-wa", "name": "Western Australia" }
   ]
 }]
