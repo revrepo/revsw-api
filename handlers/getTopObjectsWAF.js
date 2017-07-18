@@ -34,7 +34,7 @@ var logger = require('revsw-logger')(config.log_config);
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
-var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
+var maxTimePeriodForWAFGraphsDays = config.get('max_time_period_for_waf_graphs_days');
 //
 // Handler for Top Objects report WAF
 //
@@ -51,7 +51,7 @@ exports.getTopObjectsWAF = function (request, reply) {
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
 
       domainName = domainConfig.domain_name;
-      var span = utils.query2Span(request.query, 1 /*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/);
+      var span = utils.query2Span(request.query, 1 /*def start in hrs*/, 24 * maxTimePeriodForWAFGraphsDays /*allowed period - max count days*/);
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
