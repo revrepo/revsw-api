@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,7 +22,7 @@
 
 var boom     = require('boom');
 var mongoose = require('mongoose');
-
+var _ = require('lodash');
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -33,7 +33,7 @@ var logger = require('revsw-logger')(config.log_config);
 
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
-
+var GEO_COUNTRIES_REGIONS = require('../config/geo_countries_regions');
 
 exports.getGBTReports = function(request, reply) {
 
@@ -154,14 +154,46 @@ exports.getGBTReports = function(request, reply) {
             received_bytes: res.received_bytes.value
           };
           if ( res.regions && res.regions.buckets.length ) {
-            item.regions = res.regions.buckets.map( function( region ) {
-              return {
-                key: region.key,
-                count: region.doc_count,
-                sent_bytes: region.sent_bytes.value,
-                received_bytes: region.received_bytes.value
-              };
+            var countryInfo = _.find(GEO_COUNTRIES_REGIONS, function(item) {
+              return item.code_iso2 === res.key;
             });
+            if(!!countryInfo) {
+              // NOTE: prepare return data for all regions in country
+              item.regions = _.map(countryInfo.regions, function(itemRegion) {
+                var region_ = {
+                  key: itemRegion.code,
+                  count: 0, // NOTE: set default value
+                  sent_bytes: 0, // NOTE: set default value
+                  received_bytes: 0 // NOTE: set default value
+                };
+                // NOTE: add 'hc-key' for correct show data on highcharts map
+                if(!!itemRegion['hc-key']) {
+                  region_['hc-key'] = itemRegion['hc-key'];
+                }
+                // NOTE: add additional information about including region data to another region
+                if(!!itemRegion['in-key']) {
+                  region_['in-key'] = itemRegion['in-key'];
+                }
+                var i = _.find(res.regions.buckets, function(itm) {
+                  return itemRegion.code === itm.key;
+                });
+                if(!!i) {
+                  region_.count = i.doc_count;
+                  region_.sent_bytes = i.sent_bytes.value;
+                  region_.received_bytes = i.received_bytes.value;
+                }
+                return region_;
+              });
+            } else {
+              item.regions = res.regions.buckets.map( function( region ) {
+                return {
+                  key: region.key,
+                  count: region.doc_count,
+                  sent_bytes: region.sent_bytes.value,
+                  received_bytes: region.received_bytes.value
+                };
+              });
+            }
           }
           if ( res.missing_regions && res.missing_regions.doc_count ) {
             if ( !item.regions ) {
