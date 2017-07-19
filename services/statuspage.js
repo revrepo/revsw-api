@@ -49,7 +49,9 @@ function subscribe(options, cb) {
   } else {
     var newSubscrider = {
       'subscriber[email]': options.email,
-      'subscriber[skip_confirmation_notification]': options.skip_confirmation_notification || 't',
+      // NOTE: @see http://doers.statuspage.io/api/v1/subscribers/ - subscriber[skip_confirmation_notification] - Deprecated.
+      // NOTE: All subscribers will must confirm their subscription to protect against abuse.
+      // 'subscriber[skip_confirmation_notification]': options.skip_confirmation_notification || 't',
     };
     statusPageAPI.post('subscribers', newSubscrider, function(result) {
       if (result.status !== 'success') {
