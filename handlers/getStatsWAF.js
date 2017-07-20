@@ -93,17 +93,13 @@ exports.getStatsWAF = function (request, reply) {
           }
         }
       };
-      //  update query
-      elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
+      //  update query special for NAXSI data
+      elasticSearch.buildESQueryTermsForNaxsi(requestBody.query.filtered.filter.bool, request, domainConfig);
       // NOTE: fix term name for NAXSI
       _.forEach(requestBody.query.filtered.filter.bool.must, function (itemMust) {
         if (!!itemMust.terms) {
           itemMust.terms.server = _.clone(itemMust.terms.domain);
           delete itemMust.terms.domain;
-        }
-        if (!!itemMust.term && !!itemMust.term['geoip.country_code2']) {
-          itemMust.term.country = _.clone(itemMust.term['geoip.country_code2']);
-          delete itemMust.term['geoip.country_code2'];
         }
       });
 
@@ -159,6 +155,8 @@ exports.getWAFEventsList = function (request, reply) {
     metadataFilterField;
   var pageSize = request.query.count || 25;
   var pageNumber = request.query.page || 1;
+  var sortBy = request.query.sortBy || 'date';
+  var sortDirection = request.query.sortDirection || '-1';
   domainConfigs.get(domainID, function (error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
@@ -194,17 +192,19 @@ exports.getWAFEventsList = function (request, reply) {
           }
         }
       };
+      if(!!sortBy && sortBy.length>0){
+        requestBody.sort = [];
+        var sortItem =   {};
+        sortItem[''+sortBy+''] = { order: (sortDirection === '1') ? 'asc' :'desc'};
+        requestBody.sort.push(sortItem);
+      }
       //  update query
-      elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
+      elasticSearch.buildESQueryTermsForNaxsi(requestBody.query.filtered.filter.bool, request, domainConfig);
       // NOTE: fix term name for NAXSI
       _.forEach(requestBody.query.filtered.filter.bool.must, function (itemMust) {
         if (!!itemMust.terms) {
           itemMust.terms.server = _.clone(itemMust.terms.domain);
           delete itemMust.terms.domain;
-        }
-        if (!!itemMust.term && !!itemMust.term['geoip.country_code2']) {
-          itemMust.term.country = _.clone(itemMust.term['geoip.country_code2']);
-          delete itemMust.term['geoip.country_code2'];
         }
       });
 
@@ -225,9 +225,7 @@ exports.getWAFEventsList = function (request, reply) {
               end_timestamp: span.end,
               end_datetime: new Date(span.end),
               total: body.hits.total,
-              interval_sec: span.interval / 1000,
-              filter: metadataFilterField,
-              // data_points_count: len
+              filter: metadataFilterField
             },
             data: _.map(body.hits.hits, function (item) {
               return item._source;
