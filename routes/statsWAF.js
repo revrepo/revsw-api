@@ -40,6 +40,8 @@ var commonQueryParamsStatsWAF = {
 var paginationParams = {
   page: Joi.number().integer().min(1).max(100000).default(1).description('Page number'),
   count: Joi.number().integer().min(0).max(200).default(25).description('Count records'),
+  sortBy: Joi.string().trim().default('').description('Field for sort'),
+  sortDirection: Joi.any().valid('1', '-1').default('-1').description('Type of sort')
 };
 module.exports = [{
     method: 'GET',
