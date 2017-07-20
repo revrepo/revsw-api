@@ -38,11 +38,13 @@ var DomainConfig = require('../models/DomainConfig');
 var ServerGroup = require('../models/ServerGroup');
 var Account = require('../models/Account');
 var User = require('../models/User');
+var WAFRule = require('../models/WAFRule');
 
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
+var wafRules = new WAFRule(mongoose, mongoConnection.getConnectionPortal());
 
 var billing_plans = require('../models/BillingPlan');
 var authHeader = { Authorization: 'Bearer ' + config.get('cds_api_token') };
@@ -1024,8 +1026,61 @@ exports.checkIntegration = function(request, reply) {
         return reply(err);
       }
       reply(response);
-
     });
+};
+/**
+ * @name getWAFRulesList
+ * @description return list of WAF Rules for domain Id
+ *
+ */
+exports.getWAFRulesList = function(request, reply) {
+  var domainID = request.params.domain_id;
+  var domainName;
+  var accountIds;
+  var response = {
+    data: [],
+    metadata: {}
+  };
+  var wafRulesIds = [];
+  domainConfigs.get(domainID, function(error, domainConfig) {
+    if(error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+    }
+    if(!domainConfig || !utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+    response.metadata.domain_id = domainID;
+    response.metadata.domain_name = domainConfig.domain_name;
+   // NOTE: get actual WAF Rules Ids
+    wafRulesIds = _.chain(domainConfig.proxy_config.rev_component_bp.waf).map(function(itemWaf){
+      return itemWaf.waf_rules;
+    }).flatten().uniq().value();
+
+    wafRules.findWAFRulesInfoByRulesIds(wafRulesIds, function(error, result) {
+      if(error){
+        reply(boom.badImplementation('Failed to retrieve data about WAF Rules for domain'));
+        return;
+      }
+      var regexTextId = /id:\d+;$/;
+      var regexId = /\d+/;
+      var regexTextMsg = /"msg:[\w+\s+]+"/;
+      _.forEach(result,function(itemWAFRule){
+        var rulesTextList = itemWAFRule.rule_body.split('\n');
+        _.forEach(rulesTextList,function(itemText){
+          var idText = itemText.match(regexTextId);
+          if(!!idText && idText.length > 0){
+            var id_ = idText[0].match(regexId);
+            var msgText_ = itemText.match(regexTextMsg);
+            if(!!msgText_ && msgText_.length > 0){
+              response.data.push({ id: id_ + '', msg: msgText_[0].slice(5, msgText_[0].length-1) +''});
+            }
+          }
+        });
+      });
+      // TODO: add unique velidation for WAF Rules Ids
+      reply(response);
+    });
+  });
 
 
 };

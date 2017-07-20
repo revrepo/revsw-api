@@ -186,7 +186,43 @@ WAFRule.prototype = {
       callback(null, doc);
     }).limit(1);
   },
+  /**
+   * @name findWAFRulesInfoByRulesIds
+   * @description find WAR Rules by list of  WAF Rules Ids
+   */
+  findWAFRulesInfoByRulesIds: function(wafRulesId, callback){
+    var $query = {
+      delete: {$ne:true}
+    };
+    if(!!wafRulesId && wafRulesId.length > 0) {
+      if(_.isArray(wafRulesId)) {
+        $query._id = {
+          $in: wafRulesId.map(function(id) {
+            return mongoose.Types.ObjectId(id);
+          })
+        };
+      } else {
+        $query._id = mongoose.Types.ObjectId(wafRulesId);
+      }
 
+    this.model.find($query, function(err, doc) {
+      if(err) {
+        callback(err);
+      }
+      if(doc) {
+        doc = utils.clone(doc).map(function(r) {
+          delete r.__v;
+          r.id = r._id;
+          delete r._id;
+          return r;
+        });
+      }
+      callback(null, doc);
+    });
+    }else{
+      callback(null,[]);
+    }
+  }
 };
 
 module.exports = WAFRule ;

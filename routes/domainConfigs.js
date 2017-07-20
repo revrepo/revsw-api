@@ -109,7 +109,33 @@ module.exports = [{
       }
     }
   },
-
+  {
+    method: 'GET',
+    path: '/v1/domain_configs/{domain_id}/waf_rules_list',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: domainConfigsHandlers.getWAFRulesList,
+      description: 'Get a list of WAF Rules for domain',
+      notes: 'Use the call to receive a list of WAF Rules with description for specified domain ID',
+      tags: ['api', 'domain_configs'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        }
+      },
+      // TODO: add scheme for list
+      // response: {
+      //   schema: routeModels.listOfDomainsModel
+      // }
+    }
+  },
   {
     method: 'GET',
     path: '/v1/domain_configs/{domain_id}/config_status',
