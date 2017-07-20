@@ -93,17 +93,13 @@ exports.getStatsWAF = function (request, reply) {
           }
         }
       };
-      //  update query
-      elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
+      //  update query special for NAXSI data
+      elasticSearch.buildESQueryTermsForNaxsi(requestBody.query.filtered.filter.bool, request, domainConfig);
       // NOTE: fix term name for NAXSI
       _.forEach(requestBody.query.filtered.filter.bool.must, function (itemMust) {
         if (!!itemMust.terms) {
           itemMust.terms.server = _.clone(itemMust.terms.domain);
           delete itemMust.terms.domain;
-        }
-        if (!!itemMust.term && !!itemMust.term['geoip.country_code2']) {
-          itemMust.term.country = _.clone(itemMust.term['geoip.country_code2']);
-          delete itemMust.term['geoip.country_code2'];
         }
       });
 
