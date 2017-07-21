@@ -1072,7 +1072,11 @@ exports.getWAFRulesList = function(request, reply) {
             var id_ = idText[0].match(regexId);
             var msgText_ = itemText.match(regexTextMsg);
             if(!!msgText_ && msgText_.length > 0){
-              response.data.push({ id: id_ + '', msg: msgText_[0].slice(5, msgText_[0].length-1) +''});
+              var finalMessage = msgText_[0].slice(5, msgText_[0].length - 1) + '';
+              if(finalMessage.length > 0){
+                finalMessage =  utils.convertFirstCharacterToUpperCase(finalMessage);
+              }
+              response.data.push({ id: id_ + '', msg: finalMessage });
             }
           }
         });
