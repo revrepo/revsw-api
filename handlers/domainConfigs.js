@@ -1063,7 +1063,7 @@ exports.getWAFRulesList = function(request, reply) {
       }
       var regexTextId = /id:\d+;$/;
       var regexId = /\d+/;
-      var regexTextMsg = /"msg:[\w+\s+]+"/;
+      var regexTextMsg = /"msg:[\w+\s+'.,*|&#@:?!()~`§±[\]$\/-]+"/;
       _.forEach(result,function(itemWAFRule){
         var rulesTextList = itemWAFRule.rule_body.split('\n');
         _.forEach(rulesTextList,function(itemText){
