@@ -31,6 +31,7 @@
     "blipp": "2.1.x",
     "bluebird": "^2.10.2",
     "boom": "2.7.x",
+    "cache-manager": "^2.4.0",
     "config": "^1.16.0",
     "convert-base": "~0.1.0",
     "crypto": "0.0.3",
