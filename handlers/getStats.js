@@ -27,7 +27,8 @@ var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var elasticSearch   = require('../lib/elasticSearch');
-
+var moment = require('moment');
+var _ = require('lodash');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
@@ -35,6 +36,9 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
+var cacheManager = require('cache-manager');
+// TODO: get default ttl from config
+var memoryCache = cacheManager.caching({ store: 'memory', max: 100000, ttl: 10*60/*seconds*/ });
 //
 // Get traffic stats
 //
@@ -44,107 +48,115 @@ exports.getStats = function(request, reply) {
 
   var domainID = request.params.domain_id,
     domainName,
-    metadataFilterField;
-
+    metadataFilterField,
+    queryProperties = _.clone(request.query);
+  // NOTE: make correction for the time range
+  _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
+  // NOTE: get only actual data about domain config for validate user access permisions
   domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
       domainName = domainConfig.domain_name;
-
-      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
+      var span = utils.query2Span(queryProperties, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
       if ( span.error ) {
         return reply(boom.badRequest( span.error ));
       }
+      var cacheKey = 'getStats:' + domainID + ':' + JSON.stringify(queryProperties);
+      memoryCache.wrap(cacheKey, function() {
+        metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
-      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
-
-      var requestBody = {
-        size: 0,
-        query: {
-          filtered: {
-            filter: {
-              bool: {
-                must: [{
-                  range: {
-                    '@timestamp': {
-                      gte: span.start,
-                      lt: span.end
-                    }
+          var requestBody = {
+            size: 0,
+            query: {
+              filtered: {
+                filter: {
+                  bool: {
+                    must: [{
+                      range: {
+                        '@timestamp': {
+                          gte: span.start,
+                          lt: span.end
+                        }
+                      }
+                    }]
                   }
-                }]
+                }
               }
-            }
-          }
-        },
-        aggs: {
-          results: {
-            date_histogram: {
-              field: '@timestamp',
-              interval: ( '' + span.interval ),
-              min_doc_count: 0,
-              extended_bounds : {
-                min: span.start,
-                max: span.end
-              },
-              offset: ( '' + ( span.end % span.interval ) )
             },
             aggs: {
-              sent_bytes: {
-                sum: {
-                  field: 's_bytes'
-                }
-              },
-              received_bytes: {
-                sum: {
-                  field: 'r_bytes'
+              results: {
+                date_histogram: {
+                  field: '@timestamp',
+                  interval: ('' + span.interval),
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: span.start,
+                    max: span.end
+                  },
+                  offset: ('' + (span.end % span.interval))
+                },
+                aggs: {
+                  sent_bytes: {
+                    sum: {
+                      field: 's_bytes'
+                    }
+                  },
+                  received_bytes: {
+                    sum: {
+                      field: 'r_bytes'
+                    }
+                  }
                 }
               }
             }
-          }
-        }
-      };
+          };
 
-      //  update query
-      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
-
-      elasticSearch.getClient().search({
-        index: utils.buildIndexList(span.start, span.end),
-        ignoreUnavailable: true,
-        timeout: config.get('elasticsearch_timeout_ms'),
-        body: requestBody
-      })
-      .then(function(body) {
-        var dataArray = [];
-        for ( var i = 0, len = body.aggregations.results.buckets.length; i < len; i++ ) {
-          var item = body.aggregations.results.buckets[i];
-          dataArray.push({
-            time: item.key,
-            requests: item.doc_count,
-            sent_bytes: item.sent_bytes.value,
-            received_bytes: item.received_bytes.value
-          });
-        }
-        var response = {
-          metadata: {
-            domain_name: domainName,
-            domain_id: domainID,
-            start_timestamp: span.start,
-            start_datetime: new Date(span.start),
-            end_timestamp: span.end,
-            end_datetime: new Date(span.end),
-            total_hits: body.hits.total,
-            interval_sec: span.interval/1000,
-            filter: metadataFilterField,
-            data_points_count: len
-          },
-          data: dataArray
-        };
-        renderJSON(request, reply, error, response);
-      }, function(error) {
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
-      });
+          //  update query
+          elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
+          return elasticSearch.getClient().search({
+              index: utils.buildIndexList(span.start, span.end),
+              ignoreUnavailable: true,
+              query_cache: true,
+              timeout: config.get('elasticsearch_timeout_ms'),
+              body: requestBody
+            })
+            .then(function(body) {
+              var dataArray = [];
+              for (var i = 0, len = body.aggregations.results.buckets.length; i < len; i++) {
+                var item = body.aggregations.results.buckets[i];
+                dataArray.push({
+                  time: item.key,
+                  requests: item.doc_count,
+                  sent_bytes: item.sent_bytes.value,
+                  received_bytes: item.received_bytes.value
+                });
+              }
+              var response = {
+                metadata: {
+                  domain_name: domainName,
+                  domain_id: domainID,
+                  start_timestamp: span.start,
+                  start_datetime: new Date(span.start),
+                  end_timestamp: span.end,
+                  end_datetime: new Date(span.end),
+                  total_hits: body.hits.total,
+                  interval_sec: span.interval / 1000,
+                  filter: metadataFilterField,
+                  data_points_count: len
+                },
+                data: dataArray
+              };
+              return response;
+            });
+        })
+        .then(function(response) {
+          renderJSON(request, reply, error, response);
+        })
+        .catch(function(error) {
+          return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
+        });
     } else {
       return reply(boom.badRequest('Domain ID not found'));
     }
@@ -227,6 +239,7 @@ exports.getStatsImageEngine = function (request, reply) {
       elasticSearch.getClient().search({
         index: utils.buildIndexList(span.start, span.end),
         ignoreUnavailable: true,
+        query_cache: true,
         timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
@@ -331,6 +344,7 @@ exports.getMobileDesktopDistribution = function(request, reply) {
       elasticSearch.getClient().search({
         index: utils.buildIndexList(span.start, span.end),
         ignoreUnavailable: true,
+        query_cache: true,
         timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       })
