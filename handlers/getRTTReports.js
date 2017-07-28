@@ -71,23 +71,23 @@ exports.getRTTReports = function(request, reply) {
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
+
+      switch (reportType) {
+        case 'country':
+          field = 'geoip.country_code2';
+          break;
+        case 'os':
+          field = 'os';
+          break;
+        case 'device':
+          field = 'device';
+          break;
+        default:
+          return reply(boom.badImplementation('Received bad report_type value ' + reportType));
+      }
       var cacheKey = 'getRTTReports:' + domainID + ':' + JSON.stringify(queryProperties);
       multiCache.wrap(cacheKey, function() {
           isFromCache = false;
-          switch (reportType) {
-            case 'country':
-              field = 'geoip.country_code2';
-              break;
-            case 'os':
-              field = 'os';
-              break;
-            case 'device':
-              field = 'device';
-              break;
-            default:
-              return reply(boom.badImplementation('Received bad report_type value ' + reportType));
-          }
-
           var requestBody = {
             query: {
               filtered: {
@@ -172,8 +172,9 @@ exports.getRTTReports = function(request, reply) {
             })
             .then(function(body) {
               if (!body.aggregations) {
-                return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-                  ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
+                var errorText = 'Aggregation is absent completely, check indices presence: ' + indicesList +
+                  ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName;
+                return promise.reject({error_message:errorText});
               }
               var dataArray = body.aggregations.results.buckets.map(function(res) {
                 var item = {
@@ -246,7 +247,11 @@ exports.getRTTReports = function(request, reply) {
         })
         .catch(function(error) {
           logger.error('getRTTReports:Failed to retrieve data for domain ' + domainName);
-          return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domainName));
+          var errorText = 'Failed to retrieve data from ES data for domain ' + domainName;
+          if(!!error && !!error.error_message){
+            errorText = error.error_message;
+          }
+          return reply(boom.badImplementation(errorText));
         });
     } else {
       return reply(boom.badRequest('Domain ID not found'));
