@@ -581,9 +581,19 @@ exports.getTopReports = function( request, reply ) {
 };
 
 //  ---------------------------------
+/**
+ * @name getTopLists
+ * @description method for get all possible values of [country, os, device, browser, statuses(optional)]
+ * for the domain and timespan
+ */
 exports.getTopLists = function( request, reply ) {
-
-  var domainID = request.params.domain_id;
+  var statusCodes = request.query.status_codes;
+  var domainID = request.params.domain_id,
+    domainName,
+    isFromCache = true,
+    queryProperties = _.clone(request.query);
+  // NOTE: make correction for the time range
+  _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
   domainConfigs.get(domainID, function(error, domainConfig) {
 
     if (error) {
@@ -591,124 +601,133 @@ exports.getTopLists = function( request, reply ) {
     }
 
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
-
-      var span = utils.query2Span(request.query, 1/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days */);
-      if ( span.error ) {
-        return reply(boom.badRequest( span.error ));
+      domainName = domainConfig.domain_name;
+      var span = utils.query2Span(request.query, 1 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days */ );
+      if (span.error) {
+        return reply(boom.badRequest(span.error));
       }
 
-    var domainName = domainConfig.domain_name;
-    var requestBody = {
-      query: {
-        filtered: {
-          filter: {
-            bool: {
-              must: [{
-                range: {
-                  '@timestamp': {
-                    gte: span.start,
-                    lte: span.end
+      var cacheKey = 'getTopLists:' + domainID + ':' + JSON.stringify(queryProperties);
+      multiCache.wrap(cacheKey, function() {
+          isFromCache = false;
+          var requestBody = {
+            query: {
+              filtered: {
+                filter: {
+                  bool: {
+                    must: [{
+                      range: {
+                        '@timestamp': {
+                          gte: span.start,
+                          lte: span.end
+                        }
+                      }
+                    }]
                   }
                 }
-              }]
+              }
+            },
+            size: 0,
+            aggs: {
+              oses: {
+                terms: {
+                  field: 'os',
+                  size: 250
+                }
+              },
+              devices: {
+                terms: {
+                  field: 'device',
+                  size: 250
+                }
+              },
+              countries: {
+                terms: {
+                  field: 'geoip.country_code2',
+                  size: 250
+                }
+              },
+              browsers: {
+                terms: {
+                  field: 'name',
+                  size: 250
+                }
+              },
             }
-          }
-        }
-      },
-      size: 0,
-      aggs: {
-        oses: {
-          terms: {
-            field: 'os',
-            size: 250
-          }
-        },
-        devices: {
-          terms: {
-            field: 'device',
-            size: 250
-          }
-        },
-        countries: {
-          terms: {
-            field: 'geoip.country_code2',
-            size: 250
-          }
-        },
-        browsers: {
-          terms: {
-            field: 'name',
-            size: 250
-          }
-        },
-      }
-    };
+          };
 
-    if ( request.query.status_codes ) {
-      requestBody.aggs.status_codes = {
-        terms: { field: 'response' }
-      };
-    }
-
-    //  update query
-    elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, false, domainConfig );
-
-    var indicesList = utils.buildIndexList(span.start, span.end);
-    return elasticSearch.getClient().search({
-        index: indicesList,
-        ignoreUnavailable: true,
-        query_cache: true,
-        timeout: config.get('elasticsearch_timeout_ms'),
-        body: requestBody
-      })
-      .then(function(body) {
-        if ( !body.aggregations ) {
-          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
-        }
-
-        var sorter = function( lhs, rhs ) {
-          return lhs.localeCompare( rhs );
-        };
-        var response = {
-          metadata: {
-            domain_name: domainName,
-            domain_id: request.params.domain_id,
-            start_timestamp: span.start,
-            start_datetime: new Date(span.start),
-            end_timestamp: span.end,
-            end_datetime: new Date(span.end),
-            total_hits: body.hits.total
-          },
-          data: {
-            os: body.aggregations.oses.buckets.map( function( item ) {
-                return item.key;
-              }).sort( sorter ),
-            device: body.aggregations.devices.buckets.map( function( item ) {
-                return item.key;
-              }).sort( sorter ),
-            browser: body.aggregations.browsers.buckets.map( function( item ) {
-                return item.key;
-              }).sort( sorter ),
-            country: body.aggregations.countries.buckets.map( function( item ) {
-                return { key: item.key, value: ( utils.countries[item.key] || item.key ) };
-              }).sort( function( lhs, rhs ) {
-                return lhs.value === 'United States' ? -1 : ( rhs.value === 'United States' ? 1 : lhs.value.localeCompare(rhs.value) );
-              })
+          if (statusCodes) {
+            requestBody.aggs.status_codes = {
+              terms: { field: 'response' }
+            };
           }
-        };
 
-        if ( request.query.status_codes ) {
-          response.data.status_code = body.aggregations.status_codes.buckets.map( function( item ) {
-            return item.key;
-          }).sort( sorter );
-        }
+          //  update query
+          elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, false, domainConfig);
 
-        renderJSON( request, reply, false/*error is undefined here*/, response );
-      })
-      .catch( function(error) {
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
-      });
+          var indicesList = utils.buildIndexList(span.start, span.end);
+          return elasticSearch.getClient().search({
+              index: indicesList,
+              ignoreUnavailable: true,
+              query_cache: true,
+              timeout: config.get('elasticsearch_timeout_ms'),
+              body: requestBody
+            })
+            .then(function(body) {
+              if (!body.aggregations) {
+                return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+                  ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
+              }
+
+              var sorter = function(lhs, rhs) {
+                return lhs.localeCompare(rhs);
+              };
+              var response = {
+                metadata: {
+                  domain_name: domainName,
+                  domain_id: request.params.domain_id,
+                  start_timestamp: span.start,
+                  start_datetime: new Date(span.start),
+                  end_timestamp: span.end,
+                  end_datetime: new Date(span.end),
+                  total_hits: body.hits.total
+                },
+                data: {
+                  os: body.aggregations.oses.buckets.map(function(item) {
+                    return item.key;
+                  }).sort(sorter),
+                  device: body.aggregations.devices.buckets.map(function(item) {
+                    return item.key;
+                  }).sort(sorter),
+                  browser: body.aggregations.browsers.buckets.map(function(item) {
+                    return item.key;
+                  }).sort(sorter),
+                  country: body.aggregations.countries.buckets.map(function(item) {
+                    return { key: item.key, value: (utils.countries[item.key] || item.key) };
+                  }).sort(function(lhs, rhs) {
+                    return lhs.value === 'United States' ? -1 : (rhs.value === 'United States' ? 1 : lhs.value.localeCompare(rhs.value));
+                  })
+                }
+              };
+
+              if (statusCodes) {
+                response.data.status_code = body.aggregations.status_codes.buckets.map(function(item) {
+                  return item.key;
+                }).sort(sorter);
+              }
+              return response;
+            });
+        })
+        .then(function(response) {
+          if (isFromCache === true) {
+            logger.info('getTopLists:return cache for key - ' + cacheKey);
+          }
+          renderJSON(request, reply, false /*error is undefined here*/ , response);
+        })
+        .catch(function(error) {
+          logger.error('getTopLists:Failed to retrieve data for domain ' + domainName);
+          return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
+        });
 
     } else {
       return reply(boom.badRequest('Domain ID not found'));
