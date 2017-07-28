@@ -49,6 +49,7 @@ exports.getStats = function(request, reply) {
   var domainID = request.params.domain_id,
     domainName,
     metadataFilterField,
+    isFromCache = true,
     queryProperties = _.clone(request.query);
   // NOTE: make correction for the time range
   _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
@@ -59,14 +60,14 @@ exports.getStats = function(request, reply) {
     }
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
       domainName = domainConfig.domain_name;
-      var span = utils.query2Span(queryProperties, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
-      if ( span.error ) {
-        return reply(boom.badRequest( span.error ));
+      var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
+      if (span.error) {
+        return reply(boom.badRequest(span.error));
       }
       var cacheKey = 'getStats:' + domainID + ':' + JSON.stringify(queryProperties);
       memoryCache.wrap(cacheKey, function() {
-        metadataFilterField = elasticSearch.buildMetadataFilterString(request);
-
+          metadataFilterField = elasticSearch.buildMetadataFilterString(request);
+          isFromCache = false;
           var requestBody = {
             size: 0,
             query: {
@@ -152,9 +153,13 @@ exports.getStats = function(request, reply) {
             });
         })
         .then(function(response) {
+          if (isFromCache === true) {
+            logger.info('getStats:return cache for key - ' + cacheKey);
+          }
           renderJSON(request, reply, error, response);
         })
         .catch(function(error) {
+          logger.error('getStats:Failed to retrieve data for domain ' + domainName);
           return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
         });
     } else {
