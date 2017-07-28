@@ -95,6 +95,7 @@ exports.getTopObjects = function(request, reply) {
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
+        query_cache: true,
         timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       }).then(function(body) {
@@ -202,6 +203,7 @@ exports.getSlowestFBTObjects = function(request, reply) {
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
+        query_cache: true,
         timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       }).then(function(body) {
@@ -310,6 +312,7 @@ exports.getSlowestDownloadObjects = function(request, reply) {
       elasticSearch.getClientURL().search({
         index: indicesList,
         ignoreUnavailable: true,
+        query_cache: true,
         timeout: config.get('elasticsearch_timeout_ms'),
         body: requestBody
       }).then(function(body) {

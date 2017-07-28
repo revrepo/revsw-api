@@ -46,27 +46,33 @@ var memoryCache = cacheManager.caching({
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
 //  ---------------------------------
+/**
+ * @name getRTTReports
+ * @description method get data RTT stats for a domain
+ */
 exports.getRTTReports = function(request, reply) {
-
+  var reportType = request.query.report_type || 'country';
   var domainID = request.params.domain_id,
     domainName,
-    field;
+    field,
+    isFromCache = true,
+    queryProperties = _.clone(request.query);
+  // NOTE: make correction for the time range
+  _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
 
   domainConfigs.get(domainID, function(error, domainConfig) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
-
       domainName = domainConfig.domain_name;
-      var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
-      if ( span.error ) {
-        return reply(boom.badRequest( span.error ));
+
+      var span = utils.query2Span(queryProperties, 1 /*def start in hrs*/ , 24 /*allowed period in hrs*/ );
+      if (span.error) {
+        return reply(boom.badRequest(span.error));
       }
 
-      request.query.report_type = request.query.report_type || 'country';
-
-      switch (request.query.report_type) {
+      switch (reportType) {
         case 'country':
           field = 'geoip.country_code2';
           break;
@@ -77,159 +83,176 @@ exports.getRTTReports = function(request, reply) {
           field = 'device';
           break;
         default:
-          return reply(boom.badImplementation('Received bad report_type value ' + request.query.report_type));
+          return reply(boom.badImplementation('Received bad report_type value ' + reportType));
       }
-
-      var requestBody = {
-        query: {
-          filtered: {
-            filter: {
-              bool: {
-                must: [{
-                  range: {
-                    lm_rtt: {
-                      gt: 1000
-                    }
+      var cacheKey = 'getRTTReports:' + domainID + ':' + JSON.stringify(queryProperties);
+      multiCache.wrap(cacheKey, function() {
+          isFromCache = false;
+          var requestBody = {
+            query: {
+              filtered: {
+                filter: {
+                  bool: {
+                    must: [{
+                      range: {
+                        lm_rtt: {
+                          gt: 1000
+                        }
+                      }
+                    }, {
+                      range: {
+                        '@timestamp': {
+                          gte: span.start,
+                          lte: span.end
+                        }
+                      }
+                    }]
                   }
-                }, {
-                  range: {
-                    '@timestamp': {
-                      gte: span.start,
-                      lte: span.end
-                    }
-                  }
-                }]
+                }
+              }
+            },
+            size: 0,
+            aggs: {
+              results: {
+                terms: {
+                  field: field,
+                  size: queryProperties.count || 30
+                },
+                aggs: {
+                  rtt_avg: { avg: { field: 'lm_rtt' } },
+                  rtt_min: { min: { field: 'lm_rtt' } },
+                  rtt_max: { max: { field: 'lm_rtt' } }
+                }
+              },
+              missing_field: {
+                missing: { field: field },
+                aggs: {
+                  rtt_avg: { avg: { field: 'lm_rtt' } },
+                  rtt_min: { min: { field: 'lm_rtt' } },
+                  rtt_max: { max: { field: 'lm_rtt' } }
+                }
               }
             }
-          }
-        },
-        size: 0,
-        aggs: {
-          results: {
-            terms: {
-              field: field,
-              size: request.query.count || 30
-            },
-            aggs: {
-              rtt_avg: { avg: { field: 'lm_rtt' } },
-              rtt_min: { min: { field: 'lm_rtt' } },
-              rtt_max: { max: { field: 'lm_rtt' } }
-            }
-          },
-          missing_field: {
-            missing: { field: field },
-            aggs: {
-              rtt_avg: { avg: { field: 'lm_rtt' } },
-              rtt_min: { min: { field: 'lm_rtt' } },
-              rtt_max: { max: { field: 'lm_rtt' } }
-            }
-          }
-        }
-      };
-
-      //  add 2 sub-aggregations for country
-      if ( request.query.report_type === 'country' ) {
-        requestBody.aggs.results.aggs.regions = {
-          terms: {
-            field: 'geoip.region_name',
-            size: 0
-          },
-          aggs: {
-            rtt_avg: { avg: { field: 'lm_rtt' } },
-            rtt_min: { min: { field: 'lm_rtt' } },
-            rtt_max: { max: { field: 'lm_rtt' } }
-          }
-        };
-        requestBody.aggs.results.aggs.missing_regions = {
-          missing: {
-            field: 'geoip.region_name',
-          },
-          aggs: {
-            rtt_avg: { avg: { field: 'lm_rtt' } },
-            rtt_min: { min: { field: 'lm_rtt' } },
-            rtt_max: { max: { field: 'lm_rtt' } }
-          }
-        };
-      }
-
-      //  update query
-      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, false, domainConfig );
-
-      var indicesList = utils.buildIndexList(span.start, span.end);
-      elasticSearch.getClientURL().search({
-        index: indicesList,
-        ignoreUnavailable: true,
-        timeout: config.get('elasticsearch_timeout_ms'),
-        body: requestBody
-      }).then(function(body) {
-        if ( !body.aggregations ) {
-          return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-            ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName ) );
-        }
-        var dataArray = body.aggregations.results.buckets.map( function( res ) {
-          var item = {
-            key: res.key,
-            count: res.doc_count,
-            lm_rtt_avg_ms: Math.round( res.rtt_avg.value / 1000 ),
-            lm_rtt_min_ms: Math.round( res.rtt_min.value / 1000 ),
-            lm_rtt_max_ms: Math.round( res.rtt_max.value / 1000 )
           };
-          if ( res.regions && res.regions.buckets.length ) {
-            item.regions = res.regions.buckets.map( function( region ) {
-              return {
-                key: region.key,
-                count: region.doc_count,
-                lm_rtt_avg_ms: Math.round( region.rtt_avg.value / 1000 ),
-                lm_rtt_min_ms: Math.round( region.rtt_min.value / 1000 ),
-                lm_rtt_max_ms: Math.round( region.rtt_max.value / 1000 )
+
+          //  add 2 sub-aggregations for country
+          if (reportType === 'country') {
+            requestBody.aggs.results.aggs.regions = {
+              terms: {
+                field: 'geoip.region_name',
+                size: 0
+              },
+              aggs: {
+                rtt_avg: { avg: { field: 'lm_rtt' } },
+                rtt_min: { min: { field: 'lm_rtt' } },
+                rtt_max: { max: { field: 'lm_rtt' } }
+              }
+            };
+            requestBody.aggs.results.aggs.missing_regions = {
+              missing: {
+                field: 'geoip.region_name',
+              },
+              aggs: {
+                rtt_avg: { avg: { field: 'lm_rtt' } },
+                rtt_min: { min: { field: 'lm_rtt' } },
+                rtt_max: { max: { field: 'lm_rtt' } }
+              }
+            };
+          }
+
+          //  update query
+          elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, false, domainConfig);
+
+          var indicesList = utils.buildIndexList(span.start, span.end);
+          return elasticSearch.getClientURL().search({
+              index: indicesList,
+              ignoreUnavailable: true,
+              timeout: config.get('elasticsearch_timeout_ms'),
+              body: requestBody
+            })
+            .then(function(body) {
+              if (!body.aggregations) {
+                var errorText = 'Aggregation is absent completely, check indices presence: ' + indicesList +
+                  ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName;
+                return promise.reject({error_message:errorText});
+              }
+              var dataArray = body.aggregations.results.buckets.map(function(res) {
+                var item = {
+                  key: res.key,
+                  count: res.doc_count,
+                  lm_rtt_avg_ms: Math.round(res.rtt_avg.value / 1000),
+                  lm_rtt_min_ms: Math.round(res.rtt_min.value / 1000),
+                  lm_rtt_max_ms: Math.round(res.rtt_max.value / 1000)
+                };
+                if (res.regions && res.regions.buckets.length) {
+                  item.regions = res.regions.buckets.map(function(region) {
+                    return {
+                      key: region.key,
+                      count: region.doc_count,
+                      lm_rtt_avg_ms: Math.round(region.rtt_avg.value / 1000),
+                      lm_rtt_min_ms: Math.round(region.rtt_min.value / 1000),
+                      lm_rtt_max_ms: Math.round(region.rtt_max.value / 1000)
+                    };
+                  });
+                }
+                if (res.missing_regions && res.missing_regions.doc_count) {
+                  if (!item.regions) {
+                    item.regions = [];
+                  }
+                  var region = res.missing_regions;
+                  item.regions.push({
+                    key: '--',
+                    count: region.doc_count,
+                    lm_rtt_avg_ms: Math.round(region.rtt_avg.value / 1000),
+                    lm_rtt_min_ms: Math.round(region.rtt_min.value / 1000),
+                    lm_rtt_max_ms: Math.round(region.rtt_max.value / 1000)
+                  });
+                }
+                return item;
+              });
+
+              if (body.aggregations.missing_field && body.aggregations.missing_field.doc_count) {
+                var res = body.aggregations.missing_field;
+                dataArray.push({
+                  key: '--',
+                  count: res.doc_count,
+                  lm_rtt_avg_ms: Math.round(res.rtt_avg.value / 1000),
+                  lm_rtt_min_ms: Math.round(res.rtt_min.value / 1000),
+                  lm_rtt_max_ms: Math.round(res.rtt_max.value / 1000)
+                });
+              }
+
+              var response = {
+                metadata: {
+                  domain_name: domainName,
+                  domain_id: domainID,
+                  start_timestamp: span.start,
+                  start_datetime: new Date(span.start),
+                  end_timestamp: span.end,
+                  end_datetime: new Date(span.end),
+                  total_hits: body.hits.total,
+                  filter: elasticSearch.buildMetadataFilterString(request),
+                  data_points_count: body.aggregations.results.buckets.length
+                },
+                data: dataArray
               };
+              return response;
             });
+        })
+        .then(function(response) {
+          if (isFromCache === true) {
+            logger.info('getRTTReports:return cache for key - ' + cacheKey);
           }
-          if ( res.missing_regions && res.missing_regions.doc_count ) {
-            if ( !item.regions ) {
-              item.regions = [];
-            }
-            var region = res.missing_regions;
-            item.regions.push({
-              key: '--',
-              count: region.doc_count,
-              lm_rtt_avg_ms: Math.round( region.rtt_avg.value / 1000 ),
-              lm_rtt_min_ms: Math.round( region.rtt_min.value / 1000 ),
-              lm_rtt_max_ms: Math.round( region.rtt_max.value / 1000 )
-            });
+          renderJSON(request, reply, error, response);
+        })
+        .catch(function(error) {
+          logger.error('getRTTReports:Failed to retrieve data for domain ' + domainName);
+          var errorText = 'Failed to retrieve data from ES data for domain ' + domainName;
+          if(!!error && !!error.error_message){
+            errorText = error.error_message;
           }
-          return item;
+          return reply(boom.badImplementation(errorText));
         });
-
-        if ( body.aggregations.missing_field && body.aggregations.missing_field.doc_count ) {
-          var res = body.aggregations.missing_field;
-          dataArray.push({
-            key: '--',
-            count: res.doc_count,
-            lm_rtt_avg_ms: Math.round( res.rtt_avg.value / 1000 ),
-            lm_rtt_min_ms: Math.round( res.rtt_min.value / 1000 ),
-            lm_rtt_max_ms: Math.round( res.rtt_max.value / 1000 )
-          });
-        }
-
-        var response = {
-          metadata: {
-            domain_name: domainName,
-            domain_id: domainID,
-            start_timestamp: span.start,
-            start_datetime: new Date(span.start),
-            end_timestamp: span.end,
-            end_datetime: new Date(span.end),
-            total_hits: body.hits.total,
-            filter: elasticSearch.buildMetadataFilterString(request),
-            data_points_count: body.aggregations.results.buckets.length
-          },
-          data: dataArray
-        };
-        renderJSON(request, reply, error, response);
-      }, function(error) {
-        return reply(boom.badImplementation('Failed to retrieve data from ES data for domain ' + domainName));
-      });
     } else {
       return reply(boom.badRequest('Domain ID not found'));
     }

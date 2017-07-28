@@ -72,8 +72,8 @@ exports.getStats = function(request, reply) {
       }
       var cacheKey = 'getStats:' + domainID + ':' + JSON.stringify(queryProperties);
       multiCache.wrap(cacheKey, function() {
-          metadataFilterField = elasticSearch.buildMetadataFilterString(request);
           isFromCache = false;
+          metadataFilterField = elasticSearch.buildMetadataFilterString(request);
           var requestBody = {
             size: 0,
             query: {
@@ -290,133 +290,151 @@ exports.getStatsImageEngine = function (request, reply) {
   });
 };
 //  ---------------------------------
+/**
+ * @name getMobileDesktopDistribution
+ * @description method get data mobile/desktop distribution for a domain
+ */
 exports.getMobileDesktopDistribution = function(request, reply) {
 
   var domainID = request.params.domain_id,
     domainName,
-    metadataFilterField;
+    metadataFilterField,
+    isFromCache = true,
+    queryProperties = _.clone(request.query);
+  // NOTE: make correction for the time range
+  _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
 
   domainConfigs.get(domainID, function(error, domainConfig) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
-    }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
-      domainName = domainConfig.domain_name;
+   if (error) {
+     return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+   }
+   if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+     domainName = domainConfig.domain_name;
 
-      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * maxTimePeriodForTrafficGraphsDays/*allowed period - max count days*/ );
-      if ( span.error ) {
-        return reply(boom.badRequest( span.error ));
-      }
+     var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
+     if (span.error) {
+       return reply(boom.badRequest(span.error));
+     }
+     var cacheKey = 'getMobileDesktopDistribution:' + domainID + ':' + JSON.stringify(queryProperties);
+     multiCache.wrap(cacheKey, function() {
+         isFromCache = false;
+         metadataFilterField = elasticSearch.buildMetadataFilterString(request);
 
-      metadataFilterField = elasticSearch.buildMetadataFilterString(request);
+         var requestBody = {
+           size: 0,
+           query: {
+             filtered: {
+               filter: {
+                 bool: {
+                   must: [{
+                     range: {
+                       '@timestamp': {
+                         gte: span.start,
+                         lt: span.end
+                       }
+                     }
+                   }]
+                 }
+               }
+             }
+           },
+           aggs: {
+             oses: {
+               terms: { field: 'os_name', size: 0 },
+               aggs: {
+                 devs: {
+                   terms: { field: 'device', size: 30 }
+                 }
+               }
+             },
+             missing_oses: {
+               missing: { field: 'os_name' },
+               aggs: {
+                 devs: {
+                   terms: { field: 'device', size: 30 }
+                 }
+               }
+             }
 
-      var requestBody = {
-        size: 0,
-        query: {
-          filtered: {
-            filter: {
-              bool: {
-                must: [{
-                  range: {
-                    '@timestamp': {
-                      gte: span.start,
-                      lt: span.end
-                    }
-                  }
-                }]
-              }
-            }
-          }
-        },
-        aggs: {
-          oses: {
-            terms: { field: 'os_name', size: 0 },
-            aggs: {
-              devs: {
-                terms: { field: 'device', size: 30 }
-              }
-            }
-          },
-          missing_oses: {
-            missing: { field: 'os_name' },
-            aggs: {
-              devs: {
-                terms: { field: 'device', size: 30 }
-              }
-            }
-          }
+           }
+         };
 
-        }
-      };
+         //  update query
+         elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
 
-      //  update query
-      elasticSearch.buildESQueryTerms( requestBody.query.filtered.filter.bool, request, domainConfig );
+         return elasticSearch.getClient().search({
+             index: utils.buildIndexList(span.start, span.end),
+             ignoreUnavailable: true,
+             query_cache: true,
+             timeout: config.get('elasticsearch_timeout_ms'),
+             body: requestBody
+           })
+           .then(function(body) {
 
-      elasticSearch.getClient().search({
-        index: utils.buildIndexList(span.start, span.end),
-        ignoreUnavailable: true,
-        query_cache: true,
-        timeout: config.get('elasticsearch_timeout_ms'),
-        body: requestBody
-      })
-      .then(function(body) {
+             var mobile = 0,
+               desktop = 0,
+               spiders = 0,
+               unknown = 0;
 
-        var mobile = 0,
-          desktop = 0,
-          spiders = 0,
-          unknown = 0;
+             body.aggregations.oses.buckets.forEach(function(os) {
+               desktop += os.doc_count - os.devs.sum_other_doc_count;
+               mobile += os.devs.sum_other_doc_count;
+               os.devs.buckets.forEach(function(dev) {
+                 if (dev.key === 'Spider') {
+                   spiders += dev.doc_count;
+                 } else {
+                   mobile += dev.doc_count;
+                 }
+                 desktop -= dev.doc_count;
+               });
+             });
 
-        body.aggregations.oses.buckets.forEach( function( os ) {
-          desktop += os.doc_count - os.devs.sum_other_doc_count;
-          mobile += os.devs.sum_other_doc_count;
-          os.devs.buckets.forEach( function( dev ) {
-            if ( dev.key === 'Spider' ) {
-              spiders += dev.doc_count;
-            } else {
-              mobile += dev.doc_count;
-            }
-            desktop -= dev.doc_count;
-          });
-        });
+             var missing = body.aggregations.missing_oses;
+             unknown += missing.doc_count - missing.devs.sum_other_doc_count;
+             mobile += missing.devs.sum_other_doc_count;
+             missing.devs.buckets.forEach(function(dev) {
+               if (dev.key === 'Spider') {
+                 spiders += dev.doc_count;
+               } else {
+                 mobile += dev.doc_count;
+               }
+               unknown -= dev.doc_count;
+             });
 
-        var missing = body.aggregations.missing_oses;
-        unknown += missing.doc_count - missing.devs.sum_other_doc_count;
-        mobile += missing.devs.sum_other_doc_count;
-        missing.devs.buckets.forEach( function( dev ) {
-          if ( dev.key === 'Spider' ) {
-            spiders += dev.doc_count;
-          } else {
-            mobile += dev.doc_count;
-          }
-          unknown -= dev.doc_count;
-        });
-
-        var response = {
-          metadata: {
-            domain_name: domainName,
-            domain_id: domainID,
-            start_timestamp: span.start,
-            start_datetime: new Date(span.start),
-            end_timestamp: span.end,
-            end_datetime: new Date(span.end),
-            total_hits: body.hits.total,
-            filter: metadataFilterField
-          },
-          data: {
-            desktop: desktop,
-            mobile: mobile,
-            spiders: spiders,
-            unknown: unknown
-          }
-        };
-
-        renderJSON(request, reply, error, response);
-      }, function(error) {
-        return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
-      });
-    } else {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-  });
+             var response = {
+               metadata: {
+                 domain_name: domainName,
+                 domain_id: domainID,
+                 start_timestamp: span.start,
+                 start_datetime: new Date(span.start),
+                 end_timestamp: span.end,
+                 end_datetime: new Date(span.end),
+                 total_hits: body.hits.total,
+                 filter: metadataFilterField
+               },
+               data: {
+                 desktop: desktop,
+                 mobile: mobile,
+                 spiders: spiders,
+                 unknown: unknown
+               }
+             };
+             return response;
+           });
+       })
+       .then(function(response) {
+         if (isFromCache === true) {
+           logger.info('getMobileDesktopDistribution:return cache for key - ' + cacheKey);
+         }
+         renderJSON(request, reply, error, response);
+       })
+       .catch(function(error) {
+         logger.error('getMobileDesktopDistribution:Failed to retrieve data for domain ' + domainName);
+         return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
+       });
+   } else {
+     return reply(boom.badRequest('Domain ID not found'));
+   }
+ });
 };
 
