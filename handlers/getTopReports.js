@@ -60,7 +60,7 @@ var topReports_ = function( req, reply, domainConfig, span) {
 
   var reportType = req.query.report_type || 'referer';
   var domainName = domainConfig.domain_name,
-    domainID = domainConfig.id,
+    domainID = domainConfig._id,
     field,
     isFromCache = true,
     queryProperties = _.clone(req.query);
