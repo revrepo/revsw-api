@@ -34,7 +34,7 @@ var logger = require('revsw-logger')(config.log_config);
 var cacheManager = require('cache-manager');
 var memoryCache = cacheManager.caching({
   store: 'memory',
-  max: config.get('cache_memory_max'),
+  max: config.get('cache_memory_max_bytes'),
   ttl: config.get('cache_memory_ttl_seconds') /*seconds*/ ,
   promiseDependency: promise
 });
