@@ -41,7 +41,7 @@ var cacheManager = require('cache-manager');
 var memoryCache = cacheManager.caching({
   store: 'memory',
   max: config.get('cache_memory_max'),
-  ttl: config.get('cache_memory_ttl_seconnds')/*seconds*/,
+  ttl: config.get('cache_memory_ttl_seconds')/*seconds*/,
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
