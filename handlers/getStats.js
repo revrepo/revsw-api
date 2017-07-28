@@ -22,7 +22,8 @@
 
 var boom     = require('boom');
 var mongoose = require('mongoose');
-
+var promise = require('bluebird');
+mongoose.Promise = promise;
 var utils           = require('../lib/utilities.js');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
@@ -37,8 +38,13 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 
 var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
 var cacheManager = require('cache-manager');
-// TODO: get default ttl from config
-var memoryCache = cacheManager.caching({ store: 'memory', max: 100000, ttl: 10*60/*seconds*/ });
+var memoryCache = cacheManager.caching({
+  store: 'memory',
+  max: config.get('cache_memory_max'),
+  ttl: config.get('cache_memory_ttl_seconnds')/*seconds*/,
+  promiseDependency: promise
+});
+var multiCache = cacheManager.multiCaching([memoryCache]);
 //
 // Get traffic stats
 //
@@ -65,7 +71,7 @@ exports.getStats = function(request, reply) {
         return reply(boom.badRequest(span.error));
       }
       var cacheKey = 'getStats:' + domainID + ':' + JSON.stringify(queryProperties);
-      memoryCache.wrap(cacheKey, function() {
+      multiCache.wrap(cacheKey, function() {
           metadataFilterField = elasticSearch.buildMetadataFilterString(request);
           isFromCache = false;
           var requestBody = {
