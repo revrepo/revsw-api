@@ -21,6 +21,8 @@
 //  ----------------------------------------------------------------------------------------------//
 
 var boom = require( 'boom' );
+var _ = require('lodash');
+var promise = require('bluebird');
 var utils = require( '../lib/utilities.js' );
 var renderJSON = require( '../lib/renderJSON' );
 var elasticSearch = require( '../lib/elasticSearch' );
@@ -29,6 +31,14 @@ var reports = require( '../lib/usageReport' );
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
+var cacheManager = require('cache-manager');
+var memoryCache = cacheManager.caching({
+  store: 'memory',
+  max: config.get('cache_memory_max'),
+  ttl: config.get('cache_memory_ttl_seconds') /*seconds*/ ,
+  promiseDependency: promise
+});
+var multiCache = cacheManager.multiCaching([memoryCache]);
 
 //  ---------------------------------
 
@@ -66,7 +76,8 @@ var checkAccountAccessPermissions_ = function( request ) {
  * @description Get Usage Report Date for an Account(s)
  */
 exports.getAccountReport = function( request, reply ) {
-
+  var queryProperties = _.clone(request.query);
+  var isFromCache = true;
   var accountID = checkAccountAccessPermissions_( request );
   if ( accountID === false/*strict identity*/ ) {
     reply(boom.badRequest( 'Account ID not found' ));
@@ -85,23 +96,29 @@ exports.getAccountReport = function( request, reply ) {
     to = new Date(to_);
   }
   to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
-
-
-  reports.checkLoadReports( from, to, accountID, request.query.only_overall, request.query.keep_samples )
-    .then( function( response ) {
-
-      response = {
-        metadata: {
-          account_id: request.params.account_id,
-          from: from.valueOf(),
-          from_datetime: from,
-          to: to.valueOf(),
-          to_datetime: to,
-          data_points_count: response.length
-        },
-        data: response
-      };
-
+  var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
+  multiCache.wrap(cacheKey, function() {
+    isFromCache = false;
+    return reports.checkLoadReports( from, to, accountID, request.query.only_overall, request.query.keep_samples )
+      .then( function( response ) {
+        var response_ = {
+          metadata: {
+            account_id: request.params.account_id,
+            from: from.valueOf(),
+            from_datetime: from,
+            to: to.valueOf(),
+            to_datetime: to,
+            data_points_count: response.length
+          },
+          data: response
+        };
+        return response_;
+      });
+    })
+    .then(function(response){
+      if(isFromCache === true) {
+        logger.info('getAccountStats:return cache for key - ' + cacheKey);
+      }
       reply( response ).type( 'application/json; charset=utf-8' );
     })
     .catch( function( err ) {
@@ -117,7 +134,7 @@ exports.getAccountReport = function( request, reply ) {
  * @description Get Usage Date Histogram for an Account(s)
  */
 exports.getAccountStats = function( request, reply ) {
-
+  var isFromCache = true;
   var accountID = checkAccountAccessPermissions_( request );
   if ( accountID === false/*strict identity*/ ) {
     reply(boom.badRequest( 'Account ID not found' ));
@@ -128,16 +145,22 @@ exports.getAccountStats = function( request, reply ) {
   if ( span.error ) {
     return reply(boom.badRequest( span.error ));
   }
-
-  span.interval = 86400000; //  voluntarily set to full day
-  reports.checkLoadStats( span, accountID )
-    .then( function( response ) {
-      reply( response ).type( 'application/json; charset=utf-8' );
+  var cacheKey = 'getAccountStats:' + accountID + ':' + JSON.stringify(request.query);
+  multiCache.wrap(cacheKey, function() {
+      isFromCache = false;
+      span.interval = 86400000; //  voluntarily set to full day
+      return reports.checkLoadStats(span, accountID);
     })
-    .catch( function( err ) {
+    .then(function(response) {
+      if (isFromCache === true) {
+        logger.info('getAccountStats:return cache for key - ' + cacheKey);
+      }
+      reply(response).type('application/json; charset=utf-8');
+    })
+    .catch(function(err) {
       var msg = err.toString() + ': account ID ' + request.params.account_id +
         ', span from ' + (new Date(span.start)).toUTCString() +
         ', to ' + (new Date(span.end)).toUTCString();
-      return reply( boom.badImplementation( msg ) );
+      return reply(boom.badImplementation(msg));
     });
 };
