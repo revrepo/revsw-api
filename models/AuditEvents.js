@@ -36,16 +36,20 @@ function AuditEvents(mongoose, connection, options) {
       user_name        : {type : String},
       user_id          : {type : String},
       account          : {type : String},
-      account_id       : {type : String},
-      activity_type    : {type : String},
-      activity_target  : {type : String},
+      account_id       : { type: String, index: true},
+      activity_type    : { type: String, index: true},
+      activity_target  : { type: String, index: true},
       target_name      : {type : String},
-      target_id        : {type : String},
+      target_id        : { type: String, index: true},
       operation_status : {type : String},
       target_object    : {type : Object, default : {}}
     }
   });
   this.AuditEventsSchema.path('meta.datetime').index(true);
+  this.AuditEventsSchema.index({ 'meta.account_id': 1, 'meta.activity_type': 1});
+  this.AuditEventsSchema.index({ 'meta.account_id': 1, 'meta.activity_target': 1 });
+  this.AuditEventsSchema.index({ 'meta.account_id': 1, 'meta.activity_type': 1, 'meta.activity_target': 1});
+  this.AuditEventsSchema.index({ 'meta.account_id': 1, 'meta.activity_type': 1, 'meta.activity_target': 1, 'meta.target_id': 1, 'meta.datetime': 1});
   this.model = connection.model('audit_events', this.AuditEventsSchema, 'audit_events');
 }
 

@@ -198,7 +198,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
         '$gte': startTime,
         '$lte': endTime
       };
-      // TODO: Need to add proper indexes for the audit collection
+      // NOTE: for all combinations of filter see indexies into models/AuditEvents.js
       auditevents.detailed(requestBody, function(error, data) {
         if (error) {
           cb(error);
