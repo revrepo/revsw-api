@@ -403,133 +403,148 @@ var top5XX_ = function( req, reply, domainConfig, span ) {
 };
 /**
  * @name topImageEngineChanges_
+ * @description  method get data for ImageEngine graph
  *
  * @param {*} req
  * @param {*} reply
  * @param {*} domainConfig
  * @param {*} span
  */
-var topImageEngineChanges_ = function (req, reply, domainConfig, span){
+var topImageEngineChanges_ = function(req, reply, domainConfig, span) {
   var reportType_ = req.query.report_type;
   var countSize_ = req.query.count || 30;
   var domainName = domainConfig.domain_name,
-    domainId = req.params.domain_id,
-    fieldOrigin_, filedChanged_, fieldName_;
+    domainID = req.params.domain_id,
+    fieldOrigin_, filedChanged_, fieldName_,
+    isFromCache = true,
+    queryProperties = _.clone(req.query);
+  // NOTE: make correction for the time range
+  _.merge(queryProperties, utils.roundTimestamps(req.query, 5));
 
   switch (reportType_) {
     case 'ie_format_changes':
       fieldOrigin_ = 'ie_format_o';
       filedChanged_ = 'ie_format';
-      fieldName_= 'ie_format_c';
+      fieldName_ = 'ie_format_c';
       break;
     case 'ie_resolution_changes':
       fieldOrigin_ = 'ie_res_o';
       filedChanged_ = 'ie_res';
-      fieldName_= 'ie_res_c';
+      fieldName_ = 'ie_res_c';
       break;
     default:
       return reply(boom.badImplementation('Received bad report_type value ' + reportType_));
   }
-  var requestBody = {
-    query: {
-      filtered: {
-        filter: {
-          bool: {
-            must: [{
-              range: {
-                '@timestamp': {
-                  gte: span.start,
-                  lte: span.end
+  var cacheKey = 'topImageEngineChanges_:' + domainID + ':' + JSON.stringify(queryProperties);
+  multiCache.wrap(cacheKey, function() {
+      isFromCache = false;
+      var requestBody = {
+        query: {
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  range: {
+                    '@timestamp': {
+                      gte: span.start,
+                      lte: span.end
+                    }
+                  }
+                }]
+              }
+            }
+          }
+        },
+        size: 0,
+        aggs: {
+          changed: {
+            terms: {
+              script: 'doc["' + fieldOrigin_ + '"]!=doc["' + filedChanged_ + '"]'
+            },
+            aggs: {
+              results: {
+                terms: {
+                  field: fieldName_,
+                  size: countSize_,
+                  order: {
+                    _count: 'desc'
+                  }
                 }
               }
-            }]
-          }
-        }
-      }
-    },
-    size: 0,
-    aggs: {
-      changed:{
-        terms:{
-          script: 'doc["'+fieldOrigin_+'"]!=doc["'+filedChanged_+'"]'
-        },
-        aggs:{
-          results: {
-            terms: {
-              field: fieldName_,
-              size: countSize_,
-                order: {
-                _count: 'desc'
-                }
+            }
+          },
+          missing_field: {
+            missing: {
+              field: fieldName_
             }
           }
         }
-      },
-      missing_field: {
-        missing: {
-          field: fieldName_
-        }
-      }
-    }
-  };
-
-  //  update query
-  elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, req, domainConfig);
-
-  var indicesList = utils.buildIndexList(span.start, span.end);
-  return elasticSearch.getClientURL().search({
-    index: indicesList,
-    ignoreUnavailable: true,
-    query_cache: true,
-    timeout: config.get('elasticsearch_timeout_ms'),
-    body: requestBody
-  })
-    .then(function (body) {
-      if (!body.aggregations) {
-        return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-          ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
-      }
-
-      var data = [], transformed = 0,origins = 0;
-      body.aggregations.changed.buckets.forEach(function (res) {
-        if(res.key === 'true'){
-          transformed = res.doc_count;
-        }
-        if (res.key === 'false') {
-          origins = res.doc_count;
-        }
-        var item = {
-          changed: res.key
-        };
-
-        if (!!res.results.buckets && res.results.buckets.length > 0){
-          res.results.buckets.forEach(function(itemData){
-            data.push(_.extend({},item,{key:itemData.key, count: itemData.doc_count}));
-          });
-        }
-        return item;
-      });
-
-      var response = {
-        metadata: {
-          domain_name: domainName,
-          domain_id: domainId,
-          start_timestamp: span.start,
-          start_datetime: new Date(span.start),
-          end_timestamp: span.end,
-          end_datetime: new Date(span.end),
-          total_hits: body.hits.total,
-          total_transformation: transformed,
-          data_points_count: transformed + origins//body.aggregations.changed.buckets.length
-        },
-        data: data
       };
-      return response;
+
+      //  update query
+      elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, req, domainConfig);
+
+      var indicesList = utils.buildIndexList(span.start, span.end);
+      return elasticSearch.getClientURL().search({
+          index: indicesList,
+          ignoreUnavailable: true,
+          query_cache: true,
+          timeout: config.get('elasticsearch_timeout_ms'),
+          body: requestBody
+        })
+        .then(function(body) {
+          if (!body.aggregations) {
+            return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
+              ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
+          }
+
+          var data = [],
+            transformed = 0,
+            origins = 0;
+          body.aggregations.changed.buckets.forEach(function(res) {
+            if (res.key === 'true') {
+              transformed = res.doc_count;
+            }
+            if (res.key === 'false') {
+              origins = res.doc_count;
+            }
+            var item = {
+              changed: res.key
+            };
+
+            if (!!res.results.buckets && res.results.buckets.length > 0) {
+              res.results.buckets.forEach(function(itemData) {
+                data.push(_.extend({}, item, { key: itemData.key, count: itemData.doc_count }));
+              });
+            }
+            return item;
+          });
+
+          var response = {
+            metadata: {
+              domain_name: domainName,
+              domain_id: domainID,
+              start_timestamp: span.start,
+              start_datetime: new Date(span.start),
+              end_timestamp: span.end,
+              end_datetime: new Date(span.end),
+              total_hits: body.hits.total,
+              total_transformation: transformed,
+              data_points_count: transformed + origins //body.aggregations.changed.buckets.length
+            },
+            data: data
+          };
+          return response;
+        });
     })
-    .then(function(response){
-      renderJSON(req, reply, false/*error is undefined here*/, response);
+    .then(function(response) {
+      if (isFromCache === true) {
+        logger.info('topImageEngineChanges_:return cache for key - ' + cacheKey);
+      }
+      renderJSON(req, reply, false /*error is undefined here*/ , response);
     })
-    .catch(function (error) {
+    .catch(function(error) {
+      logger.error('topImageEngineChanges_:Failed to retrieve data for domain ' + domainName);
       return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
     });
 };
@@ -675,8 +690,10 @@ exports.getTopLists = function( request, reply ) {
             })
             .then(function(body) {
               if (!body.aggregations) {
-                return reply(boom.badImplementation('Aggregation is absent completely, check indices presence: ' + indicesList +
-                  ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
+                return promise.reject({
+                  error_message: 'Aggregation is absent completely, check indices presence: ' + indicesList +
+                  ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName
+                });
               }
 
               var sorter = function(lhs, rhs) {
@@ -685,7 +702,7 @@ exports.getTopLists = function( request, reply ) {
               var response = {
                 metadata: {
                   domain_name: domainName,
-                  domain_id: request.params.domain_id,
+                  domain_id: domainID,
                   start_timestamp: span.start,
                   start_datetime: new Date(span.start),
                   end_timestamp: span.end,
@@ -726,7 +743,11 @@ exports.getTopLists = function( request, reply ) {
         })
         .catch(function(error) {
           logger.error('getTopLists:Failed to retrieve data for domain ' + domainName);
-          return reply(boom.badImplementation('Failed to retrieve data from ES for domain ' + domainName));
+          var errorText = 'Failed to retrieve data from ES data for domain ' + domainName;
+          if(!!error && !!error.error_message) {
+            errorText = error.error_message;
+          }
+          return reply(boom.badImplementation(errorText));
         });
 
     } else {
