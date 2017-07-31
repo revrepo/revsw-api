@@ -23,7 +23,7 @@
   "key_path": "./config/ssl_certs/server.key",
   "cert_path": "./config/ssl_certs/server.crt",
   "portal_url": "https://iad02-portal01.revsw.net",
-  "elasticsearch_url": "iad02-es05.revsw.net:9200",
+  "elasticsearch_url": "iad02-es08.revsw.net:9200",
   "elasticsearch_fullurl_url": "iad02-esurl01.revsw.net:9200",
   "cds_url": "https://cds.revdn.net:9000",
   "cds_api_token": "the_correct_value_is_in_local_json",
