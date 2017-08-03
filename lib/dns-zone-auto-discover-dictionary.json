@@ -2,7 +2,8 @@
   "list_of_typical_host_names": [
     "www", "mail", "email", "info", "ftp",
     "links", "images", "videos", "zlinks", "pages",
-    "autoconfig"
+    "autoconfig", "cdn", "assets", "_sip", "sip", "image", "imagehandler", "pop", "pop3", "static", "track", "admin",
+    "blog", "support", "localhost", "webmail", "webdisk"
   ],
   "list_of_record_types": ["A", "AAAA", "MX", "CNAME"]
 }
