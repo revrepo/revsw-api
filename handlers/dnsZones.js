@@ -604,7 +604,7 @@ function formatToNSONEAnswer(type, dnsAnswer){
  *
  */
 exports.getDnsZoneAutoDiscover = function(request, reply){
-  var zoneName = 'mbeans.com';//request.params.zone_name;//
+  var zoneName = request.params.zone_name;
   var response = { zone_records: [] };
   var recordTypes = DNS_RECORD_TYPES;// NOTE: Type DNS Rrecords for check
   var dnsRecordChecks = [];
