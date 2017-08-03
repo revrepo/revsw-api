@@ -229,6 +229,32 @@ module.exports = [
       }
     }
   },
+  {
+    method: 'GET',
+    path: '/v1/dns_zones/auto_discover/{zone_name}',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: dnsZone.getDnsZoneAutoDiscover,
+      description: 'Get Auto-Discover Zone Records',
+      notes: 'TODO: need add note',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          zone_name: Joi.string().required().description('DNS zone name')
+        }
+      },
+      // response: {
+      //   schema: routeModels.DNSZoneModel
+      // }
+    }
+  },
     {
      method: 'GET',
      path: '/v1/dns_zones/{dns_zone_id}/checkintegration/dns_servers',
