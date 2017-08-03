@@ -1,0 +1,8 @@
+{
+  "list_of_typical_host_names": [
+    "www", "mail", "email", "info", "ftp",
+    "links", "images", "videos", "zlinks", "pages",
+    "autoconfig"
+  ],
+  "list_of_record_types": ["A", "AAAA", "MX", "CNAME"]
+}

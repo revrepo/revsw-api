@@ -19,7 +19,7 @@
 /*jslint node: true */
 
 'use strict';
-
+var async = require('async');
 var config = require('config');
 var mongoose = require('mongoose');
 var boom = require('boom');
@@ -62,6 +62,16 @@ var CHECK_STATUS_CODES = {
   ERROR: 'ERROR',
   WARNING: 'WARNING',
   SUCCESS: 'SUCCESS'
+};
+
+var dnsZoneAutoDisciverDictionary = require('./../lib/dns-zone-auto-discover-dictionary');
+var listHostNames = dnsZoneAutoDisciverDictionary.list_of_typical_host_names;
+var DNS_RECORD_TYPES = dnsZoneAutoDisciverDictionary.list_of_record_types;
+var DNS_CONST = {
+  MX_PRIORITY: 10,
+  SRV_PRIORITY: 10,
+  SRV_WEIGHT: 5,
+  SRV_PORT: 5060
 };
 
 //'DNS service unable to process your request now, try again later'
@@ -549,7 +559,109 @@ exports.getDnsZone = function(request, reply) {
       }
     });
 };
-
+/**
+ * @name formatToNSONEAnswer
+ *
+ * @param {any} type
+ * @param {any} dnsAnswer
+ * @returns
+ */
+function formatToNSONEAnswer(type, dnsAnswer){
+  switch(type) {
+    case 'AFSDB':
+      return new Array(dnsAnswer.subtype, dnsAnswer.host);
+    case 'HINFO':
+      return new Array(dnsAnswer.hardware, dnsAnswer.os);
+    case 'MX':
+      // NOTE: constructtion "new Array(dnsAnswer.priority || DNS_CONST.MX_PRIORITY, dnsAnswer.host)"
+      // NOTE: not will be work if "dnsAnswer.priority" equal 0(zero)
+      if(dnsAnswer.priority === undefined) {
+        dnsAnswer.priority = DNS_CONST.MX_PRIORITY;
+      }
+      return new Array(dnsAnswer.priority, dnsAnswer.exchange);
+    case 'NAPTR':
+      return new Array(dnsAnswer.order, dnsAnswer.preference, dnsAnswer.flags, dnsAnswer.service, dnsAnswer.regexp, dnsAnswer.replacement);
+    case 'RP':
+      return new Array(dnsAnswer.email, dnsAnswer.txt_dname);
+    case 'SRV':
+      if(dnsAnswer.priority === undefined) {
+        dnsAnswer.priority = DNS_CONST.SRV_PRIORITY;
+      }
+      if(dnsAnswer.weight === undefined) {
+        dnsAnswer.weight = DNS_CONST.SRV_WEIGHT;
+      }
+      if(dnsAnswer.port === undefined) {
+        dnsAnswer.port = DNS_CONST.SRV_PORT;
+      }
+      return new Array(dnsAnswer.priority, dnsAnswer.weight, dnsAnswer.port, dnsAnswer.host);
+    default:
+      return new Array( dnsAnswer);
+  }
+}
+/**
+ * @name getDnsZoneAutoDiscover
+ * @description get data about which DNS Zone Records is already exists
+ *
+ */
+exports.getDnsZoneAutoDiscover = function(request, reply){
+  var zoneName = request.params.zone_name;
+  var response = { zone_records: [] };
+  var recordTypes = DNS_RECORD_TYPES;// NOTE: Type DNS Rrecords for check
+  var dnsRecordChecks = [];
+  // NOTE: check self domain name
+  recordTypes.forEach(function(itemType) {
+    dnsRecordChecks.push(function(cb) {
+      dnsResolve.resolve(zoneName, itemType, function(err, dnsResolveData) {
+        var returnItem = null;
+        if(!err && !!dnsResolveData.data) {
+          returnItem = {
+            type: itemType,
+            zone: zoneName,
+            domain: zoneName,
+            answers: _.map(dnsResolveData.data,function(item){
+              return {answer:formatToNSONEAnswer(itemType, item)};
+            })
+          };
+        }
+        cb(null, returnItem);
+      });
+    });
+  });
+  // NOTE: create DNS request for check popular sub domain names and rerords name
+  _.each(listHostNames,function(itemZone){
+    var checkZoneName_ = [itemZone,zoneName].join('.');
+    recordTypes.forEach(function(itemType){
+      dnsRecordChecks.push(function(cb){
+        // var returnItem = null;
+        dnsResolve.resolve(checkZoneName_, itemType, function(err, dnsResolveData) {
+          var returnItem = null;
+          if(!err && !!dnsResolveData.data) {
+            returnItem = {
+              type: itemType,
+              zone: zoneName,
+              domain: checkZoneName_,
+              answers: _.map(dnsResolveData.data, function(item) {
+                return { answer: formatToNSONEAnswer(itemType, item) };
+              })
+            };
+          }
+          cb(null, returnItem);
+        });
+      });
+    });
+  });
+  // TODO: get info about record from NSONE?
+  async.parallel(dnsRecordChecks, function(err, result) {
+    if(err){
+      reply(boom.badImplementation('DNS check error'));
+      return;
+    }
+    response.zone_records = _.filter(result,function(item){
+      return !!item;
+    });
+    reply(response);
+  });
+};
 
 exports.getDnsZoneRecords = function(request, reply) {
   var zoneId = request.params.dns_zone_id;
