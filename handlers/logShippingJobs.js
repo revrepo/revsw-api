@@ -125,7 +125,7 @@ exports.createLogShippingJob = function(request, reply) {
       return reply(boom.badImplementation('Failed to store in the DB new log shipping job ' + JSON.stringify(newLogJob)));
     }
 
-    var newJobObject = publicRecordFields.handle(result, 'LogShippingJob');
+    var newJobObject = publicRecordFields.handle(result, 'logShippingJob');
     newJobObject.destination_key = '<Hidden for security reasons>';
     newJobObject.destination_password = '<Hidden for security reasons>';
 
@@ -224,7 +224,7 @@ exports.updateLogShippingJob = function(request, reply) {
         throw new Error('Failed to update the DB for log shipping job ID ' + logJobId);
       }
 
-      var updatedJobObject = publicRecordFields.handle(result, 'LogShippingJob');
+      var updatedJobObject = publicRecordFields.handle(result, 'logShippingJob');
       updatedJobObject.destination_key = '<Hidden for security reasons>';
       updatedJobObject.destination_password = '<Hidden for security reasons>';
 
@@ -284,7 +284,7 @@ exports.deleteLogShippingJob = function(request, reply) {
         return reply(boom.badImplementation('Failed to delete from the DB log shipping job ID ' + logJobId));
       }
 
-      var result2 = publicRecordFields.handle(result, 'LogShippingJob');
+      var result2 = publicRecordFields.handle(result, 'logShippingJob');
       result2.destination_key = '<Hidden for security reasons>';
       result2.destination_password = '<Hidden for security reasons>';
 
