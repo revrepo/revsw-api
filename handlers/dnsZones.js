@@ -66,19 +66,15 @@ var CHECK_STATUS_CODES = {
 
 var dnsZoneAutoDisciverDictionary = require('./../lib/dns-zone-auto-discover-dictionary');
 var listHostNames = dnsZoneAutoDisciverDictionary.list_of_typical_host_names;
-var DNS_RECORD_TYPES = dnsZoneAutoDisciverDictionary.list_of_record_types;
-var DNS_CONST = {
-  MX_PRIORITY: 10,
-  SRV_PRIORITY: 10,
-  SRV_WEIGHT: 5,
-  SRV_PORT: 5060
-};
+var DNS_RECORD_TYPES_AUTO_DISCOVER = dnsZoneAutoDisciverDictionary.list_of_record_types_auto_discover;
 
 //'DNS service unable to process your request now, try again later'
 exports.getDnsZones = function(request, reply) {
   var filters_ = request.query.filters;
   return Promise.try(function() {
-      return dnsZones.listAsync({filters:filters_});
+      return dnsZones.listAsync({
+        filters: filters_
+      });
     })
     .then(function(zones) {
       var responseZones = [];
@@ -560,106 +556,153 @@ exports.getDnsZone = function(request, reply) {
     });
 };
 /**
- * @name formatToNSONEAnswer
- *
- * @param {any} type
- * @param {any} dnsAnswer
- * @returns
- */
-function formatToNSONEAnswer(type, dnsAnswer){
-  switch(type) {
-    case 'AFSDB':
-      return new Array(dnsAnswer.subtype, dnsAnswer.host);
-    case 'HINFO':
-      return new Array(dnsAnswer.hardware, dnsAnswer.os);
-    case 'MX':
-      // NOTE: constructtion "new Array(dnsAnswer.priority || DNS_CONST.MX_PRIORITY, dnsAnswer.host)"
-      // NOTE: not will be work if "dnsAnswer.priority" equal 0(zero)
-      if(dnsAnswer.priority === undefined) {
-        dnsAnswer.priority = DNS_CONST.MX_PRIORITY;
-      }
-      return new Array(dnsAnswer.priority, dnsAnswer.exchange);
-    case 'NAPTR':
-      return new Array(dnsAnswer.order, dnsAnswer.preference, dnsAnswer.flags, dnsAnswer.service, dnsAnswer.regexp, dnsAnswer.replacement);
-    case 'RP':
-      return new Array(dnsAnswer.email, dnsAnswer.txt_dname);
-    case 'SRV':
-      if(dnsAnswer.priority === undefined) {
-        dnsAnswer.priority = DNS_CONST.SRV_PRIORITY;
-      }
-      if(dnsAnswer.weight === undefined) {
-        dnsAnswer.weight = DNS_CONST.SRV_WEIGHT;
-      }
-      if(dnsAnswer.port === undefined) {
-        dnsAnswer.port = DNS_CONST.SRV_PORT;
-      }
-      return new Array(dnsAnswer.priority, dnsAnswer.weight, dnsAnswer.port, dnsAnswer.host);
-    default:
-      return new Array( dnsAnswer);
-  }
-}
-/**
  * @name getDnsZoneAutoDiscover
  * @description get data about which DNS Zone Records is already exists
  *
  */
-exports.getDnsZoneAutoDiscover = function(request, reply){
+exports.getDnsZoneAutoDiscover = function(request, reply) {
   var zoneName = request.params.zone_name;
-  var response = { zone_records: [] };
-  var recordTypes = DNS_RECORD_TYPES;// NOTE: Type DNS Rrecords for check
+  var response = {
+    zone_records: []
+  };
+  var recordTypes = DNS_RECORD_TYPES_AUTO_DISCOVER; // NOTE: Type DNS Rrecords for check
   var dnsRecordChecks = [];
-  // NOTE: check self domain name
-  recordTypes.forEach(function(itemType) {
-    dnsRecordChecks.push(function(cb) {
-      dnsResolve.resolve(zoneName, itemType, function(err, dnsResolveData) {
-        var returnItem = null;
-        if(!err && !!dnsResolveData.data) {
-          returnItem = {
-            type: itemType,
-            zone: zoneName,
-            domain: zoneName,
-            answers: _.map(dnsResolveData.data,function(item){
-              return {answer:formatToNSONEAnswer(itemType, item)};
-            })
-          };
+
+  var workFlowData_ = {
+    zone: zoneName,
+    dnsRecordChecks: [],
+    response: {}
+  };
+  // NOTE: run main work-flow process
+  async.waterfall([
+    //NOTE: get an IP DNS server
+    function(cb) {
+      var zonename_ = zoneName;
+      dnsResolve.resolve(zonename_, 'NS', function(err, data) {
+        if (err) {
+          // Error get IP
+          cb(err);
+          return;
         }
-        cb(null, returnItem);
-      });
-    });
-  });
-  // NOTE: create DNS request for check popular sub domain names and rerords name
-  _.each(listHostNames,function(itemZone){
-    var checkZoneName_ = [itemZone,zoneName].join('.');
-    recordTypes.forEach(function(itemType){
-      dnsRecordChecks.push(function(cb){
-        // var returnItem = null;
-        dnsResolve.resolve(checkZoneName_, itemType, function(err, dnsResolveData) {
-          var returnItem = null;
-          if(!err && !!dnsResolveData.data) {
-            returnItem = {
-              type: itemType,
-              zone: zoneName,
-              domain: checkZoneName_,
-              answers: _.map(dnsResolveData.data, function(item) {
-                return { answer: formatToNSONEAnswer(itemType, item) };
-              })
-            };
+        if (!data.short_answers || data.short_answers.length === 0) {
+          cb(new Error('Zone with name "' + zonename_ + '" no have record with "NS"'));
+          return;
+        }
+        workFlowData_.dns_server_host = data.short_answers[0];
+        var hostname_ = data.short_answers[0];
+        dnsResolve.resolve(hostname_, 'A', function(err, data) {
+          if (err) {
+            cb(err);
+            return;
           }
-          cb(null, returnItem);
+          workFlowData_.dns_server_ip = workFlowData_.dns_server_ip = data.short_answers[0];
+          cb(null);
         });
       });
-    });
-  });
-  // TODO: get info about record from NSONE?
-  async.parallel(dnsRecordChecks, function(err, result) {
-    if(err){
+    },
+    // NOTE: prepare request for main domain name
+    function(cb) {
+      var zoneName_ = zoneName;
+      var dnsServerIp = workFlowData_.dns_server_ip;
+      recordTypes.forEach(function(itemType) {
+        workFlowData_.dnsRecordChecks.push(function(cb) {
+          var question_ = {
+            name: zoneName_,
+            type: itemType
+          };
+          dnsResolve.getDNSData(question_, dnsServerIp)
+            .then(function(data) {
+              var returnItem = null;
+              if (!!data && !!data.answer && data.answer.length > 0) {
+                returnItem = {
+                  type: itemType,
+                  zone: zoneName,
+                  domain: zoneName,
+                  answers: _.map(data.answer, function(item) {
+                    return {
+                      // NOTE: convert data to format NSONE
+                      answer: dnsResolve.formatToNSONEAnswerFromFullInfo(itemType, item)
+                    };
+                  })
+                };
+                // NOTE: get TTL from first answer by default because NSONE use only one TTL value for all answers
+                returnItem.ttl = returnItem.answer[0].ttl || dnsResolve.DNS_CONST.TTL;
+              }
+              cb(null, returnItem);
+            })
+            .catch(function(err) {
+              cb(null, null);
+            });
+        });
+      });
+      cb(null);
+    },
+    // NOTE: prepare requests for subdomains
+    function(cb) {
+      var zoneName_ = zoneName;
+      var dnsServerIp = workFlowData_.dns_server_ip;
+      _.each(listHostNames, function(itemZone) {
+        var checkZoneName_ = [itemZone, zoneName_].join('.');
+        recordTypes.forEach(function(itemType) {
+          workFlowData_.dnsRecordChecks.push(function(cb) {
+            var question_ = {
+              name: checkZoneName_,
+              type: itemType
+            };
+            dnsResolve.getDNSData(question_, dnsServerIp)
+              .then(function(data) {
+                var returnItem = null;
+                if (!!data && !!data.answer && data.answer.length > 0) {
+                  returnItem = {
+                    type: itemType,
+                    zone: checkZoneName_,
+                    domain: checkZoneName_,
+                    answers: _.map(data.answer, function(item) {
+                      return {
+                        answer: dnsResolve.formatToNSONEAnswerFromFullInfo(itemType, item)
+                      };
+                    })
+                  };
+                  // NOTE: get TTL from first answer by default because NSONE use only one TTL value for all answers
+                  returnItem.ttl = data.answer[0].ttl || dnsResolve.DNS_CONST.TTL;
+                }
+                cb(null, returnItem);
+              })
+              .catch(function(err) {
+                cb(null, null);
+              });
+          });
+        });
+      });
+      cb(null);
+    },
+    // NOTE: make all request parrallel for get all information
+    function(cb) {
+      async.parallel(workFlowData_.dnsRecordChecks, function(err, result) {
+        if (err) {
+          cb(new Error('DNS check error'));
+          return;
+        }
+        workFlowData_.result = result;
+        cb(null);
+      });
+    },
+    // NOTE: prepare and send response information
+    function(cb) {
+      workFlowData_.response.zone_records = _.filter(workFlowData_.result, function(item) {
+        return !!item;
+      });
+      workFlowData_.response.count = workFlowData_.response.zone_records.length;
+      cb(null);
+    }
+  ],
+  // NOTE: end of all works - send to user a response or an error
+  function(err) {
+    if (err) {
       reply(boom.badImplementation('DNS check error'));
       return;
     }
-    response.zone_records = _.filter(result,function(item){
-      return !!item;
-    });
-    reply(response);
+    reply(workFlowData_.response);
   });
 };
 
