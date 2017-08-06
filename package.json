@@ -72,6 +72,8 @@
     "mongoose-auto-increment": "^5.0.0",
     "mongoose-merge-plugin": "0.0.5",
     "native-dns": "^0.7.0",
+    "native-dns-cache": "0.0.2",
+    "native-dns-packet": "^0.1.1",
     "node-rsa": "^0.4.0",
     "node-schedule": "^1.1.1",
     "node-uuid": "^1.4.3",

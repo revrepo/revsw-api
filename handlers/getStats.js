@@ -83,7 +83,7 @@ exports.getStats = function(request, reply) {
                     must: [{
                       range: {
                         '@timestamp': {
-                          gte: span.start,
+                          gte: span.start - span.interval,
                           lt: span.end
                         }
                       }
@@ -99,7 +99,7 @@ exports.getStats = function(request, reply) {
                   interval: ('' + span.interval),
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: span.start,
+                    min: span.start - span.interval ,
                     max: span.end
                   },
                   offset: ('' + (span.end % span.interval))
@@ -131,13 +131,14 @@ exports.getStats = function(request, reply) {
             })
             .then(function(body) {
               var dataArray = [];
-              for (var i = 0, len = body.aggregations.results.buckets.length; i < len; i++) {
-                var item = body.aggregations.results.buckets[i];
+              for (var i = 1, len = body.aggregations.results.buckets.length; i < len; i++) {
+                var itemTime = body.aggregations.results.buckets[i];
+                var itemData = body.aggregations.results.buckets[i-1];
                 dataArray.push({
-                  time: item.key,
-                  requests: item.doc_count,
-                  sent_bytes: item.sent_bytes.value,
-                  received_bytes: item.received_bytes.value
+                  time: itemTime.key,
+                  requests: itemData.doc_count,
+                  sent_bytes: itemData.sent_bytes.value,
+                  received_bytes: itemData.received_bytes.value
                 });
               }
               var response = {
@@ -157,7 +158,7 @@ exports.getStats = function(request, reply) {
               };
               return response;
             });
-        })
+      })
         .then(function(response) {
           if (isFromCache === true) {
             logger.info('getStats:return cache for key - ' + cacheKey);
