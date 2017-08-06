@@ -604,8 +604,12 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
     function(cb) {
       var zoneName_ = zoneName;
       var dnsServerIp = workFlowData_.dns_server_ip;
-      recordTypes.forEach(function(itemType) {
-        workFlowData_.dnsRecordChecks.push(function(cb) {
+      // NOTE: for main domain don't ask NS record
+      var recordTypesMainDomain = _.filter(recordTypes, function(item) {
+        return item !== 'NS';
+      });
+      async.each(recordTypesMainDomain,function(itemType, cbTypes) {
+        workFlowData_.dnsRecordChecks.push(function(cb_) {
           var question_ = {
             name: zoneName_,
             type: itemType
@@ -616,9 +620,9 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
               if (!!data && !!data.answer && data.answer.length > 0) {
                 returnItem = {
                   type: itemType,
-                  zone: zoneName,
-                  domain: zoneName,
-                  answers: _.map(data.answer, function(item) {
+                  zone: zoneName_,
+                  domain: zoneName_,
+                  answers:  _.map(data.answer, function(item) {
                     return {
                       // NOTE: convert data to format NSONE
                       answer: dnsResolve.formatToNSONEAnswerFromFullInfo(itemType, item)
@@ -626,25 +630,27 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
                   })
                 };
                 // NOTE: get TTL from first answer by default because NSONE use only one TTL value for all answers
-                returnItem.ttl = returnItem.answer[0].ttl || dnsResolve.DNS_CONST.TTL;
+                returnItem.ttl = data.answer[0].ttl || dnsResolve.DNS_CONST.TTL;
               }
-              cb(null, returnItem);
+              cb_(null, returnItem);
             })
             .catch(function(err) {
-              cb(null, null);
+              cb_(null, null);
             });
         });
+        cbTypes(null);
+      }, function(err){
+        cb(null);
       });
-      cb(null);
     },
     // NOTE: prepare requests for subdomains
     function(cb) {
       var zoneName_ = zoneName;
       var dnsServerIp = workFlowData_.dns_server_ip;
-      _.each(listHostNames, function(itemZone) {
+      async.each(listHostNames, function(itemZone,callback) {
         var checkZoneName_ = [itemZone, zoneName_].join('.');
-        recordTypes.forEach(function(itemType) {
-          workFlowData_.dnsRecordChecks.push(function(cb) {
+        async.each(recordTypes,function(itemType,cbTypes) {
+          workFlowData_.dnsRecordChecks.push(function(cb_) {
             var question_ = {
               name: checkZoneName_,
               type: itemType
@@ -666,15 +672,19 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
                   // NOTE: get TTL from first answer by default because NSONE use only one TTL value for all answers
                   returnItem.ttl = data.answer[0].ttl || dnsResolve.DNS_CONST.TTL;
                 }
-                cb(null, returnItem);
+                cb_(null, returnItem);
               })
               .catch(function(err) {
-                cb(null, null);
+                cb_(null, null);
               });
           });
+          cbTypes(null);
+        }, function(err){
+          callback();
         });
+      },function(err){
+        cb(err);
       });
-      cb(null);
     },
     // NOTE: make all request parrallel for get all information
     function(cb) {
