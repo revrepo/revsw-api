@@ -795,6 +795,7 @@ exports.createDnsZoneRecord = function(request, reply) {
   var foundDnsZone;
   var nsoneZoneRecordInfo;
   var statusResponse;
+  var updatedBy = utils.generateCreatedByField(request);
 
   return Promise.try(function() {
       return dnsZones.getAsync(zoneId);
@@ -864,6 +865,15 @@ exports.createDnsZoneRecord = function(request, reply) {
       }, request);
       return Promise.resolve(true);
     })
+    // NOTE: update DNS Zone after create DNS Zone record
+    .then(function(){
+      var updateInformation = {
+        _id: foundDnsZone.id,
+        updated_at: new Date(),
+        updated_by: updatedBy
+      };
+      return dnsZones.updateAsync(updateInformation);
+    })
     .then(function() {
       statusResponse = {
         statusCode: 200,
@@ -921,6 +931,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
   var foundDnsZone;
   var nsoneZoneRecordInfo;
   var statusResponse;
+  var updatedBy = utils.generateCreatedByField(request);
 
   return Promise.try(function() {
       return dnsZones.getAsync(zoneId);
@@ -993,6 +1004,15 @@ exports.deleteDnsZoneRecord = function(request, reply) {
       }, request);
       return Promise.resolve(true);
     })
+    // NOTE: update DNS Zone after delete DNS Zone record
+    .then(function() {
+      var updateInformation = {
+        _id: foundDnsZone.id,
+        updated_at: new Date(),
+        updated_by: updatedBy
+      };
+      return dnsZones.updateAsync(updateInformation);
+    })
     .then(function() {
       statusResponse = {
         statusCode: 200,
@@ -1043,6 +1063,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
   var foundDnsZone;
   var nsoneZoneRecordInfo;
   var statusResponse;
+  var updatedBy = utils.generateCreatedByField(request);
 
   return Promise.try(function() {
       return dnsZones.getAsync(zoneId);
@@ -1110,9 +1131,18 @@ exports.updateDnsZoneRecord = function(request, reply) {
         target_object: nsoneZoneRecordInfo, // NOTE: save extented information about changes
         operation_status: 'success'
       }, request);
-      return Promise.resolve(updatedNsoneRecord_);
+      return Promise.resolve(true);
     })
-    .then(function(updatedNsoneRecord) {
+    // NOTE: update DNS Zone after update DNS Zone record
+    .then(function() {
+      var updateInformation = {
+        _id: foundDnsZone.id,
+        updated_at: new Date(),
+        updated_by: updatedBy
+      };
+      return dnsZones.updateAsync(updateInformation);
+    })
+    .then(function() {
       statusResponse = {
         statusCode: 200,
         message: 'Successfully updated the DNS zone record'
