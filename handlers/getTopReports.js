@@ -483,6 +483,18 @@ var topImageEngineChanges_ = function(req, reply, domainConfig, span) {
 
       //  update query
       elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, req, domainConfig);
+      // NOTE: additional query property for fix a problem in data which no contains required fields
+      // @see this part of query - script: 'doc["' + fieldOrigin_ + '"]!=doc["' + filedChanged_ + '"]'
+      requestBody.query.filtered.filter.bool.must_not.push({
+        missing: {
+          field: fieldOrigin_
+        }
+      });
+      requestBody.query.filtered.filter.bool.must_not.push({
+        missing: {
+          field: filedChanged_
+        }
+      });
 
       var indicesList = utils.buildIndexList(span.start, span.end);
       return elasticSearch.getClientURL().search({
