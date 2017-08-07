@@ -70,10 +70,13 @@ exports.getStats = function(request, reply) {
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
+      // NOTE: change start time for make correction graphs for shift all values
+      var startTimeValue_ = span.start - span.interval;
       var cacheKey = 'getStats:' + domainID + ':' + JSON.stringify(queryProperties);
       multiCache.wrap(cacheKey, function() {
           isFromCache = false;
           metadataFilterField = elasticSearch.buildMetadataFilterString(request);
+
           var requestBody = {
             size: 0,
             query: {
@@ -83,7 +86,7 @@ exports.getStats = function(request, reply) {
                     must: [{
                       range: {
                         '@timestamp': {
-                          gte: span.start - span.interval,
+                          gte: startTimeValue_,
                           lt: span.end
                         }
                       }
@@ -99,7 +102,7 @@ exports.getStats = function(request, reply) {
                   interval: ('' + span.interval),
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: span.start - span.interval ,
+                    min: startTimeValue_,
                     max: span.end
                   },
                   offset: ('' + (span.end % span.interval))
@@ -123,7 +126,7 @@ exports.getStats = function(request, reply) {
           //  update query
           elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
           return elasticSearch.getClient().search({
-              index: utils.buildIndexList(span.start, span.end),
+              index: utils.buildIndexList(startTimeValue_, span.end),
               ignoreUnavailable: true,
               query_cache: true,
               timeout: config.get('elasticsearch_timeout_ms'),
@@ -131,6 +134,7 @@ exports.getStats = function(request, reply) {
             })
             .then(function(body) {
               var dataArray = [];
+              // NOTE: i equal "1" for apply action "shift all values"
               for (var i = 1, len = body.aggregations.results.buckets.length; i < len; i++) {
                 var itemTime = body.aggregations.results.buckets[i];
                 var itemData = body.aggregations.results.buckets[i-1];
@@ -152,7 +156,7 @@ exports.getStats = function(request, reply) {
                   total_hits: body.hits.total,
                   interval_sec: span.interval / 1000,
                   filter: metadataFilterField,
-                  data_points_count: len
+                  data_points_count: len - 1 // NOTE: correction a count data point for action "shift all values"
                 },
                 data: dataArray
               };
@@ -200,6 +204,8 @@ exports.getStatsImageEngine = function(request, reply) {
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
+      // NOTE: change start time for make correction graphs for shift all values
+      var startTimeValue_ = span.start - span.interval;
       var cacheKey = 'getStatsImageEngine:' + domainID + ':' + JSON.stringify(queryProperties);
       multiCache.wrap(cacheKey, function() {
           isFromCache = false;
@@ -214,7 +220,7 @@ exports.getStatsImageEngine = function(request, reply) {
                     must: [{
                       range: {
                         '@timestamp': {
-                          gte: span.start,
+                          gte: startTimeValue_,
                           lt: span.end
                         }
                       }
@@ -230,7 +236,7 @@ exports.getStatsImageEngine = function(request, reply) {
                   interval: ('' + span.interval),
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: span.start,
+                    min: startTimeValue_,
                     max: span.end
                   },
                   offset: ('' + (span.end % span.interval))
@@ -255,7 +261,7 @@ exports.getStatsImageEngine = function(request, reply) {
           elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, request, domainConfig);
 
           return elasticSearch.getClient().search({
-              index: utils.buildIndexList(span.start, span.end),
+              index: utils.buildIndexList(startTimeValue_ , span.end),
               ignoreUnavailable: true,
               query_cache: true,
               timeout: config.get('elasticsearch_timeout_ms'),
@@ -263,13 +269,15 @@ exports.getStatsImageEngine = function(request, reply) {
             })
             .then(function(body) {
               var dataArray = [];
-              for (var i = 0, len = body.aggregations.results.buckets.length; i < len; i++) {
-                var item = body.aggregations.results.buckets[i];
+              // NOTE: i equal "1" for apply action "shift all values"
+              for (var i = 1, len = body.aggregations.results.buckets.length; i < len; i++) {
+                var itemTime = body.aggregations.results.buckets[i];
+                var itemData = body.aggregations.results.buckets[i - 1];
                 dataArray.push({
-                  time: item.key,
-                  requests: item.doc_count,
-                  sent_bytes: item.sent_bytes.value,
-                  original_bytes: item.original_bytes.value
+                  time: itemTime.key,
+                  requests: itemData.doc_count,
+                  sent_bytes: itemData.sent_bytes.value,
+                  original_bytes: itemData.original_bytes.value
                 });
               }
               var response = {
@@ -283,7 +291,7 @@ exports.getStatsImageEngine = function(request, reply) {
                   total_hits: body.hits.total,
                   interval_sec: span.interval / 1000,
                   filter: metadataFilterField,
-                  data_points_count: len
+                  data_points_count: len - 1 // NOTE: correction a count data point for action "shift all values"
                 },
                 data: dataArray
               };
