@@ -19,6 +19,10 @@
 /*jslint node: true */
 'use strict';
 
+// TODO: need to fix the SSL cert on infra.revsw.net and after that
+// remove the ugly line from here
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 var boom = require('boom');
 var promise = require('bluebird');
 var config = require('config');
