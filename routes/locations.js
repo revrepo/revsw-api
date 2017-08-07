@@ -23,7 +23,7 @@
 var Joi = require('joi');
 
 var locations = require('../handlers/locations');
-
+var networkIPBlocks = require('../handlers/networkIPBlocks');
 var routeModels = require('../lib/routeModels');
 
 module.exports = [
@@ -70,6 +70,26 @@ module.exports = [
   },
 
 
+  {
+    method: 'GET',
+    path: '/v1/locations/network_ip_blocks',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: networkIPBlocks.getServersIPList,
+      description: 'Get a list of CDN IP Blocks',
+      tags: ['api', 'locations'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      // response: {
+      //   schema: routeModels.listOfLastMileLocationsModel
+      // }
+    }
+  },
 
   {
     method: 'GET',

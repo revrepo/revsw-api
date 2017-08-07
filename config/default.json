@@ -455,5 +455,8 @@
   "notification_window_for_expiring_ssl_cert_days": 90,
   "notify_admin_by_email_on_ssl_cert_expiration": "ops@revsw.com",
   "cache_memory_ttl_seconds": 600,
-  "cache_memory_max_bytes": 1073741824
+  "cache_memory_max_bytes": 1073741824,
+  "infra_db_serve_list_url": "https://infradb.revsw.net",
+  "infra_db_login_name": "apiro",
+  "infra_db_password": "7pmlZ5axCwYe"
 }
