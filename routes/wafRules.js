@@ -194,10 +194,9 @@ module.exports = [
     method: 'GET',
     path: '/v1/waf_rules/auto_generated_rules',
     config: {
-      auth: false,
-      //  {
-      //   scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
-      // },
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
       handler: wafRulesHandlers.getWAFRuleGeneratedJobs,
       description: 'Get of all not completed job',
       tags: ['api'],
