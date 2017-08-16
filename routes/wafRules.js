@@ -229,10 +229,10 @@ module.exports = [
           account_id: Joi.objectId().required().description('Account ID of the account the domain should be created for'),
           rule_name: Joi.string().max(150).regex(routeModels.wafRuleNameRegex).optional().description('WAF rule name'),
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
-          time_period: Joi.string().min(10).description('Time period info 2017.08.01” (specific day) or “2017.08.01,2017.08.04” (specific days) or “2017.08.01:2017.08.04” (specific range of days)'),
-          // from_timestamp: Joi.number().unit('milliseconds').description('Report period start timestamp (defaults to 24 hours ago from now)'),
-          // to_timestamp: Joi.number().unit('milliseconds').description('Report period end timestamp (defaults to now)')
-        }
+          time_period: Joi.string().required().min(10)
+            .description('Time period info "2017.08.01" (specific day) or '+
+            '"2017.08.01,2017.08.04" (specific days) or "2017.08.01:2017.08.04" (specific range of days)')
+          }
       },
       // TODO: add schema response
       // plugins: {
