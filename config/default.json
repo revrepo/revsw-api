@@ -458,5 +458,6 @@
   "cache_memory_max_bytes": 1073741824,
   "infra_db_serve_list_url": "https://infradb.revsw.net",
   "infra_db_login_name": "apiro",
-  "infra_db_password": "7pmlZ5axCwYe"
+  "infra_db_password": "7pmlZ5axCwYe",
+  "max_number_of_uncompleted_waf_auto_generated_rule_jobs": 5
 }
