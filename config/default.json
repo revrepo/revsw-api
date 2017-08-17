@@ -207,7 +207,7 @@
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
-        "Hello,\n\n",
+        "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
@@ -305,7 +305,7 @@
         "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
-        "Hello,\n\n",
+        "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
@@ -403,7 +403,7 @@
         "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
-        "Hello,\n\n",
+        "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"

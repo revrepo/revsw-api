@@ -156,7 +156,7 @@ module.exports = [
           rule_type: Joi.string().valid('builtin','customer').required().description('WAF rule type'),
           visibility: Joi.string().valid('public', 'hidden').required().description('WAF rule visibility scope'),
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
-          rule_body: Joi.string().min(1).max(10000).required().description('WAF rule body')
+          rule_body: Joi.string().min(1).max(65000).required().description('WAF rule body')
         }
       },
       plugins: {

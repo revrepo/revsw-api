@@ -578,7 +578,6 @@
     "eres",
     "erestes",
     "ereusa",
-    "ereüsa",
     "erg",
     "ergo",
     "ergus",
@@ -983,7 +982,7 @@
     "pamela",
     "pan",
     "pandora",
-    "parks,",
+    "parks",
     "parsec",
     "particular",
     "pasiphae",
@@ -1108,7 +1107,7 @@
     "second",
     "see",
     "seeley",
-    "seen,",
+    "seen",
     "selma",
     "seminole",
     "september",
@@ -1279,6 +1278,7 @@
     "zetta",
     "zeus",
     "zoar",
-    "zucchini"
+    "zucchini",
+    "origin"
   ]
 }
