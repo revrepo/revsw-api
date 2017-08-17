@@ -234,12 +234,15 @@ module.exports = [
             '"2017.08.01,2017.08.04" (specific days) or "2017.08.01:2017.08.04" (specific range of days)')
           }
       },
-      // TODO: add schema response
+      // TODO: check all status codes
       // plugins: {
       //   'hapi-swagger': {
       //     responseMessages: routeModels.standardHTTPErrors
       //   }
-      // }
+      // },
+      response: {
+        schema: routeModels.statusModel
+      }
     }
   }
 ];
