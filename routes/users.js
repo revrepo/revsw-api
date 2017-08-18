@@ -77,8 +77,8 @@ module.exports = [
       validate: {
         payload: {
           email: Joi.string().email().required().trim().description('User email address also used as login name'),
-          firstname: Joi.string().required().trim().max(30).description('First name'),
-          lastname: Joi.string().required().max(30).description('Last name'),
+          firstname: Joi.string().required().trim().max(30).regex(routeModels.userFirstName).description('First name'),
+          lastname: Joi.string().required().max(30).regex(routeModels.userLastName).description('Last name'),
           password: Joi.string().min(8).max(15).required().description('Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
@@ -125,8 +125,8 @@ module.exports = [
           user_id: Joi.objectId().required().description('The ID of user to be updated')
         },
         payload: {
-          firstname: Joi.string().trim().max(30).description('First name'),
-          lastname: Joi.string().max(30).description('Last name'),
+          firstname: Joi.string().trim().max(30).regex(routeModels.userFirstName).description('First name'),
+          lastname: Joi.string().max(30).regex(routeModels.userLastName).description('Last name'),
           password: Joi.string().min(8).max(15).description('New Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
