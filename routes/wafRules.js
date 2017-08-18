@@ -227,7 +227,7 @@ module.exports = [
         payload: {
           domain_id: Joi.objectId().required().description('Domain ID'),
           account_id: Joi.objectId().required().description('Account ID of the account the domain should be created for'),
-          rule_name: Joi.string().max(150).regex(routeModels.wafRuleNameRegex).optional().description('WAF rule name'),
+          rule_name: Joi.string().max(150).allow('').regex(routeModels.wafRuleNameRegex).optional().description('WAF rule name'),
           comment: Joi.string().max(300).allow('').optional().description('Optional comment field'),
           time_period: Joi.string().required().min(10)
             .description('Time period info "2017.08.01" (specific day) or '+
