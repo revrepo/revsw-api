@@ -44,13 +44,16 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
 
   switch (req.query.report_type) {
     case 'country':
-      field = 'country'; //'geoip.country_code2';
+      field = 'country';
       break;
     case 'zone':
       field = 'zone';
       break;
     case 'rule_id':
       field = 'id';
+      break;
+    case 'action_taken':
+      field = 'server';
       break;
     default:
       return reply(boom.badImplementation('Received bad report_type value ' + req.query.report_type));
@@ -97,13 +100,43 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
     requestBody.aggs.results.aggs = {
       regions: {
         terms: {
-          field: 'country', // 'geoip.region_name',
+          field: 'country',
           size: 0
         }
       },
       missing_regions: {
         missing: {
-          field: 'country' // 'geoip.region_name',
+          field: 'country'
+        }
+      }
+    };
+  }
+  // Change  sub-aggregations action_taken
+  if(req.query.report_type === 'action_taken') {
+    requestBody.aggs.results.aggs = {
+      total: {
+            value_count: {
+              field: 'block'
+            }
+          },
+      blocked: {
+        filter: { term: { 'block': '1' } },
+        aggs: {
+          total: {
+            value_count: {
+              field: 'block'
+            }
+          }
+        }
+      },
+      learning: {
+        filter: { term: { 'learning': '1' } },
+        aggs: {
+          total: {
+            value_count: {
+              field: 'learning'
+            }
+          }
         }
       }
     };
@@ -122,6 +155,7 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
   return elasticSearch.getClient().search({
       index: indicesList,
       ignoreUnavailable: true,
+      query_cache: true,
       timeout: config.get('elasticsearch_timeout_ms'),
       body: requestBody
     })
@@ -153,6 +187,14 @@ var topReportsWAF_ = function (req, reply, domainConfig, span) {
             key: '--',
             count: region.doc_count,
           });
+        }
+
+        if(res.blocked) {
+          item.blocked = res.blocked.total.value;
+        }
+
+        if(!!res.learning) {
+          item.learning = res.learning.total.value;
         }
         return item;
       });
