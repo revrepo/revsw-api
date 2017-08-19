@@ -146,9 +146,9 @@ module.exports = [{
             .description('Phone number').optional(),
           contact_email: Joi.string().email()
             .description('Contact email').optional(),
-          address1: Joi.string().min(1).max(150).trim()
+          address1: Joi.string().min(1).max(150).trim().regex(routeModels.streetAddress)
             .description('Address 1').optional(),
-          address2: Joi.string().min(1).max(150).trim()
+          address2: Joi.string().min(1).max(150).trim().regex(routeModels.streetAddress)
             .description('Address 2').optional().allow(''),
           country: Joi.string().min(1).max(150).trim()
             .description('Country').optional(),
