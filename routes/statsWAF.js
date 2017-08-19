@@ -119,7 +119,7 @@ module.exports = [{
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of entries to report (default to 30)'),
-          report_type: Joi.string().required().valid('country', 'rule_id', 'zone')
+          report_type: Joi.string().required().valid('country', 'rule_id', 'zone', 'action_taken')
             .description('Type of requested report (defaults to "country")'),
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter')
         }
