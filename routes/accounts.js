@@ -138,17 +138,17 @@ module.exports = [{
             .description('Vendor profile name'),
           comment: Joi.string().allow('').max(300).trim()
             .description('Free-text comment about the company'),
-          first_name: Joi.string().optional().min(1).max(150).trim()
+          first_name: Joi.string().optional().min(1).max(150).trim().regex(routeModels.userFirstName)
             .description('First name of contact person'),
-          last_name: Joi.string().optional().min(1).max(150).trim()
+          last_name: Joi.string().optional().min(1).max(150).trim().regex(routeModels.userLastName)
             .description('Last name of contact person'),
           phone_number: Joi.string().min(1).max(30).trim()
             .description('Phone number').optional(),
           contact_email: Joi.string().email()
             .description('Contact email').optional(),
-          address1: Joi.string().min(1).max(150).trim()
+          address1: Joi.string().min(1).max(150).trim().regex(routeModels.streetAddress)
             .description('Address 1').optional(),
-          address2: Joi.string().min(1).max(150).trim()
+          address2: Joi.string().min(1).max(150).trim().regex(routeModels.streetAddress)
             .description('Address 2').optional().allow(''),
           country: Joi.string().min(1).max(150).trim()
             .description('Country').optional(),
