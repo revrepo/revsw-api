@@ -25,6 +25,7 @@
 
 <script type="text/javascript">
 $(function() {
+  window.$resetBtn = $('#resetBtn')[0]; // NOTE: 
   window.swaggerUi = new SwaggerUi({
     url: window.location.protocol + '//' + window.location.host + '{{hapiSwagger.endpoint}}?tags=api',
     dom_id: "swagger-ui-container",
@@ -46,6 +47,10 @@ $(function() {
     authenticate();
   });
   window.swaggerUi.load();
+  $form.on('reset', function(e) { 
+    e.preventDefault(); 
+    logout(); 
+  });
 });
 
 $(function () {
@@ -109,6 +114,12 @@ function authenticate() {
 
 }
 
+function logout(){ 
+  window.authorizations.remove('token'); 
+  window.authorizations.remove('apiKey');
+  window.$resetBtn.disabled = true;
+}
+
 function authUserPassword() {
   var data = {
     email: $('#input_user').val(),
@@ -123,6 +134,7 @@ function authUserPassword() {
     var token = 'Bearer ' + response.token;
     window.authorizations.add('token', new ApiKeyAuthorization("Authorization", token, "header"));
     showMessage('Authenticated OK', 'green');
+    window.$resetBtn.disabled = false;
   }).error(function(err, data) {
     console.log(err, err.data);
     switch (err.status) {
@@ -153,6 +165,7 @@ function authApiKey() {
     success: function(response) {
       window.authorizations.add('apiKey', new ApiKeyAuthorization("Authorization", key, "header"));
       showMessage('Authenticated OK', 'green');
+      window.$resetBtn.disabled = false; 
     },
     error: function(error) {
       showMessage('Authentication Failed!', 'red');
@@ -214,9 +227,9 @@ function showMessage(message, color) {
 </head>
 <body>
 <div class="wrapper">
-<div id='header'>
+<div id="header">
   <div class="swagger-ui-wrap">
-    <form id="api_selector" style="display: flex;width: 100%;" _style="margin: 0 0 0 0; width: 485px;" __onsubmit="authenticate()">
+    <form id="api_selector" style="display: flex;width: 100%;" _style="margin: 0 0 0 0; width: 485px;">
       <div class="col col-20" color="white" style=" display: flex; justify-content: center; align-items: center;">
         <label class="white"> Authenticate via</label>
         <select id="authType" class="parameter" onchange="onAuthTypeChange()">
@@ -226,14 +239,14 @@ function showMessage(message, color) {
       </div>
       <div class="col col-60" style="">
         <div class="row">
-          <div class='input' id='authApiKey' style="width: 100%;">
+          <div class="input" id="authApiKey" style="width: 100%;">
             <input placeholder="api key" id="input_api_key" name="api_key" type="text" size="30" style="width: 100%;" />
           </div>
-          <div id='authUserPass' style="display: none">
-            <div class='input'>
+          <div id="authUserPass" style="display: none">
+            <div class="input">
               <input placeholder="user" id="input_user" name="user" type="text" size="10" />
             </div>
-            <div class='input'>
+            <div class="input">
               <input placeholder="pass" id="input_pass" name="password" type="password" size="10" />
             </div>
           </div>
@@ -242,13 +255,14 @@ function showMessage(message, color) {
           <div class="white input" style="width: 220px;padding: 5px 4px;">
             Enter One Time Password:
           </div>
-          <div class='input' style="display: inline-block;float: none;">
+          <div class="input" style="display: inline-block;float: none;">
             <input placeholder="one time pass" id="input_otp" name="otp" type="password" size="10" style="font-size: 0.9em; padding: 3px;" />
           </div>
         </div>
       </div>
-      <div class="col col-20" style="">
-        <button type="submit" id="authBtn" class="" _onclick="authenticate()">Authenticate</button>
+      <div class="col col-20">
+        <button type="submit" id="authBtn" class="btn">Authenticate</button>
+        <button type="reset" id="resetBtn" class="btn" disabled="true">Logout</button>
       </div>
     </form>
   </div>

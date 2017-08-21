@@ -596,15 +596,14 @@ div.swagger-ui-wrap #authType {
   border-radius: 3px 3px 3px 3px; 
 
 }
-
-div.swagger-ui-wrap #authBtn {
+    
+div.swagger-ui-wrap .btn {
   font-size: 0.8rem;
   display: block;
   clear: none;
   float: left;
   padding: 3px 20px;
   border: 1px solid #999;
-  border-radius: 3px 3px 3px 3px; 
+  border-radius: 3px 3px 3px 3px;
+  width: 100%;
 }
-    
-
