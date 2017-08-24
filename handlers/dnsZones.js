@@ -686,9 +686,9 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
         cb(err);
       });
     },
-    // NOTE: make all request parrallel for get all information
+    // NOTE: make all requests parrallel by 2 for get all information
     function(cb) {
-      async.parallel(workFlowData_.dnsRecordChecks, function(err, result) {
+      async.parallelLimit(workFlowData_.dnsRecordChecks, 2,function(err, result) {
         if (err) {
           cb(new Error('DNS check error'));
           return;

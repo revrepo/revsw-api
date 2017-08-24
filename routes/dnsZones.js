@@ -233,6 +233,10 @@ module.exports = [
     method: 'GET',
     path: '/v1/dns_zones/auto_discover/{zone_name}',
     config: {
+      timeout: {
+        socket: 2400001,
+        server: 2400000
+      },
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
