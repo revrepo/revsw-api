@@ -19,7 +19,7 @@
 /*jslint node: true */
 
 'use strict';
-
+var async = require('async');
 var boom     = require('boom');
 var mongoose = require('mongoose');
 var promise = require('bluebird');
@@ -33,7 +33,10 @@ var _ = require('lodash');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
+var AuditEvents = require('../models/AuditEvents');
 var DomainConfig = require('../models/DomainConfig');
+
+var auditevents = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
@@ -177,6 +180,120 @@ exports.getStats = function(request, reply) {
       return reply(boom.badRequest('Domain ID not found'));
     }
   });
+};
+/**
+ * @name getStatsDomainActivity
+ *
+ */
+exports.getStatsDomainActivity = function(request, reply) {
+    var domainID = request.params.domain_id,
+      domainName,
+      accountID,
+      sslCertID,
+      wafRulesIDs = [],
+      isFromCache = true,
+      queryProperties = _.clone(request.query);
+    // NOTE: make correction for the time range
+    _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
+    domainConfigs.get(domainID, function(error, domainConfig) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+      }
+      if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+        domainName = domainConfig.domain_name;
+        var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
+        if (span.error) {
+          return reply(boom.badRequest(span.error));
+        }
+        sslCertID = (!!domainConfig.ssl_cert_id) ? domainConfig.ssl_cert_id : null;
+        accountID = (!!domainConfig.proxy_config) ? domainConfig.proxy_config.account_id : domainConfig.account_id;
+        if (!!domainConfig.proxy_config && !!domainConfig.proxy_config.rev_component_bp) {
+          wafRulesIDs = _.chain(domainConfig.proxy_config.rev_component_bp.waf).map(function(itemWaf) {
+            return itemWaf.waf_rules;
+          }).flatten().uniq().value();
+        }
+        // NOTE: change start time for make correction graphs for shift all values
+        var startTimeValue_ = span.start - span.interval;
+        var endTime = span.end;
+        var cacheKey = 'getStatsDomainActivity:' + domainID + ':' + JSON.stringify(queryProperties);
+
+        memoryCache.wrap(cacheKey, function(cacheCallback) {
+            isFromCache = false;
+            async.auto({
+              events: function(cb) {
+                var params = {};
+                var $or = [];
+
+                params['meta.datetime'] = {
+                  '$gte': startTimeValue_,
+                  '$lte': endTime
+                };
+
+                $or.push({
+                  'meta.target_id': domainID,
+                  'meta.activity_target': 'domain',
+                  'meta.activity_type': 'publish' //'modify'
+                });
+
+                $or.push({
+                  'meta.target_id': domainID,
+                  'meta.activity_target': 'domain',
+                  'meta.activity_type': 'purge'
+                });
+                // NOTE: add information about a current SSL Certificate used in domain
+                if (!!sslCertID) {
+                  $or.push({
+                    'meta.target_id': sslCertID,
+                    'meta.activity_target': 'sslcert',
+                    'meta.activity_type': { $in: ['publish'] }
+                  });
+                }
+                // NOTE: add information about a current WAF Rules
+                if (wafRulesIDs.length > 0) {
+                  $or.push({
+                    'meta.target_id': { $in: wafRulesIDs },
+                    'meta.activity_target': 'wafrule',
+                    'meta.activity_type': { $in: ['publish'] } //,'modify'
+                  });
+                }
+                params.$or = $or;
+                auditevents.list({ $query: params, $orderby: { 'meta.datetime': 1 } }, function(error, data) {
+                  if (error) {
+                    cb(error);
+                    return;
+                  }
+                  cb(null, data);
+                });
+              }
+            }, cacheCallback);
+          }, { ttl: config.get('cache_memory_ttl_seconds') },
+          function(error, results) {
+            var dataArray = [];
+            var response = {
+              metadata: {
+                domain_name: domainName,
+                domain_id: domainID,
+                start_timestamp: span.start,
+                start_datetime: new Date(span.start),
+                end_timestamp: span.end,
+                end_datetime: new Date(span.end),
+                interval_sec: span.interval / 1000
+              },
+              data: []
+            };
+            if (!!results.events && results.events.length > 0) {
+              dataArray = results.events;
+            }
+            response.data = dataArray;
+            if (isFromCache === true) {
+              logger.info('getStatsDomainActivity:return cache for key - ' + cacheKey);
+            }
+            renderJSON(request, reply, error, response);
+          });
+      } else {
+        return reply(boom.badRequest('Domain ID not found'));
+      }
+    });
 };
 //  ---------------------------------
 /**

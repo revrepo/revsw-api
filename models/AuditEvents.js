@@ -20,6 +20,7 @@
 
 'use strict';
 
+var _ = require('lodash');
 var config = require('config');
 var utils = require('../lib/utilities.js');
 
@@ -54,6 +55,30 @@ function AuditEvents(mongoose, connection, options) {
 }
 
 AuditEvents.prototype = {
+  list: function(params, callback) {
+    this.model.find(params, function(err, results) {
+      if(!err && results){
+        results = _.map(results,function(item){
+          return {
+            ip_address: item.meta.ip_address,
+            user_id: item.meta.user_id,
+            user_name: item.meta.user_name,
+            user_type: item.meta.user_type,
+            account_id: item.meta.account_id,
+            datetime: item.meta.datetime,
+            account: item.meta.account,
+            activity_type: item.meta.activity_type,
+            activity_target: item.meta.activity_target,
+            target_name: item.meta.target_name,
+            target_id: item.meta.target_id,
+            operation_status: item.meta.operation_status,
+            target_object: item.meta.target_object
+          };
+        });
+      }
+      callback(err, results);
+    });
+  },
   detailed : function (request, callback) {
     this.model.find(request).sort({'timestamp': 'descending'}).limit(config.get('number_of_reported_audit_log_records')).exec( function (err, auditevents) {
       var data      = [];
