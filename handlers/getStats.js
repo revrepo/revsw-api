@@ -186,6 +186,7 @@ exports.getStats = function(request, reply) {
  *
  */
 exports.getStatsDomainActivity = function(request, reply) {
+    var maxTimePeriodForActivityDays = 60; // TODO: rebase to config
     var domainID = request.params.domain_id,
       domainName,
       accountID,
@@ -201,7 +202,7 @@ exports.getStatsDomainActivity = function(request, reply) {
       }
       if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
         domainName = domainConfig.domain_name;
-        var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
+        var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForActivityDays /*allowed period - max count days*/ );
         if (span.error) {
           return reply(boom.badRequest(span.error));
         }
