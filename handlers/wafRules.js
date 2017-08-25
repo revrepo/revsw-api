@@ -265,7 +265,7 @@ exports.createWAFRule = function(request, reply) {
 
   newWAFRule.created_by = utils.generateCreatedByField(request);
 
-  var newWAFRule2 = publicRecordFields.handle(newWAFRule, 'sslCertificate');
+  var newWAFRule2 = publicRecordFields.handle(newWAFRule, 'wafRule');
   logger.info('Calling CDS to create a new WAF Rule ' + JSON.stringify(newWAFRule2));
   cds_request({method: 'POST', url: config.get('cds_url') + '/v1/waf_rules', body: JSON.stringify(newWAFRule), headers: authHeader}, function (err, res, body) {
     if (err) {
