@@ -71,7 +71,32 @@ module.exports = [
       }
     }
   },
-
+  {
+    method: 'GET',
+    path: '/v1/stats/{domain_id}/activity',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: getStats.getStatsDomainActivity,
+      description: 'Get all activity for for a domain',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          domain_id: Joi.objectId().required().description('Domain ID')
+        },
+        query: {
+          from_timestamp: Joi.string().description('Report period start timestamp'),
+          to_timestamp: Joi.string().description('Report period end timestamp')
+        }
+      }
+    }
+  },
   {
     method: 'GET',
     path: '/v1/stats/top_objects/{domain_id}',
