@@ -53,7 +53,7 @@ var checkAccountAccessPermissions_ = function( request ) {
   }
 
   if ( !accountID ) {
-    accountID = creds.companyId;
+    accountID = creds.account_id;
     if ( accountID.length === 0 ) {
       return false;
     }
