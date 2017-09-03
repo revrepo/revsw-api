@@ -53,7 +53,11 @@ var checkAccountAccessPermissions_ = function( request ) {
   }
 
   if ( !accountID ) {
-    accountID = creds.account_id;
+    accountID = creds.companyId;
+    // NOTE: get information about Account ID from another property
+    if(creds.user_type === 'apikey'){
+      accountID = creds.account_id;
+    }
     if ( accountID.length === 0 ) {
       return false;
     }
