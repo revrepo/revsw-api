@@ -21,6 +21,7 @@
 'use strict';
 
 var boom = require('boom');
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var AuditLogger = require('../lib/audit');
 var speakeasy = require('speakeasy');
@@ -41,11 +42,29 @@ var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectio
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 
 var usersService = require('../services/users.js');
-
+/**
+ * @name getUsers
+ * @description method get all users
+ */
 exports.getUsers = function getUsers(request, reply) {
   var filters_ = request.query.filters;
-  // TODO: move the user list filtering from the user DB model to this function
-  users.list(request, function (error, listOfUsers) {
+  var accountIds = utils.getAccountID(request);
+  var usersAccountId = utils.getAccountID(request,true);
+  var options = {};
+  if(!!filters_ && filters_.account_id){
+    if(!accountIds.length  || !utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+      return reply(boom.badRequest('Account ID not found'));
+    }
+    usersAccountId = filters_.account_id;
+    options.account_id = filters_.account_id;
+  } else {
+    // NOTE: set limit accounts if user is not RevAdmin
+    if(!utils.isUserRevAdmin(request)){
+      options.account_id = accountIds;
+    }
+  }
+
+  users.list(options, function (error, listOfUsers) {
     if (error || !listOfUsers) {
       return reply(boom.badImplementation('Failed to get a list of users'));
     }
@@ -53,7 +72,21 @@ exports.getUsers = function getUsers(request, reply) {
     if (listOfUsers.length === 0 && !filters_) {
       return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
     }
-
+    listOfUsers = _.filter( listOfUsers, function(itemUser){
+      // NOTE: user can has only one account Id
+      if(utils.isUserRevAdmin(request)) {
+        return true;
+      }
+      // NOTE: return only users whitch first account is equal account Id form request
+      // Need to show users ofly for one account
+      if(utils.isAPIKey(request) && itemUser.companyId.indexOf(usersAccountId) !== 0) {
+        return false;
+      }
+      if(!utils.isAPIKey(request) && utils.checkUserAccessPermissionToUser(request, itemUser)) {
+        return false;
+      }
+      return true;
+    });
     listOfUsers = publicRecordFields.handle(listOfUsers, 'users');
 
     renderJSON(request, reply, error, listOfUsers);
