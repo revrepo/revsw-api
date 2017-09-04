@@ -49,8 +49,10 @@ exports.getAccountReport = function( request, reply ) {
   var queryProperties = _.clone(request.query);
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
-  var accountID = queryProperties.account_id;
-
+  var accountID = utils.getAccountID(request, true);
+  if(!!request.query && !!request.query.account_id) {
+    accountID = request.query.account_id;
+  }
   if(!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID)) {
     return reply(boom.badRequest('Account ID not found'));
   }
@@ -74,7 +76,7 @@ exports.getAccountReport = function( request, reply ) {
       .then( function( response ) {
         var response_ = {
           metadata: {
-            account_id: request.params.account_id,
+            account_id: accountID,
             from: from.valueOf(),
             from_datetime: from,
             to: to.valueOf(),
@@ -93,7 +95,7 @@ exports.getAccountReport = function( request, reply ) {
       reply( response ).type( 'application/json; charset=utf-8' );
     })
     .catch( function( err ) {
-      var msg = err.toString() + ': account ID ' + request.params.account_id +
+      var msg = err.toString() + ': account ID ' + accountID +
         ', span from ' + (new Date(from)).toUTCString() +
         ', to ' + (new Date(to)).toUTCString();
       return reply( boom.badImplementation( msg ) );
@@ -107,8 +109,10 @@ exports.getAccountReport = function( request, reply ) {
 exports.getAccountStats = function( request, reply ) {
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
-  var accountID = request.query.account_id;
-
+  var accountID = utils.getAccountID(request, true);
+  if(!!request.query && !!request.query.account_id) {
+    accountID = request.query.account_id;
+  }
   if(!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID)) {
     return reply(boom.badRequest('Account ID not found'));
   }
@@ -130,7 +134,7 @@ exports.getAccountStats = function( request, reply ) {
       reply(response).type('application/json; charset=utf-8');
     })
     .catch(function(err) {
-      var msg = err.toString() + ': account ID ' + request.params.account_id +
+      var msg = err.toString() + ': account ID ' + accountID +
         ', span from ' + (new Date(span.start)).toUTCString() +
         ', to ' + (new Date(span.end)).toUTCString();
       return reply(boom.badImplementation(msg));
