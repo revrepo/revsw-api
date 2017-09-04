@@ -285,85 +285,38 @@ User.prototype = {
       callback(null, doc);
     });
   },
-
-  list : function (request, callback) {
-
-    // console.log('Inside line. Object request.auth.credentials = ', request.auth.credentials);
-
+  /**
+   * @name list
+   * @description method get list of users data
+   */
+  list: function(params, callback) {
     var options = {};
-    if(!!request.query && !!request.query.filters){
-      var filter_ = request.query.filters;
-      if(!!filter_.account_id){
-         options.companyId = {$regex: filter_.account_id, $options: 'i'};
+    if(!!params.account_id){
+      if(_.isArray(params.account_id)){
+        options.$or = [];
+        _.each(params.account_id,function(item){
+          options.$or.push({
+            companyId: { $regex: item, $options: 'i' }
+          });
+        });
+      }else{
+        options.companyId = { $regex: params.account_id, $options: 'i'};
       }
-     }
-    this.model.find(options, function (err, users) {
+    }
+    // NOTE: don't show the fields "validation", "password", "old_passwords", "__v"
+    this.model.find(options, '-validation -password -old_passwords -__v', function (err, users) {
       if (users) {
-
         users = utils.clone(users);
         for (var i = 0; i < users.length; i++) {
-
-          // TODO need to move the access control stuff out of the method
-
-          // remove from the resulting array users without companyId property (most likely RevAdmin/system users)
-          if (request.auth.credentials.role !== 'revadmin' && (!users[i].companyId)) {
-            users.splice(i, 1);
-            i--;
-            continue;
-          }
-
-          if (request.auth.credentials.role !== 'revadmin' && (request.auth.credentials.role !== 'reseller' && users[i].role === 'reseller')) {
-            users.splice(i, 1);
-            i--;
-            continue;
-          }
           if (users[i].companyId) {
             users[i].companyId = users[i].companyId.split(',');
           } else {
             users[i].companyId = [];
           }
 
-          var companyId = utils.getAccountID(request);
-
-          // skip users which do not belong to the company
-          if (request.auth.credentials.role === 'revadmin' || utils.areOverlappingArrays(users[i].companyId, companyId)) {
-            users[i].user_id = users[i]._id;
-            users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
-            delete users[i]._id;
-            delete users[i].__v;
-            delete users[i].validation;
-            delete users[i].old_passwords;
-
-            if (users[i].domain && users[i].domain !== '') {
-              users[i].domain = users[i].domain.toLowerCase().split(',');
-            } else {
-              users[i].domain = [];
-            }
-          } else {
-            users.splice(i, 1);
-            i--;
-          }
-        }
-      }
-      //    console.log('Inside list, users = ', users);
-      callback(err, users);
-    });
-  },
-
-  listAll : function (request, callback) {
-
-    this.model.find(function (err, users) {
-      if (users) {
-        users = utils.clone(users);
-
-        for (var i = 0; i < users.length; i++) {
-          users[i].companyId = users[i].companyId ? users[i].companyId.split(',') : '';
-          users[i].user_id   = users[i]._id;
-
+          users[i].user_id = users[i]._id;
+          users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
           delete users[i]._id;
-          delete users[i].__v;
-          delete users[i].validation;
-          delete users[i].old_passwords;
 
           if (users[i].domain && users[i].domain !== '') {
             users[i].domain = users[i].domain.toLowerCase().split(',');
@@ -372,6 +325,7 @@ User.prototype = {
           }
         }
       }
+      //    console.log('Inside list, users = ', users);
       callback(err, users);
     });
   },

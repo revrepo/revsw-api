@@ -432,20 +432,16 @@ exports.removeAccount = function(accountId, options, callback) {
       //======================
       // Drop the deleted account_id from companyId of all users which are managing the account
       function getAccountUsersForDelete(cb) {
-        // TODO: change method users.listAll
-        users.listAll(null, function(error, usersToUpdate) {
+        var options = {
+          account_id: accountId
+        };
+        users.list(options, function(error, usersToUpdate) {
           var err_ = null;
           if (error) {
             // badImplementation
             err_ = new Error('Failed to retrieve from the DB a list of all users');
           }
           if (usersToUpdate.length > 0) {
-            for (var i = 0; i < usersToUpdate.length; i++) {
-              if (usersToUpdate[i].companyId.indexOf(accountId) === -1) {
-                usersToUpdate.splice(i, 1);
-                i--;
-              }
-            }
             usersListRemovedAccount_ = usersToUpdate;
           }
           cb(err_);

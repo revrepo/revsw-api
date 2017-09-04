@@ -40,36 +40,6 @@ var memoryCache = cacheManager.caching({
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
 
-//  ---------------------------------
-
-// TODO: need to move the function to "utils" module
-var checkAccountAccessPermissions_ = function( request ) {
-
-  var accountID = request.query.account_id || '';
-  var creds = request.auth.credentials;
-
-  if ( creds.role === 'revadmin' ) {
-    return accountID;
-  }
-
-  if ( !accountID ) {
-    accountID = creds.companyId;
-    if ( accountID.length === 0 ) {
-      return false;
-    }
-    if ( accountID.length === 1 ) {
-      accountID = accountID[0];
-    }
-    return accountID;
-  }
-
-  if (utils.getAccountID(request).indexOf( accountID ) !== -1) {
-    return accountID;
-  }
-
-  return false;
-};
-
 //  ----------------------------------------------------------------------------------------------//
 /**
  * @name getAccountReport
@@ -78,10 +48,11 @@ var checkAccountAccessPermissions_ = function( request ) {
 exports.getAccountReport = function( request, reply ) {
   var queryProperties = _.clone(request.query);
   var isFromCache = true;
-  var accountID = checkAccountAccessPermissions_( request );
-  if ( accountID === false/*strict identity*/ ) {
-    reply(boom.badRequest( 'Account ID not found' ));
-    return false;
+  var accountIds = utils.getAccountID(request);
+  var accountID = queryProperties.account_id;
+
+  if(!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID)) {
+    return reply(boom.badRequest('Account ID not found'));
   }
   var from = new Date(), to = new Date();// NOTE: default report period
   var from_ = request.query.from,
@@ -135,10 +106,11 @@ exports.getAccountReport = function( request, reply ) {
  */
 exports.getAccountStats = function( request, reply ) {
   var isFromCache = true;
-  var accountID = checkAccountAccessPermissions_( request );
-  if ( accountID === false/*strict identity*/ ) {
-    reply(boom.badRequest( 'Account ID not found' ));
-    return false;
+  var accountIds = utils.getAccountID(request);
+  var accountID = request.query.account_id;
+
+  if(!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID)) {
+    return reply(boom.badRequest('Account ID not found'));
   }
 
   var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*61/*allowed period - 2 months*/ );
