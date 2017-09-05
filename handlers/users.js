@@ -221,9 +221,13 @@ exports.updateUser = function (request, reply) {
     // TODO use an existing access verification function instead of the code
     if (request.auth.credentials.role !== 'revadmin' &&
       (newUser.companyId &&
-      !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
+        !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
       return Promise.reject(Error('The new account is not found'));
     }
+    // TODO: try new code
+    // if(newUser.companyId && !utils.checkUserAccessPermissionToUser(request, newUser)) {
+    //   return Promise.reject(Error('The new account is not found'));
+    // }
 
     return users.getAsync({_id: userId});
   })
