@@ -53,7 +53,11 @@ exports.getAccountReport = function( request, reply ) {
   if(!!request.query && !!request.query.account_id) {
     accountID = request.query.account_id;
   }
-  if(!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID)) {
+  if(!!request.query && request.query.account_id === '') {
+    // NOTE: if account_id exist but empty when accountID must be equal 'false' for get reports for all accounts
+    accountID = false;
+  }
+  if(accountID !== false && (!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID))) {
     return reply(boom.badRequest('Account ID not found'));
   }
   var from = new Date(), to = new Date();// NOTE: default report period
@@ -113,7 +117,11 @@ exports.getAccountStats = function( request, reply ) {
   if(!!request.query && !!request.query.account_id) {
     accountID = request.query.account_id;
   }
-  if(!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID)) {
+  if(!!request.query && request.query.account_id === '') {
+    // NOTE: if account_id exist but empty when accountID must be equal 'false' for get reports for all accounts
+    accountID = false;
+  }
+  if(accountID !== false && (!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID))) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
