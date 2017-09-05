@@ -82,7 +82,7 @@ exports.getUsers = function getUsers(request, reply) {
       if(utils.isAPIKey(request) && itemUser.companyId.indexOf(usersAccountId) !== 0) {
         return false;
       }
-      if(!utils.isAPIKey(request) && !utils.checkUserAccessPermissionToUser(request, itemUser)) {
+      if(!utils.checkUserAccessPermissionToUser(request, itemUser)) {
         return false;
       }
       return true;
