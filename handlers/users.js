@@ -52,7 +52,7 @@ exports.getUsers = function getUsers(request, reply) {
   var usersAccountId = utils.getAccountID(request,true);
   var options = {};
   if(!!filters_ && filters_.account_id){
-    if(!accountIds.length  || !utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+    if(!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     usersAccountId = filters_.account_id;
