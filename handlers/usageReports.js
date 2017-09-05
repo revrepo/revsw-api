@@ -49,17 +49,28 @@ exports.getAccountReport = function( request, reply ) {
   var queryProperties = _.clone(request.query);
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
-  var accountID = utils.getAccountID(request, true);
-  if(!!request.query && !!request.query.account_id) {
-    accountID = request.query.account_id;
+  var accountID = request.query.account_id || '';
+  var isValidAccountId = true;
+  if(!utils.isUserRevAdmin(request)) {
+    if(accountID === '') {
+      accountID = utils.getAccountID(request);
+      if(accountID.length === 0){
+        isValidAccountId = false;
+      }
+      if(accountID.length === 1) {
+        accountID = accountID[0];
+      }
+    } else {
+      if(!utils.checkUserAccessPermissionToAccount(request, accountID)) {
+        isValidAccountId = false;
+      }
+    }
   }
-  if(!!request.query && request.query.account_id === '') {
-    // NOTE: if account_id exist but empty when accountID must be equal 'false' for get reports for all accounts
-    accountID = false;
-  }
-  if(accountID !== false && (!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID))) {
+
+  if(!accountIds.length || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
+
   var from = new Date(), to = new Date();// NOTE: default report period
   var from_ = request.query.from,
     to_ = request.query.to;
@@ -113,15 +124,25 @@ exports.getAccountReport = function( request, reply ) {
 exports.getAccountStats = function( request, reply ) {
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
-  var accountID = utils.getAccountID(request, true);
-  if(!!request.query && !!request.query.account_id) {
-    accountID = request.query.account_id;
+  var accountID = request.query.account_id || '';
+  var isValidAccountId = true;
+  if(!utils.isUserRevAdmin(request)) {
+    if(accountID === '') {
+      accountID = utils.getAccountID(request);
+      if(accountID.length === 0) {
+        isValidAccountId = false;
+      }
+      if(accountID.length === 1) {
+        accountID = accountID[0];
+      }
+    } else {
+      if(!utils.checkUserAccessPermissionToAccount(request, accountID)) {
+        isValidAccountId = false;
+      }
+    }
   }
-  if(!!request.query && request.query.account_id === '') {
-    // NOTE: if account_id exist but empty when accountID must be equal 'false' for get reports for all accounts
-    accountID = false;
-  }
-  if(accountID !== false && (!accountIds.length || !utils.checkUserAccessPermissionToAccount(request, accountID))) {
+
+  if(!accountIds.length || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
