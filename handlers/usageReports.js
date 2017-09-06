@@ -51,7 +51,8 @@ exports.getAccountReport = function( request, reply ) {
   var accountIds = utils.getAccountID(request);
   var accountID = request.query.account_id || '';
   var isValidAccountId = true;
-  if(!utils.isUserRevAdmin(request)) {
+  var isRevAdmin = utils.isUserRevAdmin(request);
+  if(!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
     if(accountID === '') {
       accountID = utils.getAccountID(request);
       if(accountID.length === 0){
@@ -65,9 +66,12 @@ exports.getAccountReport = function( request, reply ) {
         isValidAccountId = false;
       }
     }
+  } else {
+    // for revadmin role just give whatever is requested
+    accountIds = accountID;
   }
 
-  if(!accountIds.length || !isValidAccountId) {
+  if((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -122,11 +126,15 @@ exports.getAccountReport = function( request, reply ) {
  * @description Get Usage Date Histogram for an Account(s)
  */
 exports.getAccountStats = function( request, reply ) {
+
+  // TODO: need to move the following permissions checking code to a separate function  
+  // and it in this and previous handlers
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
   var accountID = request.query.account_id || '';
   var isValidAccountId = true;
-  if(!utils.isUserRevAdmin(request)) {
+  var isRevAdmin = utils.isUserRevAdmin(request);
+  if(!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
     if(accountID === '') {
       accountID = utils.getAccountID(request);
       if(accountID.length === 0) {
@@ -140,9 +148,12 @@ exports.getAccountStats = function( request, reply ) {
         isValidAccountId = false;
       }
     }
+  } else {
+    // for revadmin role just give whatever is requested
+    accountIds = accountID;
   }
 
-  if(!accountIds.length || !isValidAccountId) {
+  if((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
 

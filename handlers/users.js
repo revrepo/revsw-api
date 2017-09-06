@@ -49,10 +49,10 @@ var usersService = require('../services/users.js');
 exports.getUsers = function getUsers(request, reply) {
   var filters_ = request.query.filters;
   var accountIds = utils.getAccountID(request);
-  var usersAccountId = utils.getAccountID(request,true);
+  var usersAccountId = utils.getAccountID(request);
   var options = {};
   if(!!filters_ && filters_.account_id){
-    if(!accountIds.length  || !utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+    if(!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     usersAccountId = filters_.account_id;
@@ -73,15 +73,6 @@ exports.getUsers = function getUsers(request, reply) {
       return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
     }
     listOfUsers = _.filter( listOfUsers, function(itemUser){
-      // NOTE: user can has only one account Id
-      if(utils.isUserRevAdmin(request)) {
-        return true;
-      }
-      // NOTE: return only users whitch first account is equal account Id form request
-      // Need to show users ofly for one account
-      if(utils.isAPIKey(request) && itemUser.companyId.indexOf(usersAccountId) !== 0) {
-        return false;
-      }
       if(!utils.checkUserAccessPermissionToUser(request, itemUser)) {
         return false;
       }

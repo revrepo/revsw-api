@@ -229,7 +229,7 @@
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/termsofservice",
-      "acceptable_use_policy_link": "https://www.nuubit.com/privacypolicy",
+      "acceptable_use_policy_link": "https://www.nuubit.com/aup",
       "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
       "zendesk_support_site": "nuubit.zendesk.com",
       "copyright": "Copyright RevAPM 2013-2017",
@@ -327,7 +327,7 @@
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/termsofservice",
-      "acceptable_use_policy_link": "https://www.nuubit.com/privacypolicy",
+      "acceptable_use_policy_link": "https://www.nuubit.com/aup",
       "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
       "zendesk_support_site": "nuubit.zendesk.com",
       "copyright": "Copyright nuu:bit, Inc. 2017",
@@ -425,7 +425,7 @@
         }
       },
       "terms_of_service_link": "https://www.nuubit.com/termsofservice",
-      "acceptable_use_policy_link": "https://www.nuubit.com/privacypolicy",
+      "acceptable_use_policy_link": "https://www.nuubit.com/aup",
       "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
       "zendesk_support_site": "nuubit.zendesk.com",
       "copyright": "Copyright Hooli 2017",

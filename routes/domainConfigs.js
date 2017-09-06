@@ -408,16 +408,16 @@ module.exports = [{
                 host: Joi.alternatives().try([Joi.string().uri(), Joi.string().regex(routeModels.domainRegex)]).required(),
                 name: Joi.string().max(150).required()
               }),
-              recv: Joi.string().max(10000),
-              backend_response: Joi.string().max(10000),
-              backend_error: Joi.string().max(10000),
-              hit: Joi.string().max(10000),
-              miss: Joi.string().max(10000),
-              deliver: Joi.string().max(10000),
-              pass: Joi.string().max(10000),
-              pipe: Joi.string().max(10000),
-              hash: Joi.string().max(10000),
-              synth: Joi.string().max(10000)
+              recv: Joi.string().max(40000),
+              backend_response: Joi.string().max(40000),
+              backend_error: Joi.string().max(40000),
+              hit: Joi.string().max(40000),
+              miss: Joi.string().max(40000),
+              deliver: Joi.string().max(40000),
+              pass: Joi.string().max(40000),
+              pipe: Joi.string().max(40000),
+              hash: Joi.string().max(40000),
+              synth: Joi.string().max(40000)
             })
           }).required(),
           bp_lua: Joi.array().items({
