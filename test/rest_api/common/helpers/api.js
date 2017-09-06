@@ -61,6 +61,32 @@ var APIHelpers = {
   wafRules: WAFRulesHelper,
 
   /**
+  * ### API.helpers.authenticate()
+  *
+  * Helper method to Authenticate user data before doing any type of request to
+  * the REST API services.
+  *
+  * @param {Object} credentials , credentials data.
+  *  For instance user
+  *     {
+  *       name: 'joe@email.com',
+  *       password: 'something'
+  *     }
+  *  For API Key
+  *     {
+  *       keyId: ''
+  *     }
+  * @returns {Promise}
+  */
+  authenticate: function(credentials) {
+
+    if(!credentials.keyId){
+      return this.authenticateUser(credentials);
+    }else{
+      return this.authenticateAPIKey(credentials.keyId);
+    }
+  },
+  /**
    * ### API.helpers.authenticateUser()
    *
    * Helper method to Authenticate user before doing any type of request to
