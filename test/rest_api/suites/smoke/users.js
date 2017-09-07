@@ -139,6 +139,8 @@ describe('Smoke check: Users', function() {
                 .then(function(response) {
                   newUser.firstName = 'John';
                   newUser.lastName = 'Doe';
+                  newUser.current_password = newUser.password;
+                  newUser.new_password = 'secret321';
                   API.resources.users
                     .update(response.body.object_id, newUser)
                     .expect(200)
