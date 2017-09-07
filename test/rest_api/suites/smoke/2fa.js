@@ -21,21 +21,20 @@ require('should-http');
 var config = require('config');
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
+var HelpersAPI = require('./../../common/helpers/api');
 var TwoFADP = require('./../../common/providers/data/2fa');
 
 describe('Smoke check:', function() {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
+  var revAdminCredentials = config.api.users.revAdmin;
 
-  var usersList = [
-    config.api.users.revAdmin,
-    config.api.users.reseller,
-    config.api.users.admin,
-    // API Key
-    config.api.apikeys.admin,
-    config.api.apikeys.reseller
-  ];
+  var userRolesList = [
+    'user',
+    'admin',
+    'reseller'
+  ]
 
   before(function(done) {
     done();
@@ -45,18 +44,29 @@ describe('Smoke check:', function() {
     done();
   });
 
-  usersList.forEach(function(credentials) {
-    describe('2fa resource for credential data ' + credentials.role, function() {
-      var user;
+  userRolesList.forEach(function(roleName) {
+    describe('2fa resource for user with role "' + roleName + '"', function() {
+      var user, accountForUsers;
+      before(function(done) {
+        API.helpers
+          .authenticate(revAdminCredentials)
+          .then(function() {
+            return HelpersAPI.accounts.createCompleteOne();
+          })
+          .then(function(newAccount) {
+            accountForUsers = newAccount;
+          })
+          .then(done)
+          .catch(done);
+      });
+
       beforeEach(function(done) {
         API.helpers
-          .authenticate(credentials)
+          .authenticate(revAdminCredentials)
           .then(function() {
-            var newUser = DataProvider.generateUser();
-            if (credentials.role === config.api.users.revAdmin.role) {
-              newUser.companyId = [credentials.account.id];
-              newUser.domain = [];
-            }
+            var newUser = DataProvider.generateUser(roleName);
+            newUser.companyId = [accountForUsers.id];
+            newUser.domain = [];
             return API.helpers.users.create(newUser);
           })
           .then(function(newUser) {
