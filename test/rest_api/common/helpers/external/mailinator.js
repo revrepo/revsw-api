@@ -81,17 +81,21 @@ var MailinatorHelper = {
    * @returns {Promise}
    */
   getVerificationToken: function (emailAddress) {
+    var emailId;
     return MailinatorHelper
       .waitWhileInboxIsEmpty(emailAddress)
       .then(function () {
         return MailinatorHelper.getLastMessage(emailAddress);
       })
       .then(function (msg) {
+        emailId = msg.id;
         return MailinatorResource.getEmail(msg.id);
       })
       .then(function (fullMsg) {
         var msgBody = fullMsg.data.parts[0].body;
         var tokenRegExp = /[0-9a-f]{40}/;
+        // NOTE: delete an email with verification data
+        MailinatorResource.deleteEmail(emailId);
         return msgBody.match(tokenRegExp)[0];
       });
   }
