@@ -28,45 +28,53 @@ describe('Smoke check: Users', function() {
   var users = [
     config.api.users.revAdmin,
     config.api.users.reseller,
-    config.api.users.admin
+    config.api.users.admin,
+    // API Key
+    config.api.apikeys.admin,
+    config.api.apikeys.reseller
   ];
   // Retrieving information about specific user that later we will use for
   // our API requests.
   users.forEach(function(credentials) {
     // Generating new `user` data in order to use later in our tests.
-    var userSample = DataProvider.generateUser();
-    if(credentials.role === config.api.users.revAdmin.role) {
-      userSample.companyId = [credentials.account.id];
-    }
-    before(function(done) {
-      API.helpers
-        .authenticate(credentials)
-        .then(function() {
-          API.resources.users
-            .createOne(userSample)
-            .then(function (response) {
-              userSample.id = response.body.object_id;
-              userSample.name = userSample.email;
+    describe('Users resource for credential data - ' + credentials.role, function() {
+      var userSample;
+      before(function(done) {
+        userSample = DataProvider.generateUser();
+        if (credentials.role === config.api.users.revAdmin.role) {
+          userSample.companyId = [credentials.account.id];
+          userSample.domain = [];
+        }
 
-              return API.resources.authenticate.createOne({
-                email: userSample.email,
-                password: userSample.password
-              });
-            })
-            .then(function (response) {
-              userSample.token = response.body.token;
-              done();
-            })
-            .catch(done);
-        })
-        .catch(done);
-    });
+        API.helpers
+          .authenticate(credentials)
+          .then(function() {
+            API.resources.users
+              .createOne(userSample)
+              .then(function(response) {
+                userSample.id = response.body.object_id;
+                userSample.name = userSample.email;
 
-    after(function (done) {
-      done();
-    });
+                return API.resources.authenticate.createOne({
+                  email: userSample.email,
+                  password: userSample.password
+                });
+              })
+              .then(function(response) {
+                userSample.token = response.body.token;
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
 
-    describe('Users resource for user with role ' + credentials.role, function() {
+      after(function(done) {
+        done();
+      });
+
+
+
       it('should return a response when getting all users.',
         function(done) {
           API.helpers
@@ -81,10 +89,10 @@ describe('Smoke check: Users', function() {
         });
 
       it('should return a response when getting specific user.',
-        function (done) {
+        function(done) {
           API.helpers
             .authenticate(credentials)
-            .then(function () {
+            .then(function() {
               API.resources.users
                 .getOne(userSample.id)
                 .expect(200)
@@ -93,19 +101,20 @@ describe('Smoke check: Users', function() {
             .catch(done);
         });
 
-      it('should return a response when creating specific user.',
-        function (done) {
+      it('should return a response when creating new user.',
+        function(done) {
           var newUser = DataProvider.generateUser();
-          if(credentials.role === config.api.users.revAdmin.role) {
+          if (credentials.role === config.api.users.revAdmin.role) {
             newUser.companyId = [credentials.account.id];
+            newUser.domain = [];
           }
           API.helpers
             .authenticate(credentials)
-            .then(function () {
+            .then(function() {
               API.resources.users
                 .createOne(newUser)
                 .expect(200)
-                .then(function (response) {
+                .then(function(response) {
                   API.resources.users
                     .deleteOne(response.body.object_id)
                     .end(done);
@@ -115,18 +124,19 @@ describe('Smoke check: Users', function() {
             .catch(done);
         });
 
-      it('should return a response when updating specific user.',
-        function (done) {
+      it('should return a response when updating new user.',
+        function(done) {
           var newUser = DataProvider.generateUser();
-          if(credentials.role === config.api.users.revAdmin.role) {
+          if (credentials.role === config.api.users.revAdmin.role) {
             newUser.companyId = [credentials.account.id];
+            newUser.domain = [];
           }
           API.helpers
             .authenticate(credentials)
-            .then(function () {
+            .then(function() {
               API.resources.users
                 .createOne(newUser)
-                .then(function (response) {
+                .then(function(response) {
                   newUser.firstName = 'John';
                   newUser.lastName = 'Doe';
                   API.resources.users
@@ -139,17 +149,18 @@ describe('Smoke check: Users', function() {
             .catch(done);
         });
 
-      it('should return a response when deleting a user.', function(done) {
+      it('should return a response when deleting new user.', function(done) {
         var newUser = DataProvider.generateUser();
-        if(credentials.role === config.api.users.revAdmin.role) {
+        if (credentials.role === config.api.users.revAdmin.role) {
           newUser.companyId = [credentials.account.id];
+          newUser.domain = [];
         }
         API.helpers
           .authenticate(credentials)
-          .then(function () {
+          .then(function() {
             API.resources.users
               .createOne(newUser)
-              .then(function (response) {
+              .then(function(response) {
                 var objectId = response.body.object_id;
                 API.resources.users
                   .deleteOne(objectId)
@@ -161,26 +172,13 @@ describe('Smoke check: Users', function() {
           .catch(done);
       });
 
-      it('should return a response when getting my user profile.',
-        function(done) {
-          API.helpers
-            .authenticate(credentials)
-            .then(function () {
-              API.resources.users
-                .myself()
-                .getOne()
-                .expect(200)
-                .end(done);
-            })
-            .catch(done);
-        });
-
       // ### Spec/test to update a user's password
       it('should return a response when updating specific user\'s password.',
         function(done) {
+
           API.helpers
             .authenticate(userSample)
-            .then(function () {
+            .then(function() {
               API.resources.users
                 .password()
                 .update(userSample.id, {
@@ -194,23 +192,33 @@ describe('Smoke check: Users', function() {
         });
     });
   }); // end users.forEach
+});
 
-  // NOTE: smoke test only for user with role 'User'
-  var userRole = config.api.users.user;
-  describe('Users resource for user with role ' + userRole.role, function() {
-    it('should return a response when getting my user profile',
-      function(done) {
-        API.helpers
-          .authenticate(userRole)
-          .then(function() {
-            API.resources.users
-              .myself()
-              .getOne()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
+describe('User resource profile', function() {
+
+  var usersData = [
+    config.api.users.revAdmin,
+    config.api.users.reseller,
+    config.api.users.admin
+  ];
+  usersData.forEach(function(userData) {
+
+    describe('for user with role ' + userData.role, function() {
+
+      it('should return a success response',
+        function(done) {
+          API.helpers
+            .authenticate(userData)
+            .then(function() {
+              API.resources.users
+                .myself()
+                .getOne()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+    });
   });
 
 });

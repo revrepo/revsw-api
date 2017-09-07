@@ -74,16 +74,18 @@ var APIHelpers = {
   *     }
   *  For API Key
   *     {
-  *       keyId: ''
+  *      id: '',
+  *      key: ''
   *     }
   * @returns {Promise}
   */
   authenticate: function(credentials) {
 
-    if(!credentials.keyId){
+    if(!!credentials.email){
       return this.authenticateUser(credentials);
     }else{
-      return this.authenticateAPIKey(credentials.keyId);
+      Session.setCurrentUser(credentials);
+      return this.authenticateAPIKey(credentials.id);
     }
   },
   /**
