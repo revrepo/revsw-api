@@ -122,20 +122,8 @@ exports.get = function (request, reply) {
   var billingPlanId = params.id;
   var vendorSlug = request.query.vendor;
   var options = {
-    _id: billingPlanId,
-    vendor_profile: vendorSlug || defaultSignupVendorProfile
+    _id: billingPlanId
   };
-
-  if (request.auth.isAuthenticated === true) {
-    // NOTE: default vendor_profile if not exist  "request.query.vendor"
-    if (!vendorSlug) {
-      options.vendor_profile = request.auth.credentials.vendor_profile || defaultSignupVendorProfile;
-    }
-    // NOTE: RevAdmin must see all billing plans if not set "vendorSlug"
-    if (!vendorSlug && utils.isUserRevAdmin(request) === true) {
-        delete options.vendor_profile;
-    }
-  }
 
   BillingPlan.get(options, function(error, result) {
     if (error) {
@@ -146,7 +134,7 @@ exports.get = function (request, reply) {
       result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
       renderJSON(request, reply, error, result);
     } else {
-      return reply(boom.badRequest('Billing plan not found'));
+      return reply(boom.badRequest('Billing plan ID not found'));
     }
   });
 };
