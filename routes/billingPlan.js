@@ -35,7 +35,7 @@ module.exports = [
       handler: billingPlanHandler.list,
       description: 'Get a list of Billing Plans registered in system',
       notes: 'Use this function to get a list of Billing Plans registered in system',
- //      tags: ['api', 'web'],
+  //      tags: ['api', 'web'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -48,15 +48,11 @@ module.exports = [
     method: 'GET',
     path: '/v1/billing_plans/{id}',
     config: {
-      auth: false,
-      //TODO: check bisness logick
-      // {
-      //   scope: ['admin_rw']
-      // },
+      auth:{ mode: 'try'}, // @see https://hapijs.com/tutorials/auth#mode
       handler: billingPlanHandler.get,
       description: 'Get Billing Plan details',
       notes: 'Use this function to get details of an Billing plan',
-//      tags: ['api'],
+ //      tags: ['api'],
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
