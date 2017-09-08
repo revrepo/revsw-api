@@ -266,7 +266,7 @@
       "signup_user_verify_email_subject": "nuu:bit New User Email Verification Request",
       "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
       "enable_self_registration": true,
-      "enable_simplified_signup_process": false,
+      "enable_simplified_signup_process": true,
       "signup_user_verify_email_text" : [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a nuu:bit account.\n",
         "Please click on the following link, or paste this into your browser to complete the process:\n",
