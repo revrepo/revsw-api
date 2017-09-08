@@ -521,6 +521,7 @@ exports.listOfVendorProfileNamesModel = Joi.array().items(Joi.string()).meta({
 exports.vendorProfileConfig = Joi.object({
   vendor: Joi.string().description('Vendor code name'),
   vendorUrl: Joi.string().description('Customer Portal URL'),
+  sign_up_url: Joi.string().description('Sign Up URL'),
   companyWebsiteURL: Joi.string().description('Company/product website URL'),
   contactSalesLink: Joi.string().description('"Contact Sales" link'),
   support_email: Joi.string().required().description('Support email'),
