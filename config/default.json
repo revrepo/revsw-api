@@ -165,6 +165,7 @@
       "password_reset_email_subject": "RevAPM Customer Portal Password Reset",
       "password_reset_confirmation_email_subject": "Your RevAPM Customer Portal password has been changed",
       "chargify_user_welcome_email_subject": "Welcome to RevAPM",
+      "sign_up_url": "/#/signup/plans",
       "signup_user_verify_email_subject": "RevAPM New User Email Verification Request",
       "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
       "enable_self_registration": true,
@@ -263,6 +264,7 @@
       "password_reset_email_subject": "nuu:bit Customer Portal Password Reset",
       "password_reset_confirmation_email_subject": "Your nuu:bit Customer Portal password has been changed",
       "chargify_user_welcome_email_subject": "Welcome to nuu:bit",
+      "sign_up_url": "/#/signup/plans",      
       "signup_user_verify_email_subject": "nuu:bit New User Email Verification Request",
       "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
       "enable_self_registration": true,
@@ -365,6 +367,7 @@
       "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
       "enable_self_registration": true,
       "enable_simplified_signup_process": true,
+      "sign_up_url": "/#/signup/plans",      
       "signup_user_verify_email_text" : [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a Hooli account.\n",
         "Please click on the following link, or paste this into your browser to complete the process:\n",
