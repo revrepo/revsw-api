@@ -134,7 +134,7 @@ exports.get = function (request, reply) {
       result = publicRecordFields.handle(result.toJSON(), 'billingPlan');
       renderJSON(request, reply, error, result);
     } else {
-      return reply(boom.badRequest('Billing plan ID not found'));
+      return reply(boom.badRequest('Billing plan not found'));
     }
   });
 };
