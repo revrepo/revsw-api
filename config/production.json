@@ -83,6 +83,7 @@
       "googleAnalyticsAccount": "UA-68856309-3",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "cname_domain": "revdn.net",
+      "sign_up_url": "https://www.nuubit.com/sign-up/",            
       "azure_marketplace": {
         "provider_name": "RevAPM.MobileCDN",
         "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
@@ -96,6 +97,7 @@
       "googleAnalyticsAccount": "UA-92590791-3",
       "apiGoogleAnalyticsAccount": "UA-92590791-4",
       "cname_domain": "nuubitcn.net",
+      "sign_up_url": "https://www.nuubit.com/sign-up/", 
       "azure_marketplace": {
         "provider_name": "nuubit.nextgencdn",
         "sso_endpoint": "https://portal.nuubit.net/#/azure-sso",
@@ -105,6 +107,7 @@
     "hooli": {
       "vendorUrl": "https://hooli.nuubit.net",
       "apiUrl": "https://api.revapm.net",
+      "sign_up_url": "https://www.nuubit.com/sign-up/",      
       "password_reset_portal_domain": "portal.revapm.net",
       "googleAnalyticsAccount": "UA-68856309-3",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
