@@ -38,10 +38,15 @@ var utils = require('../lib/utilities.js');
 
 var defaultSignupVendorProfile = config.get('default_signup_vendor_profile');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-
+/**
+  * @name list
+  * @description method return a list of billing plans ONLY with type "public"
+  * NOTE: revAdmin too not will be see another types
+ */
 exports.list = function (request, reply) {
   var vendorSlug = request.query.vendor;
   var options = {
+    type: 'public',
     vendor_profile: vendorSlug || defaultSignupVendorProfile
   };
 
@@ -52,6 +57,7 @@ exports.list = function (request, reply) {
     }
     // NOTE: RevAdmin must see all billing plans if not set "vendorSlug"
     if(!vendorSlug && utils.isUserRevAdmin(request) === true){
+      // NOTE: if activate this line when revAdmin will be see all billing plans -> delete options.type;
       delete options.vendor_profile;
     }
   }
@@ -106,12 +112,36 @@ exports.createBillingPlan = function (request, reply) {
     });
   });
 };
-
+  /**
+  * @name get
+  * @description method get details about a billing plan
+  * NOTE: revAdmin will be see records with any type
+  */
 exports.get = function (request, reply) {
-  var id = request.params.id;
-  BillingPlan.get({_id: id}, function (error, result) {
+  var params = request.params;
+  var billingPlanId = params.id;
+  var vendorSlug = request.query.vendor;
+  var options = {
+    _id: billingPlanId,
+    vendor_profile: vendorSlug || defaultSignupVendorProfile,
+    type: 'public'
+  };
+
+  if (request.auth.isAuthenticated === true) {
+    // NOTE: default vendor_profile if not exist  "request.query.vendor"
+    if (!vendorSlug) {
+      options.vendor_profile = request.auth.credentials.vendor_profile || defaultSignupVendorProfile;
+    }
+    // NOTE: RevAdmin must see all billing plans if not set "vendorSlug"
+    if (!vendorSlug && utils.isUserRevAdmin(request) === true) {
+        delete options.type;
+        delete options.vendor_profile;
+    }
+  }
+
+  BillingPlan.get(options, function(error, result) {
     if (error) {
-      return reply(boom.badImplementation('Failed to get Billing plan ' + id, error));
+      return reply(boom.badImplementation('Failed to get Billing plan ' + billingPlanId, error));
     }
 
     if (result) {

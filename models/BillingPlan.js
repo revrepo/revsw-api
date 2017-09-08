@@ -137,13 +137,16 @@ BillingPlanSchema.statics = {
    * @description get list all not deleted Billing Plans
    * // NOTE: can be filtred by brand(options.vendor_profile)
    *
-   * @param {Object} options {vendor_profile: String}
+   * @param {Object} options {vendor_profile: String,[type:String]}
    */
   list: function (options, callback) {
     callback = callback || _.noop;
     var params = { deleted: false };
     if(!!options.vendor_profile){
       params.brand = options.vendor_profile;
+    }
+    if (!!options.type) {
+      params.type = options.type;
     }
     return this.find(params).exec(function(err, billingPlans) {
       if (err) {
