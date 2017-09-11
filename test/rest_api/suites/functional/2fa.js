@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -188,5 +188,55 @@ describe('Functional check', function () {
           })
           .catch(done);
       });
+  });
+  // NOTE: tests for API Keys
+  describe('2fa resource and API Keys', function() {
+    var accountSample, apiKeyAccountSample;
+    var userSample;
+
+    before(function(done) {
+      API.helpers
+        .authenticateUser(reseller)
+        .then(function() {
+         return  API.helpers.accounts.createOne()
+           .then(function(newAccount) {
+              accountSample = newAccount;
+           });
+        })
+        .then(function(){
+          return API.helpers.apiKeys
+                .createOneForAccount(accountSample)
+                .then(function(apiKey) {
+                  apiKeyAccountSample = apiKey;
+                });
+        })
+        .then(function(){
+          done();
+        })
+        .catch(done);
+    });
+
+    after(function(done) {
+      API.resources.accounts
+        .deleteOne(accountSample.id)
+        .then(function(){
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should fail to init 2FA if authenticate by API Key', function(done){
+      API.helpers
+        .authenticate(apiKeyAccountSample)
+        .then(function() {
+          API.resources.twoFA
+            .init()
+            .getOne()
+            .expect(401)
+            .end(done);
+        })
+        .catch(done);
+    });
+
   });
 });
