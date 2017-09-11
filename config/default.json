@@ -106,7 +106,7 @@
   "notify_admin_by_email_on_user_login": "",
   "notify_admin_by_email_on_account_cancellation": "",
   "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
-  "notify_admin_by_email_on_customer_singup_action": "nikolay.gerzhan@yandex.ru",
+  "notify_admin_by_email_on_customer_singup_action": "",
   "trust_request_xff_header": true,
   "usage_report_regen_age_ms": 600000,
 
