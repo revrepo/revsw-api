@@ -74,7 +74,7 @@ var sendVerifyToken = function(user, account, token, cb) {
   var mailOptions = {
     to: user.email,
     fromname: currentVendorProfile.support_name,
-    from: currentVendorProfile.support_email,
+    from: currentVendorProfile.support_email, //currentVendorProfile.tag_for_signup_email, // TODO: use later
     subject: currentVendorProfile.signup_user_verify_email_subject,
     text: currentVendorProfile.signup_user_verify_email_text.join('\n')
       .replace('{{vendorUrl}}', currentVendorProfile.vendorUrl)
@@ -82,8 +82,13 @@ var sendVerifyToken = function(user, account, token, cb) {
       .replace('{{tokenPlace}}', token)
   };
   var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
-  if (bccEmail !== '') {
-    mailOptions.bcc = bccEmail;
+  var bccEmailNotifyOnCustomerSingupAction = config.notify_admin_by_email_on_customer_singup_action;
+  mailOptions.bcc = [];
+  if(bccEmail !== '') {
+    mailOptions.bcc.push(bccEmail);
+  }
+  if(bccEmailNotifyOnCustomerSingupAction !== '') {
+    mailOptions.bcc.push(bccEmailNotifyOnCustomerSingupAction);
   }
   mail.sendMail(mailOptions, cb);
 };
@@ -119,7 +124,7 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
   var mailOptions = {
     to: user.email,
     fromname: currentVendorProfile.support_name,
-    from: currentVendorProfile.support_email,
+    from: currentVendorProfile.support_email,// TODO: use it later ->  currentVendorProfile.tag_for_signup_email,
     subject: currentVendorProfile.signup_user_verify_email_subject,
     html: currentVendorProfile.signup_user_verify_email_html.join('')
         .replace('{{firstName}}', user.firstname)
@@ -129,8 +134,13 @@ function sendEmailForRegistration(user, account, billing_plan, cb) {
   };
 
   var bccEmail = currentVendorProfile.notify_admin_by_email_on_user_self_registration;
+  var bccEmailNotifyOnCustomerSingupAction = config.notify_admin_by_email_on_customer_singup_action;
+  mailOptions.bcc = [];
   if (bccEmail !== '') {
-    mailOptions.bcc = bccEmail;
+    mailOptions.bcc.push(bccEmail);
+  }
+  if(bccEmailNotifyOnCustomerSingupAction !== '') {
+    mailOptions.bcc.push(bccEmailNotifyOnCustomerSingupAction);
   }
 
   // NOTE: when we send email we do not control success or error. We only create log
