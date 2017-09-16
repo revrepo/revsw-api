@@ -77,5 +77,5 @@ describe('Functional check', function () {
           .catch(done);
       });
   });
-});    //!!!!!
+});
 
