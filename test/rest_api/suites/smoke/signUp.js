@@ -26,23 +26,9 @@ var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var testUser;
-  var revAdmin = config.get('api.users.revAdmin');
-
-  beforeEach(function (done) {
-    API.helpers.signUp.createOne()
-      .then(function (user) {
-        testUser = user;
-        done();
-      })
-      .catch(done);
-  });
-
-  afterEach(function (done) {
-    done();
-  });
 
   describe('Sign Up resource', function () {
+    var revAdmin = config.get('api.users.revAdmin');
 
     it('should return sucess response when signing up user using a random billing plan',
       function (done) {
@@ -64,28 +50,44 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return success response when resending confirmation email',
-      function (done) {
-        API.resources.signUp
-          .resend()
-          .getOne(testUser.email)
-          .expect(200)
-          .end(done);
-      });
-
-    it('should return success response when verifying just signed-up user',
-      function (done) {
-        MailinatorHelper
-          .getVerificationToken(testUser.email)
-          .then(function (token) {
-            API.resources.signUp
-              .verify()
-              .getOne(token)
-              .expect(200)
-              .end(done);
+    describe('for just signed-up user', function() {
+      var testUser;
+      beforeEach(function(done) {
+        API.helpers.signUp.createOne()
+          .then(function(user) {
+            testUser = user;
+            done();
           })
           .catch(done);
       });
-  });
+
+      afterEach(function(done) {
+        done();
+      });
+
+      it('should return success response when resending confirmation email',
+        function(done) {
+          API.resources.signUp
+            .resend()
+            .getOne(testUser.email)
+            .expect(200)
+            .end(done);
+        });
+
+      it('should return success response when verifying token from user`s email',
+        function(done) {
+          MailinatorHelper
+            .getVerificationToken(testUser.email, 'New User Email Verification Request')
+            .then(function(token) {
+              API.resources.signUp
+                .verify()
+                .getOne(token)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+    });
+   });
 });
 

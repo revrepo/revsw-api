@@ -37,7 +37,7 @@ describe('Smoke check', function () {
           .createOne({email: testUser.email})
           .then(function () {
             return MailinatorHelper
-              .getVerificationToken(testUser.email)
+              .getVerificationToken(testUser.email, 'Customer Portal Password Reset')
               .then(function (token) {
                 testToken = token;
                 done();

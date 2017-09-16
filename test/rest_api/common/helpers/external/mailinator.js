@@ -17,7 +17,7 @@
  */
 
 var Promise = require('bluebird');
-
+var _ = require('lodash');
 var MailinatorResource = require('./../../resources/external/mailinator');
 
 // Some constants
@@ -34,8 +34,9 @@ var MailinatorHelper = {
    *
    * @param {String} emailAddress,
    * @param {Number} timeout, milliseconds
+   * @param {String|null} subjectText, text in a email subject
    */
-  waitWhileInboxIsEmpty: function (emailAddress, timeout) {
+  waitWhileInboxIsEmpty: function (emailAddress, timeout, subjectText) {
     var _timeout = timeout || TIMEOUT;
     var _counter = 0;
 
@@ -45,7 +46,20 @@ var MailinatorHelper = {
         throw 'Timeout while getting Mailinator inbox for ' + emailAddress;
       }
       if (inbox && (inbox.messages.length > 0)) {
-        return;
+        // NOTE: wait secific email
+        if(!!subjectText && subjectText.length > 0) {
+          var findMail =  _.filter(inbox.messages,function(itemMail) {
+            return itemMail.subject.indexOf(subjectText) > -1;
+          });
+          if(findMail.length === 0){
+            _cb();
+            return;
+          }else{
+            return;
+          }
+        }else{
+          return;
+        }
       }
       else {
         return MailinatorResource
@@ -62,41 +76,43 @@ var MailinatorHelper = {
    * Gets latest message from Inbox from given Mailinator email address.
    *
    * @param {String} emailAddress
+   * @param {String|null} subjectText
    * @returns {Promise}
    */
-  getLastMessage: function (emailAddress) {
+  getLastMessage: function (emailAddress, subjectText) {
     return MailinatorResource
       .getInbox(emailAddress)
       .then(function (inbox) {
+        if(subjectText){
+          return _.find(inbox.messages,function(item){
+            return item.subject.indexOf(subjectText)>-1;
+          });
+        }
         var messages = inbox.messages;
         return messages[messages.length - 1];
       });
   },
 
   /**
-   * Gets the RevAPM verification token from email just sent to given
-   * Mailinator email address.
+   * Gets the verification token from email just sent to given
+   * Mailinator email address and a part of subject text.
    *
    * @param {String} emailAddress
+   * @param {String|null} subjectText
    * @returns {Promise}
    */
-  getVerificationToken: function (emailAddress) {
-    var emailId;
+  getVerificationToken: function(emailAddress, subjectText) {
     return MailinatorHelper
-      .waitWhileInboxIsEmpty(emailAddress)
+      .waitWhileInboxIsEmpty(emailAddress, null, subjectText)
       .then(function () {
-        return MailinatorHelper.getLastMessage(emailAddress);
+        return MailinatorHelper.getLastMessage(emailAddress, subjectText);
       })
       .then(function (msg) {
-        emailId = msg.id;
-        return MailinatorResource.getEmail(msg.id);
+        return MailinatorResource.getEmail(msg.id, true);
       })
-      .then(function (fullMsg) {
-        var msgBody = fullMsg.data.parts[0].body;
-        var tokenRegExp = /[0-9a-f]{40}/;
-        // NOTE: delete an email with verification data
-        MailinatorResource.deleteEmail(emailId);
-        return msgBody.match(tokenRegExp)[0];
+      .then(function (text) {
+        var tokenRegExp = /[0-9a-f]{40}/g;
+        return text.match(tokenRegExp)[0];
       });
   }
 };

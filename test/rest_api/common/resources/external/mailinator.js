@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -51,9 +51,10 @@ var MailinatorResource = {
    * Gets email info for given email ID from Mailinator
    *
    * @param {String} emailId, the email message ID from Mailinator
+   * @param {Boolean|null} isRawText return raw text data
    * @returns {Promise}
    */
-  getEmail: function (emailId) {
+  getEmail: function (emailId, isRawText) {
     return request(BASE_URL)
       .get('/email')
       .query({
@@ -61,6 +62,9 @@ var MailinatorResource = {
         token: API_TOKEN
       })
       .then(function (res) {
+        if(isRawText === true){
+          return res.text;
+        }
         return JSON.parse(res.text);
       });
   },
