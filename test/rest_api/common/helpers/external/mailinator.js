@@ -46,7 +46,7 @@ var MailinatorHelper = {
         throw 'Timeout while getting Mailinator inbox for ' + emailAddress;
       }
       if (inbox && (inbox.messages.length > 0)) {
-        // NOTE: wait secific email
+        // NOTE: wait specific email
         if(!!subjectText && subjectText.length > 0) {
           var findMail =  _.filter(inbox.messages,function(itemMail) {
             return itemMail.subject.indexOf(subjectText) > -1;
