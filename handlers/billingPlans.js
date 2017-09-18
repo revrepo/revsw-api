@@ -122,22 +122,8 @@ exports.get = function (request, reply) {
   var billingPlanId = params.id;
   var vendorSlug = request.query.vendor;
   var options = {
-    _id: billingPlanId,
-    vendor_profile: vendorSlug || defaultSignupVendorProfile,
-    type: 'public'
+    _id: billingPlanId
   };
-
-  if (request.auth.isAuthenticated === true) {
-    // NOTE: default vendor_profile if not exist  "request.query.vendor"
-    if (!vendorSlug) {
-      options.vendor_profile = request.auth.credentials.vendor_profile || defaultSignupVendorProfile;
-    }
-    // NOTE: RevAdmin must see all billing plans if not set "vendorSlug"
-    if (!vendorSlug && utils.isUserRevAdmin(request) === true) {
-        delete options.type;
-        delete options.vendor_profile;
-    }
-  }
 
   BillingPlan.get(options, function(error, result) {
     if (error) {
