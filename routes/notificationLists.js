@@ -52,8 +52,8 @@ module.exports = [{
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       tags: ['api', 'notification_lists'],
-      description: 'Notification Lists',
-      notes: 'Get all Notification Lists',
+      description: 'Create Notification Lists',
+      notes: 'Create new Notification Lists',
       handler: notificationListHandlers.createNotificationList,
       validate: {
         payload: {
@@ -71,8 +71,8 @@ module.exports = [{
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       tags: ['api', 'notification_lists'],
-      description: 'Notification Lists',
-      notes: 'Get all Notification Lists',
+      description: 'Update Notification List',
+      notes: 'Update a Notification List',
       handler: notificationListHandlers.updateNotificationList,
       validate: {
         params: {
@@ -116,12 +116,12 @@ module.exports = [{
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       tags: ['api', 'notification_lists'],
-      description: 'Notification Lists',
-      notes: 'Get all Notification Lists',
+      description: 'Delete Notification Lists',
+      notes: 'Delete a Notification Lists',
       handler: notificationListHandlers.deleteNotificationList,
       validate: {
         params: {
-          list_id: Joi.objectId().required().description('Notification List ID to be updated')
+          list_id: Joi.objectId().required().description('Notification List ID to be deleted')
         }
       }
     }
