@@ -52,8 +52,8 @@ module.exports = [{
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       tags: ['api', 'notification_lists'],
-      description: 'Create Notification Lists',
-      notes: 'Create new Notification Lists',
+      description: 'Create Notification List',
+      notes: 'Create new Notification List',
       handler: notificationListHandlers.createNotificationList,
       validate: {
         payload: {
@@ -116,8 +116,8 @@ module.exports = [{
         scope: ['admin_rw', 'reseller_rw', 'revadmin_rw', 'apikey_rw']
       },
       tags: ['api', 'notification_lists'],
-      description: 'Delete Notification Lists',
-      notes: 'Delete a Notification Lists',
+      description: 'Delete Notification List',
+      notes: 'Delete a Notification List',
       handler: notificationListHandlers.deleteNotificationList,
       validate: {
         params: {
