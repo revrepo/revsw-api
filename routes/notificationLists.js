@@ -57,7 +57,7 @@ module.exports = [{
       handler: notificationListHandlers.createNotificationList,
       validate: {
         payload: {
-          account_id: Joi.string().required().description('Account Id'),
+          account_id: Joi.objectId().required().description('Account Id'),
           list_name: Joi.string().trim().required().max(150).description('Name of Notification List')
         }
       }
@@ -83,10 +83,10 @@ module.exports = [{
           destinations: Joi.array().items(
             Joi.object().keys({
               destination_type: Joi.string().required().trim()
-                .allow('user', 'email', 'webhook'), // TODO: later ->  'pagerduty', 'opsgenie', 'slack', 'hipchat'),
+                .allow('user', 'email'), // TODO: later -> 'webhook' ,  'pagerduty', 'opsgenie', 'slack', 'hipchat'),
               user_id: Joi.objectId()
                 .when('destination_type', {
-                  is: 'user',
+                  is: 'user_id',
                   then: Joi.objectId().required(),
                 })
                 .description('ID of the system’s user which should receive email alerts to his profile email address'),
