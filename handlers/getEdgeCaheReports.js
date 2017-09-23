@@ -103,13 +103,13 @@ function getDataCacheObjects(options, cb) {
           }
         },
         aggs: {
-          distinct_requests: {
-            cardinality: {
-              field: 'request'
-            }
-          },
-          // “Number Of Unique Objects” (cardinality of “request” field when cache_ttl != “-” and large than 0)
-          number_of_unique_object: {
+          // uniq_requests: {
+          //   cardinality: {
+          //     field: 'request'
+          //   }
+          // },
+          //“Number Of Unique Objects” (cardinality of “request” field when cache_ttl != “-” and large than 0)
+          cache_object: {
             filter: {
               bool: {
                 must_not: [{
@@ -126,176 +126,113 @@ function getDataCacheObjects(options, cb) {
               }
             },
             aggs: {
-              total: {
+              number_of_unique_object: {
                 cardinality: {
                   field: 'request'
                 }
-              }
-            }
-          },
-          // “New Objects In The Edge Cache” (count of “request” field when cache_ttl != “-” and large than 0 and "cache_age": "0")
-          new_objects_in_the_edge_cache: {
-            filter: {
-              bool: {
-                must_not: [{
-                    term: {
-                      cache_ttl: '-'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_ttl: '0'
-                    }
-                  }, {
-                    term: {
-                      cache_age: '0'
+              },
+              // “New Objects In The Edge Cache” (count of “request” field when cache_ttl != “-” and large than 0
+              //and "cache_age": "0")
+              new_objects_in_the_edge_cache: {
+                filter: {
+                  bool: {
+                    must: [{
+                      term: {
+                        cache_age: '0'
+                      }
+                    }]
+                  }
+                },
+                aggs: {
+                  total: {
+                    cardinality: {
+                      field: 'request'
                     }
                   }
-                ]
-              }
-            },
-            aggs: {
-              total: {
-                cardinality: {
-                  field: 'request'
                 }
-              }
-            }
-          },
-          // “Average Configured Edge Cache TTL” - take it from “cache_ttl” attribute (search for all records with cache_ttl != “-” and above zero)
-          average_configured_edge_cache_ttl: {
-            filter: {
-              bool: {
-                must_not: [{
-                    term: {
-                      cache_ttl: '-'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_ttl: '0'
-                    }
-                  }
-                ]
-              }
-            },
-            aggs: {
-              avg_time_sec: {
+              },
+              // “Average Configured Edge Cache TTL” - take it from “cache_ttl” attribute (search for all records with cache_ttl != “-” and above zero)
+              average_configured_edge_cache_ttl: {
                 avg: {
-                  script: 'Float.parseFloat(doc["cache_ttl"].value)'
+                  script: 'try { Float.parseFloat(doc["cache_ttl"].value); } catch (NumberFormatException e) { return 0; }'
+                }
+              },
+              //“Average Age Of Served Objects” - take it from “cache_age” field  (search for all records with cache_ttl != “-” and above zero and cache = HIT)
+              cache_respond: {
+                filter: {
+                  bool: {
+                    must: [{
+                      term: {
+                        cache: 'HIT'
+                      }
+                    }]
+                  }
+                },
+                aggs: {
+                  total: {
+                    cardinality: {
+                      field: 'request'
+                    }
+                  },
+                  average_age_of_served_objects: {
+                    avg: {
+                      script: 'try { return Float.parseFloat(doc["cache_age"].value); } catch (NumberFormatException e) { return 0; }'
+                    }
+                  },
+                  //“Average Cache Response Time” - take it from “upsteam_time” (search for all records with cache_ttl != “-”
+                  // and above zero AND “cache_age” above zero and cache = HIT)
+                  response_time: {
+                    filter: {
+                      bool: {
+                        must_not: [{
+                            term: {
+                              cache_age: '0'
+                            }
+                          },
+                          {
+                            term: {
+                              cache_age: '-'
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    aggs: {
+                      average_cache_response_time: {
+                        avg: {
+                          script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
+                        }
+                      }
+                    }
+                  },
+                }
+              },
+              //“Average Origin Response Time” - take it from “upstream_time” (search for all records with cache = MISS AND
+              // cache_ttl != “-” and above zero AND “cache_age” = 0)
+              origin_response: {
+                filter: {
+                  bool: {
+                    must: [{
+                      term: {
+                        cache: 'MISS'
+                      }
+                    }, {
+                      term: {
+                        cache_age: '0'
+                      }
+                    }]
+                  }
+                },
+                aggs: {
+                  average_origin_response_time: {
+                    avg: {
+                      script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
+                    }
+                  }
                 }
               }
             }
-          },
-          //“Average Age Of Served Objects” - take it from “cache_age” field  (search for all records with cache_ttl != “-” and above zero and cache = HIT)
-          average_age_of_served_objects: {
-            filter: {
-              bool: {
-                must: [{
-                  term: {
-                    cache: 'HIT'
-                  }
-                }],
-                must_not: [{
-                    term: {
-                      cache_ttl: '-'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_ttl: '0'
-                    }
-                  }
-                ]
-              }
-            },
-            aggs: {
-              avg_time_sec: {
-                avg: {
-                  script: 'Float.parseFloat(doc["cache_age"].value)'
-                }
-              }
-            }
-          },
-          //“Average Cache Response Time” - take it from “upsteam_time” (search for all records with cache_ttl != “-” and above zero AND “cache_age” above zero and cache = HIT)
-          average_cache_response_time: {
-            filter: {
-              bool: {
-                must: [{
-                  term: {
-                    cache: 'HIT'
-                  }
-                }],
-                must_not: [{
-                    term: {
-                      cache_ttl: '-'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_ttl: '0'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_age: '0'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_age: '-'
-                    }
-                  }
-                ]
-              }
-            },
-            aggs: {
-              avg_time_sec: {
-                avg: {
-                  script: 'Float.parseFloat(doc["upstream_time"].value)'
-                }
-              }
-            }
-          },
-          // “Average Origin Response Time” - take it from “upsteam_time” (search for all records with cache = MISS AND cache_ttl != “-” and above zero AND “cache_age” = 0)
-          average_origin_response_time: {
-            filter: {
-              bool: {
-                must: [{
-                  term: {
-                    cache: 'MISS'
-                  }
-                }, {
-                  term: {
-                    cache_age: '0'
-                  }
-                }],
-                must_not: [{
-                    term: {
-                      cache_ttl: '-'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_ttl: '0'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_age: '-'
-                    }
-                  }
-                ]
-              }
-            },
-            aggs: {
-              avg_time_sec: {
-                avg: {
-                  script: 'Float.parseFloat(doc["upstream_time"].value)'
-                }
-              }
-            }
-          },
+          }
         }
       };
       //  update query
@@ -307,6 +244,7 @@ function getDataCacheObjects(options, cb) {
           index: utils.buildIndexList(startTimeValue_, endTimeValue_),
           ignoreUnavailable: true,
           query_cache: true,
+          search_type: 'count', // NOTE: make it faster
           timeout: config.get('elasticsearch_timeout_ms'),
           body: requestBody
         })
@@ -315,33 +253,38 @@ function getDataCacheObjects(options, cb) {
             total_unique_objects: 0,
             new_unique_objects: 0,
             average_configured_edge_cache_ttl_sec: 0,
-            average_age_for_served_objects_sec: 0,
+            average_age_for_served_objects_sec: 10,
             average_edge_cache_response_time_sec: 0,
             average_origin_response_time_sec: 0
           };
 
-          if (!!data.aggregations) {
-            var argData_ = data.aggregations;
+          if (!!data.aggregations && !!data.aggregations.cache_object) {
+            var argData_ = data.aggregations.cache_object;
             if (!!argData_.number_of_unique_object) {
-              response.total_unique_objects = argData_.number_of_unique_object.total.value || 0;
+              response.total_unique_objects = argData_.number_of_unique_object.value || 0;
             }
-            if (!!argData_.new_objects_in_the_edge_cache) {
+            if (!!argData_.new_objects_in_the_edge_cache && !!argData_.new_objects_in_the_edge_cache.total) {
               response.new_unique_objects = argData_.new_objects_in_the_edge_cache.total.value || 0;
             }
 
             if (!!argData_.average_configured_edge_cache_ttl) {
-              response.average_configured_edge_cache_ttl_sec = argData_.average_configured_edge_cache_ttl.avg_time_sec.value || 0;
+              response.average_configured_edge_cache_ttl_sec = argData_.average_configured_edge_cache_ttl.value || 0;
             }
-            if (!!argData_.average_age_of_served_objects) {
-              response.average_age_for_served_objects_sec = argData_.average_age_of_served_objects.avg_time_sec.value || 0;
+            if (!!argData_.cache_respond) {
+              var cacheRespond = argData_.cache_respond;
+              if (!!cacheRespond.average_age_of_served_objects) {
+                response.average_age_for_served_objects_sec = cacheRespond.average_age_of_served_objects.value || 0;
+              }
+              if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time) {
+                response.average_edge_cache_response_time_sec = cacheRespond.response_time.average_cache_response_time.value || 0;
+              }
             }
-            if (!!argData_.average_cache_response_time) {
-              response.average_edge_cache_response_time_sec = argData_.average_cache_response_time.avg_time_sec.value || 0;
-            }
-            if (!!argData_.average_origin_response_time) {
-              response.average_origin_response_time_sec = argData_.average_origin_response_time.avg_time_sec.value || 0;
+            if (!!argData_.origin_response && !!argData_.origin_response) {
+              response.average_origin_response_time_sec = argData_.origin_response.average_origin_response_time.value || 0;
+
             }
           }
+          // response.data = data; // NOTE: ES result
           return response;
         });
     })
