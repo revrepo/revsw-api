@@ -29,7 +29,7 @@ var RTTReports = require('../handlers/getRTTReports');
 var GBTReports = require('../handlers/getGBTReports');
 var FBTReports = require('../handlers/getFBTReports');
 var SDKReports = require('../handlers/getSDKReports');
-var EdgeCaheReports = require('./../handlers/getEdgeCaheReports');
+var EdgeCacheReports = require('./../handlers/getEdgeCacheReports');
 
 var routeModels = require('../lib/routeModels');
 
@@ -977,7 +977,7 @@ module.exports = [
       auth: {
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
-      handler: EdgeCaheReports.getStatsEdgeCache,
+      handler: EdgeCacheReports.getStatsEdgeCache,
       description: 'TODO add text',
       tags: ['api'],
       plugins: {

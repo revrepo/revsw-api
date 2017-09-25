@@ -198,9 +198,9 @@ function getDataCacheObjects(options, cb) {
                       }
                     },
                     aggs: {
-                      average_cache_response_time: {
+                      average_cache_response_time_sec: {
                         avg: {
-                          script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
+                          script: 'try { return Float.parseFloat(doc["upstream_time"].value)*1000; } catch (NumberFormatException e) { return 0; }'
                         }
                       }
                     }
@@ -224,9 +224,9 @@ function getDataCacheObjects(options, cb) {
                   }
                 },
                 aggs: {
-                  average_origin_response_time: {
+                  average_origin_response_time_sec: {
                     avg: {
-                      script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
+                      script: 'try { return Float.parseFloat(doc["upstream_time"].value)*1000; } catch (NumberFormatException e) { return 0; }'
                     }
                   }
                 }
@@ -253,7 +253,7 @@ function getDataCacheObjects(options, cb) {
             total_unique_objects: 0,
             new_unique_objects: 0,
             average_configured_edge_cache_ttl_sec: 0,
-            average_age_for_served_objects_sec: 10,
+            average_age_for_served_objects_sec: 0,
             average_edge_cache_response_time_sec: 0,
             average_origin_response_time_sec: 0
           };
@@ -268,20 +268,23 @@ function getDataCacheObjects(options, cb) {
             }
 
             if (!!argData_.average_configured_edge_cache_ttl) {
-              response.average_configured_edge_cache_ttl_sec = argData_.average_configured_edge_cache_ttl.value || 0;
+              response.average_configured_edge_cache_ttl_sec = parseFloat(argData_.average_configured_edge_cache_ttl.value / 1000).toFixed(0) || 0;
             }
             if (!!argData_.cache_respond) {
               var cacheRespond = argData_.cache_respond;
               if (!!cacheRespond.average_age_of_served_objects) {
-                response.average_age_for_served_objects_sec = cacheRespond.average_age_of_served_objects.value || 0;
+                response.average_age_for_served_objects_sec = parseFloat(cacheRespond.average_age_of_served_objects.value / 1000).toFixed(0) || 0;
               }
-              if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time) {
-                response.average_edge_cache_response_time_sec = cacheRespond.response_time.average_cache_response_time.value || 0;
+              if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec) {
+                try {
+                  response.average_edge_cache_response_time_sec = parseFloat(cacheRespond.response_time.average_cache_response_time_sec.value).toFixed(1);
+                } catch (e) {}
               }
             }
             if (!!argData_.origin_response && !!argData_.origin_response) {
-              response.average_origin_response_time_sec = argData_.origin_response.average_origin_response_time.value || 0;
-
+              try {
+                response.average_origin_response_time_sec = parseFloat(argData_.origin_response.average_origin_response_time_sec.value).toFixed(1);
+              } catch (e) {}
             }
           }
           // response.data = data; // NOTE: ES result
