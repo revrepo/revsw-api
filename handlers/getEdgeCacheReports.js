@@ -267,21 +267,26 @@ function getDataCacheObjects(options, cb) {
               response.new_unique_objects = argData_.new_objects_in_the_edge_cache.total.value || 0;
             }
 
-            if (!!argData_.average_configured_edge_cache_ttl) {
-              response.average_configured_edge_cache_ttl_sec = parseFloat(argData_.average_configured_edge_cache_ttl.value / 1000).toFixed(0) || 0;
+            if (!!argData_.average_configured_edge_cache_ttl && !!argData_.average_configured_edge_cache_ttl.value) {
+              try {
+                response.average_configured_edge_cache_ttl_sec = parseFloat(argData_.average_configured_edge_cache_ttl.value / 1000).toFixed(0) || 0;
+              } catch (e) {}
             }
             if (!!argData_.cache_respond) {
               var cacheRespond = argData_.cache_respond;
-              if (!!cacheRespond.average_age_of_served_objects) {
-                response.average_age_for_served_objects_sec = parseFloat(cacheRespond.average_age_of_served_objects.value / 1000).toFixed(0) || 0;
+              if (!!cacheRespond.average_age_of_served_objects && !!cacheRespond.average_age_of_served_objects.value) {
+                try {
+                  response.average_age_for_served_objects_sec = parseFloat(cacheRespond.average_age_of_served_objects.value / 1000).toFixed(0) || 0;
+                } catch (e) {}
               }
-              if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec) {
+              if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec &&
+                !!cacheRespond.response_time.average_cache_response_time_sec.value) {
                 try {
                   response.average_edge_cache_response_time_sec = parseFloat(cacheRespond.response_time.average_cache_response_time_sec.value).toFixed(1);
                 } catch (e) {}
               }
             }
-            if (!!argData_.origin_response && !!argData_.origin_response) {
+            if (!!argData_.origin_response && !!argData_.origin_response && !!argData_.origin_response.average_origin_response_time_sec.value) {
               try {
                 response.average_origin_response_time_sec = parseFloat(argData_.origin_response.average_origin_response_time_sec.value).toFixed(1);
               } catch (e) {}
