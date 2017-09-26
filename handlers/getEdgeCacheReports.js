@@ -200,7 +200,7 @@ function getDataCacheObjects(options, cb) {
                     aggs: {
                       average_cache_response_time_sec: {
                         avg: {
-                          script: 'try { return Float.parseFloat(doc["upstream_time"].value)*1000; } catch (NumberFormatException e) { return 0; }'
+                          script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
                         }
                       }
                     }
@@ -226,7 +226,7 @@ function getDataCacheObjects(options, cb) {
                 aggs: {
                   average_origin_response_time_sec: {
                     avg: {
-                      script: 'try { return Float.parseFloat(doc["upstream_time"].value)*1000; } catch (NumberFormatException e) { return 0; }'
+                      script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
                     }
                   }
                 }
@@ -269,14 +269,14 @@ function getDataCacheObjects(options, cb) {
 
             if (!!argData_.average_configured_edge_cache_ttl && !!argData_.average_configured_edge_cache_ttl.value) {
               try {
-                response.average_configured_edge_cache_ttl_sec = parseFloat(argData_.average_configured_edge_cache_ttl.value / 1000).toFixed(0) || 0;
+                response.average_configured_edge_cache_ttl_sec = parseFloat(argData_.average_configured_edge_cache_ttl.value).toFixed(0) || 0;
               } catch (e) {}
             }
             if (!!argData_.cache_respond) {
               var cacheRespond = argData_.cache_respond;
               if (!!cacheRespond.average_age_of_served_objects && !!cacheRespond.average_age_of_served_objects.value) {
                 try {
-                  response.average_age_for_served_objects_sec = parseFloat(cacheRespond.average_age_of_served_objects.value / 1000).toFixed(0) || 0;
+                  response.average_age_for_served_objects_sec = parseFloat(cacheRespond.average_age_of_served_objects.value).toFixed(0) || 0;
                 } catch (e) {}
               }
               if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec &&
@@ -321,7 +321,7 @@ module.exports.getStatsEdgeCache = function(request, reply) {
     }
     if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
       domainName = domainConfig.domain_name;
-      var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * 30 /* maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
+      var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 /* maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
       if (span.error) {
         return reply(boom.badRequest(span.error));
       }
