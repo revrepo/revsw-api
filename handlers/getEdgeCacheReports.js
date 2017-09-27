@@ -254,8 +254,8 @@ function getDataCacheObjects(options, cb) {
             new_unique_objects: 0,
             average_configured_edge_cache_ttl_sec: 0,
             average_age_for_served_objects_sec: 0,
-            average_edge_cache_response_time_sec: 0,
-            average_origin_response_time_sec: 0
+            average_edge_cache_response_time_ms: 0,
+            average_origin_response_time_ms: 0
           };
 
           if (!!data.aggregations && !!data.aggregations.cache_object) {
