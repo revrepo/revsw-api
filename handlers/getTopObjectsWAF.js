@@ -35,6 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForWAFGraphsDays = config.get('max_time_period_for_waf_graphs_days');
+var jGeoIP = require('jgeoip');
 //
 // Handler for Top Objects report WAF
 //
@@ -111,11 +112,65 @@ exports.getTopObjectsWAF = function (request, reply) {
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
         }
         var dataArray = [];
+        var geoipISP = new jGeoIP('./maxminddb/GeoIP2-ISP.mmdb');
+        var geoipCity = new jGeoIP('./maxminddb/GeoIP2-City.mmdb');
+        var geoipCountry = new jGeoIP('./maxminddb/GeoIP2-Country.mmdb');
+
         for (var i = 0; i < body.aggregations.results.buckets.length; i++) {
-          dataArray[i] = {
-            key: body.aggregations.results.buckets[i].key,
-            count: body.aggregations.results.buckets[i].doc_count
-          };
+          var ipregex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+          if (ipregex.test(body.aggregations.results.buckets[i].key)) {
+            // if key is an IP address pull data
+            var ispinfo = geoipISP.getRecord(body
+              .aggregations
+              .results
+              .buckets[i]
+              .key) === null ? undefined : geoipISP.getRecord(body
+                .aggregations
+                .results
+                .buckets[i]
+                .key).isp;
+            var countryinfo = geoipCountry.getRecord(body
+              .aggregations
+              .results
+              .buckets[i]
+              .key) === null ? undefined : geoipCountry.getRecord(body
+                .aggregations
+                .results
+                .buckets[i]
+                .key).country.names.en;
+            var cityinfo = geoipCity.getRecord(body
+              .aggregations
+              .results
+              .buckets[i]
+              .key) === null ? undefined : geoipCity.getRecord(body
+                .aggregations
+                .results
+                .buckets[i]
+                .key).city.names.en;
+
+            if (ispinfo !== null && ispinfo !== undefined) {
+              dataArray[i] = {
+                key: body.aggregations.results.buckets[i].key,
+                count: body.aggregations.results.buckets[i].doc_count,
+                country: countryinfo || 'No data',
+                city: cityinfo || 'No data',
+                isp: ispinfo || 'No data',
+              };
+            } else {
+              dataArray[i] = {
+                key: body.aggregations.results.buckets[i].key,
+                count: body.aggregations.results.buckets[i].doc_count,
+                country: 'No data',
+                city: 'No data',
+                isp: 'No data',
+              };
+            }
+          } else {
+            dataArray[i] = {
+              key: body.aggregations.results.buckets[i].key,
+              count: body.aggregations.results.buckets[i].doc_count
+            };
+          }
         }
         var response = {
           metadata: {
