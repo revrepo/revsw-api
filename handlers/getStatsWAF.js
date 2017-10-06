@@ -262,12 +262,12 @@ exports.getWAFEventsList = function (request, reply) {
               filter: metadataFilterField
             },
             data: _.map(body.hits.hits, function (item) {
-              var ispinfo = geoipISP.getRecord(item._source['ip']) === null ? undefined : geoipISP.getRecord(item._source['ip']).isp;
-              var countryinfo = geoipCountry.getRecord(item._source['ip']) === null ? undefined : geoipCountry.getRecord(item._source['ip']).country.names.en;
-              var cityinfo = geoipCity.getRecord(item._source['ip']) === null ? undefined : geoipCity.getRecord(item._source['ip']).city.names.en;
-              item._source['isp'] = ispinfo || 'No data';
-              item._source['city'] = cityinfo || 'No data';
-              item._source['countryByIp'] = countryinfo || 'No data';
+              var ispinfo = geoipISP.getRecord(item._source.ip) === null ? undefined : geoipISP.getRecord(item._source.ip).isp;
+              var countryinfo = geoipCountry.getRecord(item._source.ip) === null ? undefined : geoipCountry.getRecord(item._source.ip).country.names.en;
+              var cityinfo = geoipCity.getRecord(item._source.ip) === null ? undefined : geoipCity.getRecord(item._source.ip).city.names.en;
+              item._source.isp = ispinfo || 'No data';
+              item._source.city = cityinfo || 'No data';
+              item._source.countryByIp = countryinfo || 'No data';
               return item._source;
             })
           };
