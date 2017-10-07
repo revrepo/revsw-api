@@ -91,6 +91,7 @@ cp -rf  $WORKSPACE/templates $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/public $foldername/opt/$PackageName/
 cp -rf  $WORKSPACE/docs/revsw-api.txt $foldername/opt/$PackageName/docs/
 cp -rf  $WORKSPACE/utils $foldername/opt/$PackageName/
+cp -rf  $WORKSPACE/maxminddb $foldername/opt/$PackageName/
 
 mkdir -p $foldername/opt/$PackageName/log
 
