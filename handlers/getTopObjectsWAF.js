@@ -35,7 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForWAFGraphsDays = config.get('max_time_period_for_waf_graphs_days');
-var jGeoIP = require('jgeoip');
+var maxmind = require('maxmind');
 //
 // Handler for Top Objects report WAF
 //
@@ -112,41 +112,27 @@ exports.getTopObjectsWAF = function (request, reply) {
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
         }
         var dataArray = [];
-        var geoipISP = new jGeoIP('./maxminddb/GeoIP2-ISP.mmdb');
-        var geoipCity = new jGeoIP('./maxminddb/GeoIP2-City.mmdb');
-        var geoipCountry = new jGeoIP('./maxminddb/GeoIP2-Country.mmdb');
+        var ispinfo;
+        var cityinfo;
+        var countryinfo;
 
         for (var i = 0; i < body.aggregations.results.buckets.length; i++) {
           var ipregex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
           if (ipregex.test(body.aggregations.results.buckets[i].key)) {
-            // if key is an IP address pull data
-            var ispinfo = geoipISP.getRecord(body
+            var ip = body
               .aggregations
               .results
               .buckets[i]
-              .key) === null ? undefined : geoipISP.getRecord(body
-                .aggregations
-                .results
-                .buckets[i]
-                .key).isp;
-            var countryinfo = geoipCountry.getRecord(body
-              .aggregations
-              .results
-              .buckets[i]
-              .key) === null ? undefined : geoipCountry.getRecord(body
-                .aggregations
-                .results
-                .buckets[i]
-                .key).country.names.en;
-            var cityinfo = geoipCity.getRecord(body
-              .aggregations
-              .results
-              .buckets[i]
-              .key) === null ? undefined : geoipCity.getRecord(body
-                .aggregations
-                .results
-                .buckets[i]
-                .key).city.names.en;
+              .key;
+            var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
+            ispinfo = ispsync.get(ip) === null ? 'No data' : ispsync.get(ip).isp;
+            var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
+            cityinfo = citysync.get(ip) === null ?
+              'No data' : citysync.get(ip).city === undefined ?
+                citysync.get(ip).country.names.en :
+                citysync.get(ip).city.names.en;
+            var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
+            countryinfo = countrysync.get(ip) === null ? 'No data' : countrysync.get(ip).country.names.en;
 
             if (ispinfo !== null && ispinfo !== undefined) {
               dataArray[i] = {

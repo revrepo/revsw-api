@@ -45,7 +45,7 @@ var memoryCache = cacheManager.caching({
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
-var jGeoIP = require('jgeoip');
+var maxmind = require('maxmind');
 //
 // Get traffic stats for WAF
 //
@@ -245,11 +245,10 @@ exports.getWAFEventsList = function (request, reply) {
         body: requestBody
       })
         .then(function (body) {
-          var geoipISP = new jGeoIP('./maxminddb/GeoIP2-ISP.mmdb');
-          var geoipCity = new jGeoIP('./maxminddb/GeoIP2-City.mmdb');
-          var geoipCountry = new jGeoIP('./maxminddb/GeoIP2-Country.mmdb');
+          var ispinfo;
+          var cityinfo;
+          var countryinfo;
           var dataArray = [];
-          var ip;
           var response = {
             metadata: {
               domain_name: domainName,
@@ -262,11 +261,18 @@ exports.getWAFEventsList = function (request, reply) {
               filter: metadataFilterField
             },
             data: _.map(body.hits.hits, function (item) {
-              var ispinfo = geoipISP.getRecord(item._source.ip) === null ? undefined : geoipISP.getRecord(item._source.ip).isp;
-              var countryinfo = geoipCountry.getRecord(item._source.ip) === null ? undefined : geoipCountry.getRecord(item._source.ip).country.names.en;
-              var cityinfo = geoipCity.getRecord(item._source.ip) === null ? undefined : geoipCity.getRecord(item._source.ip).city.names.en;
+              var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
+              ispinfo = ispsync.get(item._source.ip) === null ? 'No data' : ispsync.get(item._source.ip).isp;
               item._source.isp = ispinfo || 'No data';
+              var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
+              cityinfo = citysync.get(item._source.ip) === null ?
+                'No data' :
+                citysync.get(item._source.ip).city === undefined ?
+                  citysync.get(item._source.ip).country.names.en :
+                  citysync.get(item._source.ip).city.names.en;
               item._source.city = cityinfo || 'No data';
+              var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
+              countryinfo = countrysync.get(item._source.ip) === null ? 'No data' : countrysync.get(item._source.ip).country.names.en;
               item._source.countryByIp = countryinfo || 'No data';
               return item._source;
             })
