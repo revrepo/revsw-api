@@ -370,19 +370,30 @@ module.exports = [{
             web_app_firewall: Joi.string().valid('off', 'detect', 'block', 'block_all').required(),
 
             // WAF-related configuration
-            // TODO need to add required() statements, description and proper validation of input
+            // TODO need to add descriptions and proper validation of input
             enable_waf             : Joi.boolean(),
             waf                    : Joi.array().items({
-              location                  : Joi.string(),
-              enable_waf                : Joi.boolean(),
-              enable_learning_mode      : Joi.boolean(),
-              enable_sql_injection_lib  : Joi.boolean(),
-              enable_xss_injection_lib  : Joi.boolean(),
+              location                  : Joi.string().max(150).required(),
+              enable_waf                : Joi.boolean().required(),
+              enable_learning_mode      : Joi.boolean().required(),
+              enable_sql_injection_lib  : Joi.boolean().required(),
+              enable_xss_injection_lib  : Joi.boolean().required(),
               waf_rules                 : Joi.array().items(Joi.objectId()),
               waf_actions               : Joi.array().items({
                 condition     : Joi.string(),
                 action        : Joi.string().valid('DROP','BLOCK','LOG','ALLOW')
               })
+            }),
+
+            // TODO: need to add proper descriptions
+            enable_bot_protection  : Joi.boolean(),
+            bot_protection              : Joi.array().items({
+              location                  : Joi.string().max(150).required(),
+              mode                      : Joi.string().valid('disable','monitor','active_protection').required(),
+              call_type                 : Joi.number().integer().min(1).max(6).required(),
+              username_cookie_name      : Joi.string().max(300).allow('').required(),
+              sessionid_cookie_name     : Joi.string().max(300).allow('').required(),
+              bot_protection_id         : Joi.string().max(36).required()
             }),
 
             acl: Joi.object({
