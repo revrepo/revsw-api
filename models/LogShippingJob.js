@@ -186,6 +186,7 @@ LogShippingJob.prototype = {
 
     return this.model.aggregate([
         { $match: where },
+        { $project: {'account_id': 1}},
         { $group: {
             _id: '$account_id',
             count: { $sum: 1 }

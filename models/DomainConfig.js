@@ -264,6 +264,16 @@ DomainConfig.prototype = {
     return promise.all([
         this.model.aggregate([
           { $match: _.assign({ deleted: { $ne:true } }, where ) },
+          { $project: {
+              'enable_enhanced_analytics': 1,
+              'proxy_config.account_id': 1,
+              'proxy_config.rev_component_bp.custom_vcl.enabled': 1,
+              'proxy_config.rev_component_bp.enable_waf': 1,
+              'enable_ssl': 1,
+              'bp_lua_enable_all': 1,
+              'co_lua_enable_all': 1
+            }
+          },
           { $group: {
             _id: '$proxy_config.account_id',
             count: { $sum: 1 },
@@ -278,6 +288,7 @@ DomainConfig.prototype = {
         ]).exec(),
         this.model.aggregate([
           { $match: where },
+          { $project: {'proxy_config.account_id': 1}},
           { $group: { _id: '$proxy_config.account_id', count: { $sum: 1 } } }
         ]).exec()
       ])
