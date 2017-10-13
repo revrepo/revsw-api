@@ -35,6 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForWAFGraphsDays = config.get('max_time_period_for_waf_graphs_days');
+var maxmind = require('maxmind');
 //
 // Handler for Top Objects report WAF
 //
@@ -111,11 +112,51 @@ exports.getTopObjectsWAF = function (request, reply) {
             ', timestamps: ' + span.start + ' ' + span.end + ', domain: ' + domainName));
         }
         var dataArray = [];
+        var ispinfo;
+        var cityinfo;
+        var countryinfo;
+
         for (var i = 0; i < body.aggregations.results.buckets.length; i++) {
-          dataArray[i] = {
-            key: body.aggregations.results.buckets[i].key,
-            count: body.aggregations.results.buckets[i].doc_count
-          };
+          var ipregex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+          if (ipregex.test(body.aggregations.results.buckets[i].key)) {
+            var ip = body
+              .aggregations
+              .results
+              .buckets[i]
+              .key;
+            var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
+            ispinfo = ispsync.get(ip) === null ? 'No data' : ispsync.get(ip).isp;
+            var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
+            cityinfo = citysync.get(ip) === null ?
+              'No data' : citysync.get(ip).city === undefined ?
+                citysync.get(ip).country.names.en :
+                citysync.get(ip).city.names.en;
+            var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
+            countryinfo = countrysync.get(ip) === null ? 'No data' : countrysync.get(ip).country.names.en;
+
+            if (ispinfo !== null && ispinfo !== undefined) {
+              dataArray[i] = {
+                key: body.aggregations.results.buckets[i].key,
+                count: body.aggregations.results.buckets[i].doc_count,
+                country: countryinfo || 'No data',
+                city: cityinfo || 'No data',
+                isp: ispinfo || 'No data',
+              };
+            } else {
+              dataArray[i] = {
+                key: body.aggregations.results.buckets[i].key,
+                count: body.aggregations.results.buckets[i].doc_count,
+                country: 'No data',
+                city: 'No data',
+                isp: 'No data',
+              };
+            }
+          } else {
+            dataArray[i] = {
+              key: body.aggregations.results.buckets[i].key,
+              count: body.aggregations.results.buckets[i].doc_count
+            };
+          }
         }
         var response = {
           metadata: {
