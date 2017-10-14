@@ -21,6 +21,7 @@
 'use strict';
 
 var promise = require('bluebird');
+var usageReport = require('../lib/usageReport.js');
 
 //  this is 0.10, console.dir( obj, opts ) doesn't work
 var util = require('util');
@@ -97,18 +98,35 @@ for (var i = 0; i < parslen; ++i) {
 var countSends = 0;
 promise.resolve()
   .then(function() {
-    return require('../lib/usageReport.js').collectDayReport(
+    if (conf.accountId === false) {
+      return usageReport.getListActiveAccountsForReports(conf);
+    }
+    return [conf.accountId];
+  })
+  .then(function logListAccounts(data) {
+    log_('Get list Accounts for make day reports for ' + data.length + ' accounts');
+    return data;
+  })
+  .map(function(itemId) {
+    log_('usageReport:collectDayReport:call');
+    return usageReport.collectDayReport(
         (conf.date || 'now'),
-        conf.accountId, //  no particular id(s)
-        conf.dry, //  do not save, return collected data
-        true //  collect orphans
-      )
-      .then(function(data) {
-        if (conf.verbose) {
-          log_(data, 2);
-        }
-        console.log('collectDayReport done.\n');
+        itemId /* Account ID*/ ,
+        conf.dry /*do not save, return collected data*/ ,
+        false /* !!! NOT collect orphans !!!*/ )
+      .then(function infoResultReporting() {
+        return {
+          id: itemId
+        };
       });
+  }, {
+    concurrency: 10
+  })
+  .then(function sucess(data) {
+    if (conf.verbose) {
+      log_(data, 5);
+    }
+    console.log('collectDayReport done.\n');
   })
   .catch(function(err) {
     console.log(err);
@@ -118,6 +136,31 @@ promise.resolve()
     process.exit(0);
     return;
   });
+// NOTE: old version with error: MongoError: exception:
+// aggregation result exceeds maximum document size (16MB)
+// promise.resolve()
+// .then(function() {
+// return require('../lib/usageReport.js').collectDayReport(
+//       (conf.date || 'now'),
+//       conf.accountId, //  no particular id(s)
+//       conf.dry, //  do not save, return collected data
+//       true //  collect orphans
+//     )
+//     .then(function(data) {
+//       if (conf.verbose) {
+//         log_(data, 2);
+//       }
+//       console.log('collectDayReport done.\n');
+//     });
+// })
+// .catch(function(err) {
+//   console.log(err);
+// })
+// .finally(function() {
+//   log_('Script end to work');
+//   process.exit(0);
+//   return;
+// });
 
 
 //  ----------------------------------------------------------------------------------------------//
