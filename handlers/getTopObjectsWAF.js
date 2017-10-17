@@ -35,7 +35,11 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForWAFGraphsDays = config.get('max_time_period_for_waf_graphs_days');
+// maxmind DBs
 var maxmind = require('maxmind');
+var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
+var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
+var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
 //
 // Handler for Top Objects report WAF
 //
@@ -124,14 +128,14 @@ exports.getTopObjectsWAF = function (request, reply) {
               .results
               .buckets[i]
               .key;
-            var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
+
             ispinfo = ispsync.get(ip) === null ? 'No data' : ispsync.get(ip).isp;
-            var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
+
             cityinfo = citysync.get(ip) === null ?
               'No data' : citysync.get(ip).city === undefined ?
                 citysync.get(ip).country.names.en :
                 citysync.get(ip).city.names.en;
-            var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
+
             countryinfo = countrysync.get(ip) === null ? 'No data' : countrysync.get(ip).country.names.en;
 
             if (ispinfo !== null && ispinfo !== undefined) {
