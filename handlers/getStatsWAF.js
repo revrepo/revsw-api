@@ -45,7 +45,11 @@ var memoryCache = cacheManager.caching({
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
+// maxmind DBs
 var maxmind = require('maxmind');
+var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
+var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
+var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
 //
 // Get traffic stats for WAF
 //
@@ -261,17 +265,14 @@ exports.getWAFEventsList = function (request, reply) {
               filter: metadataFilterField
             },
             data: _.map(body.hits.hits, function (item) {
-              var ispsync = maxmind.openSync('./maxminddb/GeoIP2-ISP.mmdb');
               ispinfo = ispsync.get(item._source.ip) === null ? 'No data' : ispsync.get(item._source.ip).isp;
               item._source.isp = ispinfo || 'No data';
-              var citysync = maxmind.openSync('./maxminddb/GeoIP2-City.mmdb');
               cityinfo = citysync.get(item._source.ip) === null ?
                 'No data' :
                 citysync.get(item._source.ip).city === undefined ?
                   citysync.get(item._source.ip).country.names.en :
                   citysync.get(item._source.ip).city.names.en;
               item._source.city = cityinfo || 'No data';
-              var countrysync = maxmind.openSync('./maxminddb/GeoIP2-Country.mmdb');
               countryinfo = countrysync.get(item._source.ip) === null ? 'No data' : countrysync.get(item._source.ip).country.names.en;
               item._source.countryByIp = countryinfo || 'No data';
               return item._source;
