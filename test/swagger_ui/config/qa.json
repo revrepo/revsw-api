@@ -1,0 +1,5 @@
+{
+  "protractor": {
+    "seleniumAddress": "http://testsjc20-build01.revsw.net:4444/wd/hub"
+  }
+}
