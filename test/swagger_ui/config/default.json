@@ -1,0 +1,34 @@
+{
+  "protractor": {
+    "seleniumAddress": "http://127.0.0.1:4444/wd/hub"
+  },
+  "api": {
+    "host": {
+      "protocol": "https",
+      "name": "testsjc20-api01.revsw.net",
+      "port": 443
+    },
+    "version": "v1"
+  },
+  "swagger": {
+    "host": {
+      "protocol": "https",
+      "name": "testsjc20-api01.revsw.net",
+      "port": null,
+      "path": null
+    },
+    "users": {
+      "revAdmin": {
+        "email": "qa_user_with_rev-admin_perm@revsw.com",
+        "password": "password1",
+        "role": "Rev Admin",
+        "account": {
+          "id": "55b706a57957012304a49d0b",
+          "companyName": "API QA Reseller Company"
+        }
+      }      
+    },
+    "validApiKey": "a17cad27-c5f5-4207-8469-a8cbb8d70c85",
+    "invalidApiKey": "aaaaaaaa-ffff-dddd-bbbb-a8cbb8d7cc74"
+  }
+}
