@@ -31,7 +31,7 @@ var Endpoints = {
 
     getEndpoint: function (index) {
 
-        return this.getEndpoints().then((elems) => {
+        return this.getEndpoints().then(function (elems) {
             return new Endpoint(elems[index], this.locators.api.resource.endPoints.endPoint);
         });
 

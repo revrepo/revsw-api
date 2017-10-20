@@ -45,7 +45,7 @@ var Endpoint = function (endpoint, locators) {
                 .locators
                 .response
                 .responseCode
-                .css)).getText().then((code) => {
+                .css)).getText().then(function (code) {
                     return code;
                 });
     };

@@ -33,12 +33,12 @@ describe('Functional', function () {
 
         it('should return 401 status code if `Try it out!`' +
             'button is clicked without authentication', function () {
-                swagger.api.endpoints.getEndpoint(0).then((endpoint) => {
+                swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
                     endpoint.clickTitle();
                     browser.sleep(2000);
                     endpoint.clickSubmit();
                     browser.sleep(2000);
-                    endpoint.getResponseCode().then((code) => {
+                    endpoint.getResponseCode().then(function (code) {
                         expect(code).toBe('401');
                         endpoint.clickTitle();
                     });
@@ -46,10 +46,10 @@ describe('Functional', function () {
             });
 
         it('should successfully authenticate using a valid API key', function () {
-            swagger.header.setAPIKey(apiKey).then(() => {
+            swagger.header.setAPIKey(apiKey).then(function () {
                 swagger.header.clickAuthBtn();
                 browser.sleep(1000);
-                swagger.getSuccessAuthMSG().getText().then((text) => {
+                swagger.getSuccessAuthMSG().getText().then(function (text) {
                     expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
                 });
             });
@@ -57,15 +57,15 @@ describe('Functional', function () {
 
         it('should return 200 status code if `Try it out!`' +
         ' button is clicked after authentication', function () {
-            swagger.header.setAPIKey(apiKey).then(() => {
+            swagger.header.setAPIKey(apiKey).then(function () {
                 swagger.header.clickAuthBtn();
                 browser.sleep(5000);
-                swagger.api.endpoints.getEndpoint(0).then((endpoint) => {
+                swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
                     endpoint.clickTitle();
                     browser.sleep(2000);
                     endpoint.clickSubmit();
                     browser.sleep(2000);
-                    endpoint.getResponseCode().then((code) => {
+                    endpoint.getResponseCode().then(function (code) {
                         expect(code).toBe('200');
                         endpoint.clickTitle();
                     });
@@ -74,7 +74,7 @@ describe('Functional', function () {
         });
 
         it('should successfully logout', function () {
-            swagger.header.setAPIKey(apiKey).then(() => {
+            swagger.header.setAPIKey(apiKey).then(function () {
                 swagger.header.clickAuthBtn();
                 browser.sleep(1000);
                 swagger.header.clickLogoutBtn();
@@ -84,12 +84,12 @@ describe('Functional', function () {
 
         it('should return 401 status code if `Try it out!`' +
         ' button is clicked after logout', function () {
-            swagger.api.endpoints.getEndpoint(0).then((endpoint) => {
+            swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
                 endpoint.clickTitle();
                 browser.sleep(2000);
                 endpoint.clickSubmit();
                 browser.sleep(2000);
-                endpoint.getResponseCode().then((code) => {
+                endpoint.getResponseCode().then(function (code) {
                     expect(code).toBe('401');
                     endpoint.clickTitle();
                 });
@@ -97,10 +97,10 @@ describe('Functional', function () {
         });
 
         it('should fail to authenticate if invalid API key is used', function () {
-            swagger.header.setAPIKey(invalidApiKey).then(() => {
+            swagger.header.setAPIKey(invalidApiKey).then(function () {
                 swagger.header.clickAuthBtn();
                 browser.sleep(1000);
-                swagger.getFailAuthMSG().getText().then((text) => {
+                swagger.getFailAuthMSG().getText().then(function (text) {
                     expect(text).toBe(constants.FAIL_AUTH_MSG);
                 });
             });
