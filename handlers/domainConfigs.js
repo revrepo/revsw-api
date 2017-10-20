@@ -221,6 +221,7 @@ exports.getDomainConfig = function(request, reply) {
             code: lua.code
           };
         }) : [];
+      response.github_integration = response_json.github_integration;
 
       renderJSON(request, reply, err, response);
     });
@@ -424,139 +425,200 @@ exports.createDomainConfig = function(request, reply) {
   });
 };
 
+/**
+ * @name getDomainConfigFromGitHub
+ * @description help method
+ * @param {*} options
+ * @param {*} cb
+ */
+var getDomainConfigFromGitHub = function(options,cb) {
+  if(!options.github_integration ||
+      options.github_integration.enable === false) {
+        return cb(null, false);
+  }
+  var githubRequestUrl = options.github_integration.github_url;
+  var githubPersonalAPIKey = options.github_integration.github_personal_api_key;
+    var options_ = {
+      url: githubRequestUrl,
+      headers: {
+        'User-Agent': 'request',
+        'Authorizationt': 'token ' + githubPersonalAPIKey,
+        'content-type': 'application/vnd.github+json'
+      },
+      json: true
+    };
+
+    httpRequest(options_, function(error,response, body){
+      if(!error && response.statusCode === 200) {
+        try {
+          var configData = JSON.parse(utils.atob(body.content));
+          // TODO: add Joi schema validation ?
+          cb(null, configData);
+        } catch (error) {
+          cb(error,false);
+        }
+      }else{
+        cb(error|| new Error('Faild get JSON config from GitHub'));
+      }
+    });
+};
+/**
+ * @name updateDomainConfig
+ *
+ */
 exports.updateDomainConfig = function(request, reply) {
 
   var newDomainJson = request.payload;
   var newDomainJsonAudit = utils.clone(request.payload);
-  var domain_id = request.params.domain_id;
+  var domainId = request.params.domain_id;
   var optionsFlag = (request.query.options) ? '?options=' + request.query.options : '';
+  var gitHubIntegrationOptions = {
+      github_integration: newDomainJson.github_integration,
+      action: request.query.options
+  };
+  // NOTE: check GitHubIntegration config
+  getDomainConfigFromGitHub(gitHubIntegrationOptions,function(err,gitHubDomainConfigData){
+    if(err){
+      return reply(boom.badRequest('Failed to retrieve domain configuration from GitHub for domain ID ' + domainId));
+    }
+    if(!err && gitHubDomainConfigData !== false) {
+      // TODO: add Joi schema validation ?
+      newDomainJson = gitHubDomainConfigData;
+      delete gitHubDomainConfigData.github_integration;
+      // NOTE: set only actual settings for GitHub Integration
+      newDomainJson.github_integration = newDomainJson.github_integration;
+    }
 
-  // TODO: fix jshint (too many statements)
-  domainConfigs.get(domain_id, function(error, result) { // jshint ignore:line
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domain_id));
-    }
-    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
-      return reply(boom.badRequest('Domain ID not found'));
-    }
-
-    if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
-      return reply(boom.badRequest('Account ID not found'));
-    }
-    // NOTE: validation dependencies values of properties
-    if(!!newDomainJson.image_engine && newDomainJson.image_engine.enable_image_engine === true){
-      if(newDomainJson.rev_component_bp.enable_cache === false){
-        return reply(boom.badRequest('If ImageEngine is "ON" then Edge Caching must be "ON" too'));
+    // TODO: fix jshint (too many statements)
+    domainConfigs.get(domainId, function(error, result) { // jshint ignore:line
+      if (error) {
+        return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domainId));
       }
-    }
-    var bpLua = newDomainJson.bp_lua;
-    delete newDomainJson.bp_lua;
-    var coLua = newDomainJson.co_lua;
-    delete newDomainJson.co_lua;
+      if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+        return reply(boom.badRequest('Domain ID not found'));
+      }
 
-    var isAdmin = utils.isUserAdmin(request);
-    var luaForbidden = false;
+      if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
+        return reply(boom.badRequest('Account ID not found'));
+      }
+      // NOTE: validation dependencies values of properties
+      if(!!newDomainJson.image_engine && newDomainJson.image_engine.enable_image_engine === true){
+        if(newDomainJson.rev_component_bp.enable_cache === false){
+          return reply(boom.badRequest('If ImageEngine is "ON" then Edge Caching must be "ON" too'));
+        }
+      }
+      var bpLua = newDomainJson.bp_lua;
+      delete newDomainJson.bp_lua;
+      var coLua = newDomainJson.co_lua;
+      delete newDomainJson.co_lua;
 
-    if (bpLua) {
-      bpLua.forEach(function(lua) {
-        if (!isAdmin && lua.approve) {
-          luaForbidden = true;
-        }
-      });
-    } else {
-      bpLua = [];
-    }
+      var isAdmin = utils.isUserAdmin(request);
+      var luaForbidden = false;
 
-    if (coLua && !luaForbidden) {
-      coLua.forEach(function(lua) {
-        if (!isAdmin && lua.approve) {
-          luaForbidden = true;
-        }
-      });
-    } else {
-      coLua = [];
-    }
+      if (bpLua) {
+        bpLua.forEach(function(lua) {
+          if (!isAdmin && lua.approve) {
+            luaForbidden = true;
+          }
+        });
+      } else {
+        bpLua = [];
+      }
 
-    if (luaForbidden) {
-      return reply(boom.forbidden('You are not allowed to approve lua locations for proxy server'));
-    } else {
-      var _comment = newDomainJson.comment || '';
-      delete newDomainJson.comment;
-      var _enable_ssl = newDomainJson.enable_ssl;
-      delete newDomainJson.enable_ssl;
-      var _ssl_conf_profile = newDomainJson.ssl_conf_profile || '';
-      delete newDomainJson.ssl_conf_profile;
-      var _ssl_cert_id = newDomainJson.ssl_cert_id || '';
-      delete newDomainJson.ssl_cert_id;
-      var _ssl_protocols = newDomainJson.ssl_protocols || '';
-      delete newDomainJson.ssl_protocols;
-      var _ssl_ciphers = newDomainJson.ssl_ciphers || '';
-      delete newDomainJson.ssl_ciphers;
-      var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers;
-      delete newDomainJson.ssl_prefer_server_ciphers;
-      var _btt_key = newDomainJson.btt_key || '';
-      delete newDomainJson.btt_key;
-      var _bpLuaEnabled = newDomainJson.bp_lua_enable_all || false;
-      delete newDomainJson.bp_lua_enable_all;
-      var _coLuaEnabled = newDomainJson.co_lua_enable_all || false;
-      delete newDomainJson.co_lua_enable_all;
-      var _enableEnhancedAnalytics = newDomainJson.enable_enhanced_analytics;
-      delete newDomainJson.enable_enhanced_analytics;
+      if (coLua && !luaForbidden) {
+        coLua.forEach(function(lua) {
+          if (!isAdmin && lua.approve) {
+            luaForbidden = true;
+          }
+        });
+      } else {
+        coLua = [];
+      }
 
-      var newDomainJson2 = {
-        updated_by: utils.generateCreatedByField(request),
-        proxy_config: newDomainJson,
-        comment: _comment,
-        enable_ssl: _enable_ssl,
-        ssl_conf_profile: _ssl_conf_profile,
-        ssl_cert_id: _ssl_cert_id,
-        ssl_protocols: _ssl_protocols,
-        ssl_ciphers: _ssl_ciphers,
-        ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers,
-        btt_key: _btt_key,
-        bp_lua: bpLua,
-        bp_lua_enable_all: _bpLuaEnabled,
-        co_lua: coLua,
-        co_lua_enable_all: _coLuaEnabled,
-        enable_enhanced_analytics: _enableEnhancedAnalytics
-      };
+      if (luaForbidden) {
+        return reply(boom.forbidden('You are not allowed to approve lua locations for proxy server'));
+      } else {
+        var _comment = newDomainJson.comment || '';
+        delete newDomainJson.comment;
+        var _enable_ssl = newDomainJson.enable_ssl;
+        delete newDomainJson.enable_ssl;
+        var _ssl_conf_profile = newDomainJson.ssl_conf_profile || '';
+        delete newDomainJson.ssl_conf_profile;
+        var _ssl_cert_id = newDomainJson.ssl_cert_id || '';
+        delete newDomainJson.ssl_cert_id;
+        var _ssl_protocols = newDomainJson.ssl_protocols || '';
+        delete newDomainJson.ssl_protocols;
+        var _ssl_ciphers = newDomainJson.ssl_ciphers || '';
+        delete newDomainJson.ssl_ciphers;
+        var _ssl_prefer_server_ciphers = newDomainJson.ssl_prefer_server_ciphers;
+        delete newDomainJson.ssl_prefer_server_ciphers;
+        var _btt_key = newDomainJson.btt_key || '';
+        delete newDomainJson.btt_key;
+        var _bpLuaEnabled = newDomainJson.bp_lua_enable_all || false;
+        delete newDomainJson.bp_lua_enable_all;
+        var _coLuaEnabled = newDomainJson.co_lua_enable_all || false;
+        delete newDomainJson.co_lua_enable_all;
+        var _enableEnhancedAnalytics = newDomainJson.enable_enhanced_analytics;
+        delete newDomainJson.enable_enhanced_analytics;
+        var _githubIntegration = newDomainJson.github_integration;
+        delete newDomainJson.github_integration;
 
-      logger.info('Calling CDS to update configuration for domain ID: ' + domain_id + ', optionsFlag: ' + optionsFlag + ', request body: ' +
-        JSON.stringify(newDomainJson2));
-      cdsRequest({
-        url: config.get('cds_url') + '/v1/domain_configs/' + domain_id + optionsFlag,
-        method: 'PUT',
-        headers: authHeader,
-        body: JSON.stringify(newDomainJson2)
-      }, function(err, res, body) {
-        if (err) {
-          return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domain_id));
-        }
-        var response_json = JSON.parse(body);
-        if (res.statusCode === 400) {
-          return reply(boom.badRequest(response_json.message));
-        }
-        var response = response_json;
-        var action = '';
-        if (request.query.options && request.query.options === 'publish') {
-          action = 'publish';
-        } else if (!request.query.options || request.query.options !== 'verify_only') {
-          action = 'modify';
-        }
-        if (action !== '') {
-          AuditLogger.store({
-            account_id: newDomainJson.account_id,
-            activity_type: action,
-            activity_target: 'domain',
-            target_id: result._id,
-            target_name: result.domain_name,
-            target_object: newDomainJsonAudit,
-            operation_status: 'success'
-          }, request);
-        }
-        renderJSON(request, reply, err, response);
-      });
-    }
+        var newDomainJson2 = {
+          updated_by: utils.generateCreatedByField(request),
+          proxy_config: newDomainJson,
+          comment: _comment,
+          enable_ssl: _enable_ssl,
+          ssl_conf_profile: _ssl_conf_profile,
+          ssl_cert_id: _ssl_cert_id,
+          ssl_protocols: _ssl_protocols,
+          ssl_ciphers: _ssl_ciphers,
+          ssl_prefer_server_ciphers: _ssl_prefer_server_ciphers,
+          btt_key: _btt_key,
+          bp_lua: bpLua,
+          bp_lua_enable_all: _bpLuaEnabled,
+          co_lua: coLua,
+          co_lua_enable_all: _coLuaEnabled,
+          enable_enhanced_analytics: _enableEnhancedAnalytics,
+          github_integration: _githubIntegration
+        };
+
+        logger.info('Calling CDS to update configuration for domain ID: ' + domainId + ', optionsFlag: ' + optionsFlag + ', request body: ' +
+          JSON.stringify(newDomainJson2));
+        cdsRequest({
+          url: config.get('cds_url') + '/v1/domain_configs/' + domainId + optionsFlag,
+          method: 'PUT',
+          headers: authHeader,
+          body: JSON.stringify(newDomainJson2)
+        }, function(err, res, body) {
+          if (err) {
+            return reply(boom.badImplementation('Failed to update the CDS with confguration for domain ID: ' + domainId));
+          }
+          var response_json = JSON.parse(body);
+          if (res.statusCode === 400) {
+            return reply(boom.badRequest(response_json.message));
+          }
+          var response = response_json;
+          var action = '';
+          if (request.query.options && request.query.options === 'publish') {
+            action = 'publish';
+          } else if (!request.query.options || request.query.options !== 'verify_only') {
+            action = 'modify';
+          }
+          if (action !== '') {
+            AuditLogger.store({
+              account_id: newDomainJson.account_id,
+              activity_type: action,
+              activity_target: 'domain',
+              target_id: result._id,
+              target_name: result.domain_name,
+              target_object: newDomainJsonAudit,
+              operation_status: 'success'
+            }, request);
+          }
+          renderJSON(request, reply, err, response);
+        });
+      }
+    });
   });
 };
 
