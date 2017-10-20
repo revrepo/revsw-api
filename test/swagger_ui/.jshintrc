@@ -12,7 +12,6 @@
   "eqnull": true,
   "funcscope": true,
   "node": true,
-
   "undef": true,
   "globals": {
     "jQuery": true,
