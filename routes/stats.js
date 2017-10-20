@@ -978,7 +978,7 @@ module.exports = [
         scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
       },
       handler: EdgeCacheReports.getStatsEdgeCache,
-      description: 'TODO add text',
+      description: 'Get edge caching stats for a domain',
       tags: ['api'],
       plugins: {
         'hapi-swagger': {
