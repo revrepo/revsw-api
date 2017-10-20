@@ -30,9 +30,9 @@ var Endpoints = {
     },
 
     getEndpoint: function (index) {
-
+        var locs = this.locators;
         return this.getEndpoints().then(function (elems) {
-            return new Endpoint(elems[index], this.locators.api.resource.endPoints.endPoint);
+            return new Endpoint(elems[index], locs.api.resource.endPoints.endPoint);
         });
 
     }
