@@ -21,7 +21,7 @@
 var Constants = {
     SUCCESSFUL_AUTH_MSG: 'Authenticated OK',
     FAIL_AUTH_MSG: 'Authentication Failed!',
-    /* API_ENDPOINTS array should be updated every time a new end-point is added to the api. */
+    /* API_ENDPOINTS array should be updated every time a new end-point is added to the API. */
     API_ENDPOINTS: [
         '/v1/accounts',
         '/v1/accounts/{account_id}',
