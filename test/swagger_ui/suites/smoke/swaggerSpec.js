@@ -96,7 +96,7 @@ describe('Smoke', function () {
             });
         });
 
-        it('should display the expected end-points', function () {
+        it('should display all expected API end-points', function () {
             var tags = constants.API_ENDPOINTS;
             for (var i = 0; i < tags.length; i++) {
                 expect(swagger.getElementByText(tags[i]).isDisplayed()).toBeTruthy();
