@@ -18,6 +18,7 @@
 
 var config = require('config');
 var swagger = require('../../page_objects/swagger');
+var constants = require('../../page_objects/constants');
 
 describe('Smoke', function () {
     describe('Swagger UI', function () {
@@ -93,6 +94,13 @@ describe('Smoke', function () {
                     });
                 });
             });
+        });
+
+        it('should display the expected end-points', function () {
+            var tags = constants.API_ENDPOINTS;
+            for (var i = 0; i < tags.length; i++) {
+                expect(swagger.getElementByText(tags[i]).isDisplayed()).toBeTruthy();
+            }                       
         });
     });
 });

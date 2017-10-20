@@ -16,11 +16,12 @@
  * from Rev Software, Inc.
  */
 var config = require('config');
-
+var Constants = require('../constants');
 var Locators = require('../locators/locators');
 var Header = {
 
     locators: Locators,
+    constants: Constants,
 
     getAuthViaDropdown: function () {
         return browser.driver.findElement(by.id(this.locators.header.authViaDropdown.id));
@@ -36,6 +37,39 @@ var Header = {
 
     getLogoutBtn: function () {
         return browser.driver.findElement(by.id(this.locators.header.logoutBtn.id));
+    },
+
+    setAPIKey: function (value) {
+        this.getAPIKeyInput().clear();
+        return this.getAPIKeyInput().sendKeys(value);
+    },
+
+    clickAuthBtn: function () {
+        return this.getAuthBtn().click();
+    },
+
+    clickLogoutBtn: function () {
+        return this.getLogoutBtn().click();
+    },
+
+    setAuthVia: function (value) {
+        return this.getAuthViaDropdown().sendKeys(value);
+    },
+
+    getUsernameInput: function () {
+        return browser.driver.findElement(by.id(this.locators.header.userInput.id));
+    },
+
+    getPasswordInput: function () {
+        return browser.driver.findElement(by.id(this.locators.header.passInput.id));
+    },
+
+    setUsername: function (value) {
+        return this.getUsernameInput().sendKeys(value);
+    },
+
+    setPassword: function (value) {
+        return this.getPasswordInput().sendKeys(value);
     }
 };
 

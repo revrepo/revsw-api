@@ -18,10 +18,11 @@
 var config = require('config');
 
 var Locators = require('../locators/locators');
+var Endpoints = require('./endpoints/endpoints');
 var API = {
 
     //TODO: write comments for all methods
-
+    endpoints: Endpoints,
     locators: Locators,
 
     getContainer: function () {

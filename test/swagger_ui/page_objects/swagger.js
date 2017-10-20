@@ -19,6 +19,7 @@ var config = require('config');
 var Locators = require('./locators/locators');
 var Header = require('./header/header');
 var API = require('./api/api');
+var Constants = require('./constants');
 
 var baseURL = config.swagger.host.protocol + '://' + config.swagger.host.name;
 
@@ -27,7 +28,7 @@ var Swagger = {
     locators: Locators,
     header: Header,
     api: API,
-
+    constants: Constants,
     /**
    * ### Swagger.load()
    *
@@ -47,6 +48,40 @@ var Swagger = {
 
     isDisplayed: function () {
         return this.getWrapper().isDisplayed();
+    },
+
+    getSuccessAuthMSG: function () {
+        return browser
+            .driver
+            .findElement(by.css(this
+                .locators
+                .authMsgs
+                .success
+                .css));
+    },
+
+    getFailAuthMSG: function () {
+
+        return browser
+            .driver
+            .findElement(by.css(this
+                .locators
+                .authMsgs
+                .fail
+                .css));
+    },
+
+    loginAPI: function (key) {
+        this.header.setAPIKey(key);
+        return this.header.clickAuthBtn();
+    },
+
+    logout: function () {
+        return this.header.clickLogoutBtn();
+    },
+
+    getElementByText: function (text) {
+        return browser.driver.findElement(by.xpath('.//*[.="' + text + '"]'));
     }
 };
 

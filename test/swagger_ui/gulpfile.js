@@ -11,7 +11,8 @@ gulp.task('lint', function () {
   return gulp.src([
     './*.js',
     './config/**/*.js',
-    './suites/**/*.js'
+    './suites/**/*.js',
+    './page_objects/**/*.js'
   ])
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'));

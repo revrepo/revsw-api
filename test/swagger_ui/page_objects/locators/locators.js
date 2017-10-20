@@ -30,6 +30,12 @@ var Locators = {
         },
         logoutBtn: {
             id: 'resetBtn'
+        },
+        userInput: {
+            id: 'input_user'
+        },
+        passInput: {
+            id: 'input_pass'
         }
     },
     wrapper: {
@@ -64,9 +70,27 @@ var Locators = {
                     },
                     content: {
                         class: 'content'
+                    },
+                    submitBtn: {
+                        class: 'submit'
+                    },
+                    response: {
+                        responseCode: {
+                            css: '.response_code pre'
+                        }
                     }
                 }
             }
+        }
+    },
+    authMsgs: {
+        success: {
+            css: '#message',
+            linkText: 'Authenticated OK' // TODO: use constants.js
+        },
+        fail: {
+            css: '#message',
+            linkText: 'Authentication Failed!' // TODO: use constants.js
         }
     }
 };
