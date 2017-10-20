@@ -48,7 +48,7 @@ var Endpoint = function (endpoint, locators) {
                 .css)).getText().then((code) => {
                     return code;
                 });
-    }
+    };
 };
 
 module.exports = Endpoint;
