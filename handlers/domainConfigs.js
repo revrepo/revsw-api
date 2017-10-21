@@ -427,40 +427,68 @@ exports.createDomainConfig = function(request, reply) {
 
 /**
  * @name getDomainConfigFromGitHub
- * @description help method
+ * @description help method for get a JSON content from GitHub
  * @param {*} options
  * @param {*} cb
  */
-var getDomainConfigFromGitHub = function(options,cb) {
-  if(!options.github_integration ||
-      options.github_integration.enable === false) {
-        return cb(null, false);
+var getDomainConfigFromGitHub = function(options, cb) {
+  if (!options.github_integration ||
+    options.github_integration.enable === false) {
+    return cb(null, false);
   }
   var githubRequestUrl = options.github_integration.github_url;
   var githubPersonalAPIKey = options.github_integration.github_personal_api_key;
-    var options_ = {
-      url: githubRequestUrl,
-      headers: {
-        'User-Agent': 'request',
-        'Authorizationt': 'token ' + githubPersonalAPIKey,
-        'content-type': 'application/vnd.github+json'
-      },
-      json: true
-    };
+  var options_ = {
+    url: githubRequestUrl,
+    headers: {
+      'User-Agent': 'request',
+      'Authorization': 'token ' + githubPersonalAPIKey,
+      'content-type': 'application/vnd.github.v3+json',
+      'cache-control': 'no-cache, no-store, must-revalidate, max-age=6000'
+    },
+    json: true
+  };
 
-    httpRequest(options_, function(error,response, body){
-      if(!error && response.statusCode === 200) {
-        try {
-          var configData = JSON.parse(utils.atob(body.content));
-          // TODO: add Joi schema validation ?
-          cb(null, configData);
-        } catch (error) {
-          cb(error,false);
-        }
-      }else{
-        cb(error|| new Error('Faild get JSON config from GitHub'));
+  httpRequest(options_, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      var configData = {};
+      if (_.isObject(body) !== true) {
+        return cb(new Error('File content is not valid JSON object'));
       }
-    });
+      if (_.isObject(body) !== true || Object.keys(body).length === 0) {
+        return cb(new Error('Not found content'));
+      }
+      // NOTE: when we use https://api.github.com/
+      if (!!body.content && body.encoding === 'base64' && body.type === 'file') {
+        try {
+          configData = JSON.parse(utils.atob(body.content));
+        } catch (error) {
+          var msg = 'Failed get JSON content';
+          if (!!error && error.message) {
+            msg += ' (' + error.message + ')';
+          }
+          return cb(new Error(msg), false);
+        }
+      } else {
+        configData = body;
+      }
+      // TODO: add Joi schema validation ?
+      cb(null, configData);
+
+    } else {
+      var message = 'Faild get JSON config from GitHub';
+      if (!error && response.statusCode === 404) {
+        message = 'File not found or not valid API Access Token';
+      }
+      if (!error && response.statusCode === 401) {
+        message = 'Bad credentials';
+      }
+      if (!error && response.statusCode === 400) {
+        message = 'Bad request';
+      }
+      cb(error || new Error(message));
+    }
+  });
 };
 /**
  * @name updateDomainConfig
@@ -479,14 +507,15 @@ exports.updateDomainConfig = function(request, reply) {
   // NOTE: check GitHubIntegration config
   getDomainConfigFromGitHub(gitHubIntegrationOptions,function(err,gitHubDomainConfigData){
     if(err){
-      return reply(boom.badRequest('Failed to retrieve domain configuration from GitHub for domain ID ' + domainId));
+      // NOTE: show an error message whith a reason of bad request
+      return reply(boom.badRequest(err.message || 'Failed to retrieve domain configuration from GitHub for domain ID ' + domainId));
     }
     if(!err && gitHubDomainConfigData !== false) {
       // TODO: add Joi schema validation ?
       newDomainJson = gitHubDomainConfigData;
       delete gitHubDomainConfigData.github_integration;
       // NOTE: set only actual settings for GitHub Integration
-      newDomainJson.github_integration = newDomainJson.github_integration;
+      newDomainJson.github_integration = newDomainJsonAudit.github_integration;
     }
 
     // TODO: fix jshint (too many statements)
