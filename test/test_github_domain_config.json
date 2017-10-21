@@ -1,0 +1,193 @@
+{
+  "3rd_party_rewrite": {
+    "3rd_party_root_rewrite_domains": "dell2.com",
+    "3rd_party_runtime_domains": "dell3.com",
+    "3rd_party_urls": "dell.com",
+    "enable_3rd_party_rewrite": true,
+    "enable_3rd_party_root_rewrite": true,
+    "enable_3rd_party_runtime_rewrite": true
+  },
+  "proxy_timeout": 20,
+  "rev_component_bp": {
+    "enable_quic": false,
+    "acl": {
+      "acl_rules": [
+        {
+          "country_code": "",
+          "header_name": "",
+          "header_value": "",
+          "host_name": "1.1.1.1",
+          "subnet_mask": "23"
+        }
+      ],
+      "action": "allow_except",
+      "enabled": true
+    },
+    "block_crawlers": false,
+    "cache_bypass_locations": [],
+    "caching_rules": [
+      {
+        "browser_caching": {
+          "force_revalidate": false,
+          "new_ttl": 0,
+          "override_edge": false
+        },
+        "cookies": {
+          "ignore_all": false,
+          "keep_or_ignore_list": [],
+          "list_is_keep": false,
+          "override": false,
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        },
+        "edge_caching": {
+          "new_ttl": 0,
+          "override_no_cc": false,
+          "override_origin": false,
+          "query_string_keep_or_remove_list": []
+        },
+        "url": {
+          "is_wildcard": true,
+          "value": "**"
+        },
+        "version": 1,
+        "enable_esi": false,
+        "serve_stale": {
+          "enable": false,
+          "while_fetching_ttl": 8,
+          "origin_sick_ttl": 15
+        },
+        "origin_request_headers": [
+          {
+            "operation": "add",
+            "header_name": "werwer",
+            "header_value": "werwerwer"
+          }
+        ],
+        "end_user_response_headers": [
+          {
+            "operation": "add",
+            "header_name": "werwerwer",
+            "header_value": "werwerwerwer"
+          }
+        ]
+      }
+    ],
+    "cdn_overlay_urls": [],
+    "enable_cache": true,
+    "enable_security": true,
+    "web_app_firewall": "off",
+    "custom_vcl": {
+      "enabled": true,
+      "backends": [],
+      "recv": "unset req.http.Cookie;\nunset req.http.proxy;\n\n\nif (req.url == \"/favicon.ico\") {\n    return (hash);\n}\n\nset req.http.X-Rev-Url = req.url;\n\nif (req.http.accept ~ \"webp\" ||   wurfl.get_capability(\"webp_lossy_support\") == \"true\" || wurfl.get_capability(\"webp_lossless_support\") == \"true\") {\n    # webp is supported, so we don't include it in the blacklist\n} else {\n    var.set_string(\"unsupported_formats\", var.get_string(\"unsupported_formats\") + \"_webp\");\n}\n\nvar.set_string(\"new_directives\", \"\");\n\nif (req.http.dpr && req.http.width) {\n    # Use client hints to determine width\n    var.set_string(\"new_width\", req.http.width);\n\n    # We'll use this to send the Content-DPR header later\n    var.set_string(\"content_dpr\", req.http.dpr);\n\n    # Add \"Width\" to the Vary header\n    var.set_string(\"vary\", var.get_string(\"vary\") + \"Width, \");\n\n} else if (req.http.dpr && req.http.viewport-width) {\n    # Use client hints to determine width\n\n    if (req.http.dpr ~ \"\\.\") {\n        # Non-integral DPR Math\n\n        # From \"2.0\"  capture [\"2\",\"0\"],  return 20\n        # From \"1.75\" capture [\"1\", \"7\"], return 17\n\n        # NOTE: if std.integer() fails to parse the regsub() result, it will return 10 (which will be divided by 10 later to get a 1x multiplier)\n        var.set_int(\"dpr\", std.integer(regsub(req.http.dpr, \"(\\d+)?\\.(\\d)\", \"\\1\\2\"), 10));\n\n        # NOTE: the ' \"\" +  ' prefix is required to implicitly typecast the INT to a STRING, otherwise set_string() will fail\n        var.set_string(\"new_width\", \"\" + (  std.integer(req.http.viewport-width, 0) * var.get_int(\"dpr\") / 10  ));\n\n    } else {\n        var.set_string(\"new_width\", \"\" + (  std.integer(req.http.viewport-width, 0) * std.integer(req.http.dpr, 2)  ));\n    }\n\n    # We'll use this to send the Content-DPR header later\n    var.set_string(\"content_dpr\", req.http.dpr);\n\n    # Add \"Viewport-Width\" and \"DPR\" to the Vary header\n    var.set_string(\"vary\", var.get_string(\"vary\") + \"Viewport-Width, DPR, \");\n\n} else if (wurfl.get_capability(\"is_wireless_device\") == \"true\") {\n\n    if (wurfl.get_capability(\"is_tablet\") == \"true\") {\n        # For tablets we use max_image_height because they are normally used in LANDSCAPE orientation\n        \n        # Since WURFL inconsistently models the orientation of tablets, we normalize it\n        if (std.integer(wurfl.get_capability(\"resolution_width\"), 1280) > std.integer(wurfl.get_capability(\"resolution_height\"), 0)) {\n            # This is modeled in landscape orientation - it's wider than it is tall\n            var.set_string(\"new_width\", wurfl.get_capability(\"resolution_width\"));\n        } else {\n            # This is modeled in portrait orientation - it's taller than it is wide\n            var.set_string(\"new_width\", wurfl.get_capability(\"resolution_height\"));\n        }\n\n    } else {\n        # For everything else we use max_image_width because they are in PORTRAIT orientation\n        var.set_string(\"new_width\", wurfl.get_capability(\"resolution_width\"));\n    }\n\n    # Add \"User-Agent\" to the Vary header\n    var.set_string(\"vary\", var.get_string(\"vary\") + \"User-Agent, \");\n\n } else {\n    # Non-mobile, use hard-coded maximum\n    var.set_string(\"new_width\", \"2560\");\n\n    var.set_string(\"vary\", var.get_string(\"vary\") + \"User-Agent, \");\n}\n\nvar.set_string(\"new_directives\", var.get_string(\"new_directives\") + \"/w_\" + var.get_string(\"new_width\"));\n\n# `/a_*` and `/pc_*` should never make it back to the origin server\nvar.set_string(\"directives\", regsuball(var.get_string(\"directives\"), \"/(?:a|pc)_[^/]+\", \"\"));\n\n# Remove params that are already set in auto mode\nvar.set_string(\"directives\", regsuball(var.get_string(\"directives\"), \"/(?:w|h|m)_[^/]+\", \"\"));\n\nvar.set_string(\"new_directives\", var.get_string(\"new_directives\") + var.get_string(\"directives\"));\n\nif (var.get_string(\"unsupported_formats\") != \"\") {\n    # Each unsupported format is added with \"_\" prepended, so this might look like \"_webp_bmp_gif\"\n    # then we prepend \"/naf\" to it to make \"/naf_webp_bmp_gif\" and add that to the directives\n    var.set_string(\"new_directives\", var.get_string(\"new_directives\") + \"/naf\" + var.get_string(\"unsupported_formats\"));\n}\n\n# std.syslog(0, var.get_string(\"new_directives\"));",
+      "hit": "#",
+      "miss": "#\n# Prefix is missing, use hard-coded origin server\n# WARNING: This is domain/customer specific!\nif (req.url !~ \"^/https?:/\") {\n    # Note, this will fetch all origin content on HTTP.  To use the same scheme as the original request,\n    # you would need to look at req.http.X-Forwarded-Proto or similar from the upstream SSL Terminator.\n    set req.url = \"/http://\" + req.http.x-ie-origin + req.url;\n}",
+      "deliver": "# Victor Gartvich 3/9/17\r\nset resp.http.X-Rev-Wurfl = var.get_string(\"new_directives\");\r\nif (resp.http.X-Rev-Vary != \"\") {\r\n   set resp.http.Vary = resp.http.X-Rev-Vary;\r\n   unset resp.http.X-Rev-Vary;\r\n}\r\nset resp.http.X-WIT-Device-ID = wurfl.get_device_id();\r\nset resp.http.X-Orig-UA = wurfl.get_original_useragent();",
+      "pass": "#",
+      "pipe": "#",
+      "hash": "hash_data(req.url);\r\nif (req.http.host) {\r\n  hash_data(req.http.host);\r\n} else {\r\n  hash_data(server.ip);\r\n}\r\nhash_data(var.get_string(\"new_directives\"));\r\nreturn (lookup);",
+      "synth": "#",
+      "backend_response": "# Victor Gartvich 3/8/17\nset beresp.http.X-Rev-Vary = beresp.http.Vary;\nunset beresp.http.Vary;\n\n# This keeps the objects longer than the TTL specifies in case we get bombarded with requests\n    #  when a TTL expires, in which case some of the requests in the queue will get stale cached content\n    #  while we wait for the new data to be fetched from the backend servers.\n    set beresp.grace = 2h;\n\n    if (beresp.status == 404) {\n        # Cache 404s for a short time\n        unset beresp.http.cache-control;\n        unset beresp.http.pragma;\n        unset beresp.http.expires;\n\n        set beresp.uncacheable = false;\n        set beresp.ttl = 30s;\n\n    } elseif (beresp.status >= 300 && beresp.status < 400) {\n        # Don't cache redirects\n        unset beresp.http.cache-control;\n        unset beresp.http.pragma;\n        unset beresp.http.expires;\n\n        set beresp.uncacheable = false;\n        set beresp.ttl = 0s;\n\n    } elseif (beresp.status >= 500 && beresp.status < 600) {\n        # Cache server errors for only a tiny time\n        unset beresp.http.cache-control;\n        unset beresp.http.pragma;\n        unset beresp.http.expires;\n\n        set beresp.uncacheable = false;\n        set beresp.ttl = 5s;\n\n    } elseif (beresp.ttl < 1h) {\n        # Cache everything valid for at least 1 hour regardless of cache control\n\n\nunset beresp.http.X-Cache-Debug;\nunset beresp.http.x-cache-status;\nunset beresp.http.X-Backend-Key;\nunset beresp.http.Server;  # gunicorn/0.14.3\nunset beresp.http.Via;  # 1.1 vegur, 1.1 varnish\n        unset beresp.http.X-Served-By;  # cache-lcy1132-LCY\n        unset beresp.http.X-Cache;  # MISS\n        unset beresp.http.X-Cache-Hits;  # 0\n        unset beresp.http.X-Timer;\n        unset beresp.http.set-cookie;\n        set beresp.uncacheable = false;\n        set beresp.ttl = 72h;\n    }\n\n    # Return deliver here to avoid the varnish logic that hit-for-passes 0s ttl objects\n    #   https://www.varnish-cache.org/trac/browser/bin/varnishd/builtin.vcl?rev=4.0#L154\n\n# Required for NUUBIT edge cache purging to work\nset beresp.http.X-Rev-Host = bereq.http.Host;                                                                                                                                                                               \nset beresp.http.X-Rev-Url = bereq.http.X-Rev-Url;\n\n    return (deliver);",
+      "backend_error": "#"
+    },
+    "enable_bot_protection": true,
+    "bot_protection": [
+      {
+        "location": "/",
+        "mode": "monitor",
+        "call_type": 1,
+        "username_cookie_name": "",
+        "sessionid_cookie_name": "",
+        "bot_protection_id": "42e769f3-5cd6-406e-9cf6-f65382d3d025"
+      }
+    ],
+    "enable_waf": true,
+    "waf": [
+      {
+        "location": "/",
+        "enable_waf": true,
+        "enable_learning_mode": true,
+        "enable_sql_injection_lib": true,
+        "enable_xss_injection_lib": true,
+        "waf_rules": [
+          "58ec620c2499eb41279788d8"
+        ],
+        "waf_actions": [
+          {
+            "condition": "$SQL >= 8",
+            "action": "BLOCK"
+          },
+          {
+            "condition": "$UWA >= 4",
+            "action": "DROP"
+          },
+          {
+            "condition": "$XSS >= 8",
+            "action": "BLOCK"
+          },
+          {
+            "condition": "$EVADE >= 4",
+            "action": "BLOCK"
+          },
+          {
+            "condition": "$LIBINJECTION_XSS >= 8",
+            "action": "BLOCK"
+          },
+          {
+            "condition": "$LIBINJECTION_SQL >= 8",
+            "action": "BLOCK"
+          }
+        ]
+      }
+    ]
+  },
+  "rev_component_co": {
+    "css_choice": "medium",
+    "enable_optimization": false,
+    "enable_rum": false,
+    "img_choice": "medium",
+    "js_choice": "medium",
+    "mode": "moderate",
+    "enable_decompression": true
+  },
+  "origin_secure_protocol": "use_end_user_protocol",
+  "origin_server": "images1.voonik.com.s3-ap-southeast-1.amazonaws.com",
+  "origin_host_header": "images1.voonik.com.s3-ap-southeast-1.amazonaws.com",
+  "account_id": "590ec06d90430aae4c5ee09d",
+  "tolerance": "3000",
+  "origin_server_location_id": "55a56fa6476c10c329a90741",
+  "domain_aliases": [],
+  "image_engine": {
+    "enable_image_engine": true,
+    "image_engine_token": "nnml",
+    "image_engine_api_key": "",
+    "image_engine_origin_server": "",
+    "refresh_image_engine_configuration": false,
+    "custom_configuration_present": true
+  },
+  "comment": "TEST ImageEngine",
+  "enable_ssl": true,
+  "ssl_conf_profile": "571e9f7591dcb9f97a0c4841",
+  "ssl_cert_id": "",
+  "ssl_protocols": "TLSv1 TLSv1.1 TLSv1.2",
+  "ssl_ciphers": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS",
+  "ssl_prefer_server_ciphers": true,
+  "btt_key": "",
+  "bp_lua_enable_all": false,
+  "bp_lua": [],
+  "co_lua_enable_all": false,
+  "co_lua": [],
+  "github_integration": {
+    "enable": false,
+    "github_url": "",
+    "github_personal_api_key": ""
+  },
+  "enable_origin_health_probe": true,
+  "origin_health_probe": {
+    "HTTP_REQUEST": "GET / HTTP/1.1",
+    "PROBE_TIMEOUT": 1,
+    "PROBE_INTERVAL": 40,
+    "HTTP_STATUS": 200
+  }
+}
