@@ -28,6 +28,7 @@ describe('Negative', function () {
         });
 
         it('should not display unexpected API end-points', function () {
+            /*jshint loopfunc: true */
             swagger.api.endpoints.getEndpoints().then(function (endpoints) {
                 for (var i = 0; i < endpoints.length; i++) {
                     endpoints[i].findElement(by.css(swagger
