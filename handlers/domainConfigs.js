@@ -476,9 +476,9 @@ var getDomainConfigFromGitHub = function(options, cb) {
       cb(null, configData);
 
     } else {
-      var message = 'Faild get JSON config from GitHub';
+      var message = 'Faild to receive the specified configuration file from GitHub';
       if (!error && response.statusCode === 404) {
-        message = 'File not found or not valid API Access Token';
+        message = 'The specified configuration file is not found or the personal API access token is not correct';
       }
       if (!error && response.statusCode === 401) {
         message = 'Bad credentials';
