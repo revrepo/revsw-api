@@ -464,7 +464,18 @@ module.exports = [{
               .description('Refresh Image Engine Configuration - update the custom VCL code with the current master VCL code. PROPERTY NOT BE STORED'),
             custom_configuration_present: Joi.boolean().optional()
               .description('compare the configured master IE VCL code with current custom VCL code set for a domain. PROPERTY NOT BE STORED')
-          })
+          }),
+          github_integration: Joi.object({
+            enable: Joi.boolean().default(false).description('Enabled GitHub Integration'),
+            github_url: Joi.alternatives().when('enable', {
+              is: true, then: Joi.string().uri().required(),
+              otherwise: Joi.string().allow('').optional()
+            }).description('Url to GitHub file'),
+            github_personal_api_key: Joi.alternatives().when('enable', {
+              is: true, then: Joi.string().allow('').optional().default(''),
+              otherwise: Joi.string().allow('').optional()
+            }).description('Personal API Key GitHub'),
+          }).description('GitHub Integration')
         }
       },
       //      response    : {
