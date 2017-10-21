@@ -35,6 +35,11 @@ var Endpoints = {
             return new Endpoint(elems[index], locs.api.resource.endPoints.endPoint);
         });
 
+    },
+
+    getEndpointTitle: function (endpoint) {
+        var locs = this.locators;
+        return new Endpoint(endpoint, locs.api.resource.endPoints.endPoint).getTitle();
     }
 };
 
