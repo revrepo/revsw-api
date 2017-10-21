@@ -67,7 +67,8 @@ function DomainConfig(mongoose, connection, options) {
     'bp_lua': [luaSchema],
     'co_lua_enable_all': {type: Boolean, default: false},
     'co_lua': [luaSchema],
-    'enable_enhanced_analytics': {type: Boolean, default: true}
+    'enable_enhanced_analytics': {type: Boolean, default: true},
+    'github_integration': {}
   });
 
   this.model = connection.model('DomainConfig', this.DomainConfigSchema, 'DomainConfig');
