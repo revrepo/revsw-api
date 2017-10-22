@@ -183,26 +183,26 @@ describe('UsageReport Functional check:', function () {
     report = report.domains_usage[domain];
   });
 
-  it( 'UsageReport contains correct total hits amount', function () {
+  xit( 'UsageReport contains correct total hits amount', function () {
     report.count.should.be.equal( estimated.total_hits );
   });
 
-  it( 'UsageReport contains correct cache hits amount', function () {
+  xit( 'UsageReport contains correct cache hits amount', function () {
     report.cache_hits.MISS.should.be.equal( estimated.hits.cache_code );
     report.cache_hits.HIT.should.be.equal( estimated.hits.cache_code );
   });
 
-  it( 'UsageReport contains correct port hits amount', function () {
+  xit( 'UsageReport contains correct port hits amount', function () {
     report.port_hits['80'].should.be.equal( estimated.hits.protocol );
     report.port_hits['443'].should.be.equal( estimated.hits.protocol );
   });
 
-  it( 'UsageReport contains correct traffic values', function () {
+  xit( 'UsageReport contains correct traffic values', function () {
     report.received_bytes.should.be.equal( estimated.received_bytes );
     report.sent_bytes.should.be.equal( estimated.sent_bytes );
   });
 
-  it( 'UsageReport contains correct billable bandwidth values', function () {
+  xit( 'UsageReport contains correct billable bandwidth values', function () {
     report.billable_sent_bps.should.be.approximately( ( estimated.sent_bytes * 8 / test_data_timespan ), 100 );
     report.billable_received_bps.should.be.approximately( ( estimated.received_bytes * 8 / test_data_timespan ), 100 );
   });
