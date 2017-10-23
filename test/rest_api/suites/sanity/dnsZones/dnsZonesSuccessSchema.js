@@ -214,7 +214,7 @@ describe('Sanity check', function () {
                 .catch(done);
             });
 
-          it('should return a response when checking integration with dns ' +
+          it('should return a response when checking integration with DNS ' +
             'servers for specific DNS Zone',
             function (done) {
               API.helpers
@@ -238,8 +238,8 @@ describe('Sanity check', function () {
                 .catch(done);
             });
 
-          it('should return a response when checking integration with records ' +
-            ' for specific DNS Zone',
+          xit('should return a response when checking integration with records ' +
+            'for specific DNS Zone',
             function (done) {
               API.helpers
                 .authenticateUser(user)

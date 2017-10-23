@@ -31,7 +31,7 @@ describe('CRUD check', function () {
     //config.get('api.users.revAdmin'),
     config.get('api.users.reseller')
   ];
-  var versionRegExp = /^\d{1,3}(\.\d{1,3}){2}$/;
+  var versionRegExp = /^\d{1,3}(\.\d{1,4}){2}$/;
 
   users.forEach(function (user) {
 

@@ -1,0 +1,36 @@
+{
+    "name": "revsw-swagger-ui-test",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+      "lint": "find suites/ -name '*js' -print -exec jshint '{}' \\;",
+      "test": "NODE_ENV=qa node node_modules/.bin/protractor config/regression.js",
+      "smoke": "NODE_ENV=qa node node_modules/.bin/protractor config/smoke.js"
+    },
+    "author": "",
+    "license": "Unknown",
+    "dependencies": {
+      "bluebird": "^2.10.2",
+      "config": "^1.16.0",
+      "del": "^2.0.2",
+      "docker": "^0.2.14",
+      "faker": "^3.0.1",
+      "gulp": "^3.9.0",
+      "gulp-jshint": "^1.12.0",
+      "gulp-shell": "^0.5.1",
+      "jasmine-expect": "^1.22.3",
+      "jasmine-spec-reporter": "^2.4.0",
+      "jshint-stylish": "^2.0.1",
+      "moment": "^2.13.0",
+      "protractor": "^2.5.1",
+      "protractor-jasmine2-html-reporter": "0.0.5",
+      "speakeasy": "^2.0.0",
+      "supertest": "^1.1.0",
+      "supertest-as-promised": "^2.0.2",
+      "validator": "^4.7.1"
+    },
+    "devDependencies": {
+      "underscore": "^1.8.3"
+    }
+  }
+  
