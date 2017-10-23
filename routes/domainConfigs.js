@@ -469,7 +469,7 @@ module.exports = [{
             enable: Joi.boolean().default(false).description('Enabled GitHub Integration'),
             github_url: Joi.alternatives().when('enable', {
               is: true, then: Joi.string().uri().required(),
-              otherwise: Joi.string().allow('').optional()
+              otherwise: Joi.string().allow('').max(300).optional()
             }).description('Url to GitHub file'),
             github_personal_api_key: Joi.alternatives().when('enable', {
               is: true, then: Joi.string().regex(routeModels.gihubPersonalAccessToken).required(),
