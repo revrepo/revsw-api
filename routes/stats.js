@@ -68,7 +68,7 @@ module.exports = [
           os: Joi.string().description('OS name/version to filter'),
           device: Joi.string().description('Device name/version to filter'),
           browser: Joi.string().description('Browser name to filter'),
-          cache_type: Joi.string().optional().allow('').valid('secondary').default('').description('Option for use Secondary Cache ')
+          cache_type: Joi.string().optional().valid(['edge','secondary']).default('edge').description('Cache type')
         }
       }
     }
@@ -234,7 +234,7 @@ module.exports = [
           os: Joi.string().description('OS name/version to filter'),
           device: Joi.string().description('Device name/version to filter'),
           browser: Joi.string().description('Browser name to filter'),
-          cache_type: Joi.string().optional().allow('').valid('secondary').default('').description('Option for use Secondary Cache ')
+          cache_type: Joi.string().optional().valid(['edge', 'secondary']).default('edge').description('Cache type')
         }
       }
     }
