@@ -41,6 +41,20 @@
     "request": {
       "maxTimeout": 600000
     },
+    "gitHubPersonalAccessTokenForAccountId":{
+        "55b706a57957012304a49d0b" :{
+          "token": "d3c29d29b64890efb94bba2606e44cc25c0aa100",
+          "valid_config": "https://raw.githubusercontent.com/gerzhan/demo/master/55b706a57957012304a49d0b_valid.json"
+        },
+        "55b6ff6a7957012304a49d04":{
+          "token": "d3c29d29b64890efb94bba2606e44cc25c0aa100",
+          "valid_config": "https://raw.githubusercontent.com/gerzhan/demo/master/55b6ff6a7957012304a49d04_valid.json"
+        },
+        "5588869fbde7a0d00338ce8f":{
+          "token": "d3c29d29b64890efb94bba2606e44cc25c0aa100",
+          "valid_config": "https://raw.githubusercontent.com/gerzhan/demo/master/5588869fbde7a0d00338ce8f_valid.json"
+        }
+    },
     "users": {
       "revAdmin": {
         "email": "qa_user_with_rev-admin_perm@revsw.com",
