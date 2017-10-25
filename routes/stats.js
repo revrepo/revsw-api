@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -67,7 +67,8 @@ module.exports = [
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
           device: Joi.string().description('Device name/version to filter'),
-          browser: Joi.string().description('Browser name to filter')
+          browser: Joi.string().description('Browser name to filter'),
+          cache_type: Joi.string().optional().allow('').valid('secondary').default('').description('Option for use Secondary Cache ')
         }
       }
     }
@@ -232,7 +233,8 @@ module.exports = [
           country: Joi.string().length(2).uppercase().regex(/[A-Z]{2}/).description('Two-letters country code of end user location to filter'),
           os: Joi.string().description('OS name/version to filter'),
           device: Joi.string().description('Device name/version to filter'),
-          browser: Joi.string().description('Browser name to filter')
+          browser: Joi.string().description('Browser name to filter'),
+          cache_type: Joi.string().optional().allow('').valid('secondary').default('').description('Option for use Secondary Cache ')
         }
       }
     }
