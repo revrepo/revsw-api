@@ -422,6 +422,7 @@ module.exports = [{
               recv: Joi.string().max(40000),
               backend_response: Joi.string().max(40000),
               backend_error: Joi.string().max(40000),
+              backend_fetch: Joi.string().max(40000),
               hit: Joi.string().max(40000),
               miss: Joi.string().max(40000),
               deliver: Joi.string().max(40000),
