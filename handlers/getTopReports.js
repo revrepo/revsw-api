@@ -176,7 +176,10 @@ var topReports_ = function( req, reply, domainConfig, span) {
         }
       };
     }
-
+    // NOTE: don`t use missing_field for the report type 'cache2'
+    if(field === 'cache2') {
+      delete requestBody.aggs.missing_field;
+    }
     //  update query
     elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, req, domainConfig);
 
