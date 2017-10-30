@@ -178,6 +178,8 @@ var topReports_ = function( req, reply, domainConfig, span) {
     }
     // NOTE: don`t use missing_field for the report type 'cache2'
     if(field === 'cache2') {
+      requestBody.query.filtered.filter.bool.must.push({ exists: { field: 'cache2' } });
+      requestBody.query.filtered.filter.bool.must.push({ terms: { cache: ['MISS', '-'] } });
       delete requestBody.aggs.missing_field;
     }
     //  update query
