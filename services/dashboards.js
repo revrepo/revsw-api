@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,6 +20,7 @@
 
 'use strict';
 
+var async = require('async');
 var _ = require('lodash');
 var utils = require('../lib/utilities.js');
 
@@ -35,16 +36,21 @@ var mongoConnection = require('../lib/mongoConnections');
 var Dashboard = require('../models/Dashboard');
 var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
 
+var maxNumberOfDashboardsPerUser = config.max_number_of_dashboards_per_user;
 /**
  * @name  createUserDashboard
  * @description
  *
- * @param  {Staring}   userId
- * @param  {Object| null }   newDashboardOptions
+ * @param  {Object| null }   Options
+ *      {
+ *        user_id:String,
+ *        new_dashboard_options: Object
+ *      }
  * @param  {Function} cb                  [description]
- * @return {[type]}                       [description]
  */
-exports.createUserDashboard = function(userId, newDashboardOptions, cb) {
+exports.createUserDashboard = function(options, cb) {
+  var userId = options.user_id;
+  var newDashboardOptions = options.new_dashboard_options || null;
   var _defaultDashboard = {
     title: 'My Dashboard',
     structure: '6-6',
@@ -64,14 +70,36 @@ exports.createUserDashboard = function(userId, newDashboardOptions, cb) {
 
   var newDashboard = newDashboardOptions || _defaultDashboard;
   newDashboard.user_id = userId;
-  dashboard.add(newDashboard, function(error, result) {
-    if (error) {
-      logger.error('createUserDashboard::Failed to add new dashboard ' + newDashboard.title);
-      cb(error);
-    } else {
-      logger.info('createUserDashboard::Success added new dashboard ' + newDashboard.title);
-      cb(null, result);
+  // NOTE: start workflow
+  async.waterfall([
+    // NOTE: step - check limit
+    function(cb) {
+      dashboard.getDashboardsByUserID(userId, function(err, data) {
+        if (err) {
+          return cb(err);
+        }
+        if (data.length >= maxNumberOfDashboardsPerUser) {
+          var ErrorMessage_ = 'You cannot add more than ' + maxNumberOfDashboardsPerUser + ' dashboards. ' +
+            'Please contact our support team if you need additional dashboards.';
+          return cb(new Error(ErrorMessage_));
+        }
+        cb(null);
+      });
+    },
+    // NOTE: step - create dashboard
+    function(cb) {
+      dashboard.add(newDashboard, function(error, result) {
+        if (error) {
+          logger.error('createUserDashboard::Failed to add new dashboard ' + newDashboard.title);
+          cb(error);
+        } else {
+          logger.info('createUserDashboard::Success added new dashboard ' + newDashboard.title);
+          cb(null, result);
+        }
+      });
     }
+  ], function(err, result) {
+    cb(err, result);
   });
 };
 
