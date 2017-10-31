@@ -1176,6 +1176,14 @@ exports.getWAFRulesList = function(request, reply) {
       reply(response);
     });
   });
-
-
+};
+/**
+ * @name getRecommendedDefaultSettings
+ */
+exports.getRecommendedDefaultSettings = function(request,reply){
+  var response = {
+    waf_rules_ids: config.default_waf_rules_ids,
+    ssl_conf_profile_id: config.default_ssl_conf_profile_id
+  };
+  reply(response);
 };
