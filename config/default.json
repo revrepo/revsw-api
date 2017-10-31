@@ -69,6 +69,8 @@
   "shared_ssl_cert_id": "5723e997bd75f6e7668dbe26",
 
   "default_cname_domain": "revdn.net",
+  "default_waf_rules_ids": ["58ec620c2499eb41279788d8"],
+  "default_ssl_conf_profile_id": "571e9f7591dcb9f97a0c4841",
   "portal_mongo": {
     "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
   },

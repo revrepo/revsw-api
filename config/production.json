@@ -27,7 +27,8 @@
   "elasticsearch_fullurl_url": "iad02-esurl01.revsw.net:9200",
   "cds_url": "https://cds.revdn.net:9000",
   "cds_api_token": "the_correct_value_is_in_local_json",
-
+  "default_waf_rules_ids": ["58ed3c21f140f9d32b9bc754"],
+  "default_ssl_conf_profile_id": "571e9f7591dcb9f97a0c4841",
   "shared_ssl_cert_id": "572973b9e8ebfce21d047afa",
 
   "portal_mongo": {

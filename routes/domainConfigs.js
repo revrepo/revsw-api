@@ -510,5 +510,26 @@ module.exports = [{
       //        schema : routeModels.statusModel
       //      }
     }
-  }
+  },
+  {
+    method: 'GET',
+    path: '/v1/domain_configs/recommended_default_settings',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: domainConfigsHandlers.getRecommendedDefaultSettings,
+      description: 'Provides a list of recommended default values for different domain configuration attributes',
+      notes: 'TODO text',
+      tags: ['api', 'domain_configs'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.recommendedDefaultDomainSettings
+      }
+    }
+  },
 ];
