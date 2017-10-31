@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -15,7 +15,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
-
+require('should-http');
 var config = require('config');
 var API= require('./../../common/api');
 var DomainConfigsDP= require('./../../common/providers/data/domainConfigs');
@@ -61,6 +61,31 @@ describe('Smoke check', function () {
     afterEach(function (done) {
       done();
     });
+
+    it('should return success response data when getting a recommended default settings',
+      function(done) {
+        API.helpers
+          .authenticateUser(reseller)
+          .then(function() {
+            API.resources.domainConfigs
+              .recommendedDefaultSettings()
+              .getAll()
+              .expect(200)
+              .then(function(res){
+                var defaultSettings = res.body;
+                defaultSettings.should.have.property('waf_rules_ids');
+                defaultSettings.should.have.property('ssl_conf_profile_id');
+                defaultSettings.waf_rules_ids.should.be.instanceof(Array);
+                defaultSettings.waf_rules_ids.should.not.empty;
+                defaultSettings.ssl_conf_profile_id.should.be.type('string');
+                defaultSettings.ssl_conf_profile_id.should.not.empty;
+              })
+              .then(function(){
+                done();
+              });
+          })
+          .catch(done);
+      });
 
     it('should return success response code when getting a list of domains',
       function (done) {

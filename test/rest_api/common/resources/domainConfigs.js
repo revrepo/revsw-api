@@ -48,6 +48,13 @@ var resourceConfig = {
       methods: [
         Methods.READ_ALL
       ]
+    },
+    {
+      name: 'recommendedDefaultSettings',
+      path: '/recommended_default_settings',
+      methods: [
+        Methods.READ_ALL
+      ]
     }
   ]
 };
