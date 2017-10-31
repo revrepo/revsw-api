@@ -82,6 +82,30 @@ var Swagger = {
 
     getElementByText: function (text) {
         return browser.driver.findElement(by.xpath('.//*[.="' + text + '"]'));
+    },
+
+    waitForElement: function (cssLocator, callback) {
+        var handler = setInterval(function () {
+            browser.isElementPresent(by.css(cssLocator)).then(function (vis) {
+                if (vis) {
+                    callback();
+                    clearInterval(handler);
+                }
+            });
+        }, 1000);
+    },
+
+    waitForText: function (locator, callback) {
+        var handler = setInterval(function () {
+            browser
+                .isElementPresent(by
+                    .cssContainingText(locator.css, locator.linkText)).then(function (vis) {
+                        if (vis) {
+                            callback();
+                            clearInterval(handler);
+                        }
+                    });
+        }, 1000);
     }
 };
 

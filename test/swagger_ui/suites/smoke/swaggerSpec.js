@@ -25,6 +25,8 @@ describe('Smoke', function () {
 
         beforeAll(function () {
             swagger.load();
+            // disable animations
+            browser.executeScript('jQuery.fx.off=true;');
         });
 
         it('should display `Swagger UI` page', function () {
@@ -64,20 +66,16 @@ describe('Smoke', function () {
         });
 
         it('should collapse endpoints if link is clicked', function () {
-            swagger.api.getResourceLink().then(function (e) {
-                e.click();
+            swagger.api.clickResourceLink().then(function () {
                 swagger.api.getResourceContent().then(function (endp) {
-                    browser.sleep(2000); // wait for animation to finish
                     expect(endp.isDisplayed()).toBeFalsy();
                 });
             });
         });
 
         it('should expand endpoints if link is clicked again', function () {
-            swagger.api.getResourceLink().then(function (e) {
-                e.click();
+            swagger.api.clickResourceLink().then(function () {
                 swagger.api.getResourceContent().then(function (endp) {
-                    browser.sleep(2000); // wait for animation to finish
                     expect(endp.isDisplayed()).toBeTruthy();
                 });
             });
@@ -87,7 +85,6 @@ describe('Smoke', function () {
             swagger.api.getResourceLink().then(function (e) {
                 swagger.api.getResourceContent().then(function (endp) {
                     swagger.api.clickEndpoint().then(function () {
-                        browser.sleep(2000);
                         swagger.api.getEndpointContent().then(function (content) {
                             expect(content.isDisplayed()).toBeTruthy();
                         });
@@ -100,7 +97,7 @@ describe('Smoke', function () {
             var tags = constants.API_ENDPOINTS;
             for (var i = 0; i < tags.length; i++) {
                 expect(swagger.getElementByText(tags[i]).isDisplayed()).toBeTruthy();
-            }                       
+            }
         });
     });
 });
