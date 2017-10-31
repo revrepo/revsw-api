@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -65,8 +65,12 @@ exports.createDashboard = function createDashboard(request, reply) {
   var newDashboard = request.payload;
   var user_id = request.auth.credentials.user_id;
 
-  dashboardService.createUserDashboard(user_id,newDashboard, function(error, result) {
+  dashboardService.createUserDashboard({ user_id: user_id, new_dashboard_options: newDashboard}, function(error, result) {
     if (error || !result) {
+      // TODO: Change method for detect message for user ("You cannot") ?
+      if(!!error && !!error.message && /You cannot /.test(error.message) === true){
+        return reply(boom.badRequest(error.message));
+      }
       return reply(boom.badImplementation('Failed to add new dashboard ' + newDashboard.title));
     }
 

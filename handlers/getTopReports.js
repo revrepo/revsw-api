@@ -59,6 +59,7 @@ var multiCache = cacheManager.multiCaching([memoryCache]);
 var topReports_ = function( req, reply, domainConfig, span) {
 
   var reportType = req.query.report_type || 'referer';
+  var isSecondaryCacheType = req.query.cache_type ? (req.query.cache_type === 'secondary') : false;
   var domainName = domainConfig.domain_name,
     domainID = domainConfig._id,
     field,
@@ -99,7 +100,11 @@ var topReports_ = function( req, reply, domainConfig, span) {
       field = 'geoip.country_code2';
       break;
     case 'cache_status':
-      field = 'cache';
+      if(isSecondaryCacheType === true){
+        field = 'cache2';
+      } else {
+        field = 'cache';
+      }
       break;
     case 'request_status':
       field = 'conn_status';
@@ -171,7 +176,12 @@ var topReports_ = function( req, reply, domainConfig, span) {
         }
       };
     }
-
+    // NOTE: don`t use missing_field for the report type 'cache2'
+    if(field === 'cache2') {
+      requestBody.query.filtered.filter.bool.must.push({ exists: { field: 'cache2' } });
+      requestBody.query.filtered.filter.bool.must.push({ terms: { cache: ['MISS', '-'] } });
+      delete requestBody.aggs.missing_field;
+    }
     //  update query
     elasticSearch.buildESQueryTerms(requestBody.query.filtered.filter.bool, req, domainConfig);
 

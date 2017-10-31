@@ -419,16 +419,17 @@ module.exports = [{
                 host: Joi.alternatives().try([Joi.string().uri(), Joi.string().regex(routeModels.domainRegex)]).required(),
                 name: Joi.string().max(150).required()
               }),
-              recv: Joi.string().max(40000),
-              backend_response: Joi.string().max(40000),
-              backend_error: Joi.string().max(40000),
-              hit: Joi.string().max(40000),
-              miss: Joi.string().max(40000),
-              deliver: Joi.string().max(40000),
-              pass: Joi.string().max(40000),
-              pipe: Joi.string().max(40000),
-              hash: Joi.string().max(40000),
-              synth: Joi.string().max(40000)
+              recv: Joi.string().trim().allow('').max(40000),
+              backend_response: Joi.string().trim().allow('').max(40000),
+              backend_error: Joi.string().trim().allow('').max(40000),
+              backend_fetch: Joi.string().trim().allow('').max(40000),
+              hit: Joi.string().trim().allow('').max(40000),
+              miss: Joi.string().trim().allow('').max(40000),
+              deliver: Joi.string().trim().allow('').max(40000),
+              pass: Joi.string().trim().allow('').max(40000),
+              pipe: Joi.string().trim().allow('').max(40000),
+              hash: Joi.string().trim().allow('').max(40000),
+              synth: Joi.string().trim().allow('').max(40000)
             })
           }).required(),
           bp_lua: Joi.array().items({
@@ -469,10 +470,10 @@ module.exports = [{
             enable: Joi.boolean().default(false).description('Enabled GitHub Integration'),
             github_url: Joi.alternatives().when('enable', {
               is: true, then: Joi.string().uri().required(),
-              otherwise: Joi.string().allow('').optional()
+              otherwise: Joi.string().allow('').max(300).optional()
             }).description('Url to GitHub file'),
             github_personal_api_key: Joi.alternatives().when('enable', {
-              is: true, then: Joi.string().allow('').optional().default(''),
+              is: true, then: Joi.string().regex(routeModels.gihubPersonalAccessToken).required(),
               otherwise: Joi.string().allow('').optional()
             }).description('Personal API Key GitHub'),
           }).description('GitHub Integration')
@@ -509,5 +510,26 @@ module.exports = [{
       //        schema : routeModels.statusModel
       //      }
     }
-  }
+  },
+  {
+    method: 'GET',
+    path: '/v1/domain_configs/recommended_default_settings',
+    config: {
+      auth: {
+        scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+      },
+      handler: domainConfigsHandlers.getRecommendedDefaultSettings,
+      description: 'Provides a list of recommended default values for different domain configuration attributes',
+      notes: 'TODO text',
+      tags: ['api', 'domain_configs'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.recommendedDefaultDomainSettings
+      }
+    }
+  },
 ];

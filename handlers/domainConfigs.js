@@ -476,9 +476,9 @@ var getDomainConfigFromGitHub = function(options, cb) {
       cb(null, configData);
 
     } else {
-      var message = 'Faild get JSON config from GitHub';
+      var message = 'Faild to receive the specified configuration file from GitHub';
       if (!error && response.statusCode === 404) {
-        message = 'File not found or not valid API Access Token';
+        message = 'The specified configuration file is not found or the personal API access token is not correct';
       }
       if (!error && response.statusCode === 401) {
         message = 'Bad credentials';
@@ -1176,6 +1176,14 @@ exports.getWAFRulesList = function(request, reply) {
       reply(response);
     });
   });
-
-
+};
+/**
+ * @name getRecommendedDefaultSettings
+ */
+exports.getRecommendedDefaultSettings = function(request,reply){
+  var response = {
+    waf_rules_ids: config.default_waf_rules_ids,
+    ssl_conf_profile_id: config.default_ssl_conf_profile_id
+  };
+  reply(response);
 };
