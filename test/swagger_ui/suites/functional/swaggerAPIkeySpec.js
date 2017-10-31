@@ -72,7 +72,7 @@ describe('Functional', function () {
         it('should return 200 status code if `Try it out!`' +
             ' button is clicked after authentication', function (done) {
                 swagger.header.setAPIKey(apiKey).then(function () {
-                    swagger.header.clickAuthBtn();
+                    swagger.header.clickAuthBtn();                    
                     swagger.waitForText(swagger
                         .locators
                         .authMsgs

@@ -92,7 +92,7 @@ var Swagger = {
                     clearInterval(handler);
                 }
             });
-        }, 100);
+        }, 1000);
     },
 
     waitForText: function (locator, callback) {
@@ -105,7 +105,7 @@ var Swagger = {
                             clearInterval(handler);
                         }
                     });
-        }, 100);
+        }, 1000);
     }
 };
 
