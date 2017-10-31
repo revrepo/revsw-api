@@ -32,11 +32,6 @@ describe('Functional', function () {
             browser.executeScript('jQuery.fx.off=true;');
             browser.ignoreSynchronization = true;
         });
-        var loops = 0;
-        function waitForElement() {
-
-            if (loops === 10) { clearInterval(handler) }
-        }
 
         it('should return 401 status code if `Try it out!`' +
             ' button is clicked without authentication', function (done) {
