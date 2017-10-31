@@ -131,8 +131,8 @@ describe('Functional', function () {
                 });
             });
 
-        it('should fail to authenticate if invalid API key is used', function () {
-            swagger.header.setAPIKey(invalidApiKey).then(function (done) {
+        it('should fail to authenticate if invalid API key is used', function (done) {
+            swagger.header.setAPIKey(invalidApiKey).then(function () {
                 swagger.header.clickAuthBtn();
                 swagger.waitForText(swagger
                     .locators
