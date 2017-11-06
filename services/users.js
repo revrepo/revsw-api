@@ -93,7 +93,7 @@ exports.createUser = function(newUser, callback) {
       function defaultActionsForNewUser(cb) {
         // NOTE:
         // 1. Create default dashboard for new user
-        dashboardService.createUserDashboard(_createdUser_.user_id, null, function(err) {
+        dashboardService.createUserDashboard({user_id:_createdUser_.user_id}, function(err) {
           if (err) {
             logger.error('UserService::createUser:error add default dashboard: ' + JSON.stringify(err));
           } else {
