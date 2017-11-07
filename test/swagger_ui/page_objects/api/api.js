@@ -83,6 +83,19 @@ var API = {
         }
     },
 
+    clickResourceLink: function (resourceTitle) {
+        var locs = this.locators;
+        if (resourceTitle === undefined) {
+            return this.getFirstResource().then(function (res) {
+                return res.findElement(by.css(locs.api.resource.resourceTitle.css)).click();
+            });
+        } else {
+            return this.getResourceByTitle(resourceTitle).then(function (res) {
+                return res.findElement(by.css(locs.api.resource.resourceTitle.css)).click();
+            });
+        }
+    },
+
     getResourceContent: function (resourceTitle) {
         var locs = this.locators;
         if (resourceTitle === undefined) {

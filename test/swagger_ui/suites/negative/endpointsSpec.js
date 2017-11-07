@@ -40,6 +40,9 @@ describe('Negative', function () {
                         .title
                         .css)).getText().then(function (text) {
                             // TODO: should we console.log an unexpected end-point?
+                            if (constants.API_ENDPOINTS.indexOf(text) === -1) {
+                                console.log('UNEXPECTED ENDPOINT: ' + text);
+                            }
                             expect(constants.API_ENDPOINTS.indexOf(text)).toBeGreaterThan(-1);
                         });
                 }

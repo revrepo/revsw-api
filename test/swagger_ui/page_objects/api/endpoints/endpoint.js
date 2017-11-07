@@ -49,6 +49,16 @@ var Endpoint = function (endpoint, locators) {
                     return code;
                 });
     };
+
+    this.getResponseCodeContainer = function () {
+        return browser
+            .driver
+            .findElement(by.css(this
+                .locators
+                .response
+                .responseCode
+                .css));
+    };
 };
 
 module.exports = Endpoint;

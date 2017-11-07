@@ -52,6 +52,7 @@ var Constants = {
         '/v1/domain_configs/{domain_id}/config_status',
         '/v1/domain_configs/{domain_id}/versions',
         '/v1/domain_configs/{domain_id}/waf_rules_list',
+        '/v1/domain_configs/recommended_default_settings',
         '/v1/locations/billing_zones',
         '/v1/locations/firstmile',
         '/v1/locations/lastmile',
