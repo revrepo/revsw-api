@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -15,7 +15,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
-
+require('should-http');
 // # Smoke check: Sign Up
 var config = require('config');
 
@@ -23,21 +23,21 @@ var API = require('./../../common/api');
 var UsersDP = require('./../../common/providers/data/users');
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
-describe('Smoke check', function () {
+describe('Smoke check', function() {
   this.timeout(config.get('api.request.maxTimeout'));
 
 
-  describe('Sign Up resource', function () {
+  describe('Sign Up resource', function() {
     var revAdmin = config.get('api.users.revAdmin');
 
     it('should return sucess response when signing up user using a random billing plan',
-      function (done) {
+      function(done) {
         API.helpers
           .authenticateUser(revAdmin)
-          .then(function () {
+          .then(function() {
             return API.helpers.billingPlans.getRandomOne();
           })
-          .then(function (bPlan) {
+          .then(function(bPlan) {
             API.session.reset();
             var newUser = API.providers.data.users.generateToSignUp({
               billingPlan: bPlan.chargify_handle
@@ -88,6 +88,37 @@ describe('Smoke check', function () {
             .catch(done);
         });
     });
-   });
-});
 
+    describe('for just signed-up and verified user', function() {
+      var testUser;
+      beforeEach(function(done) {
+        API.helpers.signUpAndVerifyUser()
+          .then(function(user) {
+            testUser = user;
+            return testUser;
+          })
+          .then(function() {
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should be created an empty dashboard',
+        function(done) {
+          API.helpers
+            .authenticateUser(testUser)
+            .then(function() {
+              return API.resources.dashboards
+                .getAll()
+                .expect(200);
+            })
+            .then(function(response) {
+              var dashboards = response.body;
+              dashboards.should.be.instanceof(Array).and.have.lengthOf(1);
+              done();
+            })
+            .catch(done);
+        });
+    });
+  });
+});
