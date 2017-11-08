@@ -108,24 +108,21 @@ function getDataCacheObjects(options, cb) {
           //     field: 'request'
           //   }
           // },
-          //“Number Of Unique Objects” (cardinality of “request” field when cache_ttl != “-” and large than 0)
+          // Common filter  cache_ttl != “-” and large than 0
           cache_object: {
             filter: {
               bool: {
                 must_not: [{
-                    term: {
-                      cache_ttl: '-'
-                    }
-                  },
-                  {
-                    term: {
-                      cache_ttl: '0'
+                    terms: {
+                      // NOTE: all records with cache_ttl != “-” and above zero
+                      cache_ttl: ['-', '0']
                     }
                   }
                 ]
               }
             },
             aggs: {
+              //“Number Of Unique Objects” (cardinality of “request” field when cache_ttl != “-” and large than 0)
               number_of_unique_object: {
                 cardinality: {
                   field: 'request'
@@ -179,28 +176,35 @@ function getDataCacheObjects(options, cb) {
                       script: 'try { return Float.parseFloat(doc["cache_age"].value); } catch (NumberFormatException e) { return 0; }'
                     }
                   },
-                  //“Average Cache Response Time” - take it from “upsteam_time” (search for all records with cache_ttl != “-”
-                  // and above zero AND “cache_age” above zero and cache = HIT)
+                  //“Average Cache Response Time” - take it from “FBT_mu” (search for all records with cache_ttl != “-”
+                  // and above zero AND “cache_age” above zero and cache = HIT) and cache_age field should not be equal 0
                   response_time: {
                     filter: {
                       bool: {
                         must_not: [{
-                            term: {
-                              cache_age: '0'
-                            }
-                          },
-                          {
-                            term: {
-                              cache_age: '-'
+                            terms: {
+                              cache_age: ['0','-']
                             }
                           }
                         ]
                       }
                     },
                     aggs: {
+                      // TODO: delete commented code
+                      // details_FBT_mu: {
+                      //   terms: {
+                      //     field: 'FBT_mu'
+                      //    }
+                      // },
+                      // details_upstream_time: {
+                      //   terms: {
+                      //     field: 'upstream_time'
+                      //   }
+                      // },
                       average_cache_response_time_sec: {
                         avg: {
-                          script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
+                          field: 'FBT_mu'
+                          //   script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
                         }
                       }
                     }
@@ -226,7 +230,8 @@ function getDataCacheObjects(options, cb) {
                 aggs: {
                   average_origin_response_time_sec: {
                     avg: {
-                      script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
+                      field: 'FBT_mu'
+                      // script: 'try { return Float.parseFloat(doc["upstream_time"].value); } catch (NumberFormatException e) { return 0; }'
                     }
                   }
                 }
@@ -279,6 +284,7 @@ function getDataCacheObjects(options, cb) {
                   response.average_age_for_served_objects_sec = parseFloat(parseFloat(cacheRespond.average_age_of_served_objects.value).toFixed(0)) || 0;
                 } catch (e) {}
               }
+              // TODO: !!! Check data  "* 1000" !!!
               if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec &&
                 !!cacheRespond.response_time.average_cache_response_time_sec.value) {
                 try {
@@ -289,6 +295,7 @@ function getDataCacheObjects(options, cb) {
             }
             if (!!argData_.origin_response && !!argData_.origin_response && !!argData_.origin_response.average_origin_response_time_sec.value) {
               try {
+                 // TODO: !!! Check data  "* 1000" !!!
                 response.average_origin_response_time_ms = parseFloat(parseFloat(argData_.origin_response.average_origin_response_time_sec.value * 1000)
                   .toFixed(3));
               } catch (e) {}
