@@ -256,7 +256,22 @@ APIKey.prototype = {
         return dist;
       });
   },
-
+  /**
+   * @name cleanAccountIdInManagedAccountIds
+   * @description method clean managed_account_ids
+   */
+  cleanAccountIdInManagedAccountIds: function(accountId,cb){
+    var conditionsFind = (_.isArray(accountId) ? {$nin: accountId}: {$ne:accountId/*string*/});
+    var conditionsUpdate = (_.isArray(accountId) ? { $in: accountId } : { $in: [accountId]/*string*/ });
+    this.model.update({
+      account_id: conditionsFind
+    },
+    { $pull: { managed_account_ids: conditionsUpdate} },
+    { multi: true },
+    function(err, numAffected){
+      cb(err, numAffected);
+    });
+  }
 };
 
 module.exports = APIKey;
