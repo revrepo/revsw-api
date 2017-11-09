@@ -52,8 +52,8 @@ describe('Clean up', function () {
           });
       });
     });
-
-    describe('Native clean NSONE: ', function() {
+    // NOTE: use this test only for clean QA DNS Zones
+    xdescribe('Native clean NSONE: ', function() {
       var dnsZonesList = [];
       before(function(done){
         API.helpers
