@@ -207,7 +207,7 @@ exports.removeAccount = function(accountId, options, callback) {
         });
       },
       // verify that there are no active domains for an account
-      function(cb) {
+      function checkActiveDomainConfigs(cb) {
         domainConfigs.query({
           'proxy_config.account_id': accountId,
           deleted: {
@@ -271,7 +271,7 @@ exports.removeAccount = function(accountId, options, callback) {
         });
       },
       // verify that there are no active dns zones for an account
-      function(cb) {
+      function checkActiveDNSZones(cb) {
         dnsZones.getByAccountId(accountId, function(error, dnsZones_) {
           var err_ = null;
           if (error) {
@@ -411,6 +411,18 @@ exports.removeAccount = function(accountId, options, callback) {
             err_ = new Error('Failed to delete API keys for account ID ' + accountId);
           }
           logger.info('Removed All API keys while removing account ID ' + accountId);
+          cb(err_);
+        });
+      },
+      // Automatically delete account id from all API keys belonging to another accounts (from managed_account_ids)
+      function removeAccountsApiKeys(cb) {
+        apiKeysService.deleteAccountIdFromAPIKeysAnotheAccounts(accountId, function(error) {
+          var err_ = null;
+          if(error) {
+            logger.error('Error clean managed_account_ids in All API keys for account ID ' + accountId);
+            err_ = new Error('Failed to delete account ID from manage list in All API keys (for account ID ' + accountId + ')');
+          }
+          logger.info('Clean managed_account_ids in All API keys while removing account ID ' + accountId);
           cb(err_);
         });
       },

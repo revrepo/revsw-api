@@ -57,7 +57,7 @@ exports.deleteAPIKeysWithAccountId = function(accountId, cb) {
             if (err) {
               logger.error('deleteAPIKeysWithAccountId:error: API Key id ' + item._id + '(' + JSON.stringify(err) + ')');
             } else {
-              logger.info('deleteAPIKeysWithAccountId:succes API Key ' + item._id);
+              logger.info('deleteAPIKeysWithAccountId:success API Key ' + item._id);
             }
             cb_item(!!err);
           });
@@ -69,6 +69,52 @@ exports.deleteAPIKeysWithAccountId = function(accountId, cb) {
       }
     } else {
       logger.error('deleteAPIKeysWithAccountId:error' + JSON.stringify(err));
+      cb(err);
+    }
+  });
+
+};
+
+
+/**
+ * @name  deleteAccountIdFromAPIKeysAnotheAccounts
+ * @description
+ *
+ *   Delete AccountId from managed_account_ids in API Keys
+ *
+ * @param  {String}   accountId [description]
+ * @param  {Function} cb        [description]
+ * @return {[type]}             [description]
+ */
+exports.deleteAccountIdFromAPIKeysAnotheAccounts = function(accountId, cb) {
+  logger.info('deleteAccountIdFromAPIKeysAnotheAccounts: Account Id ' + accountId);
+
+  apiKeys.query({
+    'managed_account_ids': {
+      $exists: true,
+      $ne: [],
+      $in: [accountId]
+    },
+    account_id: {
+      $ne: accountId
+    }
+  }, function(err, data) {
+    if (!err) {
+      if (data.length >= 0) {
+        apiKeys.cleanAccountIdInManagedAccountIds(accountId, function(err) {
+          if (err) {
+            logger.error('deleteAccountIdFromAPIKeysAnotheAccounts:error: delete ' + accountId +
+              ' API Key id ' + '(' + JSON.stringify(err) + ')');
+          } else {
+            logger.info('deleteAccountIdFromAPIKeysAnotheAccounts:success delete ' + accountId + ' from API Keys');
+          }
+          cb(!!err);
+        });
+      } else {
+        cb(null);
+      }
+    } else {
+      logger.error('deleteAccountIdFromAPIKeysAnotheAccounts:error' + JSON.stringify(err));
       cb(err);
     }
   });
