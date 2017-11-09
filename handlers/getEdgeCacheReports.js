@@ -284,19 +284,17 @@ function getDataCacheObjects(options, cb) {
                   response.average_age_for_served_objects_sec = parseFloat(parseFloat(cacheRespond.average_age_of_served_objects.value).toFixed(0)) || 0;
                 } catch (e) {}
               }
-              // TODO: !!! Check data  "* 1000" !!!
-              if (!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec &&
+              if(!!cacheRespond.response_time && !!cacheRespond.response_time.average_cache_response_time_sec &&
                 !!cacheRespond.response_time.average_cache_response_time_sec.value) {
                 try {
-                  response.average_edge_cache_response_time_ms = parseFloat(parseFloat(cacheRespond.response_time.average_cache_response_time_sec.value * 1000)
+                  response.average_edge_cache_response_time_ms = parseFloat(parseFloat(cacheRespond.response_time.average_cache_response_time_sec.value / 1000)
                     .toFixed(3));
                 } catch (e) {}
               }
             }
-            if (!!argData_.origin_response && !!argData_.origin_response && !!argData_.origin_response.average_origin_response_time_sec.value) {
+            if(!!argData_.origin_response && !!argData_.origin_response && !!argData_.origin_response.average_origin_response_time_sec.value) {
               try {
-                 // TODO: !!! Check data  "* 1000" !!!
-                response.average_origin_response_time_ms = parseFloat(parseFloat(argData_.origin_response.average_origin_response_time_sec.value * 1000)
+                response.average_origin_response_time_ms = parseFloat(parseFloat(argData_.origin_response.average_origin_response_time_sec.value / 1000)
                   .toFixed(3));
               } catch (e) {}
             }
