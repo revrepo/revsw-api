@@ -468,43 +468,38 @@ exports.removeAccount = function(accountId, options, callback) {
               user.companyId.length + ' ' + JSON.stringify(user.companyId));
 
             if (user.companyId.length === 1) {
-              // NOTE: delete user's dashboards
-              logger.info('Accounts:dropAccountUsers:Removing Dashboards for user with ID ' + user_id + ' while removing account ID ' + accountId);
+              // NOTE: delete user and all his resources
+              logger.info('Accounts:dropAccountUsers:Removing user with ID ' + user_id + ' while removing account ID ' + accountId);
               usersService.removeUser(user_id, function(error, result) {
                 var err_ = null;
                 if (error) {
-                  logger.warn('Account:dropAccountUsers:Failed to delete user ID ' + user.user_id + ' while removing account ID ' + accountId);
-                  // badImplementation
-                  err_ = new Error('Failed to delete user ID ' + user.user_id + ' while removing account ID ' + accountId);
+                  logger.warn('Account:dropAccountUsers:Failed to delete user with ID ' + user.user_id + ' while removing account ID ' + accountId);
+                  err_ = new Error('Failed to delete user with ID ' + user.user_id + ' while removing account ID ' + accountId);
                 } else {
-                  logger.info('Removed user ID ' + user_id + 'and role "' + _role + '" while removing account ID ' + accountId);
+                  logger.info('Removed user with ID ' + user_id + ' and role "' + _role + '" while removing account ID ' + accountId);
                 }
                 callback_(err_, user);
               });
 
-            } else { /// else just update the user account and delete the account_id from companyId array
-              logger.warn('Updating user ID ' + user_id + ' while removing account ID ' + accountId);
-              var indexToDelete = user.companyId.indexOf(accountId);
-              logger.debug('indexToDelete = ' + indexToDelete + ', account_id = ' + accountId + ', user.companyId = ' + user.companyId);
-              user.companyId.splice(indexToDelete, 1);
-              var updatedUser = {
-                user_id: user_id,
-                companyId: user.companyId
-              };
-
-              users.update(updatedUser, function(error, result) {
-                var err_ = null;
-                if (error) {
-                  //badImplementation
-                  err_ = new Error('Failed to update user ID ' + user.user_id + ' while removing account ID ' + accountId);
-                }
-                callback_(err_, user);
-              });
+            } else { /// else just update the user account and delete the account_id from companyId array (see next step cleanManagedAccountIdForResselers)
+              callback_(null);
             }
           },
           function(error) {
             cb(error);
           });
+      },
+      // NOTE: delete managed account for all users
+      function cleanManagedAccountIdForResselers(cb) {
+        var accountId_ = accountId;
+        users.cleanOneManagedAccountIdForAllResselers(accountId_,function(err,data){
+          if(err){
+            logger.error('Account:cleanManagedAccountIdForResselers:Failed to remove for all resselers the account ID ' + accountId);
+            return cb(err);
+          }
+          logger.info('Account:cleanManagedAccountIdForResselers:Removed for all resselers the account ID ' + accountId);
+          cb(null);
+        });
       },
       // Mark account as deleted
       function markAccountAsDeleted(cb) {
