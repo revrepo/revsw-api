@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -446,6 +446,45 @@ User.prototype = {
         res.total = c[1];
         res.deleted = res.total - res.active;
         return res;
+      });
+  },
+  /**
+   * @name cleanOneManagedAccountIdForAllResselers
+   * @description method delete the account’s ID from field "companyId"
+   * must not to be main Account Id (not first Account Id)
+   *
+   * @param {{String}}  accountId - Account Id
+   */
+  cleanOneManagedAccountIdForAllResselers: function(accountId, cb) {
+    var context = this;
+    if(_.isArray(accountId)){
+     return cb(new Error('accountId must be String'));
+    }
+    var conditionsFind = { '$regex': ','+accountId/*not main Account Id*/ };
+    var ops = [];
+    this.model.find({
+      companyId: conditionsFind
+    }, function(err, docs) {
+        if(err) {
+          return cb(err);
+        }
+        var total = docs.length;
+        docs.forEach(function(doc) {
+          ops.push({
+            'updateOne': {
+              'filter': { '_id': doc._id },
+              'update': { '$set': { 'companyId': doc.companyId.replace(',' + accountId, '') } }
+            }
+          });
+          if(ops.length === 500) {
+            context.model.collection.bulkWrite(ops);
+            ops = [];
+          }
+        });
+        if(ops.length > 0){
+          context.model.collection.bulkWrite(ops);
+        }
+        cb(err, { total: total} );
       });
   }
 };
