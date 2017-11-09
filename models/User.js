@@ -449,9 +449,9 @@ User.prototype = {
       });
   },
   /**
-   * @name cleanAllManagedAccountId
-   * @description method delete the account’s ID from AccountId
-   * must not to be first Account Id
+   * @name cleanOneManagedAccountIdForAllResselers
+   * @description method delete the account’s ID from field "companyId"
+   * must not to be main Account Id (not first Account Id)
    *
    * @param {{String}}  accountId - Account Id
    */
