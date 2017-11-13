@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -37,7 +37,7 @@ var logger = require('revsw-logger')(config.log_config);
 var Account = require('../models/Account');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 
-exports.getVendorProfiles = function getAccounts(request, reply) {
+exports.getVendorProfiles = function(request, reply) {
     var vendorProfilesConfig = config.get('vendor_profiles');
     var names = [];
 
@@ -48,7 +48,7 @@ exports.getVendorProfiles = function getAccounts(request, reply) {
     renderJSON(request, reply, null, names);
 };
 
-exports.getVendorProfile = function getAccounts(request, reply) {
+exports.getVendorProfile = function(request, reply) {
   var vendorUrl = request.params.vendorUrl;
   var vendorProfiles = config.get('vendor_profiles');
   var systemVendor = config.get('default_system_vendor_profile');
@@ -70,18 +70,26 @@ exports.getVendorProfile = function getAccounts(request, reply) {
 
   renderJSON(request, reply, null, result);
 };
-
-exports.getVendorProfileByName = function getAccounts(request, reply) {
+/**
+ * @name getVendorProfileByName
+ * @description find Vendor Profile use name
+ *
+ * @param {*} request
+ * @param {*} reply
+ */
+exports.getVendorProfileByName = function(request, reply) {
   var vendor = request.params.vendor;
   var vendorProfiles = config.get('vendor_profiles');
   var result = vendorProfiles[vendor];
-
+  if(!result) {
+    return reply(boom.badRequest('Vendor profile not found'));
+  }
   result = publicRecordFields.handle(result, 'vendorProfiles');
 
   renderJSON(request, reply, null, result);
 };
 
-exports.updateAccountVendor = function getAccounts(request, reply) {
+exports.updateAccountVendor = function(request, reply) {
   var account_id = request.params.account_id;
   var vendor_profile = request.payload.vendor_profile;
   var vendorProfiles = config.get('vendor_profiles');
