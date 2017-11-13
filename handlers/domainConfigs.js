@@ -697,7 +697,12 @@ exports.deleteDomainConfig = function(request, reply) {
         var params ={
           domain_id: domainId
         };
-        isDomainUseInLogShippingJobs(params, cb);
+        isDomainUseInLogShippingJobs(params, function(err,isUsed){
+          if(err || isUsed === true ){
+            return cb(err, true);
+          }
+          cb();
+        });
       },
       function(cb){
         cdsRequest({
