@@ -217,7 +217,7 @@
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
-
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
       "sdk": {
         "download_links": {
           "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
@@ -317,7 +317,7 @@
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
       ],
-
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
       "sdk": {
         "download_links": {
           "iOS": "https://github.com/nuubit/SDK/archive/v1.0.5.zip"
@@ -417,7 +417,7 @@
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
       ],
-
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",      
       "sdk": {
         "download_links": {
           "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
