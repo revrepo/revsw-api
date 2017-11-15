@@ -20,14 +20,14 @@
 'use strict';
 //  ----------------------------------------------------------------------------------------------//
 
-var boom = require( 'boom' );
+var boom = require('boom');
 var _ = require('lodash');
 var promise = require('bluebird');
-var utils = require( '../lib/utilities.js' );
-var renderJSON = require( '../lib/renderJSON' );
-var elasticSearch = require( '../lib/elasticSearch' );
-var reports = require( '../lib/usageReport' );
-
+var utils = require('../lib/utilities.js');
+var renderJSON = require('../lib/renderJSON');
+var elasticSearch = require('../lib/elasticSearch');
+var reports = require('../lib/usageReport');
+var usageReport = require('../lib/usageReport.js');
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
 
@@ -35,7 +35,7 @@ var cacheManager = require('cache-manager');
 var memoryCache = cacheManager.caching({
   store: 'memory',
   max: config.get('cache_memory_max_bytes'),
-  ttl: config.get('cache_memory_ttl_seconds') /*seconds*/ ,
+  ttl: config.get('cache_memory_ttl_seconds') /*seconds*/,
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
@@ -45,24 +45,24 @@ var multiCache = cacheManager.multiCaching([memoryCache]);
  * @name getAccountReport
  * @description Get Usage Report Date for an Account(s)
  */
-exports.getAccountReport = function( request, reply ) {
+exports.getAccountReport = function (request, reply) {
   var queryProperties = _.clone(request.query);
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
   var accountID = request.query.account_id || '';
   var isValidAccountId = true;
   var isRevAdmin = utils.isUserRevAdmin(request);
-  if(!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
-    if(accountID === '') {
+  if (!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
+    if (accountID === '') {
       accountID = utils.getAccountID(request);
-      if(accountID.length === 0){
+      if (accountID.length === 0) {
         isValidAccountId = false;
       }
-      if(accountID.length === 1) {
+      if (accountID.length === 1) {
         accountID = accountID[0];
       }
     } else {
-      if(!utils.checkUserAccessPermissionToAccount(request, accountID)) {
+      if (!utils.checkUserAccessPermissionToAccount(request, accountID)) {
         isValidAccountId = false;
       }
     }
@@ -71,7 +71,7 @@ exports.getAccountReport = function( request, reply ) {
     accountIds = accountID;
   }
 
-  if((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
+  if ((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -79,45 +79,40 @@ exports.getAccountReport = function( request, reply ) {
   var from_ = request.query.from,
     to_ = request.query.to;
 
-  if ( !!from_ ) {
+  if (!!from_) {
     from = new Date(from_);
   }
   from.setUTCDate(1);             //  the very beginning of the month
-  from.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
-  if ( !!to_ ) {
+  from.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+  if (!!to_) {
     to = new Date(to_);
   }
-  to.setUTCHours( 0, 0, 0, 0 ); //  the very beginning of the day
+  to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
   var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
-  multiCache.wrap(cacheKey, function() {
-    isFromCache = false;
-    return reports.checkLoadReports( from, to, accountID, request.query.only_overall, request.query.keep_samples )
-      .then( function( response ) {
-        var response_ = {
-          metadata: {
-            account_id: accountID,
-            from: from.valueOf(),
-            from_datetime: from,
-            to: to.valueOf(),
-            to_datetime: to,
-            data_points_count: response.length
-          },
-          data: response
-        };
-        return response_;
-      });
-    })
-    .then(function(response){
-      if(isFromCache === true) {
+  return reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+    .then(function (response) {
+      var response_ = {
+        metadata: {
+          account_id: accountID,
+          from: from.valueOf(),
+          from_datetime: from,
+          to: to.valueOf(),
+          to_datetime: to,
+          data_points_count: response.length
+        },
+        data: response
+      };
+      return response_;
+    }).then(function (response) {
+      if (isFromCache === true) {
         logger.info('getAccountStats:return cache for key - ' + cacheKey);
       }
-      reply( response ).type( 'application/json; charset=utf-8' );
-    })
-    .catch( function( err ) {
+      reply(response).type('application/json; charset=utf-8');
+    }).catch(function (err) {
       var msg = err.toString() + ': account ID ' + accountID +
         ', span from ' + (new Date(from)).toUTCString() +
         ', to ' + (new Date(to)).toUTCString();
-      return reply( boom.badImplementation( msg ) );
+      return reply(boom.badImplementation(msg));
     });
 };
 
@@ -125,7 +120,7 @@ exports.getAccountReport = function( request, reply ) {
  * @name getAccountStats
  * @description Get Usage Date Histogram for an Account(s)
  */
-exports.getAccountStats = function( request, reply ) {
+exports.getAccountStats = function (request, reply) {
 
   // TODO: need to move the following permissions checking code to a separate function  
   // and it in this and previous handlers
@@ -134,17 +129,17 @@ exports.getAccountStats = function( request, reply ) {
   var accountID = request.query.account_id || '';
   var isValidAccountId = true;
   var isRevAdmin = utils.isUserRevAdmin(request);
-  if(!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
-    if(accountID === '') {
+  if (!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
+    if (accountID === '') {
       accountID = utils.getAccountID(request);
-      if(accountID.length === 0) {
+      if (accountID.length === 0) {
         isValidAccountId = false;
       }
-      if(accountID.length === 1) {
+      if (accountID.length === 1) {
         accountID = accountID[0];
       }
     } else {
-      if(!utils.checkUserAccessPermissionToAccount(request, accountID)) {
+      if (!utils.checkUserAccessPermissionToAccount(request, accountID)) {
         isValidAccountId = false;
       }
     }
@@ -153,30 +148,81 @@ exports.getAccountStats = function( request, reply ) {
     accountIds = accountID;
   }
 
-  if((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
+  if ((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
-  var span = utils.query2Span( request.query, 24/*def start in hrs*/, 24*61/*allowed period - 2 months*/ );
-  if ( span.error ) {
-    return reply(boom.badRequest( span.error ));
+  var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * 61/*allowed period - 2 months*/);
+  if (span.error) {
+    return reply(boom.badRequest(span.error));
   }
   var cacheKey = 'getAccountStats:' + accountID + ':' + JSON.stringify(request.query);
-  multiCache.wrap(cacheKey, function() {
-      isFromCache = false;
-      span.interval = 86400000; //  voluntarily set to full day
-      return reports.checkLoadStats(span, accountID);
-    })
-    .then(function(response) {
+  multiCache.wrap(cacheKey, function () {
+    isFromCache = false;
+    span.interval = 86400000; //  voluntarily set to full day
+    return reports.checkLoadStats(span, accountID);
+  })
+    .then(function (response) {
       if (isFromCache === true) {
         logger.info('getAccountStats:return cache for key - ' + cacheKey);
       }
       reply(response).type('application/json; charset=utf-8');
     })
-    .catch(function(err) {
+    .catch(function (err) {
       var msg = err.toString() + ': account ID ' + accountID +
         ', span from ' + (new Date(span.start)).toUTCString() +
         ', to ' + (new Date(span.end)).toUTCString();
       return reply(boom.badImplementation(msg));
+    });
+};
+
+exports.generateAccountReport = function (request, reply) {
+  var conf = {
+    accountId: utils.getAccountID(request),
+    dry: false // NOTE: by default save data to storage
+  };
+  var countSends = 0;
+  promise.resolve()
+    .then(function () {
+      if (conf.accountId === false) {
+        return usageReport.getListActiveAccountsForReports(conf);
+      }
+      return [conf.accountId];
+    })
+    .then(function logListAccounts(data) {
+      logger.info('Get list Accounts for make day reports for ' + data.length + ' accounts');
+      var statusResponse = {
+        statusCode: 200,
+        message: 'Usage Report Generated'
+      };
+      reply(statusResponse).code(200);
+      return data;
+    })
+    .map(function (itemId) {
+      logger.info('usageReport:collectDayReport:call');
+      return usageReport.collectDayReport(
+        (conf.date || 'now'),
+        itemId /* Account ID*/,
+        conf.dry /*do not save, return collected data*/,
+        false /* !!! NOT collect orphans !!!*/)
+        .then(function infoResultReporting() {
+          return {
+            id: itemId
+          };
+        });
+    }, {
+      concurrency: 10
+    })
+    .then(function sucess(data) {
+      if (conf.verbose) {
+        logger.info(data, 5);
+      }
+    })
+    .catch(function (err) {
+      console.log(err);
+    })
+    .finally(function () {
+      process.exit(0);
+      return;
     });
 };
