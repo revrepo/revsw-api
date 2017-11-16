@@ -521,7 +521,6 @@ var getDomainConfigFromGitHub = function(options, cb) {
  *
  */
 exports.updateDomainConfig = function(request, reply) {
-
   var newDomainJson = request.payload;
   var newDomainJsonAudit = utils.clone(request.payload);
   var domainId = request.params.domain_id;
@@ -561,6 +560,9 @@ exports.updateDomainConfig = function(request, reply) {
         if(newDomainJson.rev_component_bp.enable_cache === false){
           return reply(boom.badRequest('If ImageEngine is "ON" then Edge Caching must be "ON" too'));
         }
+      }
+      if( newDomainJson.rev_component_bp.co_bypass_locations.length === 0 ){
+        delete newDomainJson.rev_component_bp.co_bypass_locations;
       }
       var bpLua = newDomainJson.bp_lua;
       delete newDomainJson.bp_lua;

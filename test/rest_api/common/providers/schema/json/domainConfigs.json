@@ -91,7 +91,7 @@
   "rev_component_bp.acl.acl_rules.0.header_name": "Joi.string().allow(\"\").required()",
   "rev_component_bp.acl.acl_rules.0.header_value": "Joi.string().allow(\"\").required()",
   "rev_component_bp.cache_bypass_locations": "Joi.array().items(Joi.string()).required()",
-  "rev_component_bp.co_bypass_locations": "Joi.array().items(Joi.string().required())",
+  "rev_component_bp.co_bypass_locations": "Joi.array().items(Joi.string())",
   "rev_component_bp.enable_vcl_geoip_headers": "Joi.boolean()",
   "rev_component_bp.custom_vcl": "Joi.object({})",
   "rev_component_bp.custom_vcl.enabled": "Joi.boolean().required()",
