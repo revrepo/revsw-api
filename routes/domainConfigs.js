@@ -408,7 +408,7 @@ module.exports = [{
               }).required()
             }).required(),
             cache_bypass_locations: Joi.array().items(Joi.string().max(150)).required(),
-            co_bypass_locations: Joi.array().items(Joi.string().max(150).required()),
+            co_bypass_locations: Joi.array().items(Joi.string().max(150)),
             enable_vcl_geoip_headers: Joi.boolean(),
             custom_vcl: Joi.object({
               enabled: Joi.boolean().required(),
