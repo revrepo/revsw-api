@@ -561,9 +561,6 @@ exports.updateDomainConfig = function(request, reply) {
           return reply(boom.badRequest('If ImageEngine is "ON" then Edge Caching must be "ON" too'));
         }
       }
-      if( newDomainJson.rev_component_bp.co_bypass_locations.length === 0 ){
-        delete newDomainJson.rev_component_bp.co_bypass_locations;
-      }
       var bpLua = newDomainJson.bp_lua;
       delete newDomainJson.bp_lua;
       var coLua = newDomainJson.co_lua;
