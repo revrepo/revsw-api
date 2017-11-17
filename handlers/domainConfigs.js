@@ -37,6 +37,7 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var DomainConfig = require('../models/DomainConfig');
 var ServerGroup = require('../models/ServerGroup');
 var Account = require('../models/Account');
+var ApiKey = require('../models/APIKey');
 var User = require('../models/User');
 var WAFRule = require('../models/WAFRule');
 var LogShippingJob = require('../models/LogShippingJob');
@@ -44,6 +45,7 @@ var LogShippingJob = require('../models/LogShippingJob');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var wafRules = new WAFRule(mongoose, mongoConnection.getConnectionPortal());
 var logShippingJobs = Promise.promisifyAll(new LogShippingJob(mongoose, mongoConnection.getConnectionPortal()));
@@ -681,7 +683,7 @@ exports.deleteDomainConfig = function(request, reply) {
   var domainId = request.params.domain_id;
   var _deletedBy = utils.generateCreatedByField(request);
   var options = '?deleted_by=' + _deletedBy;
-
+  var response = {};
   domainConfigs.get(domainId, function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domainId, error));
@@ -727,11 +729,56 @@ exports.deleteDomainConfig = function(request, reply) {
             target_object: result.proxy_config,
             operation_status: 'success'
           }, request);
-          var response = responseJson;
-          cb(null, response);
+          response = responseJson;
+          cb(null);
         });
-      }
-    ],function(err, result){
+      },
+      // NOTE: delete the domain from the list of managed domains for all users
+      function cleanIn(cb){
+        var params_ = {
+          domain_name: result.domain_name
+        };
+        users.cleanOneManagedDomainNameForAllUsers(params_, function(err, data) {
+          if(!!err){
+            logger.error('Error clean the list of managed domains for all users: when delete domain Id ' + domainId);
+          } else {
+            logger.info('Clean the list of managed domains for all users: when delete domain Id ' + domainId);
+          }
+          cb(); // NOTE: result only logged
+        });
+      },
+      // NOTE: delete the domain from the list of managed domains for all API Key
+      function(cb) {
+        var params_ = {
+          domain_id: domainId
+        };
+        apiKeys.cleanOneManagedDomainIdForAllAPIKeys(params_, function(err, data) {
+          if(err) {
+            logger.error('Error clean the list of managed domains for all API Keys: when delete domain Id ' + domainId);
+          } else {
+            logger.info('Clean the list of managed domains for all API Keys: when delete domain Id ' + domainId);
+          }
+          cb(); // NOTE: result only logged
+        });
+      },
+      // TODO: delete the domain from the list of  provisioned  domains for all Apps
+      // function(cb) {
+      //   var params_ = {
+      //     domain_name: result.domain_name
+      //   };
+      //   users.cleanOneProvisionedDomainNameForAllApps(params_, function(err, data) {
+      //     if(err) {
+      //       logger.error('Error clean the list of provisioned domains for all apps: when delete domain Id ' + domainId);
+      //     } else {
+      //       logger.info('Clean the list of provisioned domains for all apps: when delete domain Id ' + domainId);
+      //     }
+      //     cb(); // NOTE: result only logged
+      //   });
+      // },
+      // NOTE: last step respond data
+      function(cb){
+        cb(null,response);
+      }], function(err, result){
       if(err) {
         if(!!result && (result === 500 || result === true)){
           return reply(boom.conflict(err.message));
