@@ -265,8 +265,10 @@ var topReports_ = function( req, reply, domainConfig, span) {
           });
         }
 
-        //  special treatment for cache report type to avoid garbage like "-" or just missing field
-        if (field === 'cache') {
+        //  special treatment for cache and cache2 report type to avoid garbage like "-"
+        // or keys not equal 'MISS' or 'HIT'
+        // or just missing field
+        if(field === 'cache' || field === 'cache2' ) {
           data = [{
             key: 'HIT',
             count: data.reduce(function(prev, curr) {

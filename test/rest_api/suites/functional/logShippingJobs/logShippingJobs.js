@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -24,7 +24,7 @@ var AccountsDP = require('./../../../common/providers/data/accounts');
 var DomainConfigsDP = require('./../../../common/providers/data/domainConfigs');
 var LogShippingJobsDP = require('./../../../common/providers/data/logShippingJobs');
 
-describe('LogShipping Jobs functional test', function () {
+describe('LogShipping Jobs functional test', function() {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -34,83 +34,125 @@ describe('LogShipping Jobs functional test', function () {
   var otherAccount;
   var firstDc;
   var secondDc;
+  var deleteDc;
   var firstLsJ;
   var firstLsJresp;
+  var lockedDomainConfigLsJ;
   var user = config.get('api.users.reseller');
   var secondReseller = config.get('api.users.secondReseller');
   var revAdmin = config.get('api.users.revAdmin');
 
-  before(function (done) {
+  before(function(done) {
     API.helpers
       .authenticateUser(secondReseller)
-      .then(function () {
+      .then(function() {
         return API.helpers.accounts.createOne();
       })
-      .then(function (newAccount) {
+      .then(function(newAccount) {
         otherAccount = newAccount;
         return API.helpers.domainConfigs.createOne(otherAccount.id);
       })
-      .then(function (newDomainConfig) {
+      .then(function(newDomainConfig) {
         firstDc = newDomainConfig;
-        API.helpers
+        return API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             return API.helpers.accounts.createOne();
           })
-          .then(function (newAccount) {
+          .then(function(newAccount) {
             account = newAccount;
             return API.helpers.accounts.createOne();
           })
-          .then(function (newAccount) {
+          .then(function(newAccount) {
             secondAccount = newAccount;
+            return;
           })
-          .then(function () {
+          .then(function() {
             return API.helpers.domainConfigs.createOne(secondAccount.id);
           })
-          .then(function (newDomainConfig) {
+          .then(function(newDomainConfig) {
             secondDc = newDomainConfig;
             return API.helpers.logShippingJobs.createOne(account.id);
           })
-          .then(function (logShippingJob) {
+          .then(function(logShippingJob) {
             firstLsJ = logShippingJob;
+            return;
           })
-          .then(done)
-          .catch(done);
-      })
-      .catch(done);
-  });
+          .then(function() {
+            return API.helpers.domainConfigs.createOne(account.id)
+              .then(function(newDomainConfig) {
+                deleteDc = newDomainConfig;
+                return API.helpers.logShippingJobs.createOne(account.id)
+                  .then(function(logShippingJob) {
+                    lockedDomainConfigLsJ = logShippingJob;
+                    var updateData = {};
+                    updateData.source_type = 'domain';
+                    updateData.account_id = deleteDc.account_id;
+                    updateData.job_name = 'updated-' + lockedDomainConfigLsJ.job_name;
+                    updateData.source_id = deleteDc.id;
+                    updateData.destination_type = 's3';
+                    updateData.destination_host = 'test-s3';
+                    updateData.destination_port = '';
+                    updateData.destination_key = 'test-s3-key';
+                    updateData.destination_username = 'test-username';
+                    updateData.destination_password = 'test-s3-secret';
+                    updateData.notification_email = '';
+                    updateData.operational_mode = 'stop';
+                    updateData.comment = 'this is test logshipping job ' +
+                      'for functional check lock delete docmain config';
+                    return API.resources.logShippingJobs
+                      .update(lockedDomainConfigLsJ.id, updateData)
+                      .expect(200)
+                  });
+              });
+            });
 
-  after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
-      .then(function () {
-        return API.resources.accounts.deleteOne(otherAccount.id);
       })
-      .then(function () {
-        return API.resources.domainConfigs.deleteOne(firstDc.id);
-      })
-      .then(function () {
-        return API.resources.domainConfigs.deleteOne(secondDc.id);
-      })
-      .then(function () {
-        API.resources.logShippingJobs.deleteOne(firstLsJ.id);
+      .then(function() {
         done();
       })
       .catch(done);
   });
 
-  describe('LogShipping Jobs resource', function () {
+  after(function(done) {
+    API.helpers
+      .authenticateUser(revAdmin)
+      .then(function() {
+        return API.resources.logShippingJobs.deleteOne(lockedDomainConfigLsJ.id)
+          .then(function() {
+            return API.resources.domainConfigs.deleteOne(deleteDc.id);
+          });
+      })
+      .then(function() {
+        return API.resources.accounts.deleteOne(otherAccount.id);
+      })
+      .then(function() {
+        return API.resources.domainConfigs.deleteOne(firstDc.id);
+      })
+      .then(function() {
+        return API.resources.domainConfigs.deleteOne(secondDc.id);
+      })
+      .then(function() {
+        return API.resources.logShippingJobs.deleteOne(firstLsJ.id);
+      })
+      .then(function() {
+        done();
+      })
+      .catch(done);
+  });
+
+  describe('LogShipping Jobs resource', function() {
 
     it('should not be able to create logshipping job using account from other customer',
-      function (done) {
+      function(done) {
         var logShippingJob = LogShippingJobsDP.generateOne(otherAccount.id);
         API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             API.resources.logShippingJobs
               .createOne(logShippingJob)
               .expect(400)
-              .then(function (response) {
+              .then(function(response) {
                 response.body.message.should.equal('Account ID not found');
                 done();
               })
@@ -120,14 +162,14 @@ describe('LogShipping Jobs functional test', function () {
       });
 
     it('should return success response code when getting a specific logshipping job',
-      function (done) {
+      function(done) {
         API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             API.resources.logShippingJobs
               .getOne(firstLsJ.id)
               .expect(200)
-              .then(function (response) {
+              .then(function(response) {
                 firstLsJresp = response.body;
                 done();
               })
@@ -137,7 +179,7 @@ describe('LogShipping Jobs functional test', function () {
       });
 
     it('should not be able to activate unconfigured logshipping job',
-      function (done) {
+      function(done) {
         firstLsJresp.source_type = 'domain';
         firstLsJresp.source_id = secondDc.id;
         firstLsJresp.operational_mode = 'active';
@@ -150,11 +192,11 @@ describe('LogShipping Jobs functional test', function () {
         var expectedMsg = 'child \"destination_host\" fails because [\"destination_host\" is not allowed to be empty]';
         API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             API.resources.logShippingJobs
               .update(firstLsJ.id, firstLsJresp)
               .expect(400)
-              .then(function (res) {
+              .then(function(res) {
                 res.body.message.should.equal(expectedMsg);
                 done();
               })
@@ -164,7 +206,7 @@ describe('LogShipping Jobs functional test', function () {
       });
 
     it('should not be able to update logshipping job without access to source_type domain',
-      function (done) {
+      function(done) {
         firstLsJresp.source_type = 'domain';
         firstLsJresp.source_id = firstDc.id;
         firstLsJresp.destination_type = 's3';
@@ -177,11 +219,11 @@ describe('LogShipping Jobs functional test', function () {
         var expectedMsg = 'Domain ID not found';
         API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             API.resources.logShippingJobs
               .update(firstLsJ.id, firstLsJresp)
               .expect(400)
-              .then(function (res) {
+              .then(function(res) {
                 res.body.message.should.equal(expectedMsg);
                 done();
               })
@@ -191,7 +233,7 @@ describe('LogShipping Jobs functional test', function () {
       });
 
     it('should be able to update logshipping job with access to source_type domain and start the job',
-      function (done) {
+      function(done) {
         firstLsJresp.source_type = 'domain';
         firstLsJresp.source_id = secondDc.id;
         firstLsJresp.destination_type = 's3';
@@ -204,11 +246,11 @@ describe('LogShipping Jobs functional test', function () {
         var expectedMsg = 'Successfully updated the log shipping job';
         API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             API.resources.logShippingJobs
               .update(firstLsJ.id, firstLsJresp)
               .expect(200)
-              .then(function (res) {
+              .then(function(res) {
                 res.body.message.should.equal(expectedMsg);
                 done();
               })
@@ -218,15 +260,15 @@ describe('LogShipping Jobs functional test', function () {
       });
 
     it('should return logshipping job with active operational_mode',
-      function (done) {
+      function(done) {
         var expectedOperationalMode = 'active';
         API.helpers
           .authenticateUser(user)
-          .then(function () {
+          .then(function() {
             API.resources.logShippingJobs
               .getOne(firstLsJ.id)
               .expect(200)
-              .then(function (response) {
+              .then(function(response) {
                 var logShippingJob = response.body;
                 logShippingJob.operational_mode.should.equal(expectedOperationalMode);
                 done();
@@ -234,6 +276,28 @@ describe('LogShipping Jobs functional test', function () {
               .catch(done);
           })
           .catch(done);
+      });
+
+    it('should lock Domain Config for exists logshipping job with source_type "domain"',
+      function(done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function() {
+            return API.resources.domainConfigs
+              .deleteOne(deleteDc.id)
+              .expect(409)
+              .then(function(response) {
+                var result = response.body;
+                result.should.have.property('message');
+                result.message.should.match(new RegExp(lockedDomainConfigLsJ.job_name));
+              });
+          })
+          .then(function() {
+            done();
+          })
+          .catch(function(err){
+            done(err);
+          });
       });
 
     // TODO: As soon as we run logshipper live in QA uncomment this test

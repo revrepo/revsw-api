@@ -39,12 +39,14 @@ var ServerGroup = require('../models/ServerGroup');
 var Account = require('../models/Account');
 var User = require('../models/User');
 var WAFRule = require('../models/WAFRule');
+var LogShippingJob = require('../models/LogShippingJob');
 
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var serverGroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var wafRules = new WAFRule(mongoose, mongoConnection.getConnectionPortal());
+var logShippingJobs = Promise.promisifyAll(new LogShippingJob(mongoose, mongoConnection.getConnectionPortal()));
 
 var billing_plans = require('../models/BillingPlan');
 var authHeader = { Authorization: 'Bearer ' + config.get('cds_api_token') };
@@ -87,6 +89,30 @@ var isSubscriptionActive = function(companyId, callback) {
     }
     return account.subscription_state !== 'active' ? callback(false, null) : callback(true, null);
   });
+};
+/**
+ * @name isDomainUseInLogShippingJobs
+ *
+ * @param {Object} options
+ * @param {Function} cb
+ */
+var isDomainUseInLogShippingJobs = function(options,cb){
+  var whereParams = {
+    source_type: 'domain',
+    source_id: options.domain_id || 'not_valid_empty_property'
+  };
+  logShippingJobs.queryAsync(whereParams)
+    .then(function(data){
+      if(data.length > 0){
+        var list_ = _.map(data,function(item){
+          return  '"'+item.job_name+'"';
+        }).join(',');
+        cb(new Error('The domain is used in Log Shipping job(s) (' + list_ +'). Please remove the job(s) before removing the domain.'),true);
+      }else{
+        cb(null,false);
+      }
+    })
+    .catch(cb);
 };
 
 exports.getDomainConfigStatus = function(request, reply) {
@@ -665,31 +691,56 @@ exports.deleteDomainConfig = function(request, reply) {
     }
 
     logger.info('Calling CDS to delete domain ID: ' + domainId + ' and option deleted_by ' + _deletedBy);
+    async.waterfall([
+       // NOTE: The domain should not used in any log shipping jobs
+      function(cb){
+        var params ={
+          domain_id: domainId
+        };
+        isDomainUseInLogShippingJobs(params, function(err,isUsed){
+          if(err || isUsed === true ){
+            return cb(err, true);
+          }
+          cb();
+        });
+      },
+      function(cb){
+        cdsRequest({
+          url: config.get('cds_url') + '/v1/domain_configs/' + domainId + options,
+          method: 'DELETE',
+          headers: authHeader,
+        }, function(err, res, body) {
+          if(err) {
+            return cb(new Error('Failed to send a CDS command to delete domain ID ' + domainId), 500);
+          }
+          var responseJson = JSON.parse(body);
+          if(res.statusCode === 400) {
+            return cb(new Error(responseJson.message),400);
+          }
 
-    cdsRequest({
-      url: config.get('cds_url') + '/v1/domain_configs/' + domainId + options,
-      method: 'DELETE',
-      headers: authHeader,
-    }, function(err, res, body) {
-      if (err) {
-        return reply(boom.badImplementation('Failed to send a CDS command to delete domain ID ' + domainId));
+          AuditLogger.store({
+            account_id: result.proxy_config.account_id,
+            activity_type: 'delete',
+            activity_target: 'domain',
+            target_id: result._id,
+            target_name: result.domain_name,
+            target_object: result.proxy_config,
+            operation_status: 'success'
+          }, request);
+          var response = responseJson;
+          cb(null, response);
+        });
       }
-      var responseJson = JSON.parse(body);
-      if (res.statusCode === 400) {
-        return reply(boom.badRequest(responseJson.message));
+    ],function(err, result){
+      if(err) {
+        if(!!result && (result === 500 || result === true)){
+          return reply(boom.conflict(err.message));
+        } else if(!!result && result === 400) {
+          return reply(boom.badRequest(err.message));
+        }
+        return reply(boom.badImplementation('Error delete domain ID '+ domainId));
       }
-
-      AuditLogger.store({
-        account_id: result.proxy_config.account_id,
-        activity_type: 'delete',
-        activity_target: 'domain',
-        target_id: result._id,
-        target_name: result.domain_name,
-        target_object: result.proxy_config,
-        operation_status: 'success'
-      }, request);
-      var response = responseJson;
-      renderJSON(request, reply, err, response);
+      renderJSON(request, reply, err, result);
     });
   });
 };

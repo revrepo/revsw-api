@@ -217,7 +217,7 @@
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
       ],
-
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
       "sdk": {
         "download_links": {
           "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
@@ -317,7 +317,7 @@
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
       ],
-
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
       "sdk": {
         "download_links": {
           "iOS": "https://github.com/nuubit/SDK/archive/v1.0.5.zip"
@@ -417,7 +417,7 @@
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
         "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
       ],
-
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",      
       "sdk": {
         "download_links": {
           "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
@@ -459,7 +459,7 @@
   "notify_admin_by_email_on_customer_activities":"",
   "accounts_to_ignore_for_activity_reporting": [],
   "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE", "GD2017"],
-  "max_time_period_for_traffic_graphs_days": 7,
+  "max_time_period_for_traffic_graphs_days": 8,
   "max_time_period_for_waf_graphs_days": 30,
   "notification_window_for_expiring_ssl_cert_days": 90,
   "notify_admin_by_email_on_ssl_cert_expiration": "ops@revsw.com",

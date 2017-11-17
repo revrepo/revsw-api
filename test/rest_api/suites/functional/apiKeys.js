@@ -27,7 +27,7 @@ var APIKeyDataProvider = require('./../../common/providers/data/apiKeys');
 describe('Functional check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
   var resellerUser = config.get('api.users.reseller');
-  var accountFirst, accountSecond;
+  var accountFirst, accountSecond, accountForDelete;
   var userReseller = DataProvider.generateUser('reseller');
 
   before(function (done) {
@@ -53,9 +53,19 @@ describe('Functional check', function () {
             return accountSecond;
           });
       })
+      .then(function() {
+        // create account 3 for delete
+        accountForDelete = AccountsDP.generateOne();
+        return API.resources.accounts
+          .createOne(accountForDelete)
+          .then(function(response) {
+            accountForDelete.id = response.body.object_id;
+            return accountForDelete;
+          });
+      })
       .then(function () {
         // create user with role "resseler" and access to Account First and Account Second
-        userReseller.companyId = [accountFirst.id + '', accountSecond.id + ''];
+        userReseller.companyId = [accountFirst.id + '', accountSecond.id + '', accountForDelete.id + '',];
         userReseller.access_control_list.readOnly = false;
         API.resources.users
           .createOne(userReseller)
@@ -259,6 +269,69 @@ describe('Functional check', function () {
             .catch(done);
         });
       });
+    });
+
+    describe('with additional account which will be delete', function() {
+        before(function(done) {
+          API.helpers.authenticateUser(userReseller)
+            .then(function() {
+              // add to API Key additional Account For Delete
+              var updatedKey = APIKeyDataProvider
+                .generateCompleteOne(apiKey.account_id);
+              updatedKey.managed_account_ids = [accountForDelete.id];
+              API.resources.apiKeys
+                .update(apiKey.id, updatedKey)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+        after(function(done) {
+          done();
+        });
+
+        it('should provide access to additional account which exisit and will be delete', function(done) {
+          API.helpers.authenticateAPIKey(apiKey.id)
+            .then(function() {
+              API.resources.accounts
+                .getOne(accountForDelete.id)
+                .expect(200)
+                .then(function(response) {
+                  var accountObject = response.body;
+                  accountObject.id.should.equal(accountForDelete.id);
+                  done();
+                });
+            })
+            .catch(done);
+        });
+
+        it('should no contain account ID in managed_account_ids after account was deleted', function(done) {
+          API.helpers.authenticateUser(userReseller)
+            .then(function() {
+              API.resources.accounts
+                .deleteOne(accountForDelete.id)
+                .then(function() {
+                  API.resources.accounts
+                    .getOne(accountForDelete.id)
+                    .expect(400)
+                    .end(function(err, res) {
+                      res.body.message.should.equal('Account ID not found');
+                      API.resources.apiKeys
+                        .getOne(apiKey.id)
+                        .expect(200)
+                        .end(function(err, res) {
+                          res.body.should.have.property('managed_account_ids');
+                          res.body.managed_account_ids.should.be.instanceof(Array);
+                          res.body.managed_account_ids.should.not.containEql(accountForDelete.id);
+                          done();
+                        });
+                    });
+                });
+            })
+            .catch(done);
+        });
+
     });
   });
 });
