@@ -22,7 +22,7 @@ var config = require('config');
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
 
-describe('Smoke check', function () {
+describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -53,7 +53,7 @@ describe('Smoke check', function () {
           done();
         });
 
-       xit('should return a success response when getting all subscriptions.', 
+        xit('should load Subscriptions list with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -61,12 +61,18 @@ describe('Smoke check', function () {
                 API.resources.subscriptions
                   .getAll()
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    var subscriptionsArray = res.body;
+                    subscriptionsArray.should.be.not.empty();
+                    subscriptionsArray[1].id.should.be.not.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           });
 
-       xit('should return a success response when getting all resources.', 
+        xit('should load Resources list with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -74,12 +80,18 @@ describe('Smoke check', function () {
                 API.resources.resources
                   .getAll()
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    var resourcesArray = res.body;
+                    resourcesArray.should.be.not.empty();
+                    resourcesArray[24].resource_name.should.be.not.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in resourceGroup.', 
+        xit('should load Resources list in resourceGroup with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -89,12 +101,18 @@ describe('Smoke check', function () {
                   .accounts() 
                   .getAll()
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    var providersArray = res.body;
+                    providersArray.should.be.not.empty();
+                    providersArray[20].plan_name.should.be.not.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in subscription.', 
+        xit('should load Resources list in subscription with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -104,20 +122,31 @@ describe('Smoke check', function () {
                   .accounts() 
                   .getAll()
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    var providersArray = res.body;
+                    providersArray.should.be.not.empty();
+                    providersArray[20].name.should.be.not.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting specific resource.', 
+        xit('should load specific Resource with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources 
-                  .getOne()
+                API.resources.resources
+                  .getOne('590f48146550d63ae698029c')
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    res.body.should.not.be.empty();
+                    res.body.resource_name.should.not.be.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           });

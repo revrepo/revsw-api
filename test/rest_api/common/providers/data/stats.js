@@ -498,6 +498,349 @@ var StatsDataProvider = {
         Utils.removeJsonFromArray(params, 'device');
         return params;
       }
+    },
+
+    imageEngine: {
+      getQueryParams: function () {
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
+        return [
+          {from_timestamp: startTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
+          {status_code: 200},
+          {cache_code: 'HIT'},
+          {cache_code: 'MISS'},
+          {request_status: 'OK'},
+          {request_status: 'ERROR'},
+          {protocol: 'HTTP'},
+          {protocol: 'HTTPS'},
+          {http_method: 'GET'},
+          {http_method: 'HEAD'},
+          {http_method: 'POST'},
+          {http_method: 'PUT'},
+          {http_method: 'DELETE'},
+          {http_method: 'TRACE'},
+          {http_method: 'OPTIONS'},
+          {http_method: 'CONNECT'},
+          {http_method: 'PATCH'},
+          {quic: 'QUIC'},
+          {quic: 'HTTP'},
+          {country: 'US'},
+          {os: 'Linux'},
+          {device: 'Something'},
+          {browser: 'FireFox'}
+        ];
+      },
+
+      getCustomQueryParams: function (data) {
+        return [
+          {from_timestamp: data.stringVal},
+          {to_timestamp: data.stringVal},
+          {report_type: data.stringVal}
+        ];
+      },
+
+      getLongQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: longNumber,
+          stringVal: longStr
+        });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      }
+    },
+
+    mobileDesktop: {
+      getQueryParams: function () {
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
+        return [
+          {from_timestamp: startTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
+          {status_code: 200},
+          {cache_code: 'HIT'},
+          {cache_code: 'MISS'},
+          {request_status: 'OK'},
+          {request_status: 'ERROR'},
+          {protocol: 'HTTP'},
+          {protocol: 'HTTPS'},
+          {http_method: 'GET'},
+          {http_method: 'HEAD'},
+          {http_method: 'POST'},
+          {http_method: 'PUT'},
+          {http_method: 'DELETE'},
+          {http_method: 'TRACE'},
+          {http_method: 'OPTIONS'},
+          {http_method: 'CONNECT'},
+          {http_method: 'PATCH'},
+          {quic: 'QUIC'},
+          {quic: 'HTTP'},
+          {country: 'US'}
+        ];
+      },
+
+      getCustomQueryParams: function (data) {
+        return [
+          {from_timestamp: data.stringVal},
+          {to_timestamp: data.stringVal},
+          {report_type: data.stringVal}
+        ];
+      },
+
+      getLongQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: longNumber,
+          stringVal: longStr
+        });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      }
+    },
+
+    fbtHeatmap: {
+      getQueryParams: function () {
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
+        return [
+          {from_timestamp: startTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
+          {count: 10},
+          
+        ];
+      },
+
+      getCustomQueryParams: function (data) {
+        return [
+          {from_timestamp: data.stringVal},
+          {to_timestamp: data.stringVal},
+          {report_type: data.stringVal}
+        ];
+      },
+
+      getLongQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: longNumber,
+          stringVal: longStr
+        });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      }
+    },
+
+    fbtDistribution: {
+      getQueryParams: function () {
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
+        return [
+          {from_timestamp: startTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
+          {country: 'US'} ,
+          {os: 'Linux'},
+          {device: 'Something'},
+          {browser: 'FireFox'},
+          {interval_ms: '10'},
+          {limit_ms: '10'}               
+        ];
+      },
+
+      getCustomQueryParams: function (data) {
+        return [
+          {from_timestamp: data.stringVal},
+          {to_timestamp: data.stringVal},
+          {report_type: data.stringVal}
+        ];
+      },
+
+      getLongQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: longNumber,
+          stringVal: longStr
+        });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      }
+    },
+
+    fbtAverage: {
+      getQueryParams: function () {
+        var now = Date.now();
+        var hour = 60 * 60 * 1000; // minutes * secs * milli-seconds
+        var startTimestamp = now - (2 * hour); // 2 hours before
+        var endTimestamp = now - (1 * hour); // 1 hour before
+        return [
+          {from_timestamp: startTimestamp.toString()},
+          {
+            from_timestamp: startTimestamp.toString(),
+            to_timestamp: endTimestamp.toString()
+          },
+          {country: 'US'} ,
+          {os: 'Linux'},
+          {device: 'Something'},
+          {browser: 'FireFox'}                   
+        ];
+      },
+
+      getCustomQueryParams: function (data) {
+        return [
+          {from_timestamp: data.stringVal},
+          {to_timestamp: data.stringVal},
+          {report_type: data.stringVal}
+        ];
+      },
+
+      getLongQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: longNumber,
+          stringVal: longStr
+        });
+      },
+
+      getBogusQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: bogusString,
+          stringVal: bogusString
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      },
+
+      getEmptyQueryParams: function () {
+        return this.getCustomQueryParams({
+          numberVal: emptyString,
+          stringVal: emptyString
+        });
+      },
+
+      getInvalidQueryParams: function () {
+        var params = this.getCustomQueryParams({
+          numberVal: 'INVALID',
+          stringVal: 'INVALID'
+        });
+        Utils.removeJsonFromArray(params, 'os');
+        Utils.removeJsonFromArray(params, 'device');
+        return params;
+      }
     }
   }
 };

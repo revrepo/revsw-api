@@ -133,6 +133,62 @@ describe('CRUD check', function () {
               })
               .catch(done);
           });
+
+        it('should return data when getting specific purge request.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.purge
+                  .getOne(purge.id)
+                  .expect(200)
+                  .then(function (res) {
+                    purge.should.not.be.empty();
+                    res.body.should.not.be.empty();
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        it('should return data when getting list purge requests.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.purge
+                  .domain_id()
+                  .getOne()
+                  .expect(200)
+                  .then(function (res) {
+                    purge.should.not.be.empty();
+                    res.body.should.not.be.empty();
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        it('should return data when posting domain purge object.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+                API.resources.purge
+                  .createOne(purgeData)
+                  .expect(200)
+                  .then(function (res) {
+                    purge.should.not.be.empty();
+                    res.body.request_id.should.not.be.empty();
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
       });
     });
   });

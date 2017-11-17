@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2017] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -15,12 +15,11 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
-
 require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DataProvider = require('./../../common/providers/data');
+var DNSZonesDP = require('./../../common/providers/data/dnsZones');
 
 describe('Smoke check', function () {
 
@@ -28,21 +27,44 @@ describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
-    config.get('api.users.revAdmin')
+    config.get('api.users.reseller')
   ];
 
   users.forEach(function (user) {
 
+    var account;
+    var firstDnsZone;
+    var firstDnsZoneRecord;
+
     describe('With user: ' + user.role, function () {
 
-      describe('Azure resource', function () {
+      describe('DNS Zones Statistics resource', function () {
 
         before(function (done) {
-          done();
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              return API.helpers.accounts.createOne();
+            })
+            .then(function (newAccount) {
+              account = newAccount;
+              return API.helpers.dnsZones.create(account.id);
+            })
+            .then(function (dnsZone) {
+              firstDnsZone = dnsZone;
+              return API.helpers.dnsZones.records.create(firstDnsZone);
+            })
+            .then(function (dnsZoneRecord) {
+              firstDnsZoneRecord = dnsZoneRecord;
+            })
+            .then(done)
+            .catch(done);
         });
 
         after(function (done) {
-          done();
+          API.helpers.dnsZones
+            .cleanup(new RegExp(firstDnsZone.zone))
+            .finally(done);
         });
 
         beforeEach(function (done) {
@@ -53,68 +75,42 @@ describe('Smoke check', function () {
           done();
         });
 
-       xit('should return a success response when getting all subscriptions.', 
+              
+       it('should return a response when getting a specific DNS zone with usage stats and period last 24h',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
-                  .getAll()
+                API.resources.dnsZones
+                  .stats_usage(firstDnsZone.id)
+                  .getOne()
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
 
-       xit('should return a success response when getting all resources.', 
+        it('should return a response when getting a specific DNS zone with usage stats and period last 1h',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources
-                  .getAll()
+                API.resources.dnsZones
+                  .stats_usages(firstDnsZone.id)
+                  .getOne()
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in resourceGroup.', 
+        it('should return a response when getting a specific DNS zone with usage stats and period last 30d',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resourceGroups
-                  .providers()
-                  .accounts() 
-                  .getAll()
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
-
-        xit('should return a success response when getting all resources in subscription.', 
-          function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.subscriptions
-                  .providers()
-                  .accounts() 
-                  .getAll()
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
-
-        xit('should return a success response when getting specific resource.', 
-          function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                API.resources.resources 
+                API.resources.dnsZones
+                  .statss_usage(firstDnsZone.id)
                   .getOne()
                   .expect(200)
                   .end(done);

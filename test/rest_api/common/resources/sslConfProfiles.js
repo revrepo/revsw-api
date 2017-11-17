@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,36 +16,25 @@
  * from Rev Software, Inc.
  */
 
-// # Purge Resource object
+// # SSL Config profile Resource object
 
+// Requiring `BaseResource`
 var BasicResource = require('./basic');
+// Requiring constants
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-var purgeIdKey = 'purgeId';
-var domainConfigIdKey = 'domainId';
+
+// Config for resource
 var resourceConfig = {
-  idKey: purgeIdKey,
-  name: 'purge',
-  path: '/purge/{' + purgeIdKey + '}',
+  idKey: null,
+  name: 'sslConfProfiles',
+  path: '/ssl_conf_profiles',
   methods: [
-    Methods.CREATE,
-    Methods.READ_ONE,
     Methods.READ_ALL
   ]
-  ,
-  nestedResources: [
-    {
-      idKey: domainConfigIdKey,
-      name: 'domain_id',
-      path: '?domain_id=56ca9bd8cffd0ecd4e1f8f41',
-      methods: [
-        Methods.READ_ONE
-      ]
-    } 
-  ]  
 };
 
 // Creating new instance of BaseResource which is going to represent the API
-// `purge resource`
+// `SSL Config profile resource `
 module.exports = new BasicResource(resourceConfig);

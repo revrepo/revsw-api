@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2015] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,39 +16,33 @@
  * from Rev Software, Inc.
  */
 
-require('should-http');
-
 var config = require('config');
 
 var API = require('./../../common/api');
-var AccountsDP = require('./../../common/providers/data/accounts');
 var DataProvider = require('./../../common/providers/data');
 
-describe('Functional check', function () {
+describe('Smoke check', function () {
+
+  // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var revAdmin = config.get('api.users.revAdmin');
+  var user = config.get('api.users.revAdmin');
 
-  after(function (done) {
-    done();
-  });
-
-  describe('Vendor profile resource', function () {
-
-    it('should load vendor profile names list with admin role', function (done) {
-      API.helpers
-        .authenticateUser(revAdmin)
-        .then(function () {
-          API.resources.vendorProfiles
-            .getAll({})
-            .expect(200)
-            .end(function (err, res) {
-              done();
-            });
-        })
-        .catch(done);
-    });
-
+  describe('SSL Config profile resource', function () {
+    
+   xit('should return a success response when getting all SSL Config profiles.',
+      function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            API.resources.sslConfProfiles
+              .getAll().then(function(response){
+                console.log(response);
+              })
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });   
   });
 });
-

@@ -32,7 +32,7 @@ var resourceName = 'resourceName';
 var resourceConfig = {
   idKey: null,
   name: 'azure',
-  path: '',
+  path: '/',
   methods: [],
   nestedResources: [
     {
@@ -56,13 +56,14 @@ var resourceConfig = {
       name: 'resources',
       path: '/resources',
       methods: [
-        Methods.READ_ALL
+        Methods.READ_ALL,
+        Methods.READ_ONE,
       ]
     },
     {
       idKey: subscriptionId,
       name: 'subscriptions',
-      path: '/subscriptions/{' + subscriptionId + '}',
+      path: '/subscriptions',
       methods: [
         Methods.READ_ALL,
         Methods.UPDATE
@@ -170,4 +171,3 @@ var resourceConfig = {
 // Creating new instance of BaseResource which is going to represent the API
 // `Azure resource`
 module.exports = new BaseResource(resourceConfig);
-

@@ -22,7 +22,7 @@ var config = require('config');
 var API= require('./../../common/api');
 var DataProvider= require('./../../common/providers/data');
 
-describe('Functional check', function () {
+describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
@@ -47,15 +47,6 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should allow to `get` specific `SDK config` without authentication.',
-      function (done) {
-        var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(200)
-          .end(done);
-      });
-
     it('should return a success response when getting specific app SDK Config.',
       function (done) {
         API.helpers
@@ -66,25 +57,13 @@ describe('Functional check', function () {
               .getOne(sdk_key)
               .expect(200)
               .then(function (res) {
-                res.body.app_name.should.equal('Racer QA App 1 - please don\'t delete me');
+                res.body.should.be.not.empty();
+                res.body.app_name.should.be.not.empty();
                 done();
               })
               .catch(done);
           })
           .catch(done);
       });
-
-    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
-      function (done) {
-        var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(400)
-          .end(function (err, res) {
-            res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('Application not found');
-            done();
-          });
-      });
-    });
   });
+});

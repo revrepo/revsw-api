@@ -32,6 +32,7 @@ describe('Functional check', function () {
   var domainConfig;
   var purge;
   var reseller = config.get('api.users.reseller');
+  var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
     API.helpers
@@ -129,5 +130,59 @@ describe('Functional check', function () {
           })
           .catch(done);
       });
+
+    it('should return data when getting specific purge request.',
+      function (done) {
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            API.resources.purge
+              .getOne(purge.id)
+              .expect(200)
+              .then(function (res) {
+                res.body.message.should.be.equal('Success');
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return data when getting list purge requests.',
+      function (done) {
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            API.resources.purge
+              .domain_id()
+              .getOne()
+              .expect(200)
+              .then(function (res) {
+                res.body.total.should.be.equal(0);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return data when posting domain purge object.',
+      function (done) {
+        API.helpers
+          .authenticateUser(revAdmin)
+          .then(function () {
+            var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+            API.resources.purge
+              .createOne(purgeData)
+              .expect(200)
+              .then(function (res) {
+                var expMsg = 'The purge request has been successfully queued';
+                res.body.message.should.be.equal(expMsg);
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });    
   });
 });

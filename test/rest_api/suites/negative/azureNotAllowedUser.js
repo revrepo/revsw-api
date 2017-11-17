@@ -22,18 +22,18 @@ var config = require('config');
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
 
-describe('Smoke check', function () {
+describe('Negative check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
-    config.get('api.users.revAdmin')
+    config.get('api.users.admin')
   ];
 
   users.forEach(function (user) {
 
-    describe('With user: ' + user.role, function () {
+    describe('With not-allowed user: ' + user.role, function () {
 
       describe('Azure resource', function () {
 
@@ -53,33 +53,33 @@ describe('Smoke check', function () {
           done();
         });
 
-       xit('should return a success response when getting all subscriptions.', 
+        xit('should return `Forbidden` response when getting all subscriptions with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.subscriptions 
                   .getAll()
-                  .expect(200)
+                  .expect(403)
                   .end(done);
               })
               .catch(done);
           });
-
-       xit('should return a success response when getting all resources.', 
+      
+        xit('should return `Forbidden` response when getting all resources with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.resources
                   .getAll()
-                  .expect(200)
+                  .expect(403)
                   .end(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in resourceGroup.', 
+        xit('should return `Forbidden` response when getting all resources in resourceGroup with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -88,13 +88,13 @@ describe('Smoke check', function () {
                   .providers()
                   .accounts() 
                   .getAll()
-                  .expect(200)
+                  .expect(403)
                   .end(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in subscription.', 
+        xit('should return `Forbidden` response when getting all resources in subscription with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -103,20 +103,20 @@ describe('Smoke check', function () {
                   .providers()
                   .accounts() 
                   .getAll()
-                  .expect(200)
+                  .expect(403)
                   .end(done);
               })
               .catch(done);
           });
 
-        xit('should return a success response when getting specific resource.', 
+        xit('should return `Forbidden` response when getting specific resource with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.resources 
                   .getOne()
-                  .expect(200)
+                  .expect(403)
                   .end(done);
               })
               .catch(done);
@@ -124,4 +124,4 @@ describe('Smoke check', function () {
       });
     });
   });
-});
+ });

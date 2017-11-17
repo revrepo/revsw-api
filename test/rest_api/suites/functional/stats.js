@@ -157,6 +157,161 @@ describe('Functional check.', function () {
     });
   });
 
+ describe('Image Engine: Stats resource', function () {
+    var testData = [];
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    before(function () {
+      testData = DP.generateImageEngineTests();
+    });
+
+    it('All requests combinations', function (done) {
+      var run_ = function (test) {
+        return API.resources.stats
+          .imageEngine()
+          .getOne(domains.google.id, test.query)
+          .expect(200)
+          .then(function (res) {
+            var metadata = res.body.metadata;
+            metadata.total_hits.should.equal(test.count);
+          })
+          .catch(done);
+      };
+
+      promise.map(testData, run_, {concurrency: 32})
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    });
+  });
+
+ describe('Mobile/Desktop Distribution : Stats resource', function () {
+    var testData = [];
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    before(function () {
+      testData = DP.generateMobileDesktopTests();
+    });
+
+    it('All requests combinations', function (done) {
+      var run_ = function (test) {
+        return API.resources.stats
+          .mobileDesktop()
+          .getOne(domains.google.id, test.query)
+          .expect(200)
+          .then(function (res) {
+            var metadata = res.body.metadata;
+            metadata.total_hits.should.equal(test.count);
+          })
+          .catch(done);
+      };
+
+      promise.map(testData, run_, {concurrency: 32})
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    });
+  });
+
+  describe('FBT Heatmap: Stats resource', function () {
+    var testData = [];
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    before(function () {
+      testData = DP.generateFBTHeatmapTests();
+    });
+
+    it('All requests combinations', function (done) {
+      var run_ = function (test) {
+        return API.resources.stats
+          .fbtHeatmap()
+          .getOne(domains.google.id, test.query)
+          .expect(200)
+          .then(function (res) {
+            var metadata = res.body.metadata;
+            metadata.total_hits.should.equal(test.count);
+          })
+          .catch(done);
+      };
+
+      promise.map(testData, run_, {concurrency: 32})
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    });
+  });
+
+  describe('FBT Distribution: Stats resource', function () {
+    var testData = [];
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    before(function () {
+      testData = DP.generateFBTDistributionTests();
+    });
+
+    it('All requests combinations', function (done) {
+      var run_ = function (test) {
+        return API.resources.stats
+          .fbtDistribution()
+          .getOne(domains.google.id, test.query)
+          .expect(200)
+          .then(function (res) {
+            var metadata = res.body.metadata;
+            metadata.total_hits.should.equal(test.count);
+          })
+          .catch(done);
+      };
+
+      promise.map(testData, run_, {concurrency: 32})
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    });
+  });
+
+  describe('FBT Average: Stats resource', function () {
+    var testData = [];
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    before(function () {
+      testData = DP.generateFBTAverageTests();
+    });
+
+    it('All requests combinations', function (done) {
+      var run_ = function (test) {
+        return API.resources.stats
+          .fbtAverage()
+          .getOne(domains.google.id, test.query)
+          .expect(200)
+          .then(function (res) {
+            var metadata = res.body.metadata;
+            metadata.total_hits.should.equal(test.count);
+          })
+          .catch(done);
+      };
+
+      promise.map(testData, run_, {concurrency: 32})
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    });
+  });
+
   describe('Top: Stats resource', function () {
 
     var testData = [];
@@ -248,5 +403,7 @@ describe('Functional check.', function () {
         });
     });
   });
-
 });
+
+
+

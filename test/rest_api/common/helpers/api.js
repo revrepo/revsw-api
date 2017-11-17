@@ -37,6 +37,7 @@ var DomainConfigsHelper = require('./domainConfigs');
 var PurgeHelper = require('./purge');
 var SignUpHelper = require('./signUp');
 var SSLCertsHelper = require('./sslCerts');
+var SSLNamesHelper = require('./sslNames');
 var UsersHelper = require('./users');
 var LogShippingJobsHelper = require('./logShippingJobs');
 var WAFRulesHelper = require('./wafRules');
@@ -56,6 +57,7 @@ var APIHelpers = {
   purge: PurgeHelper,
   signUp: SignUpHelper,
   sslCerts: SSLCertsHelper,
+  sslNames: SSLNamesHelper,
   users: UsersHelper,
   logShippingJobs: LogShippingJobsHelper,
   wafRules: WAFRulesHelper,
