@@ -229,5 +229,5 @@ exports.generateAccountReport = function (request, reply) {
       reply(statusResponse).code(503);
       process.exit(0);
       return;
-    })
+    });
 };
