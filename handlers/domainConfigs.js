@@ -521,7 +521,6 @@ var getDomainConfigFromGitHub = function(options, cb) {
  *
  */
 exports.updateDomainConfig = function(request, reply) {
-
   var newDomainJson = request.payload;
   var newDomainJsonAudit = utils.clone(request.payload);
   var domainId = request.params.domain_id;
