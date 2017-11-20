@@ -191,11 +191,7 @@ exports.generateAccountReport = function (request, reply) {
     })
     .then(function logListAccounts(data) {
       logger.info('Get list Accounts for make day reports for ' + data.length + ' accounts');
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Usage Report Generated'
-      };
-      reply(statusResponse).code(200);
+
       return data;
     })
     .map(function (itemId) {
@@ -214,14 +210,23 @@ exports.generateAccountReport = function (request, reply) {
       concurrency: 10
     })
     .then(function sucess(data) {
+      var statusResponse = {
+        statusCode: 200,
+        message: 'Usage Report Generated'
+      };
+      
       if (conf.verbose) {
         logger.info(data, 5);
       }
+      reply(statusResponse).code(200);
     })
     .catch(function (err) {
-      console.log(err);
-    })
-    .finally(function () {
+      var statusResponse = {
+        statusCode: 503,
+        message: err
+      };
+
+      reply(statusResponse).code(503);
       process.exit(0);
       return;
     });
