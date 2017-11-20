@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -238,7 +238,7 @@ describe('Sanity check', function () {
                 .catch(done);
             });
 
-          xit('should return a response when checking integration with records ' +
+            it('should return a response when checking integration with records ' +
             'for specific DNS Zone',
             function (done) {
               API.helpers
