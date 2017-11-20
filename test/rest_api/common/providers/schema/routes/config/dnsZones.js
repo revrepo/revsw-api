@@ -310,7 +310,8 @@ module.exports = [
             id: Joi.string(),
             hostmaster: Joi.string().email(),
             networks: Joi.array().items(Joi.number().integer()),
-            pool: Joi.string()
+            pool: Joi.string(),
+            dnssec: Joi.boolean().optional()
           }),
           dns_server_ip: Joi.string(),
           check_reports: Joi.array().items(Joi.object().keys({
