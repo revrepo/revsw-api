@@ -20,12 +20,11 @@ var config = require('config');
 
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
-var SSLNameDataProvider = require('./../../common/providers/data/sslNames');
+var SSLNameDP = require('./../../common/providers/data/sslNames');
 
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Shared variables
   var sslName;
   var accountId;
 
@@ -34,8 +33,17 @@ describe('Smoke check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    done();
-      
+    API.helpers
+      .authenticateUser(user)
+      .then(function () {
+        return API.helpers.sslNames.createOne();
+      })
+      .then(function (sslname) {
+        sslName = sslname;
+        accountId = sslName.account_id;
+        done();
+      })
+      .catch(done);
   });
 
   after(function (done) {
@@ -64,26 +72,26 @@ describe('Smoke check', function () {
           .then(function () {
             API.resources.sslNames
               .getOne('5818c83150611e2c5be4e49c')
-              .expect(200)
+              .expect(200).then(function(response){
+                console.log(response);
+              })
               .end(done);
           })
           .catch(done);
       });
 
-    xit('should return a success response when creating specific SSL name.',
+    it('should return a success response when creating specific SSL name.',
       function (done) {
-       //var account_id = SSLNameDataProvider.generateOne(accountId);
-       var account_id = '55b6ff6a7957012304a49d04'
-       // can't create sslName because it fails with generateOne function don't create account with sslName
+        var sslname = SSLNameDP.generateOne(accountId,'test');
         API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .createOne(account_id)
+              .createOne(sslname)
               .expect(200)
               .then(function (response) {
                 API.resources.sslNames
-                  .deleteOne(response.body.id)
+                  .deleteOne(response.body.object_id)
                   .end(done);
               })
               .catch(done);
@@ -91,21 +99,19 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return a success response when deleting a SSL Name.',
+    it('should return a success response when deleting a specific SSL Name.',
       function (done) {
-        var ssl_name_id = '5a0327ee92bf45484157ef81';
-        // it's created manually because createOne doesn't working properly
+        var sslname = SSLNameDP.generateOne(accountId,'test2');
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            return API.helpers.sslNames.createOne();
-           //createOne doesn't working
+            return API.resources.sslNames.createOne(sslname);
           })
-          .then(function () {
+          .then(function (response) {
             API.resources.sslNames
-             .deleteOne(ssl_name_id)
-             .expect(200)
-             .end(done);
+              .deleteOne(response.body.object_id)
+              .expect(200)
+              .end(done);
           })
           .catch(done);
       });
@@ -117,7 +123,7 @@ describe('Smoke check', function () {
           .then(function () {
             API.resources.sslNames
               .approvers()
-              .getAll()
+              .getAll({ssl_name:'wwww3.revsw.com'})
               .expect(200)
               .end(done);
           })
@@ -134,7 +140,7 @@ describe('Smoke check', function () {
           })
           .then(function () {
             API.resources.sslNames
-             .getOne() 
+             .getOne(ssl_name_id)
              .expect(200)
              .end(done);
           })

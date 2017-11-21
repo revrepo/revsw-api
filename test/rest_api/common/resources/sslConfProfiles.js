@@ -24,7 +24,6 @@ var BasicResource = require('./basic');
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
-
 // Config for resource
 var resourceConfig = {
   idKey: null,
@@ -37,4 +36,5 @@ var resourceConfig = {
 
 // Creating new instance of BaseResource which is going to represent the API
 // `SSL Config profile resource `
+
 module.exports = new BasicResource(resourceConfig);

@@ -22,7 +22,7 @@ var config = require('config');
 
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
-var SSLNameDataProvider = require('./../../common/providers/data/sslNames');
+var SSLNameDP = require('./../../common/providers/data/sslNames');
 
 describe('Functional check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
@@ -36,8 +36,17 @@ describe('Functional check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    done();
-      
+    API.helpers
+      .authenticateUser(user)
+      .then(function () {
+        return API.helpers.sslNames.createOne();
+      })
+      .then(function (sslname) {
+        sslName = sslname;
+        accountId = sslName.account_id;
+        done();
+      })
+      .catch(done);
   });
 
   after(function (done) {
@@ -82,53 +91,47 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should create specific SSL Name with revAdmin role.',
+    it('should create specific SSL Name with revAdmin role.',
       function (done) {
-        //var account_id = SSLNameDataProvider.generateOne(accountId);
-        var account_id = '55b6ff6a7957012304a49d04'
-        // can't create sslName because it fails with generateOne function don't create account with sslName
+        var sslname = SSLNameDP.generateOne(accountId,'test1');
         API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .createOne(account_id)
-              .expect(200)
-              .end(function (err, res) {
-                res.body.message.should.equal('Sucessfully created the SSL name');
-                done();
-              })
+              .createOne(sslname)
+              .expect(200)    
               .then(function (response) {
+                response.body.message.should.equal('Successfully added new SSL name');
                 API.resources.sslNames
-                  .deleteOne(response.body.id)
-                  .end(done);
+                   .deleteOne(response.body.object_id)
+                   .end(done);
               })
               .catch(done);
           })
-          .catch(done);
+          .catch(done); 
       });
 
-    xit('should delete specific SSL Name with revAdmin role.',
+    it('should delete specific SSL Name with revAdmin role.',
       function (done) {
-        var ssl_name_id = '5a0af85fb97d742a44b373d2';
-        // it's created manually because createOne doesn't working properly
+        var sslname = SSLNameDP.generateOne(accountId,'test2');
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            return API.helpers.sslNames.createOne();
-           //createOne doesn't working
+            return API.resources.sslNames.createOne(sslname);
           })
-          .then(function () {
+          .then(function (response) {
             API.resources.sslNames
-             .deleteOne(ssl_name_id)
-             .expect(200)
-             .then(function(res) {
-                res.body.message.should.equal('Sucessfully deleted the SSL name');
+              .deleteOne(response.body.object_id)
+              .expect(200)
+              .then(function(res) {
+                res.body.message.should.equal('Successfully deleted the SSL name');
                 done();   
               })
               .catch(done);
           })
           .catch(done);
       });
+
 
     it('should load specific SSL Name with Email Approvers and revAdmin role.',
       function (done) {
@@ -137,7 +140,7 @@ describe('Functional check', function () {
           .then(function () {
             API.resources.sslNames
               .approvers()
-              .getAll()
+              .getAll({ssl_name:'wwww3.revsw.com'})
               .expect(200)
               .then(function (res) {
                 var approversArray = res.body;

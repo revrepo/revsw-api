@@ -24,21 +24,19 @@ var DataProvider = require('./../../common/providers/data');
 describe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
+  this.timeout(config.get('api.request.maxTimeout'));
 
   var user = config.get('api.users.revAdmin');
 
   describe('SSL Config profile resource', function () {
     
-   xit('should return a success response when getting all SSL Config profiles.',
+   it('should return a success response when getting all SSL Config profiles.',
       function (done) {
         API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslConfProfiles
-              .getAll().then(function(response){
-                console.log(response);
-              })
+              .getAll()
               .expect(200)
               .end(done);
           })

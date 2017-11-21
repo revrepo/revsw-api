@@ -22,7 +22,7 @@ var config = require('config');
 
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
-var SSLNameDataProvider = require('./../../common/providers/data/sslNames');
+var SSLNameDP = require('./../../common/providers/data/sslNames');
 
 describe('CRUD check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
@@ -36,7 +36,17 @@ describe('CRUD check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    done();
+    API.helpers
+      .authenticateUser(user)
+      .then(function () {
+        return API.helpers.sslNames.createOne();
+      })
+      .then(function (sslname) {
+        sslName = sslname;
+        accountId = sslName.account_id;
+        done();
+      })
+      .catch(done);
       
   });
 
@@ -46,7 +56,7 @@ describe('CRUD check', function () {
 
   describe('SSL Names resource', function () {
 
-    sit('should load SSL Names list with revAdmin role.',
+    it('should load SSL Names list with revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -83,45 +93,38 @@ describe('CRUD check', function () {
         .catch(done);
     });
 
-    xit('should create specific SSL Name with revAdmin role.',
+    it('should create specific SSL Name with revAdmin role.',
       function (done) {
-       //var account_id = SSLNameDataProvider.generateOne(accountId);
-       var account_id = '55b6ff6a7957012304a49d04'
-       // can't create sslName because it fails with generateOne function don't create account with sslName
-        API.helpers
+       var sslname = SSLNameDP.generateOne(accountId,'test1');
+       API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .createOne(account_id)
+              .createOne(sslname)
               .expect(200)
               .then(function (res) {
                 res.body.should.not.be.empty();
                 res.body.message.should.not.be.empty();
-                done();
-             })
-              .then(function (response) {
                 API.resources.sslNames
-                  .deleteOne(response.body.id)
-                  .end(done);
+                   .deleteOne(res.body.object_id)
+                   .end(done);
               })
               .catch(done);
           })
-          .catch(done);
+          .catch(done); 
       });
 
-    xit('should delete specific SSL Name with revAdmin role.',
+    it('should delete specific SSL Name with revAdmin role.',
       function (done) {
-        var ssl_name_id = '5a0af85fb97d742a44b373d2';
-        // it's created manually because createOne doesn't working properly
+        var sslname = SSLNameDP.generateOne(accountId,'test2');
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            return API.helpers.sslNames.createOne();
-           //createOne doesn't working
+            return API.resources.sslNames.createOne(sslname);
           })
-          .then(function () {
+          .then(function (response) {
             API.resources.sslNames
-              .deleteOne(ssl_name_id)
+              .deleteOne(response.body.object_id)
               .expect(200)
               .then(function(res) {
                 res.body.should.not.be.empty();
@@ -140,7 +143,7 @@ describe('CRUD check', function () {
           .then(function () {
             API.resources.sslNames
               .approvers()
-              .getAll()
+              .getAll({ssl_name:'wwww3.revsw.com'})
               .expect(200)
               .then(function (res) {
                 var approversArray = res.body;

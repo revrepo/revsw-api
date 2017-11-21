@@ -83,8 +83,8 @@ describe('Functional check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.dnsZones
-                  .stats_usage(firstDnsZone.id)
-                  .getOne()
+                  .usage(firstDnsZone.id)
+                  .getOne(firstDnsZone.id, {period: '24h'})
                   .expect(200)
                   .then(function (res) {
                     res.body.metadata.period.should.equal('24h');
@@ -101,8 +101,8 @@ describe('Functional check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.dnsZones
-                  .stats_usages(firstDnsZone.id)
-                  .getOne()
+                  .usage(firstDnsZone.id)
+                  .getOne(firstDnsZone.id, {period: '1h'})
                   .expect(200)
                   .then(function (res) {
                     res.body.metadata.period.should.equal('1h');
@@ -119,8 +119,8 @@ describe('Functional check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.dnsZones
-                  .statss_usage(firstDnsZone.id)
-                  .getOne()
+                  .usage(firstDnsZone.id)
+                  .getOne(firstDnsZone.id, {period: '30d'})
                   .expect(200)
                   .then(function (res) {
                     res.body.metadata.period.should.equal('30d');

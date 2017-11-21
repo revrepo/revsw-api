@@ -63,7 +63,7 @@ var resourceConfig = {
     {
       idKey: subscriptionId,
       name: 'subscriptions',
-      path: '/subscriptions',
+      path: '/subscriptions/{' + subscriptionId + '}',
       methods: [
         Methods.READ_ALL,
         Methods.UPDATE

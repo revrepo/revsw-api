@@ -75,30 +75,10 @@ var resourceConfig = {
       name: 'usage',
       path: '/stats/usage',
       methods: [
-        Methods.READ_ALL
-      ]
-    },
-    {
-      name: 'stats_usage',
-      path: '/stats/usage?period=24h',
-      methods: [
+        Methods.READ_ALL,
         Methods.READ_ONE
       ]
-    },
-    {
-      name: 'stats_usages',
-      path: '/stats/usage?period=1h',
-      methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      name: 'statss_usage',
-      path: '/stats/usage?period=30d',
-      methods: [
-        Methods.READ_ONE
-      ]
-    }
+    },   
   ]
 };
 

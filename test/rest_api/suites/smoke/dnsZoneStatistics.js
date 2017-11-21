@@ -36,6 +36,7 @@ describe('Smoke check', function () {
     var firstDnsZone;
     var firstDnsZoneRecord;
 
+
     describe('With user: ' + user.role, function () {
 
       describe('DNS Zones Statistics resource', function () {
@@ -82,8 +83,8 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.dnsZones
-                  .stats_usage(firstDnsZone.id)
-                  .getOne()
+                  .usage(firstDnsZone.id)
+                  .getOne(firstDnsZone.id, {period: '24h'})
                   .expect(200)
                   .end(done);
               })
@@ -96,8 +97,8 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.dnsZones
-                  .stats_usages(firstDnsZone.id)
-                  .getOne()
+                  .usage(firstDnsZone.id)
+                  .getOne(firstDnsZone.id, {period: '1h'})
                   .expect(200)
                   .end(done);
               })
@@ -110,8 +111,8 @@ describe('Smoke check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.dnsZones
-                  .statss_usage(firstDnsZone.id)
-                  .getOne()
+                  .usage(firstDnsZone.id)
+                  .getOne(firstDnsZone.id, {period: '30d'})
                   .expect(200)
                   .end(done);
               })

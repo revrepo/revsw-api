@@ -39,7 +39,7 @@ var resourceConfig = {
     {
       idKey: null,
       name: 'approvers',
-      path: '/approvers?ssl_name=wwww3.revsw.com',
+      path: '/approvers',
       methods: [
         Methods.READ_ALL
       ]
