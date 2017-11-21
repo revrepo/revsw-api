@@ -35,13 +35,14 @@ describe('Functional check', function() {
       'reseller',
       'admin',
       'user'
-    ]
+    ];
+
     userRolesList.forEach(function(role) {
       var accountMain = AccountsDP.generateOne();
       var managedDomainConfig, deleteDomainConfig;
       var newUserWithRole = DataProvider.generateUser(role);
       // Generating new `user` data in order to use later in our tests.
-      describe('Users resource for new user with role ' + role, function() {
+      describe('Users resource for new user with role "' + role + '"', function() {
         before(function(done) {
           API.helpers
             .authenticateUser(revAdmin)
@@ -53,14 +54,14 @@ describe('Functional check', function() {
                 });
             })
             .then(function() {
-              return API.helpers.domainConfigs.createOne(accountMain.id)
+              return API.helpers.domainConfigs.createOne(accountMain.id, role + '-managed-domain')
                 .then(function(domainConfig) {
                   managedDomainConfig = domainConfig;
                   return domainConfig;
                 });
             })
             .then(function() {
-              return API.helpers.domainConfigs.createOne(accountMain.id)
+              return API.helpers.domainConfigs.createOne(accountMain.id, role + '-managed-domain-delete')
                 .then(function(domainConfig) {
                   deleteDomainConfig = domainConfig;
                   return domainConfig;

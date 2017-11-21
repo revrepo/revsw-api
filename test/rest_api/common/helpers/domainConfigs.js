@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -24,16 +24,16 @@ var APITestError = require('./../apiTestError');
 // Abstracts common functionality for the related resource.
 module.exports = {
 
-  createOne: function (accountId) {
-    var domainConfig = DomainConfigsDP.generateOne(accountId);
+  createOne: function(accountId, prefix) {
+    var domainConfig = DomainConfigsDP.generateOne(accountId, prefix);
     return DomainConfigsResource
       .createOne(domainConfig)
-      .then(function (res) {
+      .then(function(res) {
         domainConfig.id = res.body.object_id;
         return domainConfig;
       })
-      .catch(function(error){
-        throw new APITestError('Creating Domain Config' ,
+      .catch(function(error) {
+        throw new APITestError('Creating Domain Config',
           error.response.body, domainConfig);
       });
   }
