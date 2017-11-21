@@ -65,7 +65,7 @@ describe('Functional check', function () {
       })
       .then(function () {
         // create user with role "resseler" and access to Account First and Account Second
-        userReseller.companyId = [accountFirst.id + '', accountSecond.id + '', accountForDelete.id + '',];
+        userReseller.companyId = [accountFirst.id + '', accountSecond.id + '', accountForDelete.id + ''];
         userReseller.access_control_list.readOnly = false;
         API.resources.users
           .createOne(userReseller)
@@ -190,10 +190,9 @@ describe('Functional check', function () {
               .then(function (response) {
                 var accountsArray = response.body;
                 accountsArray.length.should.equal(2);
-                // TODO: refactor this - not sure that the API will return
-                // the elements in this specific order
-                accountsArray[0].id.should.equal(accountFirst.id);
-                accountsArray[1].id.should.equal(accountSecond.id);
+                accountsArray.should.matchEach(function(item){
+                  return (item.id === accountFirst.id) || (item.id === accountSecond.id);
+                });
                 done();
               })
               .catch(done);
