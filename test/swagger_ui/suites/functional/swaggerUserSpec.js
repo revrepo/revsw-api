@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,120 +20,145 @@ var config = require('config');
 var swagger = require('../../page_objects/swagger');
 var constants = require('../../page_objects/constants');
 
-describe('Functional', function () {
-    describe('Swagger UI using user', function () {
+describe('Functional', function() {
+  describe('Swagger UI using user', function() {
 
-        var user = config.get('swagger.users.revAdmin');
+    var user = config.get('swagger.users.revAdmin');
 
-        beforeEach(function () {
-            swagger.load();
-            // disable animations
-            browser.executeScript('jQuery.fx.off=true;');
-            browser.ignoreSynchronization = true;
-        });
-
-        it('should return 401 status code if `Try it out!`' +
-            ' button is clicked without authentication', function (done) {
-                swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
-                    endpoint.clickTitle();
-                    endpoint.clickSubmit();
-                    swagger.waitForElement(swagger
-                        .locators
-                        .api
-                        .resource
-                        .endPoints
-                        .endPoint
-                        .response
-                        .responseCode
-                        .css, function () {
-                            expect(endpoint.getResponseCode()).toBe('401');
-                            done();
-                        });
-                });
-            });
-
-        it('should successfully authenticate using a valid user', function (done) {
-            swagger.header.setAuthVia('Username/Password');
-            swagger.header.clickAuthBtn();
-            swagger.header.setUsername(user.email);
-            swagger.header.setPassword(user.password);
-            swagger.header.clickAuthBtn();
-            swagger.waitForText(swagger
-                .locators
-                .authMsgs
-                .success, function () {
-                    swagger.getSuccessAuthMSG().getText().then(function (text) {
-                        expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
-                    });
-                    done();
-                });
-
-        });
-
-        it('should return 200 status code if `Try it out!`' +
-            ' button is clicked after authentication', function (done) {
-                swagger.header.setAuthVia('Username/Password');
-                swagger.header.clickAuthBtn();
-                swagger.header.setUsername(user.email);
-                swagger.header.setPassword(user.password);
-                swagger.header.clickAuthBtn();
-                swagger.waitForText(swagger
-                    .locators
-                    .authMsgs
-                    .success, function () {
-                        swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
-                            endpoint.clickTitle();
-                            endpoint.clickSubmit();
-                            swagger.waitForElement(swagger
-                                .locators
-                                .api
-                                .resource
-                                .endPoints
-                                .endPoint
-                                .response
-                                .responseCode
-                                .css, function () {
-                                    expect(endpoint.getResponseCode()).toBe('200');
-                                    done();
-                                });
-                        });
-                    });
-            });
-
-        it('should successfully logout', function (done) {
-            swagger.header.setAuthVia('Username/Password');
-            swagger.header.clickAuthBtn();
-            swagger.header.setUsername(user.email);
-            swagger.header.setPassword(user.password);
-            swagger.header.clickAuthBtn();
-            swagger.waitForText(swagger
-                .locators
-                .authMsgs
-                .success, function () {
-                    swagger.header.clickLogoutBtn();
-                    expect(swagger.header.getLogoutBtn().isEnabled()).toBeFalsy();
-                    done();
-                });            
-        });
-
-        it('should return 401 status code if `Try it out!`' +
-            ' button is clicked after logout', function (done) {
-                swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
-                    endpoint.clickTitle();
-                    endpoint.clickSubmit();
-                    swagger.waitForElement(swagger
-                        .locators
-                        .api
-                        .resource
-                        .endPoints
-                        .endPoint
-                        .response
-                        .responseCode
-                        .css, function () {
-                            expect(endpoint.getResponseCode()).toBe('401');
-                            done();
-                        });
-                });
-            });
+    beforeEach(function() {
+      swagger.load();
+      // disable animations
+      browser.executeScript('jQuery.fx.off=true;');
+      browser.ignoreSynchronization = true;
     });
+
+    it('should return 401 status code if `Try it out!`' +
+      ' button is clicked without authentication',
+      function(done) {
+        swagger.api.endpoints.getEndpoint(0)
+          .then(function(endpoint) {
+            endpoint.clickTitle();
+            endpoint.clickSubmit();
+            return swagger.waitForElement(swagger
+                .locators
+                .api
+                .resource
+                .endPoints
+                .endPoint
+                .response
+                .responseCode
+                .css)
+              .then(function() {
+                return expect(endpoint.getResponseCode()).toBe('401');
+                done();
+              });
+          })
+          .then(function() {
+            done();
+          });
+      });
+
+    it('should successfully authenticate using a valid user', function(done) {
+      swagger.header.setAuthVia('Username/Password');
+      // swagger.header.clickAuthBtn();
+      swagger.header.setUsername(user.email);
+      swagger.header.setPassword(user.password);
+      swagger.header.clickAuthBtn();
+      swagger.waitForText(swagger
+          .locators
+          .authMsgs
+          .success)
+        .then(function() {
+          return swagger.getSuccessAuthMSG().getText()
+            .then(function(text) {
+              return expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
+            });
+        })
+        .then(function() {
+          done();
+        });
+
+    });
+
+    it('should return 200 status code if `Try it out!`' +
+      ' button is clicked after authentication',
+      function(done) {
+        swagger.header.setAuthVia('Username/Password');
+        swagger.header.clickAuthBtn();
+        swagger.header.setUsername(user.email);
+        swagger.header.setPassword(user.password);
+        swagger.header.clickAuthBtn();
+        swagger.waitForText(swagger
+            .locators
+            .authMsgs
+            .success)
+          .then(function() {
+            return swagger.api.endpoints.getEndpoint(0)
+              .then(function(endpoint) {
+                endpoint.clickTitle();
+                endpoint.clickSubmit();
+                return swagger.waitForElement(swagger
+                    .locators
+                    .api
+                    .resource
+                    .endPoints
+                    .endPoint
+                    .response
+                    .responseCode
+                    .css)
+                  .then(function() {
+                    return expect(endpoint.getResponseCode()).toBe('200');
+                  });
+              });
+          })
+          .then(function() {
+            done();
+          });
+      });
+
+    it('should successfully logout', function(done) {
+      swagger.header.setAuthVia('Username/Password');
+      swagger.header.clickAuthBtn();
+      swagger.header.setUsername(user.email);
+      swagger.header.setPassword(user.password);
+      swagger.header.clickAuthBtn();
+      swagger.waitForText(swagger
+          .locators
+          .authMsgs
+          .success)
+        .then(function() {
+          expect(swagger.header.getLogoutBtn().isEnabled()).toBeTruthy();
+          swagger.header.clickLogoutBtn();
+          return expect(swagger.header.getLogoutBtn().isEnabled()).toBeFalsy();
+        })
+        .then(function() {
+          done();
+        });
+    });
+
+    it('should return 401 status code if `Try it out!`' +
+      ' button is clicked after logout',
+      function(done) {
+        swagger.api.endpoints.getEndpoint(0)
+          .then(function(endpoint) {
+            endpoint.clickTitle();
+            endpoint.clickSubmit();
+            return swagger.waitForElement(swagger
+                .locators
+                .api
+                .resource
+                .endPoints
+                .endPoint
+                .response
+                .responseCode
+                .css)
+              .then(function() {
+                return expect(endpoint.getResponseCode()).toBe('401');
+              });
+          })
+          .then(function() {
+            done();
+          });
+      });
+  });
 });
