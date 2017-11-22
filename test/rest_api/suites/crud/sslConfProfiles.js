@@ -32,7 +32,7 @@ describe('CRUD check', function () {
 
   describe('SSL Config profile resource', function () {
     
-    xit('should load  SSL Config profiles list with revAdmin role.',
+    it('should load  SSL Config profiles list with revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)

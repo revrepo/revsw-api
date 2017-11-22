@@ -23,7 +23,6 @@ var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
 var purgeIdKey = 'purgeId';
-var domainConfigIdKey = 'domainId';
 var resourceConfig = {
   idKey: purgeIdKey,
   name: 'purge',
@@ -33,17 +32,6 @@ var resourceConfig = {
     Methods.READ_ONE,
     Methods.READ_ALL
   ]
-  ,
-  nestedResources: [
-    {
-      idKey: domainConfigIdKey,
-      name: 'domain_id',
-      path: '?domain_id=56ca9bd8cffd0ecd4e1f8f41',
-      methods: [
-        Methods.READ_ONE
-      ]
-    } 
-  ]  
 };
 
 // Creating new instance of BaseResource which is going to represent the API

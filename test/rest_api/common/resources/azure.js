@@ -32,7 +32,7 @@ var resourceName = 'resourceName';
 var resourceConfig = {
   idKey: null,
   name: 'azure',
-  path: '/',
+  path: '',
   methods: [],
   nestedResources: [
     {

@@ -152,14 +152,13 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should return data when getting list purge requests.',
+        xit('should return data when getting list purge requests.',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.purge
-                  .domain_id()
-                  .getOne()
+                  .getOne(domainConfig.id)
                   .expect(200)
                   .then(function (res) {
                     purge.should.not.be.empty();
