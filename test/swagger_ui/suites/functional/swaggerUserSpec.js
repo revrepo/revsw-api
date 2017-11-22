@@ -58,19 +58,22 @@ describe('Functional', function() {
       });
 
     it('should successfully authenticate using a valid user', function(done) {
-      swagger.header.setAuthVia('Username/Password');
-      // swagger.header.clickAuthBtn();
-      swagger.header.setUsername(user.email);
-      swagger.header.setPassword(user.password);
-      swagger.header.clickAuthBtn();
-      swagger.waitForText(swagger
-          .locators
-          .authMsgs
-          .success)
+      swagger.scrollToElement(swagger.header.getUsernameInput())
         .then(function() {
-          return swagger.getSuccessAuthMSG().getText()
-            .then(function(text) {
-              return expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
+          swagger.header.setAuthVia('Username/Password');
+          // swagger.header.clickAuthBtn();
+          swagger.header.setUsername(user.email);
+          swagger.header.setPassword(user.password);
+          swagger.header.clickAuthBtn();
+          return swagger.waitForText(swagger
+              .locators
+              .authMsgs
+              .success)
+            .then(function() {
+              return swagger.getSuccessAuthMSG().getText()
+                .then(function(text) {
+                  return expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
+                });
             });
         })
         .then(function() {
@@ -83,7 +86,7 @@ describe('Functional', function() {
       ' button is clicked after authentication',
       function(done) {
         swagger.header.setAuthVia('Username/Password');
-        swagger.header.clickAuthBtn();
+        // swagger.header.clickAuthBtn();
         swagger.header.setUsername(user.email);
         swagger.header.setPassword(user.password);
         swagger.header.clickAuthBtn();
@@ -117,7 +120,7 @@ describe('Functional', function() {
 
     it('should successfully logout', function(done) {
       swagger.header.setAuthVia('Username/Password');
-      swagger.header.clickAuthBtn();
+      // swagger.header.clickAuthBtn();
       swagger.header.setUsername(user.email);
       swagger.header.setPassword(user.password);
       swagger.header.clickAuthBtn();
