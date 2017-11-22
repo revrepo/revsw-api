@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,132 +20,171 @@ var config = require('config');
 var swagger = require('../../page_objects/swagger');
 var constants = require('../../page_objects/constants');
 
-describe('Functional', function () {
-    describe('Swagger UI using API key', function () {
+describe('Functional', function() {
+  describe('Swagger UI using API key', function() {
 
-        var apiKey = config.get('swagger.validApiKey');
-        var invalidApiKey = config.get('swagger.invalidApiKey');
+    var apiKey = config.get('swagger.validApiKey');
+    var invalidApiKey = config.get('swagger.invalidApiKey');
 
-        beforeEach(function () {
-            swagger.load();
-            // disable animations
-            browser.executeScript('jQuery.fx.off=true;');
-            browser.ignoreSynchronization = true;
-        });
-
-        it('should return 401 status code if `Try it out!`' +
-            ' button is clicked without authentication', function (done) {
-                swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
-                    endpoint.clickTitle();
-                    endpoint.clickSubmit();
-                    swagger.waitForElement(swagger
-                        .locators
-                        .api
-                        .resource
-                        .endPoints
-                        .endPoint
-                        .response
-                        .responseCode
-                        .css, function () {
-                            expect(endpoint.getResponseCode()).toBe('401');
-                            done();
-                        });
-                });
-            });
-
-        it('should successfully authenticate using a valid API key', function (done) {
-            swagger.header.setAPIKey(apiKey).then(function () {
-                swagger.header.clickAuthBtn();
-                swagger.waitForText(swagger
-                    .locators
-                    .authMsgs
-                    .success, function () {
-                        swagger.getSuccessAuthMSG().getText().then(function (text) {
-                            expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
-                        });
-                        done();
-                    });
-
-            });
-        });
-
-        it('should return 200 status code if `Try it out!`' +
-            ' button is clicked after authentication', function (done) {
-                swagger.header.setAPIKey(apiKey).then(function () {
-                    swagger.header.clickAuthBtn();                    
-                    swagger.waitForText(swagger
-                        .locators
-                        .authMsgs
-                        .success, function () {
-                            swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
-                                endpoint.clickTitle();
-                                endpoint.clickSubmit();
-                                swagger.waitForElement(swagger
-                                    .locators
-                                    .api
-                                    .resource
-                                    .endPoints
-                                    .endPoint
-                                    .response
-                                    .responseCode
-                                    .css, function () {
-                                        expect(endpoint.getResponseCode()).toBe('200');
-                                        done();
-                                    });
-                            });
-                        });
-                });
-            });
-
-        it('should successfully logout', function (done) {
-            swagger.header.setAPIKey(apiKey).then(function () {
-                swagger.header.clickAuthBtn();
-                swagger.waitForText(swagger
-                    .locators
-                    .authMsgs
-                    .success, function () {
-                        swagger.header.clickLogoutBtn();
-                        expect(swagger.header.getLogoutBtn().isEnabled()).toBeFalsy();
-                        done();
-                    });
-            });
-        });
-
-        it('should return 401 status code if `Try it out!`' +
-            ' button is clicked after logout', function (done) {
-                swagger.api.endpoints.getEndpoint(0).then(function (endpoint) {
-                    endpoint.clickTitle();
-                    endpoint.clickSubmit();
-                    swagger.waitForElement(swagger
-                        .locators
-                        .api
-                        .resource
-                        .endPoints
-                        .endPoint
-                        .response
-                        .responseCode
-                        .css, function () {
-                            expect(endpoint.getResponseCode()).toBe('401');
-                            done();
-                        });
-                });
-            });
-
-        it('should fail to authenticate if invalid API key is used', function (done) {
-            swagger.header.setAPIKey(invalidApiKey).then(function () {
-                swagger.header.clickAuthBtn();
-                swagger.waitForText(swagger
-                    .locators
-                    .authMsgs
-                    .fail, function () {
-                        swagger.getFailAuthMSG().getText().then(function (text) {
-                            expect(text).toBe(constants.FAIL_AUTH_MSG);
-                        });
-                        done();
-                    });
-
-            });
-        });
-
+    beforeEach(function() {
+      swagger.load();
+      // disable animations
+      browser.executeScript('jQuery.fx.off=true;');
+      browser.ignoreSynchronization = true;
     });
+
+    it('should return 401 status code if `Try it out!`' +
+      ' button is clicked without authentication',
+      function(done) {
+        swagger.api.endpoints.getEndpoint(0)
+          .then(function(endpoint) {
+            return endpoint.clickTitle()
+              .then(function() {
+                return endpoint.clickSubmit()
+                  .then(function() {
+                    return swagger.waitForElement(swagger
+                        .locators
+                        .api
+                        .resource
+                        .endPoints
+                        .endPoint
+                        .response
+                        .responseCode
+                        .css)
+                      .then(function(data) {
+                        expect(endpoint.getResponseCode()).toBe('401');
+                        return;
+                      });
+                  });
+              });
+          })
+          .then(function() {
+            done();
+          });
+      });
+
+    it('should successfully authenticate using a valid API key', function(done) {
+      swagger.header.setAPIKey(apiKey)
+        .then(function() {
+          swagger.header.clickAuthBtn();
+          return swagger.waitForText(swagger
+              .locators
+              .authMsgs
+              .success)
+            .then(function() {
+              return swagger.getSuccessAuthMSG().getText()
+                .then(function(text) {
+                  return expect(text).toBe(constants.SUCCESSFUL_AUTH_MSG);
+                });
+            });
+
+        })
+        .then(function() {
+          done();
+        });
+    });
+
+    it('should return 200 status code if `Try it out!`' +
+      ' button is clicked after authentication',
+      function(done) {
+        swagger.header.setAPIKey(apiKey)
+          .then(function() {
+            swagger.header.clickAuthBtn();
+            return swagger.waitForText(swagger
+                .locators
+                .authMsgs
+                .success)
+              .then(function() {
+                return swagger.api.endpoints.getEndpoint(0)
+                  .then(function(endpoint) {
+                    endpoint.clickTitle();
+                    endpoint.clickSubmit();
+                    return swagger.waitForElement(swagger
+                        .locators
+                        .api
+                        .resource
+                        .endPoints
+                        .endPoint
+                        .response
+                        .responseCode
+                        .css)
+                      .then(function() {
+                        return expect(endpoint.getResponseCode()).toBe('200');
+                      });
+                  });
+              });
+          })
+          .then(function() {
+            done();
+          });
+
+      });
+
+    it('should successfully logout', function(done) {
+
+      swagger.header.setAPIKey(apiKey)
+        .then(function() {
+          swagger.header.clickAuthBtn();
+          return swagger.waitForText(swagger
+              .locators
+              .authMsgs
+              .success)
+            .then(function() {
+              expect(swagger.header.getLogoutBtn().isEnabled()).toBeTruthy();
+              swagger.header.clickLogoutBtn();
+              return expect(swagger.header.getLogoutBtn().isEnabled()).toBeFalsy();
+            });
+        })
+        .then(function() {
+          done();
+        });
+    });
+
+    it('should return 401 status code if `Try it out!`' +
+      ' button is clicked after logout',
+      function(done) {
+        swagger.api.endpoints.getEndpoint(0)
+          .then(function(endpoint) {
+            endpoint.clickTitle();
+            endpoint.clickSubmit();
+            swagger.waitForElement(swagger
+                .locators
+                .api
+                .resource
+                .endPoints
+                .endPoint
+                .response
+                .responseCode
+                .css)
+              .then(function() {
+                return expect(endpoint.getResponseCode()).toBe('401');
+              });
+          })
+          .then(function() {
+            done();
+          });
+      });
+
+    it('should fail to authenticate if invalid API key is used', function(done) {
+      swagger.header.setAPIKey(invalidApiKey)
+        .then(function() {
+          swagger.header.clickAuthBtn();
+          swagger.waitForText(swagger
+              .locators
+              .authMsgs
+              .fail)
+            .then(function() {
+              return swagger.getFailAuthMSG().getText()
+                .then(function(text) {
+                  return expect(text).toBe(constants.FAIL_AUTH_MSG);
+                });
+            })
+            .then(function() {
+              done();
+            });
+
+        });
+    });
+
+  });
 });

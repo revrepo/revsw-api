@@ -103,7 +103,8 @@ var Swagger = {
         .then(function(val) {
           return val !== '';
         }));
-    }, timeout, 'Not found selector ' + locator.css + ' text ' + locator.linkText + ' and id' + locator.id);
+    }, timeout, 'Not found selector ' + locator.css + ' text ' + locator.linkText +
+       ' and id' + locator.id);
   },
 
   scrollToElement: function(element_) {
