@@ -50,7 +50,6 @@ describe('Functional', function() {
                 .css)
               .then(function() {
                 return expect(endpoint.getResponseCode()).toBe('401');
-                done();
               });
           })
           .then(function() {

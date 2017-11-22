@@ -85,11 +85,13 @@ var Locators = {
     },
     authMsgs: {
         success: {
-            css: '#message',
+            id: 'message',
+            css: 'div[id="message"]',
             linkText: 'Authenticated OK' // TODO: use constants.js
         },
         fail: {
-            css: '#message',
+            id: 'message',
+            css: 'div[id="message"]',
             linkText: 'Authentication Failed!' // TODO: use constants.js
         }
     }
