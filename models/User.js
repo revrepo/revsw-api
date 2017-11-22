@@ -486,6 +486,47 @@ User.prototype = {
         }
         cb(err, { total: total} );
       });
+  },
+  /**
+   * @name cleanOneManagedDomainNameForAllUsers
+   * @description method clean one domain name for all users
+   */
+  cleanOneManagedDomainNameForAllUsers: function(options, cb) {
+    var domainName = options.domain_name;
+    var context = this;
+    var ops = [];
+    if(!domainName) {
+      return cb(new Error('Property domain_name not set'));
+    }
+    if(_.isArray(domainName)) {
+      return cb(new Error('Property domain_name must be String'));
+    }
+    var conditionsFind = { '$regex': domainName};
+    this.model.find({ domain: conditionsFind }, function(err, docs){
+      if(err) {
+        return cb(err);
+      }
+      var total = docs.length;
+      docs.forEach(function(doc) {
+        var domainList = _.filter(doc.domain.split(','), function(item){
+          return item !== domainName;
+        });
+        ops.push({
+          'updateOne': {
+            'filter': { '_id': doc._id },
+            'update': { '$set': { 'domain': domainList.join(',') } }
+          }
+        });
+        if(ops.length === 500) {
+          context.model.collection.bulkWrite(ops);
+          ops = [];
+        }
+      });
+      if(ops.length > 0) {
+        context.model.collection.bulkWrite(ops);
+      }
+      cb(err, { total: total });
+    });
   }
 };
 

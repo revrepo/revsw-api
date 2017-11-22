@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -270,6 +270,47 @@ APIKey.prototype = {
     { multi: true },
     function(err, numAffected){
       cb(err, numAffected);
+    });
+  },
+  /**
+  * @name cleanOneManagedDomainIdForAllAPIKeys
+  * @description method clean one domain id for all users
+  */
+  cleanOneManagedDomainIdForAllAPIKeys: function(options, cb) {
+    var domainId = options.domain_id;
+    var context = this;
+    var ops = [];
+    if(!domainId) {
+      return cb(new Error('Property domain_id not set'));
+    }
+    if(_.isArray(domainId)) {
+      return cb(new Error('Property domain_id must be String'));
+    }
+    var conditionsFind = { '$regex': domainId };
+    this.model.find({ domains: conditionsFind }, function(err, docs) {
+      if(err) {
+        return cb(err);
+      }
+      var total = docs.length;
+      docs.forEach(function(doc) {
+        var domainList = _.filter(doc.domains, function(item) {
+          return (item !== domainId);
+        });
+        ops.push({
+          'updateOne': {
+            'filter': { '_id': doc._id },
+            'update': { '$set': { 'domains': domainList } }
+          }
+        });
+        if(ops.length === 500) {
+          context.model.collection.bulkWrite(ops);
+          ops = [];
+        }
+      });
+      if(ops.length > 0) {
+        context.model.collection.bulkWrite(ops);
+      }
+      cb(err, { total: total });
     });
   }
 };
