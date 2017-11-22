@@ -54,8 +54,8 @@ describe('Smoke check', function () {
 
   //  ---------------------------------
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -73,8 +73,8 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.apps.deleteOne(app_id);
         done();
@@ -89,8 +89,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .app()
@@ -115,8 +115,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .account()
@@ -142,8 +142,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .dirs()
@@ -168,8 +168,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .flow()
@@ -195,8 +195,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .agg_flow()
@@ -222,8 +222,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .top_requests()
@@ -249,8 +249,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .top_users()
@@ -276,8 +276,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .top_gbt()
@@ -303,8 +303,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .distributions()
@@ -330,8 +330,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .top_objects()
@@ -357,8 +357,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .top_objects_slowest()
@@ -384,8 +384,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .top_objects_5xx()
@@ -411,8 +411,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .ab_fbt()
@@ -438,8 +438,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .ab_fbt_distribution()
@@ -465,8 +465,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .ab_errors()
@@ -492,8 +492,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (queryData) {
       return function (done) {
         updateQueryData( queryData );
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats_sdk
               .ab_speed()

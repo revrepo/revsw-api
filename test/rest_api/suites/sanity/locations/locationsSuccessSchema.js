@@ -48,8 +48,8 @@ describe('Sanity check', function () {
       it('should return data applying accounts schema when getting ' +
         '`first-mile` data.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.locations
                 .firstMile()
@@ -78,8 +78,8 @@ describe('Sanity check', function () {
       it('should return data applying accounts schema when getting ' +
         '`last-mile` data.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.locations
                 .lastMile()

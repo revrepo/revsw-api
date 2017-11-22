@@ -39,8 +39,8 @@ describe('Clean up', function () {
 
         it('should clean Domains created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 API.resources.domainConfigs
                   .getAll()

@@ -40,8 +40,8 @@ describe('Functional check.', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(done)
       .catch(done);
   });

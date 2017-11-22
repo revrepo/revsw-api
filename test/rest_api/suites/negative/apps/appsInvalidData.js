@@ -47,8 +47,8 @@ describe('Negative check', function () {
           var invalidId = '1234567890';
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -78,8 +78,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting app using ' +
             'invalid id.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .getOne(invalidId)
@@ -97,8 +97,8 @@ describe('Negative check', function () {
             'invalid id.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -118,8 +118,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting config ' +
             'status for app using invalid id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .configStatus(invalidId)
@@ -137,8 +137,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting versions ' +
             'for app using invalid id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .versions(invalidId)

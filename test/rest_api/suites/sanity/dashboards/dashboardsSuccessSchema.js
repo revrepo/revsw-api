@@ -43,8 +43,8 @@ describe('Sanity check', function () {
         describe('Success Response Data Schema', function () {
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.dashboards.createOne();
               })
@@ -70,8 +70,8 @@ describe('Sanity check', function () {
           it('should return data applying expected schema when getting all ' +
             'dashboards.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.dashboards
                     .getAll()
@@ -88,8 +88,8 @@ describe('Sanity check', function () {
           it('should return data applying expected schema when getting specific ' +
             'dashboard.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.dashboards
                     .getOne(testDashboard.id)
@@ -106,8 +106,8 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'creating specific dashboard.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.dashboards
                     .createOne(API.providers.data.dashboards.generateOne())
@@ -124,8 +124,8 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'updating specific dashboard.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.helpers.dashboards.createOne();
                 })
@@ -147,8 +147,8 @@ describe('Sanity check', function () {
           it('should return data applying `success response` schema when ' +
             'deleting an dashboard.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.helpers.dashboards.createOne();
                 })

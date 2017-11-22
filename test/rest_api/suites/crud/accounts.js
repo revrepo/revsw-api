@@ -43,8 +43,8 @@ describe('CRUD check', function () {
       describe('Accounts resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.accounts
                 .createOne(accountSample)
@@ -71,8 +71,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all accounts.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.accounts
                   .getAll()
@@ -90,8 +90,8 @@ describe('CRUD check', function () {
 
         it('should allow to get specific account.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.accounts
                   .getOne(accountSample.id)
@@ -113,8 +113,8 @@ describe('CRUD check', function () {
         it('should allow to create an account.',
           function (done) {
             var newAccount = AccountsDP.generateOne('NEW');
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.accounts
                   .createOne(newAccount)
@@ -137,8 +137,8 @@ describe('CRUD check', function () {
           function (done) {
             var newAccount = AccountsDP.generateOne('NEW');
             var updatedAccount = AccountsDP.generateOne('UPDATED');
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.accounts
                   .createOne(newAccount)
@@ -161,8 +161,8 @@ describe('CRUD check', function () {
 
         it('should allow to delete an account.', function (done) {
           var newProject = AccountsDP.generateOne('NEW');
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.accounts
                 .createOne(newProject)

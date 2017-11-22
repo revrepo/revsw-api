@@ -45,8 +45,8 @@ describe('Sanity check', function () {
     describe('Error Response Data Schema', function () {
 
       beforeEach(function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.helpers.users.create({
               firstName: 'Tom',

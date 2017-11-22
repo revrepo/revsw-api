@@ -50,8 +50,8 @@ describe('Negative check', function () {
 
       var getSpecCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.activity
                 .getAll(queryData)
@@ -87,8 +87,8 @@ describe('Negative check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.activity
                   .summary()

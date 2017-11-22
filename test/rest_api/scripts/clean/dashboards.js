@@ -41,8 +41,8 @@ describe('Clean up', function () {
 
         it('should clean Dashboards created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 API.resources.dashboards
                   .getAll()

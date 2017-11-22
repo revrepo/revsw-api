@@ -57,8 +57,8 @@ describe('API Keys resource: pre-requisites', function () {
      */
     var getSpecFn = function (user, field, model) {
       return function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.resources.apiKeys.createOne(model);
           })

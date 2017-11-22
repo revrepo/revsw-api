@@ -65,8 +65,8 @@ describe('DNS Zones resource: pre-requisites', function () {
        */
       var getSpecFn = function (user, field, model) {
         return function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.resources.dnsZones.createOne(model);
             })
@@ -140,8 +140,8 @@ describe('DNS Zones resource: pre-requisites', function () {
       var getSpecFn = function (user, field, model) {
         var key = Utils.getLastKeyFromPath(field);
         return function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               var dnsZone = dnsZones[user.role];
               if (field !== 'type') {
@@ -181,8 +181,8 @@ describe('DNS Zones resource: pre-requisites', function () {
                     describe('Add with `' + type + '` data', function () {
 
                       before(function (done) {
-                        return API.helpers
-                          .authenticateUser(user)
+                        return API.identity
+                          .authenticate(user)
                           .then(function () {
                             return API.helpers.accounts.createOne();
                           })
@@ -198,8 +198,8 @@ describe('DNS Zones resource: pre-requisites', function () {
                       });
 
                       after(function (done) {
-                        return API.helpers
-                          .authenticateUser(user)
+                        return API.identity
+                          .authenticate(user)
                           .then(function () {
                             API.helpers.dnsZones
                               .cleanup(dnsZones[user.role].zone)

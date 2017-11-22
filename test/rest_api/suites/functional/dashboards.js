@@ -43,15 +43,15 @@ describe('Functional check', function () {
       describe('Dashboards resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.dashboards.createOne();
             })
             .then(function (dashboard) {
               testDashboard = dashboard;
-              return API.helpers
-                .authenticateUser(secondReseller)
+              return API.identity
+                .authenticate(secondReseller)
                 .then(function () {
                   return API.helpers.dashboards.createOne();
                 });
@@ -77,8 +77,8 @@ describe('Functional check', function () {
 
         it('should not allow to get dashboards from other user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .getAll()
@@ -96,8 +96,8 @@ describe('Functional check', function () {
 
         it('should not allow to get specific dashboard from other user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .getOne(secondTestDashboard.id)
@@ -114,8 +114,8 @@ describe('Functional check', function () {
           function (done) {
             var updatedDashboard = API.providers.data.dashboards
               .generateOneForUpdate(secondTestDashboard);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .update(secondTestDashboard.id, updatedDashboard)
@@ -131,8 +131,8 @@ describe('Functional check', function () {
 
         it('should not allow to delete an dashboard from other user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .deleteOne(secondTestDashboard.id)

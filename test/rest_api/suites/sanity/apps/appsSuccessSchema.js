@@ -45,8 +45,8 @@ describe('Sanity check', function () {
         describe('Success Response Data Schema', function () {
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -75,8 +75,8 @@ describe('Sanity check', function () {
 
           it('should return data applying apps schema when getting all apps.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .getAll()
@@ -99,8 +99,8 @@ describe('Sanity check', function () {
           it('should return data applying apps schema when getting specific ' +
             'app.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .getOne(testApp.id)
@@ -117,8 +117,8 @@ describe('Sanity check', function () {
             'creating specific app.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .createOne(newApp)
@@ -144,8 +144,8 @@ describe('Sanity check', function () {
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
               var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -165,8 +165,8 @@ describe('Sanity check', function () {
             'deleting an app.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -184,8 +184,8 @@ describe('Sanity check', function () {
 
           it('should allow to get all SDK releases',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .sdkReleases()
@@ -202,8 +202,8 @@ describe('Sanity check', function () {
 
           it('should allow to get config status for specific app',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .configStatus(testApp.id)
@@ -219,8 +219,8 @@ describe('Sanity check', function () {
 
           it('should allow to get all versions for specific app',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .versions(testApp.id)

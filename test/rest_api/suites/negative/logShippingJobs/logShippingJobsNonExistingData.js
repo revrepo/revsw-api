@@ -34,8 +34,8 @@ describe('Negative check', function () {
   var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -51,8 +51,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
+    API.identity
+      .authenticate(revAdmin)
       .then(function () {
         API.resources.logShippingJobs.deleteOne(logShippingJob.id);
         done();
@@ -76,8 +76,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingAccountId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Account ID not found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var logShippingJob =
                 LogShippingJobsDP.generateOne(nonExistingAccountId);
@@ -98,8 +98,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingJobId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Log shipping job ID not found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.logShippingJobs
                 .getOne(nonExistingJobId)
@@ -118,8 +118,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingJobId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Log shipping job ID not found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.logShippingJobs
                 .status(nonExistingJobId)

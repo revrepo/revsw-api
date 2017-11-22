@@ -46,8 +46,8 @@ describe('Boundary check', function () {
           var longObjectId = 'abcdef01234567890123456789';
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -77,8 +77,8 @@ describe('Boundary check', function () {
           it('should return `bad request` response when getting specific ' +
             'app with `long` app id.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .getOne(longObjectId)
@@ -96,8 +96,8 @@ describe('Boundary check', function () {
             '`long` app id.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -117,8 +117,8 @@ describe('Boundary check', function () {
           it('should return `bad request` response when getting config ' +
             'status for specific app with `long` app id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .configStatus(longObjectId)
@@ -136,8 +136,8 @@ describe('Boundary check', function () {
           it('should return `bad request` response when getting all versions ' +
             'for specific app with `long` app id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .versions(longObjectId)

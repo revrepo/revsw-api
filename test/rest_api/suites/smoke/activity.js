@@ -34,8 +34,8 @@ describe('Smoke check', function () {
   var domainConfig;
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         return API.resources.users
           .myself()
@@ -67,8 +67,8 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -87,8 +87,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (index) {
       return function (done) {
         var queryData = ActivityDDHelper.getQueryParams()[index];
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.activity
               .getAll(queryData)
@@ -120,8 +120,8 @@ describe('Smoke check', function () {
     var getSpecCallback = function (index) {
       return function (done) {
         var queryData = ActivityDDHelper.getQueryParams()[index];
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.activity
               .summary()

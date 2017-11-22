@@ -39,8 +39,8 @@ describe('Boundary check', function () {
       var fullTestApp = AppsDP.generateOneForUpdate(0);
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -65,8 +65,8 @@ describe('Boundary check', function () {
           var updatedApp = AppsDP.clone(fullTestApp);
           AppsDDHelper
             .setValueByPath(updatedApp, ddCase.propertyPath, ddCase.testValue);
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.apps
                 .update(testApp.id, updatedApp)

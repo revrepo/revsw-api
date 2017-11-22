@@ -46,8 +46,8 @@ describe('Negative check', function () {
       var clonedDc = DomainConfigsDP.cloneForUpdate(fullDomainConfig);
       DomainConfigsDP.DataDrivenHelper.removeValueByPath(clonedDc,
         ddCase.propertyPath);
-      API.helpers
-        .authenticateUser(reseller)
+      API.identity
+        .authenticate(reseller)
         .then(function () {
           API.resources.domainConfigs
             .update(clonedDc.id, clonedDc)
@@ -71,8 +71,8 @@ describe('Negative check', function () {
   };
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -90,8 +90,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();

@@ -54,8 +54,8 @@ describe('UsageReport Functional check:', function () {
             account_id: account_id
           };
         before(function(done){
-              API.helpers
-            .authenticateUser(user)
+              API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.usage_report
                 .stats()
@@ -87,8 +87,8 @@ describe('UsageReport Functional check:', function () {
           account_id: account_id
         };
         before(function(done){
-              API.helpers
-            .authenticateUser(user)
+              API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.usage_report
                 .stats()
@@ -112,8 +112,8 @@ describe('UsageReport Functional check:', function () {
   //  ---------------------------------
   it( 'UsageReport downloaded successfully', function ( done ) {
 
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         API.resources.usage_report
           .getAll({

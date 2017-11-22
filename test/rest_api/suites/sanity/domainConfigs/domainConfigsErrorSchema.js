@@ -36,8 +36,8 @@ describe('Sanity check', function () {
   var errorResponseSchema = CommonResponseSP.getError();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -53,8 +53,8 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(commonDomainConfig.id);
         done();

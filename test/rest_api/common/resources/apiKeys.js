@@ -58,4 +58,5 @@ var resourceConfig = {
 
 // Creating new instance of BaseResource which is going to represent the API
 // `API Keys resource`
-module.exports = new BaseResource(resourceConfig);
+var apiKeysRes = new BaseResource(resourceConfig);
+module.exports = apiKeysRes;

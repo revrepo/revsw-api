@@ -36,8 +36,8 @@ describe('Smoke check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         return API.helpers.apiKeys.createOne();
       })
@@ -57,8 +57,8 @@ describe('Smoke check', function () {
 
     it('should allow to get all API Keys.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.resources.apiKeys
               .getAll()
@@ -75,8 +75,8 @@ describe('Smoke check', function () {
 
     it('should allow to get specific API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.resources.apiKeys
               .getOne(apiKey.id)
@@ -92,8 +92,8 @@ describe('Smoke check', function () {
     it('should allow to create specific API Key.',
       function (done) {
         var newApiKey = APIKeyDataProvider.generateOne(accountId);
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.resources.apiKeys
               .createOne(newApiKey)
@@ -109,8 +109,8 @@ describe('Smoke check', function () {
 
     it('should allow to update specific API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.apiKeys.createOne();
           })
@@ -132,8 +132,8 @@ describe('Smoke check', function () {
 
     it('should allow to delete an API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.apiKeys.createOne();
           })

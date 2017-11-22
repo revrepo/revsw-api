@@ -43,6 +43,10 @@ var Constants = {
       LONG: 'long',
       SHORT: 'short',
       BOGUS: 'bogus'
+    },
+    AUTH_MODE: {
+      API_KEY: 'API_KEY',
+      CREDENTIALS: 'CREDENTIALS'
     }
   }
 };

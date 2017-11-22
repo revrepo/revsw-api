@@ -40,8 +40,8 @@ describe('Clean up', function () {
 
         it('should clean-up Users created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 API.resources.users
                   .getAll()

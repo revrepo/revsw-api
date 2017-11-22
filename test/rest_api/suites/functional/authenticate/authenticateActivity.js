@@ -29,8 +29,8 @@ describe('Functional check', function () {
   var user = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         API.resources.users
           .myself()

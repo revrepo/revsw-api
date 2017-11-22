@@ -44,8 +44,8 @@ describe('Smoke check', function () {
       describe('Billing Plans resource', function () {
 
         before(function (done) {
-/*          API.helpers
-            .authenticateUser(user)
+/*          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.billingPlans.createOne();
             })
@@ -72,8 +72,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting all billing plans.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.billingPlans
                   .getAll()
@@ -86,8 +86,8 @@ describe('Smoke check', function () {
         // TODO: please change the check for look for four existing billing plans
         xit('should return a response when getting specific billing plan.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.billingPlans
                   .getOne(testBillingPlan.id)
@@ -101,8 +101,8 @@ describe('Smoke check', function () {
         xit('should return a response when creating an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.billingPlans
                   .createOne(newBillingPlan)
@@ -124,8 +124,8 @@ describe('Smoke check', function () {
             var newBillingPlan = BillingPlansDP.generateOne();
             var updatedBillingPlan = BillingPlansDP
               .generateOneForUpdate(newBillingPlan);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.billingPlans
                   .createOne(newBillingPlan);
@@ -143,8 +143,8 @@ describe('Smoke check', function () {
         xit('should return a response when deleting an billing plan.',
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.billingPlans
                   .createOne(newBillingPlan);

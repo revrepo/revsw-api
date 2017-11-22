@@ -45,8 +45,8 @@ describe('Negative check', function () {
     return function (done) {
       var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
       Utils.removeValueByPath(purgeData, ddCase.propertyPath);
-      API.helpers
-        .authenticateUser(reseller)
+      API.identity
+        .authenticate(reseller)
         .then(function () {
           API.resources.purge
             .createOne(purgeData)
@@ -70,8 +70,8 @@ describe('Negative check', function () {
   };
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -87,8 +87,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -100,8 +100,8 @@ describe('Negative check', function () {
 
     it('should return `Bad Request` response when not providing a query parameters',
       function(done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function() {
             API.resources.purge
               .getAll({})

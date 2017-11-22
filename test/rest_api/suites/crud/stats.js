@@ -44,8 +44,8 @@ describe('CRUD check.', function () {
     describe('With user: ' + user.role, function () {
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -61,8 +61,8 @@ describe('CRUD check.', function () {
       });
 
       after(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs.deleteOne(domainConfig.id);
             done();
@@ -79,8 +79,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .getOne(domainConfig.id, queryData)
@@ -126,8 +126,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .gbt()
@@ -165,8 +165,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .lastMileRtt()
@@ -204,8 +204,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .top()
@@ -243,8 +243,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .topObjects()

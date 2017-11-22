@@ -66,8 +66,8 @@ describe('Functional check', function () {
           .then(function () {
             testUser.password = newPassword;
             API.session.reset();
-            API.helpers
-              .authenticateUser(testUser)
+            API.identity
+              .authenticate(testUser)
               .then(function () {
                 testUser.email.should.equal(API.session.getCurrentUser().email);
                 done();

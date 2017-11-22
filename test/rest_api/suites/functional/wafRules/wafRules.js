@@ -33,7 +33,7 @@ describe('Functional check', function () {
       var firstWAFRule, seccondWAFRule;
       before(function (done) {
         // Prepare data for
-        API.helpers.authenticateUser(userRevAdmin)
+        API.identity.authenticate(userRevAdmin)
           .then(function () {
             return API.helpers.accounts.createOne()
               .then(function (dataAccount) {
@@ -81,7 +81,7 @@ describe('Functional check', function () {
       });
 
       it('should have access to WAF Rule for user with same account', function (done) {
-        API.helpers.authenticateUser(firstUser)
+        API.identity.authenticate(firstUser)
           .then(function () {
             return API.resources.wafRules
               .getOne(firstWAFRule.id)
@@ -99,7 +99,7 @@ describe('Functional check', function () {
       });
 
       it('should have no access to WAF Rules for users from different accounts', function (done) {
-        API.helpers.authenticateUser(firstUser)
+        API.identity.authenticate(firstUser)
           .then(function (data) {
             return API.resources.wafRules
               .getOne(seccondWAFRule.id)
@@ -110,7 +110,7 @@ describe('Functional check', function () {
               });
           })
           .then(function () {
-            return API.helpers.authenticateUser(seccondUser)
+            return API.identity.authenticate(seccondUser)
               .then(function () {
                 return API.resources.wafRules
                   .getOne(firstWAFRule.id)

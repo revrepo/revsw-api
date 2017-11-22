@@ -35,8 +35,8 @@ describe('Functional check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.users
           .myself()
@@ -65,8 +65,8 @@ describe('Functional check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -88,8 +88,8 @@ describe('Functional check', function () {
       function (done) {
         var purgeData;
         var startTime = Date.now();
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             purgeData = PurgeDP.generateOne(domainConfig.domain_name);
             return API.resources.purge

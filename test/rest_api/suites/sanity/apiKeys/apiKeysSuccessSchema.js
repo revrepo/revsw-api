@@ -46,8 +46,8 @@ describe('Sanity check', function () {
         describe('Success Response Data Schema', function () {
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -63,8 +63,8 @@ describe('Sanity check', function () {
           });
 
           after(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apiKeys.deleteOne(testAPIKey.id).end(done);
               })
@@ -81,8 +81,8 @@ describe('Sanity check', function () {
 
           it('should return data applying apiKeys schema when getting all apiKeys.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apiKeys
                     .getAll()
@@ -105,8 +105,8 @@ describe('Sanity check', function () {
           it('should return data applying apiKey schema when getting specific ' +
             'apiKey',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apiKeys
                     .getOne(testAPIKey.id)
@@ -123,8 +123,8 @@ describe('Sanity check', function () {
             'creating specific apiKey.',
             function (done) {
               var newAPIKey = APIKeyDP.generateOne(testAccount.id);
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apiKeys
                     .createOne(newAPIKey)
@@ -151,8 +151,8 @@ describe('Sanity check', function () {
               var newAPIKey = APIKeyDP.generateOne(testAccount.id);
               var updatedApp = APIKeyDP
                 .generateCompleteOne(testAccount.id, 'UPDATED');
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apiKeys.createOne(newAPIKey);
                 })
@@ -172,8 +172,8 @@ describe('Sanity check', function () {
             'deleting an apiKey.',
             function (done) {
               var newAPIKey = APIKeyDP.generateOne(testAccount.id);
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apiKeys.createOne(newAPIKey);
                 })
@@ -192,12 +192,9 @@ describe('Sanity check', function () {
           it('should return data applying apiKeys schema when getting all apiKeys '+
             'with X-API-KEY',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
-                .then(function(){
-                  return API.helpers.authenticateAPIKey(testAPIKey.id);
-                })
-                .then(function (key) {
+              API.identity
+                .authenticateWithAPIKey(user)
+                .then(function () {
                   return API.resources.apiKeys
                     .getAll()
                     .expect(200);
@@ -218,11 +215,8 @@ describe('Sanity check', function () {
         it('should return data applying apiKey schema when getting specific ' +
             'apiKey with X-API-KEY',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
-                .then(function(){
-                  return API.helpers.authenticateAPIKey(testAPIKey.id);
-                })
+              API.identity
+                .authenticateWithAPIKey(user)
                 .then(function () {
                   return API.resources.apiKeys
                     .getOne(testAPIKey.id)
@@ -240,11 +234,8 @@ describe('Sanity check', function () {
             'with X-API-KEY',
             function (done) {
               var newAPIKey = APIKeyDP.generateOne(testAccount.id);
-              API.helpers
-                .authenticateUser(user)
-                .then(function(){
-                  return API.helpers.authenticateAPIKey(testAPIKey.id);
-                })
+              API.identity
+                .authenticateWithAPIKey(user)
                 .then(function () {
                   return API.resources.apiKeys
                     .createOne(newAPIKey)
@@ -272,11 +263,8 @@ describe('Sanity check', function () {
               var newAPIKey = APIKeyDP.generateOne(testAccount.id);
               var updatedApp = APIKeyDP
                 .generateCompleteOne(testAccount.id, 'UPDATED');
-              API.helpers
-                .authenticateUser(user)
-                .then(function(){
-                  return API.helpers.authenticateAPIKey(testAPIKey.id);
-                })
+              API.identity
+                .authenticateWithAPIKey(user)
                 .then(function () {
                   return API.resources.apiKeys.createOne(newAPIKey);
                 })
@@ -297,11 +285,8 @@ describe('Sanity check', function () {
             'with X-API-KEY',
             function (done) {
               var newAPIKey = APIKeyDP.generateOne(testAccount.id);
-              API.helpers
-                .authenticateUser(user)
-                .then(function(){
-                  return API.helpers.authenticateAPIKey(testAPIKey.id);
-                })
+              API.identity
+                .authenticateWithAPIKey(user)
                 .then(function () {
                   return API.resources.apiKeys.createOne(newAPIKey);
                 })

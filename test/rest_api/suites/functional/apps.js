@@ -47,8 +47,8 @@ describe('Functional check', function () {
       describe('Apps resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.accounts.createOne();
             })
@@ -58,8 +58,8 @@ describe('Functional check', function () {
             })
             .then(function (app) {
               testApp = app;
-              return API.helpers
-                .authenticateUser(secondReseller)
+              return API.identity
+                .authenticate(secondReseller)
                 .then(function () {
                   return API.helpers.accounts.createOne();
                 })
@@ -90,8 +90,8 @@ describe('Functional check', function () {
 
         it('should not allow to get apps from other user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .getAll()
@@ -110,8 +110,8 @@ describe('Functional check', function () {
 
         it('should not allow to get specific app from other user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .getOne(secondTestApp.id)
@@ -129,8 +129,8 @@ describe('Functional check', function () {
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: secondTestAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(secondTestAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -150,8 +150,8 @@ describe('Functional check', function () {
         it('should not allow to delete an app from other user.',
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: secondTestAccount.id});
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -171,8 +171,8 @@ describe('Functional check', function () {
         it('should not allow to get config status for specific app from ' +
           'other user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .configStatus(secondTestApp.id)
@@ -190,8 +190,8 @@ describe('Functional check', function () {
         it('should not allow to get all versions for specific app form ' +
           'other user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .versions(secondTestApp.id)
@@ -211,8 +211,8 @@ describe('Functional check', function () {
             var options = {options: 'verify_only'};
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -237,8 +237,8 @@ describe('Functional check', function () {
             var options = {options: 'publish'};
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -263,8 +263,8 @@ describe('Functional check', function () {
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -318,8 +318,8 @@ describe('Functional check', function () {
 
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -342,8 +342,8 @@ describe('Functional check', function () {
             var options = {options: 'publish'};
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -398,8 +398,8 @@ describe('Functional check', function () {
             var options = {options: 'publish'};
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -418,8 +418,8 @@ describe('Functional check', function () {
 
          it('should allow to create apps with same data for two different account.', function(done) {
           var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               return API.resources.apps.createOne(newApp)
                 .then(function() {
@@ -429,8 +429,8 @@ describe('Functional check', function () {
                 });
             })
             .then(function(resource) {
-              return API.helpers
-                .authenticateUser(secondReseller)
+              return API.identity
+                .authenticate(secondReseller)
                 .then(function() {
                   // Same data for second Account
                   newApp.account_id = secondTestAccount.id;
@@ -474,8 +474,8 @@ describe('Functional check', function () {
                 }
               ]
             };
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })

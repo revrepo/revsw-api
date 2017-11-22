@@ -48,8 +48,8 @@ describe('Boundary check', function () {
       delete clonedDc.id;
       DomainConfigsDP.DataDrivenHelper
         .setValueByPath(clonedDc, ddCase.propertyPath, ddCase.testValue);
-      API.helpers
-        .authenticateUser(reseller)
+      API.identity
+        .authenticate(reseller)
         .then(function () {
           API.resources.domainConfigs
             .update(dcId, clonedDc)
@@ -72,8 +72,8 @@ describe('Boundary check', function () {
   };
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -91,8 +91,8 @@ describe('Boundary check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();

@@ -43,8 +43,8 @@ describe('Functional check', function () {
   describe('2fa resource', function () {
 
     beforeEach(function (done) {
-      API.helpers
-        .authenticateUser(reseller)
+      API.identity
+        .authenticate(reseller)
         .then(function () {
           return API.helpers.users.create({
             firstName: 'Tom',
@@ -65,8 +65,8 @@ describe('Functional check', function () {
     it('should fail to enable 2fa for user before calling init',
       function (done) {
         var oneTimePassword = TwoFADP.generateOneTimePassword('none');
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.twoFA
               .enable()
@@ -84,8 +84,8 @@ describe('Functional check', function () {
 
     it('should fail to enable 2fa for user with wrong oneTimePassword',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.twoFA
               .init()
@@ -111,8 +111,8 @@ describe('Functional check', function () {
 
     it('should fail to disable 2FA for another user',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.twoFA
               .init()
@@ -126,8 +126,8 @@ describe('Functional check', function () {
                   .createOne(oneTimePassword)
                   .expect(200)
                   .then(function () {
-                    API.helpers
-                      .authenticateUser(normalUser)
+                    API.identity
+                      .authenticate(normalUser)
                       .then(function () {
                         API.resources.twoFA
                           .disable()
@@ -151,8 +151,8 @@ describe('Functional check', function () {
 
     it('should fail to disable 2FA for an existing user from another account',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.twoFA
               .init()
@@ -166,8 +166,8 @@ describe('Functional check', function () {
                   .createOne(oneTimePassword)
                   .expect(200)
                   .then(function () {
-                    API.helpers
-                      .authenticateUser(secondReseller)
+                    API.identity
+                      .authenticate(secondReseller)
                       .then(function () {
                         API.resources.twoFA
                           .disable()
@@ -195,8 +195,8 @@ describe('Functional check', function () {
     var userSample;
 
     before(function(done) {
-      API.helpers
-        .authenticateUser(reseller)
+      API.identity
+        .authenticate(reseller)
         .then(function() {
          return  API.helpers.accounts.createOne()
            .then(function(newAccount) {

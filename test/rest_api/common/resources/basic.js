@@ -57,15 +57,18 @@ var getRequest = function () {
 //
 // Receives as param the request instance
 var setUserToRequest = function (request) {
-  var user = Session.getCurrentUser();
-  if (user && user.token) {
-    return request.set('Authorization', 'Bearer ' + user.token);
-  }else{
-    if(user && !!user.key){
-      return request.set('Authorization', 'X-API-KEY ' + user.key);
-    }
+  var authMode = Session.getAuthenticationMode();
+
+  switch(authMode) {
+    case Constants.API.AUTH_MODE.API_KEY:
+      var apiKey = Session.getCurrentAPIKey();
+      return request.set('Authorization', 'X-API-KEY ' + apiKey.key);
+    case Constants.API.AUTH_MODE.CREDENTIALS:
+      var user = Session.getCurrentUser();
+      return request.set('Authorization', 'Bearer ' + user.token);
+    default: // CREDENTIALS
+      return request;
   }
-  return request;
 };
 
 // #### Helper function getPath
@@ -181,7 +184,7 @@ var BasicResource = function (data) {
      *
      * @param {String} id, the uuid of the object
      *
-     * @param {object} query, will be transformed to a query string
+     * @param {object} [query], will be transformed to a query string
      *
      * @returns {object} the supertest-as-promised instance
      */

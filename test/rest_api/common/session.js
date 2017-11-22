@@ -16,16 +16,31 @@
  * from Rev Software, Inc.
  */
 
+var authMode;
+var currentAPIKey;
+var currentUser;
+
 // # Session object
 
 // This object stores in memory information about the current user being used.
 // It also provides additional methods to retrieve, update or reset that
 // information. Re-setting means as if no user was authenticated
-var currentUser;
-
 var Session = {
   reset: function(){
     currentUser = undefined;
+  },
+  setAuthenticationMode: function (mode) {
+    authMode = mode;
+    console.log('AUTH_MODE', mode);
+  },
+  getAuthenticationMode: function () {
+    return authMode;
+  },
+  setCurrentAPIKey: function(apiKey){
+    currentAPIKey = apiKey;
+  },
+  getCurrentAPIKey: function(){
+    return currentAPIKey;
   },
   setCurrentUser: function(user){
     currentUser = user;

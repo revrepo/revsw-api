@@ -33,8 +33,8 @@ describe('Negative check', function () {
   var normalUser = config.get('api.users.user');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         API.resources.accounts
           .createOne(accountSample)
@@ -65,8 +65,8 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when getting all accounts with ' +
         '`user-role` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(normalUser)
+          API.identity
+            .authenticate(normalUser)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -79,8 +79,8 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when getting specific account ' +
         'with `user-role` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(normalUser)
+          API.identity
+            .authenticate(normalUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)
@@ -94,8 +94,8 @@ describe('Negative check', function () {
         'with `user-role` user.',
         function (done) {
           var newAccount = AccountsDP.generateOne('test');
-          API.helpers
-            .authenticateUser(normalUser)
+          API.identity
+            .authenticate(normalUser)
             .then(function () {
               API.resources.accounts
                 .createOne(newAccount)
@@ -109,8 +109,8 @@ describe('Negative check', function () {
         'with `user-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.helpers
-            .authenticateUser(normalUser)
+          API.identity
+            .authenticate(normalUser)
             .then(function () {
               API.resources.accounts
                 .update(accountSample.id, updatedAccount)
@@ -123,8 +123,8 @@ describe('Negative check', function () {
       it('should return `Forbidden` response when deleting an account with ' +
         '`user-role` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(normalUser)
+          API.identity
+            .authenticate(normalUser)
             .then(function () {
               API.resources.accounts
                 .deleteOne(accountSample.id)
@@ -140,8 +140,8 @@ describe('Negative check', function () {
       xit('should return `Forbidden` response when getting all accounts with ' +
         '`admin-role` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(adminUser)
+          API.identity
+            .authenticate(adminUser)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -154,8 +154,8 @@ describe('Negative check', function () {
       xit('should return `Forbidden` response when getting specific account ' +
         'with `admin-role` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(adminUser)
+          API.identity
+            .authenticate(adminUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)
@@ -169,8 +169,8 @@ describe('Negative check', function () {
         'with `admin-role` user.',
         function (done) {
           var newAccount = AccountsDP.generateOne('test');
-          API.helpers
-            .authenticateUser(adminUser)
+          API.identity
+            .authenticate(adminUser)
             .then(function () {
               API.resources.accounts
                 .createOne(newAccount)
@@ -184,8 +184,8 @@ describe('Negative check', function () {
         'with `admin-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.helpers
-            .authenticateUser(adminUser)
+          API.identity
+            .authenticate(adminUser)
             .then(function () {
               API.resources.accounts
                 .update(accountSample.id, updatedAccount)
@@ -198,8 +198,8 @@ describe('Negative check', function () {
       xit('should return `Forbidden` response when deleting an account with ' +
         '`admin-role` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(adminUser)
+          API.identity
+            .authenticate(adminUser)
             .then(function () {
               API.resources.accounts
                 .deleteOne(accountSample.id)
@@ -212,8 +212,8 @@ describe('Negative check', function () {
       it('should return `bad request` response when getting specific account ' +
         'with another `reseller` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(anotherResellerUser)
+          API.identity
+            .authenticate(anotherResellerUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)
@@ -227,8 +227,8 @@ describe('Negative check', function () {
         'with another `reseller` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.helpers
-            .authenticateUser(anotherResellerUser)
+          API.identity
+            .authenticate(anotherResellerUser)
             .then(function () {
               API.resources.accounts
                 .update(accountSample.id, updatedAccount)
@@ -241,8 +241,8 @@ describe('Negative check', function () {
       it('should return `bad request` response when deleting an account with ' +
         'another `reseller` user.',
         function (done) {
-          API.helpers
-            .authenticateUser(anotherResellerUser)
+          API.identity
+            .authenticate(anotherResellerUser)
             .then(function () {
               API.resources.accounts
                 .deleteOne(accountSample.id)

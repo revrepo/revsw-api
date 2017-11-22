@@ -34,8 +34,8 @@ describe('Negative check', function () {
   var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -51,8 +51,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
+    API.identity
+      .authenticate(revAdmin)
       .then(function () {
         API.resources.logShippingJobs.deleteOne(logShippingJob.id);
         done();
@@ -77,8 +77,8 @@ describe('Negative check', function () {
           var emptyJobName = '';
           var expectedMsg = 'child "job_name" fails because ' +
             '["job_name" is not allowed to be empty]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var logShippingJob = LogShippingJobsDP.generateOne(account.id);
               logShippingJob.job_name = emptyJobName;
@@ -100,8 +100,8 @@ describe('Negative check', function () {
           var emptyAccountId = '';
           var expectedMsg = 'child "account_id" fails because ["account_id" ' +
             'is not allowed to be empty]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var logShippingJob = LogShippingJobsDP.generateOne(emptyAccountId);
               API.resources.logShippingJobs

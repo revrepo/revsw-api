@@ -39,8 +39,8 @@ describe('Clean up', function () {
 
         it('should clean-up log-shipping-jobs created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 API.resources.logShippingJobs
                   .getAll()

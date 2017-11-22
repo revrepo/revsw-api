@@ -41,8 +41,8 @@ describe('Clean up', function () {
 
         it('should clean DNS Zones created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 API.helpers.dnsZones
                   .cleanup(namePattern)
@@ -56,8 +56,8 @@ describe('Clean up', function () {
     describe('Native clean NSONE: ', function() {
       var dnsZonesList = [];
       before(function(done){
-        API.helpers
-          .authenticateUser(config.get('api.users.revAdmin'))
+        API.identity
+          .authenticateWithCredentials(config.get('api.users.revAdmin'))
           .then(function(){
             return API.resources.dnsZones
               .getAll()

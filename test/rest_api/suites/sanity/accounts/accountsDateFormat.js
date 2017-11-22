@@ -33,8 +33,8 @@ describe('Sanity check', function () {
   var expectedDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         API.resources.accounts
           .createOne(accountSample)
@@ -65,8 +65,8 @@ describe('Sanity check', function () {
       it('should return `created_at` field in expected `Date format` when ' +
         'getting all accounts.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -86,8 +86,8 @@ describe('Sanity check', function () {
       it('should return `created_at` field in expected `Date format` when ' +
         'getting specific account.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)
@@ -105,8 +105,8 @@ describe('Sanity check', function () {
       it('should return `updated_at` field in expected `Date format` when ' +
         'getting all accounts.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -126,8 +126,8 @@ describe('Sanity check', function () {
       it('should return `updated_at` field in expected `Date format` when ' +
         'getting specific account.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)

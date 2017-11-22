@@ -47,8 +47,8 @@ describe('Negative check', function () {
           var nonExistingId = '123456789abcdef987654321';
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -78,8 +78,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting app using ' +
             'non-existent id.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .getOne(nonExistingId)
@@ -97,8 +97,8 @@ describe('Negative check', function () {
             'non-existent id.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -118,8 +118,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting config ' +
             'status for app using non-existent id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .configStatus(nonExistingId)
@@ -137,8 +137,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting versions ' +
             'for app using non-existent id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .versions(nonExistingId)

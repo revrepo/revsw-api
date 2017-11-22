@@ -41,8 +41,8 @@ describe('CRUD check', function () {
 
         it('should allow to get health-check info.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.healthCheck
                   .getAll()

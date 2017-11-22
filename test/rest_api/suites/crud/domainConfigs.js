@@ -45,8 +45,8 @@ describe('CRUD check', function () {
       describe('Domain Configs resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.accounts.createOne();
             })
@@ -75,8 +75,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all domain configs',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .getAll()
@@ -102,8 +102,8 @@ describe('CRUD check', function () {
 
         it('should allow to get one domain config',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .getOne(firstDc.id)
@@ -122,8 +122,8 @@ describe('CRUD check', function () {
         it('should allow to create new domain config',
           function (done) {
             secondDc = DomainConfigsDP.generateOne(account.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .createOne(secondDc)
@@ -147,8 +147,8 @@ describe('CRUD check', function () {
             delete firstFdc.cname;
             delete firstFdc.published_domain_version;
             delete firstFdc.last_published_domain_version;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .update(firstDc.id, firstFdc)
@@ -166,8 +166,8 @@ describe('CRUD check', function () {
 
         it('should allow to get status of existing domain config',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .status(secondDc.id)
@@ -185,8 +185,8 @@ describe('CRUD check', function () {
 
         it('should allow to get versions of existing domain config',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .versions(secondDc.id)
@@ -208,8 +208,8 @@ describe('CRUD check', function () {
 
         it('should allow to delete existing domain config',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.domainConfigs
                   .deleteOne(secondDc.id)

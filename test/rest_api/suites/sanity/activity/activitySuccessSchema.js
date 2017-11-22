@@ -37,8 +37,8 @@ describe('Sanity check', function () {
   var activityResponseSchema = SchemaProvider.getActivityResponse();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         return API.resources.users
           .myself()
@@ -70,8 +70,8 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -91,8 +91,8 @@ describe('Sanity check', function () {
       var getSpecCallback = function (index) {
         return function (done) {
           var queryData = ActivityDDHelper.getQueryParams()[index];
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.activity
                 .getAll(queryData)
@@ -129,8 +129,8 @@ describe('Sanity check', function () {
         var getSpecCallback = function (index) {
           return function (done) {
             var queryData = ActivityDDHelper.getQueryParams()[index];
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.activity
                   .summary()

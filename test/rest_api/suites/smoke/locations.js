@@ -51,8 +51,8 @@ describe('Smoke check', function() {
       describe('Locations resource', function() {
         it('should return a response when getting `first-mile`.',
           function(done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function() {
                 API.resources.locations
                   .firstMile()
@@ -65,8 +65,8 @@ describe('Smoke check', function() {
 
         it('should return a response when getting `last-mile`.',
           function(done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function() {
                 API.resources.locations
                   .lastMile()
@@ -79,8 +79,8 @@ describe('Smoke check', function() {
 
         it('should return a response when getting `billing_zones`.',
           function(done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function() {
                 API.resources.locations
                   .billingZones()

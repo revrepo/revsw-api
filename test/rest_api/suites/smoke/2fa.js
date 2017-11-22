@@ -82,8 +82,8 @@ describe('Smoke check:', function() {
 
       it('should return success response when initializing 2fa for specific user',
         function(done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               API.resources.twoFA
                 .init()
@@ -96,8 +96,8 @@ describe('Smoke check:', function() {
 
       it('should return success response when enabling 2fa for specific user',
         function(done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               API.resources.twoFA
                 .init()
@@ -119,8 +119,8 @@ describe('Smoke check:', function() {
 
       it('should return success response when disabling 2fa for specific user',
         function(done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               API.resources.twoFA
                 .init()

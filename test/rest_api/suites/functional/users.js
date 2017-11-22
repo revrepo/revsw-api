@@ -33,8 +33,8 @@ describe('Functional check', function () {
   var accountSample = AccountsDP.generateOne();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         return API.resources.accounts.createOne(accountSample);
       })
@@ -70,8 +70,8 @@ describe('Functional check', function () {
 
     it('should return `Bad Request` when updating user\'s role from `admin` to `user`.',
       function (done) {
-        API.helpers
-          .authenticateUser(userSample)
+        API.identity
+          .authenticate(userSample)
           .then(function () {
             API.resources.users
               .update(userSample.id, {
@@ -89,8 +89,8 @@ describe('Functional check', function () {
       });
 
     it('should update user with reseller role', function (done) {
-      API.helpers
-        .authenticateUser(revAdmin)
+      API.identity
+        .authenticate(revAdmin)
         .then(function () {
           API.resources.users
             .update(userSample.id, {
@@ -107,8 +107,8 @@ describe('Functional check', function () {
     it('should return `Bad Request` when updating user\'s role from `reseller` to `user` having multiple' +
       ' accounts assigned to the reseller',
       function (done) {
-        API.helpers
-          .authenticateUser(userSample)
+        API.identity
+          .authenticate(userSample)
           .then(function() {
             var resellerAccountSample = AccountsDP.generateOne();
             return API.resources.accounts.createOne(resellerAccountSample);

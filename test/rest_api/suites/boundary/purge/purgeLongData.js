@@ -45,8 +45,8 @@ describe('Negative check', function () {
     return function (done) {
       var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
       Utils.setValueByPath(purgeData, ddCase.propertyPath, ddCase.testValue);
-      API.helpers
-        .authenticateUser(reseller)
+      API.identity
+        .authenticate(reseller)
         .then(function () {
           API.resources.purge
             .createOne(purgeData)
@@ -70,8 +70,8 @@ describe('Negative check', function () {
   };
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -87,8 +87,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -101,8 +101,8 @@ describe('Negative check', function () {
     it('should return `bad request` response when providing `long` purge ID',
       function (done) {
         var longObjectId = 'abcdef01234567890123456789';
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.purge
               .getOne(longObjectId)

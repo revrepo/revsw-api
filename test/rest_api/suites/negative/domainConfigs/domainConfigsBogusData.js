@@ -33,8 +33,8 @@ describe('Negative check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -50,8 +50,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -79,8 +79,8 @@ describe('Negative check', function () {
             'with value "' + transformedStr + '" fails to match the required ' +
             'pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-z' +
             'A-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.domain_name = bogusDomainName;
@@ -104,8 +104,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "account_id" fails because ["account_id" ' +
             'with value "' + transformedStr + '" fails to match the required ' +
             'pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(bogusAccountId);
               API.resources.domainConfigs
@@ -129,8 +129,8 @@ describe('Negative check', function () {
             'host_header" with value "' + transformedStr + '" fails to ' +
             'match the required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-z' +
             'A-Z0-9-\\_]{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_host_header = bogusOriginHostHeader;
@@ -157,8 +157,8 @@ describe('Negative check', function () {
             transformedStr + '" fails to match the required pattern: ' +
             '/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]' +
             '{2}|2[0-4][0-9]|25[0-5])$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_server = bogusOriginServer;
@@ -182,8 +182,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "origin_server_location_id" fails because ' +
             '["origin_server_location_id" with value "' + transformedStr +
             '" fails to match the required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_server_location_id = bogusLocationId;
@@ -207,8 +207,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
             'with value "' + transformedStr + '" fails to match the required ' +
             'pattern: /^\\d+$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.tolerance = bogusTolerance;
@@ -232,8 +232,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child \"domain_id\" fails because [\"domain_id' +
             '\" with value \"' + transformedStr + '\" fails to match the ' +
             'required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .status(bogusDomainId)
@@ -256,8 +256,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child \"domain_id\" fails because [\"domain_id' +
             '\" with value \"' + transformedStr + '\" fails to match the ' +
             'required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .versions(bogusDomainId)

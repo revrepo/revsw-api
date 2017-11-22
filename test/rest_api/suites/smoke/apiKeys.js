@@ -35,8 +35,8 @@ describe('Smoke check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         return API.helpers.apiKeys.createOne();
       })
@@ -56,8 +56,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when getting all API Keys.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.apiKeys
               .getAll()
@@ -69,8 +69,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when getting specific API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.apiKeys
               .getOne(apiKey.id)
@@ -83,8 +83,8 @@ describe('Smoke check', function () {
     it('should return a success response when creating specific API Key.',
       function (done) {
         var newApiKey = APIKeyDataProvider.generateOne(accountId);
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.apiKeys
               .createOne(newApiKey)
@@ -101,8 +101,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when updating specific API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.apiKeys.createOne();
           })
@@ -121,8 +121,8 @@ describe('Smoke check', function () {
     it('should return a success response when updating with property '+
       ' "managed_account_ids".',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.apiKeys.createOne();
           })
@@ -142,8 +142,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when deleting an API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.apiKeys.createOne();
           })
@@ -158,8 +158,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when activating an API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.apiKeys
               .activate(apiKey.id)
@@ -172,8 +172,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when deactivating an API Key.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.apiKeys
               .deactivate(apiKey.id)

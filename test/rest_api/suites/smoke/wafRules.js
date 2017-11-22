@@ -35,8 +35,8 @@ describe('Smoke check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         return API.helpers.wafRules.createOne();
       })
@@ -56,8 +56,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when getting all WAF Rules',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.wafRules
               .getAll()
@@ -69,8 +69,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when getting specific WAF Rule',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.wafRules
               .getOne(wafRule.id)
@@ -85,8 +85,8 @@ describe('Smoke check', function () {
         var newWAFRule = WAFRulesDataProvider.generateOne({
           accountId: accountId
         });
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.wafRules
               .createOne(newWAFRule)
@@ -101,8 +101,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when updating specific WAF Rule',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.wafRules.createOneForAccount({
               id: accountId
@@ -122,8 +122,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when deleting an WAF Rule',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.wafRules.createOneForAccount({
               id: accountId

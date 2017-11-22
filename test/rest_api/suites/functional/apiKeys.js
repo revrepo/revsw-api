@@ -31,8 +31,8 @@ describe('Functional check', function () {
   var userReseller = DataProvider.generateUser('reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         // create account 1
         accountFirst = AccountsDP.generateOne();
@@ -81,7 +81,7 @@ describe('Functional check', function () {
   describe('API Keys resource', function () {
     var apiKey;
     before(function (done) {
-      API.helpers.authenticateUser(userReseller)
+      API.identity.authenticate(userReseller)
         .then(function () {
           // create API Key for Account 1
           return API.helpers.apiKeys.createOneForAccount(accountFirst)
@@ -100,7 +100,7 @@ describe('Functional check', function () {
     });
 
     it('should provide access to main account', function (done) {
-      API.helpers.authenticateAPIKey(apiKey.id)
+      API.identity.authenticateWithAPIKey(userReseller)
         .then(function (user) {
           API.resources.accounts
             .getOne(accountFirst.id)
@@ -115,7 +115,7 @@ describe('Functional check', function () {
     });
 
     it('should provide access only one account', function (done) {
-      API.helpers.authenticateAPIKey(apiKey.id)
+      API.identity.authenticateWithAPIKey(userReseller)
         .then(function () {
           API.resources.accounts
             .getAll()
@@ -132,7 +132,7 @@ describe('Functional check', function () {
     });
 
     it('should have no access to another account', function (done) {
-      API.helpers.authenticateAPIKey(apiKey.id)
+      API.identity.authenticateWithAPIKey(userReseller)
         .then(function () {
           API.resources.accounts
             .getOne(accountSecond.id)
@@ -148,7 +148,7 @@ describe('Functional check', function () {
     describe('with additional account', function () {
       before(function (done) {
 
-        API.helpers.authenticateUser(userReseller)
+        API.identity.authenticate(userReseller)
           .then(function () {
             // add to API Key additional Account 2
             var updatedKey = APIKeyDataProvider
@@ -167,7 +167,7 @@ describe('Functional check', function () {
       });
 
       it('should provide access to specified additional account', function (done) {
-        API.helpers.authenticateAPIKey(apiKey.id)
+        API.identity.authenticateWithAPIKey(userReseller)
           .then(function () {
             API.resources.accounts
               .getOne(accountSecond.id)
@@ -182,7 +182,7 @@ describe('Functional check', function () {
       });
 
       it('should provide access to main and additional account', function (done) {
-        API.helpers.authenticateAPIKey(apiKey.id)
+        API.identity.authenticateWithAPIKey(userReseller)
           .then(function () {
             API.resources.accounts
               .getAll()
@@ -204,7 +204,7 @@ describe('Functional check', function () {
       describe('after delete additional account', function () {
         before(function (done) {
           // remove account 2 from apikey
-          API.helpers.authenticateUser(userReseller)
+          API.identity.authenticate(userReseller)
             .then(function () {
               // remove form API Key access to additional Account 2
               var updatedKey = APIKeyDataProvider
@@ -223,7 +223,7 @@ describe('Functional check', function () {
         });
 
         it('should provide access to main account', function (done) {
-          API.helpers.authenticateAPIKey(apiKey.id)
+          API.identity.authenticateWithAPIKey(userReseller)
             .then(function () {
               API.resources.accounts
                 .getOne(accountFirst.id)
@@ -239,7 +239,7 @@ describe('Functional check', function () {
         });
 
         it('should have no access to additional account', function (done) {
-          API.helpers.authenticateAPIKey(apiKey.id)
+          API.identity.authenticateWithAPIKey(userReseller)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSecond.id)
@@ -253,7 +253,7 @@ describe('Functional check', function () {
         });
 
         it('should get only one account', function (done) {
-          API.helpers.authenticateAPIKey(apiKey.id)
+          API.identity.authenticateWithAPIKey(userReseller)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -273,7 +273,7 @@ describe('Functional check', function () {
 
     describe('with additional account which will be delete', function() {
         before(function(done) {
-          API.helpers.authenticateUser(userReseller)
+          API.identity.authenticate(userReseller)
             .then(function() {
               // add to API Key additional Account For Delete
               var updatedKey = APIKeyDataProvider
@@ -291,8 +291,8 @@ describe('Functional check', function () {
           done();
         });
 
-        it('should provide access to additional account which exisit and will be delete', function(done) {
-          API.helpers.authenticateAPIKey(apiKey.id)
+        it('should provide access to additional account which exists and will be delete', function(done) {
+          API.identity.authenticateWithAPIKey(userReseller)
             .then(function() {
               API.resources.accounts
                 .getOne(accountForDelete.id)
@@ -307,7 +307,7 @@ describe('Functional check', function () {
         });
 
         it('should no contain account ID in managed_account_ids after account was deleted', function(done) {
-          API.helpers.authenticateUser(userReseller)
+          API.identity.authenticate(userReseller)
             .then(function() {
               API.resources.accounts
                 .deleteOne(accountForDelete.id)

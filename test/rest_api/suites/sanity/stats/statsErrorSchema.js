@@ -40,8 +40,8 @@ describe('Sanity check.', function () {
   var statsValidationErrorSchema = StatsSP.getValidationError();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -57,8 +57,8 @@ describe('Sanity check.', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -90,8 +90,8 @@ describe('Sanity check.', function () {
 
       var getSpecInvalidDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .getOne(domainConfig.id, queryData)
@@ -149,8 +149,8 @@ describe('Sanity check.', function () {
 
       var getSpecInvalidDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .gbt()
@@ -209,8 +209,8 @@ describe('Sanity check.', function () {
 
       var getSpecInvalidDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .lastMileRtt()
@@ -269,8 +269,8 @@ describe('Sanity check.', function () {
 
       var getSpecInvalidDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .top()
@@ -329,8 +329,8 @@ describe('Sanity check.', function () {
 
       var getSpecInvalidDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .topObjects()

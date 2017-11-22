@@ -43,8 +43,8 @@ describe('Sanity check', function () {
         describe('Date Format', function () {
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -74,8 +74,8 @@ describe('Sanity check', function () {
           it('should return `updated_at` field in expected `Date format` ' +
             'when getting all apps.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .getAll()
@@ -94,8 +94,8 @@ describe('Sanity check', function () {
           it('should return `created_at` and `updated_at` field in expected ' +
             '`Date format` when getting specific app.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .getOne(testApp.id)
@@ -113,8 +113,8 @@ describe('Sanity check', function () {
           it('should return `updated_at` field in expected `Date format` ' +
             'when getting all versions for specific app',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps
                     .versions(testApp.id)

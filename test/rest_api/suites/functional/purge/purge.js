@@ -34,8 +34,8 @@ describe('Functional check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -55,8 +55,8 @@ describe('Functional check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -76,8 +76,8 @@ describe('Functional check', function () {
 
     it('should queue a purge that was just created.',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
             API.resources.purge
@@ -95,8 +95,8 @@ describe('Functional check', function () {
 
     it('should set as `success` a purge after some time it was created.',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
             var counter = 10000; // 10 secs

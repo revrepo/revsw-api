@@ -44,8 +44,8 @@ describe('Negative check', function () {
     describe('With bogus data,', function () {
 
       beforeEach(function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.helpers.users.create({
               firstName: 'Tom',
@@ -66,8 +66,8 @@ describe('Negative check', function () {
       it('should return `bad request` when enabling 2fa for user with bogus ' +
         'oneTimePassword',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()
@@ -97,8 +97,8 @@ describe('Negative check', function () {
       it('should return `bad request` when disabling 2fa for user with bogus ' +
         'user ID',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()

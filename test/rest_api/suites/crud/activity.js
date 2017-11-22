@@ -45,8 +45,8 @@ describe('CRUD check', function () {
       describe('Activity resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.resources.users
                 .myself()
@@ -78,8 +78,8 @@ describe('CRUD check', function () {
         });
 
         after(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.domainConfigs.deleteOne(domainConfig.id);
               done();
@@ -96,8 +96,8 @@ describe('CRUD check', function () {
         var getSpecCallback = function (index) {
           return function (done) {
             var queryData = ActivityDDHelper.getQueryParams()[index];
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.activity
                   .getAll(queryData)
@@ -134,8 +134,8 @@ describe('CRUD check', function () {
         var getSpecCallback = function (index) {
           return function (done) {
             var queryData = ActivityDDHelper.getQueryParams()[index];
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.activity
                   .summary()

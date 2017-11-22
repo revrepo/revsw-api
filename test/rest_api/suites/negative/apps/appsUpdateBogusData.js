@@ -39,8 +39,8 @@ describe('Negative check', function () {
       var fullTestApp = AppsDP.generateOneForUpdate(0);
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -65,8 +65,8 @@ describe('Negative check', function () {
           var clonedApp = AppsDP.clone(fullTestApp);
           AppsDDHelper
             .setValueByPath(clonedApp, ddCase.propertyPath, ddCase.testValue);
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.apps
                 .update(testApp.id, clonedApp)

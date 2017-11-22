@@ -39,8 +39,8 @@ describe('Sanity check', function () {
   var successCreatePurgeResponseSchema = PurgeRespSP.getSuccessCreate();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -60,8 +60,8 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -83,8 +83,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when getting ' +
         'specific purge.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.purge
                 .getOne(purge.id)
@@ -101,8 +101,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'creating new purge.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
               API.resources.purge

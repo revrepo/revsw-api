@@ -36,8 +36,8 @@ describe('Functional check', function () {
   describe('Vendor profile resource', function () {
 
     it('should load vendor profile names list with admin role', function (done) {
-      API.helpers
-        .authenticateUser(revAdmin)
+      API.identity
+        .authenticate(revAdmin)
         .then(function () {
           API.resources.vendorProfiles
             .getAll({})

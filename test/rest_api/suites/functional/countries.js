@@ -41,8 +41,8 @@ describe('Functional check', function () {
   describe('Countries resource', function () {
     it('should return countries object that has specific country as property.',
       function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.countries
               .getAll()

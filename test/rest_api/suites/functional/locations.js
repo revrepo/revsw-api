@@ -41,8 +41,8 @@ describe('Functional check', function () {
   describe('Locations resource', function () {
     it('should return `first-mile` data.',
       function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.locations
               .firstMile()
@@ -64,8 +64,8 @@ describe('Functional check', function () {
 
     it('should return `last-mile` data.',
       function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.locations
               .lastMile()

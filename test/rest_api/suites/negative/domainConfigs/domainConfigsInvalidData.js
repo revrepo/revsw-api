@@ -33,8 +33,8 @@ describe('Negative check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -50,8 +50,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -78,8 +78,8 @@ describe('Negative check', function () {
             'with value "' + invalidDomainName + '" fails to match the ' +
             'required pattern: /(?=^.{4,253}$)(^((?!-)(?!\\_)[a-zA-Z0-9-\\_]' +
             '{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.domain_name = invalidDomainName;
@@ -102,8 +102,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "account_id" fails because ["account_id" ' +
             'with value "' + invalidAccountId + '" fails to match the ' +
             'required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(invalidAccountId);
               API.resources.domainConfigs
@@ -126,8 +126,8 @@ describe('Negative check', function () {
             'origin_host_header" with value "' + invalidOriginHostHeader +
             '" fails to match the required pattern: /(?=^.{4,253}$)(^((?!-)' +
             '(?!\\_)[a-zA-Z0-9-\\_]{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_host_header = invalidOriginHostHeader;
@@ -152,8 +152,8 @@ describe('Negative check', function () {
           '[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$)/, "origin_server" with value "' + invalidOriginServer +
           '" fails to match the required pattern: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.)' +
           '{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/]';
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             var domainConfig = DomainConfigsDP.generateOne(account.id);
             domainConfig.origin_server = invalidOriginServer;
@@ -176,8 +176,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "origin_server_location_id" fails because ' +
             '["origin_server_location_id" with value "' + invalidLocationId +
             '" fails to match the required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_server_location_id = invalidLocationId;
@@ -200,8 +200,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "tolerance" fails because ["tolerance" ' +
             'with value "' + invalidTolerance + '" fails to match the ' +
             'required pattern: /^\\d+$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.tolerance = invalidTolerance;
@@ -224,8 +224,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child \"domain_id\" fails because [\"domain_id' +
             '\" with value \"' + invalidDomainId + '\" fails to match the ' +
             'required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .status(invalidDomainId)
@@ -247,8 +247,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "domain_id" fails because ["domain_id" ' +
             'with value "' + invalidDomainId + '" fails to match the ' +
             'required pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .versions(invalidDomainId)

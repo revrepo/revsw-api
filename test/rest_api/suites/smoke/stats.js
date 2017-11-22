@@ -35,8 +35,8 @@ describe('Smoke check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -52,8 +52,8 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -70,8 +70,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats
               .getOne(domainConfig.id, queryData)
@@ -110,8 +110,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats
               .gbt()
@@ -142,8 +142,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats
               .lastMileRtt()
@@ -174,8 +174,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats
               .top()
@@ -206,8 +206,8 @@ describe('Smoke check', function () {
 
     var getSpecCallback = function (queryData) {
       return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.stats
               .topObjects()
