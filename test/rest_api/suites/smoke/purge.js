@@ -102,13 +102,13 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return data when getting list purge requests.',
+    it('should return data when getting list purge requests.',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
           .then(function () {
             API.resources.purge
-            .getOne(domainConfig.id)
+            .getAll({domain_id:domainConfig.id})
             .expect(200)
             .end(done);
           })

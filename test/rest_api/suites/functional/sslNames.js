@@ -55,7 +55,7 @@ describe('Functional check', function () {
 
   describe('SSL Names resource', function () {
 
-    it('should load SSL Names list with revAdmin role.',
+    it('should get SSL Names list with revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -64,9 +64,9 @@ describe('Functional check', function () {
               .getAll()
               .expect(200)
               .then(function (res) {
-                var sslNamesArray = res.body;
-                sslNamesArray.length.should.equal(7);
-                sslNamesArray[6].ssl_name.should.be.equal('wwww3.revsw.com');
+                var sslNames = res.body;
+                sslNames.length.should.equal(7);
+                sslNames[6].ssl_name.should.be.equal('wwww3.revsw.com');
                 done();
               })
               .catch(done);
@@ -74,17 +74,22 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should load specific SSL Name with revAdmin role.',
+    it('should get specific SSL Name with revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .getOne('5818c83150611e2c5be4e49c')
-              .expect(200)
-              .then(function (res) {
-                res.body.ssl_name.should.equal('asd-123.revsw.com');
-                done();
+              .getAll()
+              .then(function (response){
+                API.resources.sslNames
+                  .getOne(response.body[0].id)
+                  .expect(200)
+                  .then(function (res) {
+                    res.body.ssl_name.should.equal('test.revsw.com');
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           })
@@ -93,7 +98,7 @@ describe('Functional check', function () {
 
     it('should create specific SSL Name with revAdmin role.',
       function (done) {
-        var sslname = SSLNameDP.generateOne(accountId,'test1');
+        var sslname = SSLNameDP.generateOne(accountId,'test');
         API.helpers
           .authenticateUser(user)
           .then(function () {
@@ -132,42 +137,48 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-
-    it('should load specific SSL Name with Email Approvers and revAdmin role.',
+    it('should get specific SSL Name with Email Approvers and revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .approvers()
-              .getAll({ssl_name:'wwww3.revsw.com'})
-              .expect(200)
-              .then(function (res) {
-                var approversArray = res.body;
-                approversArray.length.should.equal(11);
-                approversArray[10].approver_email.should.be.equal('webmaster@revsw.com'); 
-                done();
+              .getAll()
+              .then(function (response){  
+                API.resources.sslNames
+                  .approvers()
+                  .getAll({ssl_name:response.body[0].ssl_name})
+                  .expect(200)
+                  .then(function (res) {
+                    var approvers = res.body;
+                    approvers.length.should.equal(11);
+                    approvers[10].approver_email.should.be.equal('webmaster@revsw.com'); 
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           })
           .catch(done);
       });
 
-    it('should load specific SSL Name with revAdmin role.',
+    it('should verify specific SSL Name with revAdmin role.',
       function (done) {
-        var ssl_name_id = '5818c83150611e2c5be4e49c';
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            return API.resources.sslNames.verify(ssl_name_id);
-          })
-          .then(function () {
             API.resources.sslNames
-              .getOne(ssl_name_id) 
-              .expect(200)
-              .then(function (res) {
-                res.body.ssl_name.should.equal('asd-123.revsw.com');
-                done();
+              .getAll()
+              .then(function (response){
+                API.resources.sslNames
+                  .verify(response.body[5].id)
+                  .getOne()
+                  .expect(200)
+                  .then(function (res) {
+                    res.body.message.should.equal('Waiting for approval');
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           })

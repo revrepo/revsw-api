@@ -32,7 +32,7 @@ describe('CRUD check', function () {
 
   describe('SSL Config profile resource', function () {
     
-    it('should load  SSL Config profiles list with revAdmin role.',
+    it('should get SSL Config profiles list with revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -41,9 +41,9 @@ describe('CRUD check', function () {
               .getAll()
               .expect(200)
               .then(function (res) {
-                var sslConfProfilesArray = res.body;
-                sslConfProfilesArray.should.be.not.empty();
-                sslConfProfilesArray[1].id.should.be.not.empty();
+                var sslConfProfiles = res.body;
+                sslConfProfiles.should.be.not.empty();
+                sslConfProfiles[1].id.should.be.not.empty();
                 done();
               })
               .catch(done);

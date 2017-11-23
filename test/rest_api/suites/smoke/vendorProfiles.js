@@ -92,7 +92,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a response when getting revapm vendor profile by id  with revAdmin role', 
+    xit('should return a response when getting revapm vendor profile by id  with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(Admin)

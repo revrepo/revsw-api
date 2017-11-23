@@ -38,70 +38,14 @@ var resourceConfig = {
   nestedResources: [
     {
       name: 'vendorProfile',
-      path: '/vendor=revapm',
+      path: '/vendor',
       methods: [
         Methods.READ_ONE 
-      ]
-    },
-    {
-      name: 'vendorsProfile',
-      path: '/vendor=nuubit',
-      methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      name: 'vendorssProfile',
-      path: '/vendor=hooli',
-      methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      name: 'vendorUrlProfile',
-      path: '/vendorUrl=revapm',
-      methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      name: 'vendorsUrlProfile',
-      path: '/vendorUrl=nuubit',
-      methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      name: 'vendorssUrlProfile',
-      path: '/vendorUrl=hooli',
-      methods: [
-        Methods.READ_ONE
-      ]
-    },
-    {
-      name: 'updateVendorProfile',
-      path: '/57ed58d10676749d3ef7c2bc?vendor=hooli' ,
-      methods: [
-        Methods.UPDATE
-      ]
-    },
-    {
-      name: 'updateVendorsProfile',
-      path: '/57ed58d10676749d3ef7c2bc?vendor=revapm' ,
-      methods: [
-        Methods.UPDATE
-      ]
-    },
-    {
-      name: 'updateVendorssProfile',
-      path: '/57ed58d10676749d3ef7c2bc?vendor=nuubit' ,
-      methods: [
-        Methods.UPDATE
       ]
     }
   ]
 };
-
+  
 // Creating new instance of BaseResource which is going to represent the API
 // `vendor profiles resource`
 module.exports = new BasicResource(resourceConfig);

@@ -56,8 +56,7 @@ var resourceConfig = {
       name: 'resources',
       path: '/resources',
       methods: [
-        Methods.READ_ALL,
-        Methods.READ_ONE,
+        Methods.READ_ALL
       ]
     },
     {

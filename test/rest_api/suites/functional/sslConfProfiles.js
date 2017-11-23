@@ -32,7 +32,7 @@ describe('Functional check', function () {
 
   describe('SSL Config profile resource', function () {
     
-    it('should load  SSL Config profiles list with revAdmin role.',
+    it('should get  SSL Config profiles list with revAdmin role.',
       function (done) {
         API.helpers
           .authenticateUser(user)
@@ -41,9 +41,9 @@ describe('Functional check', function () {
               .getAll()
               .expect(200)
               .then(function (res) {
-                var sslConfProfilesArray = res.body;
-                sslConfProfilesArray.length.should.equal(2);
-                sslConfProfilesArray[1].id.should.be.equal('571e9f7591dcb9f97a0c4841');
+                var sslConfProfiles = res.body;
+                sslConfProfiles.length.should.equal(2);
+                sslConfProfiles[1].id.should.be.equal('571e9f7591dcb9f97a0c4841');
                 done();
               })
               .catch(done);

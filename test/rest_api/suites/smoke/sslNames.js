@@ -71,11 +71,14 @@ describe('Smoke check', function () {
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .getOne('5818c83150611e2c5be4e49c')
-              .expect(200).then(function(response){
-                console.log(response);
+              .getAll()
+              .then(function (response){
+                API.resources.sslNames
+                  .getOne(response.body[0].id)
+                  .expect(200)
+                  .end(done);
               })
-              .end(done);
+              .catch(done);
           })
           .catch(done);
       });
@@ -122,27 +125,34 @@ describe('Smoke check', function () {
           .authenticateUser(user)
           .then(function () {
             API.resources.sslNames
-              .approvers()
-              .getAll({ssl_name:'wwww3.revsw.com'})
-              .expect(200)
-              .end(done);
+              .getAll()
+              .then(function (response){  
+                API.resources.sslNames
+                  .approvers()
+                  .getAll({ssl_name: response.body[0].ssl_name})
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
           })
           .catch(done);
       });
 
     it('should return a success response when getting (verify) specific SSL name.',
       function (done) {
-        var ssl_name_id = '5818c83150611e2c5be4e49c';
         API.helpers
           .authenticateUser(user)
           .then(function () {
-            return API.resources.sslNames.verify(ssl_name_id);
-          })
-          .then(function () {
             API.resources.sslNames
-             .getOne(ssl_name_id)
-             .expect(200)
-             .end(done);
+              .getAll()
+              .then(function (response){
+                API.resources.sslNames
+                  .verify(response.body[5].id)
+                  .getOne()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
           })
           .catch(done);
       });

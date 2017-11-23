@@ -35,7 +35,7 @@ describe('CRUD check', function () {
 
   describe('Vendor profile resource', function () {
 
-    it('should load vendor profile names list with revAdmin role', 
+    it('should get vendor profile names list with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -52,7 +52,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should load revapm vendor profile  by name with revAdmin role', 
+    it('should get revapm vendor profile  by name with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -71,7 +71,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should load nuubit vendor profile by name with revAdmin role', 
+    xit('should get nuubit vendor profile by name with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -90,7 +90,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should load hooli vendor profile by name with revAdmin role', 
+    xit('should get hooli vendor profile by name with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -109,7 +109,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should load revapm vendor profile  by id with revAdmin role', 
+    xit('should get revapm vendor profile  by id with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -128,7 +128,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should load nuubit vendor profile  by id with revAdmin role', 
+    xit('should get nuubit vendor profile  by id with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
@@ -147,7 +147,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should load hooli vendor profile  by id with revAdmin role', 
+    xit('should get hooli vendor profile  by id with revAdmin role', 
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)

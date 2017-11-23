@@ -148,16 +148,16 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should return data when getting list purge requests.',
+    it('should return data when getting list purge requests.',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
           .then(function () {
             API.resources.purge
-              .getOne(domainConfig.id)
+              .getAll({domain_id:domainConfig.id})
               .expect(200)
               .then(function (res) {
-                res.body.total.should.be.equal(0);
+                res.body.total.should.be.equal(1);
                 done();
               })
               .catch(done);

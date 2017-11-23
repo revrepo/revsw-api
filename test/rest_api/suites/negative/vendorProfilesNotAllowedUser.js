@@ -136,7 +136,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when updating revapm vendor profile to hooli  with revAdmin role', 
+      xit('should return `Forbidden` response when updating revapm vendor profile to hooli  with revAdmin role', 
         function (done) {
           API.helpers
             .authenticateUser(Admin)
@@ -150,7 +150,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when updating nuubit vendor profile to revapm  with revAdmin role', 
+      xit('should return `Forbidden` response when updating nuubit vendor profile to revapm  with revAdmin role', 
         function (done) {
           API.helpers
             .authenticateUser(Admin)
@@ -164,7 +164,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when updating revapm vendor profile to nuubit  with revAdmin role', 
+      xit('should return `Forbidden` response when updating revapm vendor profile to nuubit  with revAdmin role', 
         function (done) {
           API.helpers
             .authenticateUser(Admin)
