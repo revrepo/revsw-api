@@ -76,9 +76,9 @@ describe('Smoke check', function () {
                 defaultSettings.should.have.property('waf_rules_ids');
                 defaultSettings.should.have.property('ssl_conf_profile_id');
                 defaultSettings.waf_rules_ids.should.be.instanceof(Array);
-                defaultSettings.waf_rules_ids.should.not.empty;
+                defaultSettings.waf_rules_ids.should.not.empty();
                 defaultSettings.ssl_conf_profile_id.should.be.type('string');
-                defaultSettings.ssl_conf_profile_id.should.not.empty;
+                defaultSettings.ssl_conf_profile_id.should.not.empty();
               })
               .then(function(){
                 done();

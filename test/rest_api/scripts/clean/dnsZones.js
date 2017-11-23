@@ -94,7 +94,6 @@ describe('Clean up', function () {
                   .set({ 'X-NSONE-Key': 'f8MXIsOKoGevPM2o7LUG' })
                   .expect(200)
                   .then(function() {
-                    console.log('try delete', item)
                     cb();
                   })
                   .catch(function(){

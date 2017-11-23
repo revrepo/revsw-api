@@ -102,7 +102,7 @@ describe('LogShipping Jobs functional test', function() {
                       'for functional check lock delete docmain config';
                     return API.resources.logShippingJobs
                       .update(lockedDomainConfigLsJ.id, updateData)
-                      .expect(200)
+                      .expect(200);
                   });
               });
             });

@@ -17,6 +17,7 @@
  */
 
 var Session = require('./session');
+var APITestError = require('./apiTestError');
 var APIKeysHelper = require('./helpers/apiKeys');
 var AuthenticateRes = require('./resources/authenticate');
 var Constants = require('./../common/constants');

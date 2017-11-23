@@ -34,7 +34,7 @@ describe('Smoke check:', function() {
     'user',
     'admin',
     'reseller'
-  ]
+  ];
 
   before(function(done) {
     done();

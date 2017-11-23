@@ -62,15 +62,13 @@ var setUserToRequest = function (request) {
   switch(authMode) {
     case Constants.API.AUTH_MODE.API_KEY:
       var apiKey = Session.getCurrentAPIKey();
-      console.log('apiKey', apiKey);
       return request.set('Authorization', 'X-API-KEY ' + apiKey.key);
-    case Constants.API.AUTH_MODE.CREDENTIALS:
-      var user = Session.getCurrentUser();
-      if (user !== undefined) {
-        return request.set('Authorization', 'Bearer ' + user.token);
-      }
     default: // CREDENTIALS
-      return request;
+      var user = Session.getCurrentUser();
+      if (user === undefined) {
+        return request;
+      }
+      return request.set('Authorization', 'Bearer ' + user.token);
   }
 };
 
