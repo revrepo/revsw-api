@@ -29,9 +29,6 @@ describe('Smoke check: Users', function() {
     config.api.users.revAdmin,
     config.api.users.reseller,
     config.api.users.admin,
-    // API Key
-    config.api.apikeys.admin,
-    config.api.apikeys.reseller
   ];
   // Retrieving information about specific user that later we will use for
   // our API requests.
