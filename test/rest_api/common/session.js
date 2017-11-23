@@ -31,7 +31,6 @@ var Session = {
   },
   setAuthenticationMode: function (mode) {
     authMode = mode;
-    console.log('AUTH_MODE', mode);
   },
   getAuthenticationMode: function () {
     return authMode;
