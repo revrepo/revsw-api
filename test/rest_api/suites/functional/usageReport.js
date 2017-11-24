@@ -145,41 +145,6 @@ describe('UsageReport Functional check:', function () {
     report.should.be.ok();
   });
 
-  it('should return response when getting specific account usage histogram.', 
-      function (done) {
-        API.helpers
-          .authenticateUser(admin)
-          .then(function () {
-            API.resources.usage_report
-              .stats()
-              .getAll({account_id: account_id})
-              .expect(200)
-              .then(function (res) {
-                report.account_id.should.equal('55b6ff6a7957012304a49d04_SUMMARY');
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-  it('should return a success response when getting specific account usage report.', 
-      function (done) {
-        API.helpers
-          .authenticateUser(admin)
-          .then(function () {
-            API.resources.usage_report
-              .getAll({account_id: account_id})
-              .expect(200)
-              .then(function (res) {
-                report.account_id.should.equal('55b6ff6a7957012304a49d04_SUMMARY');
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
   it( 'UsageReport processed non-zero records', function () {
     report.should.be.ok();
     report.records_processed.should.be.ok();

@@ -53,18 +53,22 @@ describe('Functional check', function () {
           done();
         });
 
-        xit('should load Subscriptions list with revAdmin role.', 
+        it('should get Subscriptions list with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var subscriptionsArray = res.body;
-                    subscriptionsArray.length.should.equal(2);
-                    subscriptionsArray[1].id.should.be.equal('57d1bc682cb764db03d9a06a');
+                    var subscriptions = res.body;
+                    subscriptions.should.not.be.undefined();
+                    subscriptions.length.should.greaterThanOrEqual(0);
+                    subscriptions.forEach(function (subscription) {
+                      subscription.id.should.not.be.undefined();
+                    });
                     done();
                   })
                   .catch(done);
@@ -72,18 +76,22 @@ describe('Functional check', function () {
               .catch(done);
           });
 
-        xit('should load Resources list with revAdmin role.', 
+        it('should get Resources list with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources
+                API.resources.azure
+                  .resources()
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var resourcesArray = res.body;
-                    resourcesArray.length.should.equal(25);
-                    resourcesArray[24].resource_name.should.be.equal('r2');
+                    var resources = res.body;
+                    resources.should.not.be.undefined();
+                    resources.length.should.greaterThanOrEqual(0);
+                    resources.forEach(function (resource) {
+                      resource.resource_name.should.not.be.undefined();
+                    });
                     done();
                   })
                   .catch(done);
@@ -91,20 +99,24 @@ describe('Functional check', function () {
               .catch(done);
           });
 
-        xit('should load Resources list in resourceGroup with revAdmin role.', 
+        xit('should get Resources list in resourceGroup with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resourceGroups
+                API.resources.azure
+                  .resourceGroups()
                   .providers()
                   .accounts() 
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var providersArray = res.body;
-                    providersArray.length.should.equal(21);
-                    providersArray[20].plan_name.should.be.equal('free');
+                    var providers = res.body;
+                    providers.should.not.be.undefined();
+                    providers.length.should.greaterThanOrEqual(0);
+                    providers.forEach(function (provider) {
+                      provider.plan_name.should.not.be.undefined();
+                    });
                     done();
                   })
                   .catch(done);
@@ -112,20 +124,24 @@ describe('Functional check', function () {
               .catch(done);
           });
 
-        xit('should load Resources list in subscription with revAdmin role.', 
+        xit('should get Resources list in subscription with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .providers()
                   .accounts() 
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var providersArray = res.body;
-                    providersArray.length.should.equal(21);
-                    providersArray[20].name.should.be.equal('r2');
+                    var providers = res.body;
+                    providers.should.not.be.undefined();
+                    providers.length.should.greaterThanOrEqual(0);
+                    providers.forEach(function (provider) {
+                      provider.name.should.not.be.undefined();
+                    });
                     done();
                   })
                   .catch(done);
@@ -133,21 +149,30 @@ describe('Functional check', function () {
               .catch(done);
           });
 
-        xit('should load specific Resource with revAdmin role.', 
+        xit('should get specific Resource with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources
-                  .getOne('590f48146550d63ae698029c')
-                  .expect(200)
-                  .then(function (res) {
-                    res.body.resource_name.should.equal('r2');
-                    done();
+                API.resources.azure
+                  .resources()
+                  .getAll()
+                  .then(function (response) {
+                    var resources = response.body;
+                    API.resources.resources
+                      .getOne(resources[0].id)
+                      .expect(200)
+                      .then(function (res) {
+                        var resource = res.body;
+                        resource.should.not.be.undefined();
+                        resource.resource_name.should.not.be.undefined();
+                        done();
+                      })
+                      .catch(done);
                   })
                   .catch(done);
               })
-              .catch(done);
+              .catch(done);   
           });
       });
     });

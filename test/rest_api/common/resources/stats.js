@@ -27,7 +27,7 @@ var domainConfigIdKey = 'domainId';
 var resourceConfig = {
   idKey: domainConfigIdKey,
   name: 'stats',
-  path: '/stats/{' + domainConfigIdKey + '}',
+  path: '/v1/stats/{' + domainConfigIdKey + '}',
   methods: [
     Methods.READ_ONE
   ],

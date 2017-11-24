@@ -88,7 +88,7 @@ describe('CRUD check', function () {
                   .expect(200)
                   .then(function (res) {
                     res.body.should.be.not.empty();
-                    res.body.metadata.period.should.be.not.empty();
+                    res.body.metadata.account_id.should.be.not.empty();
                     done();
                   })
                   .catch(done);
@@ -107,7 +107,7 @@ describe('CRUD check', function () {
                   .expect(200)
                   .then(function (res) {
                     res.body.should.be.not.empty();
-                    res.body.metadata.period.should.be.not.empty();
+                    res.body.metadata.account_id.should.be.not.empty();
                     done();
                   })
                   .catch(done);
@@ -126,7 +126,7 @@ describe('CRUD check', function () {
                   .expect(200)
                   .then(function (res) {
                     res.body.should.be.not.empty();
-                    res.body.metadata.period.should.be.not.empty();
+                    res.body.metadata.account_id.should.be.not.empty();
                     done();
                   })
                   .catch(done);

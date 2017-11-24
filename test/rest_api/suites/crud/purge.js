@@ -161,8 +161,8 @@ describe('CRUD check', function () {
                   .getAll({domain_id:domainConfig.id})
                   .expect(200)
                   .then(function (res) {
-                    purge.should.not.be.empty();
-                    res.body.should.not.be.empty();
+                    var purge = res.body;
+                    purge.should.not.be.undefined();
                     done();
                   })
                   .catch(done);

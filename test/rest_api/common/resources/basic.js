@@ -46,8 +46,7 @@ var _contains = function (list, element) {
 //  the config's parameters
 var getRequest = function () {
   var host = config.get('api.host');
-  var apiVersion = config.get('api.version');
-  return request((host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion));
+  return request((host.protocol + '://' + host.name + ':' + host.port));
 };
 
 // #### Helper function setUserToRequest

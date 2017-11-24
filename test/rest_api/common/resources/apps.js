@@ -26,7 +26,7 @@ var appIdKey = 'appId';
 var resourceConfig = {
   idKey: appIdKey,
   name: 'apps',
-  path: '/apps/{' + appIdKey + '}',
+  path: '/v1/apps/{' + appIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,

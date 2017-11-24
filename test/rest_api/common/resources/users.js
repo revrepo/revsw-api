@@ -27,7 +27,7 @@ var userIdKey = 'userId';
 var resourceConfig = {
   idKey: userIdKey,
   name: 'users',
-  path: '/users/{' + userIdKey + '}',
+  path: '/v1/users/{' + userIdKey + '}',
   methods: [
     Methods.READ_ALL,
     Methods.READ_ONE,

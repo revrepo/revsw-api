@@ -27,13 +27,8 @@ describe('Smoke check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var users = [
-    config.get('api.users.revAdmin')
-  ];
 
-  users.forEach(function (user) {
-
-    describe('With user: ' + user.role, function () {
+  var RevAdmin = config.get('api.users.revAdmin');
 
       describe('Azure resource', function () {
 
@@ -53,12 +48,13 @@ describe('Smoke check', function () {
           done();
         });
 
-       xit('should return a success response when getting all subscriptions.', 
+       it('should return a success response when getting all subscriptions.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .attemptToAuthenticateUser(RevAdmin)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .getAll()
                   .expect(200)
                   .end(done);
@@ -66,12 +62,13 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-       xit('should return a success response when getting all resources.', 
+       it('should return a success response when getting all resources.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .attemptToAuthenticateUser(RevAdmin)
               .then(function () {
-                API.resources.resources
+                API.resources.azure
+                  .resources()
                   .getAll()
                   .expect(200)
                   .end(done);
@@ -82,12 +79,16 @@ describe('Smoke check', function () {
         xit('should return a success response when getting all resources in resourceGroup.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticateUser(RevAdmin)
               .then(function () {
-                API.resources.resourceGroups
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups()
                   .providers()
                   .accounts() 
-                  .getAll()
+                  .getAll().then(function(response){
+                    console.log(response);
+                  })
                   .expect(200)
                   .end(done);
               })
@@ -97,9 +98,10 @@ describe('Smoke check', function () {
         xit('should return a success response when getting all resources in subscription.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticateUser(RevAdmin)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .providers()
                   .accounts() 
                   .getAll()
@@ -112,16 +114,18 @@ describe('Smoke check', function () {
         xit('should return a success response when getting specific resource.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticateUser(RevAdmin)
               .then(function () {
-                API.resources.resources 
-                  .getOne()
-                  .expect(200)
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups()
+                  .providers()
+                  .accounts() 
+                  .getAll()
                   .end(done);
               })
               .catch(done);
           });
       });
     });
-  });
-});
+

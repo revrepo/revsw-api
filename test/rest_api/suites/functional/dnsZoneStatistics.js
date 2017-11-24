@@ -87,7 +87,7 @@ describe('Functional check', function () {
                   .getOne(firstDnsZone.id, {period: '24h'})
                   .expect(200)
                   .then(function (res) {
-                    res.body.metadata.period.should.equal('24h');
+                    res.body.metadata.account_id.should.equal(account.id); 
                     done();
                   })
                   .catch(done);
@@ -105,7 +105,7 @@ describe('Functional check', function () {
                   .getOne(firstDnsZone.id, {period: '1h'})
                   .expect(200)
                   .then(function (res) {
-                    res.body.metadata.period.should.equal('1h');
+                    res.body.metadata.account_id.should.equal(account.id); 
                     done();
                   })
                   .catch(done);
@@ -123,7 +123,7 @@ describe('Functional check', function () {
                   .getOne(firstDnsZone.id, {period: '30d'})
                   .expect(200)
                   .then(function (res) {
-                    res.body.metadata.period.should.equal('30d');
+                    res.body.metadata.account_id.should.equal(account.id); 
                     done();
                   })
                   .catch(done);

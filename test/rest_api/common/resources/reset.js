@@ -31,7 +31,7 @@ var tokenKey = 'tokenId';
 var resourceConfig = {
   idKey: tokenKey,
   name: 'reset',
-  path: '/reset/{' + tokenKey + '}',
+  path: '/v1/reset/{' + tokenKey + '}',
   methods: [
     Methods.READ_ONE,
     Methods.CREATE

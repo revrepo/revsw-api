@@ -28,7 +28,7 @@ var Methods = Constants.API.METHODS;
 var resourceConfig = {
   idKey: null,
   name: 'sslConfProfiles',
-  path: '/ssl_conf_profiles',
+  path: '/v1/ssl_conf_profiles',
   methods: [
     Methods.READ_ALL
   ]

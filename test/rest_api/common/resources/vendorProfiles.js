@@ -27,7 +27,7 @@ var Methods = Constants.API.METHODS;
 // Config for resource
 var resourceConfig = {
   name: 'vendorProfiles',
-  path: '/vendor_profiles',
+  path: '/v1/vendor_profiles',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,

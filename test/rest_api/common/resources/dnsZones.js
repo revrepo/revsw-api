@@ -28,7 +28,7 @@ var dnsZoneRecordKey = 'dnsZoneRecordId';
 var resourceConfig = {
   idKey: dnsZoneKey,
   name: 'dnsZones',
-  path: '/dns_zones/{' + dnsZoneKey + '}',
+  path: '/v1/dns_zones/{' + dnsZoneKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ONE,

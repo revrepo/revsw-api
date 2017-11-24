@@ -53,18 +53,19 @@ describe('CRUD check', function () {
           done();
         });
 
-        xit('should load Subscriptions list with revAdmin role.', 
+        it('should get Subscriptions list with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var subscriptionsArray = res.body;
-                    subscriptionsArray.should.be.not.empty();
-                    subscriptionsArray[1].id.should.be.not.empty();
+                    var subscriptions = res.body;
+                    subscriptions.should.not.be.undefined();
+                    subscriptions.length.should.greaterThanOrEqual(0);
                     done();
                   })
                   .catch(done);
@@ -72,18 +73,19 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should load Resources list with revAdmin role.', 
+        it('should get Resources list with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources
+                API.resources.azure
+                  .resources()
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var resourcesArray = res.body;
-                    resourcesArray.should.be.not.empty();
-                    resourcesArray[24].resource_name.should.be.not.empty();
+                    var resources = res.body;
+                    resources.should.not.be.undefined();
+                    resources.length.should.greaterThanOrEqual(0);
                     done();
                   })
                   .catch(done);
@@ -91,20 +93,21 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should load Resources list in resourceGroup with revAdmin role.', 
+        xit('should get Resources list in resourceGroup with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resourceGroups
+                API.resources.azure
+                  .resourceGroups()
                   .providers()
                   .accounts() 
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var providersArray = res.body;
-                    providersArray.should.be.not.empty();
-                    providersArray[20].plan_name.should.be.not.empty();
+                    var providers = res.body;
+                    providers.should.not.be.undefined();
+                    providers.length.should.greaterThanOrEqual(0);
                     done();
                   })
                   .catch(done);
@@ -112,20 +115,21 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should load Resources list in subscription with revAdmin role.', 
+        xit('should get Resources list in subscription with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .providers()
                   .accounts() 
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var providersArray = res.body;
-                    providersArray.should.be.not.empty();
-                    providersArray[20].name.should.be.not.empty();
+                    var providers = res.body;
+                    providers.should.not.be.undefined();
+                    providers.length.should.greaterThanOrEqual(0);
                     done();
                   })
                   .catch(done);
@@ -133,18 +137,25 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should load specific Resource with revAdmin role.', 
+        xit('should get specific Resource with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources
-                  .getOne('590f48146550d63ae698029c')
-                  .expect(200)
-                  .then(function (res) {
-                    res.body.should.not.be.empty();
-                    res.body.resource_name.should.not.be.empty();
-                    done();
+                API.resources.azure
+                  .resources()
+                  .getAll()
+                  .then(function (response) {
+                    var resources = response.body;
+                    API.resources.resources
+                      .getOne(resources[0].id)
+                      .expect(200)
+                      .then(function (res) {
+                        var resource = res.body;
+                        resource.should.not.be.undefined();
+                        done();
+                      })
+                      .catch(done);
                   })
                   .catch(done);
               })
