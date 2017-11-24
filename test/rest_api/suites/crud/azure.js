@@ -99,6 +99,7 @@ describe('CRUD check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
+                  .subscriptions()
                   .resourceGroups()
                   .providers()
                   .accounts() 
@@ -117,7 +118,7 @@ describe('CRUD check', function () {
 
         xit('should get Resources list in subscription with revAdmin role.', 
           function (done) {
-            API.helpers
+            API.helpers                       
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
@@ -143,19 +144,16 @@ describe('CRUD check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
-                  .resources()
-                  .getAll()
+                  .subscriptions()
+                  .resourceGroups()
+                  .providers()
+                  .accounts()
+                  .getOne()
+                  .expect(200)
                   .then(function (response) {
                     var resources = response.body;
-                    API.resources.resources
-                      .getOne(resources[0].id)
-                      .expect(200)
-                      .then(function (res) {
-                        var resource = res.body;
-                        resource.should.not.be.undefined();
-                        done();
-                      })
-                      .catch(done);
+                    resources.should.not.be.undefined();
+                    done();
                   })
                   .catch(done);
               })

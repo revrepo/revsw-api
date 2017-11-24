@@ -86,9 +86,7 @@ describe('Smoke check', function () {
                   .resourceGroups()
                   .providers()
                   .accounts() 
-                  .getAll().then(function(response){
-                    console.log(response);
-                  })
+                  .getAll()
                   .expect(200)
                   .end(done);
               })
@@ -121,7 +119,8 @@ describe('Smoke check', function () {
                   .resourceGroups()
                   .providers()
                   .accounts() 
-                  .getAll()
+                  .getOne()
+                  .expect(200)
                   .end(done);
               })
               .catch(done);

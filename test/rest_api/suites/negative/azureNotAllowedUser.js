@@ -53,12 +53,13 @@ describe('Negative check', function () {
           done();
         });
 
-        xit('should return `Forbidden` response when getting all subscriptions with Admin role.', 
+        it('should return `Forbidden` response when getting all subscriptions with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions 
+                API.resources.azure
+                  .subscriptions() 
                   .getAll()
                   .expect(403)
                   .end(done);
@@ -66,12 +67,13 @@ describe('Negative check', function () {
               .catch(done);
           });
       
-        xit('should return `Forbidden` response when getting all resources with Admin role.', 
+        it('should return `Forbidden` response when getting all resources with Admin role.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources
+                API.resources.azure
+                  .resources()
                   .getAll()
                   .expect(403)
                   .end(done);
@@ -84,7 +86,9 @@ describe('Negative check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resourceGroups
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups()
                   .providers()
                   .accounts() 
                   .getAll()
@@ -99,7 +103,8 @@ describe('Negative check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.subscriptions
+                API.resources.azure
+                  .subscriptions()
                   .providers()
                   .accounts() 
                   .getAll()
@@ -114,7 +119,11 @@ describe('Negative check', function () {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.resources 
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups()
+                  .providers()
+                  .accounts()
                   .getOne()
                   .expect(403)
                   .end(done);

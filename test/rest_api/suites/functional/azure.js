@@ -105,6 +105,7 @@ describe('Functional check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
+                  .subscriptions() 
                   .resourceGroups()
                   .providers()
                   .accounts() 
@@ -155,24 +156,21 @@ describe('Functional check', function () {
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
-                  .resources()
-                  .getAll()
+                  .subscriptions()
+                  .resourceGroups()
+                  .providers()
+                  .accounts() 
+                  .getOne()
+                  .expect(200)
                   .then(function (response) {
-                    var resources = response.body;
-                    API.resources.resources
-                      .getOne(resources[0].id)
-                      .expect(200)
-                      .then(function (res) {
-                        var resource = res.body;
-                        resource.should.not.be.undefined();
-                        resource.resource_name.should.not.be.undefined();
-                        done();
-                      })
-                      .catch(done);
+                    var resource = response.body;
+                    resource.should.not.be.undefined();
+                    resource.resource_name.should.not.be.undefined();
+                    done();
                   })
                   .catch(done);
               })
-              .catch(done);   
+              .catch(done);
           });
       });
     });

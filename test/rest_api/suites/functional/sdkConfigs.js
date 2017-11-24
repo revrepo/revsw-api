@@ -47,7 +47,7 @@ describe('Functional check', function () {
       done();
     });
 
-    xit('should allow to `get` specific `SDK config` without authentication.',
+    it('should allow to `get` specific `SDK config` without authentication.',
       function (done) {
         var sdk_key = DataProvider.generateSDKConfig().sdk_key;
         API.resources.sdkConfigs
@@ -76,7 +76,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
+    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
       function (done) {
         var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
         API.resources.sdkConfigs
