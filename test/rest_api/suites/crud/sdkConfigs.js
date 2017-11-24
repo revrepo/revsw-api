@@ -57,8 +57,8 @@ describe('CRUD check', function () {
               .getOne(sdk_key)
               .expect(200)
               .then(function (res) {
-                res.body.should.be.not.empty();
-                res.body.app_name.should.be.not.empty();
+                var sdk = res.body;
+                sdk.should.not.be.undefined();
                 done();
               })
               .catch(done);

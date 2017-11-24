@@ -47,7 +47,7 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should allow to `get` specific `SDK config` without authentication.',
+    xit('should allow to `get` specific `SDK config` without authentication.',
       function (done) {
         var sdk_key = DataProvider.generateSDKConfig().sdk_key;
         API.resources.sdkConfigs
@@ -66,7 +66,9 @@ describe('Functional check', function () {
               .getOne(sdk_key)
               .expect(200)
               .then(function (res) {
-                res.body.app_name.should.equal('Racer QA App 1 - please don\'t delete me');
+                var sdk = res.body;
+                sdk.should.not.be.undefined();
+                sdk.configs.should.not.be.undefined();
                 done();
               })
               .catch(done);
@@ -74,7 +76,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
+    xit('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
       function (done) {
         var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
         API.resources.sdkConfigs
