@@ -20,93 +20,100 @@ var Locators = require('./locators/locators');
 var Header = require('./header/header');
 var API = require('./api/api');
 var Constants = require('./constants');
-
+var BROWSER_WAIT_TIMEOUT = 10000;
 var baseURL = config.swagger.host.protocol + '://' + config.swagger.host.name;
 
 var Swagger = {
 
-    locators: Locators,
-    header: Header,
-    api: API,
-    constants: Constants,
-    /**
+  locators: Locators,
+  header: Header,
+  api: API,
+  constants: Constants,
+  /**
    * ### Swagger.load()
    *
    * Loads the swagger ui into the browser
    *
    */
-    load: function () {
-        browser.ignoreSynchronization = true; // don't wait for angular        
-        browser.get(baseURL);
-        browser.sleep(5000); //wait for resources to load
-    },
+  load: function() {
+    browser.ignoreSynchronization = true; // don't wait for angular
+    browser.get(baseURL);
+    browser.sleep(5000); //wait for resources to load
+  },
 
-    /* Global swagger methods */
-    getWrapper: function () {
-        return browser.driver.findElement(by.className(this.locators.wrapper.class));
-    },
+  /* Global swagger methods */
+  getWrapper: function() {
+    return browser.driver.findElement(by.className(this.locators.wrapper.class));
+  },
 
-    isDisplayed: function () {
-        return this.getWrapper().isDisplayed();
-    },
+  isDisplayed: function() {
+    return this.getWrapper().isDisplayed();
+  },
 
-    getSuccessAuthMSG: function () {
-        return browser
-            .driver
-            .findElement(by.css(this
-                .locators
-                .authMsgs
-                .success
-                .css));
-    },
+  getSuccessAuthMSG: function() {
+    var self = this;
+    return browser
+      .driver
+      .findElement(by.css(self
+        .locators
+        .authMsgs
+        .success
+        .css));
+  },
 
-    getFailAuthMSG: function () {
+  getFailAuthMSG: function() {
 
-        return browser
-            .driver
-            .findElement(by.css(this
-                .locators
-                .authMsgs
-                .fail
-                .css));
-    },
+    return browser
+      .driver
+      .findElement(by.css(this
+        .locators
+        .authMsgs
+        .fail
+        .css));
+  },
 
-    loginAPI: function (key) {
-        this.header.setAPIKey(key);
-        return this.header.clickAuthBtn();
-    },
+  loginAPI: function(key) {
+    this.header.setAPIKey(key);
+    return this.header.clickAuthBtn();
+  },
 
-    logout: function () {
-        return this.header.clickLogoutBtn();
-    },
+  logout: function() {
+    return this.header.clickLogoutBtn();
+  },
 
-    getElementByText: function (text) {
-        return browser.driver.findElement(by.xpath('.//*[.="' + text + '"]'));
-    },
+  getElementByText: function(text) {
+    return browser.driver.findElement(by.xpath('.//*[.="' + text + '"]'));
+  },
 
-    waitForElement: function (cssLocator, callback) {
-        var handler = setInterval(function () {
-            browser.isElementPresent(by.css(cssLocator)).then(function (vis) {
-                if (vis) {
-                    callback();
-                    clearInterval(handler);
-                }
-            });
-        }, 1000);
-    },
+  waitForElement: function(cssLocator) {
+    var timeout = BROWSER_WAIT_TIMEOUT;
+    var self = this;
+    var el_ = by.css(cssLocator);
+    return browser.wait(function() {
+      return browser.isElementPresent(el_);
+    }, timeout);
+  },
 
-    waitForText: function (locator, callback) {
-        var handler = setInterval(function () {
-            browser
-                .isElementPresent(by
-                    .cssContainingText(locator.css, locator.linkText)).then(function (vis) {
-                        if (vis) {
-                            callback();
-                            clearInterval(handler);
-                        }
-                    });
-        }, 1000);
-    }
+  waitForText: function(locator) {
+    var timeout = BROWSER_WAIT_TIMEOUT;
+    var self = this;
+    return browser.wait(function() {
+      return (browser.isElementPresent(by.id(locator.id)) &&
+        browser.driver.findElement(by.id(locator.id)).getText()
+        .then(function(val) {
+          return val !== '';
+        }));
+    }, timeout, 'Not found selector ' + locator.css + ' text ' + locator.linkText +
+       ' and id' + locator.id);
+  },
+
+  scrollToElement: function(element_) {
+    return browser.executeScript('arguments[0].scrollIntoView(true);', element_)
+      .then(function() {
+        return element_;
+      });
+  }
+
 };
 
 module.exports = Swagger;

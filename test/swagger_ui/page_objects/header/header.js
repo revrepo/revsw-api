@@ -40,8 +40,9 @@ var Header = {
     },
 
     setAPIKey: function (value) {
-        this.getAPIKeyInput().clear();
-        return this.getAPIKeyInput().sendKeys(value);
+      var element_ = this.getAPIKeyInput();
+      element_.clear();
+      return element_.sendKeys(''+value);
     },
 
     clickAuthBtn: function () {

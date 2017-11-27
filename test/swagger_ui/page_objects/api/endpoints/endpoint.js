@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -15,50 +15,79 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
+var BROWSER_WAIT_TIMEOUT = 10000;
 
-var Endpoint = function (endpoint, locators) {
+var Endpoint = function(endpoint, locators) {
 
-    // Properties
-    this.endpoint = endpoint;
-    this.locators = locators;
+  // Properties
+  this.endpoint = endpoint;
+  this.locators = locators;
 
-    this.getTitle = function () {
-        return browser.driver.findElement(by.css(this.locators.title.css));
-    };
+  this.getTitle = function() {
+    return browser.driver.findElement(by.css(this.locators.title.css));
+  };
 
-    this.clickTitle = function () {
-        return this.getTitle().click();
-    };
+  this.clickTitle = function() {
+    var self = this;
+    var element_ = self.getTitle();
+    return self.scrollToElement(element_)
+      .then(function() {
+        return element_.click();
+      });
+  };
 
-    this.getSubmit = function () {
-        return browser.driver.findElement(by.className(this.locators.submitBtn.class));
-    };
+  this.getSubmit = function() {
+    var self = this;
+    return browser.driver.findElement(by.className(self.locators.submitBtn.class));
+  };
 
-    this.clickSubmit = function () {
-        return this.getSubmit().click();
-    };
+  this.clickSubmit = function() {
+    var self = this;
+    var element_ = self.getSubmit();
+    return self.scrollToElement(element_)
+      .then(function() {
+        return element_.click();
+      });
 
-    this.getResponseCode = function () {
-        return browser
-            .driver
-            .findElement(by.css(this
-                .locators
-                .response
-                .responseCode
-                .css)).getText().then(function (code) {
-                    return code;
-                });
-    };
+  };
 
-    this.getResponseCodeContainer = function () {
-        return browser
-            .driver
-            .findElement(by.css(this
-                .locators
-                .response
-                .responseCode
-                .css));
-    };
+  this.getResponseCode = function(milliseconds) {
+    var self = this;
+    var timeout = milliseconds || BROWSER_WAIT_TIMEOUT;
+    return browser.wait(function() {
+    var element_ = browser
+      .driver
+      .findElement(by.css(self
+        .locators
+        .response
+        .responseCode
+        .css));
+
+    return self.scrollToElement(element_)
+      .then(function(){
+        return element_.getText().then(function(code) {
+          return code;
+        });
+      });
+    }, timeout);
+  };
+
+  this.getResponseCodeContainer = function() {
+    return browser
+      .driver
+      .findElement(by.css(this
+        .locators
+        .response
+        .responseCode
+        .css));
+  };
+
+  this.scrollToElement = function(element_) {
+    return browser.executeScript('arguments[0].scrollIntoView(true);',
+      element_).then(function(){
+        return element_;
+      });
+  };
 };
 
 module.exports = Endpoint;
