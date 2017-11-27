@@ -18,15 +18,30 @@
 
 var Session = require('./session');
 var APITestError = require('./apiTestError');
-var APIKeysHelper = require('./helpers/apiKeys');
+var APIKeysResource = require('./resources/apiKeys');
 var AuthenticateRes = require('./resources/authenticate');
+var APIKeyDP = require('./providers/data/apiKeys');
 var Constants = require('./../common/constants');
 
+var CURRENT_AUTH_MODE = process.env.AUTH_MODE;
+
 var authenticateWithAPIKey = function (data) {
-  APIKeysHelper
-    .createOneForAccount(data.account.id)
-    .then(function (apiKey) {
-      Session.setCurrentAPIKey(apiKey);
+  var currentAuthMode = Session.getAuthenticationMode();
+  Session.setAuthenticationMode(Constants.API.AUTH_MODE.CREDENTIALS);
+  return AuthenticateRes
+    .createOne({email: data.email, password: data.password})
+    .then(function (response) {
+      data.token = response.body.token;
+      Session.setCurrentUser(data);
+      var apiKey = APIKeyDP.generateOne(data.account.id);
+      return APIKeysResource.createOne(apiKey);
+    })
+    .then(function (response) {
+      Session.setAuthenticationMode(currentAuthMode);
+      Session.setCurrentAPIKey({
+        id: response.body.object_id,
+        key: response.body.key
+      });
     })
     .catch(function (error) {
       throw new APITestError('Authenticating user with API Key',
@@ -65,9 +80,7 @@ var Identity = {
    */
   authenticate: function (data) {
 
-    var authMode = process.env.AUTH_MODE;
-
-    switch(authMode) {
+    switch(CURRENT_AUTH_MODE) {
       case Constants.API.AUTH_MODE.API_KEY:
         Session.setAuthenticationMode(Constants.API.AUTH_MODE.API_KEY);
         return authenticateWithAPIKey(data);
