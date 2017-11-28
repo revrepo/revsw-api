@@ -33,7 +33,7 @@ describe('Negative check', function () {
   
   describe('Usage Report resource', function () {
 
-    describe('With not-allowed user', function () {
+    describe('With not-allowed user: ' + user.role, function () {
 
       it('should return `Forbidden` response when getting specific account usage report with user-role user.', 
         function (done) {
