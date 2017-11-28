@@ -54,7 +54,8 @@ var Header = {
     },
 
     setAuthVia: function (value) {
-        return this.getAuthViaDropdown().sendKeys(value);
+        this.getAuthViaDropdown().click();
+        return element(by.cssContainingText('option', value)).click();
     },
 
     getUsernameInput: function () {
