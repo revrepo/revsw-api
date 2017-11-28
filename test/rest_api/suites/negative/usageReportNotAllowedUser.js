@@ -35,7 +35,7 @@ describe('Negative check', function () {
 
     describe('With not-allowed user', function () {
 
-      it('should return `Forbidden` response when getting specific account usage report.', 
+      it('should return `Forbidden` response when getting specific account usage report with user-role user.', 
         function (done) {
           API.helpers
             .authenticateUser(user)
@@ -48,7 +48,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when getting specific account usage histogram.', 
+      it('should return `Forbidden` response when getting specific account usage histogram with user-role user.', 
         function (done) {
           API.helpers
             .authenticateUser(user)

@@ -30,135 +30,146 @@ describe('Smoke check', function () {
 
   // Retrieving information about specific user that later we will use for
   // our API requests.
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'), 
+    config.get('api.users.reseller'),  
+    config.get('api.users.admin'),  
+    config.get('api.users.user')      
+  ];
 
-  before(function (done) {
-    // API.helpers
-    //   .authenticateUser(user)
-    //   .then(function () {
-    //     return API.helpers.sslNames.createOne();
-    //   })
-    //   .then(function (sslname) {
-    //     sslName = sslname;
-    //     accountId = sslName.account_id;
-    //     done();
-    //   })
-    //   .catch(done);
-     done();
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function() {
 
-  describe('SSL Names resource', function () {
-
-    it('should return a success response when getting all SSL Names.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      before(function (done) {
+        // API.helpers
+        //   .authenticateUser(user)
+        //   .then(function () {
+        //     return API.helpers.sslNames.createOne();
+        //   })
+        //   .then(function (sslname) {
+        //     sslName = sslname;
+        //     accountId = sslName.account_id;
+        //     done();
+        //   })
+        //   .catch(done);
+        done();
       });
 
-    it('should return a success response when getting specific SSL Name.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .then(function (response){
-                var sslNames = response.body;
+      after(function (done) {
+        done();
+      });
+
+      describe('SSL Names resource', function () {
+
+        it('should return a success response when getting all SSL Names with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.sslNames
-                  .getOne(sslNames[0].id)
+                  .getAll()
                   .expect(200)
                   .end(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    xit('should return a success response when creating specific SSL name.',
-      function (done) {
-        var sslname = SSLNameDP.generateOne(accountId,'test');
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .createOne(sslname)
-              .expect(200)
+        it('should return a success response when getting specific SSL Name with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslNames
+                  .getAll()
+                  .then(function (response){
+                    var sslNames = response.body;
+                    API.resources.sslNames
+                      .getOne(sslNames[0].id)
+                      .expect(200)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        xit('should return a success response when creating specific SSL name with user-role user.',
+          function (done) {
+            var sslname = SSLNameDP.generateOne(accountId,'test');
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslNames
+                  .createOne(sslname)
+                  .expect(200)
+                  .then(function (response) {
+                    API.resources.sslNames
+                      .deleteOne(response.body.object_id)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        xit('should return a success response when deleting a specific SSL Name with user-role user.',
+          function (done) {
+            var sslname = SSLNameDP.generateOne(accountId,'test2');
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.sslNames.createOne(sslname);
+              })
               .then(function (response) {
                 API.resources.sslNames
                   .deleteOne(response.body.object_id)
-                  .end(done);
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    xit('should return a success response when deleting a specific SSL Name.',
-      function (done) {
-        var sslname = SSLNameDP.generateOne(accountId,'test2');
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.resources.sslNames.createOne(sslname);
-          })
-          .then(function (response) {
-            API.resources.sslNames
-              .deleteOne(response.body.object_id)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a success response when getting specific SSL Name with Email Approvers.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .then(function (response){ 
-                var sslNames = response.body; 
-                API.resources.sslNames
-                  .approvers()
-                  .getAll({ssl_name: sslNames[0].ssl_name})
                   .expect(200)
                   .end(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    it('should return a success response when getting (verify) specific SSL name.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .then(function (response){
-                var sslNames = response.body;
+        it('should return a success response when getting specific SSL Name with Email Approvers with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.sslNames
-                  .verify(sslNames[5].id)
-                  .getOne()
-                  .expect(200)
-                  .end(done);
+                  .getAll()
+                  .then(function (response){ 
+                    var sslNames = response.body; 
+                    API.resources.sslNames
+                      .approvers()
+                      .getAll({ssl_name: sslNames[0].ssl_name})
+                      .expect(200)
+                      .end(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
+
+        it('should return a success response when getting (verify) specific SSL name with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslNames
+                  .getAll()
+                  .then(function (response){
+                    var sslNames = response.body;
+                    API.resources.sslNames
+                      .verify(sslNames[0].id)
+                      .getOne()
+                      .expect(200)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
       });
-   });
+    });
+  });
 });

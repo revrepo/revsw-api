@@ -28,14 +28,16 @@ describe('Negative check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
-    config.get('api.users.admin')
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
   ];
 
   users.forEach(function (user) {
 
-    describe('With not-allowed user: ' + user.role, function () {
+    describe('Azure resource', function () {
 
-      describe('Azure resource', function () {
+      describe('With not-allowed user: ' + user.role, function () {
 
         before(function (done) {
           done();
@@ -53,7 +55,7 @@ describe('Negative check', function () {
           done();
         });
 
-        it('should return `Forbidden` response when getting all subscriptions with Admin role.', 
+        it('should return `Forbidden` response when getting all subscriptions with user-role user.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -67,7 +69,7 @@ describe('Negative check', function () {
               .catch(done);
           });
       
-        it('should return `Forbidden` response when getting all resources with Admin role.', 
+        it('should return `Forbidden` response when getting all resources with user-role user.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -81,7 +83,7 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting all resources in resourceGroup with Admin role.', 
+        xit('should return `Forbidden` response when getting all resources in resourceGroup with user-role user.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -98,7 +100,7 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting all resources in subscription with Admin role.', 
+        xit('should return `Forbidden` response when getting all resources in subscription with user-role user.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -114,7 +116,7 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting specific resource with Admin role.', 
+        xit('should return `Forbidden` response when getting specific resource with user-role user.', 
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -133,4 +135,4 @@ describe('Negative check', function () {
       });
     });
   });
- });
+});

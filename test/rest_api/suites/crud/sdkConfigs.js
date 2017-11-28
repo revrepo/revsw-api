@@ -27,43 +27,46 @@ describe('CRUD check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
+  ];
 
-  before(function (done) {
-    done();
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function() {
 
-  describe('SDK Configs resource', function () {
+      before(function (done) {
+        done();
+      });
 
-    beforeEach(function (done) {
-      done();
-    });
+      after(function (done) {
+        done();
+      });
 
-    afterEach(function (done) {
-      done();
-    });
+      describe('SDK Configs resource', function () {
 
-    it('should return a success response when getting specific app SDK Config.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-            API.resources.sdkConfigs
-              .getOne(sdk_key)
-              .expect(200)
-              .then(function (res) {
-                var sdk = res.body;
-                sdk.should.not.be.undefined();
-                done();
+        it('should return a success response when getting specific app SDK Config with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                var sdk_key = DataProvider.generateSDKConfig().sdk_key;
+                API.resources.sdkConfigs
+                  .getOne(sdk_key)
+                  .expect(200)
+                  .then(function (res) {
+                    var sdk = res.body;
+                    sdk.should.not.be.undefined();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });

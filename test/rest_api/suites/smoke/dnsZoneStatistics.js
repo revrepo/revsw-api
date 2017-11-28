@@ -20,6 +20,7 @@ require('should-http');
 var config = require('config');
 var API = require('./../../common/api');
 var DNSZonesDP = require('./../../common/providers/data/dnsZones');
+var DNSZoneStatisticsDP = require('./../../common/providers/data/dnsZoneStatistics');
 
 describe('Smoke check', function () {
 
@@ -27,6 +28,7 @@ describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var users = [
+    config.get('api.users.revAdmin'),
     config.get('api.users.reseller')
   ];
 
@@ -76,43 +78,45 @@ describe('Smoke check', function () {
           done();
         });
 
-              
-       it('should return a response when getting a specific DNS zone with usage stats and period last 24h',
+        it('should return a response when getting a specific DNS zone with usage stats and period last 24h with user-role user',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
+                var period = DNSZoneStatisticsDP.generatePeriod();
                 API.resources.dnsZones
                   .usage(firstDnsZone.id)
-                  .getOne(firstDnsZone.id, {period: '24h'})
+                  .getOne(firstDnsZone.id, period)
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
 
-        it('should return a response when getting a specific DNS zone with usage stats and period last 1h',
+        it('should return a response when getting a specific DNS zone with usage stats and period last 1h with user-role user',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
+                var period = DNSZoneStatisticsDP.generateOne();
                 API.resources.dnsZones
                   .usage(firstDnsZone.id)
-                  .getOne(firstDnsZone.id, {period: '1h'})
+                  .getOne(firstDnsZone.id, period)
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
 
-        it('should return a response when getting a specific DNS zone with usage stats and period last 30d',
+        it('should return a response when getting a specific DNS zone with usage stats and period last 30d with user-role user',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
+                var period = DNSZoneStatisticsDP.generateTwo();
                 API.resources.dnsZones
                   .usage(firstDnsZone.id)
-                  .getOne(firstDnsZone.id, {period: '30d'})
+                  .getOne(firstDnsZone.id, period)
                   .expect(200)
                   .end(done);
               })

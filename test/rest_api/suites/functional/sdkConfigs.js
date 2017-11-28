@@ -27,66 +27,79 @@ describe('Functional check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
+  ];
 
-  before(function (done) {
-    done();
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function() {
 
-  describe('SDK Configs resource', function () {
-
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should allow to `get` specific `SDK config` without authentication.',
-      function (done) {
-        var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(200)
-          .end(done);
+      before(function (done) {
+        done();
       });
 
-    it('should return a success response when getting specific app SDK Config.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
+      after(function (done) {
+        done();
+      });
+
+      describe('SDK Configs resource', function () {
+
+        beforeEach(function (done) {
+          done();
+        });
+
+        afterEach(function (done) {
+          done();
+        });
+
+        it('should allow to `get` specific `SDK config` without authentication.',
+          function (done) {
             var sdk_key = DataProvider.generateSDKConfig().sdk_key;
             API.resources.sdkConfigs
               .getOne(sdk_key)
               .expect(200)
-              .then(function (res) {
-                var sdk = res.body;
-                sdk.should.not.be.undefined();
-                sdk.configs.should.not.be.undefined();
-                done();
+              .end(done);
+          });
+
+        it('should return a success response when getting specific app SDK Config with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                var sdk_key = DataProvider.generateSDKConfig().sdk_key;
+                API.resources.sdkConfigs
+                  .getOne(sdk_key)
+                  .expect(200)
+                  .then(function (res) {
+                    var sdk = res.body;
+                    sdk.should.not.be.undefined();
+                    sdk.os.should.not.be.undefined();
+                    sdk.app_name.should.not.be.undefined();
+                    sdk.configs.should.not.be.undefined();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
-      function (done) {
-        var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
-        API.resources.sdkConfigs
-          .getOne(sdk_key)
-          .expect(400)
-          .end(function (err, res) {
-            res.body.error.should.equal('Bad Request');
-            res.body.message.should.equal('Application not found');
-            done();
+        it('should return `Bad Request` when trying to `get` non-existing `SDK config`.',
+          function (done) {
+            var sdk_key = DataProvider.generateInvalidSDKConfig().sdk_key;
+            API.resources.sdkConfigs
+              .getOne(sdk_key)
+              .expect(400)
+              .end(function (err, res) {
+                res.body.error.should.equal('Bad Request');
+                res.body.message.should.equal('Application not found');
+                done();
+              });
           });
       });
     });
   });
+});

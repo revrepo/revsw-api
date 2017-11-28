@@ -16,20 +16,39 @@
  * from Rev Software, Inc.
  */
 
-var AppsDataProvider = require('./apps');
-var DashboardsDataProvider = require('./dashboards');
-var DNSZonesDataProvider = require('./dnsZones');
-var DNSZoneStatisticsDataProvider = require('./dnsZoneStatistics');
-var UsersDataProvider = require('./users');
-var WAFRulesDataProvider = require('./wafRules');
 
-var APIDataProviders = {
-  apps: AppsDataProvider,
-  dashboards: DashboardsDataProvider,
-  dnsZones: DNSZonesDataProvider,
-  dnsZoneStatistics: DNSZoneStatisticsDataProvider,
-  users: UsersDataProvider,
-  wafRules: WAFRulesDataProvider
+
+// # DNS Zone Statistics  Data Provider object
+//
+// Defines some methods to generate valid and common DNS Zone Statistics test data.
+// With common we mean it does not have anything special on it.
+//
+// From there, you can modify and get bogus, invalid or other type of data
+// depending on your test needs.
+var DNSZoneStatisticsDataProvider = {
+
+  prefix: 'API-ZONE',
+
+  
+  generateOne: function () {
+    return {
+      period: '1h'
+    };
+  },
+
+ generatePeriod: function() {
+    return {
+      period: '24h'
+    };
+  },
+
+  generateTwo: function () {
+    return {
+      period: '30d'
+    };
+  },
+
+
 };
 
-module.exports = APIDataProviders;
+module.exports = DNSZoneStatisticsDataProvider;

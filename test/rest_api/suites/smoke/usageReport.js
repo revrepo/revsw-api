@@ -29,35 +29,53 @@ var account_id = config.get('api.usage_report.account_id');
 describe('Smoke check', function () {
   this.timeout(config.api.request.maxTimeout);
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+   config.get('api.users.revAdmin'),
+   config.get('api.users.secondReseller'),
+   config.get('api.users.admin')
+  ];
   
-  describe('Usage Report resource', function () {
+  users.forEach(function(user) {
 
-    it('should return a success response when getting specific account usage report.', 
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.usage_report
-              .getAll({account_id: account_id})
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+    describe('With user: ' + user.role, function() {
+
+      before(function(done) {
+        done();
       });
 
-    it('should return a success response when getting specific account usage histogram.', 
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.usage_report
-              .stats()
-              .getAll({account_id: account_id})
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      after(function(done) {
+        done();
+      }); 
+
+      describe('Usage Report resource', function () {
+
+        it('should return a success response when getting specific account usage report with user-role user.', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.usage_report
+                  .getAll({account_id: account_id})
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return a success response when getting specific account usage histogram with user-role user.', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.usage_report
+                  .stats()
+                  .getAll({account_id: account_id})
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
-   });
+    });
+  });
 });

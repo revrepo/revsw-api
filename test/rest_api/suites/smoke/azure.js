@@ -48,7 +48,7 @@ describe('Smoke check', function () {
           done();
         });
 
-       it('should return a success response when getting all subscriptions.', 
+       it('should return a success response when getting all subscriptions with revAdmin role.', 
           function (done) {
             API.helpers
               .attemptToAuthenticateUser(RevAdmin)
@@ -62,7 +62,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-       it('should return a success response when getting all resources.', 
+       it('should return a success response when getting all resources with revAdmin role.', 
           function (done) {
             API.helpers
               .attemptToAuthenticateUser(RevAdmin)
@@ -76,7 +76,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in resourceGroup.', 
+        xit('should return a success response when getting all resources in resourceGroup with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(RevAdmin)
@@ -93,7 +93,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in subscription.', 
+        xit('should return a success response when getting all resources in subscription with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(RevAdmin)
@@ -109,7 +109,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        xit('should return a success response when getting specific resource.', 
+        xit('should return a success response when getting specific resource with revAdmin role.', 
           function (done) {
             API.helpers
               .authenticateUser(RevAdmin)

@@ -33,168 +33,179 @@ describe('Functional check', function () {
 
   // Retrieving information about specific user that later we will use for
   // our API requests.
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
+  ];
 
-  before(function (done) {
-    // API.helpers
-    //   .authenticateUser(user)
-    //   .then(function () {
-    //    return API.helpers.sslNames.createOne();
-    //   })
-    //   .then(function (sslname) {
-    //     sslName = sslname;
-    //     accountId = sslName.account_id;
-    //     done();
-    //   })
-    //   .catch(done);
-      done();
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    done();
-  });
+    describe('With user: ' + user.role, function() {
 
-  describe('SSL Names resource', function () {
-
-    it('should get SSL Names list with revAdmin role.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var sslNames = res.body;
-                sslNames.should.not.be.undefined();
-                sslNames.length.should.greaterThanOrEqual(0);
-                sslNames.forEach(function (ssl) {
-                  ssl.ssl_name.should.not.be.undefined();
-                });
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
+      before(function (done) {
+        // API.helpers
+        //   .authenticateUser(user)
+        //   .then(function () {
+        //     return API.helpers.sslNames.createOne();
+        //   })
+        //   .then(function (sslname) {
+        //     sslName = sslname;
+        //     accountId = sslName.account_id;
+        //     done();
+        //   })
+        //   .catch(done);
+        done();
       });
 
-    it('should get specific SSL Name with revAdmin role.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .then(function (response){
-                var sslNames = response.body;
+      after(function (done) {
+        done();
+      });
+
+      describe('SSL Names resource', function () {
+
+        it('should get SSL Names list with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.sslNames
-                  .getOne(sslNames[0].id)
+                  .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var ssl = res.body;
-                    ssl.should.not.be.undefined();
-                    ssl.ssl_name.should.not.be.undefined();
-                    done();
-                  })
-                  .catch(done);
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    xit('should create specific SSL Name with revAdmin role.',
-      function (done) {
-        var sslname = SSLNameDP.generateOne(accountId,'test');
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .createOne(sslname)
-              .expect(200)    
-              .then(function (response) {
-                response.body.message.should.equal('Successfully added new SSL name');
-                API.resources.sslNames
-                   .deleteOne(response.body.object_id)
-                   .end(done);
-              })
-              .catch(done);
-          })
-          .catch(done); 
-      });
-
-    xit('should delete specific SSL Name with revAdmin role.',
-      function (done) {
-        var sslname = SSLNameDP.generateOne(accountId,'test2');
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.resources.sslNames.createOne(sslname);
-          })
-          .then(function (response) {
-            API.resources.sslNames
-              .deleteOne(response.body.object_id)
-              .expect(200)
-              .then(function(res) {
-                res.body.message.should.equal('Successfully deleted the SSL name');
-                done();   
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should get specific SSL Name with Email Approvers and revAdmin role.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .then(function (response) {  
-                var sslNames = response.body;
-                API.resources.sslNames
-                  .approvers()
-                  .getAll({ssl_name:sslNames[0].ssl_name})
-                  .expect(200)
-                  .then(function (res) {
-                    var approvers = res.body;
-                    approvers.should.not.be.undefined();
-                    approvers.length.should.greaterThanOrEqual(0);
-                    approvers.forEach(function (email) {
-                      email.approver_email.should.not.be.undefined();
+                    var sslNames = res.body;
+                    sslNames.should.not.be.undefined();
+                    sslNames.length.should.greaterThanOrEqual(0);
+                    sslNames.forEach(function (ssl) {
+                      ssl.ssl_name.should.not.be.undefined();
                     });
                     done();
                   })
                   .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    it('should verify specific SSL Name with revAdmin role.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslNames
-              .getAll()
-              .then(function (response) {
-                var sslNames = response.body;
+        it('should get specific SSL Name with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
                 API.resources.sslNames
-                  .verify(sslNames[5].id)
-                  .getOne()
-                  .expect(200)
-                  .then(function (res) {
-                    res.body.message.should.equal('Waiting for approval');
-                    done();
+                  .getAll()
+                  .then(function (response){
+                    var sslNames = response.body;
+                    API.resources.sslNames
+                      .getOne(sslNames[0].id)
+                      .expect(200)
+                      .then(function (res) {
+                        var ssl = res.body;
+                        ssl.should.not.be.undefined();
+                        ssl.ssl_name.should.not.be.undefined();
+                        done();
+                      })
+                      .catch(done);
                   })
                   .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
+
+        xit('should create specific SSL Name user-role user.',
+          function (done) {
+            var sslname = SSLNameDP.generateOne(accountId,'test');
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslNames
+                  .createOne(sslname)
+                  .expect(200)    
+                  .then(function (response) {
+                    response.body.message.should.equal('Successfully added new SSL name');
+                    API.resources.sslNames
+                       .deleteOne(response.body.object_id)
+                       .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done); 
+          });
+
+        xit('should delete specific SSL Name with user-role user.',
+          function (done) {
+            var sslname = SSLNameDP.generateOne(accountId,'test2');
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                return API.resources.sslNames.createOne(sslname);
+              })
+              .then(function (response) {
+                API.resources.sslNames
+                  .deleteOne(response.body.object_id)
+                  .expect(200)
+                  .then(function(res) {
+                    res.body.message.should.equal('Successfully deleted the SSL name');
+                    done();   
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+       it('should get specific SSL Name with Email Approvers and user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslNames
+                  .getAll()
+                  .then(function (response) {  
+                    var sslNames = response.body;
+                    API.resources.sslNames
+                      .approvers()
+                      .getAll({ssl_name:sslNames[0].ssl_name})
+                      .expect(200)
+                      .then(function (res) {
+                        var approvers = res.body;
+                        approvers.should.not.be.undefined();
+                        approvers.length.should.greaterThanOrEqual(0);
+                        approvers.forEach(function (email) {
+                          email.approver_email.should.not.be.undefined();
+                        });
+                        done();
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        it('should verify specific SSL Name with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslNames
+                  .getAll()
+                  .then(function (response) {
+                    var sslNames = response.body;
+                    API.resources.sslNames
+                      .verify(sslNames[0].id)
+                      .getOne()
+                      .expect(200)
+                      .then(function (res) {
+                        res.body.message.should.equal('Waiting for approval');
+                        done();
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
       });
+    });
   });
 });

@@ -26,21 +26,40 @@ describe('Smoke check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
+  ];
 
-  describe('SSL Config profile resource', function () {
+  users.forEach(function(user) {
+
+    describe('With user: ' + user.role, function() {
+
+      before(function(done) {
+        done();
+      });
+
+      after(function(done) {
+        done();
+      });
+
+      describe('SSL Config profile resource', function () {
     
-   it('should return a success response when getting all SSL Config profiles.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.sslConfProfiles
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });   
+        it('should return a success response when getting all SSL Config profiles with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.sslConfProfiles
+                  .getAll()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });   
+      });
+    });
   });
 });

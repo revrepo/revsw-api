@@ -29,48 +29,57 @@ describe('UsageReport CRUD check:', function () {
   // Changing default mocha's timeout
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var user = config.get('api.users.revAdmin');
+  var users = [
+   config.get('api.users.revAdmin'),
+   config.get('api.users.secondReseller'),
+   config.get('api.users.admin')
+  ];
 
-  describe( 'UsageReport Stats ', function ( ) {
+  users.forEach(function(user) {
 
-    it('should return response when getting specific account usage histogram.', 
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.usage_report
-              .stats()
-              .getAll({account_id: account_id})
-              .expect(200)
-              .then(function (data) {
-                report = data.body.metadata;
-                report.should.be.not.empty();
-                report.account_id.should.be.not.empty();
-                done();
+    describe('With user: ' + user.role, function() {
+
+      describe( 'UsageReport Stats ', function ( ) {
+
+        it('should return response when getting specific account usage histogram with user-role user.', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.usage_report
+                  .stats()
+                  .getAll({account_id: account_id})
+                  .expect(200)
+                  .then(function (data) {
+                    report = data.body.metadata;
+                    report.should.be.not.empty();
+                    report.account_id.should.be.not.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    it('should return a success response when getting specific account usage report.', 
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.usage_report
-              .getAll({account_id: account_id})
-              .expect(200)
-              .then(function (data) {
-                report = data.body.metadata;
-                report.should.be.not.empty();
-                report.account_id.should.be.not.empty();
-                done();
+        it('should return a success response when getting specific account usage report with user-role user.', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.usage_report
+                  .getAll({account_id: account_id})
+                  .expect(200)
+                  .then(function (data) {
+                    report = data.body.metadata;
+                    report.should.be.not.empty();
+                    report.account_id.should.be.not.empty();
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
       });
+    });
   });
 });
- 

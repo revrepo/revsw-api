@@ -85,7 +85,7 @@ describe('CRUD check', function () {
           done();
         });
 
-        it('should return data when getting specific purge.',
+        it('should return data when getting specific purge with user-role user.',
           function (done) {
             var counter = 10000; // 10 secs
             var interval = 1000; // 1 sec
@@ -116,7 +116,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should return data when creating new purge.',
+        it('should return data when creating new purge with user-role user.',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -134,7 +134,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should return data when getting specific purge request.',
+        it('should return data when getting specific purge request with user-role user.',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -152,7 +152,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should return data when getting list purge requests.',
+        it('should return data when getting list purge requests with user-role user.',
           function (done) {
             API.helpers
               .authenticateUser(user)
@@ -163,25 +163,6 @@ describe('CRUD check', function () {
                   .then(function (res) {
                     var purge = res.body;
                     purge.should.not.be.undefined();
-                    done();
-                  })
-                  .catch(done);
-              })
-              .catch(done);
-          });
-
-        it('should return data when posting domain purge object.',
-          function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
-                API.resources.purge
-                  .createOne(purgeData)
-                  .expect(200)
-                  .then(function (res) {
-                    purge.should.not.be.empty();
-                    res.body.request_id.should.not.be.empty();
                     done();
                   })
                   .catch(done);

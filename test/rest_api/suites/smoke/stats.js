@@ -32,360 +32,369 @@ describe('Smoke check', function () {
 
   var account;
   var domainConfig;
-  var reseller = config.get('api.users.reseller');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        return API.helpers.accounts.createOne();
-      })
-      .then(function (newAccount) {
-        account = newAccount;
-        return API.helpers.domainConfigs.createOne(account.id);
-      })
-      .then(function (newDomainConfig) {
-        domainConfig = newDomainConfig;
-      })
-      .then(done)
-      .catch(done);
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        API.resources.domainConfigs.deleteOne(domainConfig.id);
-        done();
-      })
-      .catch(done);
-  });
+    describe('With user: ' + user.role, function() {
 
-  parallel('Stats resource,', function () {
-
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
-
-    var getSpecCallback = function (queryData) {
-      return function (done) {
+      before(function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.stats
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
+            return API.helpers.accounts.createOne();
           })
+          .then(function (newAccount) {
+            account = newAccount;
+            return API.helpers.domainConfigs.createOne(account.id);
+          })
+          .then(function (newDomainConfig) {
+            domainConfig = newDomainConfig;
+          })
+          .then(done)
           .catch(done);
-      };
-    };
-
-    StatsDDHelper
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
       });
 
-    //StatsDDHelper
-    //  .getCombinedQueryParams()
-    //  .forEach(function (queryParams) {
-    //    var specDescription = getSpecDescription(queryParams);
-    //    var specCallback = getSpecCallback(queryParams);
-    //    /** Running spec with a set of combined query params */
-    //    it(specDescription, specCallback);
-    //  });
-  });
-
-  parallel('GBT: Stats resource,', function () {
-
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
-
-    var getSpecCallback = function (queryData) {
-      return function (done) {
+      after(function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.stats
-              .gbt()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
+            API.resources.domainConfigs.deleteOne(domainConfig.id);
+            done();
           })
           .catch(done);
-      };
-    };
-
-    StatsDDHelper.gbt
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
       });
-  });
 
-  parallel('Last Mile RTT: Stats resource,', function () {
+      parallel('Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .lastMileRtt()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.lastMileRtt
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+
+          //StatsDDHelper
+          //  .getCombinedQueryParams()
+          //  .forEach(function (queryParams) {
+          //    var specDescription = getSpecDescription(queryParams);
+          //    var specCallback = getSpecCallback(queryParams);
+          //    /** Running spec with a set of combined query params */
+          //    it(specDescription, specCallback);
+          //  });
       });
-  });
 
-  parallel('TOP: Stats resource,', function () {
+      parallel('GBT: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .top()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .gbt()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.top
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.gbt
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('TOP Objects: Stats resource,', function () {
+      parallel('Last Mile RTT: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .topObjects()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .lastMileRtt()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.topObjects
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.lastMileRtt
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('Image Engine: Stats resource,', function () {
+      parallel('TOP: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .imageEngine()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .top()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.imageEngine
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.top
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('Mobile/Desktop Distribution: Stats resource,', function () {
+      parallel('TOP Objects: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .mobileDesktop()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .topObjects()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.mobileDesktop
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.topObjects
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('FBT Heatmap: Stats resource,', function () {
+      parallel('Image Engine: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .fbtHeatmap()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .imageEngine()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.fbtHeatmap
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.imageEngine
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('FBT Distribution: Stats resource,', function () {
+      parallel('Mobile/Desktop Distribution: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .fbtDistribution()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .mobileDesktop()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.fbtDistribution
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.mobileDesktop
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
-  });
 
-  parallel('FBT Average: Stats resource,', function () {
+      parallel('FBT Heatmap: Stats resource,', function () {
 
-    var getSpecDescription = function (queryData) {
-      return 'should return success response when using: ' +
-        Utils.getJsonAsKeyValueString(queryData);
-    };
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
 
-    var getSpecCallback = function (queryData) {
-      return function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.stats
-              .fbtAverage()
-              .getOne(domainConfig.id, queryData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      };
-    };
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .fbtHeatmap()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
 
-    StatsDDHelper.fbtAverage
-      .getQueryParams()
-      .forEach(function (queryParams) {
-        var specDescription = getSpecDescription(queryParams);
-        var specCallback = getSpecCallback(queryParams);
-        /** Running spec for each query params */
-        it(specDescription, specCallback);
+        StatsDDHelper.fbtHeatmap
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
       });
+
+      parallel('FBT Distribution: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .fbtDistribution()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.fbtDistribution
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+
+      parallel('FBT Average: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return success response when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .fbtAverage()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.fbtAverage
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+    });
   });
 });

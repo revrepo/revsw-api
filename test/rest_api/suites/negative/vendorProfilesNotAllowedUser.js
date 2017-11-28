@@ -29,75 +29,84 @@ describe('Negative check', function () {
   
   this.timeout(config.api.request.maxTimeout);
 
-  var Admin = config.get('api.users.admin');
+  var users = [
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user')
+  ];
 
-  after(function (done) {
-    done();
-  });
+  users.forEach(function (user) {
 
-  describe('Vendor profile resource', function () {
-    
-    describe('With not-allowed user', function () {
+    describe('Vendor profile resource', function () {
 
-      it('should return `Forbidden` response when getting all vendor profiles with Admin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .getAll()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+      before(function (done) {
+        done();
+      });
+      after(function (done) {
+        done();
+      });
 
-      xit('should return `Forbidden` response when getting revapm vendor profile by name  with Admin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .vendorProfile()
-                .getOne()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+      describe('With not-allowed user: ' + user.role, function () {
 
-      xit('should return `Forbidden` response when getting nuubit vendor profile by name  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .vendorsProfile()
-                .getOne()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        it('should return `Forbidden` response when getting all vendor profiles with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .getAll()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
 
-      xit('should return `Forbidden` response when getting hooli vendor profile by name  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .vendorssProfile()
-                .getOne()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        xit('should return `Forbidden` response when getting revapm vendor profile by name with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .vendorProfile()
+                  .getOne()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
 
-      xit('should return `Forbidden` response when getting revapm vendor profile by id  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
+        xit('should return `Forbidden` response when getting nuubit vendor profile by name with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .vendorsProfile()
+                  .getOne()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        xit('should return `Forbidden` response when getting hooli vendor profile by name with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .vendorssProfile()
+                  .getOne()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        xit('should return `Forbidden` response when getting revapm vendor profile by id with user-role user', 
+          function (done) {
+            API.helpers
+            .authenticateUser(user)
             .then(function () {
               API.resources.vendorProfiles
                 .vendorUrlProfile()
@@ -106,77 +115,78 @@ describe('Negative check', function () {
                 .end(done);
             })
             .catch(done);
-        });
+          });
 
-      xit('should return `Forbidden` response when getting nuubit vendor profile by id  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .vendorsUrlProfile()
-                .getOne()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        xit('should return `Forbidden` response when getting nuubit vendor profile by id with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .vendorsUrlProfile()
+                  .getOne()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
 
-      xit('should return `Forbidden` response  when getting hooli vendor profile by id  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .vendorssUrlProfile()
-                .getOne()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        xit('should return `Forbidden` response  when getting hooli vendor profile by id with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .vendorssUrlProfile()
+                  .getOne()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
 
-      xit('should return `Forbidden` response when updating revapm vendor profile to hooli  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .updateVendorProfile()
-                .update()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        xit('should return `Forbidden` response when updating revapm vendor profile to hooli with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .updateVendorProfile()
+                  .update()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
 
-      xit('should return `Forbidden` response when updating nuubit vendor profile to revapm  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .updateVendorsProfile()
-                .update()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        xit('should return `Forbidden` response when updating nuubit vendor profile to revapm with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .updateVendorsProfile()
+                  .update()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
 
-      xit('should return `Forbidden` response when updating revapm vendor profile to nuubit  with revAdmin role', 
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.resources.vendorProfiles
-                .updateVendorssProfile()
-                .update()
-                .expect(403)
-                .end(done);
-            })
-            .catch(done);
-        });
+        xit('should return `Forbidden` response when updating revapm vendor profile to nuubit with user-role user', 
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.vendorProfiles
+                  .updateVendorssProfile()
+                  .update()
+                  .expect(403)
+                  .end(done);
+              })
+              .catch(done);
+          });
+      });
     });
   });
 });
