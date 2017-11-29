@@ -20,7 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DataProvider = require('./../../common/providers/data');
+var AzureDP = require('./../../common/providers/data/azure');
 
 describe('Negative check', function () {
 
@@ -100,15 +100,17 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting all resources in subscription with user-role user.', 
+        it('should return `Forbidden` response when getting all resources in subscription with user-role user.', 
           function (done) {
+            var provider = AzureDP.generateOne().provider;
+            var subscription = AzureDP.generateOne().subscription_id;
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
-                  .providers()
-                  .accounts() 
+                  .providers(subscription)
+                  .accounts(provider) 
                   .getAll()
                   .expect(403)
                   .end(done);

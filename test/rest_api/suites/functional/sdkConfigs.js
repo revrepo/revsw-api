@@ -19,42 +19,64 @@
 require('should-http');
 
 var config = require('config');
-var API= require('./../../common/api');
-var DataProvider= require('./../../common/providers/data');
+var API = require('./../../common/api');
+var DataProvider = require('./../../common/providers/data');
+var AppsDP = require('./../../common/providers/data/apps');
 
 describe('Functional check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
-
+  
   var users = [
     config.get('api.users.revAdmin'),
-    config.get('api.users.reseller'),
-    config.get('api.users.admin'),
-    config.get('api.users.user')
+    config.get('api.users.reseller')
   ];
 
-  users.forEach(function(user) {
+  users.forEach(function (user) {
+    var secondTestApp;
+    var testApp;
+    var testAccount;
+    var secondTestAccount;
 
     describe('With user: ' + user.role, function() {
 
       before(function (done) {
-        done();
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (newAccount) {
+            testAccount = newAccount;
+            return API.helpers.apps.create({accountId: testAccount.id});
+          })
+          .then(function (app) {
+              testApp = app;
+              return API.helpers
+                .authenticateUser(user)
+                .then(function () {
+                  return API.helpers.accounts.createOne();
+                })
+                .then(function (newAccount) {
+                  secondTestAccount = newAccount;
+                  return API.helpers.apps.create({accountId: secondTestAccount.id});
+                })
+                .then(function (app) {
+                  secondTestApp = app;
+                })
+                .then(done)
+                .catch(done);
+            })
+            .catch(done);
       });
+      
 
       after(function (done) {
         done();
       });
 
       describe('SDK Configs resource', function () {
-
-        beforeEach(function (done) {
-          done();
-        });
-
-        afterEach(function (done) {
-          done();
-        });
 
         it('should allow to `get` specific `SDK config` without authentication.',
           function (done) {
@@ -67,19 +89,23 @@ describe('Functional check', function () {
 
         it('should return a success response when getting specific app SDK Config with user-role user.',
           function (done) {
+            var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                var sdk_key = DataProvider.generateSDKConfig().sdk_key;
+                return API.resources.apps.createOne(newApp);
+              })
+              .then(function (response) {
+                var sdk_key = response.body.sdk_key;
                 API.resources.sdkConfigs
                   .getOne(sdk_key)
                   .expect(200)
                   .then(function (res) {
-                    var sdk = res.body;
-                    sdk.should.not.be.undefined();
-                    sdk.os.should.not.be.undefined();
-                    sdk.app_name.should.not.be.undefined();
-                    sdk.configs.should.not.be.undefined();
+                    var data = res.body;
+                    newApp.app_name.should.equal(data.app_name);
+                    newApp.app_platform.should.equal(data.os);
+                    newApp.account_id.should.equal(testAccount.id);
+                    config.should.not.be.undefined();
                     done();
                   })
                   .catch(done);

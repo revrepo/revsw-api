@@ -20,7 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DataProvider = require('./../../common/providers/data');
+var AzureDP = require('./../../common/providers/data/azure');
 
 describe('CRUD check', function () {
 
@@ -116,19 +116,21 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        xit('should get Resources list in subscription with revAdmin role.', 
+        it('should get Resources list in subscription with revAdmin role.', 
           function (done) {
+            var provider = AzureDP.generateOne().provider;
+            var subscription = AzureDP.generateOne().subscription_id;
             API.helpers                       
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
-                  .providers()
-                  .accounts() 
+                  .providers(subscription)
+                  .accounts(provider) 
                   .getAll()
                   .expect(200)
                   .then(function (res) {
-                    var providers = res.body;
+                    var providers = res.body.value;
                     providers.should.not.be.undefined();
                     providers.length.should.greaterThanOrEqual(0);
                     done();

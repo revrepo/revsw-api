@@ -16,22 +16,23 @@
  * from Rev Software, Inc.
  */
 
-var AppsDataProvider = require('./apps');
-var DashboardsDataProvider = require('./dashboards');
-var DNSZonesDataProvider = require('./dnsZones');
-var DNSZoneStatisticsDataProvider = require('./dnsZoneStatistics');
-var UsersDataProvider = require('./users');
-var WAFRulesDataProvider = require('./wafRules');
-var AzureDataProvider = require('./azure');
 
-var APIDataProviders = {
-  apps: AppsDataProvider,
-  dashboards: DashboardsDataProvider,
-  dnsZones: DNSZonesDataProvider,
-  dnsZoneStatistics: DNSZoneStatisticsDataProvider,
-  users: UsersDataProvider,
-  wafRules: WAFRulesDataProvider,
-  azure: AzureDataProvider
+
+// # Azure Data Provider object
+//
+// Defines some methods to generate valid and common Azure test data.
+// With common we mean it does not have anything special on it.
+//
+// From there, you can modify and get bogus, invalid or other type of data
+// depending on your test needs.
+var AzureDataProvider = {
+
+  generateOne: function () {
+    return {
+      subscription_id: '2',	
+      provider: 'RevAPM.MobileCDN'
+    };
+  }
 };
 
-module.exports = APIDataProviders;
+module.exports = AzureDataProvider;

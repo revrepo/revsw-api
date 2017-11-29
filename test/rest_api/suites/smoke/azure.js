@@ -20,13 +20,12 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DataProvider = require('./../../common/providers/data');
+var AzureDP = require('./../../common/providers/data/azure');
 
 describe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
-
 
   var RevAdmin = config.get('api.users.revAdmin');
 
@@ -93,22 +92,24 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        xit('should return a success response when getting all resources in subscription with revAdmin role.', 
+        it('should return a success response when getting all resources in subscription with revAdmin role.', 
           function (done) {
+            var provider = AzureDP.generateOne().provider;
+            var subscription = AzureDP.generateOne().subscription_id;
             API.helpers
               .authenticateUser(RevAdmin)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
-                  .providers()
-                  .accounts() 
+                  .providers(subscription)
+                  .accounts(provider)
                   .getAll()
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
-
+      
         xit('should return a success response when getting specific resource with revAdmin role.', 
           function (done) {
             API.helpers
