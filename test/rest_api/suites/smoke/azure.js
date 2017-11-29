@@ -50,7 +50,7 @@ describe('Smoke check', function () {
        it('should return a success response when getting all subscriptions with revAdmin role.', 
           function (done) {
             API.helpers
-              .attemptToAuthenticateUser(RevAdmin)
+              .authenticateUser(RevAdmin)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
@@ -64,7 +64,7 @@ describe('Smoke check', function () {
        it('should return a success response when getting all resources with revAdmin role.', 
           function (done) {
             API.helpers
-              .attemptToAuthenticateUser(RevAdmin)
+              .authenticateUser(RevAdmin)
               .then(function () {
                 API.resources.azure
                   .resources()
