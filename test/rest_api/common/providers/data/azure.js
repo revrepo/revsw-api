@@ -30,7 +30,14 @@ var AzureDataProvider = {
   generateOne: function () {
     return {
       subscription_id: '2',	
-      provider: 'RevAPM.MobileCDN'
+      provider: 'RevAPM.MobileCDN',
+      resource_group_name: 'RG1',
+      resource_name: 'r2'
+    };
+  },
+   generateTwo: function () {
+    return {
+      subscription_id: 'ab'    
     };
   }
 };

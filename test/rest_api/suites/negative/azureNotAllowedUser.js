@@ -83,18 +83,21 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting all resources in resourceGroup with user-role user.', 
+        it('should return `Unauthorized` response when getting all resources in resourceGroup with user-role user.', 
           function (done) {
+            var provider = AzureDP.generateOne().provider;
+            var subscription = AzureDP.generateOne().subscription_id;
+            var resourceGroupName = AzureDP.generateOne().resource_group_name;
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
-                  .resourceGroups()
-                  .providers()
-                  .accounts() 
+                  .resourceGroups(subscription)
+                  .providers(resourceGroupName)
+                  .accounts(provider) 
                   .getAll()
-                  .expect(403)
+                  .expect(401)
                   .end(done);
               })
               .catch(done);
@@ -118,18 +121,22 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting specific resource with user-role user.', 
+        it('should return `Unauthorized` response when getting specific resource with user-role user.', 
           function (done) {
+            var provider = AzureDP.generateOne().provider;
+            var subscription = AzureDP.generateOne().subscription_id;
+            var resourceGroupName = AzureDP.generateOne().resource_group_name;
+            var resourceName = AzureDP.generateOne().resource_name;
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
-                  .resourceGroups()
-                  .providers()
-                  .accounts()
-                  .getOne()
-                  .expect(403)
+                  .resourceGroups(subscription)
+                  .providers(resourceGroupName)
+                  .accounts(provider) 
+                  .getOne(resourceName)
+                  .expect(401)
                   .end(done);
               })
               .catch(done);

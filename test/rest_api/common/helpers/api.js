@@ -136,6 +136,18 @@ var APIHelpers = {
         throw new Error('Authenticating user as API KEY ', error.response.body, keyId);
       });
   },
+
+  authenticateAzureKey: function (token) {
+    return APIKeysRes
+      .getOne(token)
+      .then(function (response) {
+        var user  = response.body;
+        Session.setCurrentUser(user);
+      })
+      .catch(function (error) {
+        throw new Error('Authenticating user as Azure token ', error.response.body, token);
+      });
+  },
   /**
    * ### API.helpers.attemptToAuthenticateUser()
    *
