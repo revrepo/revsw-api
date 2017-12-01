@@ -29,6 +29,7 @@ describe('Functional check', function () {
 
   var RevAdmin = config.get('api.users.revAdmin');
 
+
   describe('Azure resource', function () {
 
     before(function (done) {
@@ -47,46 +48,78 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should get Subscriptions list with revAdmin role.', 
+    it('should create subscription with Azure token and get Subscriptions list with revAdmin role.', 
       function (done) {
+        var subscription = AzureDP.generateTwo().subscription_id;
+        var state = AzureDP.generate();
         API.helpers
-          .authenticateUser(RevAdmin)
+          .authenticateAzureKey()
           .then(function () {
             API.resources.azure
               .subscriptions()
-              .getAll()
+              .update(subscription, state)
               .expect(200)
-              .then(function (res) {
-                var subscriptions = res.body;
-                subscriptions.should.not.be.undefined();
-                subscriptions.length.should.greaterThanOrEqual(0);
-                subscriptions.forEach(function (subscription) {
-                  subscription.id.should.not.be.undefined();
-                });
-                done();
+              .then(function (){ 
+                API.helpers
+                  .authenticateUser(RevAdmin)
+                  .then(function () {
+                    API.resources.azure
+                      .subscriptions()
+                      .getAll()
+                      .expect(200)
+                      .then(function (res) {
+                        var subscriptions = res.body;
+                        subscriptions[2].subscription_id.should.equal(subscription);
+                        subscriptions.forEach(function (subscription) {
+                          subscription.id.should.not.be.undefined();
+                        });
+                        done();
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          })    
+          .catch(done); 
       });
 
-    it('should get Resources list with revAdmin role.', 
+    it('should create resource with Azure token and get Resources list with revAdmin role.', 
       function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        var location = AzureDP.generateLocation();
         API.helpers
-          .authenticateUser(RevAdmin)
+          .authenticateAzureKey()
           .then(function () {
             API.resources.azure
-              .resources()
-              .getAll()
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .update(resourceName, location)
               .expect(200)
-              .then(function (res) {
-                var resources = res.body;
-                resources.should.not.be.undefined();
-                resources.length.should.greaterThanOrEqual(0);
-                resources.forEach(function (resource) {
-                  resource.resource_name.should.not.be.undefined();
-                });
-                done();
+              .then(function () {
+                API.helpers
+                  .authenticateUser(RevAdmin)
+                  .then(function () {
+                    API.resources.azure
+                      .resources()
+                      .getAll()
+                      .expect(200)
+                      .then(function (res) {
+                        var resources = res.body;
+                        resources[26].resource_name.should.equal(resourceName);
+                        resources.forEach(function (resource) {
+                          resource.resource_name.should.not.be.undefined();
+                        });
+                        done();
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
               })
               .catch(done);
           })
@@ -168,7 +201,7 @@ describe('Functional check', function () {
               .then(function (response) {
                 var resource = response.body;
                 resource.should.not.be.undefined();
-                resource.name.should.not.be.undefined();
+                resource.name.should.be.equal(resourceName);
                 done();
               })
               .catch(done);
