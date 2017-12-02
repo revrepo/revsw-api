@@ -26,7 +26,7 @@ var purgeIdKey = 'purgeId';
 var resourceConfig = {
   idKey: purgeIdKey,
   name: 'purge',
-  path: '/purge/{' + purgeIdKey + '}',
+  path: '/v1/purge/{' + purgeIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ONE,

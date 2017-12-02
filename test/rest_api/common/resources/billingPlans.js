@@ -26,7 +26,7 @@ var billingPlanIdKey = 'billingPlanId';
 var resourceConfig = {
   idKey: billingPlanIdKey,
   name: 'billingPlans',
-  path: '/billing_plans/{' + billingPlanIdKey + '}',
+  path: '/v1/billing_plans/{' + billingPlanIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,

@@ -20,43 +20,354 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var AppsDP = require('./../../common/providers/data/apps');
+var AzureDP = require('./../../common/providers/data/azure');
+
 
 describe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  var users = [
-    config.get('api.users.reseller')
-  ];
+  var RevAdmin = config.get('api.users.revAdmin');
 
-  users.forEach(function (user) {
+  describe('Azure resource', function () {
 
-    describe('With user: ' + user.role, function () {
-
-      describe('Azure resource', function () {
-
-        before(function (done) {
-          done();
-        });
-
-        after(function (done) {
-          done();
-        });
-
-        beforeEach(function (done) {
-          done();
-        });
-
-        afterEach(function (done) {
-          done();
-        });
-
-        it('should return a response when getting all apps.', function (done) {
-          done();
-        });
-      });
+    before(function (done) {
+      done();
     });
+
+    after(function (done) {
+      done();
+    });
+
+    beforeEach(function (done) {
+      done();
+    });
+
+    afterEach(function (done) {
+      done();
+    });
+
+    it('should return a success response when getting all subscriptions with revAdmin role.', 
+      function (done) {
+        API.helpers
+          .authenticateUser(RevAdmin)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when getting all resources with revAdmin role.', 
+      function (done) {
+        API.helpers
+          .authenticateUser(RevAdmin)
+          .then(function () {
+            API.resources.azure
+              .resources()
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when getting all resources in resourceGroup with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when getting all resources in subscription with revAdmin role.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        API.helpers
+          .authenticateUser(RevAdmin)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .providers(subscription)
+              .accounts(provider)
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+      
+    it('should return a success response when getting specific resource with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateResource().resource_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .getOne(resourceName)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when getting all resources in subscription with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .providers(subscription)
+              .accounts(provider)
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when create a subscription with Azure token.', 
+      function (done) {
+        var subscription = AzureDP.generateTwo().subscription_id;
+        var state = AzureDP.generate();
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .update(subscription, state)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when create a resource with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        var location = AzureDP.generateLocation();
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .update(resourceName, location)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    xit('should return a success response when update a resource with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .PatchOne(resourceName)
+              .expect(400)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when move a resource with Azure token.', 
+      function (done) {
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .moveResources(resourceGroupName)
+              .createOne()
+              .expect(400)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when create a list secrets with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .listSecrets(resourceName)
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when getting all operations  with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .providers()
+              .operations(provider)
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when update Communication Preference with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .providers(subscription)
+              .updateCommunicationPreference(provider) 
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response get list Communication Preference with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .providers(subscription)
+              .listCommunicationPreference(provider) 
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when regenerate key with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .regenerateKey(resourceName)
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when get list Single Sign On Authorization with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .listSingleSignOnToken(resourceName)
+              .createOne()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when delete a resource with Azure token.', 
+      function (done) {
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        API.helpers
+          .authenticateAzureKey()
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider) 
+              .deleteOne(resourceName)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
   });
 });
+

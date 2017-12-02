@@ -47,6 +47,8 @@ var UsageReportResource = require('./usage-report');
 var LogShippingJobsResource = require('./logShippingJobs');
 var DNSZonesResource = require('./dnsZones');
 var WAFRulesResource = require('./wafRules');
+var SSLConfProfilesResource = require('./sslConfProfiles');
+var AzureResource = require('./azure');
 
 // Set of all resources that the REST API service provides..
 var APIResources = {
@@ -78,7 +80,9 @@ var APIResources = {
   usage_report: UsageReportResource,
   logShippingJobs: LogShippingJobsResource,
   dnsZones: DNSZonesResource,
-  wafRules: WAFRulesResource
+  wafRules: WAFRulesResource,
+  sslConfProfiles: SSLConfProfilesResource,
+  azure: AzureResource
 };
 
 module.exports = APIResources;

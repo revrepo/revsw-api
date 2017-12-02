@@ -272,6 +272,201 @@ describe('CRUD check.', function () {
             it(specDescription, specCallback);
           });
       });
+
+      parallel('Image Engine: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .imageEngine()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name.toLowerCase());
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.imageEngine
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+      
+      parallel('Mobile/Desktop Distribution: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .mobileDesktop()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name.toLowerCase());
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.mobileDesktop
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+
+      parallel('FBT Distribution: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .fbtDistribution()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name.toLowerCase());
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.fbtDistribution
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+
+      parallel('FBT Heatmap: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .fbtHeatmap()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name.toLowerCase());
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.fbtHeatmap
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
+
+      parallel('FBT Average: Stats resource,', function () {
+
+        var getSpecDescription = function (queryData) {
+          return 'should return domain-stat data when using: ' +
+            Utils.getJsonAsKeyValueString(queryData);
+        };
+
+        var getSpecCallback = function (queryData) {
+          return function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.stats
+                  .fbtAverage()
+                  .getOne(domainConfig.id, queryData)
+                  .expect(200)
+                  .then(function (res) {
+                    var metadata = res.body.metadata;
+                    metadata.domain_name.should.be
+                      .equal(domainConfig.domain_name.toLowerCase());
+                    metadata.domain_id.should.be.equal(domainConfig.id);
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          };
+        };
+
+        StatsDDHelper.fbtAverage
+          .getQueryParams()
+          .forEach(function (queryParams) {
+            var specDescription = getSpecDescription(queryParams);
+            var specCallback = getSpecCallback(queryParams);
+            /** Running spec for each query params */
+            it(specDescription, specCallback);
+          });
+      });
     });
   });
 });

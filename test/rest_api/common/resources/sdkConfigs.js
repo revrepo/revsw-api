@@ -26,7 +26,7 @@ var sdkConfigKey = 'sdkConfigKey';
 var resourceConfig = {
   idKey: sdkConfigKey,
   name: 'sdKConfigs',
-  path: '/sdk/config/{' + sdkConfigKey + '}',
+  path: '/v1/sdk/config/{' + sdkConfigKey + '}',
   methods: [
     Methods.READ_ONE
   ],

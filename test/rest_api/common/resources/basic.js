@@ -46,8 +46,7 @@ var _contains = function (list, element) {
 //  the config's parameters
 var getRequest = function () {
   var host = config.get('api.host');
-  var apiVersion = config.get('api.version');
-  return request((host.protocol + '://' + host.name + ':' + host.port + '/' + apiVersion));
+  return request((host.protocol + '://' + host.name + ':' + host.port));
 };
 
 // #### Helper function setUserToRequest
@@ -58,9 +57,13 @@ var getRequest = function () {
 // Receives as param the request instance
 var setUserToRequest = function (request) {
   var user = Session.getCurrentUser();
+  var token = 'sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf';
   if (user && user.token) {
     return request.set('Authorization', 'Bearer ' + user.token);
-  }else{
+  }else if (user && !!token) {
+     return request.set('Authorization', 'Bearer-RP ' + token);
+  }
+  else{
     if(user && !!user.key){
       return request.set('Authorization', 'X-API-KEY ' + user.key);
     }

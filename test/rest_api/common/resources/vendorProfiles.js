@@ -27,7 +27,7 @@ var Methods = Constants.API.METHODS;
 // Config for resource
 var resourceConfig = {
   name: 'vendorProfiles',
-  path: '/vendorProfiles',
+  path: '/v1/vendor_profiles',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,
@@ -37,16 +37,15 @@ var resourceConfig = {
   ],
   nestedResources: [
     {
-      name: 'vendorProfiles',
-      path: '/',
+      name: 'vendorProfile',
+      path: '/vendor',
       methods: [
-        Methods.READ_ALL,
-        Methods.READ_ONE
+        Methods.READ_ONE 
       ]
     }
   ]
 };
-
+  
 // Creating new instance of BaseResource which is going to represent the API
 // `vendor profiles resource`
 module.exports = new BasicResource(resourceConfig);

@@ -24,7 +24,7 @@ var Methods = Constants.API.METHODS;
 
 var resourceConfig = {
   name: 'healthCheck',
-  path: '/healthcheck',
+  path: '/v1/healthcheck',
   methods: [
     Methods.READ_ALL
   ]

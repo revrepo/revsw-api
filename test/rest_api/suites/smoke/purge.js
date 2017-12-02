@@ -31,74 +31,96 @@ describe('Smoke check', function () {
   var account;
   var domainConfig;
   var purge;
-  var reseller = config.get('api.users.reseller');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        return API.helpers.accounts.createOne();
-      })
-      .then(function (newAccount) {
-        account = newAccount;
-        return API.helpers.domainConfigs.createOne(account.id);
-      })
-      .then(function (newDomainConfig) {
-        domainConfig = newDomainConfig;
-        return API.helpers.purge.createOne(domainConfig.domain_name);
-      })
-      .then(function (newPurge) {
-        purge = newPurge;
-      })
-      .then(done)
-      .catch(done);
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        API.resources.domainConfigs.deleteOne(domainConfig.id);
-        done();
-      })
-      .catch(done);
-  });
+    describe('With user: ' + user.role, function() {
 
-  describe('Purge resource', function () {
-
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should return data when getting specific purge.',
-      function (done) {
+      before(function (done) {
         API.helpers
-          .authenticateUser(reseller)
+          .authenticateUser(user)
           .then(function () {
-            API.resources.purge
-              .getOne(purge.id)
-              .expect(200)
-              .end(done);
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (newAccount) {
+            account = newAccount;
+            return API.helpers.domainConfigs.createOne(account.id);
+          })
+          .then(function (newDomainConfig) {
+            domainConfig = newDomainConfig;
+            return API.helpers.purge.createOne(domainConfig.domain_name);
+          })
+          .then(function (newPurge) {
+            purge = newPurge;
+          })
+          .then(done)
+          .catch(done);
+      });
+
+      after(function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            API.resources.domainConfigs.deleteOne(domainConfig.id);
+            done();
           })
           .catch(done);
       });
 
-    it('should return data when creating new purge.',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
-            API.resources.purge
-              .createOne(purgeData)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      describe('Purge resource', function () {
+
+        beforeEach(function (done) {
+          done();
+        });
+
+        afterEach(function (done) {
+          done();
+        });
+
+        it('should return data when getting specific purge with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.purge
+                  .getOne(purge.id)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return data when creating new purge with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+                API.resources.purge
+                  .createOne(purgeData)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+        it('should return data when getting list purge requests with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.purge
+                  .getAll({domain_id:domainConfig.id})
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
+    });
   });
 });

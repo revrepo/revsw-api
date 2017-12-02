@@ -170,4 +170,3 @@ var resourceConfig = {
 // Creating new instance of BaseResource which is going to represent the API
 // `Azure resource`
 module.exports = new BaseResource(resourceConfig);
-

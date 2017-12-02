@@ -32,7 +32,7 @@ var tokenKey = 'tokenId';
 var resourceConfig = {
   idKey: null,
   name: 'signUp',
-  path: '/signup2',
+  path: '/v1/signup2',
   methods: [
     Methods.CREATE
   ],
