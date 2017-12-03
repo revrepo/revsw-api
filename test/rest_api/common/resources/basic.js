@@ -57,11 +57,15 @@ var getRequest = function () {
 // Receives as param the request instance
 var setUserToRequest = function (request) {
   var user = Session.getCurrentUser();
+
+  // TODO: need to move the Azure token to config/default.json config file
   var token = 'sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf';
   if (user && user.token) {
     return request.set('Authorization', 'Bearer ' + user.token);
-  }else if (user && !!token) {
-     return request.set('Authorization', 'Bearer-RP ' + token);
+// TODO: The code is fucked up - need to add a way to detect when to use
+// different methods of authentication
+//  }else if (user && !!token) {
+//     return request.set('Authorization', 'Bearer-RP ' + token);
   }
   else{
     if(user && !!user.key){

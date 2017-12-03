@@ -32,6 +32,8 @@ describe('Smoke check', function () {
 
   // Retrieving information about specific user that later we will use for
   // our API requests.
+  // TODO: need to add admin/reseller roles and also write negative tests for user role
+  // and RO users
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
