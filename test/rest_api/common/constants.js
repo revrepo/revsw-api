@@ -43,7 +43,12 @@ var Constants = {
       LONG: 'long',
       SHORT: 'short',
       BOGUS: 'bogus'
-    }
+    },
+    VENDORS: [
+      'revapm',
+      'nuubit',
+      'hooli'      
+    ]
   }
 };
 
