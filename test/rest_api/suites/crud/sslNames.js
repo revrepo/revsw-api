@@ -176,7 +176,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should verify specific SSL Name with user-role user.',
+        xit('should verify specific SSL Name with user-role user.',
           function (done) {
             API.helpers
               .authenticateUser(user)
