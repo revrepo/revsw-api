@@ -30,7 +30,7 @@ module.exports = [{
   path: '/v1/dashboards',
   config: {
     auth: {
-      scope: ['user', 'admin', 'reseller', 'revadmin']
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey' ]
     },
     handler: dashboars.getDashboards,
     description: 'Get a list of dashboards',
@@ -49,7 +49,7 @@ module.exports = [{
   path: '/v1/dashboards',
   config: {
     auth: {
-      scope: ['user', 'admin', 'reseller', 'revadmin']
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
     },
     handler: dashboars.createDashboard,
     description: 'Create a new dashboard',
@@ -81,7 +81,7 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user', 'admin', 'reseller', 'revadmin']
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
     },
     handler: dashboars.getDashboard,
     description: 'Get a dashboard',
@@ -105,7 +105,7 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user', 'admin', 'reseller', 'revadmin']
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
     },
     handler: dashboars.updateDashboard,
     description: 'Update a dashboard',
@@ -134,7 +134,7 @@ module.exports = [{
   path: '/v1/dashboards/{dashboard_id}',
   config: {
     auth: {
-      scope: ['user', 'admin', 'reseller', 'revadmin']
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
     },
     handler: dashboars.deleteDashboard,
     description: 'Remove a dashboard',
