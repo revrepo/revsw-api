@@ -41,7 +41,7 @@ var SSLNamesHelper = require('./sslNames');
 var UsersHelper = require('./users');
 var LogShippingJobsHelper = require('./logShippingJobs');
 var WAFRulesHelper = require('./wafRules');
-
+var VendorsHelper = require('./vendorProfiles');
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
 // Abstracts common functionality for the API.
@@ -61,6 +61,7 @@ var APIHelpers = {
   users: UsersHelper,
   logShippingJobs: LogShippingJobsHelper,
   wafRules: WAFRulesHelper,
+  vendors: VendorsHelper,
 
   /**
   * ### API.helpers.authenticate()
