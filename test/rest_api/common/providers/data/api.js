@@ -19,15 +19,19 @@
 var AppsDataProvider = require('./apps');
 var DashboardsDataProvider = require('./dashboards');
 var DNSZonesDataProvider = require('./dnsZones');
+var DNSZoneStatisticsDataProvider = require('./dnsZoneStatistics');
 var UsersDataProvider = require('./users');
 var WAFRulesDataProvider = require('./wafRules');
+var AzureDataProvider = require('./azure');
 
 var APIDataProviders = {
   apps: AppsDataProvider,
   dashboards: DashboardsDataProvider,
   dnsZones: DNSZonesDataProvider,
+  dnsZoneStatistics: DNSZoneStatisticsDataProvider,
   users: UsersDataProvider,
-  wafRules: WAFRulesDataProvider
+  wafRules: WAFRulesDataProvider,
+  azure: AzureDataProvider
 };
 
 module.exports = APIDataProviders;

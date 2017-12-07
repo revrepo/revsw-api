@@ -27,7 +27,7 @@ var logShippingJobIdKey = 'jobId';
 var resourceConfig = {
   idKey: logShippingJobIdKey,
   name: 'logShippingJobs',
-  path: '/log_shipping_jobs/{' + logShippingJobIdKey + '}',
+  path: '/v1/log_shipping_jobs/{' + logShippingJobIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,

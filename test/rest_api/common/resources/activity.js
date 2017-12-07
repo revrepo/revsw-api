@@ -25,7 +25,7 @@ var Methods = Constants.API.METHODS;
 var resourceConfig = {
   idKey: null,
   name: 'activity',
-  path: '/activity',
+  path: '/v1/activity',
   methods: [
     Methods.READ_ALL
   ],

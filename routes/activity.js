@@ -64,7 +64,7 @@ module.exports = [{
   path: '/v1/activity/summary',
   config: {
     auth: {
-      scope: ['user', 'admin', 'reseller', 'revadmin']
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
     },
     handler: auditInfo.getSummaryAuditInfo,
     description: 'Get a summarized audit report of user activity',

@@ -58,6 +58,7 @@ var DomainConfigsResponseSP = {
         origin_host_header: Joi.string().required(),
         origin_server: Joi.string().required(),
         cname: Joi.string().required(),
+        comment: Joi.string().allow(''),
         image_engine: {
           enable_image_engine: Joi.boolean().required()
         },

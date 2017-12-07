@@ -23,11 +23,12 @@ var BasicResource = require('./basic');
 // Requiring constants
 var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
-
+var vendorIdKey = 'vendorId';
 // Config for resource
 var resourceConfig = {
+  idKey: vendorIdKey,
   name: 'vendorProfiles',
-  path: '/vendorProfiles',
+  path: '/v1/vendor_profiles/{' + vendorIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,
@@ -37,16 +38,16 @@ var resourceConfig = {
   ],
   nestedResources: [
     {
-      name: 'vendorProfiles',
-      path: '/',
+      idKey: vendorIdKey,
+      name: 'vendorProfile',
+      path: '/name/{' + vendorIdKey + '}',
       methods: [
-        Methods.READ_ALL,
         Methods.READ_ONE
       ]
     }
   ]
 };
-
+  
 // Creating new instance of BaseResource which is going to represent the API
 // `vendor profiles resource`
 module.exports = new BasicResource(resourceConfig);

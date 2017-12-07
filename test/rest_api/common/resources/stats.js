@@ -27,7 +27,7 @@ var domainConfigIdKey = 'domainId';
 var resourceConfig = {
   idKey: domainConfigIdKey,
   name: 'stats',
-  path: '/stats/{' + domainConfigIdKey + '}',
+  path: '/v1/stats/{' + domainConfigIdKey + '}',
   methods: [
     Methods.READ_ONE
   ],
@@ -57,6 +57,45 @@ var resourceConfig = {
       idKey: domainConfigIdKey,
       name: 'topObjects',
       path: '/top_objects/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },{
+      idKey: domainConfigIdKey,
+      name: 'imageEngine',
+      path: '/imageengine/saved_bytes/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'mobileDesktop',
+      path: '/mobile_desktop/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'fbtHeatmap',
+      path: '/fbt/heatmap/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'fbtDistribution',
+      path: '/fbt/distribution/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'fbtAverage',
+      path: '/fbt/average/{' + domainConfigIdKey + '}',
       methods: [
         Methods.READ_ONE
       ]

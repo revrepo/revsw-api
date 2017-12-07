@@ -55,6 +55,9 @@
           "valid_config": "https://raw.githubusercontent.com/gerzhan/demo/master/5588869fbde7a0d00338ce8f_valid.json"
         }
     },
+    "azureKey": {
+      "azureKey": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf"
+    },
     "users": {
       "revAdmin": {
         "email": "qa_user_with_rev-admin_perm@revsw.com",

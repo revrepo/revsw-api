@@ -61,7 +61,6 @@ describe('Functional', function() {
       swagger.scrollToElement(swagger.header.getUsernameInput())
         .then(function() {
           swagger.header.setAuthVia('Username/Password');
-          // swagger.header.clickAuthBtn();
           swagger.header.setUsername(user.email);
           swagger.header.setPassword(user.password);
           swagger.header.clickAuthBtn();

@@ -26,7 +26,7 @@ var Methods = Constants.API.METHODS;
 var resourceConfig = {
   name: 'stats_sdk',
   idKey: null,
-  path: '/stats/sdk',
+  path: '/v1/stats/sdk',
   methods: [],
   nestedResources: [{
       name: 'app',

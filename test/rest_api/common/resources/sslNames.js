@@ -28,7 +28,7 @@ var sslNameIdKey = 'sslNameId';
 var resourceConfig = {
   idKey: sslNameIdKey,
   name: 'sslNames',
-  path: '/ssl_names/{' + sslNameIdKey + '}',
+  path: '/v1/ssl_names/{' + sslNameIdKey + '}',
   methods: [
     Methods.READ_ALL,
     Methods.READ_ONE,

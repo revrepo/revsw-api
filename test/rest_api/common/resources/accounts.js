@@ -33,7 +33,7 @@ var billingPlanHandleKey = 'billingPlanHandleId';
 var resourceConfig = {
   idKey: accountIdKey,
   name: 'accounts',
-  path: '/accounts/{' + accountIdKey + '}',
+  path: '/v1/accounts/{' + accountIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,
