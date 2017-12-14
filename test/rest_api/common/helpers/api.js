@@ -64,59 +64,6 @@ var APIHelpers = {
   vendors: VendorsHelper,
 
   /**
-  * ### API.helpers.authenticate()
-  *
-  * Helper method to Authenticate user data before doing any type of request to
-  * the REST API services.
-  *
-  * @param {Object} credentials , credentials data.
-  *  For instance user
-  *     {
-  *       name: 'joe@email.com',
-  *       password: 'something'
-  *     }
-  *  For API Key
-  *     {
-  *      id: '',
-  *      key: ''
-  *     }
-  * @returns {Promise}
-  */
-  authenticate: function(credentials) {
-
-    if(!!credentials.email){
-      return this.authenticateUser(credentials);
-    }else{
-      Session.setCurrentUser(credentials);
-      return this.authenticateAPIKey(credentials.id);
-    }
-  },
-  /**
-   * ### API.helpers.authenticateUser()
-   *
-   * Helper method to Authenticate user before doing any type of request to
-   * the REST API services.
-   *
-   * @param user, user information. For instance
-   *     {
-   *       name: 'joe@email.com',
-   *       password: 'something'
-   *     }
-   *
-   * @returns {Promise}
-   */
-  authenticateUser: function (user) {
-    return AuthenticateRes
-      .createOne({email: user.email, password: user.password})
-      .then(function (response) {
-        user.token = response.body.token;
-        Session.setCurrentUser(user);
-      })
-      .catch(function (error) {
-        throw new Error('Authenticating user', error.response.body, user);
-      });
-  },
-  /**
    * ### API.helpers.authenticateAPIKey()
    *
    * Helper method to Authenticate user as API KEY type before doing any type of request to

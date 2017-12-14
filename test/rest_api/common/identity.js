@@ -15,38 +15,23 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
+var Promise = require('bluebird');
 
 var Session = require('./session');
 var APITestError = require('./apiTestError');
-var APIKeysResource = require('./resources/apiKeys');
 var AuthenticateRes = require('./resources/authenticate');
-var APIKeyDP = require('./providers/data/apiKeys');
 var Constants = require('./../common/constants');
 
 var CURRENT_AUTH_MODE = process.env.AUTH_MODE;
 
 var authenticateWithAPIKey = function (data) {
-  var currentAuthMode = Session.getAuthenticationMode();
-  Session.setAuthenticationMode(Constants.API.AUTH_MODE.CREDENTIALS);
-  return AuthenticateRes
-    .createOne({email: data.email, password: data.password})
-    .then(function (response) {
-      data.token = response.body.token;
-      Session.setCurrentUser(data);
-      var apiKey = APIKeyDP.generateOne(data.account.id);
-      return APIKeysResource.createOne(apiKey);
-    })
-    .then(function (response) {
-      Session.setAuthenticationMode(currentAuthMode);
-      Session.setCurrentAPIKey({
-        id: response.body.object_id,
-        key: response.body.key
-      });
-    })
-    .catch(function (error) {
-      throw new APITestError('Authenticating user with API Key',
-        error.response.body, data);
-    });
+  if (data.apiKey === undefined) {
+    throw new APITestError('Authenticating user with API Key: ' +
+      'No API key provided.');
+  }
+
+  Session.setCurrentUser(data);
+  return Promise.resolve();
 };
 
 var authenticateWithCredentials = function (data) {
