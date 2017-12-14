@@ -39,8 +39,8 @@ describe('Clean up', function () {
 
         it('should clean SSL Certificates created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 API.resources.sslCerts
                   .getAll()

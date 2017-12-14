@@ -34,8 +34,8 @@ describe('Smoke check', function () {
   var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -57,8 +57,8 @@ describe('Smoke check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
+    API.identity
+      .authenticate(revAdmin)
       .then(function () {
         return API.resources.domainConfigs.deleteOne(firstDc.id);
       })
@@ -81,8 +81,8 @@ describe('Smoke check', function () {
 
     it('should return success response code when getting a list of logshipping jobs',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.logShippingJobs
               .getAll()
@@ -95,8 +95,8 @@ describe('Smoke check', function () {
     it('should return success response code when creating a new logshipping job',
       function (done) {
         secondLsJ = LogShippingJobsDP.generateOne(account.id);
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.logShippingJobs
               .createOne(secondLsJ)
@@ -112,8 +112,8 @@ describe('Smoke check', function () {
 
     it('should return success response code when getting a specific logshipping job',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.logShippingJobs
               .getOne(secondLsJ.id)
@@ -146,8 +146,8 @@ describe('Smoke check', function () {
         delete secondLsJresp.created_by;
         delete secondLsJresp.created_at;
         delete secondLsJresp.updated_at;
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.logShippingJobs
               .update(firstLsJ.id, secondLsJresp)
@@ -160,8 +160,8 @@ describe('Smoke check', function () {
     it('should return success response code when getting the status of ' +
       'existing logshipping job',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.logShippingJobs
               .status(secondLsJ.id)
@@ -174,8 +174,8 @@ describe('Smoke check', function () {
 
     it('should return success response code when deleting a logshipping job',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.logShippingJobs
               .deleteOne(secondLsJ.id)

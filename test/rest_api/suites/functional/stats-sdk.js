@@ -49,8 +49,8 @@ describe('StatsSDK Functional check:', function () {
 
   //  ---------------------------------
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         console.log( '   "before all" hook, testing data creation' );
         console.log( ok_prefix + 'user authenticated' );
@@ -100,8 +100,8 @@ describe('StatsSDK Functional check:', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         if ( application ) {
           API.resources.apps.deleteOne(application.id);
@@ -119,8 +119,8 @@ describe('StatsSDK Functional check:', function () {
       query.from_timestamp = now - 5400000;
       query.to_timestamp = now + 1800000;
       var id = method === 'app' ? application.id : account_id;
-      API.helpers
-        .authenticateUser(user)
+      API.identity
+        .authenticate(user)
         .then(function () {
           return API.resources.stats_sdk[method]()
             .getOne(id,query)
@@ -141,8 +141,8 @@ describe('StatsSDK Functional check:', function () {
       query.from_timestamp = now - 5400000;
       query.to_timestamp = now + 1800000;
       query.app_id = application.id;
-      API.helpers
-        .authenticateUser(user)
+      API.identity
+        .authenticate(user)
         .then(function () {
           return API.resources.stats_sdk[method]()
             .getAll(query)

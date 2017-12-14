@@ -52,8 +52,8 @@ describe('Sanity check', function () {
       it('should return data applying `countries schema` when getting all ' +
         'countries.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.countries
                 .getAll()

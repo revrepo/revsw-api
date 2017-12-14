@@ -31,7 +31,7 @@ describe('Clean up', function () {
     config.get('api.users.reseller'),
     config.get('api.users.admin')
   ];
-  var namePattern = /[0-9]{13}/;
+  var namePattern = /[0-9]{13}|New API Key/;
 
   describe('API Keys', function () {
 
@@ -41,34 +41,47 @@ describe('Clean up', function () {
 
         it('should clean API Keys created for testing.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 return API.resources.apiKeys
                   .getAll()
                   .expect(200);
               })
+              // .then(function (res) {
+              //   var apiKeys = res.body;
+              //   var idsForApiKeysToDelete = [];
+              //   return Promise
+              //     .each(apiKeys, function (apiKey) { // One promise after other
+              //       return API.resources.accounts
+              //         .getOne(apiKey.account_id)
+              //         .then(function (res) {
+              //           var account = res.body;
+              //           if (namePattern.test(apiKey.key_name) ||
+              //             namePattern.test(account.companyName) ||
+              //             namePattern.test(account.contact_email)) {
+              //             idsForApiKeysToDelete.push(apiKey.id);
+              //           }
+              //         });
+              //     })
+              //     .then(function () {
+              //       API.resources.apiKeys
+              //         .deleteManyIfExist(idsForApiKeysToDelete)
+              //         .finally(done);
+              //     });
+              // })
               .then(function (res) {
+                var ids = [];
                 var apiKeys = res.body;
-                var idsForApiKeysToDelete = [];
-                return Promise
-                  .each(apiKeys, function (apiKey) { // One promise after other
-                    return API.resources.accounts
-                      .getOne(apiKey.account_id)
-                      .then(function (res) {
-                        var account = res.body;
-                        if (namePattern.test(apiKey.key_name) ||
-                          namePattern.test(account.companyName) ||
-                          namePattern.test(account.contact_email)) {
-                          idsForApiKeysToDelete.push(apiKey.id);
-                        }
-                      });
-                  })
-                  .then(function () {
-                    API.resources.apiKeys
-                      .deleteManyIfExist(idsForApiKeysToDelete)
-                      .finally(done);
-                  });
+                apiKeys.forEach(function (apiKey) {
+                  if (namePattern.test(apiKey.key_name)) {
+                    ids.push(apiKey.id);
+                  }
+                });
+
+                API.resources.apiKeys
+                  .deleteManyIfExist(ids)
+                  .finally(done);
               })
               .catch(done);
           });

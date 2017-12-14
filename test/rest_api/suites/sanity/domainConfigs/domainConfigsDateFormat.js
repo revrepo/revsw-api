@@ -33,8 +33,8 @@ describe('Sanity check', function () {
   var expectedDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -50,8 +50,8 @@ describe('Sanity check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(firstDc.id);
         done();
@@ -73,8 +73,8 @@ describe('Sanity check', function () {
       it('should return `created_at` field in expected `Date format` when ' +
         'getting all domain configs.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .getAll()
@@ -94,8 +94,8 @@ describe('Sanity check', function () {
       it('should return `created_at` field in expected `Date format` when ' +
         'getting versions of existing domain config.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .versions(firstDc.id)
@@ -116,8 +116,8 @@ describe('Sanity check', function () {
       it('should return `updated_at` field in expected `Date format` when ' +
         'getting all domain configs.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .getAll()
@@ -137,8 +137,8 @@ describe('Sanity check', function () {
       it('should return `updated_at` field in expected `Date format` when ' +
         'getting versions of existing domain config.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .versions(firstDc.id)

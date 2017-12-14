@@ -41,8 +41,8 @@ describe('Functional check', function () {
     describe('With user: ' + user.role, function() {
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -62,8 +62,8 @@ describe('Functional check', function () {
       });
 
       after(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs.deleteOne(domainConfig.id);
             done();
@@ -83,8 +83,8 @@ describe('Functional check', function () {
 
         it('should queue a purge that was just created with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
                 API.resources.purge
@@ -102,8 +102,8 @@ describe('Functional check', function () {
 
         it('should set as `success` a purge after some time it was created with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
                 var counter = 10000; // 10 secs
@@ -139,8 +139,8 @@ describe('Functional check', function () {
 
         it('should return data when getting specific purge request with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getOne(purge.id)
@@ -156,8 +156,8 @@ describe('Functional check', function () {
 
         it('should return data when getting list purge requests with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getAll({domain_id:domainConfig.id})

@@ -41,15 +41,15 @@ describe('Domain configs functional test', function () {
   var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(secondReseller)
+    API.identity
+      .authenticate(secondReseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
       .then(function (newAccount) {
         otherAccount = newAccount;
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -71,8 +71,8 @@ describe('Domain configs functional test', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(secondReseller)
+    API.identity
+      .authenticate(secondReseller)
       .then(function () {
         API.resources.accounts.deleteOne(otherAccount.id);
         done();
@@ -85,8 +85,8 @@ describe('Domain configs functional test', function () {
     it('should not be able to create domain using account from other customer',
       function (done) {
         var domainConfig = DomainConfigsDP.generateOne(otherAccount.id);
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(domainConfig)
@@ -125,8 +125,8 @@ describe('Domain configs functional test', function () {
             })
             .catch(done);
         };
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             setTimeout(cb, interval);
           })
@@ -138,8 +138,8 @@ describe('Domain configs functional test', function () {
       function (done) {
         secondDc = DomainConfigsDP.generateOne(account.id);
         originServerV1 = secondDc.origin_server;
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             var counter = 600000; // NOTE: 10 mins
             var interval = 1000;
@@ -183,8 +183,8 @@ describe('Domain configs functional test', function () {
       function (done) {
         var newDomain = DomainConfigsDP.generateOne(account.id);
         newDomain.domain_aliases = secondDc.domain_name;
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(newDomain)
@@ -204,8 +204,8 @@ describe('Domain configs functional test', function () {
       function (done) {
         var newDomain = DomainConfigsDP.generateOne(account.id);
         newDomain.domain_wildcard_alias = secondDc.domain_name;
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(newDomain)
@@ -222,8 +222,8 @@ describe('Domain configs functional test', function () {
 
     it('should allow to get `version 1` of recently created domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id, {version: 1})
@@ -239,8 +239,8 @@ describe('Domain configs functional test', function () {
 
     it('should allow to get `version 2` of recently updated domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -294,8 +294,8 @@ describe('Domain configs functional test', function () {
       function (done) {
         var domainConfig = DomainConfigsDP.cloneForUpdate(firstFdc);
         domainConfig.account_id = otherAccount.id;
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .update(firstDc.id, domainConfig)
@@ -312,8 +312,8 @@ describe('Domain configs functional test', function () {
     it('should return global status as `Modified` right after modifying the ' +
       'domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             var counter = 600000; // NOTE: 10 mins
             var interval = 1000;
@@ -349,8 +349,8 @@ describe('Domain configs functional test', function () {
 
     it('should return recently modified domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -366,8 +366,8 @@ describe('Domain configs functional test', function () {
 
     it('should return recently modified domain config in the domain-list',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -388,8 +388,8 @@ describe('Domain configs functional test', function () {
     it('should return global status as `Published` right after publishing a ' +
       'modified domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             var counter = 600000; // NOTE: 10 mins
             var interval = 1000;
@@ -425,8 +425,8 @@ describe('Domain configs functional test', function () {
 
     it('should return recently published domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -442,8 +442,8 @@ describe('Domain configs functional test', function () {
 
     it('should return recently published domain config in the domain-list',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -464,8 +464,8 @@ describe('Domain configs functional test', function () {
     it('should return global status as `Modified` right after verifying a ' +
       'modified domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             var counter = 600000; // NOTE: 10 mins
             var interval = 1000;
@@ -506,8 +506,8 @@ describe('Domain configs functional test', function () {
 
     it('should return recently verified domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -523,8 +523,8 @@ describe('Domain configs functional test', function () {
 
     it('should return recently verified domain config in the domain-list',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -547,8 +547,8 @@ describe('Domain configs functional test', function () {
       function (done) {
         var secondDcClone = JSON.parse(JSON.stringify(secondDc));
         delete secondDcClone.id;
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs
               .createOne(secondDcClone)
@@ -598,8 +598,8 @@ describe('Domain configs functional test', function () {
             .catch(done);
         };
         // Test
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.resources.domainConfigs
               .update(firstDc.id, updatedDc)
@@ -608,8 +608,8 @@ describe('Domain configs functional test', function () {
               .catch(done);
           })
           .then(function () {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 setTimeout(callBack, interval);
               })
@@ -653,8 +653,8 @@ describe('Domain configs functional test', function () {
             .catch(done);
         };
         // Test
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             return API.resources.domainConfigs
               .update(firstDc.id, updatedDc)
@@ -663,8 +663,8 @@ describe('Domain configs functional test', function () {
               .catch(done);
           })
           .then(function () {
-            API.helpers
-              .authenticateUser(secondReseller)
+            API.identity
+              .authenticate(secondReseller)
               .then(function () {
                 setTimeout(callBack, interval);
               })

@@ -45,8 +45,8 @@ describe('CRUD check', function () {
       describe('Apps resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               if (user === config.get('api.users.admin') ||
                 user === config.get('api.users.user')) {
@@ -88,8 +88,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all apps.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .getAll()
@@ -107,8 +107,8 @@ describe('CRUD check', function () {
 
         it('should allow to get specific app.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .getOne(testApp.id)
@@ -126,8 +126,8 @@ describe('CRUD check', function () {
         it('should allow to create an app.',
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .createOne(newApp)
@@ -151,8 +151,8 @@ describe('CRUD check', function () {
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -175,8 +175,8 @@ describe('CRUD check', function () {
         it('should allow to delete an app.',
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -198,8 +198,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all SDK releases',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .sdkReleases()
@@ -219,8 +219,8 @@ describe('CRUD check', function () {
 
         it('should allow to get config status for specific app',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .configStatus(testApp.id)
@@ -239,8 +239,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all versions for specific app',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .versions(testApp.id)

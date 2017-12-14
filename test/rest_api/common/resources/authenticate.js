@@ -34,4 +34,5 @@ var resourceConfig = {
 
 // Creating new instance of BaseResource which is going to represent the API
 // `authenticate resource`
-module.exports = new BasicResource(resourceConfig);
+var authenticateRes = new BasicResource(resourceConfig);
+module.exports = authenticateRes;

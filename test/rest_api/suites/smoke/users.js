@@ -29,9 +29,6 @@ describe('Smoke check: Users', function() {
     config.api.users.revAdmin,
     config.api.users.reseller,
     config.api.users.admin,
-    // API Key
-    config.api.apikeys.admin,
-    config.api.apikeys.reseller
   ];
   // Retrieving information about specific user that later we will use for
   // our API requests.
@@ -46,7 +43,7 @@ describe('Smoke check: Users', function() {
           userSample.domain = [];
         }
 
-        API.helpers
+        API.identity
           .authenticate(credentials)
           .then(function() {
             API.resources.users
@@ -77,7 +74,7 @@ describe('Smoke check: Users', function() {
 
       it('should return a response when getting all users.',
         function(done) {
-          API.helpers
+          API.identity
             .authenticate(credentials)
             .then(function() {
               API.resources.users
@@ -90,7 +87,7 @@ describe('Smoke check: Users', function() {
 
       it('should return a response when getting specific user.',
         function(done) {
-          API.helpers
+          API.identity
             .authenticate(credentials)
             .then(function() {
               API.resources.users
@@ -108,7 +105,7 @@ describe('Smoke check: Users', function() {
             newUser.companyId = [credentials.account.id];
             newUser.domain = [];
           }
-          API.helpers
+          API.identity
             .authenticate(credentials)
             .then(function() {
               API.resources.users
@@ -131,7 +128,7 @@ describe('Smoke check: Users', function() {
             newUser.companyId = [credentials.account.id];
             newUser.domain = [];
           }
-          API.helpers
+          API.identity
             .authenticate(credentials)
             .then(function() {
               API.resources.users
@@ -157,7 +154,7 @@ describe('Smoke check: Users', function() {
           newUser.companyId = [credentials.account.id];
           newUser.domain = [];
         }
-        API.helpers
+        API.identity
           .authenticate(credentials)
           .then(function() {
             API.resources.users
@@ -178,7 +175,7 @@ describe('Smoke check: Users', function() {
       it('should return a response when updating specific user\'s password.',
         function(done) {
 
-          API.helpers
+          API.identity
             .authenticate(userSample)
             .then(function() {
               API.resources.users
@@ -209,7 +206,7 @@ describe('User resource profile', function() {
 
       it('should return a success response',
         function(done) {
-          API.helpers
+          API.identity
             .authenticate(userData)
             .then(function() {
               API.resources.users

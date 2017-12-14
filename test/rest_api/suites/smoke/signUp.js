@@ -32,8 +32,8 @@ describe('Smoke check', function() {
 
     it('should return sucess response when signing up user using a random billing plan',
       function(done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function() {
             return API.helpers.billingPlans.getRandomOne();
           })
@@ -105,8 +105,8 @@ describe('Smoke check', function() {
 
       it('should be created an empty dashboard',
         function(done) {
-          API.helpers
-            .authenticateUser(testUser)
+          API.identity
+            .authenticate(testUser)
             .then(function() {
               return API.resources.dashboards
                 .getAll()

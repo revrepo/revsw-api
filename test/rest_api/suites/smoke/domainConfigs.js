@@ -32,8 +32,8 @@ describe('Smoke check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -64,8 +64,8 @@ describe('Smoke check', function () {
 
     it('should return success response data when getting a recommended default settings',
       function(done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function() {
             API.resources.domainConfigs
               .recommendedDefaultSettings()
@@ -76,9 +76,9 @@ describe('Smoke check', function () {
                 defaultSettings.should.have.property('waf_rules_ids');
                 defaultSettings.should.have.property('ssl_conf_profile_id');
                 defaultSettings.waf_rules_ids.should.be.instanceof(Array);
-                defaultSettings.waf_rules_ids.should.not.empty;
+                defaultSettings.waf_rules_ids.should.not.empty();
                 defaultSettings.ssl_conf_profile_id.should.be.type('string');
-                defaultSettings.ssl_conf_profile_id.should.not.empty;
+                defaultSettings.ssl_conf_profile_id.should.not.empty();
               })
               .then(function(){
                 done();
@@ -89,8 +89,8 @@ describe('Smoke check', function () {
 
     it('should return success response code when getting a list of domains',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .getAll()
@@ -103,8 +103,8 @@ describe('Smoke check', function () {
     it('should return success response code when creating a new domain',
       function (done) {
         secondDc = DomainConfigsDP.generateOne(account.id);
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .createOne(secondDc)
@@ -120,8 +120,8 @@ describe('Smoke check', function () {
 
     it('should return success response code when getting a specific domain',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -143,8 +143,8 @@ describe('Smoke check', function () {
         delete firstFdc.published_domain_version;
         delete firstFdc.last_published_domain_version;
         delete firstFdc.cname;
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .update(firstDc.id, firstFdc)
@@ -159,8 +159,8 @@ describe('Smoke check', function () {
       function (done) {
         firstFdc.origin_host_header = 'VERIFY-' + firstFdc.origin_host_header;
         firstFdc.origin_server = 'VERIFY-' + firstFdc.origin_server;
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .update(firstDc.id, firstFdc, {options: 'verify_only'})
@@ -175,8 +175,8 @@ describe('Smoke check', function () {
       function (done) {
         firstFdc.origin_host_header = 'PUBLISH-' + firstFdc.origin_host_header;
         firstFdc.origin_server = 'PUBLISH-' + firstFdc.origin_server;
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .update(firstDc.id, firstFdc, {options: 'publish'})
@@ -189,8 +189,8 @@ describe('Smoke check', function () {
     it('should return success response code when getting the status of ' +
       'existing domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .status(secondDc.id)
@@ -204,8 +204,8 @@ describe('Smoke check', function () {
     it('should return success response code when getting versions of ' +
       'existing domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .versions(secondDc.id)
@@ -219,8 +219,8 @@ describe('Smoke check', function () {
     it('should return success response code when getting specific versions ' +
       'for an specific existing domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id, {version: 1})
@@ -233,8 +233,8 @@ describe('Smoke check', function () {
     it('should return success response code when getting specific versions ' +
       'for an specific existing domain config',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .getOne(firstDc.id, {version: 2})
@@ -246,8 +246,8 @@ describe('Smoke check', function () {
 
     it('should return success response code when deleting a domain',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             API.resources.domainConfigs
               .deleteOne(secondDc.id)

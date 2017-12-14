@@ -44,8 +44,8 @@ describe('Sanity check', function () {
   var fullDomainConfigSchema = DomainConfigResponseSP.getFullDomainConfig();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -78,8 +78,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when getting ' +
         'all domain configs.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .getAll()
@@ -104,8 +104,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when getting ' +
         'specific domain configs.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .getOne(firstDc.id)
@@ -123,8 +123,8 @@ describe('Sanity check', function () {
         'creating new domain config.',
         function (done) {
           secondDc = DomainConfigsDP.generateOne(account.id);
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .createOne(secondDc)
@@ -148,8 +148,8 @@ describe('Sanity check', function () {
           delete firstFdc.cname;
           delete firstFdc.published_domain_version;
           delete firstFdc.last_published_domain_version;
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .update(firstDc.id, firstFdc)
@@ -167,8 +167,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'getting status of existing domain config',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .status(secondDc.id)
@@ -186,8 +186,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'getting status of existing domain config',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .versions(secondDc.id)
@@ -212,8 +212,8 @@ describe('Sanity check', function () {
       it('should return data applying `success response` schema when ' +
         'deleting a domain config.',
         function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .deleteOne(secondDc.id)

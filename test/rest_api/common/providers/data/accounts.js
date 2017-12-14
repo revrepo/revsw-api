@@ -35,7 +35,7 @@ var AccountsDataProvider = {
    * Generates valida data that represents an account which accounts REST API
    * end points accept.
    *
-   * @param {String} prefix, a prefix value to put in the name
+   * @param {String} [prefix], a prefix value to put in the name
    *
    * @returns {Object} account info with the following schema
    *

@@ -44,10 +44,14 @@ var Constants = {
       SHORT: 'short',
       BOGUS: 'bogus'
     },
+    AUTH_MODE: {
+      API_KEY: 'API_KEY',
+      CREDENTIALS: 'CREDENTIALS'
+    },
     VENDORS: [
       'revapm',
       'nuubit',
-      'hooli'      
+      'hooli'
     ]
   }
 };

@@ -46,8 +46,8 @@ describe('Boundary check', function () {
           var emptyString = '';
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -78,8 +78,8 @@ describe('Boundary check', function () {
             '`empty` app id.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -99,8 +99,8 @@ describe('Boundary check', function () {
           it('should return `bad request` response when getting config ' +
             'status for specific app with `empty` app id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .configStatus(emptyString)
@@ -118,8 +118,8 @@ describe('Boundary check', function () {
           it('should return `bad request` response when getting all versions ' +
             'for specific app with `empty` app id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .versions(emptyString)

@@ -86,8 +86,8 @@ describe('Smoke check', function () {
     // REVSW REST API services
 
     // Setting a user for all upcoming API requests
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         // For the `API` object, we get `accounts resource` and ask to create
         // one account as pre-requisite by giving the `account sample` create
@@ -132,8 +132,8 @@ describe('Smoke check', function () {
     it('should return a response when getting all accounts.',
       function (done) {
         // Setting user for all upcoming REST API calls
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             // Using `API` to get `accounts resource`
             API.resources.accounts
@@ -152,8 +152,8 @@ describe('Smoke check', function () {
     it('should return a response when getting specific account.',
       function (done) {
         // Setting user
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               // Getting one specific account giving its ID
@@ -171,8 +171,8 @@ describe('Smoke check', function () {
       function (done) {
         // Generating data for a new `account`
         var newAccount = AccountsDP.generateOne('NEW');
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               //Creating new account by using data generated
@@ -199,8 +199,8 @@ describe('Smoke check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne('NEW');
         var updatedAccount = AccountsDP.generateOne('UPDATED');
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               // Creating one account as pre-requisite since it is need to do a
@@ -222,8 +222,8 @@ describe('Smoke check', function () {
     // ### Test to delete account
     it('should return a response when deleting an account.', function (done) {
       var newProject = AccountsDP.generateOne('NEW');
-      API.helpers
-        .authenticateUser(resellerUser)
+      API.identity
+        .authenticate(resellerUser)
         .then(function () {
           API.resources.accounts
             // Creating one account as pre-requisite since it is need to do a

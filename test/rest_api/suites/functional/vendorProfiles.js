@@ -35,10 +35,10 @@ describe('Functional check', function () {
 
   describe('Vendor profile resource', function () {
 
-    it('should get vendor profile names list with revAdmin role', 
+    it('should get vendor profile names list with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .getAll()
@@ -49,13 +49,13 @@ describe('Functional check', function () {
               })
               .catch(done);
           })
-          .catch(done); 
+          .catch(done);
       });
 
-    it('should get revapm vendor profile  by name with revAdmin role', 
+    it('should get revapm vendor profile  by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorProfile()
@@ -65,15 +65,15 @@ describe('Functional check', function () {
                 res.body.vendor.should.equal('revapm');
                 done();
               })
-              .catch(done); 
+              .catch(done);
           })
           .catch(done);
       });
 
-    xit('should get nuubit vendor profile by name with revAdmin role', 
+    xit('should get nuubit vendor profile by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorsProfile()
@@ -88,10 +88,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should get hooli vendor profile by name with revAdmin role', 
+    xit('should get hooli vendor profile by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorssProfile()
@@ -106,10 +106,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should get revapm vendor profile  by id with revAdmin role', 
+    xit('should get revapm vendor profile  by id with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorUrlProfile()
@@ -124,10 +124,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should get nuubit vendor profile  by id with revAdmin role', 
+    xit('should get nuubit vendor profile  by id with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorsUrlProfile()
@@ -142,10 +142,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should get hooli vendor profile  by id with revAdmin role', 
+    xit('should get hooli vendor profile  by id with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorssUrlProfile()
@@ -160,10 +160,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should update revapm vendor profile to hooli by name with revAdmin role', 
+    xit('should update revapm vendor profile to hooli by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorProfile()
@@ -178,10 +178,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should update nuubit vendor profile to revapm by name with revAdmin role', 
+    xit('should update nuubit vendor profile to revapm by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorsProfile()
@@ -196,10 +196,10 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    xit('should update revapm vendor profile to nuubit  by name with revAdmin role', 
+    xit('should update revapm vendor profile to nuubit  by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorssProfile()

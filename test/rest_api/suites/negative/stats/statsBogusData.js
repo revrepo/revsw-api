@@ -36,8 +36,8 @@ describe('Negative check.', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -53,8 +53,8 @@ describe('Negative check.', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -72,8 +72,8 @@ describe('Negative check.', function () {
 
       var getSpecBogusDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .getOne(domainConfig.id, queryData)
@@ -113,8 +113,8 @@ describe('Negative check.', function () {
 
       var getSpecBogusDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .gbt()
@@ -155,8 +155,8 @@ describe('Negative check.', function () {
 
       var getSpecBogusDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .lastMileRtt()
@@ -197,8 +197,8 @@ describe('Negative check.', function () {
 
       var getSpecBogusDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .top()
@@ -244,8 +244,8 @@ describe('Negative check.', function () {
 
       var getSpecBogusDataCallback = function (queryData) {
         return function (done) {
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.stats
                 .topObjects()

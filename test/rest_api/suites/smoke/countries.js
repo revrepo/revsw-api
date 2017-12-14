@@ -39,8 +39,8 @@ describe('Smoke check', function () {
   describe('Countries resource', function () {
     it('should return a response when getting all countries.',
       function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.countries
               .getAll()

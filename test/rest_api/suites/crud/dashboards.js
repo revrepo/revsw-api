@@ -40,8 +40,8 @@ describe('CRUD check', function () {
       describe('Dashboards resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.dashboards.createOne();
             })
@@ -66,8 +66,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all dashboards.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .getAll()
@@ -84,8 +84,8 @@ describe('CRUD check', function () {
 
         it('should allow to get specific dashboard.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .getOne(testDashboard.id)
@@ -102,8 +102,8 @@ describe('CRUD check', function () {
         it('should allow to create a dashboard.',
           function (done) {
             var newDashboard = API.providers.data.dashboards.generateOne();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .createOne(newDashboard)
@@ -122,8 +122,8 @@ describe('CRUD check', function () {
             var newDashboard = API.providers.data.dashboards.generateOne();
             var updatedDashboard = API.providers.data.dashboards
               .generateOneForUpdate(newDashboard);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .createOne(newDashboard);
@@ -145,8 +145,8 @@ describe('CRUD check', function () {
         it('should allow to delete a dashboard.',
           function (done) {
             var newDashboard = API.providers.data.dashboards.generateOne();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .createOne(newDashboard);

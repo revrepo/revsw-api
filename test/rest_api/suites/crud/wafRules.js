@@ -44,8 +44,8 @@ describe('CRUD check', function () {
          * Prepare Account Data and New WAF Rule
          */
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               // Admin
               if (user === config.get('api.users.admin') ||
@@ -90,8 +90,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all WAF Rules',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.wafRules
                   .getAll()
@@ -109,8 +109,8 @@ describe('CRUD check', function () {
 
         it('should allow to get exists WAF Rule',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.wafRules
                   .getOne(testWAFRule.id)
@@ -127,8 +127,8 @@ describe('CRUD check', function () {
 
         it('should allow to get status of exists WAF Rule',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.wafRules
                   .status(testWAFRule.id)
@@ -152,8 +152,8 @@ describe('CRUD check', function () {
               ruleType: 'customer'
             };
             var newWAFRule = API.providers.data.wafRules.generateOne(params);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.wafRules
                   .createOne(newWAFRule)
@@ -180,8 +180,8 @@ describe('CRUD check', function () {
             var updatedWAFRule = API.providers.data.wafRules.generateOneForUpdate({
               accountId: testAccount.id
             }, 'UPDATE');
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.wafRules.createOne(newWAFRule);
               })
@@ -205,8 +205,8 @@ describe('CRUD check', function () {
             var newWAFRule = API.providers.data.wafRules.generateOne({
               accountId: testAccount.id
             });
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.wafRules.createOne(newWAFRule);
               })

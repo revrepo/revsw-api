@@ -33,8 +33,8 @@ describe('Boundary check', function () {
   var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.accounts
           .createOne(AccountsDP.generateOne())
@@ -69,8 +69,8 @@ describe('Boundary check', function () {
           'NameLongJobNameLongJobNameLongJobNameLongJobName').toLowerCase();
         var expectedMsg = 'child \"job_name\" fails because [\"job_name\" ' +
           'length must be less than or equal to 150 characters long]';
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             var logShippingJob = LogShippingJobsDP.generateOne(accountId);
             logShippingJob.job_name = longJobName;
@@ -93,8 +93,8 @@ describe('Boundary check', function () {
         var expectedMsg = 'child "account_id" fails because ["account_id" ' +
           'with value "' + longAccountId + '" fails to match the required ' +
           'pattern: /^[0-9a-fA-F]{24}$/]';
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             var logShippingJob = LogShippingJobsDP.generateOne(longAccountId);
             API.resources.logShippingJobs

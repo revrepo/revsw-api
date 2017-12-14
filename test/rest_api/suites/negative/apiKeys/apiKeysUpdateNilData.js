@@ -37,8 +37,8 @@ describe('API Keys resource: pre-requisites', function () {
   before(function (done) {
 
     Utils.forEach(users, function (user) {
-      return API.helpers
-        .authenticateUser(user)
+      return API.identity
+        .authenticate(user)
         .then(function () {
           return API.helpers.apiKeys.createOne();
         })
@@ -72,8 +72,8 @@ describe('API Keys resource: pre-requisites', function () {
     var getSpecFn = function (user, field, model) {
       var fieldName = Utils.getLastKeyFromPath(field);
       return function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             var apiKey = apiKeys[user.role];
             if (fieldName !== 'account_id') {

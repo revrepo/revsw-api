@@ -55,24 +55,24 @@ describe('Negative check', function () {
           done();
         });
 
-        it('should return `Forbidden` response when getting all subscriptions with user-role user.', 
+        it('should return `Forbidden` response when getting all subscriptions with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
-                  .subscriptions() 
+                  .subscriptions()
                   .getAll()
                   .expect(403)
                   .end(done);
               })
               .catch(done);
           });
-      
-        it('should return `Forbidden` response when getting all resources with user-role user.', 
+
+        it('should return `Forbidden` response when getting all resources with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .resources()
@@ -83,19 +83,19 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when getting all resources in resourceGroup with user-role user.', 
+        it('should return `Unauthorized` response when getting all resources in resourceGroup with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .resourceGroups(subscription)
                   .providers(resourceGroupName)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .getAll()
                   .expect(401)
                   .end(done);
@@ -103,17 +103,17 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Forbidden` response when getting all resources in subscription with user-role user.', 
+        it('should return `Forbidden` response when getting all resources in subscription with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .providers(subscription)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .getAll()
                   .expect(403)
                   .end(done);
@@ -121,20 +121,20 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when getting specific resource with user-role user.', 
+        it('should return `Unauthorized` response when getting specific resource with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
             var resourceName = AzureDP.generateOne().resource_name;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .resourceGroups(subscription)
                   .providers(resourceGroupName)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .getOne(resourceName)
                   .expect(401)
                   .end(done);
@@ -142,12 +142,12 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when create a subscription with user-role user.', 
+        it('should return `Unauthorized` response when create a subscription with user-role user.',
           function (done) {
             var subscription = AzureDP.generateTwo().subscription_id;
             var state = AzureDP.generate();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
@@ -158,21 +158,21 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when create a resource with user-role user.', 
+        it('should return `Unauthorized` response when create a resource with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
             var resourceName = AzureDP.generateOne().resource_name;
             var location = AzureDP.generateLocation();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .resourceGroups(subscription)
                   .providers(resourceGroupName)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .update(resourceName, location)
                   .expect(401)
                   .end(done);
@@ -180,12 +180,12 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when move a resource with user-role user.', 
+        it('should return `Unauthorized` response when move a resource with user-role user.',
           function (done) {
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
@@ -198,20 +198,20 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when create a list secrets with user-role user.', 
+        it('should return `Unauthorized` response when create a list secrets with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
             var resourceName = AzureDP.generateOne().resource_name;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .resourceGroups(subscription)
                   .providers(resourceGroupName)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .listSecrets(resourceName)
                   .createOne()
                   .expect(401)
@@ -220,11 +220,11 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when getting all operations with user-role user.', 
+        it('should return `Unauthorized` response when getting all operations with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .providers()
@@ -236,17 +236,17 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when update Communication Preference with user-role user.', 
+        it('should return `Unauthorized` response when update Communication Preference with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .providers(subscription)
-                  .updateCommunicationPreference(provider) 
+                  .updateCommunicationPreference(provider)
                   .createOne()
                   .expect(401)
                   .end(done);
@@ -254,17 +254,17 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response get list Communication Preference with user-role user.', 
+        it('should return `Unauthorized` response get list Communication Preference with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .providers(subscription)
-                  .listCommunicationPreference(provider) 
+                  .listCommunicationPreference(provider)
                   .createOne()
                   .expect(401)
                   .end(done);
@@ -272,20 +272,20 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when regenerate key with user-role user.', 
+        it('should return `Unauthorized` response when regenerate key with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
             var resourceName = AzureDP.generateOne().resource_name;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .resourceGroups(subscription)
                   .providers(resourceGroupName)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .regenerateKey(resourceName)
                   .createOne()
                   .expect(401)
@@ -294,20 +294,20 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        it('should return `Unauthorized` response when delete a resource with user-role user.', 
+        it('should return `Unauthorized` response when delete a resource with user-role user.',
           function (done) {
             var provider = AzureDP.generateOne().provider;
             var subscription = AzureDP.generateOne().subscription_id;
             var resourceGroupName = AzureDP.generateOne().resource_group_name;
             var resourceName = AzureDP.generateOne().resource_name;
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.azure
                   .subscriptions()
                   .resourceGroups(subscription)
                   .providers(resourceGroupName)
-                  .accounts(provider) 
+                  .accounts(provider)
                   .deleteOne(resourceName)
                   .expect(401)
                   .end(done);

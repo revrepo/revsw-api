@@ -48,8 +48,8 @@ describe('Clean up', function () {
     // TODO: Need to run this script as 'admin_rw' user
     xit('should clean Billing Plans created for testing.',
       function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticateWithCredentials(reseller)
           .then(function () {
             API.resources.billingPlans
               .getAll()

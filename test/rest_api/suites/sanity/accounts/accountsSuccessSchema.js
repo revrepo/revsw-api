@@ -37,8 +37,8 @@ describe('Sanity check', function () {
   var successCreateResponseSchema = SchemaProvider.getSuccessCreateResponse();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         API.resources.accounts
           .createOne(accountSample)
@@ -69,8 +69,8 @@ describe('Sanity check', function () {
       it('should return data applying accounts schema when getting all ' +
         'accounts.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getAll()
@@ -94,8 +94,8 @@ describe('Sanity check', function () {
       it('should return data applying accounts schema when getting specific ' +
         'account.',
         function (done) {
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getOne(accountSample.id)
@@ -113,8 +113,8 @@ describe('Sanity check', function () {
         'creating specific account.',
         function (done) {
           var newAccount = AccountsDP.generateOne('test');
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .createOne(newAccount)
@@ -141,8 +141,8 @@ describe('Sanity check', function () {
         function (done) {
           var newAccount = AccountsDP.generateOne('test');
           var updatedAccount = AccountsDP.generateOne('UPDATED');
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .createOne(newAccount)
@@ -165,8 +165,8 @@ describe('Sanity check', function () {
         'deleting an account.',
         function (done) {
           var newProject = AccountsDP.generateOne('test');
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .createOne(newProject)

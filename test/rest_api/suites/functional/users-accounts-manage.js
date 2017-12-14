@@ -35,8 +35,8 @@ describe('Functional check', function() {
     var accountManaged = AccountsDP.generateOne();
 
     before(function(done) {
-      API.helpers
-        .authenticateUser(revAdmin)
+      API.identity
+        .authenticate(revAdmin)
         .then(function() {
           return API.resources.accounts.createOne(accountMain).then(function(response) {
             accountMain.id = response.body.object_id;
@@ -76,8 +76,8 @@ describe('Functional check', function() {
     });
 
     after(function(done) {
-      API.helpers
-        .authenticateUser(revAdmin)
+      API.identity
+        .authenticate(revAdmin)
         .then(function() {
           return API.resources.accounts.deleteOne(accountMain.id);
         })
@@ -89,8 +89,8 @@ describe('Functional check', function() {
 
     it('should have access to all managed accounts ', function(done) {
       var userData;
-      API.helpers
-        .authenticateUser(newUserResseler)
+      API.identity
+        .authenticate(newUserResseler)
         .then(function() {
           API.resources.users
             .getOne(newUserResseler.id)
@@ -120,8 +120,8 @@ describe('Functional check', function() {
 
     describe('after delete managed accounts', function() {
       before(function(done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function() {
             return API.resources.accounts
               .deleteOne(newUserResseler.companyId[1])
@@ -134,8 +134,8 @@ describe('Functional check', function() {
       });
 
       it('should no have access to managed account wich was deleted', function(done) {
-        API.helpers
-          .authenticateUser(newUserResseler)
+        API.identity
+          .authenticate(newUserResseler)
           .then(function() {
             return API.resources.users
               .getOne(newUserResseler.id)

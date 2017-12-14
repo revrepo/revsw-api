@@ -34,7 +34,7 @@ describe('Smoke check:', function() {
     'user',
     'admin',
     'reseller'
-  ]
+  ];
 
   before(function(done) {
     done();
@@ -48,7 +48,7 @@ describe('Smoke check:', function() {
     describe('2fa resource for user with role "' + roleName + '"', function() {
       var user, accountForUsers;
       before(function(done) {
-        API.helpers
+        API.identity
           .authenticate(revAdminCredentials)
           .then(function() {
             return HelpersAPI.accounts.createCompleteOne();
@@ -61,7 +61,7 @@ describe('Smoke check:', function() {
       });
 
       beforeEach(function(done) {
-        API.helpers
+        API.identity
           .authenticate(revAdminCredentials)
           .then(function() {
             var newUser = DataProvider.generateUser(roleName);
@@ -82,8 +82,8 @@ describe('Smoke check:', function() {
 
       it('should return success response when initializing 2fa for specific user',
         function(done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               API.resources.twoFA
                 .init()
@@ -96,8 +96,8 @@ describe('Smoke check:', function() {
 
       it('should return success response when enabling 2fa for specific user',
         function(done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               API.resources.twoFA
                 .init()
@@ -119,8 +119,8 @@ describe('Smoke check:', function() {
 
       it('should return success response when disabling 2fa for specific user',
         function(done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function() {
               API.resources.twoFA
                 .init()

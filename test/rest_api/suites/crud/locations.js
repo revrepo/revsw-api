@@ -48,8 +48,8 @@ describe('CRUD check', function () {
 
         it('should allow to get `first-mile` data.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.locations
                   .firstMile()
@@ -68,8 +68,8 @@ describe('CRUD check', function () {
 
         it('should allow to get `last-mile` data.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.locations
                   .lastMile()

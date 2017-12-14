@@ -35,8 +35,8 @@ describe('Functional check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.users
           .myself()
@@ -78,8 +78,8 @@ describe('Functional check', function () {
       function (done) {
         var startTime = Date.now();
         secondDc = DomainConfigsDP.generateOne(account.id);
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.resources.domainConfigs
               .createOne(secondDc)
@@ -119,8 +119,8 @@ describe('Functional check', function () {
     it('should return activity data after modifying a domain config',
       function (done) {
         var startTime = Date.now();
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.resources.domainConfigs
               .getOne(firstDc.id)
@@ -177,8 +177,8 @@ describe('Functional check', function () {
     it('should return activity data after deleting a domain config',
       function (done) {
         var startTime = Date.now();
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.resources.domainConfigs
               .deleteOne(secondDc.id)

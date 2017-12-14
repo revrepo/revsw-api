@@ -26,19 +26,19 @@ var AccountsDP = require('./../../common/providers/data/accounts');
 var DataProvider = require('./../../common/providers/data');
 
 describe('Negative check', function () {
-  
+
   this.timeout(config.api.request.maxTimeout);
 
   var user = config.get('api.users.user');
-  
+
   describe('Usage Report resource', function () {
 
     describe('With not-allowed user: ' + user.role, function () {
 
-      it('should return `Forbidden` response when getting specific account usage report with user-role user.', 
+      it('should return `Forbidden` response when getting specific account usage report with user-role user.',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.usage_report
                 .getAll()
@@ -48,10 +48,10 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when getting specific account usage histogram with user-role user.', 
+      it('should return `Forbidden` response when getting specific account usage histogram with user-role user.',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.usage_report
                 .stats()

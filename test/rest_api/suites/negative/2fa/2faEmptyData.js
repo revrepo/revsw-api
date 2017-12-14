@@ -43,8 +43,8 @@ describe('Negative check', function () {
     describe('With empty data,', function () {
 
       beforeEach(function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.helpers.users.create({
               firstName: 'Tom',
@@ -65,8 +65,8 @@ describe('Negative check', function () {
       it('should return `bad request` when enabling 2fa for user with empty ' +
         'oneTimePassword',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()
@@ -96,8 +96,8 @@ describe('Negative check', function () {
       it('should return `Not Found` when disabling 2fa for user with empty ' +
         'user ID',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()

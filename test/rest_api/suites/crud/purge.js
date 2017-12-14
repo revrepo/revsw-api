@@ -27,7 +27,7 @@ describe('CRUD check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
-  
+
   var revAdmin = config.get('api.users.revAdmin');
 
   // Defining set of users for which all below tests will be run
@@ -47,8 +47,8 @@ describe('CRUD check', function () {
       describe('Purge resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.accounts.createOne();
             })
@@ -68,8 +68,8 @@ describe('CRUD check', function () {
         });
 
         after(function (done) {
-          API.helpers
-            .authenticateUser(revAdmin)
+          API.identity
+            .authenticate(revAdmin)
             .then(function () {
               API.resources.domainConfigs.deleteOne(domainConfig.id);
               done();
@@ -108,8 +108,8 @@ describe('CRUD check', function () {
                 })
                 .catch(done);
             };
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 setTimeout(cb, interval);
               })
@@ -118,8 +118,8 @@ describe('CRUD check', function () {
 
         it('should return data when creating new purge with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
                 API.resources.purge
@@ -136,8 +136,8 @@ describe('CRUD check', function () {
 
         it('should return data when getting specific purge request with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getOne(purge.id)
@@ -154,8 +154,8 @@ describe('CRUD check', function () {
 
         it('should return data when getting list purge requests with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getAll({domain_id:domainConfig.id})

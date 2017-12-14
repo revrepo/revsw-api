@@ -20,6 +20,7 @@
 
 // API dependencies
 var Session = require('./session');
+var Identity = require('./identity');
 var APIHelpers = require('./helpers/api');
 var APIResources = require('./resources/api');
 var APIDataProviders = require('./providers/data/api');
@@ -34,6 +35,8 @@ var API = {
 
   // Session, will help us to _remember_ which user is currently being used.
   session: Session,
+
+  identity: Identity,
 
   // A set of all helpers for the REST API service.
   helpers: APIHelpers,

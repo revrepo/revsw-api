@@ -31,8 +31,8 @@ describe('Smoke check', function () {
     API.helpers
       .signUpAndVerifyUser()
       .then(function (user) {
-        return API.helpers
-          .authenticateUser(revAdmin)
+        return API.identity
+          .authenticate(revAdmin)
           .then(function () {
             return API.helpers.users.getFirstCompanyId(user);
           })
@@ -53,8 +53,8 @@ describe('Smoke check', function () {
 
     it('should return success response when creating Billing profile',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.accounts
               .billingProfile(accountId)
@@ -67,8 +67,8 @@ describe('Smoke check', function () {
 
     it('should return success response when getting all Billing statements',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.accounts
               .statements(accountId)
@@ -81,8 +81,8 @@ describe('Smoke check', function () {
 
     it('should return success response when getting specific Billing statement',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             return API.helpers.accounts.getFirstStatement(accountId);
           })
@@ -99,8 +99,8 @@ describe('Smoke check', function () {
     it('should return success response when getting specific Billing ' +
       'statement in PDF format',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             return API.helpers.accounts.getFirstStatement(accountId);
           })
@@ -117,8 +117,8 @@ describe('Smoke check', function () {
 
     it('should return success response when getting all Billing transactions',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.accounts
               .transactions(accountId)
@@ -133,8 +133,8 @@ describe('Smoke check', function () {
       'information',
       function (done) {
         var billingPlanHandle = 'billing-plan-gold';
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.accounts
               .subscriptionPreview(accountId)
@@ -147,8 +147,8 @@ describe('Smoke check', function () {
 
     it('should return success response when getting subscription summary',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.accounts
               .subscriptionSummary(accountId)

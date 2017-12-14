@@ -49,8 +49,8 @@ describe('Negative check', function () {
       it('should return `Bad Request` response when creating specific account',
         function (done) {
           var emptyAccount = {};
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .createOne(emptyAccount)
@@ -64,8 +64,8 @@ describe('Negative check', function () {
         function (done) {
           var emptyId = '';
           var emptyAccount = {};
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .update(emptyId, emptyAccount)
@@ -78,8 +78,8 @@ describe('Negative check', function () {
       it('should return `Not Found` response when deleting an account.',
         function (done) {
           var emptyId = '';
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .deleteOne(emptyId)

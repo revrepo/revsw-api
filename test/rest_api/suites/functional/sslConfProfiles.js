@@ -49,11 +49,11 @@ describe('Functional check', function () {
 
 
       describe('SSL Config profile resource', function () {
-    
+
         it('should get  SSL Config profiles list with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslConfProfiles
                   .getAll()

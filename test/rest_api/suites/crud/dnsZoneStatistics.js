@@ -44,8 +44,8 @@ describe('CRUD check', function () {
       describe('DNS Zones Statistics resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.accounts.createOne();
             })
@@ -78,11 +78,12 @@ describe('CRUD check', function () {
           done();
         });
 
-              
-        it('should return a response when getting a specific DNS zone with usage stats and period last 24h with user-role user',
+
+        it('should return a response when getting a specific DNS zone with ' +
+          'usage stats and period last 24h with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var period = DNSZoneStatisticsDP.generatePeriod();
                 API.resources.dnsZones
@@ -99,10 +100,11 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should return a response when getting a specific DNS zone with usage stats and period last 1h with user-role user',
+        it('should return a response when getting a specific DNS zone with ' +
+          'usage stats and period last 1h with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var period = DNSZoneStatisticsDP.generateOne();
                 API.resources.dnsZones
@@ -119,10 +121,11 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should return a response when getting a specific DNS zone with usage stats and period last 30d with user-role user',
+        it('should return a response when getting a specific DNS zone with ' +
+          'usage stats and period last 30d with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var period = DNSZoneStatisticsDP.generateTwo();
                 API.resources.dnsZones
@@ -137,7 +140,7 @@ describe('CRUD check', function () {
                   .catch(done);
               })
               .catch(done);
-          }); 
+          });
       });
     });
   });

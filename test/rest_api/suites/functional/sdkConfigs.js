@@ -27,7 +27,7 @@ describe('Functional check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
-  
+
   var users = [
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller')
@@ -42,8 +42,8 @@ describe('Functional check', function () {
     describe('With user: ' + user.role, function() {
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -53,8 +53,8 @@ describe('Functional check', function () {
           })
           .then(function (app) {
               testApp = app;
-              return API.helpers
-                .authenticateUser(user)
+              return API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.helpers.accounts.createOne();
                 })
@@ -70,7 +70,7 @@ describe('Functional check', function () {
             })
             .catch(done);
       });
-      
+
 
       after(function (done) {
         done();
@@ -90,8 +90,8 @@ describe('Functional check', function () {
         it('should return a success response when getting specific app SDK Config with user-role user.',
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })

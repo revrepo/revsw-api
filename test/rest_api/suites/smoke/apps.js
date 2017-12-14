@@ -43,8 +43,8 @@ describe('Smoke check', function () {
       describe('Apps resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.accounts.createOne();
             })
@@ -73,8 +73,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting all apps.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .getAll()
@@ -86,8 +86,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting specific app.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .getOne(testApp.id)
@@ -100,8 +100,8 @@ describe('Smoke check', function () {
         it('should return a response when creating an app.',
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .createOne(newApp)
@@ -121,8 +121,8 @@ describe('Smoke check', function () {
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
             var updatedApp = AppsDP.generateOneForUpdate(testAccount.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -138,8 +138,8 @@ describe('Smoke check', function () {
         it('should return a response when deleting an app.',
           function (done) {
             var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.apps.createOne(newApp);
               })
@@ -154,8 +154,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting all SDK releases',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .sdkReleases()
@@ -169,8 +169,8 @@ describe('Smoke check', function () {
         it('should return a response when getting config status for an ' +
           'specific app',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .configStatus(testApp.id)
@@ -184,8 +184,8 @@ describe('Smoke check', function () {
         it('should return a response when getting all versions for ' +
           'specific app',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.apps
                   .versions(testApp.id)

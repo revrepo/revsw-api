@@ -53,8 +53,8 @@ describe('Boundary check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne();
         newAccount.companyName = '';
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
@@ -80,8 +80,8 @@ describe('Boundary check', function () {
         }
         var newAccount = AccountsDP.generateOne();
         newAccount.companyName = str;
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)

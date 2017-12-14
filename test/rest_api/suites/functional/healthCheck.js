@@ -40,8 +40,8 @@ describe('Functional check', function () {
 
         it('should return a response when getting health-check info.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.healthCheck
                   .getAll()

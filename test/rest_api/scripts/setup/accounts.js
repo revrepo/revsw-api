@@ -46,8 +46,8 @@ describe('Setup', function () {
         it('should create required items for pagination.',
           function (done) {
 
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
 
                 var accountsNeeded = [];

@@ -54,8 +54,8 @@ describe('Negative check', function () {
           it('should return `Bad Request` when trying to `create` WAF Rule ' +
             'with `bogus` Rule Name',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   var bodusWAFRule = API.providers.data.wafRules.generateOne({
                     accountId: user.account.id
@@ -98,8 +98,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting WAF Rule using ' +
             'bogus id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.wafRules
                     .getOne(bogusId)
@@ -116,8 +116,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when deleting WAF Rule using ' +
             'bogus id.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.wafRules
                     .deleteOne(bogusId)
@@ -134,8 +134,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting config ' +
             'status for WAF Rule using bogus id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.wafRules
                     .status(bogusId)

@@ -47,8 +47,8 @@ describe('Sanity check', function () {
     describe('Success Response Data Schema', function () {
 
       beforeEach(function (done) {
-        API.helpers
-          .authenticateUser(reseller)
+        API.identity
+          .authenticate(reseller)
           .then(function () {
             return API.helpers.users.create({
               firstName: 'Tom',
@@ -69,8 +69,8 @@ describe('Sanity check', function () {
       it('should return success response schema when initializing 2fa for ' +
         'specific user',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()
@@ -87,8 +87,8 @@ describe('Sanity check', function () {
 
       it('should return success response schema when enabling 2fa for user',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()
@@ -114,8 +114,8 @@ describe('Sanity check', function () {
 
       it('should return success response schema when disabling 2fa for user',
         function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.twoFA
                 .init()

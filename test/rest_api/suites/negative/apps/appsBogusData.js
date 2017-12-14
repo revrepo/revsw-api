@@ -47,8 +47,8 @@ describe('Negative check', function () {
           var bogusId = '!@#$%^&*()_+';
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -78,8 +78,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting app using ' +
             'bogus id.',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .getOne(bogusId)
@@ -97,8 +97,8 @@ describe('Negative check', function () {
             'bogus id.',
             function (done) {
               var newApp = API.providers.data.apps.generate({accountId: testAccount.id});
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.resources.apps.createOne(newApp);
                 })
@@ -118,8 +118,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting config ' +
             'status for app using bogus id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .configStatus(bogusId)
@@ -137,8 +137,8 @@ describe('Negative check', function () {
           it('should return `bad request` response when getting versions ' +
             'for app using bogus id',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.apps
                     .versions(bogusId)

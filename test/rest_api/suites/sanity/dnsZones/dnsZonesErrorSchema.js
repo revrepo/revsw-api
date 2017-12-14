@@ -66,8 +66,8 @@ describe('Sanity check', function () {
         describe('Error Response Data Schema', function () {
 
           before(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.accounts.createOne();
               })
@@ -87,8 +87,8 @@ describe('Sanity check', function () {
           });
 
           after(function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.helpers.dnsZones
                   .cleanup(new RegExp(firstDnsZone.zone))

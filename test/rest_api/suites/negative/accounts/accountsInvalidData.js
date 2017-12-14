@@ -49,8 +49,8 @@ describe('Negative check', function () {
       it('should return `Bad Request` response when getting specific account.',
         function (done) {
           var invalidId = 'invalid-account-id';
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .getOne(invalidId)
@@ -65,8 +65,8 @@ describe('Negative check', function () {
           var invalidAccount = {
             invalidKey: 'Invalid information'
           };
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .createOne(invalidAccount)
@@ -82,8 +82,8 @@ describe('Negative check', function () {
           var invalidUpdatedAccount = {
             invalidKey: 'Invalid information'
           };
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .update(invalidId, invalidUpdatedAccount)
@@ -96,8 +96,8 @@ describe('Negative check', function () {
       it('should return `Bad Request` response when deleting an account.',
         function (done) {
           var invalidId = 'invalid-account-id';
-          API.helpers
-            .authenticateUser(resellerUser)
+          API.identity
+            .authenticate(resellerUser)
             .then(function () {
               API.resources.accounts
                 .deleteOne(invalidId)

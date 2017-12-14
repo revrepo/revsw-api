@@ -56,23 +56,49 @@ var getRequest = function () {
 //
 // Receives as param the request instance
 var setUserToRequest = function (request) {
-  var user = Session.getCurrentUser();
+  var authMode = Session.getAuthenticationMode();
 
-  // TODO: need to move the Azure token to config/default.json config file
-  var token = 'sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf';
-  if (user && user.token) {
-    return request.set('Authorization', 'Bearer ' + user.token);
-// TODO: The code is fucked up - need to add a way to detect when to use
-// different methods of authentication
-//  }else if (user && !!token) {
-//     return request.set('Authorization', 'Bearer-RP ' + token);
+  switch(authMode) {
+    case Constants.API.AUTH_MODE.API_KEY:
+      var apiKey = Session.getCurrentAPIKey();
+      if (apiKey === undefined) {
+        return request;
+      }
+      return request.set('Authorization', 'X-API-KEY ' + apiKey.key);
+    default: // CREDENTIALS
+      var user = Session.getCurrentUser();
+      if (user === undefined) {
+        return request;
+      }
+      return request.set('Authorization', 'Bearer ' + user.token);
   }
-  else{
-    if(user && !!user.key){
-      return request.set('Authorization', 'X-API-KEY ' + user.key);
-    }
+};
+
+// #### Helper function getHeaders
+//
+// Returns set of headers. In case there is a session with a user or api-key
+// information, includes `Authorization` header
+var getHeaders = function () {
+  var headers = {};
+  var authMode = Session.getAuthenticationMode();
+
+  // Setting `Authorization` header
+  switch(authMode) {
+    case Constants.API.AUTH_MODE.API_KEY:
+      var apiKey = Session.getCurrentAPIKey();
+      if (apiKey && apiKey.key) {
+        headers['Authorization'] = 'X-API-KEY ' + apiKey.key; // jshint ignore:line
+      }
+      break;
+    default: // CREDENTIALS
+      var user = Session.getCurrentUser();
+      if (user && user.token) {
+        headers['Authorization'] = 'Bearer ' + user.token; // jshint ignore:line
+      }
+      break;
   }
-  return request;
+
+  return headers;
 };
 
 // #### Helper function getPath
@@ -114,6 +140,35 @@ var getResourceBuilder = function (nestedResource, path, parentIdKey) {
     }
     return new BasicResource(resource);
   };
+};
+
+// #### Helper function logRequestData
+//
+// Prints info about request. Useful while debugging.
+//
+// Receives as param the request data
+// TODO: Find a better way to do this (consider a OOP approach)
+var logRequestData = function (data) {
+  // console.log('        >>> -----------------------------------------------');
+  // console.log('            END-POINT:', data.resource);
+  // console.log('            METHOD:', data.method);
+  // console.log('            HEADERS:', JSON.stringify(data.headers));
+  // console.log('            QUERY PARAMS:', JSON.stringify(data.queryParams));
+  // console.log('            PAYLOAD:', JSON.stringify(data.payload));
+};
+
+// #### Helper function sendRequest
+//
+// Send the request, attaches headers if specified.
+//
+// Receives as param the request data and the header set.
+// TODO: Find a better way to do this (consider a OOP approach)
+var sendRequest = function (request, headers) {
+  if (Object.keys(headers).length > 0) {
+    return request.set(headers);
+  }
+
+  return request;
 };
 
 /**
@@ -172,10 +227,18 @@ var BasicResource = function (data) {
      */
     _resource.getAll = function (query) {
       var location = getPath(data);
+      var headers = getHeaders();
       var request = getRequest()
         .get(location)
         .query(query);
-      return setUserToRequest(request);
+
+      logRequestData({
+        resource: location,
+        method: 'GET',
+        queryParams: query
+      });
+
+      return sendRequest(request, headers);
     };
   }
 
@@ -188,16 +251,24 @@ var BasicResource = function (data) {
      *
      * @param {String} id, the uuid of the object
      *
-     * @param {object} query, will be transformed to a query string
+     * @param {object} [query], will be transformed to a query string
      *
      * @returns {object} the supertest-as-promised instance
      */
     _resource.getOne = function (id, query) {
       var location = getPath(data, id);
+      var headers = getHeaders();
       var request = getRequest()
         .get(location)
         .query(query);
-      return setUserToRequest(request);
+
+      logRequestData({
+        resource: location,
+        method: 'GET',
+        queryParams: query
+      });
+
+      return sendRequest(request, headers);
     };
   }
 
@@ -216,6 +287,8 @@ var BasicResource = function (data) {
      */
     _resource.createOne = function (object, query, param) {
       var location;
+      var headers = getHeaders();
+
       if (typeof object === 'string') {
         location = getPath(data, object);
         object = query;
@@ -224,11 +297,21 @@ var BasicResource = function (data) {
       else {
         location = getPath(data);
       }
+
       var request = getRequest()
         .post(location)
         .query(query)
         .send(object);
-      return setUserToRequest(request);
+
+      logRequestData({
+        resource: location,
+        headers: headers,
+        method: 'POST',
+        queryParams: query,
+        payload: object
+      });
+
+      return sendRequest(request, headers);
     };
   }
 
@@ -287,11 +370,20 @@ var BasicResource = function (data) {
      */
     _resource.update = function (id, object, query) {
       var location = getPath(data, id);
+      var headers = getHeaders();
       var request = getRequest()
         .put(location)
         .query(query)
         .send(object);
-      return setUserToRequest(request);
+
+      logRequestData({
+        resource: location,
+        method: 'PUT',
+        queryParams: query,
+        payload: object
+      });
+
+      return sendRequest(request, headers);
     };
   }
 
@@ -348,9 +440,16 @@ var BasicResource = function (data) {
      */
     _resource.deleteOne = function (id) {
       var location = getPath(data, id);
+      var headers = getHeaders();
       var request = getRequest()
         .del(location);
-      return setUserToRequest(request);
+
+      logRequestData({
+        resource: location,
+        method: 'DELETE'
+      });
+
+      return sendRequest(request, headers);
     };
   }
 

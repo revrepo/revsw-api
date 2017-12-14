@@ -42,8 +42,8 @@ describe('Smoke check', function () {
     describe('With user: ' + user.role, function() {
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -59,8 +59,8 @@ describe('Smoke check', function () {
       });
 
       after(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs.deleteOne(domainConfig.id);
             done();
@@ -77,8 +77,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .getOne(domainConfig.id, queryData)
@@ -117,8 +117,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .gbt()
@@ -149,8 +149,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .lastMileRtt()
@@ -181,8 +181,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .top()
@@ -213,8 +213,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .topObjects()
@@ -245,8 +245,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .imageEngine()
@@ -277,8 +277,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .mobileDesktop()
@@ -309,8 +309,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtHeatmap()
@@ -341,8 +341,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtDistribution()
@@ -373,8 +373,8 @@ describe('Smoke check', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtAverage()

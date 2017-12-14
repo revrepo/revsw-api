@@ -51,8 +51,8 @@ describe('CRUD check', function () {
         });
 
         beforeEach(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               if (user.role === 'Rev Admin') {
                 return API.helpers.accounts.createOne();
@@ -81,8 +81,8 @@ describe('CRUD check', function () {
 
         it('should initialize 2fa for specific user',
           function (done) {
-            API.helpers
-              .authenticateUser(newUser)
+            API.identity
+              .authenticate(newUser)
               .then(function () {
                 API.resources.twoFA
                   .init()
@@ -102,8 +102,8 @@ describe('CRUD check', function () {
 
         it('should enable 2fa for specific user',
           function (done) {
-            API.helpers
-              .authenticateUser(newUser)
+            API.identity
+              .authenticate(newUser)
               .then(function () {
                 API.resources.twoFA
                   .init()
@@ -131,8 +131,8 @@ describe('CRUD check', function () {
 
         it('should disable 2fa for specific user',
           function (done) {
-            API.helpers
-              .authenticateUser(newUser)
+            API.identity
+              .authenticate(newUser)
               .then(function () {
                 API.resources.twoFA
                   .init()

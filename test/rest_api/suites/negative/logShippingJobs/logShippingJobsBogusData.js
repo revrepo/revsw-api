@@ -34,8 +34,8 @@ describe('Negative check', function () {
   var revAdmin = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -51,8 +51,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(revAdmin)
+    API.identity
+      .authenticate(revAdmin)
       .then(function () {
         API.resources.logShippingJobs.deleteOne(logShippingJob.id);
         done();
@@ -79,8 +79,8 @@ describe('Negative check', function () {
           var expectedMsg = 'child "account_id" fails because ["account_id" ' +
             'with value "' + transformedStr + '" fails to match the required ' +
             'pattern: /^[0-9a-fA-F]{24}$/]';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var logShippingJob = LogShippingJobsDP.generateOne(bogusAccountId);
               API.resources.logShippingJobs

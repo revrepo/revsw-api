@@ -33,8 +33,8 @@ describe('Negative check', function () {
   var reseller = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         return API.helpers.accounts.createOne();
       })
@@ -50,8 +50,8 @@ describe('Negative check', function () {
   });
 
   after(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
+    API.identity
+      .authenticate(reseller)
       .then(function () {
         API.resources.domainConfigs.deleteOne(domainConfig.id);
         done();
@@ -75,8 +75,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingAccountId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Account ID not found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig =
                 DomainConfigsDP.generateOne(nonExistingAccountId);
@@ -97,8 +97,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingLocationId = 'aaaafaaaafaaaafaaaaf1234';
           var expMsg = 'Specified first mile location ID cannot be found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               var domainConfig = DomainConfigsDP.generateOne(account.id);
               domainConfig.origin_server_location_id = nonExistingLocationId;
@@ -119,8 +119,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingDomainId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Domain ID not found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .status(nonExistingDomainId)
@@ -140,8 +140,8 @@ describe('Negative check', function () {
         function (done) {
           var nonExistingDomainId = 'aaaafaaaafaaaafaaaaf1234';
           var expectedMsg = 'Domain ID not found';
-          API.helpers
-            .authenticateUser(reseller)
+          API.identity
+            .authenticate(reseller)
             .then(function () {
               API.resources.domainConfigs
                 .versions(nonExistingDomainId)

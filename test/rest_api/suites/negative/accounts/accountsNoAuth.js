@@ -30,8 +30,8 @@ describe('Negative check', function () {
   var resellerUser = config.get('api.users.reseller');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         API.resources.accounts
           .createOne(accountSample)

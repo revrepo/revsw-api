@@ -41,8 +41,8 @@ describe('Smoke check', function () {
       describe('DNS Zones resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.accounts.createOne();
             })
@@ -77,8 +77,8 @@ describe('Smoke check', function () {
 
         it('should return response when getting all of DNS zones',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dnsZones
                   .getAll()
@@ -90,8 +90,8 @@ describe('Smoke check', function () {
 
         it('should return response when getting all DNS zones with usage stats',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dnsZones
                   .usage()
@@ -104,8 +104,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting a specific DNS zone',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dnsZones
                   .getOne(firstDnsZone.id)
@@ -118,8 +118,8 @@ describe('Smoke check', function () {
         it('should return a response when creating specific DNS zone',
           function (done) {
             var dnsZone = DNSZonesDP.generateOne(account.id);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dnsZones
                   .createOne(dnsZone)
@@ -137,8 +137,8 @@ describe('Smoke check', function () {
           function (done) {
             var originalDnsZone;
             var updatedDnsZone = DNSZonesDP.generateToUpdate();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.dnsZones.create(account.id);
               })
@@ -158,8 +158,8 @@ describe('Smoke check', function () {
 
         it('should return a response when deleting specific DNS zone',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.helpers.dnsZones.create(account.id);
               })
@@ -175,8 +175,8 @@ describe('Smoke check', function () {
         it('should return a response when checking integration with dns ' +
           'servers for specific DNS Zone',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dnsZones
                   .checkIntegration(firstDnsZone.id)
@@ -191,8 +191,8 @@ describe('Smoke check', function () {
         it('should return a response when checking integration with records ' +
           ' for specific DNS Zone',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dnsZones
                   .checkIntegration(firstDnsZone.id)
@@ -208,8 +208,8 @@ describe('Smoke check', function () {
 
           it('should return a response when getting all DNS Zone Records',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.dnsZones
                     .records(firstDnsZone.id)
@@ -222,8 +222,8 @@ describe('Smoke check', function () {
 
           it('should return a response when getting specific DNS Zone Record',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.dnsZones
                     .records(firstDnsZone.id)
@@ -237,8 +237,8 @@ describe('Smoke check', function () {
           it('should return a response when creating a new DNS Zone Record',
             function (done) {
               var dnsZoneRecord = DNSZonesDP.records.generateOne(firstDnsZone.zone);
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   API.resources.dnsZones
                     .records(firstDnsZone.id)
@@ -251,8 +251,8 @@ describe('Smoke check', function () {
 
           it('should return a response when updating specific DNS Zone Record',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.helpers.dnsZones.records.create(firstDnsZone);
                 })
@@ -274,8 +274,8 @@ describe('Smoke check', function () {
 
           it('should return a response when deleting specific DNS Zone Record',
             function (done) {
-              API.helpers
-                .authenticateUser(user)
+              API.identity
+                .authenticate(user)
                 .then(function () {
                   return API.helpers.dnsZones.records.create(firstDnsZone);
                 })

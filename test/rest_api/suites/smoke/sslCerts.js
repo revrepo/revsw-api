@@ -35,8 +35,8 @@ describe('Smoke check', function () {
   var user = config.get('api.users.revAdmin');
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(user)
+    API.identity
+      .authenticate(user)
       .then(function () {
         return API.helpers.sslCerts.createOne();
       })
@@ -56,8 +56,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when getting all SSL certs.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.sslCerts
               .getAll()
@@ -69,8 +69,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when getting specific SSL cert.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.sslCerts
               .getOne(sslCert.id)
@@ -83,8 +83,8 @@ describe('Smoke check', function () {
     it('should return a success response when creating specific SSL cert.',
       function (done) {
         var certificate = SSLCertDataProvider.generateOne(accountId);
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.sslCerts
               .createOne(certificate)
@@ -101,8 +101,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when updating specific SSL cert.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.sslCerts.createOne();
           })
@@ -121,8 +121,8 @@ describe('Smoke check', function () {
 
     it('should return a success response when deleting a SSL cert.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.sslCerts.createOne();
           })
@@ -138,8 +138,8 @@ describe('Smoke check', function () {
     it('should return a success response when getting config-status of a ' +
       'SSL cert.',
       function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.sslCerts
               .configStatus(sslCert.id)

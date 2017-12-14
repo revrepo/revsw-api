@@ -27,9 +27,7 @@ describe('Functional check', function() {
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller'),
     config.get('api.users.admin'),
-    config.get('api.users.user'),
-    config.get('api.apikeys.admin'),
-    config.get('api.apikeys.reseller')
+    config.get('api.users.user')
   ];
   var gitHubPersonalAccessTokens = config.get('api.gitHubPersonalAccessTokenForAccountId');
 
@@ -41,7 +39,7 @@ describe('Functional check', function() {
           id: credentionals.account.id
         };
         before(function(done) {
-          API.helpers
+          API.identity
             .authenticate(credentionals)
             .then(function() {
               done();
@@ -83,7 +81,7 @@ describe('Functional check', function() {
             if (!domainId) {
               return done();
             }
-            API.helpers
+            API.identity
               .authenticate(credentionals)
               .then(function() {
                 API.resources.domainConfigs.deleteOne(domainId);

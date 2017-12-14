@@ -41,8 +41,8 @@ describe('Smoke check', function () {
     describe('With user: ' + user.role, function() {
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             return API.helpers.accounts.createOne();
           })
@@ -62,8 +62,8 @@ describe('Smoke check', function () {
       });
 
       after(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs.deleteOne(domainConfig.id);
             done();
@@ -83,8 +83,8 @@ describe('Smoke check', function () {
 
         it('should return data when getting specific purge with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getOne(purge.id)
@@ -96,8 +96,8 @@ describe('Smoke check', function () {
 
         it('should return data when creating new purge with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
                 API.resources.purge
@@ -110,8 +110,8 @@ describe('Smoke check', function () {
 
         it('should return data when getting list purge requests with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getAll({domain_id:domainConfig.id})

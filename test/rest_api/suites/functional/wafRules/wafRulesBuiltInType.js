@@ -38,7 +38,7 @@ describe('Functional check', function () {
     };
 
     before(function (done) {
-      API.helpers.authenticateUser(userRevAdmin)
+      API.identity.authenticate(userRevAdmin)
         .then(function () {
           return API.helpers.accounts.createOne()
             .then(function (dataAccount) {

@@ -43,8 +43,8 @@ describe('Functional check', function () {
 
     beforeEach(function (done) {
       accountSample = AccountsDP.generateOne('NEW');
-      API.helpers
-        .authenticateUser(resellerUser)
+      API.identity
+        .authenticate(resellerUser)
         .then(function () {
           API.resources.users
             .myself()
@@ -72,8 +72,8 @@ describe('Functional check', function () {
 
     it('should return activity data after creating an account.',
       function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.activity
               .getAll({user_id: resellerUser.id})
@@ -99,8 +99,8 @@ describe('Functional check', function () {
     it('should return activity data after updating specific account.',
       function (done) {
         var updatedAccount = AccountsDP.generateOne('UPDATED');
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             return API.resources.accounts
               .update(accountSample.id, updatedAccount)
@@ -134,8 +134,8 @@ describe('Functional check', function () {
       function (done) {
         var testAccountId;
         var newProject = AccountsDP.generateOne('NEW');
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             return API.resources.accounts
               .createOne(newProject)

@@ -48,8 +48,8 @@ describe('CRUD check', function () {
 
         it('should allow to get all countries.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.countries
                   .getAll()

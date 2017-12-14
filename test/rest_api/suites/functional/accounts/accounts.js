@@ -35,8 +35,8 @@ describe('Functional check', function () {
   var userSample = DataProvider.generateUser();
 
   before(function (done) {
-    API.helpers
-      .authenticateUser(resellerUser)
+    API.identity
+      .authenticate(resellerUser)
       .then(function () {
         API.resources.users
           .createOne(userSample)
@@ -75,14 +75,14 @@ describe('Functional check', function () {
     it('should allow to `get` specific `account` from other `reseller` user.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
               .then(function (response) {
-                API.helpers
-                  .authenticateUser(anotherResellerUser)
+                API.identity
+                  .authenticate(anotherResellerUser)
                   .then(function () {
                     API.resources.accounts
                       .getOne(response.body.id)
@@ -101,14 +101,14 @@ describe('Functional check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne();
         var updatedAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
               .then(function (response) {
-                API.helpers
-                  .authenticateUser(anotherResellerUser)
+                API.identity
+                  .authenticate(anotherResellerUser)
                   .then(function () {
                     API.resources.accounts
                       .update(response.body.object_id, updatedAccount)
@@ -126,14 +126,14 @@ describe('Functional check', function () {
       'another `reseller` user.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
               .then(function (response) {
-                API.helpers
-                  .authenticateUser(anotherResellerUser)
+                API.identity
+                  .authenticate(anotherResellerUser)
                   .then(function () {
                     API.resources.accounts
                       .deleteOne(response.body.object_id)
@@ -151,8 +151,8 @@ describe('Functional check', function () {
       'deleted.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
@@ -181,8 +181,8 @@ describe('Functional check', function () {
       function (done) {
         var newAccount = AccountsDP.generateOne();
         var updatedAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
@@ -210,8 +210,8 @@ describe('Functional check', function () {
       'deleted.',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(resellerUser)
+        API.identity
+          .authenticate(resellerUser)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)
@@ -238,8 +238,8 @@ describe('Functional check', function () {
     it('should return `Bad Request` when trying to `create` account from not `reseller` user',
       function (done) {
         var newAccount = AccountsDP.generateOne();
-        API.helpers
-          .authenticateUser(userSample)
+        API.identity
+          .authenticate(userSample)
           .then(function () {
             API.resources.accounts
               .createOne(newAccount)

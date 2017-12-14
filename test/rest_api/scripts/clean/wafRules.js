@@ -41,8 +41,8 @@ describe('Clean up', function () {
 
         it('should clean WAF Rules created for testing',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticateWithCredentials(user)
               .then(function () {
                 return API.resources.wafRules
                   .getAll()

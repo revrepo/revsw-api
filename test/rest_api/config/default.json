@@ -75,6 +75,10 @@
         "account": {
           "id": "55b706a57957012304a49d0b",
           "companyName": "API QA Reseller Company"
+        },
+        "apiKey": {
+          "id": "5a31f0ece21b57567192aeba",
+          "key": "20d8db34-1439-4d18-9047-ec6b0f99425b"
         }
       },
       "secondReseller": {
@@ -93,6 +97,10 @@
         "account": {
           "id": "55b6ff6a7957012304a49d04",
           "companyName": "API QA Account"
+        },
+        "apiKey": {
+          "id": "5a31f10ae21b57567192aebe",
+          "key": "3c54ccc8-85b2-4c5f-a10c-a37116bb9517"
         }
       },
       "user": {

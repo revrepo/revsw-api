@@ -26,7 +26,7 @@ var AccountsDP = require('./../../common/providers/data/accounts');
 var DataProvider = require('./../../common/providers/data');
 
 describe('Negative check', function () {
-  
+
   this.timeout(config.api.request.maxTimeout);
 
   var users = [
@@ -48,10 +48,10 @@ describe('Negative check', function () {
 
       describe('With not-allowed user: ' + user.role, function () {
 
-        it('should return `Forbidden` response when getting all vendor profiles with user-role user', 
+        it('should return `Forbidden` response when getting all vendor profiles with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .getAll()
@@ -61,10 +61,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting revapm vendor profile by name with user-role user', 
+        xit('should return `Forbidden` response when getting revapm vendor profile by name with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .vendorProfile()
@@ -75,10 +75,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting nuubit vendor profile by name with user-role user', 
+        xit('should return `Forbidden` response when getting nuubit vendor profile by name with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .vendorsProfile()
@@ -89,10 +89,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting hooli vendor profile by name with user-role user', 
+        xit('should return `Forbidden` response when getting hooli vendor profile by name with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .vendorssProfile()
@@ -103,10 +103,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting revapm vendor profile by id with user-role user', 
+        xit('should return `Forbidden` response when getting revapm vendor profile by id with user-role user',
           function (done) {
-            API.helpers
-            .authenticateUser(user)
+            API.identity
+            .authenticate(user)
             .then(function () {
               API.resources.vendorProfiles
                 .vendorUrlProfile()
@@ -117,10 +117,10 @@ describe('Negative check', function () {
             .catch(done);
           });
 
-        xit('should return `Forbidden` response when getting nuubit vendor profile by id with user-role user', 
+        xit('should return `Forbidden` response when getting nuubit vendor profile by id with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .vendorsUrlProfile()
@@ -131,10 +131,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response  when getting hooli vendor profile by id with user-role user', 
+        xit('should return `Forbidden` response  when getting hooli vendor profile by id with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .vendorssUrlProfile()
@@ -145,10 +145,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when updating revapm vendor profile to hooli with user-role user', 
+        xit('should return `Forbidden` response when updating revapm vendor profile to hooli with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .updateVendorProfile()
@@ -159,10 +159,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when updating nuubit vendor profile to revapm with user-role user', 
+        xit('should return `Forbidden` response when updating nuubit vendor profile to revapm with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .updateVendorsProfile()
@@ -173,10 +173,10 @@ describe('Negative check', function () {
               .catch(done);
           });
 
-        xit('should return `Forbidden` response when updating revapm vendor profile to nuubit with user-role user', 
+        xit('should return `Forbidden` response when updating revapm vendor profile to nuubit with user-role user',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.vendorProfiles
                   .updateVendorssProfile()

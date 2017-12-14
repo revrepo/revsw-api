@@ -42,8 +42,8 @@ describe('Smoke check', function () {
       describe('Dashboards resource', function () {
 
         before(function (done) {
-          API.helpers
-            .authenticateUser(user)
+          API.identity
+            .authenticate(user)
             .then(function () {
               return API.helpers.dashboards.createOne();
             })
@@ -68,8 +68,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting all dashboards.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dashboards
                   .getAll()
@@ -81,8 +81,8 @@ describe('Smoke check', function () {
 
         it('should return a response when getting specific dashboard.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dashboards
                   .getOne(testDashboard.id)
@@ -95,8 +95,8 @@ describe('Smoke check', function () {
         it('should return a response when creating a dashboard.',
           function (done) {
             var newDashboard = DashboardsDP.generateOne();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.dashboards
                   .createOne(newDashboard)
@@ -117,8 +117,8 @@ describe('Smoke check', function () {
             var newDashboard = DashboardsDP.generateOne();
             var updatedDashboard = DashboardsDP
               .generateOneForUpdate(newDashboard);
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .createOne(newDashboard);
@@ -135,8 +135,8 @@ describe('Smoke check', function () {
         it('should return a response when deleting a dashboard.',
           function (done) {
             var newDashboard = DashboardsDP.generateOne();
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.dashboards
                   .createOne(newDashboard);

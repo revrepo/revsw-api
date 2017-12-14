@@ -30,8 +30,8 @@ describe('Smoke check', function() {
   var user = config.get('api.users.revAdmin');
   it('should return a success response when getting all Staging Servers.',
     function(done) {
-      API.helpers
-        .authenticateUser(user)
+      API.identity
+        .authenticate(user)
         .then(function() {
           API.resources.stagingServers
             .getAll()
