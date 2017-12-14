@@ -34,7 +34,7 @@ describe('Smoke check', function () {
    config.get('api.users.secondReseller'),
    config.get('api.users.admin')
   ];
-  
+
   users.forEach(function(user) {
 
     describe('With user: ' + user.role, function() {
@@ -45,14 +45,14 @@ describe('Smoke check', function () {
 
       after(function(done) {
         done();
-      }); 
+      });
 
       describe('Usage Report resource', function () {
 
-        it('should return a success response when getting specific account usage report with user-role user.', 
+        it('should return a success response when getting specific account usage report with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .getAll({account_id: account_id})
@@ -62,10 +62,10 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when getting specific account usage histogram with user-role user.', 
+        it('should return a success response when getting specific account usage histogram with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .stats()

@@ -48,7 +48,7 @@ describe('Smoke check:', function() {
     describe('2fa resource for user with role "' + roleName + '"', function() {
       var user, accountForUsers;
       before(function(done) {
-        API.helpers
+        API.identity
           .authenticate(revAdminCredentials)
           .then(function() {
             return HelpersAPI.accounts.createCompleteOne();
@@ -61,7 +61,7 @@ describe('Smoke check:', function() {
       });
 
       beforeEach(function(done) {
-        API.helpers
+        API.identity
           .authenticate(revAdminCredentials)
           .then(function() {
             var newUser = DataProvider.generateUser(roleName);

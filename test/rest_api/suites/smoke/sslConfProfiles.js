@@ -46,11 +46,11 @@ describe('Smoke check', function () {
       });
 
       describe('SSL Config profile resource', function () {
-    
+
         it('should return a success response when getting all SSL Config profiles with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslConfProfiles
                   .getAll()
@@ -58,7 +58,7 @@ describe('Smoke check', function () {
                   .end(done);
               })
               .catch(done);
-          });   
+          });
       });
     });
   });

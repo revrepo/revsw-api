@@ -50,10 +50,10 @@ describe('Smoke check', function () {
       done();
     });
 
-    it('should return a success response when getting all subscriptions with revAdmin role.', 
+    it('should return a success response when getting all subscriptions with revAdmin role.',
       function (done) {
-        API.helpers
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -64,10 +64,10 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when getting all resources with revAdmin role.', 
+    it('should return a success response when getting all resources with revAdmin role.',
       function (done) {
-        API.helpers
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .resources()
@@ -78,7 +78,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when getting all resources in resourceGroup with Azure token.', 
+    it('should return a success response when getting all resources in resourceGroup with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -90,7 +90,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .end(done);
@@ -98,12 +98,12 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when getting all resources in subscription with revAdmin role.', 
+    it('should return a success response when getting all resources in subscription with revAdmin role.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
-        API.helpers
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -115,8 +115,8 @@ describe('Smoke check', function () {
           })
           .catch(done);
       });
-      
-    it('should return a success response when getting specific resource with Azure token.', 
+
+    it('should return a success response when getting specific resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -129,7 +129,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getOne(resourceName)
               .expect(200)
               .end(done);
@@ -137,7 +137,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when getting all resources in subscription with Azure token.', 
+    it('should return a success response when getting all resources in subscription with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -155,7 +155,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when create a subscription with Azure token.', 
+    it('should return a success response when create a subscription with Azure token.',
       function (done) {
         var subscription = AzureDP.generateTwo().subscription_id;
         var state = AzureDP.generate();
@@ -171,7 +171,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when create a resource with Azure token.', 
+    it('should return a success response when create a resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -185,7 +185,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .update(resourceName, location)
               .expect(200)
               .end(done);
@@ -193,7 +193,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return a success response when update a resource with Azure token.', 
+    xit('should return a success response when update a resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -206,7 +206,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .PatchOne(resourceName)
               .expect(400)
               .end(done);
@@ -214,7 +214,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when move a resource with Azure token.', 
+    it('should return a success response when move a resource with Azure token.',
       function (done) {
         var subscription = AzureDP.generateOne().subscription_id;
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
@@ -232,7 +232,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when create a list secrets with Azure token.', 
+    it('should return a success response when create a list secrets with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -245,7 +245,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .listSecrets(resourceName)
               .createOne()
               .expect(200)
@@ -254,7 +254,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when getting all operations  with Azure token.', 
+    it('should return a success response when getting all operations  with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         API.helpers
@@ -270,7 +270,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when update Communication Preference with Azure token.', 
+    it('should return a success response when update Communication Preference with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -280,7 +280,7 @@ describe('Smoke check', function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .updateCommunicationPreference(provider) 
+              .updateCommunicationPreference(provider)
               .createOne()
               .expect(200)
               .end(done);
@@ -288,7 +288,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response get list Communication Preference with Azure token.', 
+    it('should return a success response get list Communication Preference with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -298,7 +298,7 @@ describe('Smoke check', function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .listCommunicationPreference(provider) 
+              .listCommunicationPreference(provider)
               .createOne()
               .expect(200)
               .end(done);
@@ -306,7 +306,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when regenerate key with Azure token.', 
+    it('should return a success response when regenerate key with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -319,7 +319,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .regenerateKey(resourceName)
               .createOne()
               .expect(200)
@@ -328,7 +328,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when get list Single Sign On Authorization with Azure token.', 
+    it('should return a success response when get list Single Sign On Authorization with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -341,7 +341,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .listSingleSignOnToken(resourceName)
               .createOne()
               .expect(200)
@@ -350,7 +350,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when delete a resource with Azure token.', 
+    it('should return a success response when delete a resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -363,7 +363,7 @@ describe('Smoke check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .deleteOne(resourceName)
               .expect(200)
               .end(done);

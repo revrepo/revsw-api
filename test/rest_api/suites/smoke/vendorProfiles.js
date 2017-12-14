@@ -34,8 +34,8 @@ describe('Smoke check', function () {
 
   after(function (done) {
     // Set vendor back to RevAPM to not break any API/UI tests
-    API.helpers
-    .authenticateUser(Admin)
+    API.identity
+    .authenticate(Admin)
     .then(function () {
       API
       .helpers
@@ -50,8 +50,8 @@ describe('Smoke check', function () {
   describe('Vendor profile resource', function () {
 
     it('should return a response containing all the expected vendors', function (done) {
-      API.helpers
-        .authenticateUser(Admin)
+      API.identity
+        .authenticate(Admin)
         .then(function () {
           API.helpers.vendors.getAllVendors().then(function (res) {
             res.forEach(function (vendor) {
@@ -67,8 +67,8 @@ describe('Smoke check', function () {
     vendors.forEach(function (vendor) {
       it('should return a response containing expected data for ' + vendor + ' vendor',
         function (done) {
-          API.helpers
-            .authenticateUser(Admin)
+          API.identity
+            .authenticate(Admin)
             .then(function () {
               API.helpers.vendors.getVendorByName(vendor).then(function (res) {
                 done();
@@ -86,8 +86,8 @@ describe('Smoke check', function () {
     vendors.forEach(function (vendor) {
       it('should successfully update user\'s vendor to ' + vendor,
         function (done) {
-          API.helpers
-            .authenticateUser(Admin)
+          API.identity
+            .authenticate(Admin)
             .then(function () {
               API
               .helpers
@@ -103,8 +103,8 @@ describe('Smoke check', function () {
 
     xit('should return a response when updating nuubit vendor profile to revapm  with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(Admin)
+        API.identity
+          .authenticate(Admin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorsProfile()
@@ -117,8 +117,8 @@ describe('Smoke check', function () {
 
     xit('should return a response when updating revapm vendor profile to nuubit  with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(Admin)
+        API.identity
+          .authenticate(Admin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorssProfile()
