@@ -35,10 +35,10 @@ describe('CRUD check', function () {
 
   describe('Vendor profile resource', function () {
 
-    it('should get vendor profile names list with revAdmin role', 
+    it('should get vendor profile names list with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .getAll()
@@ -52,10 +52,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should get revapm vendor profile  by name with revAdmin role', 
+    it('should get revapm vendor profile  by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorProfile()
@@ -71,10 +71,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should get nuubit vendor profile by name with revAdmin role', 
+    xit('should get nuubit vendor profile by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorsProfile()
@@ -90,10 +90,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should get hooli vendor profile by name with revAdmin role', 
+    xit('should get hooli vendor profile by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorssProfile()
@@ -109,10 +109,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should get revapm vendor profile  by id with revAdmin role', 
+    xit('should get revapm vendor profile  by id with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorUrlProfile()
@@ -128,10 +128,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should get nuubit vendor profile  by id with revAdmin role', 
+    xit('should get nuubit vendor profile  by id with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorsUrlProfile()
@@ -147,10 +147,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should get hooli vendor profile  by id with revAdmin role', 
+    xit('should get hooli vendor profile  by id with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .vendorssUrlProfile()
@@ -166,10 +166,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should update revapm vendor profile to hooli by name with revAdmin role', 
+    xit('should update revapm vendor profile to hooli by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorProfile()
@@ -185,10 +185,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should update nuubit vendor profile to revapm by name with revAdmin role', 
+    xit('should update nuubit vendor profile to revapm by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorsProfile()
@@ -204,10 +204,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    xit('should update revapm vendor profile to nuubit  by name with revAdmin role', 
+    xit('should update revapm vendor profile to nuubit  by name with revAdmin role',
       function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
+        API.identity
+          .authenticate(revAdmin)
           .then(function () {
             API.resources.vendorProfiles
               .updateVendorssProfile()

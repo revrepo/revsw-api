@@ -136,8 +136,8 @@ describe('CRUD check', function () {
 
         it('should return data when getting specific purge request with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getOne(purge.id)
@@ -154,8 +154,8 @@ describe('CRUD check', function () {
 
         it('should return data when getting list purge requests with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.purge
                   .getAll({domain_id:domainConfig.id})

@@ -48,10 +48,10 @@ describe('CRUD check', function () {
       done();
     });
 
-    it('should get Subscriptions list with revAdmin role.', 
+    it('should get Subscriptions list with revAdmin role.',
       function (done) {
-        API.helpers
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -68,10 +68,10 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should get Resources list with revAdmin role.', 
+    it('should get Resources list with revAdmin role.',
       function (done) {
-        API.helpers
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .resources()
@@ -88,7 +88,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in resourceGroup with Azure token.', 
+    it('should get Resources list in resourceGroup with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -100,7 +100,7 @@ describe('CRUD check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -114,17 +114,17 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in subscription with revAdmin role.', 
+    it('should get Resources list in subscription with revAdmin role.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
-        API.helpers                       
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -138,7 +138,7 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should get specific Resource with Azure token.', 
+    it('should get specific Resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -151,7 +151,7 @@ describe('CRUD check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getOne(resourceName)
               .expect(200)
               .then(function (response) {
@@ -164,17 +164,17 @@ describe('CRUD check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in subscription with Azure token.', 
+    it('should get Resources list in subscription with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
-        API.helpers                       
+        API.helpers
           .authenticateAzureKey()
           .then(function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {

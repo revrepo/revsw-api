@@ -50,8 +50,8 @@ describe('CRUD check', function () {
 
         it('should return a success response when getting specific app SDK Config with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 var sdk_key = DataProvider.generateSDKConfig().sdk_key;
                 API.resources.sdkConfigs

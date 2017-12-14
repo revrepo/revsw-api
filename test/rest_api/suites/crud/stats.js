@@ -282,8 +282,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .imageEngine()
@@ -311,7 +311,7 @@ describe('CRUD check.', function () {
             it(specDescription, specCallback);
           });
       });
-      
+
       parallel('Mobile/Desktop Distribution: Stats resource,', function () {
 
         var getSpecDescription = function (queryData) {
@@ -321,8 +321,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .mobileDesktop()
@@ -360,8 +360,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtDistribution()
@@ -399,8 +399,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtHeatmap()
@@ -438,8 +438,8 @@ describe('CRUD check.', function () {
 
         var getSpecCallback = function (queryData) {
           return function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtAverage()

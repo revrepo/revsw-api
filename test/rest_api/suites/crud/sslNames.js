@@ -55,7 +55,7 @@ describe('CRUD check', function () {
         //     done();
         //   })
         //   .catch(done);
-        done();  
+        done();
       });
 
       after(function (done) {
@@ -66,8 +66,8 @@ describe('CRUD check', function () {
 
         it('should get SSL Names list with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -85,8 +85,8 @@ describe('CRUD check', function () {
 
         it('should get specific SSL Name with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -110,8 +110,8 @@ describe('CRUD check', function () {
         xit('should create specific SSL Name with user-role user.',
           function (done) {
            var sslname = SSLNameDP.generateOne(accountId,'test1');
-           API.helpers
-              .authenticateUser(user)
+           API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .createOne(sslname)
@@ -125,14 +125,14 @@ describe('CRUD check', function () {
                   })
                   .catch(done);
               })
-              .catch(done); 
+              .catch(done);
           });
 
         xit('should delete specific SSL Name with user-role user.',
           function (done) {
             var sslname = SSLNameDP.generateOne(accountId,'test2');
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.sslNames.createOne(sslname);
               })
@@ -143,7 +143,7 @@ describe('CRUD check', function () {
                   .then(function (res) {
                     res.body.should.not.be.empty();
                     res.body.message.should.not.be.empty();
-                    done();   
+                    done();
                   })
                   .catch(done);
               })
@@ -152,13 +152,13 @@ describe('CRUD check', function () {
 
         it('should get specific SSL Name with Email Approvers and user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
-                  .then(function (response) { 
-                    var sslNames = response.body; 
+                  .then(function (response) {
+                    var sslNames = response.body;
                     API.resources.sslNames
                       .approvers()
                       .getAll({ssl_name:sslNames[0].ssl_name})
@@ -178,8 +178,8 @@ describe('CRUD check', function () {
 
         xit('should verify specific SSL Name with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -187,7 +187,7 @@ describe('CRUD check', function () {
                     var sslNames = response.body;
                     API.resources.sslNames
                       .verify(sslNames[0].id)
-                      .getOne() 
+                      .getOne()
                       .expect(200)
                       .then(function (res) {
                         var ssl = res.body;

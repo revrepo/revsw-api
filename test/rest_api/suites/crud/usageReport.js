@@ -41,17 +41,17 @@ describe('UsageReport CRUD check:', function () {
 
       describe( 'UsageReport Stats ', function ( ) {
 
-        it('should return response when getting specific account usage histogram with user-role user.', 
+        it('should return response when getting specific account usage histogram with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .stats()
                   .getAll({account_id: account_id})
                   .expect(200)
                   .then(function (data) {
-                    report = data.body.metadata;
+                    var report = data.body.metadata;
                     report.should.be.not.empty();
                     report.account_id.should.be.not.empty();
                     done();
@@ -61,16 +61,16 @@ describe('UsageReport CRUD check:', function () {
               .catch(done);
           });
 
-        it('should return a success response when getting specific account usage report with user-role user.', 
+        it('should return a success response when getting specific account usage report with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .getAll({account_id: account_id})
                   .expect(200)
                   .then(function (data) {
-                    report = data.body.metadata;
+                    var report = data.body.metadata;
                     report.should.be.not.empty();
                     report.account_id.should.be.not.empty();
                     done();
