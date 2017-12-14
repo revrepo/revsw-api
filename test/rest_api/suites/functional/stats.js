@@ -47,8 +47,8 @@ users.forEach(function(user) {
       this.timeout(config.get('api.request.maxTimeout'));
 
       before(function (done) {
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(done)
           .catch(done);
       });

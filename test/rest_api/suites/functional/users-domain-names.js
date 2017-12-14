@@ -44,8 +44,8 @@ describe('Functional check', function() {
       // Generating new `user` data in order to use later in our tests.
       describe('Users resource for new user with role "' + role + '"', function() {
         before(function(done) {
-          API.helpers
-            .authenticateUser(revAdmin)
+          API.identity
+            .authenticate(revAdmin)
             .then(function() {
               return API.resources.accounts.createOne(accountMain)
                 .then(function(response) {
@@ -95,8 +95,8 @@ describe('Functional check', function() {
         });
 
         after(function(done) {
-          API.helpers
-            .authenticateUser(revAdmin)
+          API.identity
+            .authenticate(revAdmin)
             .then(function() {
               return API.resources.accounts.deleteOne(accountMain.id);
             })
@@ -108,8 +108,8 @@ describe('Functional check', function() {
 
         it('should have access to managed domain names', function(done) {
           var userData;
-          API.helpers
-            .authenticateUser(newUserWithRole)
+          API.identity
+            .authenticate(newUserWithRole)
             .then(function() {
               return API.resources.users
                 .myself()
@@ -150,8 +150,8 @@ describe('Functional check', function() {
 
         describe('after delete managed domain', function() {
           before(function(done) {
-            API.helpers
-              .authenticateUser(revAdmin)
+            API.identity
+              .authenticate(revAdmin)
               .then(function() {
                 return API.resources.domainConfigs
                   .deleteOne(deleteDomainConfig.id)
@@ -166,8 +166,8 @@ describe('Functional check', function() {
 
           it('should no managed domain name wich was deleted', function(done) {
 
-            API.helpers
-              .authenticateUser(newUserWithRole)
+            API.identity
+              .authenticate(newUserWithRole)
               .then(function() {
                 return API.resources.users
                   .myself()

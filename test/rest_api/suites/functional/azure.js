@@ -49,7 +49,7 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should create subscription with Azure token and get Subscriptions list with revAdmin role.', 
+    it('should create subscription with Azure token and get Subscriptions list with revAdmin role.',
       function (done) {
         var subscription = AzureDP.generateTwo().subscription_id;
         var state = AzureDP.generate();
@@ -60,9 +60,9 @@ describe('Functional check', function () {
               .subscriptions()
               .update(subscription, state)
               .expect(200)
-              .then(function (){ 
-                API.helpers
-                  .authenticateUser(RevAdmin)
+              .then(function (){
+                API.identity
+                  .authenticate(RevAdmin)
                   .then(function () {
                     API.resources.azure
                       .subscriptions()
@@ -81,11 +81,11 @@ describe('Functional check', function () {
                   .catch(done);
               })
               .catch(done);
-          })    
-          .catch(done); 
+          })
+          .catch(done);
       });
 
-    it('should create resource with Azure token and get Resources list with revAdmin role.', 
+    it('should create resource with Azure token and get Resources list with revAdmin role.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -99,12 +99,12 @@ describe('Functional check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .update(resourceName, location)
               .expect(200)
               .then(function () {
-                API.helpers
-                  .authenticateUser(RevAdmin)
+                API.identity
+                  .authenticate(RevAdmin)
                   .then(function () {
                     API.resources.azure
                       .resources()
@@ -127,7 +127,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in resourceGroup with Azure token.', 
+    it('should get Resources list in resourceGroup with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -139,7 +139,7 @@ describe('Functional check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -156,17 +156,17 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in subscription with revAdmin role.', 
+    it('should get Resources list in subscription with revAdmin role.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
-        API.helpers
-          .authenticateUser(RevAdmin)
+        API.identity
+          .authenticate(RevAdmin)
           .then(function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -183,7 +183,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should get specific Resource with Azure token.', 
+    it('should get specific Resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -196,7 +196,7 @@ describe('Functional check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getOne(resourceName)
               .expect(200)
               .then(function (response) {
@@ -210,7 +210,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in subscription with Azure token.', 
+    it('should get Resources list in subscription with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -220,7 +220,7 @@ describe('Functional check', function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {

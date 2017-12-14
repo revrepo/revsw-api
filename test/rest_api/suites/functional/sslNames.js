@@ -67,8 +67,8 @@ describe('Functional check', function () {
 
         it('should get SSL Names list with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -89,8 +89,8 @@ describe('Functional check', function () {
 
         it('should get specific SSL Name with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -115,12 +115,12 @@ describe('Functional check', function () {
         xit('should create specific SSL Name user-role user.',
           function (done) {
             var sslname = SSLNameDP.generateOne(accountId,'test');
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .createOne(sslname)
-                  .expect(200)    
+                  .expect(200)
                   .then(function (response) {
                     response.body.message.should.equal('Successfully added new SSL name');
                     API.resources.sslNames
@@ -129,14 +129,14 @@ describe('Functional check', function () {
                   })
                   .catch(done);
               })
-              .catch(done); 
+              .catch(done);
           });
 
         xit('should delete specific SSL Name with user-role user.',
           function (done) {
             var sslname = SSLNameDP.generateOne(accountId,'test2');
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 return API.resources.sslNames.createOne(sslname);
               })
@@ -146,7 +146,7 @@ describe('Functional check', function () {
                   .expect(200)
                   .then(function(res) {
                     res.body.message.should.equal('Successfully deleted the SSL name');
-                    done();   
+                    done();
                   })
                   .catch(done);
               })
@@ -155,12 +155,12 @@ describe('Functional check', function () {
 
        it('should get specific SSL Name with Email Approvers and user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
-                  .then(function (response) {  
+                  .then(function (response) {
                     var sslNames = response.body;
                     API.resources.sslNames
                       .approvers()
@@ -184,8 +184,8 @@ describe('Functional check', function () {
 
         xit('should verify specific SSL Name with user-role user.',
           function (done) {
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()

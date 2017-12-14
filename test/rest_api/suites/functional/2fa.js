@@ -225,9 +225,9 @@ describe('Functional check', function () {
         .catch(done);
     });
 
-    it('should fail to init 2FA if authenticate by API Key', function(done){
-      API.helpers
-        .authenticate(apiKeyAccountSample)
+    xit('should fail to init 2FA if authenticate by API Key', function(done){
+      API.identity
+        .authenticateWithAPIKey(apiKeyAccountSample)
         .then(function() {
           API.resources.twoFA
             .init()

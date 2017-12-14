@@ -66,8 +66,8 @@ describe('UsageReport Functional check:', function () {
           };
 
           before(function(done){
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .stats()
@@ -100,8 +100,8 @@ describe('UsageReport Functional check:', function () {
           };
 
           before(function(done){
-            API.helpers
-              .authenticateUser(user)
+            API.identity
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .stats()
@@ -125,8 +125,8 @@ describe('UsageReport Functional check:', function () {
 
       it( 'UsageReport downloaded successfully', function ( done ) {
 
-        API.helpers
-          .authenticateUser(user)
+        API.identity
+          .authenticate(user)
           .then(function () {
             API.resources.usage_report
               .getAll({
@@ -216,8 +216,10 @@ describe('UsageReport Functional check:', function () {
       });
 
       xit( 'UsageReport contains correct billable bandwidth values', function () {
-        report.billable_sent_bps.should.be.approximately( ( estimated.sent_bytes * 8 / test_data_timespan ), 100 );
-        report.billable_received_bps.should.be.approximately( ( estimated.received_bytes * 8 / test_data_timespan ), 100 );
+        report.billable_sent_bps.should.be
+          .approximately( ( estimated.sent_bytes * 8 / test_data_timespan ), 100 );
+        report.billable_received_bps.should.be
+          .approximately( ( estimated.received_bytes * 8 / test_data_timespan ), 100 );
       });
     });
   });
