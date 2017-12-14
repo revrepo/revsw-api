@@ -32,7 +32,8 @@ var Locators = {
             id: 'resetBtn'
         },
         userInput: {
-            id: 'input_user'
+            id: 'input_user',
+            css: '#input_user'
         },
         passInput: {
             id: 'input_pass'

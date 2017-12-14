@@ -34,7 +34,7 @@ describe('Functional check', function() {
     var userRolesList = [
       'reseller',
       'admin',
-      'user'
+      // 'user' //NOTE: role 'user' can have only one account
     ];
 
     userRolesList.forEach(function(role) {

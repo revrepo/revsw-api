@@ -28,7 +28,7 @@ var wafRuleId = 'wafRuleId';
 var resourceConfig = {
   idKey: wafRuleId,
   name: 'wafRules',
-  path: '/waf_rules/{' + wafRuleId + '}',
+  path: '/v1/waf_rules/{' + wafRuleId + '}',
   methods: [
     Methods.READ_ALL,
     Methods.READ_ONE,

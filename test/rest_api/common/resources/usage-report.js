@@ -27,7 +27,7 @@ var Methods = Constants.API.METHODS;
 module.exports = new BaseResource({
   name: 'usage_report',
   idKey: null,
-  path: '/usage_reports/web',
+  path: '/v1/usage_reports/web',
   methods: [
     Methods.READ_ALL
   ],

@@ -924,3 +924,337 @@ DataProvider.prototype.generateStatsTests = function () {
   }, this );
 };
 
+/**
+ * Stats DataProvider.generateImageEngineTests()
+ *
+ */
+DataProvider.prototype.generateImageEngineTests = function () {
+
+  var keys = this.options.keys,
+    len0 = keys.status_code.length,
+    len1 = keys.cache_code.length,
+    len2 = keys.request_status.length,
+    len3 = keys.protocol.length,
+    len4 = keys.http_method.length,
+    len5 = keys.quic.length,
+    len6 = keys.country.length,
+    len7 = keys.os.length,
+    len8 = keys.device.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6 * len7 * len8;
+
+  var tests = [];
+  for ( var i = 0; i < 512; ++i ) {
+    var keys_ = [],
+      count = total;
+
+    if ( i&1 ) {
+      keys_.push( 'status_code' );
+      count /= len0;
+    }
+    if ( i&2 ) {
+      keys_.push( 'cache_code' );
+      count /= len1;
+    }
+    if ( i&4 ) {
+      keys_.push( 'request_status' );
+      count /= len2;
+    }
+    if ( i&8 ) {
+      keys_.push( 'protocol' );
+      count /= len3;
+    }
+    if ( i&16 ) {
+      keys_.push( 'http_method' );
+      count /= len4;
+    }
+    if ( i&32 ) {
+      keys_.push( 'quic' );
+      count /= len5;
+    }
+    if ( i&64 ) {
+      keys_.push( 'country' );
+      count /= len6;
+    }
+    if ( i&128 ) {
+      keys_.push( 'os' );
+      count /= len7;
+    }
+    if ( i&256 ) {
+      keys_.push( 'device' );
+      count /= len8;
+    }
+      
+    tests.push({
+      keys: keys_,
+      count: count
+    });
+  }
+
+  this.autoSpan();
+  for ( var t = 0, lent = tests.length; t < lent; ++t ) {
+    var test = tests[t];
+    test.query = { from_timestamp: this.options.from, to_timestamp: this.options.to };
+    for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
+      var key = test.keys[k];
+      test.query[key] = keys[key][ Math.floor( keys[key].length * Math.random() ) ];
+    }
+  }
+
+  return _.map( tests, function( test ) {
+    return {
+      name: test.keys.join(','),
+      query: test.query,
+      count: test.count,
+      sent_bytes: test.count * this.options.template_short.s_bytes,
+      received_bytes: test.count * this.options.template_short.r_bytes
+    };
+  }, this );
+};
+
+/**
+ * Stats DataProvider.generateMobileDesktopTests()
+ *
+ */
+DataProvider.prototype.generateMobileDesktopTests = function () {
+
+ var keys = this.options.keys,
+    len0 = keys.status_code.length,
+    len1 = keys.cache_code.length,
+    len2 = keys.request_status.length,
+    len3 = keys.protocol.length,
+    len4 = keys.http_method.length,
+    len5 = keys.quic.length,
+    len6 = keys.country.length,
+    total = len0 * len1 * len2 * len3 * len4 * len5 * len6;
+
+  var tests = [];
+  for ( var i = 0; i < 512; ++i ) {
+    var keys_ = [],
+      count = total;
+
+    if ( i&1 ) {
+      keys_.push( 'status_code' );
+      count /= len0;
+    }
+    if ( i&2 ) {
+      keys_.push( 'cache_code' );
+      count /= len1;
+    }
+    if ( i&4 ) {
+      keys_.push( 'request_status' );
+      count /= len2;
+    }
+    if ( i&8 ) {
+      keys_.push( 'protocol' );
+      count /= len3;
+    }
+    if ( i&16 ) {
+      keys_.push( 'http_method' );
+      count /= len4;
+    }
+    if ( i&32 ) {
+      keys_.push( 'quic' );
+      count /= len5;
+    }
+    if ( i&64 ) {
+      keys_.push( 'country' );
+      count /= len6;
+    }
+     
+    tests.push({
+      keys: keys_,
+      count: 120000
+    });
+  }
+
+  this.autoSpan();
+  for ( var t = 0, lent = tests.length; t < lent; ++t ) {
+    var test = tests[t];
+    test.query = { from_timestamp: this.options.from, to_timestamp: this.options.to };
+    for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
+      var key = test.keys[k];
+    }
+  }
+
+  return _.map( tests, function( test ) {
+    return {
+      name: test.keys.join(','),
+      query: test.query,
+      count: test.count
+    };
+  });
+};
+
+/**
+ * Stats DataProvider.generateFBTHeatmapTests()
+ *
+ */
+DataProvider.prototype.generateFBTHeatmapTests = function () {
+
+   
+  var keys = this.options.keys,
+    len0 = keys.count,
+    total = len0;
+
+  var tests = [];
+  for ( var i = 0; i < 512; ++i ) {
+    var keys_ = [],
+      count = total;
+
+    if ( i&1 ) {
+      keys_.push( 'count' );
+      count /= len0;
+    }
+
+    tests.push({
+      keys: keys_,
+      count: 120000
+    });
+  }
+
+  this.autoSpan();
+  for ( var t = 0, lent = tests.length; t < lent; ++t ) {
+    var test = tests[t];
+    test.query = { from_timestamp: this.options.from, to_timestamp: this.options.to };
+    for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
+      var key = test.keys[k];
+    }
+  }
+
+  return _.map( tests, function( test ) {
+    return {
+      name: test.keys.join(','),
+      query: test.query,
+      count: test.count
+    };
+  });
+};
+
+/**
+ * Stats DataProvider.generateFBTDistributionTests()
+ *
+ */
+DataProvider.prototype.generateFBTDistributionTests = function () {
+
+   var keys = this.options.keys,
+    len0 = keys.country.length,
+    len1 = keys.os.length,
+    len2 = keys.device.length,
+    len3 = keys.browser,
+    len4 = keys.interval_ms,
+    len5 = keys.limit_ms,
+    total = len0 * len1 * len2 * len3 * len4 * len5;
+
+  var tests = [];
+  for ( var i = 0; i < 512; ++i ) {
+    var keys_ = [],
+      count = total;
+
+    if ( i&1 ) {
+      keys_.push( 'country' );
+      count /= len0;
+    }
+    if ( i&2 ) {
+      keys_.push( 'os' );
+      count /= len1;
+    }
+    if ( i&4 ) {
+      keys_.push( 'device' );
+      count /= len2;
+    }
+    if ( i&8 ) {
+      keys_.push( 'browser' );
+      count /= len3;
+    }
+    if ( i&16 ) {
+      keys_.push( 'interval_ms' );
+      count /= len4;
+    }
+    if ( i&32 ) {
+      keys_.push( 'limit_ms' );
+      count /= len5;
+    }
+    
+    tests.push({
+      keys: keys_,
+      count: 120000
+    });
+  }
+
+  this.autoSpan();
+  for ( var t = 0, lent = tests.length; t < lent; ++t ) {
+    var test = tests[t];
+    test.query = { from_timestamp: this.options.from, to_timestamp: this.options.to };
+    for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
+      var key = test.keys[k];
+    }
+  }
+
+  return _.map( tests, function( test ) {
+    return {
+      name: test.keys.join(','),
+      query: test.query,
+      count: test.count
+    };
+  });
+};
+
+/**
+ * Stats DataProvider.generateFBTAverageTests Tests()
+ *
+ */
+DataProvider.prototype.generateFBTAverageTests = function () {
+
+   var keys = this.options.keys,
+    len0 = keys.country.length,
+    len1 = keys.os.length,
+    len2 = keys.device.length,
+    len3 = keys.browser,
+    total = len0 * len1 * len2 * len3;
+
+  var tests = [];
+  for ( var i = 0; i < 512; ++i ) {
+    var keys_ = [],
+      count = total;
+
+    if ( i&1 ) {
+      keys_.push( 'country' );
+      count /= len0;
+    }
+    if ( i&2 ) {
+      keys_.push( 'os' );
+      count /= len1;
+    }
+    if ( i&4 ) {
+      keys_.push( 'device' );
+      count /= len2;
+    }
+    if ( i&8 ) {
+      keys_.push( 'browser' );
+      count /= len3;
+    }
+
+    tests.push({
+      keys: keys_,
+      count: 120000
+    });
+  }
+
+  this.autoSpan();
+  for ( var t = 0, lent = tests.length; t < lent; ++t ) {
+    var test = tests[t];
+    test.query = { from_timestamp: this.options.from, to_timestamp: this.options.to };
+    for ( var k = 0, lenk = test.keys.length; k < lenk; ++k ) {
+      var key = test.keys[k];
+    }
+  }
+
+  return _.map( tests, function( test ) {
+    return {
+      name: test.keys.join(','),
+      query: test.query,
+      count: test.count
+    };
+  });
+};
+

@@ -25,7 +25,7 @@ var Methods = Constants.API.METHODS;
 var resourceConfig = {
   idKey: null,
   name: 'authenticate',
-  path: '/authenticate',
+  path: '/v1/authenticate',
   methods: [
     Methods.CREATE
   ],

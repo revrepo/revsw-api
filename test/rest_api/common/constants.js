@@ -47,7 +47,12 @@ var Constants = {
     AUTH_MODE: {
       API_KEY: 'API_KEY',
       CREDENTIALS: 'CREDENTIALS'
-    }
+    },
+    VENDORS: [
+      'revapm',
+      'nuubit',
+      'hooli'
+    ]
   }
 };
 

@@ -25,7 +25,7 @@ var Methods = Constants.API.METHODS;
 var resourceConfig = {
   idKey: null,
   name: 'locations',
-  path: '/locations',
+  path: '/v1/locations',
   methods: [],
   nestedResources: [
     {

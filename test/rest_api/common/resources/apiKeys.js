@@ -28,7 +28,7 @@ var apiKeyId = 'apiKeyId';
 var resourceConfig = {
   idKey: apiKeyId,
   name: 'apiKeys',
-  path: '/api_keys/{' + apiKeyId + '}',
+  path: '/v1/api_keys/{' + apiKeyId + '}',
   methods: [
     Methods.READ_ALL,
     Methods.READ_ONE,

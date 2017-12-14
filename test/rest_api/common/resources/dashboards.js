@@ -26,7 +26,7 @@ var dashboardIdKey = 'dashboardId';
 var resourceConfig = {
   idKey: dashboardIdKey,
   name: 'dashboards',
-  path: '/dashboards/{' + dashboardIdKey + '}',
+  path: '/v1/dashboards/{' + dashboardIdKey + '}',
   methods: [
     Methods.CREATE,
     Methods.READ_ALL,

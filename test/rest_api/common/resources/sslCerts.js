@@ -28,7 +28,7 @@ var sslCertIdKey = 'sslCertId';
 var resourceConfig = {
   idKey: sslCertIdKey,
   name: 'sslCerts',
-  path: '/ssl_certs/{' + sslCertIdKey + '}',
+  path: '/v1/ssl_certs/{' + sslCertIdKey + '}',
   methods: [
     Methods.READ_ALL,
     Methods.READ_ONE,

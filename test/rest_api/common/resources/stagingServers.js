@@ -25,7 +25,7 @@ var Methods = Constants.API.METHODS;
 var resourceConfig = {
   idKey: null,
   name: 'stagingServers',
-  path: '/staging_servers',
+  path: '/v1/staging_servers',
   methods: [
     Methods.READ_ALL
   ]

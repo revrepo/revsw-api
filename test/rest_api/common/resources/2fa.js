@@ -26,7 +26,7 @@ var userIdKey = 'userId';
 var resourceConfig = {
   idKey: userIdKey,
   name: 'twoFA',
-  path: '/2fa/{' + userIdKey + '}',
+  path: '/v1/2fa/{' + userIdKey + '}',
   nestedResources: [
     {
       idKey: userIdKey,

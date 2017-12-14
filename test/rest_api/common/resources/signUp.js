@@ -32,7 +32,7 @@ var tokenKey = 'tokenId';
 var resourceConfig = {
   idKey: null,
   name: 'signUp',
-  path: '/signup2',
+  path: '/v1/signup2',
   methods: [
     Methods.CREATE
   ],
@@ -40,7 +40,7 @@ var resourceConfig = {
     {
       idKey: emailKey,
       name: 'resend',
-      path: '/signup/resend/{' + emailKey + '}',
+      path: '/v1/signup/resend/{' + emailKey + '}',
       isAbsolutePath: true,
       methods: [
         Methods.READ_ONE
@@ -49,7 +49,7 @@ var resourceConfig = {
     {
       idKey: tokenKey,
       name: 'verify',
-      path: '/signup/verify/{' + tokenKey+ '}',
+      path: '/v1/signup/verify/{' + tokenKey+ '}',
       isAbsolutePath: true,
       methods: [
         Methods.READ_ONE

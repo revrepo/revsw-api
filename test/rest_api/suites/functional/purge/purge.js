@@ -31,103 +31,148 @@ describe('Functional check', function () {
   var account;
   var domainConfig;
   var purge;
-  var reseller = config.get('api.users.reseller');
+  var users = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller')
+  ];
 
-  before(function (done) {
-    API.identity
-      .authenticate(reseller)
-      .then(function () {
-        return API.helpers.accounts.createOne();
-      })
-      .then(function (newAccount) {
-        account = newAccount;
-        return API.helpers.domainConfigs.createOne(account.id);
-      })
-      .then(function (newDomainConfig) {
-        domainConfig = newDomainConfig;
-        return API.helpers.purge.createOne(domainConfig.domain_name);
-      })
-      .then(function (newPurge) {
-        purge = newPurge;
-      })
-      .then(done)
-      .catch(done);
-  });
+  users.forEach(function(user) {
 
-  after(function (done) {
-    API.identity
-      .authenticate(reseller)
-      .then(function () {
-        API.resources.domainConfigs.deleteOne(domainConfig.id);
-        done();
-      })
-      .catch(done);
-  });
+    describe('With user: ' + user.role, function() {
 
-  describe('Purge resource', function () {
-
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should queue a purge that was just created.',
-      function (done) {
-        API.identity
-          .authenticate(reseller)
+      before(function (done) {
+        API.helpers
+          .authenticateUser(user)
           .then(function () {
-            var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
-            API.resources.purge
-              .createOne(purgeData)
-              .expect(200)
-              .then(function (response) {
-                var expMsg = 'The purge request has been successfully queued';
-                response.body.message.should.equal(expMsg);
-                done();
-              })
-              .catch(done);
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (newAccount) {
+            account = newAccount;
+            return API.helpers.domainConfigs.createOne(account.id);
+          })
+          .then(function (newDomainConfig) {
+            domainConfig = newDomainConfig;
+            return API.helpers.purge.createOne(domainConfig.domain_name);
+          })
+          .then(function (newPurge) {
+            purge = newPurge;
+          })
+          .then(done)
+          .catch(done);
+      });
+
+      after(function (done) {
+        API.helpers
+          .authenticateUser(user)
+          .then(function () {
+            API.resources.domainConfigs.deleteOne(domainConfig.id);
+            done();
           })
           .catch(done);
       });
 
-    it('should set as `success` a purge after some time it was created.',
-      function (done) {
-        API.identity
-          .authenticate(reseller)
-          .then(function () {
-            var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
-            var counter = 10000; // 10 secs
-            var interval = 1000; // 1 sec
-            var cb = function () {
-              if (counter < 0) {
-                done(new Error('Timeout: wait purge resp-message to change.'));
-              }
-              counter -= interval;
-              API.resources.purge
-                .getOne(purge.id)
-                .expect(200)
-                .then(function (resp) {
-                  if (resp.body.message !== 'Success') {
-                    setTimeout(cb, interval);
-                    return;
-                  }
-                  resp.body.message.should.equal('Success');
-                  done();
-                })
-                .catch(done);
-            };
-            API.resources.purge
-              .createOne(purgeData)
-              .expect(200)
+      describe('Purge resource', function () {
+
+        beforeEach(function (done) {
+          done();
+        });
+
+        afterEach(function (done) {
+          done();
+        });
+
+        it('should queue a purge that was just created with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
               .then(function () {
-                setTimeout(cb, interval);
+                var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+                API.resources.purge
+                  .createOne(purgeData)
+                  .expect(200)
+                  .then(function (response) {
+                    var expMsg = 'The purge request has been successfully queued';
+                    response.body.message.should.equal(expMsg);
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
+
+        it('should set as `success` a purge after some time it was created with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                var purgeData = PurgeDP.generateOne(domainConfig.domain_name);
+                var counter = 10000; // 10 secs
+                var interval = 1000; // 1 sec
+                var cb = function () {
+                  if (counter < 0) {
+                    done(new Error('Timeout: wait purge resp-message to change.'));
+                  }
+                  counter -= interval;
+                  API.resources.purge
+                    .getOne(purge.id)
+                    .expect(200)
+                    .then(function (resp) {
+                      if (resp.body.message !== 'Success') {
+                        setTimeout(cb, interval);
+                        return;
+                      }
+                      resp.body.message.should.equal('Success');
+                      done();
+                    })
+                    .catch(done);
+                };
+                API.resources.purge
+                  .createOne(purgeData)
+                  .expect(200)
+                  .then(function () {
+                    setTimeout(cb, interval);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        it('should return data when getting specific purge request with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.purge
+                  .getOne(purge.id)
+                  .expect(200)
+                  .then(function (res) {
+                    res.body.message.should.be.equal('Success');
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        it('should return data when getting list purge requests with user-role user.',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.purge
+                  .getAll({domain_id:domainConfig.id})
+                  .expect(200)
+                  .then(function (res) {
+                    var purge = res.body;
+                    purge.should.not.be.undefined();
+                    purge.data.should.not.be.undefined();
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
       });
+    });
   });
 });
