@@ -112,7 +112,9 @@ exports.createUser = function (request, reply) {
   var accountId = newUser.companyId[0];
 
   // TODO: Add a check for domains
-
+ if(newUser.role === 'user'  &&  newUser.domain.length>1){
+  return reply(boom.badRequest('User with this role cannot manage many domains'));
+ }
   // check that the email address is not already in use
   users.get({
     email: newUser.email
@@ -195,6 +197,10 @@ exports.updateUser = function (request, reply) {
   var newUser = request.payload;
   var userAccountId;
   var userId;
+
+  if(newUser.role === 'user'  &&  newUser.domain.length>1){
+    return reply(boom.badRequest('User with this role cannot manage many domains'));
+  }
 
   return Promise.try(function (resolve, reject) {
     if (Object.keys(newUser).length === 0) {
