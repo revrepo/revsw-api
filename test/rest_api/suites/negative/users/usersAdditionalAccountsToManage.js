@@ -58,41 +58,6 @@ describe('Negative check', function() {
                   return accountAdditional;
                 });
             })
-            // .then(function() {
-            //   return API.helpers.domainConfigs.createOne(accountMain.id, role + '-managed-domain')
-            //     .then(function(domainConfig) {
-            //       managedDomainConfig = domainConfig;
-            //       return domainConfig;
-            //     });
-            // })
-            // .then(function() {
-            //   return API.helpers.domainConfigs.createOne(accountAdditional.id, role + '-additional-domain')
-            //     .then(function(domainConfig) {
-            //       seccondDomainConfig = domainConfig;
-            //       return domainConfig;
-            //     });
-            // })
-            // .then(function() {
-            //   newUser.access_control_list.readOnly = false;
-            //   newUser.companyId = [accountMain.id + ''];
-            //   newUser.domain = [];
-            //   return API.resources.users.createOne(newUser)
-            //     .then(function(response) {
-            //       newUser.id = response.body.object_id;
-            //       newUser.name = newUser.email;
-            //       return newUser;
-            //     });
-            // })
-            // .then(function() {
-            //   return API.resources.authenticate.createOne({
-            //       email: newUser.email,
-            //       password: newUser.password
-            //     })
-            //     .then(function(response) {
-            //       newUser.token = response.body.token;
-            //       return newUser;
-            //     });
-            // })
             .then(function() {
               done();
             })
