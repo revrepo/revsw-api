@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -112,9 +112,12 @@ exports.createUser = function (request, reply) {
   var accountId = newUser.companyId[0];
 
   // TODO: Add a check for domains
- if(newUser.role === 'user'  &&  newUser.domain.length>1){
-  return reply(boom.badRequest('User with this role cannot manage many domains'));
- }
+  // NOTE: controll users Additional Accounts To Manage
+  if(!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin')  &&
+    ((_.isArray(newUser.companyId) && newUser.companyId.length > 1) ||
+    ((_.isString(newUser.companyId) && newUser.companyId.split(',').length > 1) ))){
+    return reply(boom.badRequest('User with role "'+newUser.role+'" cannot manage other accounts'));
+  }
   // check that the email address is not already in use
   users.get({
     email: newUser.email
@@ -197,9 +200,11 @@ exports.updateUser = function (request, reply) {
   var newUser = request.payload;
   var userAccountId;
   var userId;
-
-  if(newUser.role === 'user'  &&  newUser.domain.length>1){
-    return reply(boom.badRequest('User with this role cannot manage many domains'));
+  // NOTE: controll users Additional Accounts To Manage
+  if(!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin')  &&
+    ((_.isArray(newUser.companyId) && newUser.companyId.length>1)||
+     ((_.isString(newUser.companyId) && newUser.companyId.split(',').length>1) ))){
+    return reply(boom.badRequest('User with role "'+newUser.role+'" cannot manage other accounts'));
   }
 
   return Promise.try(function (resolve, reject) {
