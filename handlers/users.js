@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,6 +22,7 @@
 
 var boom = require('boom');
 var _ = require('lodash');
+var async = require('async');
 var mongoose = require('mongoose');
 var AuditLogger = require('../lib/audit');
 var speakeasy = require('speakeasy');
@@ -37,9 +38,11 @@ var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
 var Account = require('../models/Account');
+var DomainConfig = require('../models/DomainConfig');
 
 var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectionPortal()));
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
+var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var usersService = require('../services/users.js');
 /**
@@ -97,6 +100,9 @@ exports.createUser = function (request, reply) {
   // NOTE: set default companyId
   if ((newUser.companyId === undefined || newUser.companyId.length === 0) && utils.getAccountID(request).length !== 0) {
     newUser.companyId = utils.getAccountID(request);
+    if(['user','admin'].indexOf(newUser.role) >-1 ){
+      newUser.companyId.length = 1;
+    }
   }
 
   // NOTE: New User must have "companyId"
@@ -111,8 +117,12 @@ exports.createUser = function (request, reply) {
 
   var accountId = newUser.companyId[0];
 
-  // TODO: Add a check for domains
-
+  // NOTE: controll users Additional Accounts To Manage
+  if(!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin')  &&
+    ((_.isArray(newUser.companyId) && newUser.companyId.length > 1) ||
+    ((_.isString(newUser.companyId) && newUser.companyId.split(',').length > 1) ))){
+    return reply(boom.badRequest('User with role "'+newUser.role+'" cannot manage other accounts'));
+  }
   // check that the email address is not already in use
   users.get({
     email: newUser.email
@@ -121,30 +131,92 @@ exports.createUser = function (request, reply) {
     if (result) {
       return reply(boom.badRequest('The email address is already used by another user'));  // TODO: fix the error message text
     } else {
-      // call operation create user and apply another operations
-      usersService.createUser(newUser, function (error, result) {
-        var statusResponse;
-        if (result) {
-          statusResponse = {
-            statusCode: 200,
-            message: 'Successfully created new user',
-            object_id: result.user_id
+      var statusResponse;
+      var resultUserData;
+      async.waterfall([
+        // NOTE: check for domain names
+        function validateManagedDomainName(cb){
+          if (!_.isArray(newUser.domain) ||  (newUser.domain.length === 0)){
+            return cb();
+          }
+          var condition = {
+            // 'proxy_config.domain_name': {$in:newUser.domain}, //TODO: ?? use this and why it empty ??
+            'domain_name': {$in:newUser.domain},
+            deleted: { $ne: true }
           };
+          domainConfigs.query(condition,function(err,listDomainConfigs){
+            if(err){
+             return  cb(err);
+            }
+            var isNotAvailableDomain = _.find(listDomainConfigs,function(item){
+              return !_.includes(newUser.companyId, item.proxy_config.account_id);
+            });
+            if(!!isNotAvailableDomain){
+              return  cb('Can`t manage domain name another account');
+            }
+            cb();
+          });
+        },
+        function(cb){
+          usersService.createUser(newUser, function (error, result) {
+            if(error){
+              return cb(error);
+            }
+            resultUserData = publicRecordFields.handle(result, 'user');
+            cb();
+          });
+        },
+        function(cb){
+          // TODO: add activity log to all accounts (not only newUser.companyId[0])
+          AuditLogger.store({
+            account_id: accountId,
+            activity_type: 'add',
+            activity_target: 'user',
+            target_id: resultUserData.user_id,
+            target_name: resultUserData.email,
+            target_object: resultUserData,
+            operation_status: 'success'
+          }, request);
+          cb();
+        },
+        function(cb){
+          if (!!resultUserData) {
+            statusResponse = {
+              statusCode: 200,
+              message: 'Successfully created new user',
+              object_id: resultUserData.user_id
+            };
+          }
+          cb(null,statusResponse);
         }
-
-        result = publicRecordFields.handle(result, 'user');
-        // TODO: add activity log to all accounts (not only newUser.companyId[0])
-        AuditLogger.store({
-          account_id: accountId,
-          activity_type: 'add',
-          activity_target: 'user',
-          target_id: result.user_id,
-          target_name: result.email,
-          target_object: result,
-          operation_status: 'success'
-        }, request);
+      ],function(error,statusResponse){
         renderJSON(request, reply, error, statusResponse);
       });
+      // TODO: delete old implementation
+      // call operation create user and apply another operations
+      // usersService.createUser(newUser, function (error, result) {
+      //   // var statusResponse;
+      //   // if (result) {
+      //   //   statusResponse = {
+      //   //     statusCode: 200,
+      //   //     message: 'Successfully created new user',
+      //   //     object_id: result.user_id
+      //   //   };
+      //   // }
+
+      //   // result = publicRecordFields.handle(result, 'user');
+      //   // // TODO: add activity log to all accounts (not only newUser.companyId[0])
+      //   // AuditLogger.store({
+      //   //   account_id: accountId,
+      //   //   activity_type: 'add',
+      //   //   activity_target: 'user',
+      //   //   target_id: result.user_id,
+      //   //   target_name: result.email,
+      //   //   target_object: result,
+      //   //   operation_status: 'success'
+      //   // }, request);
+      //   // renderJSON(request, reply, error, statusResponse);
+      // });
     }
   });
 };
@@ -192,126 +264,287 @@ exports.getMyUser = function (request, reply) {
 };
 
 exports.updateUser = function (request, reply) {
-  var newUser = request.payload;
+  var updateUserData = request.payload;
   var userAccountId;
   var userId;
+  // NOTE: controll users Additional Accounts To Manage
+  if(!!updateUserData.companyId && (updateUserData.role === 'user' || updateUserData.role === 'admin')  &&
+    ((_.isArray(updateUserData.companyId) && updateUserData.companyId.length>1)||
+     ((_.isString(updateUserData.companyId) && updateUserData.companyId.split(',').length>1) ))){
+    return reply(boom.badRequest('User with role "'+updateUserData.role+'" cannot manage other accounts'));
+  }
+  var statusResponse;
+  var storedUserData;
+  var resultUserData;
 
-  return Promise.try(function (resolve, reject) {
-    if (Object.keys(newUser).length === 0) {
-      return Promise.reject(Error('No attributes specified'));
-    }
-
-    if (newUser.role && newUser.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
-      request.auth.credentials.role !== 'reseller')) {
-      return Promise.reject(Error('Only revadmin or reseller roles can assign "reseller" role'));
-    }
-
-    userId = request.params.user_id;
-    newUser.user_id = userId;
-
-    // TODO use an existing access verification function instead of the code
-    if (request.auth.credentials.role !== 'revadmin' &&
-      (newUser.companyId &&
-        !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
-      return Promise.reject(Error('The new account is not found'));
-    }
-    // TODO: try new code
-    // if(newUser.companyId && !utils.checkUserAccessPermissionToUser(request, newUser)) {
-    //   return Promise.reject(Error('The new account is not found'));
-    // }
-
-    return users.getAsync({_id: userId});
-  })
-    .then(function (result) {
-      if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
-        return Promise.reject(Error('User not found'));
+  async.waterfall([
+    function validateManagedDomainName(cb){
+      if (!_.isArray(updateUserData.domain) ||  (updateUserData.domain.length === 0)){
+        return cb();
+      }
+      var condition = {
+        // 'proxy_config.domain_name': {$in:updateUserData.domain}, //TODO: ?? use this and why it empty ??
+        'domain_name': {$in:updateUserData.domain},
+        deleted: { $ne: true }
+      };
+      domainConfigs.query(condition,function(err,listDomainConfigs){
+        if(err){
+         return  cb(err);
+        }
+        var isNotAvailableDomain = _.find(listDomainConfigs,function(item){
+          return !_.includes(updateUserData.companyId, item.proxy_config.account_id);
+        });
+        if(!!isNotAvailableDomain){
+         return  cb('Can`t manage domain name another account');
+        }
+        cb();
+      });
+    },
+    function (cb) {
+      if (Object.keys(updateUserData).length === 0) {
+        return cb('No attributes specified');
       }
 
-      userAccountId = result.companyId[0];
+      if (updateUserData.role && updateUserData.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
+        request.auth.credentials.role !== 'reseller')) {
+        return cb('Only revadmin or reseller roles can assign "reseller" role');
+      }
 
-      if (newUser.role && newUser.role === 'user') {
-        if (result.role === 'admin') {
-          return Promise.try(function (resolve, reject) {
-            return users.getAsync({
-              _id: { $ne: result.user_id },
+      userId = request.params.user_id;
+      updateUserData.user_id = userId;
+
+      // TODO use an existing access verification function instead of the code
+      if (request.auth.credentials.role !== 'revadmin' &&
+        (updateUserData.companyId &&
+          !utils.isArray1IncludedInArray2(updateUserData.companyId, utils.getAccountID(request)))) {
+        return cb('The new account is not found');
+      }
+      // TODO: try new code
+      // if(updateUserData.companyId && !utils.checkUserAccessPermissionToUser(request, updateUserData)) {
+      //   return cb('The new account is not found');
+      // }
+      cb();
+    },
+    function (cb){
+      users.get({_id: userId}, function (error, result) {
+        if(error){
+          return cb(error);
+        }
+        storedUserData = publicRecordFields.handle(result, 'user');
+        if (!storedUserData || !utils.checkUserAccessPermissionToUser(request, result)) {
+          return cb('User not found');
+        }
+        cb();
+      });
+    },
+    function (cb) {
+      userAccountId = storedUserData.companyId[0];
+
+      if (updateUserData.role && updateUserData.role === 'user') {
+        if (storedUserData.role === 'admin') {
+            users.get({
+              _id: { $ne: storedUserData.user_id },
               companyId: new RegExp(userAccountId, 'i'),
-              role: result.role
-            });
-          })
-            .then(function (user) {
-              if (!user) {
-                return Promise.reject(Error('Cannot change role if you are the only one admin for the account'));
-              } else {
-                return users.updateAsync(newUser);
+              role: storedUserData.role
+            },function(err, user) {
+              if(err){
+                return cb(Error('Cannot change role if you are the only one admin for the account'));
               }
-            })
-            .catch(function (error) {
-              return Promise.reject(Error('Cannot change role if you are the only one admin for the account'));
-            });
-        } else if (result.role === 'reseller') {
-          return Promise.try(function (resolve, reject) {
-            return users.getAsync({
-              _id: { $ne: result.user_id },
-              companyId: new RegExp(result.companyId.join('.*,'), 'ig'),
-              role: result.role
-            });
-          })
-            .then(function (user) {
               if (!user) {
-                return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
+                return cb('Cannot change role if you are the only one admin for the account');
               } else {
-                return users.updateAsync(newUser);
+                return users.update(updateUserData);
               }
-            })
-            .catch(function (error) {
-              return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
+            });
+        } else if (storedUserData.role === 'reseller') {
+          users.get({
+              _id: { $ne: storedUserData.user_id },
+              companyId: new RegExp(storedUserData.companyId.join('.*,'), 'ig'),
+              role: storedUserData.role
+            },function (error, user) {
+              if(error) {
+                return cb(Error('Cannot change role if you are the only one reseller for the accounts'));
+              }
+              if (!user) {
+                return cb('Cannot change role if you are the only one reseller for the accounts');
+              } else {
+                return cb();
+              }
             });
         } else {
-          return users.updateAsync(newUser);
+         cb();
         }
       } else {
-        return users.updateAsync(newUser);
+        // NOTE: updateUserData.role !== 'user'
+        cb();
       }
-    })
-    .then(function (result) {
-      console.log(result);
-      var statusResponse = {
-        statusCode: 200,
-        message: 'Successfully updated the user'
-      };
-
-      result = publicRecordFields.handle(result, 'user');
-
+    },
+    function(cb){
+      users.update(updateUserData,function(err,result){
+        if(err){
+          return cb(err);
+        }
+        resultUserData = publicRecordFields.handle(result, 'user');
+        cb();
+      });
+    },
+    function(cb){
+      // TODO: add activity log to all accounts (not only updateUserData.companyId[0])
       AuditLogger.store({
         account_id: userAccountId,
         activity_type: 'modify',
         activity_target: 'user',
-        target_id: result.user_id,
-        target_name: result.email,
-        target_object: result,
+        target_id: resultUserData.user_id,
+        target_name: resultUserData.email,
+        target_object: resultUserData,
         operation_status: 'success'
       }, request);
 
-      return renderJSON(request, reply, null, statusResponse);
-    })
-    .catch(function (error) {
-      if (/No attributes specified/.test(error.message)) {
-        return reply(boom.badRequest('Please specify at least one update attribute'));
-      } else if (/Only revadmin or reseller roles can assign "reseller" role/.test(error.message)) {
-        return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
-      } else if (/The new account is not found/.test(error.message)) {
-        return reply(boom.badRequest('The new account is not found'));
-      } else if (/User not found/.test(error.message)) {
-        return reply(boom.badRequest('User not found'));
-      } else if (/Cannot change role if you are the only one admin/.test(error.message)) {
-        return reply(boom.badRequest('Cannot change role if you are the only one admin for the account'));
-      } else if (/Cannot change role if you are the only one reseller/.test(error.message)) {
-        return reply(boom.badRequest('Cannot change role if you are the only one reseller for the accounts'));
-      } else {
-        return reply(boom.badImplementation(error.message));
+      cb();
+    },
+    function(cb){
+      if (!!resultUserData) {
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully updated the user'
+        };
       }
-    });
+      cb(null, statusResponse);
+    }
+  ],function(error,statusResponse){
+    renderJSON(request, reply, error, statusResponse);
+  });
 };
+
+
+// TODO: delet old implementation
+// exports.updateUserOld = function (request, reply) {
+//   var newUser = request.payload;
+//   var userAccountId;
+//   var userId;
+//   // NOTE: controll users Additional Accounts To Manage
+//   if(!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin')  &&
+//     ((_.isArray(newUser.companyId) && newUser.companyId.length>1)||
+//      ((_.isString(newUser.companyId) && newUser.companyId.split(',').length>1) ))){
+//     return reply(boom.badRequest('User with role "'+newUser.role+'" cannot manage other accounts'));
+//   }
+
+//   return  Promise.try(function (resolve, reject) {
+//     if (Object.keys(newUser).length === 0) {
+//       return Promise.reject(Error('No attributes specified'));
+//     }
+
+//     if (newUser.role && newUser.role === 'reseller' && (request.auth.credentials.role !== 'revadmin' &&
+//       request.auth.credentials.role !== 'reseller')) {
+//       return Promise.reject(Error('Only revadmin or reseller roles can assign "reseller" role'));
+//     }
+
+//     userId = request.params.user_id;
+//     newUser.user_id = userId;
+
+//     // TODO use an existing access verification function instead of the code
+//     if (request.auth.credentials.role !== 'revadmin' &&
+//       (newUser.companyId &&
+//         !utils.isArray1IncludedInArray2(newUser.companyId, utils.getAccountID(request)))) {
+//       return Promise.reject(Error('The new account is not found'));
+//     }
+//     // TODO: try new code
+//     // if(newUser.companyId && !utils.checkUserAccessPermissionToUser(request, newUser)) {
+//     //   return Promise.reject(Error('The new account is not found'));
+//     // }
+
+//     return users.getAsync({_id: userId});
+//   })
+//     .then(function (result) {
+//       if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+//         return Promise.reject(Error('User not found'));
+//       }
+
+//       userAccountId = result.companyId[0];
+
+//       if (newUser.role && newUser.role === 'user') {
+//         if (result.role === 'admin') {
+//           return Promise.try(function (resolve, reject) {
+//             return users.getAsync({
+//               _id: { $ne: result.user_id },
+//               companyId: new RegExp(userAccountId, 'i'),
+//               role: result.role
+//             });
+//           })
+//             .then(function (user) {
+//               if (!user) {
+//                 return Promise.reject(Error('Cannot change role if you are the only one admin for the account'));
+//               } else {
+//                 return users.updateAsync(newUser);
+//               }
+//             })
+//             .catch(function (error) {
+//               return Promise.reject(Error('Cannot change role if you are the only one admin for the account'));
+//             });
+//         } else if (result.role === 'reseller') {
+//           return Promise.try(function (resolve, reject) {
+//             return users.getAsync({
+//               _id: { $ne: result.user_id },
+//               companyId: new RegExp(result.companyId.join('.*,'), 'ig'),
+//               role: result.role
+//             });
+//           })
+//             .then(function (user) {
+//               if (!user) {
+//                 return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
+//               } else {
+//                 return users.updateAsync(newUser);
+//               }
+//             })
+//             .catch(function (error) {
+//               return Promise.reject(Error('Cannot change role if you are the only one reseller for the accounts'));
+//             });
+//         } else {
+//           return users.updateAsync(newUser);
+//         }
+//       } else {
+//         return users.updateAsync(newUser);
+//       }
+//     })
+//     .then(function (result) {
+//       console.log(result);
+//       var statusResponse = {
+//         statusCode: 200,
+//         message: 'Successfully updated the user'
+//       };
+
+//       result = publicRecordFields.handle(result, 'user');
+
+//       AuditLogger.store({
+//         account_id: userAccountId,
+//         activity_type: 'modify',
+//         activity_target: 'user',
+//         target_id: result.user_id,
+//         target_name: result.email,
+//         target_object: result,
+//         operation_status: 'success'
+//       }, request);
+
+//       return renderJSON(request, reply, null, statusResponse);
+//     })
+//     .catch(function (error) {
+//       if (/No attributes specified/.test(error.message)) {
+//         return reply(boom.badRequest('Please specify at least one update attribute'));
+//       } else if (/Only revadmin or reseller roles can assign "reseller" role/.test(error.message)) {
+//         return reply(boom.badRequest('Only revadmin or reseller roles can assign "reseller" role'));
+//       } else if (/The new account is not found/.test(error.message)) {
+//         return reply(boom.badRequest('The new account is not found'));
+//       } else if (/User not found/.test(error.message)) {
+//         return reply(boom.badRequest('User not found'));
+//       } else if (/Cannot change role if you are the only one admin/.test(error.message)) {
+//         return reply(boom.badRequest('Cannot change role if you are the only one admin for the account'));
+//       } else if (/Cannot change role if you are the only one reseller/.test(error.message)) {
+//         return reply(boom.badRequest('Cannot change role if you are the only one reseller for the accounts'));
+//       } else {
+//         return reply(boom.badImplementation(error.message));
+//       }
+//     });
+// };
 
 exports.updateUserPassword = function (request, reply) {
   var currentPassword = request.payload.current_password;
