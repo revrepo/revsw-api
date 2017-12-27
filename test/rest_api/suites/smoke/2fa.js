@@ -152,7 +152,10 @@ describe('Smoke check:', function () {
                             .then(function () {
                               done();
                             })
-                            .catch(done);
+                            .catch(function (err) {
+                              throw new Error(err);
+                              done();
+                            });
                         })
                         .catch(function (err) {
                           throw new Error(err);
