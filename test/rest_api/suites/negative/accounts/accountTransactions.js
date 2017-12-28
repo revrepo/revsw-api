@@ -25,7 +25,7 @@ var API = require('./../../../common/api');
 var AccountsDP = require('./../../../common/providers/data/accounts');
 var DataProvider = require('./../../../common/providers/data');
 
-describe('Functional check', function () {
+describe('Negative check', function () {
   describe('Account Transactions', function () {
 
     // Changing default mocha's timeout (Default is 2 seconds).

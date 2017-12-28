@@ -50,26 +50,6 @@ describe('Smoke check', function() {
           .catch(done);
       });
 
-      it('should return error response when signing up user that is already signed up',
-      function(done) {
-        API.helpers
-          .authenticateUser(revAdmin)
-          .then(function() {
-            return API.helpers.billingPlans.getRandomOne();
-          })
-          .then(function(bPlan) {
-            API.session.reset();
-            var newUser = API.providers.data.users.generateToSignUp({
-              billingPlan: bPlan.chargify_handle
-            });
-            API.resources.signUp
-              .createOne(newUser)
-              .expect(406)
-              .end(done);
-          })
-          .catch(done);
-      });
-
     describe('for just signed-up user', function() {
       var testUser;
       beforeEach(function(done) {
