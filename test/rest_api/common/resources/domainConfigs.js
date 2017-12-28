@@ -24,6 +24,7 @@ var Constants = require('./../../common/constants');
 var Methods = Constants.API.METHODS;
 
 var domainConfigIdKey = 'domainId';
+var domainCheckType = 'checkType';
 var resourceConfig = {
   idKey: domainConfigIdKey,
   name: 'domainConfigs',
@@ -54,6 +55,14 @@ var resourceConfig = {
       path: '/recommended_default_settings',
       methods: [
         Methods.READ_ALL
+      ]
+    },
+    {
+      idKey: domainCheckType,
+      name: 'checkIntegration',
+      path: '/check_integration/{' + domainCheckType + '}',
+      methods: [
+        Methods.READ_ONE
       ]
     }
   ]
