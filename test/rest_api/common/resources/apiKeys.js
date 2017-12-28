@@ -52,6 +52,13 @@ var resourceConfig = {
       methods: [
         Methods.CREATE
       ]
+    },
+    {
+      name: 'myself',
+      path: '/myself',
+      methods: [
+        Methods.READ_ONE
+      ]
     }
   ]
 };
