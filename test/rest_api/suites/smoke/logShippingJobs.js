@@ -32,6 +32,12 @@ describe('Smoke check', function () {
   var secondLsJresp;
   var reseller = config.get('api.users.reseller');
   var revAdmin = config.get('api.users.revAdmin');
+  var destTypes = [
+    's3',
+    'ftp',
+    'sftp',
+    'elasticsearch'
+  ];
 
   before(function (done) {
     API.helpers
@@ -156,6 +162,38 @@ describe('Smoke check', function () {
           })
           .catch(done);
       });
+
+    destTypes.forEach(function (dest) {
+      it('should return success response code when updating log shipping job with `' +
+        dest + '` destination type', function (done) {
+          secondLsJresp.job_name = 'updated-' + secondLsJresp.job_name;
+          secondLsJresp.source_type = 'domain';
+          secondLsJresp.source_id = firstDc.id;
+          secondLsJresp.destination_host = 'test-s3';
+          secondLsJresp.destination_port = '';
+          secondLsJresp.destination_key = 'test-s3-key';
+          secondLsJresp.destination_username = 'test-username';
+          secondLsJresp.destination_password = 'test-s3-secret';
+          secondLsJresp.notification_email = '';
+          secondLsJresp.operational_mode = 'stop';
+          secondLsJresp.comment = 'this is test logshipping job for smoke API test';
+
+          delete secondLsJresp.id;
+          delete secondLsJresp.created_by;
+          delete secondLsJresp.created_at;
+          delete secondLsJresp.updated_at;
+          secondLsJresp.destination_type = dest; // setting dest type
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.logShippingJobs
+                .update(firstLsJ.id, secondLsJresp)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+    });
 
     it('should return success response code when getting the status of ' +
       'existing logshipping job',
