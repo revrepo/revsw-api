@@ -17,8 +17,8 @@
  */
 require('should-http');
 var config = require('config');
-var API= require('./../../common/api');
-var DomainConfigsDP= require('./../../common/providers/data/domainConfigs');
+var API = require('./../../common/api');
+var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
 
 describe('Smoke check', function () {
 
@@ -30,6 +30,14 @@ describe('Smoke check', function () {
   var firstFdc;
   var secondDc;
   var reseller = config.get('api.users.reseller');
+  var domainCheckTypes = [
+    'cname',
+    'domain_name',
+    'domain_aliases',
+    'domain_wildcard_alias',
+    'stagin_proxy_server',
+    'production_proxy_server'
+  ];
 
   before(function (done) {
     API.helpers
@@ -43,8 +51,8 @@ describe('Smoke check', function () {
       })
       .then(function (domainConfig) {
         firstDc = domainConfig;
+        done();
       })
-      .then(done)
       .catch(done);
   });
 
@@ -63,15 +71,15 @@ describe('Smoke check', function () {
     });
 
     it('should return success response data when getting a recommended default settings',
-      function(done) {
+      function (done) {
         API.helpers
           .authenticateUser(reseller)
-          .then(function() {
+          .then(function () {
             API.resources.domainConfigs
               .recommendedDefaultSettings()
               .getAll()
               .expect(200)
-              .then(function(res){
+              .then(function (res) {
                 var defaultSettings = res.body;
                 defaultSettings.should.have.property('waf_rules_ids');
                 defaultSettings.should.have.property('ssl_conf_profile_id');
@@ -80,7 +88,7 @@ describe('Smoke check', function () {
                 defaultSettings.ssl_conf_profile_id.should.be.type('string');
                 defaultSettings.ssl_conf_profile_id.should.not.empty;
               })
-              .then(function(){
+              .then(function () {
                 done();
               });
           })
@@ -163,7 +171,7 @@ describe('Smoke check', function () {
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
-              .update(firstDc.id, firstFdc, {options: 'verify_only'})
+              .update(firstDc.id, firstFdc, { options: 'verify_only' })
               .expect(200)
               .end(done);
           })
@@ -179,7 +187,7 @@ describe('Smoke check', function () {
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
-              .update(firstDc.id, firstFdc, {options: 'publish'})
+              .update(firstDc.id, firstFdc, { options: 'publish' })
               .expect(200)
               .end(done);
           })
@@ -223,7 +231,7 @@ describe('Smoke check', function () {
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
-              .getOne(firstDc.id, {version: 1})
+              .getOne(firstDc.id, { version: 1 })
               .expect(200)
               .end(done);
           })
@@ -237,12 +245,28 @@ describe('Smoke check', function () {
           .authenticateUser(reseller)
           .then(function () {
             API.resources.domainConfigs
-              .getOne(firstDc.id, {version: 2})
+              .getOne(firstDc.id, { version: 2 })
               .expect(200)
               .end(done);
           })
           .catch(done);
       });
+
+    domainCheckTypes.forEach(function (type) {
+      it('should return success response code when checking domain integration (' + type + ')',
+        function (done) {
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              API.resources.domainConfigs
+                .checkIntegration(firstDc.id)
+                .getOne(type)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+    });
 
     it('should return success response code when deleting a domain',
       function (done) {

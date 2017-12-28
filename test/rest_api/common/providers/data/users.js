@@ -97,12 +97,13 @@ var UsersDataProvider = {
     }
     var firstName = data.firstName || faker.name.firstName();
     var lastName = data.lastName || faker.name.lastName();
+    var email = data.email || [firstName, Date.now() + '@mailinator.com']
+      .join('-')
+      .toLowerCase();
     var user = {
       first_name: firstName,
       last_name: lastName,
-      email: [firstName, Date.now() + '@mailinator.com']
-        .join('-')
-        .toLowerCase(),
+      email: email,
       // TODO: Commenting out below lines as the are not required for /signup2
       //company_name: faker.company.companyName(),
       //phone_number: faker.phone.phoneNumber(),

@@ -120,7 +120,7 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when updating with property '+
+    it('should return a success response when updating with property ' +
       ' "managed_account_ids".',
       function (done) {
         API.helpers
@@ -170,6 +170,25 @@ describe('Smoke check', function () {
               .end(done);
           })
           .catch(done);
+      });
+
+    it('should return a success response when getting info about an API Key.',
+      function (done) {
+        API.resources.apiKeys
+          .getOne(apiKey.id)
+          .expect(200)
+          .then(function (res) {
+            API.helpers
+              .authenticateAPIKey(res.body.id)
+              .then(function () {
+                API.resources.apiKeys
+                  .myself()
+                  .getOne()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
 
     it('should return a success response when deactivating an API Key.',

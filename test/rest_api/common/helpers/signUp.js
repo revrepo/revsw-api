@@ -37,8 +37,12 @@ module.exports = {
     return SignUpResource
       .createOne(user)
       .then(function (res) {
-        user.id = res.body.object_id;
-        return user;
+        if (res.status === 200) {
+          user.id = res.body.object_id;
+          return user;
+        } else {
+          return res;
+        }
       })
       .catch(function (error) {
         throw new APITestError('Creating Account', error.response.body, user);

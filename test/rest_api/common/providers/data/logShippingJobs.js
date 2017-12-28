@@ -49,6 +49,40 @@ var LogShippingJobsDataProvider = {
       'job_name':(_prefix + '-' + Date.now() + '-LOGSHIPPER-JOB').toLowerCase(),
       'account_id': accountId
     };
+  },
+
+    /**
+   * ### LogShippingJobsDataProvider.generateCompleteOne()
+   *
+   * Generates valid full data that represents an log-shippinhg-job which the
+   * log-shippinhg-job REST API end points accept.
+   *
+   * @param {String} data, data containing fields you wanna set, sourceId and accountId are required.
+   * @param {String} prefix, additional test-environment prefix (optional).
+   *
+   * @returns {Object} Job object with all required fields to create one.
+   *
+   */
+  generateCompleteOne: function (data, prefix) {
+    var _prefix = prefix || this.prefix;
+    var logShippingJob = {};
+    logShippingJob.job_name = data.jobName || (_prefix +
+                                              '-' +
+                                              Date.now() +
+                                              '-LOGSHIPPER-JOB').toLowerCase();
+    logShippingJob.source_type = data.sourceType || 'domain';
+    logShippingJob.source_id = data.sourceId;
+    logShippingJob.account_id = data.accountId;
+    logShippingJob.destination_host = data.destinationHost || 'test-host';
+    logShippingJob.destination_port = data.destinationPort || '';
+    logShippingJob.destination_key = data.destinationKey || 'test-key';
+    logShippingJob.destination_username = data.destinationUserName || 'test-username';
+    logShippingJob.destination_password = data.destinationPassword || 'test-password';
+    logShippingJob.notification_email = data.notificationEmail || '';
+    logShippingJob.operational_mode = data.operationalMode || 'stop';
+    logShippingJob.comment = data.comment || 'this is test logshipping job for API tests';
+    logShippingJob.destination_type = data.destinationType || 's3';
+    return logShippingJob;
   }
 };
 
