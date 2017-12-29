@@ -42,6 +42,7 @@ var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getCon
 var Nsone = require('../lib/nsone.js');
 
 var ERROR_UNHANDLED_INTERNAL_SERVER_ERROR = 'Unhandled Internal Server Error';
+var ERROR_DOMAIN_NOT_FOUND_ROOT_DNS = 'The specified domain name is not found in the global DNS system';
 var ERROR_DNS_SERVICE_UNABLE = 'The DNS service is currently unable to process your request. Please try again later.';
 var ACCOUNT_NOT_FOUND = 'Account ID not found';
 
@@ -579,12 +580,12 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
     function(cb) {
       var zonename_ = zoneName;
       dnsResolve.resolve(zonename_, 'NS', function(err, data) {
-        if (err) {
+        if (err) {             
           // Error get IP
           cb(err);
           return;
         }
-        if (!data.short_answers || data.short_answers.length === 0) {
+        if (!data.short_answers || data.short_answers.length === 0) {          
           cb(new Error('Zone with name "' + zonename_ + '" no have record with "NS"'));
           return;
         }
@@ -709,8 +710,13 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
   // NOTE: end of all works - send to user a response or an error
   function(err) {
     if (err) {
-      reply(boom.badImplementation('DNS check error'));
-      return;
+      if (err.error === ERROR_DOMAIN_NOT_FOUND_ROOT_DNS) {
+        reply(boom.badRequest(ERROR_DOMAIN_NOT_FOUND_ROOT_DNS));
+        return;
+      } else {
+        reply(boom.badImplementation('DNS check error'));
+        return;
+      }      
     }
     reply(workFlowData_.response);
   });

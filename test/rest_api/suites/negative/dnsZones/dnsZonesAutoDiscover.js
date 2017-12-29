@@ -34,9 +34,9 @@ describe('DNS Zones Negative Check', function () {
                     API.resources.dnsZones
                         .autoDiscover()
                         .getOne('apiqaresellertest00001.biz')
-                        .expect(500)
+                        .expect(400)
                         .then(function (res) {
-                            res.status.should.be.equal(500);
+                            res.status.should.be.equal(400);
                             done();
                         })
                         .catch(done);
