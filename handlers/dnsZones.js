@@ -713,7 +713,7 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
   function(err) {
     if (err) {
       if(err instanceof Object && !!err.error && (err.error.code === 'ENOTFOUND' || !!err.error.message)){
-        return reply(boom.notFound('DNS Zone information about "'+ zoneName +'" not found'));
+        return reply(boom.badRequest('The specified domain name is not found in the global DNS system'));
       }
       reply(boom.badImplementation('DNS check error'));
       return;
