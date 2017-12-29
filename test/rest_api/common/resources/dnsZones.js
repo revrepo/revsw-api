@@ -38,6 +38,14 @@ var resourceConfig = {
   ],
   nestedResources: [
     {
+      idKey: dnsZoneKey,
+      name: 'autoDiscover',
+      path: '/auto_discover/{' + dnsZoneKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
       idKey: dnsZoneRecordKey,
       name: 'records',
       path: '/records/{' + dnsZoneRecordKey + '}',
@@ -78,7 +86,7 @@ var resourceConfig = {
         Methods.READ_ALL,
         Methods.READ_ONE
       ]
-    },   
+    },
   ]
 };
 
