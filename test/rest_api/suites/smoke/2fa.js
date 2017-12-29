@@ -24,7 +24,7 @@ var DataProvider = require('./../../common/providers/data');
 var HelpersAPI = require('./../../common/helpers/api');
 var TwoFADP = require('./../../common/providers/data/2fa');
 
-describe('Smoke check:', function() {
+describe('Smoke check:', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
@@ -36,55 +36,55 @@ describe('Smoke check:', function() {
     'reseller'
   ]
 
-  before(function(done) {
+  before(function (done) {
     done();
   });
 
-  after(function(done) {
+  after(function (done) {
     done();
   });
 
-  userRolesList.forEach(function(roleName) {
-    describe('2fa resource for user with role "' + roleName + '"', function() {
+  userRolesList.forEach(function (roleName) {
+    describe('2fa resource for user with role "' + roleName + '"', function () {
       var user, accountForUsers;
-      before(function(done) {
+      before(function (done) {
         API.helpers
           .authenticate(revAdminCredentials)
-          .then(function() {
+          .then(function () {
             return HelpersAPI.accounts.createCompleteOne();
           })
-          .then(function(newAccount) {
+          .then(function (newAccount) {
             accountForUsers = newAccount;
           })
           .then(done)
           .catch(done);
       });
 
-      beforeEach(function(done) {
+      beforeEach(function (done) {
         API.helpers
           .authenticate(revAdminCredentials)
-          .then(function() {
+          .then(function () {
             var newUser = DataProvider.generateUser(roleName);
             newUser.companyId = [accountForUsers.id];
             newUser.domain = [];
             return API.helpers.users.create(newUser);
           })
-          .then(function(newUser) {
+          .then(function (newUser) {
             user = newUser;
           })
           .then(done)
           .catch(done);
       });
 
-      afterEach(function(done) {
+      afterEach(function (done) {
         done();
       });
 
       it('should return success response when initializing 2fa for specific user',
-        function(done) {
+        function (done) {
           API.helpers
             .authenticateUser(user)
-            .then(function() {
+            .then(function () {
               API.resources.twoFA
                 .init()
                 .getOne()
@@ -95,15 +95,15 @@ describe('Smoke check:', function() {
         });
 
       it('should return success response when enabling 2fa for specific user',
-        function(done) {
+        function (done) {
           API.helpers
             .authenticateUser(user)
-            .then(function() {
+            .then(function () {
               API.resources.twoFA
                 .init()
                 .getOne()
                 .expect(200)
-                .then(function(res) {
+                .then(function (res) {
                   var key = res.body.base32;
                   var oneTimePassword = TwoFADP.generateOneTimePassword(key);
                   API.resources.twoFA
@@ -112,37 +112,97 @@ describe('Smoke check:', function() {
                     .expect(200)
                     .end(done);
                 })
-                .catch(done);
+                .catch(function (err) {
+                  throw new Error(err);
+                  done();
+                });
             })
             .catch(done);
         });
 
-      it('should return success response when disabling 2fa for specific user',
-        function(done) {
+      it('should return success response when authenticating with a valid OTP',
+        function (done) {
           API.helpers
             .authenticateUser(user)
-            .then(function() {
+            .then(function () {
               API.resources.twoFA
                 .init()
                 .getOne()
                 .expect(200)
-                .then(function(res) {
+                .then(function (res) {
                   var key = res.body.base32;
                   var oneTimePassword = TwoFADP.generateOneTimePassword(key);
                   API.resources.twoFA
                     .enable()
                     .createOne(oneTimePassword)
                     .expect(200)
-                    .then(function() {
+                    .then(function () {
+                      API.resources.twoFA
+                        .init()
+                        .getOne()
+                        .expect(200)
+                        .then(function (res) {
+                          var key = res.body.base32;
+                          return TwoFADP.generateOneTimePassword(key);
+                        })
+                        .then(function (otp) {
+                          user.oneTimePassword = otp.oneTimePassword;
+                          API.helpers
+                            .authenticateUser(user)
+                            .then(function () {
+                              done();
+                            })
+                            .catch(function (err) {
+                              throw new Error(err);
+                              done();
+                            });
+                        })
+                        .catch(function (err) {
+                          throw new Error(err);
+                          done();
+                        });
+                    });
+                })
+                .catch(function (err) {
+                  throw new Error(err);
+                  done();
+                });
+            })
+            .catch(done);
+        });
+
+      it('should return success response when disabling 2fa for specific user',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.twoFA
+                .init()
+                .getOne()
+                .expect(200)
+                .then(function (res) {
+                  var key = res.body.base32;
+                  var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+                  API.resources.twoFA
+                    .enable()
+                    .createOne(oneTimePassword)
+                    .expect(200)
+                    .then(function () {
                       API.resources.twoFA
                         .disable()
                         .createOne(user.id)
                         .expect(200)
                         .end(done);
                     })
-                    .catch(done);
+                    .catch(function (err) {
+                      throw new Error(err);
+                      done();
+                    });
                 })
-                .catch(done);
+                .catch(function (err) {
+                  throw new Error(err);
+                  done();
+                });
             })
             .catch(done);
         });

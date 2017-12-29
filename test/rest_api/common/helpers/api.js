@@ -82,11 +82,11 @@ var APIHelpers = {
   *     }
   * @returns {Promise}
   */
-  authenticate: function(credentials) {
+  authenticate: function (credentials) {
 
-    if(!!credentials.email){
+    if (!!credentials.email) {
       return this.authenticateUser(credentials);
-    }else{
+    } else {
       Session.setCurrentUser(credentials);
       return this.authenticateAPIKey(credentials.id);
     }
@@ -106,8 +106,15 @@ var APIHelpers = {
    * @returns {Promise}
    */
   authenticateUser: function (user) {
+    var acc = {
+      email: user.email,
+      password: user.password
+    };
+    if (user.oneTimePassword) {
+      acc.oneTimePassword = user.oneTimePassword;
+    }
     return AuthenticateRes
-      .createOne({email: user.email, password: user.password})
+      .createOne(acc)
       .then(function (response) {
         user.token = response.body.token;
         Session.setCurrentUser(user);
@@ -130,7 +137,7 @@ var APIHelpers = {
     return APIKeysRes
       .getOne(keyId)
       .then(function (response) {
-        var user  = response.body;
+        var user = response.body;
         Session.setCurrentUser(user);
       })
       .catch(function (error) {
@@ -142,7 +149,7 @@ var APIHelpers = {
     return APIKeysRes
       .getOne(token)
       .then(function (response) {
-        var user  = response.body;
+        var user = response.body;
         Session.setCurrentUser(user);
       })
       .catch(function (error) {
@@ -165,7 +172,7 @@ var APIHelpers = {
    */
   attemptToAuthenticateUser: function (user) {
     return AuthenticateRes
-      .createOne({email: user.email, password: user.password})
+      .createOne({ email: user.email, password: user.password })
       .then(function (response) {
         user.token = response.body.token;
         Session.setCurrentUser(user);
