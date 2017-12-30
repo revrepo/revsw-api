@@ -41,6 +41,12 @@ describe('LogShipping Jobs functional test', function() {
   var user = config.get('api.users.reseller');
   var secondReseller = config.get('api.users.secondReseller');
   var revAdmin = config.get('api.users.revAdmin');
+  var destinationTypes = [
+    's3',
+    'ftp',
+    'sftp',
+    'elasticsearch'
+  ];
 
   before(function(done) {
     API.helpers
@@ -207,14 +213,10 @@ describe('LogShipping Jobs functional test', function() {
 
     it('should not be able to update logshipping job without access to source_type domain',
       function(done) {
-        firstLsJresp.source_type = 'domain';
-        firstLsJresp.source_id = firstDc.id;
-        firstLsJresp.destination_type = 's3';
-        firstLsJresp.destination_host = 'test-s3';
-        firstLsJresp.destination_key = 'test-s3-key';
-        firstLsJresp.destination_password = 'test-s3-secret';
-        firstLsJresp.operational_mode = 'stop';
-        firstLsJresp.comment = 'this is test logshipping job for smoke API test';
+        firstLsJresp = LogShippingJobsDP.generateCompleteOne({
+          sourceId: firstDc.id,
+          accountId: account.id
+        });
 
         var expectedMsg = 'Domain ID not found';
         API.helpers
@@ -234,14 +236,8 @@ describe('LogShipping Jobs functional test', function() {
 
     it('should be able to update logshipping job with access to source_type domain and start the job',
       function(done) {
-        firstLsJresp.source_type = 'domain';
         firstLsJresp.source_id = secondDc.id;
-        firstLsJresp.destination_type = 's3';
-        firstLsJresp.destination_host = 'test-s3';
-        firstLsJresp.destination_key = 'test-s3-key';
-        firstLsJresp.destination_password = 'test-s3-secret';
         firstLsJresp.operational_mode = 'active';
-        firstLsJresp.comment = 'this is test logshipping job for smoke API test';
 
         var expectedMsg = 'Successfully updated the log shipping job';
         API.helpers
@@ -277,6 +273,46 @@ describe('LogShipping Jobs functional test', function() {
           })
           .catch(done);
       });
+
+    destinationTypes.forEach(function (dest) {
+      it('should be able to update logshipping job with `' + dest + '` destination type',
+        function (done) {
+          firstLsJresp.destination_type = dest;
+
+          var expectedMsg = 'Successfully updated the log shipping job';
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.logShippingJobs
+                .update(firstLsJ.id, firstLsJresp)
+                .expect(200)
+                .then(function (res) {
+                  res.body.message.should.equal(expectedMsg);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return logshipping job with `' + dest + '` destination_type',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.logShippingJobs
+                .getOne(firstLsJ.id)
+                .expect(200)
+                .then(function (response) {
+                  var logShippingJob = response.body;
+                  logShippingJob.destination_type.should.equal(dest);
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+    });
 
     it('should lock Domain Config for exists logshipping job with source_type "domain"',
       function(done) {
