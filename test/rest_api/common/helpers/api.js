@@ -46,7 +46,6 @@ var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
 // Abstracts common functionality for the API.
 var APIHelpers = {
-
   accounts: AccountsHelper,
   apps: AppsHelper,
   apiKeys: APIKeysHelper,
@@ -116,8 +115,12 @@ var APIHelpers = {
     return AuthenticateRes
       .createOne(acc)
       .then(function (response) {
-        user.token = response.body.token;
-        Session.setCurrentUser(user);
+        if (response.status !== 200) {
+          return response.status;
+        } else {
+          user.token = response.body.token;
+          Session.setCurrentUser(user);
+        }        
       })
       .catch(function (error) {
         throw new Error('Authenticating user', error.response.body, user);
