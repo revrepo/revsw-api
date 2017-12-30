@@ -16,16 +16,38 @@
  * from Rev Software, Inc.
  */
 require('should');
-var tfaFile = require('./../handlers/authenticate');
+var oldEnv = process.env.NODE_ENV;
+process.env.NODE_ENV = 'unitTests';
 var config = require('config');
+var tfaFile = require('./../handlers/authenticate');
+var mongoose = require('mongoose');
+var mongoConnection = require('../lib/mongoConnections');
+var User = require('../models/User');
+var users = new User(mongoose, mongoConnection.getConnectionPortal());
+var speakeasy = require('speakeasy');
+
+var revAdmin = {
+    email: 'qa_user_with_rev-admin_perm@revsw.com',
+    password: 'password1',
+    role: 'Rev Admin',
+    account: {
+        id: '55b706a57957012304a49d0b',
+        companyName: 'API QA Reseller Company'
+    }
+};
 
 describe('Unit Test:', function () {
     describe('Authentication Function with Rev Admin', function () {
 
+        after(function (done) {
+            process.env.NODE_ENV = oldEnv; // go back to qa/dev/production
+            done();
+        });
+
         var request = {
             payload: {
-                email: 'ashermoshav@gmail.com',
-                password: '12345678'
+                email: revAdmin.email,
+                password: revAdmin.password
             },
             method: 'post',
             path: '/v1/authenticate',
@@ -33,11 +55,34 @@ describe('Unit Test:', function () {
             info: []
         };
 
-        it('should successfully authenticate with a self registered user', function (done) {
-            tfaFile.authenticate(request, function (reply) {
-                reply.statusCode.should.equal(200);
-                done();
+        it('should get `Forbidden` response when trying to authenticate ' +
+            ' Rev Admin without OTP supplied', function (done) {
+                tfaFile.authenticate(request, function (reply) {
+                    reply.output.statusCode.should.equal(403);
+                    done();
+                });
             });
-        });
+
+        it('should get `200 OK` response when trying to authenticate ' +
+            ' Rev Admin with a valid OTP supplied', function (done) {
+                users.getValidation({
+                    email: revAdmin.email
+                }, function (err, user) {
+                    if (!err) {
+                        var generatedOneTimePassword = speakeasy.time({
+                            key: user.two_factor_auth_secret_base32,
+                            encoding: 'base32'
+                        });
+                        request.payload.oneTimePassword = generatedOneTimePassword;
+                        tfaFile.authenticate(request, function (reply) {
+                            reply.statusCode.should.equal(200);
+                            done();
+                        });
+                    } else {
+                        throw new Error('Error getting user: ' + err);
+                        done();
+                    }
+                });
+            });
     });
 });
