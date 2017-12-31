@@ -128,6 +128,40 @@ describe('Negative check', function () {
             })
             .catch(done);
         });
+
+        it('should return `Forbidden` when authenticating user with empty ' +
+        'one time password',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.twoFA
+                .init()
+                .getOne()
+                .expect(200)
+                .then(function (res) {
+                  var key = res.body.base32;
+                  var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+                  API.resources.twoFA
+                    .enable()
+                    .createOne(oneTimePassword)
+                    .expect(200)
+                    .then(function () {
+                      user.oneTimePassword = '';
+                      API.helpers
+                      .authenticateUser(user)
+                      .then(function (res) {
+                        res.should.equal(403);
+                        done();
+                      })
+                      .catch(done);
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
     });
   });
 });
