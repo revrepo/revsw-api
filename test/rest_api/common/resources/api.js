@@ -49,6 +49,7 @@ var DNSZonesResource = require('./dnsZones');
 var WAFRulesResource = require('./wafRules');
 var SSLConfProfilesResource = require('./sslConfProfiles');
 var AzureResource = require('./azure');
+var WAFStats = require('./wafStats');
 
 // Set of all resources that the REST API service provides..
 var APIResources = {
@@ -82,7 +83,8 @@ var APIResources = {
   dnsZones: DNSZonesResource,
   wafRules: WAFRulesResource,
   sslConfProfiles: SSLConfProfilesResource,
-  azure: AzureResource
+  azure: AzureResource,
+  wafStats: WAFStats
 };
 
 module.exports = APIResources;
