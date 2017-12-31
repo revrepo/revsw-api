@@ -122,6 +122,14 @@ var resourceConfig = {
       methods: [
         Methods.READ_ONE
       ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'slowestDownloadObjects',
+      path: '/slowest_download_objects/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
     }
   ]
 };

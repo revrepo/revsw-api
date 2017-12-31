@@ -135,6 +135,20 @@ describe('Smoke check:', function () {
             })
             .catch(done);
         });
+
+        it('should return success response when getting slowest download objects',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.stats
+                .slowestDownloadObjects()
+                .getOne(domain.id)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
     });
   });
 });
