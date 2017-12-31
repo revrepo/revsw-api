@@ -87,7 +87,7 @@ var WAFRulesHelper = {
         return WAFRulesResource
           .createOne(wafRule)
           .then(function (response) {
-            wafRule.id = response.body.object_id;
+            wafRule.id = response.body.id;
             return wafRule;
           })
           .catch(function (error) {

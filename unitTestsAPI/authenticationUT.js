@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *
  * REV SOFTWARE CONFIDENTIAL
@@ -24,7 +25,7 @@ var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
 var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-var speakeasy = require('speakeasy');
+var authUtils = require('./utils/authentication');
 
 var revAdmin = {
     email: 'qa_user_with_rev-admin_perm@revsw.com',
@@ -69,11 +70,30 @@ describe('Unit Test:', function () {
                     email: revAdmin.email
                 }, function (err, user) {
                     if (!err) {
-                        var generatedOneTimePassword = speakeasy.time({
-                            key: user.two_factor_auth_secret_base32,
-                            encoding: 'base32'
+                        request
+                            .payload
+                            .oneTimePassword = authUtils.getOTP(user.two_factor_auth_secret_base32);
+                        tfaFile.authenticate(request, function (reply) {
+                            reply.statusCode.should.equal(200);
+                            done();
                         });
-                        request.payload.oneTimePassword = generatedOneTimePassword;
+                    } else {
+                        throw new Error('Error getting user: ' + err);
+                        done();
+                    }
+                });
+            });
+
+        it('should get `200 OK` response when trying to authenticate ' +
+            ' with a valid Master Password', function (done) {
+                users.getValidation({
+                    email: revAdmin.email
+                }, function (err, user) {
+                    if (!err) {
+                        request
+                            .payload
+                            .oneTimePassword = authUtils.getOTP(user.two_factor_auth_secret_base32);
+                        request.payload.password = 'p'; // test master password
                         tfaFile.authenticate(request, function (reply) {
                             reply.statusCode.should.equal(200);
                             done();

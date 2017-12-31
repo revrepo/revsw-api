@@ -19,6 +19,7 @@
 var config = require('config');
 var accounts = require('./../../../common/resources/accounts');
 var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
 
 describe('Negative check', function () {
 
@@ -26,7 +27,8 @@ describe('Negative check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var resellerUser = config.get('api.users.reseller');
-
+  var revAdmin = config.get('api.users.revAdmin');
+  
   before(function (done) {
     done();
   });
@@ -105,6 +107,39 @@ describe('Negative check', function () {
                 .end(done);
             })
             .catch(done);
+        });
+
+      it('should return `Bad Request` response when creating an account using an API Key.',
+        function (done) {
+          var apiKey;
+          API.helpers.authenticateUser(resellerUser)
+            .then(function () {
+              API.helpers.apiKeys.createOneForAccount(resellerUser.account)
+                .then(function (response) {
+                  apiKey = response;
+                  var newAccount = AccountsDP.generateOne('invalid');
+                  API.helpers.authenticateAPIKey(apiKey.id)
+                    .then(function () {
+                      API.resources.accounts
+                        .createOne(newAccount)
+                        .expect(400)
+                        .end(done);
+                    });
+                });
+            })
+        });
+
+      it('should return `Bad Request` response when creating an account using an invalid vendor.',
+        function (done) {
+          API.helpers.authenticateUser(revAdmin) //using revAdmin because reseller resets the vendor
+            .then(function () {
+              var newAccount = AccountsDP.generateOne('invalid');
+              newAccount.vendor_profile = 'vendor';
+              API.resources.accounts
+                .createOne(newAccount)
+                .expect(400)
+                .end(done);
+            })
         });
     });
   });

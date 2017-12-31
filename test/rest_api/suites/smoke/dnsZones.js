@@ -206,6 +206,7 @@ describe('Smoke check', function () {
           
           it('should return a success response when auto discovering DNS zones',
             function (done) {
+              this.timeout(870000); // auto discovering takes a long time
                 API.helpers.authenticate(user).then(function () {
                     API.resources.dnsZones
                         .autoDiscover()

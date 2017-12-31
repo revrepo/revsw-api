@@ -34,10 +34,16 @@ describe('Smoke check:', function () {
     'reseller'
   ];
 
-  var reportTypes = [
-    'top5xx',
-    'ie_format_changes',
-    'ie_resolution_changes'
+  var topObjectsTypes = [
+    'uri',
+    'ip'
+  ];
+
+  var topTypes = [
+    'country',
+    'rule_id',
+    'zone',
+    'action_taken'
   ];
 
   var user, accountForUsers, domain;
@@ -60,7 +66,7 @@ describe('Smoke check:', function () {
   });
 
   userRolesList.forEach(function (roleName) {
-    describe('Stats Reports with role "' + roleName + '"', function () {
+    describe('WAF Stats with role "' + roleName + '"', function () {
       before(function (done) {
         var newUser = DataProvider.generateUser(roleName);
         newUser.companyId = [accountForUsers.id];
@@ -78,15 +84,29 @@ describe('Smoke check:', function () {
           .catch(done);
       });
 
-      reportTypes.forEach(function (reportType) {
-        it('should return success response when getting report type ' + reportType,
+      it('should return success response when getting WAF stats',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.wafStats
+                .getOne(domain.id)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+      topObjectsTypes.forEach(function (type) {
+        it('should return success response when getting WAF stats top objects (of type `' +
+          type + '`)',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
-                API.resources.stats
-                  .top()
-                  .getOne(domain.id, { report_type: reportType })
+                API.resources.wafStats
+                  .topObjects()
+                  .getOne(domain.id, { report_type: type })
                   .expect(200)
                   .end(done);
               })
@@ -94,55 +114,30 @@ describe('Smoke check:', function () {
           });
       });
 
-      it('should return success response when getting top lists',
-        function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.stats
-                .topLists()
-                .getOne(domain.id)
-                .expect(200)
-                .end(done);
-            })
-            .catch(done);
-        });
+      topTypes.forEach(function (type) {
+        it('should return success response when getting top WAF stats (of type `' +
+          type + '`)',
+          function (done) {
+            API.helpers
+              .authenticateUser(user)
+              .then(function () {
+                API.resources.wafStats
+                  .top()
+                  .getOne(domain.id, { report_type: type })
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+      });
 
-      it('should return success response when getting edge cache reports',
+      it('should return success response when getting WAF stats events',
         function (done) {
           API.helpers
             .authenticateUser(user)
             .then(function () {
-              API.resources.stats
-                .edgeCache()
-                .getOne(domain.id)
-                .expect(200)
-                .end(done);
-            })
-            .catch(done);
-        });
-
-        it('should return success response when getting slowest FBT objects',
-        function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.stats
-                .slowestFBTObjects()
-                .getOne(domain.id)
-                .expect(200)
-                .end(done);
-            })
-            .catch(done);
-        });
-
-        it('should return success response when getting slowest download objects',
-        function (done) {
-          API.helpers
-            .authenticateUser(user)
-            .then(function () {
-              API.resources.stats
-                .slowestDownloadObjects()
+              API.resources.wafStats
+                .events()
                 .getOne(domain.id)
                 .expect(200)
                 .end(done);
