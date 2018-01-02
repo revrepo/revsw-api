@@ -56,18 +56,22 @@ var getRequest = function () {
 //
 // Receives as param the request instance
 var setUserToRequest = function (request) {
-  var azureToken = config.get('api.azureKey.azureKey');
   var user = Session.getCurrentUser();
-  var azureKey = Session.getCurrentAzureKey();
-  
-  if (azureKey && !user) { // azure authentication
-    return request.set('Authorization', 'Bearer-RP ' + azureKey);
-  } else if (user && !user.key) { // user authentication
-    return request.set('Authorization', 'Bearer ' + user.token);
-  } else if (user.key) { // API key authentication
-    return request.set('Authorization', 'X-API-KEY ' + user.key);
-  }
 
+  // TODO: need to move the Azure token to config/default.json config file
+  var token = 'sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf';
+  if (user && user.token) {
+    return request.set('Authorization', 'Bearer ' + user.token);
+// TODO: The code is fucked up - need to add a way to detect when to use
+// different methods of authentication
+//  }else if (user && !!token) {
+//     return request.set('Authorization', 'Bearer-RP ' + token);
+  }
+  else{
+    if(user && !!user.key){
+      return request.set('Authorization', 'X-API-KEY ' + user.key);
+    }
+  }
   return request;
 };
 
@@ -285,30 +289,6 @@ var BasicResource = function (data) {
       var location = getPath(data, id);
       var request = getRequest()
         .put(location)
-        .query(query)
-        .send(object);
-      return setUserToRequest(request);
-    };
-  }
-
-  if (_contains(data.methods, Methods.PATCH)) {
-    /**
-     * ### BasicResource.update()
-     *
-     * Sends the PUT request to the API in order to update specified object with
-     * given data.
-     *
-     * @param {string} id, the uui of the object
-     * @param {object} object with the information/properties from the object
-     * to update.
-     * @param {object} query, will be transformed to a query string
-     *
-     * @returns {object} the supertest-as-promised instance
-     */
-    _resource.patch = function (id, object, query) {
-      var location = getPath(data, id);
-      var request = getRequest()
-        .patch(location)
         .query(query)
         .send(object);
       return setUserToRequest(request);
