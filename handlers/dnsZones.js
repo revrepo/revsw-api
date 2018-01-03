@@ -690,9 +690,6 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
     function(cb) {
       async.parallelLimit(workFlowData_.dnsRecordChecks, 2,function(err, result) {
         if (err) {
-          if(err instanceof Error){
-            return  cb(err);
-          }
           cb(new Error('DNS check error'));
           return;
         }
@@ -712,9 +709,6 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
   // NOTE: end of all works - send to user a response or an error
   function(err) {
     if (err) {
-      if(err instanceof Object && !!err.error && (err.error.code === 'ENOTFOUND' || !!err.error.message)){
-        return reply(boom.badRequest('The specified domain name is not found in the global DNS system'));
-      }
       reply(boom.badImplementation('DNS check error'));
       return;
     }
