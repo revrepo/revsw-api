@@ -128,6 +128,40 @@ describe('Negative check', function () {
             })
             .catch(done);
         });
+
+        it('should return `Unauthorized` when authenticating user with invalid ' +
+        'one time password',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.twoFA
+                .init()
+                .getOne()
+                .expect(200)
+                .then(function (res) {
+                  var key = res.body.base32;
+                  var oneTimePassword = TwoFADP.generateOneTimePassword(key);
+                  API.resources.twoFA
+                    .enable()
+                    .createOne(oneTimePassword)
+                    .expect(200)
+                    .then(function () {
+                      user.oneTimePassword = '000000';
+                      API.helpers
+                      .authenticateUser(user)
+                      .then(function (res) {
+                        res.should.equal(401);
+                        done();
+                      })
+                      .catch(done);
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
     });
   });
 });

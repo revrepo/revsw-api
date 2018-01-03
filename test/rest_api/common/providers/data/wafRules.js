@@ -93,7 +93,36 @@ var WAFRuleDataProvider = {
       rule_body: data.ruleBody || '# QA Test WAF Rule - Update data',
       comment: data.comment || 'QA Test - Update data'
     };
-  }
+  },
+
+    /**
+   * ### WAFRuleDataProvider.generateAutoRuleOne()
+   *
+   * Generates valid data that represents an auto generated WAF Rule and the REST API
+   * end points accept.
+   *
+   * @param {Object} data, WAF Rule info
+   * @param {String} prefix, provide a prefix if not required timestamp
+   * in the name
+   * @returns {Object} WAF Rule info with the following schema
+   *
+   *    {
+   *       account_id: String,
+   *       domain_id: String,
+   *       rule_name: String,
+   *       comment: Strting
+   *    }
+   */
+  generateAutoRuleOne: function (data, prefix) {
+    prefix = (prefix ? prefix + '_' + this.prefix : this.prefix) + Date.now();
+    return {
+      account_id: data.accountId,
+      domain_id: data.domainId,
+      rule_name: prefix,
+      comment: data.comment || 'QA Test',
+      time_period: data.timePeriod || '2017.08.01'
+    };
+  },
 };
 
 module.exports = WAFRuleDataProvider;

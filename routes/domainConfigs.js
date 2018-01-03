@@ -404,7 +404,8 @@ module.exports = [{
               wallarm_instance          : Joi.number().integer(),
               wallarm_mode_allow_override : Joi.string().valid('off','strict','on'),
               wallarm_parse_response    : Joi.string().valid('on','off'),
-              wallarm_parser_disable    : Joi.string().valid('action','cookie','gzip','json','multipart','base64','path','percent','urlenc','xml'),
+              wallarm_parser_disable    : Joi.array().items(Joi.string().
+                  valid('action','cookie','gzip','json','multipart','base64','path','percent','urlenc','xml')),
               wallarm_process_time_limit  : Joi.number().integer(),
               wallarm_process_time_limit_block  : Joi.string().valid('on','off','attack'),
               wallarm_unpack_response   : Joi.string().valid('on','off')

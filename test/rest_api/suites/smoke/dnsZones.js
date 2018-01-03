@@ -202,7 +202,19 @@ describe('Smoke check', function () {
                   .end(done);
               })
               .catch(done);
-          });
+          });   
+          
+          it('should return a success response when auto discovering DNS zones',
+            function (done) {
+              this.timeout(870000); // auto discovering takes a long time
+                API.helpers.authenticate(user).then(function () {
+                    API.resources.dnsZones
+                        .autoDiscover()
+                        .getOne('google.com') // testing a real domain
+                        .expect(200)
+                        .end(done);
+                });
+            });
 
         describe('DNS Zone Records', function () {
 

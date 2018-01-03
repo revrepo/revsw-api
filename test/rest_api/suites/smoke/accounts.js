@@ -43,6 +43,7 @@
 // config module has some defined shared properties like username, passwords
 // host information and others
 var config = require('config');
+require('should-http');
 
 // ### Requiring common components to use in our spec/test.
 
@@ -73,6 +74,7 @@ describe('Smoke check', function () {
   // Retrieving information about specific user that later we will use for
   // our API requests.
   var resellerUser = config.get('api.users.reseller');
+  var revAdmin = config.get('api.users.revAdmin');
 
   // ### Test suite
 
@@ -162,6 +164,30 @@ describe('Smoke check', function () {
               .expect(200)
               // And done, test complete
               .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a response with subscription details when getting specific account.',
+      function (done) {
+        API.helpers
+          .signUpAndVerifyUser()
+          .then(function (user) {
+            return API.helpers
+              .authenticateUser(revAdmin)
+              .then(function () {
+                return API.helpers.users.getFirstCompanyId(user);
+              })
+              .then(function (accId) {
+                API.resources.accounts
+                  .getOne(accId)
+                  .expect(200)
+                  .then(function (res) {
+                    res.body.subscription_state.should.equal('trialing');
+                    done();
+                  });
+              })
+              .catch(done);
           })
           .catch(done);
       });

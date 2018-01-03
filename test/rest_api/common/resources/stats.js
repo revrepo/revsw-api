@@ -55,6 +55,13 @@ var resourceConfig = {
       ]
     }, {
       idKey: domainConfigIdKey,
+      name: 'topLists',
+      path: '/top_lists/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    }, {
+      idKey: domainConfigIdKey,
       name: 'topObjects',
       path: '/top_objects/{' + domainConfigIdKey + '}',
       methods: [
@@ -96,6 +103,30 @@ var resourceConfig = {
       idKey: domainConfigIdKey,
       name: 'fbtAverage',
       path: '/fbt/average/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'edgeCache',
+      path: '/edge_cache/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'slowestFBTObjects',
+      path: '/slowest_fbt_objects/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
+      name: 'slowestDownloadObjects',
+      path: '/slowest_download_objects/{' + domainConfigIdKey + '}',
       methods: [
         Methods.READ_ONE
       ]
