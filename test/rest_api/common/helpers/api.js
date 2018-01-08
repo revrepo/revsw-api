@@ -91,6 +91,7 @@ var APIHelpers = {
       } else if (credentials.azureKey) {
         return this.authenticateAzureKey(credentials.azureKey);
       } else {
+        Session.setCurrentUser(credentials);
         return this.authenticateAPIKey(credentials.id);
       }
     }
