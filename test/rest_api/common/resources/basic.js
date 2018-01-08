@@ -68,9 +68,6 @@ var setUserToRequest = function (request) {
   } else if (user && user.key) {
     // API key authentication
     return request.set('Authorization', 'X-API-KEY ' + user.key);    
-  } else {
-    throw new Error('No user detected in session');
-    return;
   }
 
   return request;
