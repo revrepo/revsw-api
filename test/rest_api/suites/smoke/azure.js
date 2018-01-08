@@ -29,10 +29,11 @@ describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var RevAdmin = config.get('api.users.revAdmin');
+  var azureKey = config.get('api.azureKey');
 
   // TODO: Need to fix Azure API key authentication and after that check/rewrite the tests
 
-  xdescribe('Azure resource', function () {
+  describe('Azure resource', function () {
 
     before(function (done) {
       done();
@@ -84,7 +85,7 @@ describe('Smoke check', function () {
         var subscription = AzureDP.generateOne().subscription_id;
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -123,7 +124,7 @@ describe('Smoke check', function () {
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         var resourceName = AzureDP.generateResource().resource_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -142,7 +143,7 @@ describe('Smoke check', function () {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -160,7 +161,7 @@ describe('Smoke check', function () {
         var subscription = AzureDP.generateTwo().subscription_id;
         var state = AzureDP.generate();
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -179,7 +180,7 @@ describe('Smoke check', function () {
         var resourceName = AzureDP.generateOne().resource_name;
         var location = AzureDP.generateLocation();
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -193,22 +194,22 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    xit('should return a success response when update a resource with Azure token.', 
+    it('should return a success response when update a resource with Azure token.', 
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         var resourceName = AzureDP.generateOne().resource_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
               .accounts(provider) 
-              .PatchOne(resourceName)
-              .expect(400)
+              .patch(resourceName)
+              .expect(200)
               .end(done);
           })
           .catch(done);
@@ -219,7 +220,7 @@ describe('Smoke check', function () {
         var subscription = AzureDP.generateOne().subscription_id;
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -239,7 +240,7 @@ describe('Smoke check', function () {
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         var resourceName = AzureDP.generateOne().resource_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -258,7 +259,7 @@ describe('Smoke check', function () {
       function (done) {
         var provider = AzureDP.generateOne().provider;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .providers()
@@ -275,7 +276,7 @@ describe('Smoke check', function () {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -293,7 +294,7 @@ describe('Smoke check', function () {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -313,7 +314,7 @@ describe('Smoke check', function () {
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         var resourceName = AzureDP.generateOne().resource_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -335,7 +336,7 @@ describe('Smoke check', function () {
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         var resourceName = AzureDP.generateOne().resource_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
@@ -357,7 +358,7 @@ describe('Smoke check', function () {
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
         var resourceName = AzureDP.generateOne().resource_name;
         API.helpers
-          .authenticateAzureKey()
+          .authenticateAzureKey(azureKey)
           .then(function () {
             API.resources.azure
               .subscriptions()
