@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2017] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -421,6 +421,7 @@ DomainConfig.prototype = {
    * @name  infoUsedDomainConfigsInWAFRules
    * @description method get information about used WAF Rules in domain configuration
    * Group By WAF Rule ID
+   * only not deleted Domain Configs
    * @param  {String} accountId
    * @param  {String|Array}   wafRulesId
    * @param  {Function} callback
@@ -430,6 +431,7 @@ DomainConfig.prototype = {
     var context = this;
     var pipline = [];
     var $match = {
+      deleted: {$ne: true},
       'proxy_config.rev_component_bp.waf': { $exists: true },
       'proxy_config.rev_component_bp.waf.waf_rules': { $exists: true }
     };
