@@ -1,0 +1,478 @@
+{
+  "nsone": {
+    "api_key": "f8MXIsOKoGevPM2o7LUG",
+    "req_timeout_secs": 30
+  },
+
+  "log_config": {
+    "transports": {
+      "Console": {
+        "level": "debug",
+        "colorize": true,
+        "prettyPrint": true,
+        "humanReadableUnhandledException": true,
+        "showLevel": true
+      },
+      "File": {
+        "filename": "./log/revsw-api.log",
+        "level": "debug",
+        "prettyPrint": true
+      },
+      "Rsyslog": {
+        "silent": true
+      }
+    }
+  },
+  "log_config_cli_mode": {
+    "transports": {
+      "Console": {
+        "level": "debug",
+        "colorize": true,
+        "prettyPrint": true,
+        "humanReadableUnhandledException": true,
+        "showLevel": true
+      },
+      "File": {
+        "filename": "./log/revsw-api.log",
+        "level": "debug"
+      },
+      "Rsyslog": {
+        "Level": "info",
+        "app-name": "revsw-api",
+        "silent": true
+      }
+    }
+  },
+  "service": {
+    "host": "0.0.0.0",
+    "http_port": 7000,
+    "https_port": 8000
+  },
+  "enforce_2fa_for_revadmin_role": true,
+  "master_password": "83878c91171338902e0fe0fb97a8c47a",
+  // by default use a self-signed certificate distributed wih the package
+  "key_path": "./config/dev_ssl_certs/server.key",
+  "cert_path": "./config/dev_ssl_certs/server.crt",
+  // by default go to the QA portal instance
+  "portal_url": "https://testsjc20-portal01.revsw.net",
+  // by default use QA instance of ES service
+  "elasticsearch_url": "testsjc20-es01.revsw.net:9200",
+  "elasticsearch_fullurl_url": "testsjc20-esurl01.revsw.net:9200", 
+  "elasticsearch_log_level": false,
+  "elasticsearch_timeout_ms": 120000,
+  "cds_url": "https://testsjc20-cds01.revsw.net:9000",
+  "cds_api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
+
+  "enable_shared_ssl_regeneration_scheduler": false,
+  "shared_ssl_regeneration_scheduler_period": "*/5 * * * *",
+
+  "shared_ssl_cert_id": "5723e997bd75f6e7668dbe26",
+
+  "default_cname_domain": "revdn.net",
+  "default_waf_rules_ids": ["58ec620c2499eb41279788d8"],
+  "default_ssl_conf_profile_id": "571e9f7591dcb9f97a0c4841",
+  "portal_mongo": {
+    "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
+  },
+  "purge_mongo": {
+    "connect_string": "mongodb://TESTSJC20-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
+  },
+  "version_file": "./config/version.txt",
+  "mongoose_debug_logging": true,
+  "log_dir": "./log/",
+  "audit_log": "revsw-audit.log",
+
+  "user_verify_token_lifetime_ms":  604800000, // 7 day 
+  "password_reset_token_lifespan_ms": 3600000,     // 1 hour
+  
+  "support_email" : "support@revapm.com",
+
+  "jwt_private_key" : "87d03dff28ab0e89013af7a337fbd6d4821abf0868bb",
+  "jwt_token_lifetime_minutes": 10080,   // 7 days
+  "number_of_reported_audit_log_records": 1000,
+
+  "available_sdk_release_versions": {
+    "iOS": [ 1, 2, 4 ],
+    "Android": [ 1, 4, 5 ],
+    "Windows_Mobile": [ 1, 2, 5 ]
+  },
+  "report_about_unknown_domains": "ops@revsw.com",
+  "report_daily_activity_logs": "ops@revsw.com",
+
+  "chargify": {
+    "domain": "the_correct_value_is_in_local_json",
+    "api_key": "the_correct_value_is_in_local_json",
+    "shared_key": "the_correct_value_is_in_local_json"
+  },
+
+  "notify_admin_by_email_on_user_login": "",
+  "notify_admin_by_email_on_account_cancellation": "",
+  "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
+  "notify_admin_by_email_on_customer_singup_action": "",
+  "trust_request_xff_header": true,
+  "usage_report_regen_age_ms": 600000,
+
+  "sendgrid_api_key": "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",
+  "notify_developers_by_email_about_uncaught_exceptions": "asher940@gmail.com",
+  "notify_developers_by_email_about_bad_implementation": "asher940@gmail.com",
+
+  "purge_job_environments": ["staging_only", "global_only", "global_and_staging"],
+  "purge_job_default_environment": "global_and_staging",
+
+  "globalsign": {
+    "OrderId": "the_correct_value_is_in_local_json",
+    "GsignUser": "the_correct_value_is_in_local_json",
+    "GsignPass": "the_correct_value_is_in_local_json",
+    "GasOrder": "https://system.globalsign.com/bb/ws/GasOrder?wsdl",
+    "GasQuery": "https://system.globalsign.com/bb/ws/GasQuery?wsdl",
+    "ServerSSLService": "https://system.globalsign.com/bb/ws/ServerSSLService?wsdl"
+  },
+
+  "azure_marketplace": {
+    "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+    "ssl_token_lifetime_minutes": 10,
+    "sso_private_key": "./config/sso_private_key.pem",
+    "sso_public_key": "./config/sso_public_key.pem",
+    "user_email_domain": "azure-user.revapm.net",
+    "api_token": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf"
+  },
+  "oauth":{
+    "google_secret": "tp9USq8-fjnDOX0xZ3Y4VyBE"
+  },
+  "register_new_accounts_in_crm": "no",
+  "register_new_users_for_network_status_updates":"no",
+  "statuspage":{
+    "page_id": "21mtcbv5tvch",
+    "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
+  },
+
+  "default_system_vendor_profile": "revapm",
+  "default_signup_vendor_profile": "revapm",
+  "vendor_profiles": {
+    "revapm": {
+      "vendorUrl": "https://testsjc20-portal01.revsw.net",
+      "apiUrl": "https://testsjc20-api01.revsw.net",
+      "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
+      "companyWebsiteURL": "https://www.revapm.com/",
+      "contactSalesLink": "https://www.nuubit.com/company/contact/",
+      "contactPhone": "+1 (408) 477-1738",
+      "networkStatusUrl": "http://www.nuubitstatus.net",
+      "companyNameShort": "RevAPM",
+      "companyNameFull": "RevAPM",
+      "contactUsLink": "https://support.nuubit.net/hc/en-us/requests/new",
+      "knowledgeBaseLink": "https://support.nuubit.net/hc/en-us",
+      "support_email" : "support@revapm.com",
+      "support_name" : "RevAPM Support Team",
+      "user_verify_subject" : "RevAPM New User Email Verification Request",
+      "user_registration_instruction_subject" : "RevAPM New User Registration",
+      "user_welcome_subject" : "Welcome to RevAPM",
+      "password_reset_email_subject": "RevAPM Customer Portal Password Reset",
+      "password_reset_confirmation_email_subject": "Your RevAPM Customer Portal password has been changed",
+      "chargify_user_welcome_email_subject": "Welcome to RevAPM",
+      "sign_up_url": "/#/signup/plans",
+      "tag_for_signup_email": "ops@revsw.com",
+      "signup_user_verify_email_subject": "RevAPM New User Email Verification Request",
+      "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
+      "enable_self_registration": true,
+      "enable_simplified_signup_process": true,
+      "signup_user_verify_email_text" : [
+        "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a RevAPM account.\n",
+        "Please click on the following link, or paste this into your browser to complete the process:\n",
+        "{{vendorUrl}}/#/profile/verify/{{tokenPlace}}\n",
+        "If you did not request this, please ignore this email.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}.\n",
+        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "signup_user_verify_email_html": [
+        "<div style='font-family: arial,sans-serif;font-size: 1em;'>",
+        "<p>Hello {{firstName}},</p>",
+        "<p>You are receiving this email because you (or someone else) have requested the creation of a RevAPM account.</p>",
+        "<p>Please click on ",
+        "<a href='{{hosted_page}}?{{customer_chargify}}'>this",
+        "</a> link to complete the process.",
+        "</p>",
+        "<p>If you did not request this, please ignore this email.</p>",
+        "<p>Should you have any questions please contact us 24x7 at {{supportEmail}}.</p><br><br>",
+        "<p>Kind regards,<br/>RevAPM Customer Support Team<br>http://www.revapm.com/<br/></p>",
+        "</div>"
+        ],
+      "chargify_user_welcome_email_text": [
+        "Hello {{firstname}},\n\n",
+        "We've completed setting up your new RevAPM account!\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
+        "and start managing your configuration!\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
+        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "password_reset_email_text": [
+        "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n",
+        "Please click on the following link, or paste this into your browser to complete the process:\n",
+        "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
+        "If you did not request this, please ignore this email and your password will remain unchanged.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
+        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "password_reset_confirmation_email_text" : [
+        "Hello,\n",
+        "This is a confirmation that the password for your account {{email}} has just been changed.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
+        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
+      "sdk": {
+        "download_links": {
+          "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
+        },
+        "introduction_video_youtube_ids": {
+          "iOS": "s0xDOPg_Wts",
+          "Android": "",
+          "Windows_Mobile": ""
+        },
+        "quick_start_guide":{
+          "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
+          "Android": "https://support.nuubit.net/hc/en-us/articles/115001861983-Android-SDK-Quick-Start-Guide",
+          "Windows_Mobile": ""
+        }
+      },
+      "terms_of_service_link": "https://www.nuubit.com/termsofservice",
+      "acceptable_use_policy_link": "https://www.nuubit.com/aup",
+      "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright RevAPM 2013-2017",
+      "googleAnalyticsAccount": "UA-68856309-2",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "swaggerUIPageTitle": "RevAPM Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
+      "cname_domain": "revqa.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
+    },
+    "nuubit": {
+      "vendorUrl": "https://testsjc20-portal-nuubit.revsw.net",
+      "apiUrl": "https://testsjc20-api-nuubit.revsw.net",
+      "password_reset_portal_domain": "testsjc20-portal-nuubit.revsw.net",
+      "companyWebsiteURL": "https://www.nuubit.com/",
+      "contactSalesLink": "https://www.nuubit.com/company/contact/",
+      "contactPhone": "+1 (408) 477-1738",
+      "networkStatusUrl": "http://www.nuubitstatus.net",
+      "companyNameShort": "nuu:bit",
+      "companyNameFull": "nuu:bit, Inc.",
+      "contactUsLink": "https://support.nuubit.net/hc/en-us/requests/new",
+      "knowledgeBaseLink": "https://support.nuubit.net/hc/en-us",
+      "support_email" : "support@nuubit.com",
+      "support_name" : "nuu:bit Support Team",
+      "user_verify_subject" : "nuu:bit New User Email Verification Request",
+      "user_registration_instruction_subject" : "nuu:bit New User Registration",
+      "user_welcome_subject" : "Welcome to nuu:bit",
+      "password_reset_email_subject": "nuu:bit Customer Portal Password Reset",
+      "password_reset_confirmation_email_subject": "Your nuu:bit Customer Portal password has been changed",
+      "chargify_user_welcome_email_subject": "Welcome to nuu:bit",
+      "sign_up_url": "/#/signup/plans",  
+      "tag_for_signup_email": "ops@revsw.com",      
+      "signup_user_verify_email_subject": "nuu:bit New User Email Verification Request",
+      "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
+      "enable_self_registration": true,
+      "enable_simplified_signup_process": true,
+      "signup_user_verify_email_text" : [
+        "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a nuu:bit account.\n",
+        "Please click on the following link, or paste this into your browser to complete the process:\n",
+        "{{vendorUrl}}/#/profile/verify/{{tokenPlace}}\n",
+        "If you did not request this, please ignore this email.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}.\n",
+        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+      ],
+      "signup_user_verify_email_html": [
+        "<div style='font-family: arial,sans-serif;font-size: 1em;'>",
+        "<p>Hello {{firstName}},</p>",
+        "<p>You are receiving this email because you (or someone else) have requested the creation of a nuu:bit account.</p>",
+        "<p>Please click on ",
+        "<a href='{{hosted_page}}?{{customer_chargify}}'>this",
+        "</a> link to complete the process.",
+        "</p>",
+        "<p>If you did not request this, please ignore this email.</p>",
+        "<p>Should you have any questions please contact us 24x7 at {{supportEmail}}.</p><br><br>",
+        "<p>Kind regards,<br/>nuu:bit Customer Support Team<br>http://www.nuubit.com/<br/></p>",
+        "</div>"
+      ],
+      "chargify_user_welcome_email_text": [
+        "Hello {{firstname}},\n\n",
+        "We've completed setting up your new nuu:bit account!\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
+        "and start managing your configuration!\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
+        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+      ],
+      "password_reset_email_text": [
+        "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n",
+        "Please click on the following link, or paste this into your browser to complete the process:\n",
+        "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
+        "If you did not request this, please ignore this email and your password will remain unchanged.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
+        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+      ],
+      "password_reset_confirmation_email_text" : [
+        "Hello,\n",
+        "This is a confirmation that the password for your account {{email}} has just been changed.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
+        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+      ],
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
+      "sdk": {
+        "download_links": {
+          "iOS": "https://github.com/nuubit/SDK/archive/v1.0.5.zip"
+        },
+        "introduction_video_youtube_ids": {
+          "iOS": "s0xDOPg_Wts",
+          "Android": "",
+          "Windows_Mobile": ""
+        },
+        "quick_start_guide":{
+          "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
+          "Android": "https://support.nuubit.net/hc/en-us/articles/115001861983-Android-SDK-Quick-Start-Guide",
+          "Windows_Mobile": ""
+        }
+      },
+      "terms_of_service_link": "https://www.nuubit.com/termsofservice",
+      "acceptable_use_policy_link": "https://www.nuubit.com/aup",
+      "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright nuu:bit, Inc. 2017",
+      "googleAnalyticsAccount": "UA-68856309-2",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "swaggerUIPageTitle": "nuu:bit Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
+      "cname_domain": "nuubitqa.net", 
+      "azure_marketplace": {
+        "provider_name": "nuubit.nextgencdn",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.nuubit.net"
+      }
+    },
+    "hooli": {
+      "vendorUrl": "https://testsjc20-portal-hooli.revsw.net",
+      "apiUrl": "https://testsjc20-api01.revsw.net",
+      "password_reset_portal_domain": "testsjc20-portal01.revsw.net",
+      "companyWebsiteURL": "https://www.revapm.com/",
+      "contactSalesLink": "https://www.nuubit.com/company/contact/",
+      "contactPhone": "+1 (408) 477-1738",
+      "networkStatusUrl": "http://www.nuubitstatus.net",
+      "companyNameShort": "Hooli",
+      "companyNameFull": "Hooli, Inc.",
+      "contactUsLink": "https://support.nuubit.net/hc/en-us/requests/new",
+      "knowledgeBaseLink": "https://support.nuubit.net/hc/en-us",
+      "support_email" : "support@revapm.com",
+      "support_name" : "Hooli Support Team",
+      "user_verify_subject" : "Hooli New User Email Verification Request",
+      "user_registration_instruction_subject" : "Hooli New User Registration",
+      "user_welcome_subject" : "Welcome to Hooli",
+      "password_reset_email_subject": "Hooli Customer Portal Password Reset",
+      "password_reset_confirmation_email_subject": "Your Hooli Customer Portal password has been changed",
+      "chargify_user_welcome_email_subject": "Welcome to Hooli",
+      "signup_user_verify_email_subject": "Hooli New User Email Verification Request",
+      "notify_admin_by_email_on_user_self_registration": "ops@revsw.com",
+      "enable_self_registration": true,
+      "enable_simplified_signup_process": true,
+      "sign_up_url": "/#/signup/plans",    
+      "tag_for_signup_email": "ops@revsw.com",  
+      "signup_user_verify_email_text" : [
+        "Hello,\n\nYou are receiving this email because you (or someone else) have requested the creation of a Hooli account.\n",
+        "Please click on the following link, or paste this into your browser to complete the process:\n",
+        "{{vendorUrl}}/#/profile/verify/{{tokenPlace}}\n",
+        "If you did not request this, please ignore this email.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}.\n",
+        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "signup_user_verify_email_html": [
+        "<div style='font-family: arial,sans-serif;font-size: 1em;'>",
+        "<p>Hello {{firstName}},</p>",
+        "<p>You are receiving this email because you (or someone else) have requested the creation of a Hooli account.</p>",
+        "<p>Please click on ",
+        "<a href='{{hosted_page}}?{{customer_chargify}}'>this",
+        "</a> link to complete the process.",
+        "</p>",
+        "<p>If you did not request this, please ignore this email.</p>",
+        "<p>Should you have any questions please contact us 24x7 at {{supportEmail}}.</p><br><br>",
+        "<p>Kind regards,<br/>Hooli Customer Support Team<br>http://www.revapm.com/<br/></p>",
+        "</div>"
+      ],
+      "chargify_user_welcome_email_text": [
+        "Hello {{firstname}},\n\n",
+        "We've completed setting up your new Hooli account!\n",
+        "Your are welcome to visit our customer portal at {{portalUrl}}",
+        "and start managing your configuration!\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
+        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "password_reset_email_text": [
+        "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n",
+        "Please click on the following link, or paste this into your browser to complete the process:\n",
+        "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
+        "If you did not request this, please ignore this email and your password will remain unchanged.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
+        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "password_reset_confirmation_email_text" : [
+        "Hello,\n",
+        "This is a confirmation that the password for your account {{email}} has just been changed.\n",
+        "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
+        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+      ],
+      "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",      
+      "sdk": {
+        "download_links": {
+          "iOS": "https://github.com/revrepo/SDK/releases/download/v1.0.5/RevSDK.framework.zip"
+        },
+        "introduction_video_youtube_ids": {
+          "iOS": "s0xDOPg_Wts",
+          "Android": "",
+          "Windows_Mobile": ""
+        },
+        "quick_start_guide":{
+          "iOS": "https://support.nuubit.net/hc/en-us/articles/207278946-iOS-SDK-Quick-Start-Guide",
+          "Android": "https://support.nuubit.net/hc/en-us/articles/115001861983-Android-SDK-Quick-Start-Guide",
+          "Windows_Mobile": ""
+        }
+      },
+      "terms_of_service_link": "https://www.nuubit.com/termsofservice",
+      "acceptable_use_policy_link": "https://www.nuubit.com/aup",
+      "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
+      "zendesk_support_site": "nuubit.zendesk.com",
+      "copyright": "Copyright Hooli 2017",
+      "googleAnalyticsAccount": "UA-68856309-2",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "swaggerUIPageTitle": "Hooli Platform API Documentation",
+      "swaggerUICDNCustomerAPIUrl": "https://support.nuubit.net/hc/en-us/categories/200833373-nuu-bit-API",
+      "cname_domain": "revqa.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
+    }
+  },
+  "proxy_white_referer_urls": [
+    "https://iad02-portal01.revsw.net",
+    "https://testsjc20-portal01.revsw.net",
+    "https://testsjc20-portal-nuubit.revsw.net",
+    "https://testsjc20-portal-hooli.revsw.net"
+  ],
+  "notify_admin_by_email_on_customer_activities":"",
+  "accounts_to_ignore_for_activity_reporting": [],
+  "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE", "GD2017"],
+  "max_time_period_for_traffic_graphs_days": 8,
+  "max_time_period_for_waf_graphs_days": 30,
+  "notification_window_for_expiring_ssl_cert_days": 90,
+  "notify_admin_by_email_on_ssl_cert_expiration": "ops@revsw.com",
+  "cache_memory_ttl_seconds": 600,
+  "cache_memory_max_bytes": 1073741824, 
+  "cache_memory_es_ttl_seconds": 600,
+  "cache_memory_es_max_bytes": 1073741824,
+  "infra_db_serve_list_url": "https://infradb.revsw.net",
+  "infra_db_login_name": "apiro",
+  "infra_db_password": "7pmlZ5axCwYe",
+  "max_number_of_uncompleted_waf_auto_generated_rule_jobs": 5,
+  "max_number_of_dashboards_per_user":30
+}

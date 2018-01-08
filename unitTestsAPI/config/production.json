@@ -1,0 +1,136 @@
+{
+  "log_config": {
+    "transports": {
+      "Console": {
+        "silent": true
+      },
+      "File": {
+        "filename": "./log/revsw-api.log",
+        "level": "debug"
+      },
+      "Rsyslog": {
+        "Level" : "info",
+        "app-name" : "revsw-api"
+      }
+    }
+  },
+  "service": {
+    "http_port": 80,
+    "https_port": 443 
+  },
+  "enforce_2fa_for_revadmin_role": true,
+  "master_password": "the_correct_value_is_in_local_json",
+  "key_path": "./config/ssl_certs/server.key",
+  "cert_path": "./config/ssl_certs/server.crt",
+  "portal_url": "https://iad02-portal01.revsw.net",
+  "elasticsearch_url": "iad02-es08.revsw.net:9200",
+  "elasticsearch_fullurl_url": "iad02-esurl01.revsw.net:9200",
+  "cds_url": "https://cds.revdn.net:9000",
+  "cds_api_token": "the_correct_value_is_in_local_json",
+  "default_waf_rules_ids": ["58ed3c21f140f9d32b9bc754"],
+  "default_ssl_conf_profile_id": "571e9f7591dcb9f97a0c4841",
+  "shared_ssl_cert_id": "572973b9e8ebfce21d047afa",
+
+  "portal_mongo": {
+    "connect_string": "mongodb://IAD02-CMDB01.REVSW.NET:27017/revportal?replicaSet=CMDB-rs0"
+  },
+  "purge_mongo": {
+    "connect_string": "mongodb://IAD02-CMDB01.REVSW.NET:27017/purgejobs?replicaSet=CMDB-rs0"
+  },
+
+  "password_reset_portal_domain": "portal.revapm.net",
+  "user_verify_portal_domain" : "portal.revapm.net",
+
+  "jwt_private_key" : "the_correct_value_is_in_local_json",
+  "available_sdk_release_versions": {
+    "iOS": [ 1 ],
+    "Android": [ 1 ],
+    "Windows_Mobile": [ 1 ]
+  },
+
+  "enable_self_registration": true,
+
+  "chargify": {
+    "domain": "the_correct_value_is_in_local_json",
+    "api_key": "the_correct_value_is_in_local_json",
+    "shared_key": "the_correct_value_is_in_local_json"
+  },
+
+  "notify_admin_by_email_on_user_login": "ops@revsw.com",
+  "notify_admin_by_email_on_user_self_registration":"ops@revsw.com",
+  "notify_admin_by_email_on_account_cancellation": "ops@revsw.com",
+  "usage_report_regen_age_ms": 6000000000000,
+
+  "nsone": {
+    "api_key": "the_correct_value_is_in_local_json"
+  },
+
+  "azure_marketplace": {
+    "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
+    "api_token": "the_correct_value_is_in_local_json"
+  },
+  "register_new_accounts_in_crm": "yes",
+  "register_new_users_for_network_status_updates":"yes",
+  "statuspage":{
+    "page_id": "2pjglhj418gn",
+    "api_key": "d3345fe6-c1a4-4bb8-9cc5-a55978619e79"
+  },
+
+  "vendor_profiles": {
+    "revapm": {
+      "vendorUrl": "https://portal.revapm.net",
+      "apiUrl": "https://api.revapm.net",
+      "password_reset_portal_domain": "portal.revapm.net",
+      "googleAnalyticsAccount": "UA-68856309-3",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "cname_domain": "revdn.net",
+      "sign_up_url": "https://www.nuubit.com/sign-up/",            
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
+    },
+    "nuubit": {
+      "vendorUrl": "https://portal.nuubit.net",
+      "apiUrl": "https://api.nuubit.net",
+      "password_reset_portal_domain": "portal.nuubit.net",
+      "googleAnalyticsAccount": "UA-92590791-3",
+      "apiGoogleAnalyticsAccount": "UA-92590791-4",
+      "cname_domain": "nuubitcn.net",
+      "sign_up_url": "https://www.nuubit.com/sign-up/", 
+      "azure_marketplace": {
+        "provider_name": "nuubit.nextgencdn",
+        "sso_endpoint": "https://portal.nuubit.net/#/azure-sso",
+        "user_email_domain": "azure-user.nuubit.net"
+      }
+    },
+    "hooli": {
+      "vendorUrl": "https://hooli.nuubit.net",
+      "apiUrl": "https://api.revapm.net",
+      "sign_up_url": "https://www.nuubit.com/sign-up/",      
+      "password_reset_portal_domain": "portal.revapm.net",
+      "googleAnalyticsAccount": "UA-68856309-3",
+      "apiGoogleAnalyticsAccount": "UA-68856309-7",
+      "cname_domain": "revdn.net",
+      "azure_marketplace": {
+        "provider_name": "RevAPM.MobileCDN",
+        "sso_endpoint": "https://portal.revapm.net/#/azure-sso",
+        "user_email_domain": "azure-user.revapm.net"
+      }
+    }
+  },
+  "proxy_white_referer_urls": [
+    "https://portal.revapm.net",
+    "https://portal.nuubit.net",
+    "https://hooli.nuubit.net",
+    "https://portal-staging.revapm.net",
+    "https://portal-staging.nuubit.net"
+  ],
+  "notify_admin_by_email_on_customer_activities":"customer-activity-events@nuubit.com",
+  "notify_admin_by_email_on_customer_singup_action": "1754724@bcc.hubspot.com",
+  "accounts_to_ignore_for_activity_reporting":["5472e0be5e4ac42646bdffeb"/*Rev Software*/, "585296f11ea9bb3c3f90e05b" /*SDK Tests*/],
+  "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE", "GD2017"],
+  "notification_window_for_expiring_ssl_cert_days": 60,
+  "notify_admin_by_email_on_ssl_cert_expiration": "ops@revsw.com"
+}

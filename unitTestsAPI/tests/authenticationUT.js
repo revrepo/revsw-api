@@ -17,15 +17,16 @@
  * from Rev Software, Inc.
  */
 require('should');
-var oldEnv = process.env.NODE_ENV;
-process.env.NODE_ENV = 'unitTests';
+
+process.env.NODE_CONFIG_DIR = process.cwd() + '/config';
+
 var config = require('config');
-var tfaFile = require('./../handlers/authenticate');
+var tfaFile = require('./../../handlers/authenticate');
 var mongoose = require('mongoose');
-var mongoConnection = require('../lib/mongoConnections');
-var User = require('../models/User');
+var mongoConnection = require('../../lib/mongoConnections');
+var User = require('../../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-var authUtils = require('./utils/authentication');
+var authUtils = require('./../utils/authentication');
 
 var revAdmin = {
     email: 'qa_user_with_rev-admin_perm@revsw.com',
@@ -39,11 +40,6 @@ var revAdmin = {
 
 describe('Unit Test:', function () {
     describe('Authentication Function with Rev Admin', function () {
-
-        after(function (done) {
-            process.env.NODE_ENV = oldEnv; // go back to qa/dev/production
-            done();
-        });
 
         var request = {
             payload: {
