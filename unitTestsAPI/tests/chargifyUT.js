@@ -25,10 +25,6 @@ var chargifyFile = require('./../../handlers/chargify');
 var config = require('config');
 var chargifyAcc = config.get('chargify_account.subscription');
 
-/*
-    TODO: need to enable test for all types of events to check that chargify handler is fully covered
-*/
-
 describe('Unit Test:', function () {
     describe('Chargify', function () {
 
