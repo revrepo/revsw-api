@@ -18,9 +18,17 @@
  */
 require('should');
 
-process.env.NODE_CONFIG_DIR = process.cwd() + '/config';
+var configUT = {
+    master_password: '83878c91171338902e0fe0fb97a8c47a',
+    enforce_2fa_for_revadmin_role: true
+};
+
+process.env.NODE_CONFIG_DIR = '../config';
+// overriding master password and overriding 2fa enforce for rev admin
+process.env.NODE_CONFIG = JSON.stringify(configUT);
 
 var config = require('config');
+
 var tfaFile = require('./../../handlers/authenticate');
 var mongoose = require('mongoose');
 var mongoConnection = require('../../lib/mongoConnections');
