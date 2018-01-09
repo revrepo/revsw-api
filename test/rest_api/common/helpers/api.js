@@ -144,15 +144,19 @@ var APIHelpers = {
    *
    * @returns {Promise}
    */
-  authenticateAPIKey: function (keyId) {
+  authenticateAPIKey: function (keyId) {    
     return APIKeysRes
       .getOne(keyId)
       .then(function (response) {
-        var user = response.body;
-        Session.setCurrentUser(user);
+        if (response.statusCode === 200) {
+          var user = response.body;
+          Session.setCurrentUser(user);
+        } else {
+          throw new Error('Authenticating user as API KEY ' + keyId);
+        }
       })
-      .catch(function (error) {
-        throw new Error('Authenticating user as API KEY ', error.response.body, keyId);
+      .catch(function () {
+        throw new Error('Authenticating user as API KEY ' + keyId);
       });
   },
 
