@@ -18,7 +18,6 @@
  */
 require('should');
 
-process.env.NODE_CONFIG_DIR = '../config';
 var chargifyFile = require('./../../handlers/chargify');
 
 /*

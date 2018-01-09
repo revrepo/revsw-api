@@ -8,6 +8,7 @@ var mocha = require('gulp-mocha');
 var stylish = require('jshint-stylish');
 var gutil = require('gulp-util');
 var fatalLevel = require('yargs').argv.fatal;
+var shell = require('gulp-shell');
 
 var config = {}; // todo revsw config
 config.appName = 'revsw-api';
@@ -101,6 +102,10 @@ gulp.task('lint', [], function (cb) {
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));
 });
+
+gulp.task('test:unitTests', shell.task([
+  'mocha unitTestsAPI/tests --recursive'
+]));
 
 // Event tasks
 
