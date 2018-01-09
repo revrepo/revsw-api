@@ -64,6 +64,7 @@ exports.webhookHandler = function(request, reply) {
 
   var onTest = function() {
     request.payload.msg = 'Test passed';
+    request.payload.statusCode = 200;
     reply(request.payload);
   };
   /**
