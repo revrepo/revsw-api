@@ -18,30 +18,42 @@
  */
 require('should');
 
-var chargifyFile = require('./../../handlers/chargify');
+var oldEnv = process.env.NODE_ENV;
+process.env.NODE_ENV = 'unitTests'; // use unit tests config
 
-/*
-    TODO: need to enable test for all types of events to check that chargify handler is fully covered
-*/
+var chargifyFile = require('./../../handlers/chargify');
+var config = require('config');
+var chargifyAcc = config.get('chargify_account.subscription');
 
 describe('Unit Test:', function () {
     describe('Chargify', function () {
 
+        this.timeout(30000);
+
+        after(function (done) {
+            process.env.NODE_ENV = oldEnv;
+            done();
+        });
+
         var events = [
             'test',
-            //'signup_success',
-            //'subscription_state_change'
+            'signup_success',
+            'subscription_state_change'
         ];
 
         var request = {
             payload: {
-                event: null
+                event: null,
+                payload: {
+                    subscription: null
+                }
             }   
         };
 
         events.forEach(function (event) {
             it('should return success message with `' + event + '` event', function (done) {
                 request.payload.event = event;
+                request.payload.payload.subscription = chargifyAcc;
                 chargifyFile.webhookHandler(request, function (res) {
                     res.statusCode.should.equal(200);
                     done();

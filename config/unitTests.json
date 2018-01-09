@@ -11,5 +11,17 @@
                 "companyName": "API QA Reseller Company"
             }
         }
+    },
+    "chargify_account": {
+        "id": "5a47d0eae44b0d3eb70b190f",
+        "subscription": {
+            "state": "trialing",
+            "id": "20298826",
+            "customer": {
+                "id": "19886017",
+                "reference": "5a47d0eae44b0d3eb70b190f"
+            }
+        },
+        "comment": "This is an ID of `asher moshav` account, please don't change this account."
     }
 }
