@@ -17,7 +17,7 @@
  * from Rev Software, Inc.
  */
 require('should');
-console.log(process.env.NODE_CONFIG_DIR);
+
 var configUT = {
     master_password: '83878c91171338902e0fe0fb97a8c47a',
     enforce_2fa_for_revadmin_role: true
@@ -53,6 +53,7 @@ describe('Unit Test:', function () {
 
         after(function (done) {
             process.env.NODE_CONFIG_DIR = oldDir;
+            process.env.NODE_CONFIG = undefined;
             done();
         });
 
