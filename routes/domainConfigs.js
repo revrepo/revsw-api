@@ -400,7 +400,7 @@ module.exports = [{
             enable_wallarm: Joi.boolean().default(false),
             wallarm_config: Joi.array().items({
               location                  : Joi.string().required().default('/'),
-              wallarm_mode              : Joi.string().required().valid('off','monitoring','block').default('off'),
+              wallarm_mode              : Joi.string().required().valid('off','monitoring','block','aggressive').default('off'),
               wallarm_instance          : Joi.number().integer(),
               wallarm_mode_allow_override : Joi.string().valid('off','strict','on'),
               wallarm_parse_response    : Joi.string().valid('on','off'),
