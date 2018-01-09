@@ -122,4 +122,3 @@ server.on('restart', function () { // TODO move server.on('restart') to invoke a
 // Define default
 
 gulp.task('default', ['serve', 'watch']);
-gulp.task('test', ['test:unitTests'])
