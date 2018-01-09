@@ -1,0 +1,15 @@
+{
+    "master_password": "83878c91171338902e0fe0fb97a8c47a",
+    "enforce_2fa_for_revadmin_role": true,
+    "users": {
+        "revAdmin": {
+            "email": "qa_user_with_rev-admin_perm@revsw.com",
+            "password": "password1",
+            "role": "Rev Admin",
+            "account": {
+                "id": "55b706a57957012304a49d0b",
+                "companyName": "API QA Reseller Company"
+            }
+        }
+    }
+}

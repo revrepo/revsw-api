@@ -18,15 +18,10 @@
  */
 require('should');
 
-var configUT = {
-    master_password: '83878c91171338902e0fe0fb97a8c47a',
-    enforce_2fa_for_revadmin_role: true
-};
+var oldEnv = process.env.NODE_ENV;
+process.env.NODE_ENV = 'unitTests'; // use unit tests config
 
-process.env.NODE_CONFIG_DIR = '../config';
-// overriding master password and overriding 2fa enforce for rev admin
-process.env.NODE_CONFIG = JSON.stringify(configUT);
-
+var config = require('config');
 var tfaFile = require('./../../handlers/authenticate');
 var mongoose = require('mongoose');
 var mongoConnection = require('../../lib/mongoConnections');
@@ -34,18 +29,15 @@ var User = require('../../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var authUtils = require('./../utils/authentication');
 
-var revAdmin = {
-    email: 'qa_user_with_rev-admin_perm@revsw.com',
-    password: 'password1',
-    role: 'Rev Admin',
-    account: {
-        id: '55b706a57957012304a49d0b',
-        companyName: 'API QA Reseller Company'
-    }
-};
+var revAdmin = config.get('users.revAdmin');
 
 describe('Unit Test:', function () {
     describe('Authentication Function with Rev Admin', function () {
+
+        after(function (done) {
+            process.env.NODE_ENV = oldEnv;
+            done();
+        });
 
         var request = {
             payload: {
