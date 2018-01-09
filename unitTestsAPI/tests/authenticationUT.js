@@ -17,15 +17,22 @@
  * from Rev Software, Inc.
  */
 require('should');
-var oldEnv = process.env.NODE_ENV;
-process.env.NODE_ENV = 'unitTests';
-var config = require('config');
-var tfaFile = require('./../handlers/authenticate');
+
+var configUT = {
+    master_password: '83878c91171338902e0fe0fb97a8c47a',
+    enforce_2fa_for_revadmin_role: true
+};
+
+process.env.NODE_CONFIG_DIR = '../config';
+// overriding master password and overriding 2fa enforce for rev admin
+process.env.NODE_CONFIG = JSON.stringify(configUT);
+
+var tfaFile = require('./../../handlers/authenticate');
 var mongoose = require('mongoose');
-var mongoConnection = require('../lib/mongoConnections');
-var User = require('../models/User');
+var mongoConnection = require('../../lib/mongoConnections');
+var User = require('../../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-var authUtils = require('./utils/authentication');
+var authUtils = require('./../utils/authentication');
 
 var revAdmin = {
     email: 'qa_user_with_rev-admin_perm@revsw.com',
@@ -39,11 +46,6 @@ var revAdmin = {
 
 describe('Unit Test:', function () {
     describe('Authentication Function with Rev Admin', function () {
-
-        after(function (done) {
-            process.env.NODE_ENV = oldEnv; // go back to qa/dev/production
-            done();
-        });
 
         var request = {
             payload: {

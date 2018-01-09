@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013]  [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -19,6 +19,8 @@
 // # Main API Helper
 
 var Session = require('./../session');
+var Promise = require('bluebird');
+var config = require('config');
 
 // Requiring resources to use in these Helpers.
 var AuthenticateRes = require('./../resources/authenticate');
@@ -65,7 +67,7 @@ var APIHelpers = {
   /**
   * ### API.helpers.authenticate()
   *
-  * Helper method to Authenticate user data before doing any type of request to
+  * Helper method to Authenticate user/API key/azure key data before doing any type of request to
   * the REST API services.
   *
   * @param {Object} credentials , credentials data.
@@ -82,12 +84,16 @@ var APIHelpers = {
   * @returns {Promise}
   */
   authenticate: function (credentials) {
-
-    if (!!credentials.email) {
-      return this.authenticateUser(credentials);
-    } else {
-      Session.setCurrentUser(credentials);
-      return this.authenticateAPIKey(credentials.id);
+    Session.reset();
+    if (credentials) {
+      if (credentials.email) {
+        return this.authenticateUser(credentials);
+      } else if (credentials.azureKey) {
+        return this.authenticateAzureKey(credentials.azureKey);
+      } else {
+        Session.setCurrentUser(credentials);
+        return this.authenticateAPIKey(credentials.id);
+      }
     }
   },
   /**
@@ -105,6 +111,7 @@ var APIHelpers = {
    * @returns {Promise}
    */
   authenticateUser: function (user) {
+    Session.setCurrentUser(user);
     var acc = {
       email: user.email,
       password: user.password
@@ -119,6 +126,7 @@ var APIHelpers = {
           return response.status;
         } else {
           user.token = response.body.token;
+          Session.resetAzureKey();
           Session.setCurrentUser(user);
         }        
       })
@@ -136,28 +144,43 @@ var APIHelpers = {
    *
    * @returns {Promise}
    */
-  authenticateAPIKey: function (keyId) {
+  authenticateAPIKey: function (keyId) {    
     return APIKeysRes
       .getOne(keyId)
       .then(function (response) {
-        var user = response.body;
-        Session.setCurrentUser(user);
+        if (response.statusCode === 200) {
+          var user = response.body;
+          Session.setCurrentUser(user);
+        } else {
+          throw new Error('Authenticating user as API KEY ' + keyId);
+        }
       })
-      .catch(function (error) {
-        throw new Error('Authenticating user as API KEY ', error.response.body, keyId);
+      .catch(function () {
+        throw new Error('Authenticating user as API KEY ' + keyId);
       });
   },
 
-  authenticateAzureKey: function (token) {
-    return APIKeysRes
-      .getOne(token)
-      .then(function (response) {
-        var user = response.body;
-        Session.setCurrentUser(user);
-      })
-      .catch(function (error) {
-        throw new Error('Authenticating user as Azure token ', error.response.body, token);
-      });
+  /**
+    * ### API.helpers.authenticateAzureKey()
+    *
+    * Helper method to Authenticate an Azure Token before doing any type of request to
+    * the REST API services.
+    *
+    * @param  key
+    *
+    * @returns {Promise}
+    */
+  authenticateAzureKey: function (key) {
+    Session.reset();
+    return new Promise(function (resolve, reject) {
+      if (key.azureKey === config.get('api.azureKey.azureKey')) {
+        Session.setCurrentAzureKey(key);
+        resolve();
+      } else {
+        throw new Error('Authenticating user as Azure token ', key);
+        reject();
+      }
+    });
   },
   /**
    * ### API.helpers.attemptToAuthenticateUser()

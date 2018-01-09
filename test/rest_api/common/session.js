@@ -22,16 +22,26 @@
 // It also provides additional methods to retrieve, update or reset that
 // information. Re-setting means as if no user was authenticated
 var currentUser;
-
+var currentAzureKey;
 var Session = {
   reset: function(){
     currentUser = undefined;
+    currentAzureKey = undefined;
   },
   setCurrentUser: function(user){
     currentUser = user;
   },
   getCurrentUser: function(){
     return currentUser;
+  },
+  setCurrentAzureKey: function (key) {
+    currentAzureKey = key;
+  },
+  getCurrentAzureKey: function () {
+    return currentAzureKey;
+  },
+  resetAzureKey: function () {
+    currentAzureKey = undefined;
   }
 };
 
