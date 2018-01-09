@@ -156,10 +156,55 @@ describe('Smoke check', function () {
           .catch(done);
       });
 
-    it('should return a success response when create a subscription with Azure token.', 
+    var subscription = 'SUB' + Date.now();
+    it('should return a success response when create a subscription (Unregistered state) with Azure token.',
       function (done) {
-        var subscription = AzureDP.generateTwo().subscription_id;
-        var state = AzureDP.generate();
+        var state = { state: 'Unregistered' };
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .update(subscription, state)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+      it('should return a success response when create a subscription (Registered state) with Azure token.',
+      function (done) {
+        var state = { state: 'Registered' };
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .update(subscription, state)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    it('should return a success response when create a subscription (that already exists but different state) with Azure token.',
+      function (done) {
+        var state = { state: 'Suspended' };
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .update(subscription, state)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+      it('should return a success response when create a subscription (that already exists with same state) with Azure token.',
+      function (done) {
+        var state = { state: 'Suspended' };
         API.helpers
           .authenticateAzureKey(azureKey)
           .then(function () {
@@ -213,7 +258,7 @@ describe('Smoke check', function () {
               .end(done);
           })
           .catch(done);
-      });
+      });      
 
     it('should return a success response when move a resource with Azure token.', 
       function (done) {
