@@ -143,7 +143,14 @@ describe('Smoke check', function () {
                       .approvers()
                       .getAll({ssl_name: sslNames[0].ssl_name})
                       .expect(200)
-                      .end(done);
+                      .then(function (res) {
+                        console.log(res);
+                        done();
+                      })
+                      .catch(function (res) {
+                        console.log(res);
+                        done();
+                      });
                   })
                   .catch(done);
               })
