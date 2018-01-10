@@ -49,7 +49,15 @@ describe('Smoke check', function () {
     it('should return success response when authenticating user',
       function (done) {
         API.resources.authenticate
-          .createOne({email: user.email, password: user.password})
+          .createOne({ email: user.email, password: user.password })
+          .expect(200)
+          .end(done);
+      });
+
+    xit('should return success response when authenticating SSO Azure token',
+      function (done) {
+        API.resources.authenticateSSOAzure
+          .createOne()
           .expect(200)
           .end(done);
       });
