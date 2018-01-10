@@ -98,6 +98,7 @@ gulp.task('lint', [], function (cb) {
     './services/**/*.js',
     './models/**/*.js',
     './routes/**/*.js',
+    './unitTestsAPI/**/*.js'
   ])
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));

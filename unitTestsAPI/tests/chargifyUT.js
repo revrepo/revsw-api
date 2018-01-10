@@ -22,6 +22,7 @@ var oldEnv = process.env.NODE_ENV;
 process.env.NODE_ENV = 'unitTests'; // use unit tests config
 
 var chargifyFile = require('./../../handlers/chargify');
+var accountsFile = require('./../../handlers/accounts');
 var config = require('config');
 var chargifyAcc = config.get('chargify_account.subscription');
 
@@ -47,7 +48,7 @@ describe('Unit Test:', function () {
                 payload: {
                     subscription: null
                 }
-            }   
+            }
         };
 
         events.forEach(function (event) {
@@ -55,9 +56,44 @@ describe('Unit Test:', function () {
                 request.payload.event = event;
                 request.payload.payload.subscription = chargifyAcc;
                 chargifyFile.webhookHandler(request, function (res) {
-                    res.statusCode.should.equal(200);
-                    done();
+                    if (res.statusCode === 429) {
+                        console.log(res.message);
+                        console.log('New link available at: ' + res.newLinkAt);
+                        // passing test anyway
+                        res.statusCode.should.equal(429);                        
+                        done();
+                    } else {
+                        res.statusCode.should.equal(200);
+                        done();
+                    }                    
                 });
+            });
+        });
+
+        it('should return billing ID when creating billing profile for account', function (done) {
+
+            var request2 = {
+                payload: {},
+                params: {
+                    account_id: null
+                },
+                method: 'post',
+                path: '/v1/accounts',
+                headers: [],
+                info: [],
+                auth: {
+                    credentials: {
+                        user_type: 'user',
+                        companyId: [config.get('users.admin.account.id')],
+                        role: 'admin'
+                    }
+                }
+            };
+
+            request2.params.account_id = config.get('users.admin.account.id');
+            accountsFile.createBillingProfile(request2, function (res) {
+                res.billing_id.should.not.equal(null);
+                done();
             });
         });
 

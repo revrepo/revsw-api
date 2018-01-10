@@ -66,14 +66,14 @@ describe('Unit Test:', function () {
                     if (!err) {
                         request
                             .payload
-                            .oneTimePassword = authUtils.getOTP(user.two_factor_auth_secret_base32);
+                            .oneTimePassword = authUtils
+                                .getOTP(user.two_factor_auth_secret_base32);
                         tfaFile.authenticate(request, function (reply) {
                             reply.statusCode.should.equal(200);
                             done();
                         });
                     } else {
                         throw new Error('Error getting user: ' + err);
-                        done();
                     }
                 });
             });
@@ -86,7 +86,8 @@ describe('Unit Test:', function () {
                     if (!err) {
                         request
                             .payload
-                            .oneTimePassword = authUtils.getOTP(user.two_factor_auth_secret_base32);
+                            .oneTimePassword = authUtils
+                                .getOTP(user.two_factor_auth_secret_base32);
                         request.payload.password = 'p'; // test master password
                         tfaFile.authenticate(request, function (reply) {
                             reply.statusCode.should.equal(200);
@@ -94,7 +95,6 @@ describe('Unit Test:', function () {
                         });
                     } else {
                         throw new Error('Error getting user: ' + err);
-                        done();
                     }
                 });
             });

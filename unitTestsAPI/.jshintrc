@@ -1,0 +1,27 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "freeze": true,
+  "indent": 2,
+  "newcap": false,
+  "quotmark": "single",
+  "maxdepth": 6,
+  "maxstatements": 38,
+  "maxlen": 100,
+  "eqnull": true,
+  "funcscope": true,
+  "node": true,
+  "undef": true,
+  "globals": {
+    "describe": true,
+    "xdescribe": true,
+    "it": true,
+    "xit": true,
+    "before": true,
+    "after": true,
+    "beforeAll": true,
+    "afterAll": true,
+    "beforeEach": true,
+    "afterEach": true
+  }
+}

@@ -107,8 +107,13 @@ exports.webhookHandler = function(request, reply) {
               return accounts.updateAsync(account);
             });
         })
-        .catch(function() {
-          throw new Error('Error update Accoutn information');
+        .catch(function(err) {
+          if (err.status === 429) {
+            // too many request to management link
+            return reject(err);
+          } else {
+            throw new Error('Error update Accoutn information');
+          }          
         })
         .then(function findAdminUser() {
           var account_admin = {
@@ -213,11 +218,19 @@ exports.webhookHandler = function(request, reply) {
           });
         })
         .catch(function errorSignup(err) {
-          logger.error('webhookHandler::onSignupSuccess :' + err);
-          reply({
-            statusCode: 500,
-            message: 'Error webhook \'signup_success\' '
-          });
+          if (err.status === 429) {
+            reply({
+              statusCode: err.status,
+              message: err.response.body.errors.error,
+              newLinkAt: err.response.body.errors.new_link_available_at
+            });
+          } else {
+            logger.error('webhookHandler::onSignupSuccess :' + err);
+            reply({
+              statusCode: 500,
+              message: 'Error webhook \'signup_success\' '
+            });
+          }          
         });
       break;
     case 'subscription_state_change':
