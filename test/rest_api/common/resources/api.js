@@ -50,6 +50,7 @@ var WAFRulesResource = require('./wafRules');
 var SSLConfProfilesResource = require('./sslConfProfiles');
 var AzureResource = require('./azure');
 var WAFStats = require('./wafStats');
+var AuthenticateSSOAzure = require('./authenticateSSOAzure');
 
 // Set of all resources that the REST API service provides..
 var APIResources = {
@@ -84,7 +85,8 @@ var APIResources = {
   wafRules: WAFRulesResource,
   sslConfProfiles: SSLConfProfilesResource,
   azure: AzureResource,
-  wafStats: WAFStats
+  wafStats: WAFStats,
+  authenticateSSOAzure: AuthenticateSSOAzure
 };
 
 module.exports = APIResources;

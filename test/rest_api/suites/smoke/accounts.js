@@ -75,6 +75,8 @@ describe('Smoke check', function () {
   // our API requests.
   var resellerUser = config.get('api.users.reseller');
   var revAdmin = config.get('api.users.revAdmin');
+  var apiKey = config.get('api.apikeys.admin');
+  var apiKeyReseller = config.get('api.apikeys.reseller');
 
   // ### Test suite
 
@@ -128,145 +130,149 @@ describe('Smoke check', function () {
       done();
     });
 
-    // ### Test to get all accounts
-    // This is a test, note that it requires to params, the first one is the
-    // statement and the second one a callback that receives a `done` param
-    it('should return a response when getting all accounts.',
-      function (done) {
-        // Setting user for all upcoming REST API calls
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            // Using `API` to get `accounts resource`
-            API.resources.accounts
-              // Getting all accounts
-              .getAll()
-              // Validate response is a success one
-              .expect(200)
-              // And finish either if there was a failure or if there was a
-              // success response, `done` callback will be invoked.
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    // ### Spec/test to get specific account
-    it('should return a response when getting specific account.',
-      function (done) {
-        // Setting user
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.accounts
-              // Getting one specific account giving its ID
-              .getOne(accountSample.id)
-              // Validate it has a success response
-              .expect(200)
-              // And done, test complete
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a response with subscription details when getting specific account.',
-      function (done) {
-        API.helpers
-          .signUpAndVerifyUser()
-          .then(function (user) {
-            return API.helpers
-              .authenticateUser(revAdmin)
+    [resellerUser, apiKey, apiKeyReseller].forEach(function (val) {
+      describe('With ' + val.role, function () {
+        // ### Test to get all accounts
+        // This is a test, note that it requires to params, the first one is the
+        // statement and the second one a callback that receives a `done` param
+        it('should return a response when getting all accounts.',
+          function (done) {
+            // Setting user for all upcoming REST API calls
+            API.helpers
+              .authenticate(val)
               .then(function () {
-                return API.helpers.users.getFirstCompanyId(user);
-              })
-              .then(function (accId) {
+                // Using `API` to get `accounts resource`
                 API.resources.accounts
-                  .getOne(accId)
+                  // Getting all accounts
+                  .getAll()
+                  // Validate response is a success one
                   .expect(200)
-                  .then(function (res) {
-                    res.body.subscription_state.should.equal('trialing');
-                    done();
-                  });
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    // ### Spec/test to create account
-    it('should return a response when creating specific account.',
-      function (done) {
-        // Generating data for a new `account`
-        var newAccount = AccountsDP.generateOne('NEW');
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.accounts
-              //Creating new account by using data generated
-              .createOne(newAccount)
-              // Validate it has a success reponse
-              .expect(200)
-              // Calling `then()` function instead of `done()`. This is a
-              // feature of `supertest-as-promised` package. It receives as
-              // param the success response.
-              .then(function (response) {
-                // Since we got a success response, we need to clean account
-                // created
-                API.resources.accounts
-                  .deleteOne(response.body.object_id)
+                  // And finish either if there was a failure or if there was a
+                  // success response, `done` callback will be invoked.
                   .end(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    // ### Test to update account
-    it('should return a response when updating specific account.',
-      function (done) {
-        var newAccount = AccountsDP.generateOne('NEW');
-        var updatedAccount = AccountsDP.generateOne('UPDATED');
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.accounts
-              // Creating one account as pre-requisite since it is need to do a
-              // `update` REST API call. Note, no validations after it.
-              .createOne(newAccount)
-              .then(function (response) {
-                // Since account was created, we can `update` it
+        // ### Spec/test to get specific account
+        it('should return a response when getting specific account.',
+          function (done) {
+            // Setting user
+            API.helpers
+              .authenticateUser(resellerUser)
+              .then(function () {
                 API.resources.accounts
-                  .update(response.body.object_id, updatedAccount)
-                  // Validate `update` was a success
+                  // Getting one specific account giving its ID
+                  .getOne(accountSample.id)
+                  // Validate it has a success response
                   .expect(200)
+                  // And done, test complete
                   .end(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    // ### Test to delete account
-    it('should return a response when deleting an account.', function (done) {
-      var newProject = AccountsDP.generateOne('NEW');
-      API.helpers
-        .authenticateUser(resellerUser)
-        .then(function () {
-          API.resources.accounts
-            // Creating one account as pre-requisite since it is need to do a
-            // `delete` REST API call. Note, no validations after it.
-            .createOne(newProject)
-            .then(function (response) {
-              // Since account was created, we can `delete` it
-              var objectId = response.body.object_id;
+        it('should return a response with subscription details when getting specific account.',
+          function (done) {
+            API.helpers
+              .signUpAndVerifyUser()
+              .then(function (user) {
+                return API.helpers
+                  .authenticateUser(revAdmin)
+                  .then(function () {
+                    return API.helpers.users.getFirstCompanyId(user);
+                  })
+                  .then(function (accId) {
+                    API.resources.accounts
+                      .getOne(accId)
+                      .expect(200)
+                      .then(function (res) {
+                        res.body.subscription_state.should.equal('trialing');
+                        done();
+                      });
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        // ### Spec/test to create account
+        it('should return a response when creating specific account.',
+          function (done) {
+            // Generating data for a new `account`
+            var newAccount = AccountsDP.generateOne('NEW');
+            API.helpers
+              .authenticateUser(resellerUser)
+              .then(function () {
+                API.resources.accounts
+                  //Creating new account by using data generated
+                  .createOne(newAccount)
+                  // Validate it has a success reponse
+                  .expect(200)
+                  // Calling `then()` function instead of `done()`. This is a
+                  // feature of `supertest-as-promised` package. It receives as
+                  // param the success response.
+                  .then(function (response) {
+                    // Since we got a success response, we need to clean account
+                    // created
+                    API.resources.accounts
+                      .deleteOne(response.body.object_id)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        // ### Test to update account
+        it('should return a response when updating specific account.',
+          function (done) {
+            var newAccount = AccountsDP.generateOne('NEW');
+            var updatedAccount = AccountsDP.generateOne('UPDATED');
+            API.helpers
+              .authenticateUser(resellerUser)
+              .then(function () {
+                API.resources.accounts
+                  // Creating one account as pre-requisite since it is need to do a
+                  // `update` REST API call. Note, no validations after it.
+                  .createOne(newAccount)
+                  .then(function (response) {
+                    // Since account was created, we can `update` it
+                    API.resources.accounts
+                      .update(response.body.object_id, updatedAccount)
+                      // Validate `update` was a success
+                      .expect(200)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        // ### Test to delete account
+        it('should return a response when deleting an account.', function (done) {
+          var newProject = AccountsDP.generateOne('NEW');
+          API.helpers
+            .authenticateUser(resellerUser)
+            .then(function () {
               API.resources.accounts
-                .deleteOne(objectId)
-                // Validate `delete` was a success
-                .expect(200)
-                .end(done);
+                // Creating one account as pre-requisite since it is need to do a
+                // `delete` REST API call. Note, no validations after it.
+                .createOne(newProject)
+                .then(function (response) {
+                  // Since account was created, we can `delete` it
+                  var objectId = response.body.object_id;
+                  API.resources.accounts
+                    .deleteOne(objectId)
+                    // Validate `delete` was a success
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
             })
             .catch(done);
-        })
-        .catch(done);
+        });
+      });
     });
   });
 });
