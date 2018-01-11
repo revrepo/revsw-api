@@ -29,7 +29,9 @@ describe('Smoke check', function () {
 
   var users = [
     config.get('api.users.revAdmin'),
-    config.get('api.users.reseller')
+    config.get('api.users.reseller'),
+    config.get('api.apikeys.reseller'),
+    config.get('api.apikeys.admin')
   ];
 
   users.forEach(function (user) {
@@ -45,9 +47,13 @@ describe('Smoke check', function () {
 
         before(function (done) {
           API.helpers
-            .authenticateUser(user)
+            .authenticate(user)
             .then(function () {
-              return API.helpers.accounts.createOne();
+              if (user.key) {
+                return user.account;
+              } else {
+                return API.helpers.accounts.createOne();
+              }     
             })
             .then(function (newAccount) {
               account = newAccount;
@@ -124,5 +130,5 @@ describe('Smoke check', function () {
           });
       });
     });
-  });
+  });  
 });
