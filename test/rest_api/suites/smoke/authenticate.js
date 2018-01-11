@@ -56,8 +56,7 @@ describe('Smoke check', function () {
           .end(done);
       });
 
-      // Test is not working right now. TODO : figure out whats wrong with crypto module
-    xit('should return a success response when authenticating Azure SSO Token',
+    it('should return a success response when authenticating Azure SSO Token',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;

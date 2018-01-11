@@ -18,15 +18,19 @@
  */
 require('should');
 
+
 var oldEnv = process.env.NODE_ENV;
 process.env.NODE_ENV = 'unitTests'; // use unit tests config
 
 var config = require('config');
 var utilsFile = require('../../lib/utilities');
 
-/* TODO: fix decodeSSOToken function and enable tests */
+var ssoTokenProperties = [
+    'expirationTimestamp',
+    'providerData'
+];
 
-xdescribe('Unit Test:', function () {
+describe('Unit Test:', function () {
     describe('SSO token decryption', function () {
 
         after(function (done) {
@@ -34,12 +38,31 @@ xdescribe('Unit Test:', function () {
             done();
         });
 
-        var token = 'tokenhere';
+        var token = config.get('azureSSOToken').toString(); // dummy token
 
-        it('should decrypt a valid SSO token', function (done) {
+        it('should successfully decrypt a valid SSO token', function (done) {
+            var decToken = utilsFile.decodeSSOToken(token);
+            decToken.should.not.equal(undefined);
+            done();
+        });
+
+        ssoTokenProperties.forEach(function (prop) {
+            it('should contain `' + prop + '` property in a decrypted SSO token', function (done) {
                 var decToken = utilsFile.decodeSSOToken(token);
-                console.log(decToken);
+                decToken.should.have.property(prop);
+                decToken[prop].should.not.equal(undefined);
                 done();
-            });        
+            });
+        });
+
+        it('should not contain any unexpected properties in a decrypted SSO token',
+            function (done) {
+                var decToken = utilsFile.decodeSSOToken(token);
+                for (var p in decToken) {
+                    ssoTokenProperties.indexOf(p).should.not.equal(-1);
+                }
+                done();
+            });
+
     });
 });
