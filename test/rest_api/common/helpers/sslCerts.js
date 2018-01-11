@@ -30,11 +30,11 @@ var SSLCertsHelper = {
    *
    * @returns {Object} SSL Certificate data.
    */
-  createOne: function () {
+  createOne: function (accountId) {
     return AccountsHelper
       .createOne()
       .then(function (account) {
-        var sslCert = SSLCertDP.generateOne(account.id);
+        var sslCert = SSLCertDP.generateOne(accountId || account.id);
         return SSLCertsResource
           .createOne(sslCert)
           .then(function (respose) {

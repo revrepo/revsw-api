@@ -21,23 +21,31 @@ var config = require('config');
 
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
+var users = [
+  config.get('api.users.revAdmin'),
+  config.get('api.users.reseller'),
+  config.get('api.users.admin'),
+  config.get('api.users.user'),
+  config.get('api.apikeys.reseller'),
+  config.get('api.apikeys.admin')
+];
 
-describe('Smoke check', function() {
-  this.timeout(config.get('api.request.maxTimeout'));
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  //
-  var user = config.get('api.users.revAdmin');
-  it('should return a success response when getting all Staging Servers.',
-    function(done) {
-      API.helpers
-        .authenticateUser(user)
-        .then(function() {
-          API.resources.stagingServers
-            .getAll()
-            .expect(200)
-            .end(done);
-        })
-        .catch(done);
-    });
+users.forEach(function (user) {
+  describe('Smoke check with ' + user.role, function() {
+    this.timeout(config.get('api.request.maxTimeout'));
+
+    it('should return a success response when getting all Staging Servers.',
+      function(done) {
+        API.helpers
+          .authenticate(user)
+          .then(function() {
+            API.resources.stagingServers
+              .getAll()
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+  });
 });
+
