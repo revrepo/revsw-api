@@ -34,7 +34,9 @@ describe('Smoke check', function () {
   var domainConfig;
   var users = [
     config.get('api.users.revAdmin'),
-    config.get('api.users.reseller')
+    config.get('api.users.reseller'),
+    config.get('api.apikeys.reseller'),
+    config.get('api.apikeys.admin')
   ];
 
   users.forEach(function(user) {
@@ -43,9 +45,13 @@ describe('Smoke check', function () {
 
       before(function (done) {
         API.helpers
-          .authenticateUser(user)
+          .authenticate(user)
           .then(function () {
-            return API.helpers.accounts.createOne();
+            if (user.key) {
+              return user.account;
+            } else {
+              return API.helpers.accounts.createOne();
+            }  
           })
           .then(function (newAccount) {
             account = newAccount;
@@ -60,7 +66,7 @@ describe('Smoke check', function () {
 
       after(function (done) {
         API.helpers
-          .authenticateUser(user)
+          .authenticate(user)
           .then(function () {
             API.resources.domainConfigs.deleteOne(domainConfig.id);
             done();
@@ -78,7 +84,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .getOne(domainConfig.id, queryData)
@@ -118,7 +124,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .gbt()
@@ -150,7 +156,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .lastMileRtt()
@@ -182,7 +188,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .top()
@@ -214,7 +220,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .topObjects()
@@ -246,7 +252,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .imageEngine()
@@ -278,7 +284,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .mobileDesktop()
@@ -310,7 +316,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtHeatmap()
@@ -342,7 +348,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtDistribution()
@@ -374,7 +380,7 @@ describe('Smoke check', function () {
         var getSpecCallback = function (queryData) {
           return function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.stats
                   .fbtAverage()

@@ -20,6 +20,7 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
+var AzureDP = require('./../../common/providers/data/azure');
 
 describe('Smoke check', function () {
 
@@ -27,6 +28,7 @@ describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var user = config.get('api.users.reseller');
+  var azureKey = config.get('api.azureKey');
 
   before(function (done) {
     done();
@@ -54,12 +56,44 @@ describe('Smoke check', function () {
           .end(done);
       });
 
-    xit('should return success response when authenticating SSO Azure token',
+      // Test is not working right now. TODO : figure out whats wrong with crypto module
+    xit('should return a success response when authenticating Azure SSO Token',
       function (done) {
-        API.resources.authenticateSSOAzure
-          .createOne()
-          .expect(200)
-          .end(done);
+        var provider = AzureDP.generateOne().provider;
+        var subscription = AzureDP.generateOne().subscription_id;
+        var resourceGroupName = AzureDP.generateOne().resource_group_name;
+        var resourceName = AzureDP.generateOne().resource_name;
+        var location = AzureDP.generateLocation();
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider)
+              .update(resourceName, location)
+              .expect(200)
+              .then(function () {
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups(subscription)
+                  .providers(resourceGroupName)
+                  .accounts(provider)
+                  .listSingleSignOnToken(resourceName)
+                  .createOne()
+                  .expect(200)
+                  .then(function (res) {
+                    API.resources.authenticateSSOAzure
+                      .createOne({token: res.body.token, resourceId: res.body.resourceId})
+                      .expect(200)
+                      .end(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
       });
   });
 });

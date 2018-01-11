@@ -19,266 +19,278 @@ require('should-http');
 var config = require('config');
 var API = require('./../../common/api');
 var DomainConfigsDP = require('./../../common/providers/data/domainConfigs');
+var reseller = config.get('api.users.reseller');
+var users = [
+  reseller,
+  config.get('api.apikeys.admin'),
+  config.get('api.apikeys.reseller')
+];
+users.forEach(function (user) {
+  describe('Smoke check with ' + user.role, function () {
 
-describe('Smoke check', function () {
-
-  // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.get('api.request.maxTimeout'));
-
-  var account;
-  var firstDc;
-  var firstFdc;
-  var secondDc;
-  var reseller = config.get('api.users.reseller');
-  var domainCheckTypes = [
-    'cname',
-    'domain_name',
-    'domain_aliases',
-    'domain_wildcard_alias',
-    'stagin_proxy_server',
-    'production_proxy_server'
-  ];
-
-  before(function (done) {
-    API.helpers
-      .authenticateUser(reseller)
-      .then(function () {
-        return API.helpers.accounts.createOne();
-      })
-      .then(function (newAccount) {
-        account = newAccount;
-        return API.helpers.domainConfigs.createOne(account.id);
-      })
-      .then(function (domainConfig) {
-        firstDc = domainConfig;
+    // Changing default mocha's timeout (Default is 2 seconds).
+    this.timeout(config.get('api.request.maxTimeout'));
+  
+    var account;
+    var firstDc;
+    var firstFdc;
+    var secondDc;
+    
+    var domainCheckTypes = [
+      'cname',
+      'domain_name',
+      'domain_aliases',
+      'domain_wildcard_alias',
+      'stagin_proxy_server',
+      'production_proxy_server'
+    ];
+  
+    before(function (done) {
+      API.helpers
+        .authenticate(user)
+        .then(function () {
+          if (user.key) {
+            return user.account;
+          } else {
+            return API.helpers.accounts.createOne();
+          }  
+        })
+        .then(function (newAccount) {
+          account = newAccount;
+          return API.helpers.domainConfigs.createOne(account.id);
+        })
+        .then(function (domainConfig) {
+          firstDc = domainConfig;
+          done();
+        })
+        .catch(done);
+    });
+  
+    after(function (done) {
+      done();
+    });
+  
+    describe('Domain configs resource', function () {
+  
+      beforeEach(function (done) {
         done();
-      })
-      .catch(done);
-  });
-
-  after(function (done) {
-    done();
-  });
-
-  describe('Domain configs resource', function () {
-
-    beforeEach(function (done) {
-      done();
-    });
-
-    afterEach(function (done) {
-      done();
-    });
-
-    it('should return success response data when getting a recommended default settings',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .recommendedDefaultSettings()
-              .getAll()
-              .expect(200)
-              .then(function (res) {
-                var defaultSettings = res.body;
-                defaultSettings.should.have.property('waf_rules_ids');
-                defaultSettings.should.have.property('ssl_conf_profile_id');
-                defaultSettings.waf_rules_ids.should.be.instanceof(Array);
-                defaultSettings.waf_rules_ids.should.not.empty;
-                defaultSettings.ssl_conf_profile_id.should.be.type('string');
-                defaultSettings.ssl_conf_profile_id.should.not.empty;
-              })
-              .then(function () {
-                done();
-              });
-          })
-          .catch(done);
       });
-
-    it('should return success response code when getting a list of domains',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+  
+      afterEach(function (done) {
+        done();
       });
-
-    it('should return success response code when creating a new domain',
-      function (done) {
-        secondDc = DomainConfigsDP.generateOne(account.id);
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .createOne(secondDc)
-              .expect(200)
-              .then(function (response) { // This is needed for the next tests
-                secondDc.id = response.body.object_id;
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when getting a specific domain',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getOne(firstDc.id)
-              .expect(200)
-              .then(function (response) { // This is needed for the next tests
-                firstFdc = response.body;
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when updating a domain',
-      function (done) {
-        firstFdc.origin_host_header = 'UPDATED-' + firstFdc.origin_host_header;
-        firstFdc.origin_server = 'UPDATED-' + firstFdc.origin_server;
-        delete firstFdc.domain_name;
-        delete firstFdc.published_domain_version;
-        delete firstFdc.last_published_domain_version;
-        delete firstFdc.cname;
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .update(firstDc.id, firstFdc)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when updating a domain to ' +
-      '`verify only`',
-      function (done) {
-        firstFdc.origin_host_header = 'VERIFY-' + firstFdc.origin_host_header;
-        firstFdc.origin_server = 'VERIFY-' + firstFdc.origin_server;
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .update(firstDc.id, firstFdc, { options: 'verify_only' })
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when updating a domain to ' +
-      '`publish`',
-      function (done) {
-        firstFdc.origin_host_header = 'PUBLISH-' + firstFdc.origin_host_header;
-        firstFdc.origin_server = 'PUBLISH-' + firstFdc.origin_server;
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .update(firstDc.id, firstFdc, { options: 'publish' })
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when getting the status of ' +
-      'existing domain config',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .status(secondDc.id)
-              .getOne()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when getting versions of ' +
-      'existing domain config',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .versions(secondDc.id)
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when getting specific versions ' +
-      'for an specific existing domain config',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getOne(firstDc.id, { version: 1 })
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return success response code when getting specific versions ' +
-      'for an specific existing domain config',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .getOne(firstDc.id, { version: 2 })
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    domainCheckTypes.forEach(function (type) {
-      it('should return success response code when checking domain integration (' + type + ')',
+  
+      it('should return success response data when getting a recommended default settings',
         function (done) {
           API.helpers
-            .authenticateUser(reseller)
+            .authenticate(user)
             .then(function () {
               API.resources.domainConfigs
-                .checkIntegration(firstDc.id)
-                .getOne(type)
+                .recommendedDefaultSettings()
+                .getAll()
+                .expect(200)
+                .then(function (res) {
+                  var defaultSettings = res.body;
+                  defaultSettings.should.have.property('waf_rules_ids');
+                  defaultSettings.should.have.property('ssl_conf_profile_id');
+                  defaultSettings.waf_rules_ids.should.be.instanceof(Array);
+                  defaultSettings.waf_rules_ids.should.not.empty;
+                  defaultSettings.ssl_conf_profile_id.should.be.type('string');
+                  defaultSettings.ssl_conf_profile_id.should.not.empty;
+                })
+                .then(function () {
+                  done();
+                });
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when getting a list of domains',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .getAll()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when creating a new domain',
+        function (done) {
+          secondDc = DomainConfigsDP.generateOne(account.id);
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .createOne(secondDc)
+                .expect(200)
+                .then(function (response) { // This is needed for the next tests
+                  secondDc.id = response.body.object_id;
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when getting a specific domain',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .getOne(firstDc.id)
+                .expect(200)
+                .then(function (response) { // This is needed for the next tests
+                  firstFdc = response.body;
+                  done();
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when updating a domain',
+        function (done) {
+          firstFdc.origin_host_header = 'UPDATED-' + firstFdc.origin_host_header;
+          firstFdc.origin_server = 'UPDATED-' + firstFdc.origin_server;
+          delete firstFdc.domain_name;
+          delete firstFdc.published_domain_version;
+          delete firstFdc.last_published_domain_version;
+          delete firstFdc.cname;
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .update(firstDc.id, firstFdc)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when updating a domain to ' +
+        '`verify only`',
+        function (done) {
+          firstFdc.origin_host_header = 'VERIFY-' + firstFdc.origin_host_header;
+          firstFdc.origin_server = 'VERIFY-' + firstFdc.origin_server;
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .update(firstDc.id, firstFdc, { options: 'verify_only' })
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when updating a domain to ' +
+        '`publish`',
+        function (done) {
+          firstFdc.origin_host_header = 'PUBLISH-' + firstFdc.origin_host_header;
+          firstFdc.origin_server = 'PUBLISH-' + firstFdc.origin_server;
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .update(firstDc.id, firstFdc, { options: 'publish' })
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when getting the status of ' +
+        'existing domain config',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .status(secondDc.id)
+                .getOne()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when getting versions of ' +
+        'existing domain config',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .versions(secondDc.id)
+                .getAll()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when getting specific versions ' +
+        'for an specific existing domain config',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .getOne(firstDc.id, { version: 1 })
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      it('should return success response code when getting specific versions ' +
+        'for an specific existing domain config',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .getOne(firstDc.id, { version: 2 })
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+  
+      domainCheckTypes.forEach(function (type) {
+        it('should return success response code when checking domain integration (' + type + ')',
+          function (done) {
+            API.helpers
+              .authenticate(user)
+              .then(function () {
+                API.resources.domainConfigs
+                  .checkIntegration(firstDc.id)
+                  .getOne(type)
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+      });
+  
+      it('should return success response code when deleting a domain',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.domainConfigs
+                .deleteOne(secondDc.id)
                 .expect(200)
                 .end(done);
             })
             .catch(done);
         });
     });
-
-    it('should return success response code when deleting a domain',
-      function (done) {
-        API.helpers
-          .authenticateUser(reseller)
-          .then(function () {
-            API.resources.domainConfigs
-              .deleteOne(secondDc.id)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
   });
+  
 });
