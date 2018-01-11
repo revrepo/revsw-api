@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *
  * REV SOFTWARE CONFIDENTIAL
@@ -32,12 +33,15 @@ describe('Smoke check', function () {
 
   // Defining set of users for which all below tests will be run
   var users = [
-    config.get('api.users.revAdmin')
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.apikeys.admin'),
+    config.get('api.apikeys.reseller')
   ];
 
   users.forEach(function (user) {
 
-    var testBillingPlan;
+    var billingPlans = [];
 
     describe('With user: ' + user.role, function () {
 
@@ -78,23 +82,49 @@ describe('Smoke check', function () {
                 API.resources.billingPlans
                   .getAll()
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
           });
 
-        // TODO: please change the check for look for four existing billing plans
-        xit('should return a response when getting specific billing plan.',
+
+        it('should return a response when getting specific billing plan.',
           function (done) {
             API.helpers
               .authenticateUser(user)
               .then(function () {
                 API.resources.billingPlans
-                  .getOne(testBillingPlan.id)
+                  .getAll()
                   .expect(200)
-                  .end(done);
+                  .then(function (res) {
+                    var pollPlans = function (index) {
+                      console.log('Requesting plan: ' + res.body[index].name);
+                      API.resources.billingPlans
+                        .getOne(res.body[index].id)
+                        .expect(200)
+                        .then(function () {
+                          if (index === res.body.length - 1) {
+                            done();
+                          } else {
+                            setTimeout(function () {
+                              pollPlans(index += 1);
+                            }, 1000); // wait a sec before requesting again
+                          }
+                        });
+                    };
+                    API.helpers
+                      .authenticateUser(user)
+                      .then(function () {
+                        pollPlans(0); // init requests for plans
+                      })
+                      .catch(done);                    
+                  })
+                  .catch(done);
               })
-              .catch(done);
+              .catch(done);            
           });
 
         // TODO: Not needed to test yet. Also, admin_rw user is required
