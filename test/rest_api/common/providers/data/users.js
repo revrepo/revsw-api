@@ -54,6 +54,7 @@ var UsersDataProvider = {
    *    }
    */
   generate: function (data) {
+    if (!data) data = {};
     var firstName = data.firstName || faker.name.firstName();
     var lastName = data.lastName || faker.name.lastName();
     var user = {

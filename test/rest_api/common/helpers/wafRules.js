@@ -79,11 +79,11 @@ var WAFRulesHelper = {
    *
    * @returns {Object} WAF Rule data
    */
-  createOne: function () {
+  createOne: function (accountId) {
     return AccountsHelper
       .createOne()
       .then(function (account) {
-        var wafRule = WAFRulesDP.generateOne({accountId:account.id});
+        var wafRule = WAFRulesDP.generateOne({ accountId: accountId || account.id });
         return WAFRulesResource
           .createOne(wafRule)
           .then(function (response) {
