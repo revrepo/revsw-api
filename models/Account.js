@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -28,7 +28,8 @@ var config = require('config');
 function Account(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
-  this.ObjectId = this.Schema.ObjectId;
+  this.ObjectId = this.Schema.Types.ObjectId;
+
   this.mongoose = mongoose;
 
   this.AccountSchema = new this.Schema({
@@ -83,6 +84,7 @@ function Account(mongoose, connection, options) {
         default: false
     },
     'promocode': {type: String, default: null},
+    'bp_group_id': {type: this.ObjectId, default : null }
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
@@ -322,37 +324,10 @@ Account.prototype = {
    *  @param {Date|nothing} - ignore accounts deleted before this date and created after, default today
    *  @return promise([id,id,...])
    */
-  allHalfDeadIDs: function( day ) {
-
-    day = day || new Date();
-    day.setUTCHours( 0, 0, 0, 0 );  //  very begin of the day
-    var where = {
-      $or: [
-        { deleted_at: { $gte: day } },
-        { deleted: { $ne: true } }
-      ],
-      created_at: { $lte: ( new Date( day.valueOf() + 86400000/*day in ms*/ ) ) }
-    };
-
-    return this.model.find( where, { _id: 1 } )
-      .exec()
-      .then( function( data ) {
-        return data.map( function( item ) {
-          return item._id.toString();
-        });
-      });
-  },
-
- /**
-   *  return array of all account IDs, non-deleted or deleted in the given day
-   *
-   *  @param {Date|nothing} - ignore accounts deleted before this date and created after, default today
-   *  @return promise([id,id,...])
-   */
-  listActiveAccointIDs: function( day_ ) {
+  allHalfDeadIDs: function( day_ ) {
     var day = new Date();
     if(_.isDate(day_)){
-        day = _.clone(day_);
+      day = _.clone(day_);
     }
     day.setUTCHours( 0, 0, 0, 0 );  //  very begin of the day
     var where = {
@@ -370,7 +345,7 @@ Account.prototype = {
           return item._id.toString();
         });
       });
-  },
+  }
 
 };
 

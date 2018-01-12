@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,13 +20,13 @@
 
 'use strict';
 //	data access layer
-
+var _ = require('lodash');
 var utils = require('../lib/utilities.js');
-
+var mongoose =  require('mongoose');
 function ServerGroup(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
-  this.ObjectId = this.Schema.ObjectId;
+  this.ObjectId = this.Schema.Types.ObjectId;
 
   this.ServerGroupSchema = new this.Schema({
     'groupName'               : String,
@@ -59,8 +59,19 @@ ServerGroup.prototype = {
     });
   },
 
-  listFirstMileLocations : function (callback) {
-    this.model.find({groupType : 'CO', serverType : 'public'}, function (err, servergroups) {
+  listFirstMileLocations : function (options,callback) {
+    var params = {
+      groupType : 'CO',
+      serverType : 'public'
+    };
+    if(!!options && !!options.bp_group_id){
+      if(_.isString(options.bp_group_id)){
+        params.parent_bp_group_ids =  {$in: [ mongoose.Types.ObjectId(options.bp_group_id)]};
+      }else{
+        params.parent_bp_group_ids = {$in:  [options.bp_group_id]};
+      }
+    }
+    this.model.find(params, function (err, servergroups) {
       callback(err, servergroups);
     });
   },

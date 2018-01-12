@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -64,7 +64,13 @@ exports.getAccounts = function getAccounts(request, reply) {
     renderJSON(request, reply, error, accounts_list);
   });
 };
-
+/**
+ * @name createAccount
+ * @description
+ *
+ * @param {*} request
+ * @param {*} reply
+ */
 exports.createAccount = function(request, reply) {
   var vendorProfiles = config.get('vendor_profiles');
   var newAccount = request.payload;
@@ -95,30 +101,51 @@ exports.createAccount = function(request, reply) {
     user_id: request.auth.credentials.user_id,
     companyId: utils.getAccountID(request)
   };
+  var statusResponse;
 
-  users.get({ _id: updatedUser.user_id }, function(error, user) {
-    if (error || !user) {
-      return reply(boom.badImplementation('Failed to get user ' + updatedUser.user_id));
-    }
-    if ((user.role === 'admin' || user.role === 'user') && user.companyId.length !== 0) {
-      return reply(boom.badRequest('Cannot assign more, than one account to the user'));
-    }
+  // NOTE: main workflow
+  async.waterfall([
+    function addBPGroupIdParentAccount(cb){
+      // If creator is Reseller - check used "bp_group_id"
+      if(request.auth.credentials.role === 'reseller'){
+        var parentAccountId = utils.getAccountID(request,true);
+        accounts.get({_id: parentAccountId},function(err,accountData){
+          if(err || !accountData){
+            return cb('Account ID not found');
+          }
+          if(!!accountData.bp_group_id){
+            newAccount.bp_group_id = accountData.bp_group_id;
+          }
+          return cb();
+        });
 
-    var loggerData = {
-      user_name: newAccount.createdBy,
-      activity_type: 'add',
-      activity_target: 'account',
-      operation_status: 'success',
-      request: request
-    };
-
-    accountService.createAccount(newAccount, { loggerData: loggerData }, function(err, result) {
-      if (error || !result) {
-        return reply(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
+      }else{
+        cb();
       }
-
-      var statusResponse;
-      if (result) {
+    },
+    function getCurrentUserForUpdate(cb){
+      users.get({ _id: updatedUser.user_id }, function(error, user) {
+        if (error || !user) {
+          return cb(new Error('Failed to get user ' + updatedUser.user_id));
+        }
+        if ((user.role === 'admin' || user.role === 'user') && user.companyId.length !== 0) {
+          return cb('Cannot assign more, than one account to the user');
+        }
+        cb();
+      });
+    },
+    function createNewAccount(cb){
+      var loggerData = {
+        user_name: newAccount.createdBy,
+        activity_type: 'add',
+        activity_target: 'account',
+        operation_status: 'success',
+        request: request
+      };
+      accountService.createAccount(newAccount, { loggerData: loggerData }, function(error, result) {
+        if (error || !result) {
+          return cb(boom.badImplementation('Failed to add new account ' + newAccount.companyName));
+        }
         statusResponse = {
           statusCode: 200,
           message: 'Successfully created new account',
@@ -128,17 +155,30 @@ exports.createAccount = function(request, reply) {
         if (request.auth.credentials.role !== 'revadmin') {
           updatedUser.companyId.push(result.id);
         }
-
-        users.update(updatedUser, function(error, result) {
-          if (error) {
-            return reply(boom.badImplementation('Failed to update user ID ' + updatedUser.user_id +
-              ' with details of new account IDs ' + updatedUser.companyId));
-          } else {
-            renderJSON(request, reply, error, statusResponse);
-          }
-        });
+        cb();
+      });
+    },
+    function updateUserData(cb){
+      users.update(updatedUser, function(error, result) {
+        if (error) {
+          return cb(Error('Failed to update user ID ' + updatedUser.user_id +
+            ' with details of new account IDs ' + updatedUser.companyId));
+        } else {
+          cb(null);
+        }
+      });
+    },
+    function makeResponseData(cb){
+      cb(null,statusResponse);
+    }
+  ],function(error,result){
+    if(!!error){
+      if(error instanceof Error){
+        return reply(boom.badImplementation(error.message));
       }
-    });
+      return boom.badRequest(error.message || error);
+    }
+    return  renderJSON(request, reply, error, result);
   });
 };
 /**

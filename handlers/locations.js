@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,39 +20,81 @@
 
 'use strict';
 
+var async = require('async');
 var mongoose = require('mongoose');
 var boom     = require('boom');
-
+var config = require('config');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON      = require('../lib/renderJSON');
+var utils = require('../lib/utilities.js');
 
 var ServerGroup = require('../models/ServerGroup');
 var Location = require('../models/Location');
+var Account = require('../models/Account');
 
 var servergroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var locations = new Location(mongoose, mongoConnection.getConnectionPortal());
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 
+var BP_GROUP_ID_DEFAULT_ = config.get('bp_group_id_default');
 
+/**
+ * @name getFirstMileLocations
+ * @description
+ *
+ * @param {*} request
+ * @param {*} reply
+ */
 exports.getFirstMileLocations = function(request, reply) {
-
-  servergroups.listFirstMileLocations(function(error, result) {
-
-    if (error) {
-      return reply(boom.badImplementation('Failed to retrive from the database a list of first mile locations'));
-    }
-    if (result) {
-      var listOfSites = [];
-      for (var i = 0; i < result.length; i++) {
-        listOfSites.push({
-          locationName: result[i].publicName,
-          id: result[i]._id.toString()
+  var parentAccountId =utils.getAccountID(request,true);
+  var optionsForSergerGroup = {};
+  var listOfSites = [];
+  // NOTE: main workflow
+  async.waterfall([
+    function(cb){
+      if(request.auth.credentials.role === 'revadmin'){
+        cb();
+      }else{
+        accounts.get({_id: parentAccountId},function(err,accountData){
+          if(err || !accountData){
+            return cb(boom.badImplementation('Account not found'));
+          }
+          if(accountData && accountData.bp_group_id){
+            optionsForSergerGroup.bp_group_id = accountData.bp_group_id;
+          }else{
+            // NOTE: default BP Group Id
+            optionsForSergerGroup.bp_group_id = BP_GROUP_ID_DEFAULT_;
+          }
+          cb();
         });
       }
-
-      renderJSON(request, reply, error, listOfSites);
-    } else {
-      return reply(boom.badRequest('No first mile locations are registered in the system'));
+    },
+    function(cb){
+      servergroups.listFirstMileLocations(optionsForSergerGroup,function(error, result) {
+        if (error) {
+          return cb(boom.badImplementation('Failed to retrive from the database a list of first mile locations'));
+        }
+        if (result) {
+          for (var i = 0; i < result.length; i++) {
+            listOfSites.push({
+              locationName: result[i].publicName,
+              id: result[i]._id.toString()
+            });
+          }
+          cb();
+        } else {
+          return cb(boom.badRequest('No first mile locations are registered in the system'));
+        }
+      });
+    },
+    function rormatResponse(cb){
+      cb(null,listOfSites );
     }
+  ],function(error,result){
+    if(error && error.isBoom){
+      return reply(error);
+    }
+    renderJSON(request, reply, error, result);
   });
 };
 

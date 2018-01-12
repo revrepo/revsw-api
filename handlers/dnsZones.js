@@ -580,12 +580,12 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
     function(cb) {
       var zonename_ = zoneName;
       dnsResolve.resolve(zonename_, 'NS', function(err, data) {
-        if (err) {             
+        if (err) {
           // Error get IP
           cb(err);
           return;
         }
-        if (!data.short_answers || data.short_answers.length === 0) {          
+        if (!data.short_answers || data.short_answers.length === 0) {
           cb(new Error('Zone with name "' + zonename_ + '" no have record with "NS"'));
           return;
         }
@@ -716,7 +716,7 @@ exports.getDnsZoneAutoDiscover = function(request, reply) {
       } else {
         reply(boom.badImplementation('DNS check error'));
         return;
-      }      
+      }
     }
     reply(workFlowData_.response);
   });
