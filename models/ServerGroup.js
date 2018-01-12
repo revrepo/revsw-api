@@ -66,7 +66,7 @@ ServerGroup.prototype = {
     };
     if(!!options && !!options.bp_group_id){
       if(_.isString(options.bp_group_id)){
-        params.parent_bp_group_ids =  {$in: [ this.model.ObjectId(options.bp_group_id)]};
+        params.parent_bp_group_ids =  {$in: [ mongoose.Types.ObjectId(options.bp_group_id)]};
       }else{
         params.parent_bp_group_ids = {$in:  [options.bp_group_id]};
       }
