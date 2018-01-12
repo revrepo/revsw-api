@@ -34,7 +34,9 @@ describe('Smoke check', function () {
     config.get('api.users.revAdmin'), 
     config.get('api.users.reseller'),  
     config.get('api.users.admin'),  
-    config.get('api.users.user')      
+    config.get('api.users.user'),
+    config.get('api.apikeys.admin'),
+    config.get('api.apikeys.reseller')
   ];
 
   users.forEach(function(user) {
@@ -42,18 +44,22 @@ describe('Smoke check', function () {
     describe('With user: ' + user.role, function() {
 
       before(function (done) {
-        // API.helpers
-        //   .authenticateUser(user)
-        //   .then(function () {
-        //     return API.helpers.sslNames.createOne();
-        //   })
-        //   .then(function (sslname) {
-        //     sslName = sslname;
-        //     accountId = sslName.account_id;
-        //     done();
-        //   })
-        //   .catch(done);
-        done();
+        // if using a user auth then an account is needed
+        if (!user.key) {
+          API.helpers
+          .authenticate(user)
+          .then(function () {
+            return API.helpers.accounts.createOne();
+          })
+          .then(function (acc) {            
+            accountId = acc.id;
+            done();
+          })
+          .catch(done);
+        } else {
+          accountId = user.account.id;
+          done();
+        }
       });
 
       after(function (done) {
@@ -62,10 +68,10 @@ describe('Smoke check', function () {
 
       describe('SSL Names resource', function () {
 
-        it('should return a success response when getting all SSL Names with user-role user.',
+        it('should return a success response when getting all SSL Names',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -75,10 +81,10 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when getting specific SSL Name with user-role user.',
+        it('should return a success response when getting specific SSL Name',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -94,11 +100,11 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        xit('should return a success response when creating specific SSL name with user-role user.',
+        it('should return a success response when creating specific SSL name',
           function (done) {
-            var sslname = SSLNameDP.generateOne(accountId,'test');
+            var sslname = SSLNameDP.generateOne(accountId,'test-' + Date.now());
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .createOne(sslname)
@@ -113,11 +119,11 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        xit('should return a success response when deleting a specific SSL Name with user-role user.',
+        it('should return a success response when deleting a specific SSL Name',
           function (done) {
-            var sslname = SSLNameDP.generateOne(accountId,'test2');
+            var sslname = SSLNameDP.generateOne(accountId,'test2-' + Date.now());
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 return API.resources.sslNames.createOne(sslname);
               })
@@ -130,10 +136,10 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when getting specific SSL Name with Email Approvers with user-role user.',
+        it('should return a success response when getting specific SSL Name with Email Approvers',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
@@ -151,10 +157,10 @@ describe('Smoke check', function () {
           });
 
         // TODO: need to rewrite the test
-        xit('should return a success response when getting (verify) specific SSL name with user-role user.',
+        xit('should return a success response when getting (verify) specific SSL name',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.sslNames
                   .getAll()
