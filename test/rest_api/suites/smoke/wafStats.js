@@ -27,11 +27,12 @@ describe('Smoke check:', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
-  var revAdminCredentials = config.api.users.revAdmin;
 
-  var userRolesList = [
-    'admin',
-    'reseller'
+  var users = [
+    config.get('api.users.reseller'),
+    config.get('api.users.revAdmin'),
+    config.get('api.apikeys.admin'),
+    config.get('api.apikeys.reseller')
   ];
 
   var topObjectsTypes = [
@@ -46,40 +47,28 @@ describe('Smoke check:', function () {
     'action_taken'
   ];
 
-  var user, accountForUsers, domain;
+  var accountForUsers, domain;
 
-  before(function (done) {
-    API.helpers
-      .authenticate(revAdminCredentials)
-      .then(function () {
-        return HelpersAPI.accounts.createCompleteOne();
-      })
-      .then(function (newAccount) {
-        accountForUsers = newAccount;
-        return API.helpers.domainConfigs.createOne(newAccount.id);
-      })
-      .then(function (dom) {
-        domain = dom;
-        done();
-      })
-      .catch(done);
-  });
+  users.forEach(function (user) {
+    describe('With ' + user.role, function () {
 
-  userRolesList.forEach(function (roleName) {
-    describe('WAF Stats with role "' + roleName + '"', function () {
       before(function (done) {
-        var newUser = DataProvider.generateUser(roleName);
-        newUser.companyId = [accountForUsers.id];
-        newUser.domain = [];
         API.helpers
-          .authenticate(revAdminCredentials)
+          .authenticate(user)
           .then(function () {
-            API.helpers.users.create(newUser)
-              .then(function (u) {
-                user = u;
-                done();
-              })
-              .catch(done);
+            if (user.key) {
+              return user.account;
+            } else {
+              return HelpersAPI.accounts.createCompleteOne();
+            }
+          })
+          .then(function (newAccount) {
+            accountForUsers = newAccount;
+            return API.helpers.domainConfigs.createOne(newAccount.id);
+          })
+          .then(function (dom) {
+            domain = dom;
+            done();
           })
           .catch(done);
       });
@@ -87,7 +76,7 @@ describe('Smoke check:', function () {
       it('should return success response when getting WAF stats',
         function (done) {
           API.helpers
-            .authenticateUser(user)
+            .authenticate(user)
             .then(function () {
               API.resources.wafStats
                 .getOne(domain.id)
@@ -102,7 +91,7 @@ describe('Smoke check:', function () {
           type + '`)',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.wafStats
                   .topObjects()
@@ -119,7 +108,7 @@ describe('Smoke check:', function () {
           type + '`)',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.wafStats
                   .top()
@@ -134,7 +123,7 @@ describe('Smoke check:', function () {
       it('should return success response when getting WAF stats events',
         function (done) {
           API.helpers
-            .authenticateUser(user)
+            .authenticate(user)
             .then(function () {
               API.resources.wafStats
                 .events()
