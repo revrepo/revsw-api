@@ -29,7 +29,8 @@ describe('Smoke check', function () {
   // Defining set of users for which all below tests will be run
   var users = [
     //config.get('api.users.revAdmin'),
-    config.get('api.users.reseller')
+    config.get('api.users.reseller'),
+    config.get('api.apikeys.reseller')
   ];
 
   users.forEach(function (user) {
@@ -41,7 +42,7 @@ describe('Smoke check', function () {
         it('should return a response when getting health-check info.',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.healthCheck
                   .getAll()

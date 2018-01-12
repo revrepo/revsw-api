@@ -24,9 +24,12 @@ var API = require('./../../common/api');
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  var resellerUser = config.get('api.users.reseller');
+  var users = [
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.apikeys.reseller'),
+    config.get('api.apikeys.admin')
+  ];
 
   before(function (done) {
     done();
@@ -37,10 +40,11 @@ describe('Smoke check', function () {
   });
 
   describe('Countries resource', function () {
-    it('should return a response when getting all countries.',
+    users.forEach(function (user) {
+      it('should return a response when getting all countries. With ' + user.role,
       function (done) {
         API.helpers
-          .authenticateUser(resellerUser)
+          .authenticate(user)
           .then(function () {
             API.resources.countries
               .getAll()
@@ -49,5 +53,6 @@ describe('Smoke check', function () {
           })
           .catch(done);
       });
+    });
   });
 });

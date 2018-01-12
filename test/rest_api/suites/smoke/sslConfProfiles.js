@@ -30,7 +30,9 @@ describe('Smoke check', function () {
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller'),
     config.get('api.users.admin'),
-    config.get('api.users.user')
+    config.get('api.users.user'),
+    config.get('api.apikeys.reseller'),
+    config.get('api.apikeys.admin')
   ];
 
   users.forEach(function(user) {
@@ -50,7 +52,7 @@ describe('Smoke check', function () {
         it('should return a success response when getting all SSL Config profiles with user-role user.',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.sslConfProfiles
                   .getAll()

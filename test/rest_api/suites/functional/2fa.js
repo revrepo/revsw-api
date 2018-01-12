@@ -227,12 +227,12 @@ describe('Functional check', function () {
 
     it('should fail to init 2FA if authenticate by API Key', function(done){
       API.helpers
-        .authenticate(apiKeyAccountSample)
+        .authenticateAPIKey(apiKeyAccountSample.id)
         .then(function() {
           API.resources.twoFA
             .init()
             .getOne()
-            .expect(401)
+            .expect(403)
             .end(done);
         })
         .catch(done);

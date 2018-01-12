@@ -35,175 +35,196 @@ describe('Smoke check', function () {
   // TODO: need to add admin/reseller roles and also write negative tests for user role
   // and RO users
   var user = config.get('api.users.revAdmin');
-
-  before(function (done) {
-    API.helpers
-      .authenticateUser(user)
-      .then(function () {
-        return API.helpers.apiKeys.createOne();
-      })
-      .then(function (key) {
-        apiKey = key;
-        accountId = apiKey.account_id;
-        done();
-      })
-      .catch(done);
-  });
-
-  after(function (done) {
-    done();
-  });
+  var users = [
+    user,
+    config.get('api.apikeys.admin'),
+    config.get('api.apikeys.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.reseller')
+  ];
 
   describe('API Keys resource', function () {
-
-    it('should return a success response when getting all API Keys.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apiKeys
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a success response when getting specific API Key.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apiKeys
-              .getOne(apiKey.id)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a success response when creating specific API Key.',
-      function (done) {
-        var newApiKey = APIKeyDataProvider.generateOne(accountId);
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apiKeys
-              .createOne(newApiKey)
-              .expect(200)
-              .then(function (response) {
+    users.forEach(function (user) {
+      describe('With ' + user.role, function () {
+        before(function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              return API.helpers.apiKeys.createOne();
+            })
+            .then(function (key) {
+              apiKey = key;
+              accountId = apiKey.account_id;
+              done();
+            })
+            .catch(done);
+        });
+        it('should return a success response when getting all API Keys.',
+          function (done) {
+            API.helpers
+              .authenticate(user)
+              .then(function () {
                 API.resources.apiKeys
-                  .deleteOne(response.body.id)
+                  .getAll()
+                  .expect(200)
                   .end(done);
               })
               .catch(done);
-          })
-          .catch(done);
-      });
+          });
 
-    it('should return a success response when updating specific API Key.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.helpers.apiKeys.createOne();
-          })
-          .then(function (key) {
-            var apiKeyId = key.id;
-            var updatedKey = APIKeyDataProvider
-              .generateCompleteOne(key.account_id);
-            API.resources.apiKeys
-              .update(apiKeyId, updatedKey)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a success response when updating with property ' +
-      ' "managed_account_ids".',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.helpers.apiKeys.createOne();
-          })
-          .then(function (key) {
-            var apiKeyId = key.id;
-            var updatedKey = APIKeyDataProvider
-              .generateCompleteOne(key.account_id);
-            updatedKey.managed_account_ids = [key.account_id];
-            API.resources.apiKeys
-              .update(apiKeyId, updatedKey)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-
-    it('should return a success response when deleting an API Key.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            return API.helpers.apiKeys.createOne();
-          })
-          .then(function (key) {
-            API.resources.apiKeys
-              .deleteOne(key.id)
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a success response when activating an API Key.',
-      function (done) {
-        API.helpers
-          .authenticateUser(user)
-          .then(function () {
-            API.resources.apiKeys
-              .activate(apiKey.id)
-              .createOne()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
-
-    it('should return a success response when getting info about an API Key.',
-      function (done) {
-        API.resources.apiKeys
-          .getOne(apiKey.id)
-          .expect(200)
-          .then(function (res) {
+        it('should return a success response when getting specific API Key.',
+          function (done) {
             API.helpers
-              .authenticateAPIKey(res.body.id)
+              .authenticate(user)
               .then(function () {
                 API.resources.apiKeys
-                  .myself()
-                  .getOne()
+                  .getOne(apiKey.id)
                   .expect(200)
                   .end(done);
               })
               .catch(done);
           });
       });
+    });
+  });
 
-    it('should return a success response when deactivating an API Key.',
-      function (done) {
+  [user, config.get('api.users.reseller')].forEach(function (user) {
+    describe('With ' + user.role, function () {
+      before(function (done) {
         API.helpers
-          .authenticateUser(user)
+          .authenticate(user)
           .then(function () {
-            API.resources.apiKeys
-              .deactivate(apiKey.id)
-              .createOne()
-              .expect(200)
-              .end(done);
+            return API.helpers.apiKeys.createOne();
+          })
+          .then(function (key) {
+            apiKey = key;
+            accountId = apiKey.account_id;
+            done();
           })
           .catch(done);
       });
+      it('should return a success response when creating specific API Key.',
+        function (done) {
+          var newApiKey = APIKeyDataProvider.generateOne(accountId);
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.apiKeys
+                .createOne(newApiKey)
+                .expect(200)
+                .then(function (response) {
+                  API.resources.apiKeys
+                    .deleteOne(response.body.id)
+                    .end(done);
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
+      it('should return a success response when updating specific API Key.',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              return API.helpers.apiKeys.createOne();
+            })
+            .then(function (key) {
+              var apiKeyId = key.id;
+              var updatedKey = APIKeyDataProvider
+                .generateCompleteOne(key.account_id);
+              API.resources.apiKeys
+                .update(apiKeyId, updatedKey)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+      it('should return a success response when updating with property ' +
+        ' "managed_account_ids".',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              return API.helpers.apiKeys.createOne();
+            })
+            .then(function (key) {
+              var apiKeyId = key.id;
+              var updatedKey = APIKeyDataProvider
+                .generateCompleteOne(key.account_id);
+              updatedKey.managed_account_ids = [key.account_id];
+              API.resources.apiKeys
+                .update(apiKeyId, updatedKey)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+
+      it('should return a success response when deleting an API Key.',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              return API.helpers.apiKeys.createOne();
+            })
+            .then(function (key) {
+              API.resources.apiKeys
+                .deleteOne(key.id)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+      it('should return a success response when activating an API Key.',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.apiKeys
+                .activate(apiKey.id)
+                .createOne()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+      it('should return a success response when getting info about an API Key.',
+        function (done) {
+          API.resources.apiKeys
+            .getOne(apiKey.id)
+            .expect(200)
+            .then(function (res) {
+              API.helpers
+                .authenticateAPIKey(res.body.id)
+                .then(function () {
+                  API.resources.apiKeys
+                    .myself()
+                    .getOne()
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            });
+        });
+
+      it('should return a success response when deactivating an API Key.',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.apiKeys
+                .deactivate(apiKey.id)
+                .createOne()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+    });
   });
 });
-

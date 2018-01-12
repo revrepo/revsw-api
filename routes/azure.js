@@ -580,7 +580,7 @@ module.exports = [
     config: {
       handler: azure.listSingleSignOnToken,
       description: 'List SSO token',
-      notes: 'List SSL token',
+      notes: 'List SSO token',
 //     tags: ['api','web'],
       auth: false,//'azure-token',
       plugins: {

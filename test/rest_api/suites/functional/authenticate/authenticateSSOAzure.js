@@ -19,16 +19,16 @@
 require('should-http');
 
 var config = require('config');
-var API = require('./../../common/api');
-var AzureDP = require('./../../common/providers/data/azure');
+var API = require('./../../../common/api');
+var AzureDP = require('./../../../common/providers/data/azure');
+var azureKey = config.get('api.azureKey');
 
-describe('Smoke check', function () {
+describe('Functional check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
   var user = config.get('api.users.reseller');
-  var azureKey = config.get('api.azureKey');
 
   before(function (done) {
     done();
@@ -38,7 +38,7 @@ describe('Smoke check', function () {
     done();
   });
 
-  describe('Authenticate resource', function () {
+  describe('Authenticate SSO Azure resource', function () {
 
     beforeEach(function (done) {
       done();
@@ -48,16 +48,9 @@ describe('Smoke check', function () {
       done();
     });
 
-    it('should return success response when authenticating user',
+    it('should generate a different token each time',
       function (done) {
-        API.resources.authenticate
-          .createOne({ email: user.email, password: user.password })
-          .expect(200)
-          .end(done);
-      });
-
-    it('should return a success response when authenticating Azure SSO Token',
-      function (done) {
+        var tokens = [];
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
@@ -74,21 +67,38 @@ describe('Smoke check', function () {
               .update(resourceName, location)
               .expect(200)
               .then(function () {
-                API.resources.azure
-                  .subscriptions()
-                  .resourceGroups(subscription)
-                  .providers(resourceGroupName)
-                  .accounts(provider)
-                  .listSingleSignOnToken(resourceName)
-                  .createOne()
-                  .expect(200)
-                  .then(function (res) {
-                    API.resources.authenticateSSOAzure
-                      .createOne({token: res.body.token, resourceId: res.body.resourceId})
+                var tokensWanted = 5;
+                var ssoPolling = function (wanted) {
+                  if (wanted === 0) {
+                    // check if any tokens are the same
+                    for (var i = 0; i < tokens.length; i++) {
+                      for (var j = 0; j < tokens.length; j++) {
+                        if (i !== j) {
+                          tokens[i].should.not.equal(tokens[j]);
+                        }
+                      }
+                    }
+                    done();
+                  } else {
+                    // get 5 tokens
+                    API.resources.azure
+                      .subscriptions()
+                      .resourceGroups(subscription)
+                      .providers(resourceGroupName)
+                      .accounts(provider)
+                      .listSingleSignOnToken(resourceName)
+                      .createOne()
                       .expect(200)
-                      .end(done);
-                  })
-                  .catch(done);
+                      .then(function (res) {
+                        tokens.push(res.body.token);
+                        setTimeout(function () {
+                          ssoPolling(wanted - 1);
+                        }, 1500); // wait a sec
+                      })
+                      .catch(done);
+                  }
+                };
+                ssoPolling(tokensWanted);
               })
               .catch(done);
           })

@@ -74,7 +74,6 @@ exports.listResources = function(request, reply) {
 };
 
 exports.createSubscription = function(request, reply) {
-
   var subscription = request.payload,
     subscriptionId = request.params.subscription_id,
     subscriptionDate = request.payload.RegistrationDate,
@@ -117,23 +116,23 @@ exports.createSubscription = function(request, reply) {
       // A call with state "Unregistered" for none existing subscription should return 200
       if (state === 'Unregistered') {
         renderJSON(request, reply, error, subscription);
+      } else {
+        logger.info('Adding new Azure Subscription with ID ' + subscriptionId + ', payload ' + JSON.stringify(subscription));
+        var newSubscription = {
+          subscription_id: subscriptionId,
+          subscription_state: state,
+          properties: properties,
+          original_object: subscription
+        };
+        azureSubscriptions.add(newSubscription, function(error, result) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to add to the DB a new Azure subscription ' + JSON.stringify(newSubscription)));
+          }
+          logger.info('Successfully added new Azure Subscription with ID ' + subscriptionId + ', subscription object ' +
+            JSON.stringify(result));
+          renderJSON(request, reply, error, subscription);
+        });
       }
-
-      logger.info('Adding new Azure Subscription with ID ' + subscriptionId + ', payload ' + JSON.stringify(subscription));
-      var newSubscription = {
-        subscription_id: subscriptionId,
-        subscription_state: state,
-        properties: properties,
-        original_object: subscription
-      };
-      azureSubscriptions.add(newSubscription, function(error, result) {
-        if (error) {
-          return reply(boom.badImplementation('Failed to add to the DB a new Azure subscription ' + JSON.stringify(newSubscription)));
-        }
-        logger.info('Successfully added new Azure Subscription with ID ' + subscriptionId + ', subscription object ' +
-          JSON.stringify(result));
-        renderJSON(request, reply, error, subscription);
-      });
     }
   });
 };

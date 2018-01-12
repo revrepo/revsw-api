@@ -35,21 +35,19 @@ var AzureDataProvider = {
       resource_name: 'r4'
     };
   },
-   generateTwo: function () {
+  generateTwo: function () {
     return {
       subscription_id: 'ab'
     };
   },
   generate: function () {
     return {
-      state: 'Registered',
-
+      state: 'Registered'
     };
   },
   generateLocation: function () {
     return {
       location: 'west us' 
-
     };
   },
    generateResource: function () {
