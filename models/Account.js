@@ -28,7 +28,8 @@ var config = require('config');
 function Account(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
-  this.ObjectId = this.Schema.ObjectId;
+  this.ObjectId = this.Schema.Types.ObjectId;
+
   this.mongoose = mongoose;
 
   this.AccountSchema = new this.Schema({
@@ -83,6 +84,7 @@ function Account(mongoose, connection, options) {
         default: false
     },
     'promocode': {type: String, default: null},
+    'bp_group_id': {type: this.ObjectId, default : null }
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');

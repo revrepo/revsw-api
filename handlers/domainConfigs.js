@@ -296,12 +296,12 @@ exports.getDomainConfigVersions = function(request, reply) {
 exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
-  var account_id = newDomainJson.account_id;
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  var accountId = newDomainJson.account_id;
+  if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
-  var createDomain = function(error, result) {
+  var callbackResultCreateDomain = function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID' + newDomainJson.origin_server_location_id));
     }
@@ -375,7 +375,7 @@ exports.createDomainConfig = function(request, reply) {
           };
 
           AuditLogger.store({
-            account_id: account_id,
+            account_id: accountId,
             activity_type: 'add',
             activity_target: 'domain',
             target_id: response.object_id,
@@ -391,18 +391,22 @@ exports.createDomainConfig = function(request, reply) {
   };
 
 
-  accounts.get({ _id: account_id }, function(err, account) {
+  accounts.get({ _id: accountId }, function(err, account) {
     if (err) {
       return reply(boom.badImplementation('DomainConfigs::checkDomainsList: Failed to find an account with ID ' +
         newDomainJson.account_id));
     }
 
-    if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     // NOTE: Account has property "vendor_profile". We need get additional parameter 'cname_domain' from them
     var accountVendorProfile = vendorProfiles[ account.vendor_profile ] || deafultVendorProfile;
-    newDomainJson.cname_domain = accountVendorProfile.cname_domain; //
+    newDomainJson.cname_domain = accountVendorProfile.cname_domain;
+    // NOTE: Set special BP Server Group
+    if(!!account.bp_group_id){
+      newDomainJson.bp_group_id = account.bp_group_id;
+    }
     if (false /* TODO need to restore a check for status of account.billing_plan */ ) {
       isSubscriptionActive(newDomainJson.account_id, function(err, res) {
         if (err) {
@@ -422,7 +426,7 @@ exports.createDomainConfig = function(request, reply) {
             _id: newDomainJson.origin_server_location_id,
             serverType: 'public',
             groupType: 'CO'
-          }, createDomain);
+          }, callbackResultCreateDomain);
         });
       });
     } else {
@@ -446,7 +450,7 @@ exports.createDomainConfig = function(request, reply) {
         domainConfigs.query({
           domain_name: newDomainJson.domain_name,
           deleted: { $ne: true }
-        }, createDomain);
+        }, callbackResultCreateDomain);
       });
     }
 
