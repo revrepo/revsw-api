@@ -37,6 +37,7 @@ describe('Negative check', function () {
 
     var testAccount;
     var testApp;
+    var admin = config.get('api.users.admin');
 
     describe('With user: ' + user.role, function () {
 
@@ -146,6 +147,80 @@ describe('Negative check', function () {
                     .expect(400)
                     .then(function (response) {
                       response.body.message.should.containEql('"app_id" fails');
+                      done();
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            });
+
+            it('should return `bad request` response when getting app ' +
+            'using a different user',
+            function (done) {
+              API.helpers
+                .authenticateUser(admin)
+                .then(function () {
+                  API.resources.apps
+                    .getOne(testApp.id)
+                    .expect(400)
+                    .then(function (response) {
+                      response.body.message.should.containEql('App ID not found');
+                      done();
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            });
+
+            it('should return `bad request` response when deleting app ' +
+            'using a different user',
+            function (done) {
+              API.helpers
+                .authenticateUser(admin)
+                .then(function () {
+                  API.resources.apps
+                    .deleteOne(testApp.id)
+                    .expect(400)
+                    .then(function (response) {
+                      response.body.message.should.containEql('App ID not found');
+                      done();
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            });
+
+            it('should return `bad request` response when getting config status for app ' +
+            'using a different user',
+            function (done) {
+              API.helpers
+                .authenticateUser(admin)
+                .then(function () {
+                  API.resources.apps
+                    .configStatus(testApp.id)
+                    .getOne()
+                    .expect(400)
+                    .then(function (response) {
+                      response.body.message.should.containEql('App ID not found');
+                      done();
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            });
+
+            it('should return `bad request` response when getting versions for app ' +
+            'using a different user',
+            function (done) {
+              API.helpers
+                .authenticateUser(admin)
+                .then(function () {
+                  API.resources.apps
+                    .versions(testApp.id)
+                    .getAll()
+                    .expect(400)
+                    .then(function (response) {
+                      response.body.message.should.containEql('App ID not found');
                       done();
                     })
                     .catch(done);
