@@ -100,7 +100,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when creating specific SSL name',
+        xit('should return a success response when creating specific SSL name',
           function (done) {
             var sslname = SSLNameDP.generateOne(accountId,'test-' + Date.now());
             API.helpers
@@ -119,7 +119,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when deleting a specific SSL Name',
+        xit('should return a success response when deleting a specific SSL Name',
           function (done) {
             var sslname = SSLNameDP.generateOne(accountId,'test2-' + Date.now());
             API.helpers
