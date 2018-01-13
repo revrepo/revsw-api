@@ -16,10 +16,10 @@
             "password": "password1",
             "role": "Admin",
             "account": {
-              "id": "55b6ff6a7957012304a49d04",
-              "companyName": "API QA Account"
+                "id": "55b6ff6a7957012304a49d04",
+                "companyName": "API QA Account"
             }
-          }
+        }
     },
     "chargify_account": {
         "id": "5a47d0eae44b0d3eb70b190f",
@@ -33,22 +33,28 @@
         },
         "comment": "This is an ID of `asher moshav` account, please don't change this account."
     },
-    "azureSSOToken": ["eyJzaWduZWRIYXNoIjoiWWlVYzhxdURuWSsxT1Q0K2xoZVRIekZ",
-                    "3TnR5bVlnRVlXUWpRT1NXdjkzQXUyMVRjVzJ5ZG5hV05VVmV2eGVBK2xHRjZJbllPU2N2",
-                    "ajc2MExzUWFleUZjZDhLZjkrTXF1NW1ubW05V1g0dUhWTUt6dUJQcThQcTc0dCs0UGRke",
-                    "lE3aElpK2QySUxpUXBUNUFxK05Vc2hOUVRTT3BWNE9XTFR5L2ZpYVI5WHJtMDlIdXdBVj",
-                    "BuYm43azkrWHo2dnpMc3Jub0lVaTAyWVRBdlhCaW52WE02UFVsSjhwZTB1Rk1kaXFPNTZ",
-                    "qWGRXMXVWbFZDc1lpVWd4Mjg2anNiWDgzUG5yM2ljK3dJZlZuNGloWlArN2swMFRhejA4",
-                    "UW1pK3lJVkt4YkNHazJDM0tKY2o4bkc5ckZpeUpjeGRFVzY5bGF2YUhETlVJRTZXQUowR",
-                    "3FKNWtsa0RnPT0iLCJlbmNyeXB0ZWREYXRhIjoibjhMcWxJZEJQZi9Xb2p1bHhNb2pyTj",
-                    "B3VTFRUStpcmRNa3J0bFc1MTBBRWlUTlMweVNpK09pVHVsVng0NVVKbmJad1pIenFKdTV",
-                    "FRnpBVG1ubGpzS1pqZzZoeHkrd0JZZHlvMGVBbFR1bTg9Iiwic2VjcmV0VG9rZW4iOiJv",
-                    "VEp4Qk1hSmhMaVlrUXVlYkp5K05iTktTcnhOckdXbVI1RDg0WW01TkRnRFBNbDg2NjJ3Z",
-                    "XRNRnF5K2dXYzJ6TXhKODREWHhwaGJNRXhDa1M2ai9DS0dlekR3MGVuUm45WVNBR1U0Rl",
-                    "NhaW10dzR6ajB4Tjltdk0vYnNMUDVFTWoyOG5Kbk1TTElrdmZMaTY5azFXT1ZiYW9xSDl",
-                    "LejlVV05mWGlLRzQ0eEpWRHF2MkZHcEZ2aUZOcDE3ajZuU3pwRW1zalFxR2wyK1FRZU5q",
-                    "MWh3dnY1WFNrMUhnWnlLMWhKb2tQeGgrU1RYMEFjK1VmMjlJQWF3bWlqUzBRN3h2ZkU1O",
-                    "XNzM2Jod0c0Qnl4SnpXK3R2ZVpFVFkvajRoKzVwSFlDc3NoV2ZQZkQ1MnNJRHZuWUlUen",
-                    "ZQZ3NPbFpBVGdxQndiS3MrZi90NmE1VEw5ckVSWHc9PSJ9"],
+    "azureSSOToken": [
+        "eyJzaWduZWRIYXNoIjoiWWlVYzhxdURuWSsxT1Q0K2xoZVRIekZ",
+        "3TnR5bVlnRVlXUWpRT1NXdjkzQXUyMVRjVzJ5ZG5hV05VVmV2eGVBK2xHRjZJbllPU2N2",
+        "ajc2MExzUWFleUZjZDhLZjkrTXF1NW1ubW05V1g0dUhWTUt6dUJQcThQcTc0dCs0UGRke",
+        "lE3aElpK2QySUxpUXBUNUFxK05Vc2hOUVRTT3BWNE9XTFR5L2ZpYVI5WHJtMDlIdXdBVj",
+        "BuYm43azkrWHo2dnpMc3Jub0lVaTAyWVRBdlhCaW52WE02UFVsSjhwZTB1Rk1kaXFPNTZ",
+        "qWGRXMXVWbFZDc1lpVWd4Mjg2anNiWDgzUG5yM2ljK3dJZlZuNGloWlArN2swMFRhejA4",
+        "UW1pK3lJVkt4YkNHazJDM0tKY2o4bkc5ckZpeUpjeGRFVzY5bGF2YUhETlVJRTZXQUowR",
+        "3FKNWtsa0RnPT0iLCJlbmNyeXB0ZWREYXRhIjoibjhMcWxJZEJQZi9Xb2p1bHhNb2pyTj",
+        "B3VTFRUStpcmRNa3J0bFc1MTBBRWlUTlMweVNpK09pVHVsVng0NVVKbmJad1pIenFKdTV",
+        "FRnpBVG1ubGpzS1pqZzZoeHkrd0JZZHlvMGVBbFR1bTg9Iiwic2VjcmV0VG9rZW4iOiJv",
+        "VEp4Qk1hSmhMaVlrUXVlYkp5K05iTktTcnhOckdXbVI1RDg0WW01TkRnRFBNbDg2NjJ3Z",
+        "XRNRnF5K2dXYzJ6TXhKODREWHhwaGJNRXhDa1M2ai9DS0dlekR3MGVuUm45WVNBR1U0Rl",
+        "NhaW10dzR6ajB4Tjltdk0vYnNMUDVFTWoyOG5Kbk1TTElrdmZMaTY5azFXT1ZiYW9xSDl",
+        "LejlVV05mWGlLRzQ0eEpWRHF2MkZHcEZ2aUZOcDE3ajZuU3pwRW1zalFxR2wyK1FRZU5q",
+        "MWh3dnY1WFNrMUhnWnlLMWhKb2tQeGgrU1RYMEFjK1VmMjlJQWF3bWlqUzBRN3h2ZkU1O",
+        "XNzM2Jod0c0Qnl4SnpXK3R2ZVpFVFkvajRoKzVwSFlDc3NoV2ZQZkQ1MnNJRHZuWUlUen",
+        "ZQZ3NPbFpBVGdxQndiS3MrZi90NmE1VEw5ckVSWHc9PSJ9"
+    ],
+    "azureSSOResourceId": [
+        "'H4sIAAAAAAAACg3KwQmAMAwAwF06gEFxAdFvRdzApqEEpClJ0_n13hfAPBk",
+        "qt85SDRZQMnFFKireDLTM0FQGZ1KDm8Z2xSlK4pf244QHUbz2_63hA6RH43JMAAAA'"
+    ],
     "mongoose_debug_logging": false
 }

@@ -21,11 +21,12 @@
 var Session = require('./../session');
 var Promise = require('bluebird');
 var config = require('config');
-
+var host = config.api.host;
 // Requiring resources to use in these Helpers.
 var AuthenticateRes = require('./../resources/authenticate');
+var SSOAuthenticateRes = require('./../resources/authenticateSSOAzure');
 var APIKeysRes = require('./../resources/apiKeys');
-
+var UsersRes = require('./../resources/users');
 
 
 // Required Helpers to attach to main API helper object
@@ -90,6 +91,8 @@ var APIHelpers = {
         return this.authenticateUser(credentials);
       } else if (credentials.azureKey) {
         return this.authenticateAzureKey(credentials.azureKey);
+      } else if (credentials.token && credentials.resourceId) {
+        return this.authenticateAzureSSO(credentials);
       } else {
         Session.setCurrentUser(credentials);
         return this.authenticateAPIKey(credentials.id);
@@ -182,6 +185,38 @@ var APIHelpers = {
       }
     });
   },
+
+    /**
+    * ### API.helpers.authenticateAzureSSO()
+    *
+    * Helper method to Authenticate an Azure SSO Token before doing any type of request to
+    * the REST API services.
+    *
+    * @param  key
+    *
+    * @returns {Promise}
+    */
+    authenticateAzureSSO: function (token) {
+      Session.reset();
+      return SSOAuthenticateRes
+        .createOne(token)
+        .expect(200)
+        .then(function (res) {
+          return UsersRes
+                  .myself()
+                  .getOne()
+                  .set('Authorization', 'Bearer ' + res.body.token)
+                  .expect(200)
+                  .then(function (user) {
+                    var azureUser = user.body;
+                    azureUser.token = res.body.token;
+                    Session.setCurrentUser(azureUser);
+                  });                  
+        })
+        .catch(function () {
+          throw new Error('Authenticating user as Azure SSO token ', token);
+        });
+    },
   /**
    * ### API.helpers.attemptToAuthenticateUser()
    *
@@ -225,6 +260,15 @@ var APIHelpers = {
       .then(function () {
         return testUser;
       });
+  },
+
+  /**
+   * Gets the API url
+   *
+   * @returns {String} API url
+   */
+  getAPIURL: function () {
+    return host.protocol + '://' + host.name + ':' + host.port; 
   }
 };
 

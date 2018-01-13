@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *
  * REV SOFTWARE CONFIDENTIAL
@@ -36,9 +37,13 @@ var User = require('../models/User');
 var Account = require('../models/Account');
 var publicRecordFields = require('../lib/publicRecordFields');
 var AuditLogger = require('../lib/audit');
+var Promise = require('bluebird');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
+
+var AzureResource = require('../models/AzureResource');
+var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 
 var vendorProfileList = config.get('vendor_profiles');
 var defaultVendorProfile = config.get('default_signup_vendor_profile');
@@ -193,13 +198,18 @@ exports.authenticate = function(request, reply) {
 };
 
 exports.authenticateSSOAzure = function(request, reply) {
-
+  var resourceIdEncrypted = request.payload.resourceId;
   var tokenEncrypted = request.payload.token;
   var token = utils.decodeSSOToken(tokenEncrypted);
   logger.info('authenticateSSOAzure: SSO token = ', token);
   if (!token || !token.providerData || !token.expirationTimestamp) {
     logger.warn('authenticateSSOAzure:: Missing or incorrect SSO token');
     return reply(boom.unauthorized());
+  }
+
+  if (token === 'Bad token format') {
+    logger.warn('authenticateSSOAzure:: Bad token format');
+    return reply(boom.badRequest());
   }
 
   var currentTimestamp = new Date().getTime();
@@ -237,15 +247,34 @@ exports.authenticateSSOAzure = function(request, reply) {
         return reply(boom.unauthorized());
       } else {
         // TODO need to fix the code to do the actual verification of provided token and resourceId
-        var authPassed = true;
-        var sendResultChecks = function sendResultChecks(authPassed) {
-          if (authPassed) {
-            onAuthPassed(user, request, reply, error);
-          } else {
-            return reply(boom.unauthorized());
-          }
-        };
-        sendResultChecks(authPassed);
+        // ^^^ ResourceID check is done, need to check token as well.
+        utils.decodeSSOResourceId(resourceIdEncrypted).then(function (id) {
+          var dataArr = id.toString().split('/');
+          var resourceName = dataArr[8];
+          var resourceGroupName = dataArr[4];
+          var subscriptionId = dataArr[2];
+          azureResources.get({
+            resource_name: resourceName,
+            resource_group_name: resourceGroupName,
+            subscription_id: subscriptionId
+          }, function (err, res) {
+            var authPassed = true;
+            if (err && !res) {
+              authPassed = false;
+            }
+            var sendResultChecks = function sendResultChecks(authPassed) {
+              if (authPassed) {
+                onAuthPassed(user, request, reply, err);
+              } else {
+                return reply(boom.unauthorized());
+              }
+            };
+            sendResultChecks(authPassed);
+          });          
+        })
+        .catch(function (err) {
+          return reply(boom.badRequest('Bad resource ID'));
+        });        
       }
     });
   });

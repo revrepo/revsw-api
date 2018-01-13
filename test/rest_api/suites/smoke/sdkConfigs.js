@@ -19,51 +19,30 @@
 require('should-http');
 
 var config = require('config');
-var API= require('./../../common/api');
-var DataProvider= require('./../../common/providers/data');
+var API = require('./../../common/api');
+var DataProvider = require('./../../common/providers/data');
 
 describe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.api.request.maxTimeout);
-
-  var users = [
-    config.get('api.users.revAdmin'),
-    config.get('api.users.reseller'),
-    config.get('api.users.admin'),
-    config.get('api.users.user'),
-    config.get('api.apikeys.reseller'),
-    config.get('api.apikeys.admin')
-  ];
-
-  users.forEach(function(user) {
-
-    describe('With user: ' + user.role, function() {
-
-      before(function (done) {
-        done();
-      });
-
-      after(function (done) {
-        done();
-      });
-
-      describe('SDK Configs resource', function () {
-    
-        it('should return a success response when getting specific app SDK Config with user-role user.',
-          function (done) {
-            API.helpers
-              .authenticateUser(user)
-              .then(function () {
-                var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-                API.resources.sdkConfigs
-                  .getOne(sdk_key)
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
-      });
+    before(function (done) {
+      done();
     });
-  });
+
+    after(function (done) {
+      done();
+    });
+
+    describe('SDK Configs resource', function () {
+
+      it('should return a success response when getting specific app SDK Config with user-role user.',
+        function (done) {
+          var sdk_key = DataProvider.generateSDKConfig().sdk_key;
+          API.resources.sdkConfigs
+            .getOne(sdk_key)
+            .expect(200)
+            .end(done);
+        });
+    });
 });
