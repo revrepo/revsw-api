@@ -54,6 +54,13 @@ var AzureDataProvider = {
     return {
       resource_name: 'r2' 
     };
+  },
+  generateCompleteOne: function () {
+    var complete = this.generateOne();
+    complete.state = this.generate().state;
+    complete.location = this.generateLocation().location;
+
+    return complete;
   }
 };
 
