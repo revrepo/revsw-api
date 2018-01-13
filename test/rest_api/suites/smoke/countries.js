@@ -18,7 +18,7 @@
 
 // # Smoke check: countries
 var config = require('config');
-require('should');
+var should = require('should');
 
 var API = require('./../../common/api');
 
@@ -46,7 +46,7 @@ describe('Smoke check', function () {
         .getAll()
         .expect(200)
         .then(function (res) {
-          res.body.US.should.not.equal(undefined);
+          should(res.body.US).not.equal(undefined);
           done();
         })
         .catch(done);

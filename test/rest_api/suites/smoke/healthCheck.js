@@ -17,6 +17,7 @@
  */
 
 require('should-http');
+var should = require('should');
 
 var config = require('config');
 var API = require('./../../common/api');
@@ -26,47 +27,27 @@ describe('Smoke check', function () {
   // Changing default mocha's timeout (Default is 2 seconds).
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Defining set of users for which all below tests will be run
-  var users = [
-    //config.get('api.users.revAdmin'),
-    config.get('api.users.reseller'),
-    config.get('api.apikeys.reseller')
-  ];
+  describe('HealthCheck resource', function () {
 
-  users.forEach(function (user) {
-
-    describe('With user: ' + user.role, function () {
-
-      describe('HealthCheck resource', function () {
-
-        it('should return a response when getting health-check info.',
-          function (done) {
-            API.helpers
-              .authenticate(user)
-              .then(function () {
-                API.resources.healthCheck
-                  .getAll()
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
+    it('should return a response when getting health-check info.',
+      function (done) {
+        API.resources.healthCheck
+          .getAll()
+          .expect(200)
+          .end(done);
       });
-    });
+
+      it('should contain valid data in health-check response',
+      function (done) {
+        API.resources.healthCheck
+          .getAll()
+          .expect(200)
+          .then(function(res) {
+            should(res.body.message).not.equal(undefined);
+            should(res.body.version).not.equal(undefined);
+            done();
+          })
+          .catch(done);
+      });
   });
-
-  describe('Without user', function () {
-
-    describe('HealthCheck resource', function () {
-
-      it('should return a response when getting health-check info.',
-        function (done) {
-          API.resources.healthCheck
-            .getAll()
-            .expect(200)
-            .end(done);
-        });
-    });
-  });
-
 });
