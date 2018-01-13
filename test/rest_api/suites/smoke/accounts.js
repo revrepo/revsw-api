@@ -249,6 +249,33 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
+        it('should return a response when creating a billing profile for an account.',
+          function (done) {
+            var newAccount = AccountsDP.generateOne('NEW');
+            var updatedAccount = AccountsDP.generateCompleteOne(newAccount);
+            API.helpers
+              .authenticateUser(resellerUser)
+              .then(function () {
+                API.resources.accounts
+                  .createOne(newAccount)
+                  .then(function (response) {
+                    API.resources.accounts
+                      .update(response.body.object_id, updatedAccount)
+                      .expect(200)
+                      .then(function () {
+                        API.resources.accounts
+                          .billingProfile(response.body.object_id)
+                          .createOne()
+                          .expect(200)
+                          .end(done);
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
         // ### Test to delete account
         it('should return a response when deleting an account.', function (done) {
           var newProject = AccountsDP.generateOne('NEW');
