@@ -49,7 +49,7 @@ describe('Smoke check', function () {
 
         before(function (done) {
 /*          API.helpers
-            .authenticateUser(user)
+            .authenticate(user)
             .then(function () {
               return API.helpers.billingPlans.createOne();
             })
@@ -77,7 +77,7 @@ describe('Smoke check', function () {
         it('should return a response when getting all billing plans.',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.billingPlans
                   .getAll()
@@ -94,7 +94,7 @@ describe('Smoke check', function () {
         it('should return a response when getting specific billing plan.',
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.billingPlans
                   .getAll()
@@ -111,12 +111,12 @@ describe('Smoke check', function () {
                           } else {
                             setTimeout(function () {
                               pollPlans(index += 1);
-                            }, 30000); // wait 30 sec before requesting again
+                            }, 1000); // wait a sec before requesting again
                           }
                         });
                     };
                     API.helpers
-                      .authenticateUser(user)
+                      .authenticate(user)
                       .then(function () {
                         pollPlans(0); // init requests for plans
                       })
@@ -132,7 +132,7 @@ describe('Smoke check', function () {
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.billingPlans
                   .createOne(newBillingPlan)
@@ -155,7 +155,7 @@ describe('Smoke check', function () {
             var updatedBillingPlan = BillingPlansDP
               .generateOneForUpdate(newBillingPlan);
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 return API.resources.billingPlans
                   .createOne(newBillingPlan);
@@ -174,7 +174,7 @@ describe('Smoke check', function () {
           function (done) {
             var newBillingPlan = BillingPlansDP.generateOne();
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 return API.resources.billingPlans
                   .createOne(newBillingPlan);
