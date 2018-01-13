@@ -111,7 +111,7 @@ describe('Smoke check', function () {
                           } else {
                             setTimeout(function () {
                               pollPlans(index += 1);
-                            }, 1000); // wait a sec before requesting again
+                            }, 30000); // wait 30 sec before requesting again
                           }
                         });
                     };
