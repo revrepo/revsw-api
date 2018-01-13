@@ -105,5 +105,24 @@ describe('Negative check', function () {
                     .expect(401)
                     .end(done);
             });
+
+        it('should return a `400 Bad Request` response when ' +
+            'making a request that\'s outside the token\'s scope ',
+            function (done) {
+                // just an account that the token is not authorized to access
+                API.helpers.accounts.createOne() 
+                    .then(function (acc) {
+                        API.resources.authenticateSSOAzure
+                        .createOne(authToken)
+                        .expect(200)
+                        .then(function () {
+                            API.resources.accounts
+                                .getOne(acc.id)
+                                .expect(401)
+                                .end(done);
+                        })
+                        .catch(done);
+                    });
+            });
     });
 });

@@ -27,9 +27,7 @@ var DataProvider = require('./../../common/providers/data');
 var revAdmin = config.get('api.users.revAdmin');
 var runs = [
   config.get('api.users.reseller'),
-  config.get('api.users.revAdmin'),
-  config.get('api.apikeys.admin'),
-  config.get('api.apikeys.reseller')
+  config.get('api.users.revAdmin')
 ];
 runs.forEach(function (run) {
   describe('Smoke check with ' + run.role, function () {
@@ -41,11 +39,7 @@ runs.forEach(function (run) {
       API.helpers
         .authenticate(run)
         .then(function () {
-          if (run.key) {
-            return run.account;
-          } else {
-            return API.helpers.accounts.createOne();
-          }
+          return API.helpers.accounts.createOne();
         })
         .then(function (acc) {
           return API.helpers.users.create({ companyId: [acc.id] });
