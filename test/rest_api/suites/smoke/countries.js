@@ -18,18 +18,12 @@
 
 // # Smoke check: countries
 var config = require('config');
+require('should');
 
 var API = require('./../../common/api');
 
 describe('Smoke check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
-
-  var users = [
-    config.get('api.users.reseller'),
-    config.get('api.users.admin'),
-    config.get('api.apikeys.reseller'),
-    config.get('api.apikeys.admin')
-  ];
 
   before(function (done) {
     done();
@@ -40,19 +34,22 @@ describe('Smoke check', function () {
   });
 
   describe('Countries resource', function () {
-    users.forEach(function (user) {
-      it('should return a response when getting all countries. With ' + user.role,
-      function (done) {
-        API.helpers
-          .authenticate(user)
-          .then(function () {
-            API.resources.countries
-              .getAll()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
-      });
+    it('should return a response when getting all countries.', function (done) {
+      API.resources.countries
+        .getAll()
+        .expect(200)
+        .end(done);
+    });
+
+    it('should contain countries in a response when getting countries', function (done) {
+      API.resources.countries
+        .getAll()
+        .expect(200)
+        .then(function (res) {
+          res.body.US.should.not.equal(undefined);
+          done();
+        })
+        .catch(done);
     });
   });
 });
