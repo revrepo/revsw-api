@@ -374,9 +374,7 @@ module.exports = [{
         },
         payload: {
           cancellation_message: Joi.string().optional().allow(null).trim().allow('').max(300)
-            .description('Free-text comment about reason delete the account'),
-            auto_remove: Joi.boolean().optional()
-            .description('Auto Remove flag')
+            .description('Free-text comment about reason delete the account')
         }
       },
       response: {

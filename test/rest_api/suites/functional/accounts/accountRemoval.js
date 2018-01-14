@@ -55,50 +55,50 @@ describe('Functional check', function () {
         })
         .then(function (dnszone) {
           testDNSZone = dnszone;
-          // alright lets delete the account with auto removal on and test
-          API.resources.accounts
-            .deleteOne(testAccount.id, { auto_remove: true })
-            .expect(200)
-            .end(done);
+          done();
         })
         .catch(done);
-
     });
 
-    it('should return `400 Domain ID Not Found` response when getting domain after deleting it\'s account.',
+    it('should return `400 Bad Request` when deleting an account with domains, apps, dns zones..',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
           .then(function () {
-            API.resources.domainConfigs
-              .getOne(testDomain.id)
+            API.resources.accounts
+              .deleteOne(testAccount.id)
               .expect(400)
               .end(done);
           })
           .catch(done);
       });
 
-    it('should return `400 App ID Not Found` response when getting app after deleting it\'s account.',
+    it('should return `200 OK` when deleting an account after ' +
+      'deleting it\'s domains, apps, dns zones..',
       function (done) {
         API.helpers
           .authenticateUser(revAdmin)
           .then(function () {
-            API.resources.apps
-              .getOne(testApp.id)
-              .expect(400)
-              .end(done);
+            return API
+              .helpers
+              .dnsZones
+              .cleanup(testDNSZone.zone);
           })
-          .catch(done);
-      });
-
-    it('should return `400 DNS Zone ID Not Found` response when getting DNS zone after deleting it\'s account.',
-      function (done) {
-        API.helpers
-          .authenticateUser(revAdmin)
           .then(function () {
-            API.resources.dnsZones
-              .getOne(testDNSZone.id)
-              .expect(400)
+            return API.resources.domainConfigs
+              .deleteOne(testDomain.id)
+              .expect(200);
+          })
+          .then(function () {
+            return API.resources.apps
+              .deleteOne(testApp.id)
+              .expect(200);
+          })
+          .then(function () {
+            // trying to delete the account after deleting all it's child objects
+            API.resources.accounts
+              .deleteOne(testAccount.id)
+              .expect(200)
               .end(done);
           })
           .catch(done);

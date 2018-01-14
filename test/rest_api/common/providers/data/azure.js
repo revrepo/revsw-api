@@ -27,12 +27,13 @@
 // depending on your test needs.
 var AzureDataProvider = {
 
-  generateOne: function () {
+  generateOne: function (data) {
+    data = data || {};
     return {
-      subscription_id: '2',	
-      provider: 'RevAPM.MobileCDN',
-      resource_group_name: 'rg1',
-      resource_name: 'r4'
+      subscription_id: data.subscription_id || '2',	
+      provider: data.provider || 'RevAPM.MobileCDN',
+      resource_group_name: data.resource_group_name || 'rg1',
+      resource_name: data.resource_name || this.generateResourceName()
     };
   },
   generateTwo: function () {
@@ -61,6 +62,9 @@ var AzureDataProvider = {
     complete.location = this.generateLocation().location;
 
     return complete;
+  },
+  generateResourceName: function () {
+    return 'azureResource-' + Date.now();
   }
 };
 

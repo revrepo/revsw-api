@@ -765,7 +765,6 @@ exports.updateAccount = function(request, reply) {
  */
 exports.deleteAccount = function(request, reply) {
   var account_id = request.params.account_id;
-  var autoRemoveAccount = request.payload.auto_remove;
   var account;
   var _payload = request.payload;
   var cancellationMessage_ = _payload.cancellation_message || 'not provided';
@@ -781,7 +780,7 @@ exports.deleteAccount = function(request, reply) {
   };
 
   var removeOptions_ = {
-    autoRemove: autoRemoveAccount && autoRemoveAccount === true ? true : false, // NOTE: dont delete if not specified otherwise in payload
+    autoRemove: false, // NOTE: dont auto delete for non azure account
     loggerInfo: loggerInfo_,
     deletedBy: utils.generateCreatedByField(request),
     remoteIP: utils.getAPIUserRealIP(request),

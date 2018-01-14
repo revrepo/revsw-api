@@ -46,6 +46,7 @@ var LogShippingJobsHelper = require('./logShippingJobs');
 var WAFRulesHelper = require('./wafRules');
 var VendorsHelper = require('./vendorProfiles');
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
+var AzureHelper = require('./azure');
 
 // Abstracts common functionality for the API.
 var APIHelpers = {
@@ -64,6 +65,7 @@ var APIHelpers = {
   logShippingJobs: LogShippingJobsHelper,
   wafRules: WAFRulesHelper,
   vendors: VendorsHelper,
+  azure: AzureHelper,
 
   /**
   * ### API.helpers.authenticate()
