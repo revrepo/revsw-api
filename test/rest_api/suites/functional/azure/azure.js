@@ -19,8 +19,8 @@
 require('should-http');
 
 var config = require('config');
-var API = require('./../../common/api');
-var AzureDP = require('./../../common/providers/data/azure');
+var API = require('./../../../common/api');
+var AzureDP = require('./../../../common/providers/data/azure');
 
 describe('Functional check', function () {
 
@@ -30,7 +30,8 @@ describe('Functional check', function () {
   var RevAdmin = config.get('api.users.revAdmin');
   var azureKey = config.get('api.azureKey');
 
-  // TODO: Need to fix Azure API authentication and enable the tests back
+  // TODO: Need to change all resource creation calls to use the helper function createOne for
+  //       better looking code
   describe('Azure resource', function () {
 
     before(function (done) {
@@ -49,7 +50,7 @@ describe('Functional check', function () {
       done();
     });
 
-    it('should create subscription with Azure token and get Subscriptions list with revAdmin role.', 
+    it('should create subscription with Azure token and get Subscriptions list with revAdmin role.',
       function (done) {
         var subscription = AzureDP.generateTwo().subscription_id;
         var state = AzureDP.generate();
@@ -60,7 +61,7 @@ describe('Functional check', function () {
               .subscriptions()
               .update(subscription, state)
               .expect(200)
-              .then(function (){ 
+              .then(function () {
                 API.helpers
                   .authenticateUser(RevAdmin)
                   .then(function () {
@@ -81,16 +82,16 @@ describe('Functional check', function () {
                   .catch(done);
               })
               .catch(done);
-          })    
-          .catch(done); 
+          })
+          .catch(done);
       });
 
-    it('should create resource with Azure token and get Resources list with revAdmin role.', 
+    it('should create resource with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
         var resourceGroupName = AzureDP.generateOne().resource_group_name;
-        var resourceName = AzureDP.generateOne().resource_name;
+        var resourceName = AzureDP.generateResourceName();
         var location = AzureDP.generateLocation();
         API.helpers
           .authenticateAzureKey(azureKey)
@@ -99,35 +100,25 @@ describe('Functional check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .update(resourceName, location)
               .expect(200)
               .then(function () {
-                API.helpers
-                  .authenticateUser(RevAdmin)
-                  .then(function () {
-                    API.resources.azure
-                      .resources()
-                      .getAll()
-                      .expect(200)
-                      .then(function (res) {
-                        var resources = res.body;
-                        resources[26].resource_name.should.equal(resourceName);
-                        resources.forEach(function (resource) {
-                          resource.resource_name.should.not.be.undefined();
-                        });
-                        done();
-                      })
-                      .catch(done);
-                  })
-                  .catch(done);
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups(subscription)
+                  .providers(resourceGroupName)
+                  .accounts(provider)
+                  .getOne(resourceName)
+                  .expect(200)
+                  .end(done);
               })
               .catch(done);
           })
           .catch(done);
       });
 
-    it('should get Resources list in resourceGroup with Azure token.', 
+    it('should get Resources list in resourceGroup with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -139,7 +130,7 @@ describe('Functional check', function () {
               .subscriptions()
               .resourceGroups(subscription)
               .providers(resourceGroupName)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -156,7 +147,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should get Resources list in subscription with revAdmin role.', 
+    it('should get Resources list in subscription with revAdmin role.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -166,7 +157,7 @@ describe('Functional check', function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -183,34 +174,7 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should get specific Resource with Azure token.', 
-      function (done) {
-        var provider = AzureDP.generateOne().provider;
-        var subscription = AzureDP.generateOne().subscription_id;
-        var resourceGroupName = AzureDP.generateOne().resource_group_name;
-        var resourceName = AzureDP.generateOne().resource_name;
-        API.helpers
-          .authenticateAzureKey(azureKey)
-          .then(function () {
-            API.resources.azure
-              .subscriptions()
-              .resourceGroups(subscription)
-              .providers(resourceGroupName)
-              .accounts(provider) 
-              .getOne(resourceName)
-              .expect(200)
-              .then(function (response) {
-                var resource = response.body;
-                resource.should.not.be.undefined();
-                resource.name.should.be.equal(resourceName);
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
-      });
-
-    it('should get Resources list in subscription with Azure token.', 
+    it('should get Resources list in subscription with Azure token.',
       function (done) {
         var provider = AzureDP.generateOne().provider;
         var subscription = AzureDP.generateOne().subscription_id;
@@ -220,7 +184,7 @@ describe('Functional check', function () {
             API.resources.azure
               .subscriptions()
               .providers(subscription)
-              .accounts(provider) 
+              .accounts(provider)
               .getAll()
               .expect(200)
               .then(function (res) {
@@ -233,6 +197,46 @@ describe('Functional check', function () {
                 done();
               })
               .catch(done);
+          })
+          .catch(done);
+      });
+
+    it('should return `200 OK` and successfully delete resource',
+      function (done) {
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.helpers.azure.createOne().then(function (res) {
+              res = res.original_object;
+              API.resources.azure
+                .subscriptions()
+                .resourceGroups(res.subscription_id)
+                .providers(res.resource_group_name)
+                .accounts(res.provider)
+                .getOne(res.resource_name)
+                .expect(200) // get it
+                .then(function () {
+                  API.resources.azure
+                    .subscriptions()
+                    .resourceGroups(res.subscription_id)
+                    .providers(res.resource_group_name)
+                    .accounts(res.provider)
+                    .deleteOne(res.resource_name)
+                    .expect(200) // delete it
+                    .then(function () {
+                      API.resources.azure
+                        .subscriptions()
+                        .resourceGroups(res.subscription_id)
+                        .providers(res.resource_group_name)
+                        .accounts(res.provider)
+                        .getOne(res.resource_name)
+                        .expect(404) // validate that it is indeed deleted
+                        .end(done);
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            });
           })
           .catch(done);
       });

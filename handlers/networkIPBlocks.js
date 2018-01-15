@@ -90,7 +90,10 @@ exports.getServersIPList = function(request, reply) {
             case 'BP':
               response.edge_blocks.push(serverIP_);
               break;
-            case 'LS', 'MONITOR':
+            case 'LS':
+              response.log_shipping_blocks.push(serverIP_);
+              break;
+            case 'MONITOR':
               response.log_shipping_blocks.push(serverIP_);
               break;
           }

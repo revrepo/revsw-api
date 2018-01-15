@@ -199,5 +199,11 @@
     "domain": "https://nuubit-test.chargify.com",
     "api_key": "0WMnGbZ6E5aFtNMjeI2oGjWWpjfjTIu7Y1OCTWjs",
     "shared_key": "KGXNkhdMAEjgosppDso5vm9xWfx5449b0vkfgII2Yug"
-  }
+  },
+  "proxy_white_referer_urls": [
+    "http://localhost:3000/",
+    "http://localhost:4000/",
+    "http://testsjc20-victordev01.revsw.net:3000/",
+    "http://testsjc20-victordev01.revsw.net:4000/"
+  ]
 }

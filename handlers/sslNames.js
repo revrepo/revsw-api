@@ -336,9 +336,9 @@ exports.verifySSLName = function (request, reply) {
               }
             }
           }
-          if (domain.CloudOVSANStatus === '2' || domain.CloudOVSANStatus === '3') {
+          if (domain && (domain.CloudOVSANStatus === '2' || domain.CloudOVSANStatus === '3')) {
             setStatusVerified(request, reply, result);
-          } else {
+          } else if(domain) {
             sendStatusReport(request, reply, error, 200, globalSignApi.sanStatusCode[domain.CloudOVSANStatus], result.id);
           }
         }
