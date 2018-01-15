@@ -24,110 +24,95 @@ var Constants = require('./../../common/constants');
 var API = require('./../../common/api');
 var AccountsDP = require('./../../common/providers/data/accounts');
 var DataProvider = require('./../../common/providers/data');
+var revAdmin = config.get('api.users.revAdmin');
+var runs = [
+  config.get('api.users.reseller'),
+  config.get('api.users.revAdmin')
+];
+runs.forEach(function (run) {
+  describe('Smoke check with ' + run.role, function () {
+    this.timeout(config.api.request.maxTimeout);
+    var vendors = Constants.API.VENDORS;
+    var testUser;
 
-
-describe('Smoke check', function () {
-  this.timeout(config.api.request.maxTimeout);
-
-  var Admin = config.get('api.users.revAdmin');
-  var vendors = Constants.API.VENDORS;
-
-  after(function (done) {
-    // Set vendor back to RevAPM to not break any API/UI tests
-    API.helpers
-    .authenticateUser(Admin)
-    .then(function () {
-      API
-      .helpers
-      .vendors
-      .updateVendorProfile(Admin.account.id, 'revapm').then(function () {
-        done();
-      });
-    })
-    .catch(done);
-  });
-
-  describe('Vendor profile resource', function () {
-
-    it('should return a response containing all the expected vendors', function (done) {
+    before(function (done) {
       API.helpers
-        .authenticateUser(Admin)
+        .authenticate(run)
         .then(function () {
-          API.helpers.vendors.getAllVendors().then(function (res) {
-            res.forEach(function (vendor) {
-              vendors.indexOf(vendor).should.not.equal(-1);
-            });
-            vendors.length.should.equal(res.length);
-            done();
-          });
+          return API.helpers.accounts.createOne();
+        })
+        .then(function (acc) {
+          return API.helpers.users.create({ companyId: [acc.id] });
+        })
+        .then(function (user) {
+          testUser = user;
+          done();
         })
         .catch(done);
     });
 
-    vendors.forEach(function (vendor) {
-      it('should return a response containing expected data for ' + vendor + ' vendor',
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API.helpers.vendors.getVendorByName(vendor).then(function (res) {
-                done();
-                vendor
-                  .should
-                  .equal(res.vendor === undefined ?
-                    res.companyNameShort.toLowerCase().replace(/[^a-zA-Z ]/g, '') :
-                    res.vendor);
-              });
-            })
-            .catch(done);
-        });
-    });
+    describe('Vendor profile resource', function () {
 
-    vendors.forEach(function (vendor) {
-      it('should successfully update user\'s vendor to ' + vendor,
-        function (done) {
-          API.helpers
-            .authenticateUser(Admin)
-            .then(function () {
-              API
-              .helpers
-              .vendors
-              .updateVendorProfile(Admin.account.id, vendor).then(function (res) {
-                res.statusCode.should.equal(200);
-                done();
-              });
-            })
-            .catch(done);
-        });
-    });
-
-    xit('should return a response when updating nuubit vendor profile to revapm  with revAdmin role',
-      function (done) {
+      it('should return a response containing all the expected vendors', function (done) {
         API.helpers
-          .authenticateUser(Admin)
+          .authenticate(revAdmin)
           .then(function () {
-            API.resources.vendorProfiles
-              .updateVendorsProfile()
-              .update()
-              .expect(200)
-              .end(done);
+            API.helpers.vendors.getAllVendors().then(function (res) {
+              res.forEach(function (vendor) {
+                vendors.indexOf(vendor).should.not.equal(-1);
+              });
+              vendors.length.should.equal(res.length);
+              done();
+            });
           })
           .catch(done);
       });
 
-    xit('should return a response when updating revapm vendor profile to nuubit  with revAdmin role',
-      function (done) {
-        API.helpers
-          .authenticateUser(Admin)
-          .then(function () {
-            API.resources.vendorProfiles
-              .updateVendorssProfile()
-              .update()
-              .expect(200)
-              .end(done);
-          })
-          .catch(done);
+      vendors.forEach(function (vendor) {
+        it('should return a response containing expected data for ' + vendor + ' vendor',
+          function (done) {
+            API.helpers
+              .authenticate(run)
+              .then(function () {
+                API.helpers.vendors.getVendorByName(vendor).then(function (res) {
+                  done();
+                  vendor
+                    .should
+                    .equal(res.vendor === undefined ?
+                      res.companyNameShort.toLowerCase().replace(/[^a-zA-Z ]/g, '') :
+                      res.vendor);
+                });
+              })
+              .catch(done);
+          });
       });
+
+      vendors.forEach(function (vendor) {
+        it('should successfully update user\'s account vendor to ' + vendor,
+          function (done) {
+            API.helpers
+              .authenticate(revAdmin)
+              .then(function () {
+                API
+                  .helpers
+                  .vendors
+                  .updateVendorProfile(testUser.companyId[0], vendor).then(function (res) {
+                    res.statusCode.should.equal(200);
+                    API.resources.accounts
+                      .getOne(testUser.companyId[0])
+                      .expect(200)
+                      .then(function (res) {
+                        res.body.vendor_profile.should.equal(vendor);
+                        done();
+                      })
+                      .catch(done);
+                  });
+              })
+              .catch(done);
+          });
+      });
+    });
   });
+
 });
 

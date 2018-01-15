@@ -29,6 +29,7 @@ describe('Smoke check', function () {
   // Shared variables
   var apiKey;
   var accountId;
+  var account;
 
   // Retrieving information about specific user that later we will use for
   // our API requests.
@@ -43,66 +44,56 @@ describe('Smoke check', function () {
     config.get('api.users.reseller')
   ];
 
-  describe('API Keys resource', function () {
-    users.forEach(function (user) {
-      describe('With ' + user.role, function () {
-        before(function (done) {
-          API.helpers
-            .authenticate(user)
-            .then(function () {
-              return API.helpers.apiKeys.createOne();
-            })
-            .then(function (key) {
-              apiKey = key;
-              accountId = apiKey.account_id;
-              done();
-            })
-            .catch(done);
-        });
-        it('should return a success response when getting all API Keys.',
-          function (done) {
-            API.helpers
-              .authenticate(user)
-              .then(function () {
-                API.resources.apiKeys
-                  .getAll()
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
-
-        it('should return a success response when getting specific API Key.',
-          function (done) {
-            API.helpers
-              .authenticate(user)
-              .then(function () {
-                API.resources.apiKeys
-                  .getOne(apiKey.id)
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
-      });
-    });
-  });
-
-  [user, config.get('api.users.reseller')].forEach(function (user) {
+  users.forEach(function (user) {
     describe('With ' + user.role, function () {
       before(function (done) {
         API.helpers
           .authenticate(user)
           .then(function () {
-            return API.helpers.apiKeys.createOne();
+            if (user.key || user.role === 'Admin') {
+              return user.account;
+            } else {
+              return API.helpers.accounts.createOne();
+            }
+          })
+          .then(function (acc) {
+            account = acc;
+            return API.helpers.apiKeys.createOneForAccount(acc);
           })
           .then(function (key) {
             apiKey = key;
-            accountId = apiKey.account_id;
+            accountId = apiKey.account_id;            
             done();
           })
           .catch(done);
       });
+
+      it('should return a success response when getting all API Keys.',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.apiKeys
+                .getAll()
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+      it('should return a success response when getting specific API Key.',
+        function (done) {
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              API.resources.apiKeys
+                .getOne(apiKey.id)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
       it('should return a success response when creating specific API Key.',
         function (done) {
           var newApiKey = APIKeyDataProvider.generateOne(accountId);
@@ -127,7 +118,7 @@ describe('Smoke check', function () {
           API.helpers
             .authenticate(user)
             .then(function () {
-              return API.helpers.apiKeys.createOne();
+              return API.helpers.apiKeys.createOneForAccount(account);
             })
             .then(function (key) {
               var apiKeyId = key.id;
@@ -141,13 +132,47 @@ describe('Smoke check', function () {
             .catch(done);
         });
 
+        it('should return a success response when updating specific API Key with domains.',
+        function (done) {
+          var apik;
+          API.helpers
+            .authenticate(user)
+            .then(function () {
+              return API.helpers.apiKeys.createOneForAccount(account);
+            })
+            .then(function (key) {
+              apik = key;
+              return API.helpers.domainConfigs.createOne(account.id, 'apikey-test');
+            })
+            .then(function (domain) {              
+              apik.domains = [domain.id];
+              return apik;
+            })
+            .then(function (key) {
+              var apiKeyId = key.id;
+              var updatedKey = APIKeyDataProvider
+                .generateCompleteOne(key.account_id);
+              API.resources.apiKeys
+                .update(apiKeyId, updatedKey)
+                .expect(200)
+                .then(function () {
+                  API.resources.domainConfigs
+                    .deleteOne(key.domains[0])
+                    .expect(200)
+                    .end(done);
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
+
       it('should return a success response when updating with property ' +
         ' "managed_account_ids".',
         function (done) {
           API.helpers
             .authenticate(user)
             .then(function () {
-              return API.helpers.apiKeys.createOne();
+              return API.helpers.apiKeys.createOneForAccount(account);
             })
             .then(function (key) {
               var apiKeyId = key.id;
@@ -168,7 +193,7 @@ describe('Smoke check', function () {
           API.helpers
             .authenticate(user)
             .then(function () {
-              return API.helpers.apiKeys.createOne();
+              return API.helpers.apiKeys.createOneForAccount(account);
             })
             .then(function (key) {
               API.resources.apiKeys

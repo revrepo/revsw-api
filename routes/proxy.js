@@ -23,6 +23,7 @@
 var Joi = require('joi');
 var _ = require('lodash');
 var config = require('config');
+var boom = require('boom');
 
 var proxyWhiteRefererURLs = config.get('proxy_white_referer_urls');
 
@@ -45,7 +46,7 @@ module.exports = [{
           var url = request.query.url || 'https://www.statuspage.io/';
           callback(null, url);
         } else {
-          callback(new Error('Bad request'));
+          callback(boom.badRequest());
         }
       }
     }
