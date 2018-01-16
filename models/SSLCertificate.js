@@ -104,7 +104,202 @@ SSLCertificate.prototype = {
       }
       callback(null, doc);
     });
-  }  
+  },
+
+  // Get data about ssl_certs on moment call function or custom day
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  accountSSLCertificateData: function(account_id, day_) {
+    var day = _.clone(day_);
+    var pipline = [];
+    var from, to ;
+    if(!day){
+      day = new Date();
+    }
+    if(!!day){
+      from = day.setUTCHours( 0, 0, 0, 0 );
+      to = day.setUTCHours( 24, 0, 0, 0 );
+    }
+    // NOTE: get total sum all SSL Certs on end of day
+    var match_ = {
+      $match: {
+        $and: [
+          { created_at: { $lt: new Date(to) } }, {
+            $or: [
+              { deleted: { $ne: true } },
+              { deleted: { $ne: false } }
+            ]
+          }
+        ]
+      }
+    };
+    if (account_id) {
+      var accountId ;
+       if ( _.isArray( account_id ) ) {
+        accountId = { $in: account_id.map( function( id ) {
+          return mongoose.Types.ObjectId( id );
+        }) };
+      } else {
+        accountId = mongoose.Types.ObjectId( account_id );
+      }
+      match_.$match.$and.push({ account_id: accountId });
+    }
+    pipline.push(match_);
+
+    pipline.push({
+      $project: {
+        account_id: 1,
+        deleted: 1
+      }
+    });
+    // Group and get total sum for active and deleted SSL Certs
+    pipline.push({
+      $group: {
+        _id: { account_id: '$account_id' },
+        deleted: { $sum: { $cond: [{ $ne: ['$deleted', false] }, 1, 0] } },
+        active: { $sum: { $cond: [{ $ne: ['$deleted', true] }, 1, 0] } },
+        total: { $sum: 1 }
+      }
+    });
+    //
+    pipline.push({
+      $project: {
+        _id: '$_id.account_id',
+        account_id: '$_id.account_id',
+        deleted: 1,
+        active: 1,
+        total: 1
+      }
+    });
+    return this.model.aggregate(pipline)
+      .exec()
+      .then(function(data) {
+        var dist = {};
+        data.forEach(function(item) {
+          if (!dist[item.account_id]) {
+            dist[item.account_id] = _.defaultsDeep({}, { total: 0, deleted: 0, active: 0 });
+          }
+          dist[item.account_id] = { total: item.total, deleted: item.deleted, active: item.active };
+        });
+        return dist;
+      });
+  },
+
+  // Get data about ssl_certs_per_type on moment call function or custom day
+  //  account_id can be array of IDs, one ID(string) or nothing to return data for all accounts
+  accountSSLCertificatePerTypeData: function(account_id, day_) {
+    var day = _.clone(day_);
+    var pipline = [];
+    var from, to ;
+    if(!day){
+      day = new Date();
+    }
+    if(!!day){
+      from = day.setUTCHours( 0, 0, 0, 0 );
+      to = day.setUTCHours( 24, 0, 0, 0 );
+    }
+    // NOTE: get total sum all SSL Certs on end of day
+    var match_ = {
+      $match: {
+        $and: [
+          { created_at: { $lt: new Date(to) } }, {
+            $or: [
+              { deleted: { $ne: true } },
+              { deleted: { $ne: false } }
+            ]
+          }
+        ]
+      }
+    };
+    if (account_id) {
+      var accountId ;
+       if ( _.isArray( account_id ) ) {
+        accountId = { $in: account_id.map( function( id ) {
+          return mongoose.Types.ObjectId( id );
+        }) };
+      } else {
+        accountId = mongoose.Types.ObjectId( account_id );
+      }
+      match_.$match.$and.push({ account_id: accountId });
+    }
+    pipline.push(match_);
+    //
+    pipline.push({
+      $project: {
+        account_id: 1,
+        cert_type: 1,
+        deleted: 1
+      }
+    });
+    // Group and get tatal sum for active and deleted apps
+    pipline.push({
+      $group: {
+        _id: { account_id: '$account_id', cert_type: '$cert_type' },
+        deleted: { $sum: { $cond: [{ $ne: ['$deleted', false] }, 1, 0] } },
+        active: { $sum: { $cond: [{ $ne: ['$deleted', true] }, 1, 0] } },
+        total: { $sum: 1 }
+      }
+    });
+    //
+    pipline.push({
+      $project: {
+        _id: '$_id.account_id',
+        account_id: '$_id.account_id',
+        name: '$_id.cert_type',
+        deleted: 1,
+        active: 1,
+        total: 1
+      }
+    });
+    return this.model.aggregate(pipline)
+      .exec()
+      .then(function(data) {
+        var dist = {};
+        data.forEach(function(item) {
+          if (!dist[item.account_id]) {
+            dist[item.account_id] = _.defaultsDeep({}, SSL_CERTIFICATES_DEFAULT_DATA_OBJECT);
+          }
+          dist[item.account_id][item.name] = { total: item.total, deleted: item.deleted, active: item.active };
+        });
+        return dist;
+      });
+  },
+   /**
+   * @name getExpiringSSLCertificatesByTimePeriod
+   * @description method get information about expiring SSL Certificates witch will expire on time period
+   * time period between actual day and date in future (all dates is included)
+   * @param {{Object}} options {actualDay?:date,expireDate?:date }
+   * @return {{Function}}
+   */
+  getExpiringSSLCertificatesByTimePeriod: function(options,cb){
+    var countDays = 60; //NOTE: default count days for time period
+    var actualDay = moment(options.actualDate).utc();
+    var expireDate = moment(options.expireDate) || new moment(actualDay).utc().add(countDays,'days').endOf('day');
+    var where =  {
+      $and: [
+        { expires_at: { $gte: actualDay.startOf('day').toDate() } }, // NOTE: Don’t get already expired certs
+        { expires_at: { $lte: expireDate.toDate()}}
+      ],
+      deleted: { $ne: true }
+    };
+    var fields = 'id account_id cert_name cert_type domains expires_at';
+    this.model.find(where, fields)
+      .lean() // NOTE: return plain javascript objects
+      .exec()
+      .then(function(data){
+        data.forEach(function(itemData) {
+          itemData.cert_id = itemData._id.toString();
+          delete itemData._id;
+          if(itemData.domains.length>0){
+            itemData.domains = itemData.domains.split(',');
+            itemData.domains = _.uniq(itemData.domains,true);
+          }else{
+            itemData.domains = [];
+          }
+        });
+        cb(null,data);
+      })
+      .catch(cb);
+  }
 };
 
 module.exports = SSLCertificate;
