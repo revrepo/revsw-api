@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -43,7 +43,7 @@ describe('Negative check', function () {
           API.session.reset();
           API.resources.locations
             .firstMile()
-            .getOne()
+            .getAll()
             .expect(401)
             .end(done);
         });
@@ -53,7 +53,7 @@ describe('Negative check', function () {
           API.session.reset();
           API.resources.locations
             .lastMile()
-            .getOne()
+            .getAll()
             .expect(401)
             .end(done);
         });

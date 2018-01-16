@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -23,66 +23,100 @@ var config = require('config');
 
 var API = require('./../../common/api');
 
-describe('Functional check', function () {
+describe('Functional check', function() {
   this.timeout(config.get('api.request.maxTimeout'));
 
-  // Retrieving information about specific user that later we will use for
-  // our API requests.
-  var resellerUser = config.get('api.users.reseller');
+  // Defining set of credentials for which all below tests will be run
+  var credentialList = [
+    config.get('api.users.revAdmin'),
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.users.user'),
+    config.get('api.apikeys.admin'),
+    config.get('api.apikeys.reseller')
+  ];
 
-  before(function (done) {
-    done();
-  });
+  credentialList.forEach(function(user) {
 
-  after(function (done) {
-    done();
-  });
-
-  describe('Locations resource', function () {
-    it('should return `first-mile` data.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .firstMile()
-              .getOne()
-              .expect(200)
-              .then(function (response) {
-                var locations = response.body;
-                locations.should.not.be.undefined();
-                locations.length.should.greaterThanOrEqual(0);
-                locations.forEach(function (location) {
-                  location.id.should.not.be.undefined();
-                });
-                done();
-              })
-              .catch(done);
-          })
-          .catch(done);
+    describe('With user: ' + user.role, function() {
+      before(function(done) {
+        done();
       });
 
-    it('should return `last-mile` data.',
-      function (done) {
-        API.helpers
-          .authenticateUser(resellerUser)
-          .then(function () {
-            API.resources.locations
-              .lastMile()
-              .getOne()
-              .expect(200)
-              .then(function (response) {
-                var locations = response.body;
-                locations.should.not.be.undefined();
-                locations.length.should.greaterThanOrEqual(0);
-                locations.forEach(function (location) {
-                  location.id.should.not.be.undefined();
-                });
-                done();
+      after(function(done) {
+        done();
+      });
+
+      describe('Locations resource', function() {
+        it('should return `first-mile` data if not send "account_id"',
+          function(done) {
+            API.helpers
+              .authenticate(user)
+              .then(function() {
+                API.resources.locations
+                  .firstMile()
+                  .getAll()
+                  .expect(200)
+                  .then(function(response) {
+                    var locations = response.body;
+                    locations.should.not.be.undefined();
+                    locations.length.should.greaterThanOrEqual(0);
+                    locations.forEach(function(location) {
+                      location.id.should.not.be.undefined();
+                    });
+                    done();
+                  })
+                  .catch(done);
               })
               .catch(done);
-          })
-          .catch(done);
+          });
+
+          it('should return `first-mile` data if send account_id',
+          function(done) {
+            API.helpers
+              .authenticate(user)
+              .then(function() {
+                API.resources.locations
+                  .firstMile()
+                  .getAll({account_id: user.account.id})
+                  .expect(200)
+                  .then(function(response) {
+                    var locations = response.body;
+                    locations.should.not.be.undefined();
+                    locations.length.should.greaterThanOrEqual(0);
+                    locations.forEach(function(location) {
+                      location.id.should.not.be.undefined();
+                    });
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+        it('should return `last-mile` data.',
+          function(done) {
+            API.helpers
+              .authenticate(user)
+              .then(function() {
+                API.resources.locations
+                  .lastMile()
+                  .getAll()
+                  .expect(200)
+                  .then(function(response) {
+                    var locations = response.body;
+                    locations.should.not.be.undefined();
+                    locations.length.should.greaterThanOrEqual(0);
+                    locations.forEach(function(location) {
+                      location.id.should.not.be.undefined();
+                    });
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
       });
+    });
   });
 });
