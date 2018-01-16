@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -36,6 +36,11 @@ module.exports = [
       },
       handler: locations.getFirstMileLocations,
       description: 'Get a list of first mile network locations',
+      validate:{
+        query:{
+          account_id: Joi.objectId().optional().trim().description('ID of a company')
+        }
+      },
       tags: ['api', 'locations'],
       plugins: {
         'hapi-swagger': {
