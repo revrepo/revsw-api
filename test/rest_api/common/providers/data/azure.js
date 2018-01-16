@@ -64,7 +64,7 @@ var AzureDataProvider = {
     return complete;
   },
   generateResourceName: function () {
-    return 'azureResource-' + Date.now();
+    return 'azureresource-' + Date.now();
   }
 };
 
