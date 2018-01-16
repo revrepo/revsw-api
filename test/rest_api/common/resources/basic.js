@@ -368,10 +368,11 @@ var BasicResource = function (data) {
      *
      * @returns {object} the supertest-as-promised instance
      */
-    _resource.deleteOne = function (id) {
+    _resource.deleteOne = function (id, payload) {
       var location = getPath(data, id);
       var request = getRequest()
-        .del(location);
+        .del(location)
+        .send(payload);
       return setUserToRequest(request);
     };
   }

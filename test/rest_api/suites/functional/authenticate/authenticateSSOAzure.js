@@ -17,6 +17,8 @@
  */
 
 require('should-http');
+var should = require('should');
+var request = require('supertest-as-promised');
 
 var config = require('config');
 var API = require('./../../../common/api');
@@ -29,6 +31,13 @@ describe('Functional check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
 
   var user = config.get('api.users.reseller');
+
+  var provider = AzureDP.generateOne().provider;
+  var subscription = AzureDP.generateOne().subscription_id;
+  var resourceGroupName = AzureDP.generateOne().resource_group_name;
+  var resourceName = AzureDP.generateOne().resource_name;
+  var location = AzureDP.generateLocation();
+  var testAPIUrl = API.helpers.getAPIURL();
 
   before(function (done) {
     done();
@@ -48,14 +57,48 @@ describe('Functional check', function () {
       done();
     });
 
+    it('should return a token when authenticating Azure SSO Token',
+      function (done) {
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider)
+              .update(resourceName, location)
+              .expect(200)
+              .then(function () {
+                API.resources.azure
+                  .subscriptions()
+                  .resourceGroups(subscription)
+                  .providers(resourceGroupName)
+                  .accounts(provider)
+                  .listSingleSignOnToken(resourceName)
+                  .createOne()
+                  .expect(200)
+                  .then(function (res) {
+                    API.resources.authenticateSSOAzure
+                      .createOne({ token: res.body.token, resourceId: res.body.resourceId })
+                      .expect(200)
+                      .then(function (res) {
+                        should(res.body.token).not.equal(undefined);
+                        done();
+                      })
+                      .catch(done);
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+
     it('should generate a different token each time',
       function (done) {
         var tokens = [];
-        var provider = AzureDP.generateOne().provider;
-        var subscription = AzureDP.generateOne().subscription_id;
-        var resourceGroupName = AzureDP.generateOne().resource_group_name;
-        var resourceName = AzureDP.generateOne().resource_name;
-        var location = AzureDP.generateLocation();
         API.helpers
           .authenticateAzureKey(azureKey)
           .then(function () {
@@ -104,5 +147,49 @@ describe('Functional check', function () {
           })
           .catch(done);
       });
+
+
+    describe('API Requests using SSO authentication token', function () {
+
+      var authToken = {};
+
+      before(function (done) {
+        API.helpers
+          .authenticateAzureKey(azureKey)
+          .then(function () {
+            API.resources.azure
+              .subscriptions()
+              .resourceGroups(subscription)
+              .providers(resourceGroupName)
+              .accounts(provider)
+              .listSingleSignOnToken(resourceName)
+              .createOne()
+              .expect(200)
+              .then(function (res) {
+                authToken.resourceId = res.body.resourceId;
+                authToken.token = res.body.token;
+                done();
+              })
+              .catch(done);
+          })
+          .catch(done);
+      });
+
+      it('should successfully send a request to the API using the authentication token',
+        function (done) {
+          API.helpers.authenticate(authToken)
+            .then(function () {
+              API.resources.users
+                .myself()
+                .getOne()
+                .expect(200)
+                .then(function (res) {
+                  res.body.lastname.should.containEql(resourceName);
+                  done();
+                })
+                .catch(done);
+            });
+        });
+    });
   });
 });

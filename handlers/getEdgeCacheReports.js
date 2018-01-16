@@ -292,7 +292,7 @@ function getDataCacheObjects(options, cb) {
                 } catch (e) {}
               }
             }
-            if(!!argData_.origin_response && !!argData_.origin_response && !!argData_.origin_response.average_origin_response_time_sec.value) {
+            if(!!argData_.origin_response && !!argData_.origin_response.average_origin_response_time_sec.value) {
               try {
                 response.average_origin_response_time_ms = parseFloat(parseFloat(argData_.origin_response.average_origin_response_time_sec.value / 1000)
                   .toFixed(3));

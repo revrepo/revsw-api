@@ -24,7 +24,6 @@ var config = require('config');
 var API = require('./../../common/api');
 var AccountsDP = require('./../../common/providers/data/accounts');
 var DataProvider = require('./../../common/providers/data');
-var account_id = config.get('api.usage_report.account_id');
 
 describe('Smoke check', function () {
   this.timeout(config.api.request.maxTimeout);
@@ -32,12 +31,16 @@ describe('Smoke check', function () {
   var users = [
    config.get('api.users.revAdmin'),
    config.get('api.users.secondReseller'),
-   config.get('api.users.admin')
+   config.get('api.users.admin'),
+   config.get('api.apikeys.admin'),
+   config.get('api.apikeys.reseller')
   ];
   
   users.forEach(function(user) {
 
     describe('With user: ' + user.role, function() {
+
+      var account_id = user.key ? user.account.id : config.get('api.usage_report.account_id');
 
       before(function(done) {
         done();
@@ -52,7 +55,7 @@ describe('Smoke check', function () {
         it('should return a success response when getting specific account usage report with user-role user.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .getAll({account_id: account_id})
@@ -65,7 +68,7 @@ describe('Smoke check', function () {
         it('should return a success response when getting specific account usage histogram with user-role user.', 
           function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
                 API.resources.usage_report
                   .stats()

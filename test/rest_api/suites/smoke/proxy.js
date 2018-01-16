@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2017] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,29 +20,25 @@ require('should-http');
 
 var config = require('config');
 var API = require('./../../common/api');
-var DataProvider = require('./../../common/providers/data');
 
 describe('Smoke check', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.api.request.maxTimeout);
-    before(function (done) {
-      done();
-    });
+  this.timeout(config.get('api.request.maxTimeout'));
 
-    after(function (done) {
-      done();
-    });
+  describe('Proxy resource', function () {
 
-    describe('SDK Configs resource', function () {
+    var proxyWhiteRefererURLs = config.get('proxy_white_referer_urls');
 
-      it('should return a success response when getting specific app SDK Config with user-role user.',
+    proxyWhiteRefererURLs.forEach(function (url) {
+      it('should return success response for `' + url + '`',
         function (done) {
-          var sdk_key = DataProvider.generateSDKConfig().sdk_key;
-          API.resources.sdkConfigs
-            .getOne(sdk_key)
+          API.resources.proxy
+            .getOne()
+            .set('Referer', url)
             .expect(200)
             .end(done);
         });
     });
+  });
 });

@@ -23,112 +23,101 @@ var API = require('./../../common/api');
 var UsersDP = require('./../../common/providers/data/users');
 var MailinatorHelper = require('./../../common/helpers/external/mailinator');
 
-var users = [
-  config.get('api.users.revAdmin'),
-  config.get('api.users.reseller'),
-  config.get('api.users.admin'),
-  config.get('api.apikeys.reseller'),
-  config.get('api.apikeys.admin')
-];
-users.forEach(function (user) {
-  describe('Smoke check with ' + user.role, function() {
-    this.timeout(config.get('api.request.maxTimeout'));
-  
-  
-    describe('Sign Up resource', function() {
-      var revAdmin = config.get('api.users.revAdmin');
-  
-      it('should return sucess response when signing up user using a random billing plan',
-        function(done) {
-          API.helpers
-            .authenticate(user)
-            .then(function() {
-              return API.helpers.billingPlans.getRandomOne();
-            })
-            .then(function(bPlan) {
-              API.session.reset();
-              var newUser = API.providers.data.users.generateToSignUp({
-                billingPlan: bPlan.chargify_handle
-              });
+describe('Smoke check', function () {
+  this.timeout(config.get('api.request.maxTimeout'));
+
+  describe('Sign Up resource', function () {
+    var revAdmin = config.get('api.users.revAdmin');
+
+    it('should return sucess response when signing up user using a random billing plan',
+      function (done) {
+        API.helpers
+          .authenticate(revAdmin)
+          .then(function () {
+            return API.helpers.billingPlans.getRandomOne();
+          })
+          .then(function (bPlan) {
+            API.session.reset();
+            var newUser = API.providers.data.users.generateToSignUp({
+              billingPlan: bPlan.chargify_handle
+            });
+            API.resources.signUp
+              .createOne(newUser)
+              .expect(200)
+              .end(done);
+          })
+          .catch(done);
+      });
+
+    describe('for just signed-up user', function () {
+      var testUser;
+      beforeEach(function (done) {
+        API.helpers.signUp.createOne()
+          .then(function (user) {
+            testUser = user;
+            done();
+          })
+          .catch(done);
+      });
+
+      afterEach(function (done) {
+        done();
+      });
+
+      it('should return success response when resending confirmation email',
+        function (done) {
+          API.resources.signUp
+            .resend()
+            .getOne(testUser.email)
+            .expect(200)
+            .end(done);
+        });
+
+      it('should return success response when verifying token from user`s email',
+        function (done) {
+          MailinatorHelper
+            .getVerificationToken(testUser.email, 'New User Email Verification Request')
+            .then(function (token) {
               API.resources.signUp
-                .createOne(newUser)
+                .verify()
+                .getOne(token)
                 .expect(200)
                 .end(done);
             })
             .catch(done);
         });
-  
-      describe('for just signed-up user', function() {
-        var testUser;
-        beforeEach(function(done) {
-          API.helpers.signUp.createOne()
-            .then(function(user) {
-              testUser = user;
+    });
+
+    describe('for just signed-up and verified user', function () {
+      var testUser;
+      beforeEach(function (done) {
+        API.helpers.signUpAndVerifyUser()
+          .then(function (user) {
+            testUser = user;
+            return testUser;
+          })
+          .then(function () {
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should be created an empty dashboard',
+        function (done) {
+          API.helpers
+            .authenticateUser(testUser)
+            .then(function () {
+              return API.resources.dashboards
+                .getAll()
+                .expect(200);
+            })
+            .then(function (response) {
+              var dashboards = response.body;
+              dashboards.should.be.instanceof(Array).and.have.lengthOf(1);
               done();
             })
             .catch(done);
         });
-  
-        afterEach(function(done) {
-          done();
-        });
-  
-        it('should return success response when resending confirmation email',
-          function(done) {
-            API.resources.signUp
-              .resend()
-              .getOne(testUser.email)
-              .expect(200)
-              .end(done);
-          });
-  
-        it('should return success response when verifying token from user`s email',
-          function(done) {
-            MailinatorHelper
-              .getVerificationToken(testUser.email, 'New User Email Verification Request')
-              .then(function(token) {
-                API.resources.signUp
-                  .verify()
-                  .getOne(token)
-                  .expect(200)
-                  .end(done);
-              })
-              .catch(done);
-          });
-      });
-  
-      describe('for just signed-up and verified user', function() {
-        var testUser;
-        beforeEach(function(done) {
-          API.helpers.signUpAndVerifyUser()
-            .then(function(user) {
-              testUser = user;
-              return testUser;
-            })
-            .then(function() {
-              done();
-            })
-            .catch(done);
-        });
-  
-        it('should be created an empty dashboard',
-          function(done) {
-            API.helpers
-              .authenticateUser(testUser)
-              .then(function() {
-                return API.resources.dashboards
-                  .getAll()
-                  .expect(200);
-              })
-              .then(function(response) {
-                var dashboards = response.body;
-                dashboards.should.be.instanceof(Array).and.have.lengthOf(1);
-                done();
-              })
-              .catch(done);
-          });
-      });
     });
   });
-  
 });
