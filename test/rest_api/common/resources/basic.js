@@ -58,16 +58,16 @@ var getRequest = function () {
 var setUserToRequest = function (request) {
   var user = Session.getCurrentUser();
   var azureKey = Session.getCurrentAzureKey();
-  
+
   if (azureKey) {
     // azure authentication
-    return request.set('Authorization', 'Bearer-RP ' + azureKey.azureKey);    
+    return request.set('Authorization', 'Bearer-RP ' + azureKey.azureKey);
   } else if (user && user.key === undefined) {
     // user authentication
-    return request.set('Authorization', 'Bearer ' + user.token);    
+    return request.set('Authorization', 'Bearer ' + user.token);
   } else if (user && user.key) {
     // API key authentication
-    return request.set('Authorization', 'X-API-KEY ' + user.key);    
+    return request.set('Authorization', 'X-API-KEY ' + user.key);
   }
 
   return request;

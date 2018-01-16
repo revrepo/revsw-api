@@ -33,6 +33,7 @@ var resourceConfig = {
       name: 'firstMile',
       path: '/firstmile',
       methods: [
+        Methods.READ_ALL,
         Methods.READ_ONE
       ]
     },
@@ -41,6 +42,7 @@ var resourceConfig = {
       name: 'lastMile',
       path: '/lastmile',
       methods: [
+        Methods.READ_ALL,
         Methods.READ_ONE
       ]
     }, {

@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -26,19 +26,18 @@ describe('Smoke check', function() {
 
   // Retrieving information about specific user that later we will use for
   // our API requests.
-  var resellerUser = config.get('api.users.reseller');
-  var users = [
+  var listCredentials = [
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller'),
     config.get('api.users.admin'),
     config.get('api.users.user'),
     config.get('api.apikeys.admin'),
     config.get('api.apikeys.reseller')
-//    config.get('api.users.roUser')   // TODO: need to add RO users for every role. 
+//    config.get('api.users.roUser')   // TODO: need to add RO users for every role.
 // Or better we need to automatically create necessary test users...
   ];
 
-  users.forEach(function(user) {
+  listCredentials.forEach(function(user) {
 
     describe('With user: ' + user.role, function() {
 
@@ -54,11 +53,11 @@ describe('Smoke check', function() {
         it('should return a response when getting `first-mile`.',
           function(done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function() {
                 API.resources.locations
                   .firstMile()
-                  .getOne()
+                  .getAll()
                   .expect(200)
                   .end(done);
               })
@@ -68,11 +67,11 @@ describe('Smoke check', function() {
         it('should return a response when getting `last-mile`.',
           function(done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function() {
                 API.resources.locations
                   .lastMile()
-                  .getOne()
+                  .getAll()
                   .expect(200)
                   .end(done);
               })
@@ -82,7 +81,7 @@ describe('Smoke check', function() {
         it('should return a response when getting `billing_zones`.',
           function(done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function() {
                 API.resources.locations
                   .billingZones()
