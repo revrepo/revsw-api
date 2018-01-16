@@ -79,7 +79,49 @@ AuditEvents.prototype = {
       }
       callback(err, data);
     });
-  }  
+  },
+
+  summary : function (request, callback) {
+    var requestBody = [
+      {
+        $match : request
+      },
+      {
+        $group : {
+          _id    : {
+            ip_address        : '$meta.ip_address',
+            user_id          : '$meta.user_id',
+            email            : '$meta.target_object.email',
+            firstname        : '$meta.target_object.firstname',
+            lastname         : '$meta.target_object.lastname',
+            activity_type    : '$meta.activity_type',
+            activity_target  : '$meta.activity_target',
+            operation_status : '$meta.operation_status'
+          },
+          amount : {
+            $sum : 1
+          }
+        }
+      }
+    ];
+
+    this.model.aggregate(requestBody, function (err, auditevents) {
+      var data = [];
+      for (var key in auditevents) {
+        var innerData = {
+          activity_target  : auditevents[key]._id.activity_target,
+          activity_type    : auditevents[key]._id.activity_type,
+          email            : auditevents[key]._id.email,
+          firstname        : auditevents[key]._id.firstname,
+          lastname         : auditevents[key]._id.lastname,
+          operation_status : auditevents[key]._id.operation_status,
+          amount           : auditevents[key].amount
+        };
+        data.push(innerData);
+      }
+      callback(err, data);
+    });
+  }
 };
 
 module.exports = AuditEvents;

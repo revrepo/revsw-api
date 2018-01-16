@@ -14,5 +14,8 @@
     "domain": "https://nuubit-test.chargify.com",
     "api_key": "0WMnGbZ6E5aFtNMjeI2oGjWWpjfjTIu7Y1OCTWjs",
     "shared_key": "KGXNkhdMAEjgosppDso5vm9xWfx5449b0vkfgII2Yug"
-  }
+  },
+  "proxy_white_referer_urls": [
+    "https://testsjc20-api01.revsw.net/"
+  ]
 }
