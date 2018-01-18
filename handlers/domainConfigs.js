@@ -136,7 +136,7 @@ exports.getDomainConfigStatus = function(request, reply) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration status for domain ' + domain_id));
       }
       var response_json = JSON.parse(body);
-      if (res.statusCode === 400) {
+      if (res.statusCode === 400 || res.statusCode === 500) {
         return reply(boom.badRequest(response_json.message));
       } else {
         renderJSON(request, reply, err, response_json);
@@ -250,7 +250,10 @@ exports.getDomainConfig = function(request, reply) {
           };
         }) : [];
       response.github_integration = response_json.github_integration;
-
+      // NOTE: only revAdmin can see bp_group_id
+      if(request.auth.credentials.role === 'revadmin'){
+        response.bp_group_id = response_json.bp_group_id;
+      }
       renderJSON(request, reply, err, response);
     });
   });
@@ -403,8 +406,12 @@ exports.createDomainConfig = function(request, reply) {
     // NOTE: Account has property "vendor_profile". We need get additional parameter 'cname_domain' from them
     var accountVendorProfile = vendorProfiles[ account.vendor_profile ] || deafultVendorProfile;
     newDomainJson.cname_domain = accountVendorProfile.cname_domain;
-    // NOTE: Set special BP Server Group
-    if(!!account.bp_group_id){
+    // NOTE: Only RevAdmin can set value for propery "bp_group_id"
+    if(request.auth.credentials.role !== 'revadmin'){
+      delete newDomainJson.bp_group_id;
+    }
+    // NOTE: Set special BP Server Group from User Account if it not exists
+    if(!newDomainJson.bp_group_id && !!account.bp_group_id){
       newDomainJson.bp_group_id = account.bp_group_id;
     }
     if (false /* TODO need to restore a check for status of account.billing_plan */ ) {
@@ -561,6 +568,14 @@ exports.updateDomainConfig = function(request, reply) {
       if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
         return reply(boom.badRequest('Account ID not found'));
       }
+      // NOTE: Only RevAdmin can change value "bp_group_id"
+      if(request.auth.credentials.role !== 'revadmin'){
+        if(!!result.bp_group_id && !!newDomainJson.bp_group_id){
+          if(result.bp_group_id.toString() !== newDomainJson.bp_group_id){
+            return reply(boom.badRequest('Property "bp_group_id" can`t be changed'));
+          }
+        }
+      }
       // NOTE: validation dependencies values of properties
       if(!!newDomainJson.image_engine && newDomainJson.image_engine.enable_image_engine === true){
         if(newDomainJson.rev_component_bp.enable_cache === false){
@@ -622,6 +637,8 @@ exports.updateDomainConfig = function(request, reply) {
         delete newDomainJson.enable_enhanced_analytics;
         var _githubIntegration = newDomainJson.github_integration;
         delete newDomainJson.github_integration;
+        var _bpGroupId = newDomainJson.bp_group_id;
+        delete newDomainJson.bp_group_id;
 
         var newDomainJson2 = {
           updated_by: utils.generateCreatedByField(request),
@@ -639,7 +656,8 @@ exports.updateDomainConfig = function(request, reply) {
           co_lua: coLua,
           co_lua_enable_all: _coLuaEnabled,
           enable_enhanced_analytics: _enableEnhancedAnalytics,
-          github_integration: _githubIntegration
+          github_integration: _githubIntegration,
+          bp_group_id: _bpGroupId
         };
 
         logger.info('Calling CDS to update configuration for domain ID: ' + domainId + ', optionsFlag: ' + optionsFlag + ', request body: ' +
