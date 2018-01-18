@@ -136,8 +136,10 @@ exports.getDomainConfigStatus = function(request, reply) {
         return reply(boom.badImplementation('Failed to get from CDS the configuration status for domain ' + domain_id));
       }
       var response_json = JSON.parse(body);
-      if (res.statusCode === 400 || res.statusCode === 500) {
+      if (res.statusCode === 400) {
         return reply(boom.badRequest(response_json.message));
+      } else if ( res.statusCode === 500) {
+        return reply(boom.badImplementation(response_json.message));
       } else {
         renderJSON(request, reply, err, response_json);
       }
