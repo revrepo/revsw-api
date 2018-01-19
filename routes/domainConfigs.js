@@ -398,7 +398,7 @@ module.exports = [{
             }),
 
             // TODO: add proper descriptions
-            enable_wallarm: Joi.boolean().default(false),
+            enable_wallarm: Joi.boolean(),
             wallarm_config: Joi.array().items({
               location                  : Joi.string().required().default('/'),
               wallarm_mode              : Joi.string().required().valid('off','monitoring','block','aggressive').default('off'),
