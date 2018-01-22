@@ -53,7 +53,8 @@
     "https://iad02-portal01.revsw.net",
     "https://testsjc20-portal01.revsw.net",
     "https://testsjc20-portal-nuubit.revsw.net",
-    "https://testsjc20-portal-hooli.revsw.net"
+    "https://testsjc20-portal-hooli.revsw.net",
+    "https://testsjc20-api01.revsw.net"
   ],
   "notify_admin_by_email_on_customer_activities":"",
   "notify_admin_by_email_on_customer_singup_action": "",

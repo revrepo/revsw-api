@@ -40,17 +40,28 @@ var BP_GROUP_ID_DEFAULT_ = config.get('bp_group_id_default');
 
 /**
  * @name getFirstMileLocations
- * @description
+ * @description method return all avalibel Firdt Mile Locations
  *
  * @param {*} request
  * @param {*} reply
  */
 exports.getFirstMileLocations = function(request, reply) {
-  var parentAccountId =utils.getAccountID(request,true);
-  var optionsForSergerGroup = {};
+  var accountId = request.query.account_id;
+  var parentAccountId = utils.getAccountID(request,true);
+  var optionsForServerGroup = {};
   var listOfSites = [];
   // NOTE: main workflow
   async.waterfall([
+    function chekPermissionToParentAccount(cb) {
+      if (!!accountId && !utils.checkUserAccessPermissionToAccount(request, accountId)) {
+        return cb(boom.badRequest('Account ID not found'));
+      }else{
+        if(!!accountId){
+          parentAccountId =  accountId;
+        }
+      }
+      cb();
+    },
     function(cb){
       if(request.auth.credentials.role === 'revadmin'){
         cb();
@@ -60,17 +71,17 @@ exports.getFirstMileLocations = function(request, reply) {
             return cb(boom.badImplementation('Account not found'));
           }
           if(accountData && accountData.bp_group_id){
-            optionsForSergerGroup.bp_group_id = accountData.bp_group_id;
+            optionsForServerGroup.bp_group_id = accountData.bp_group_id;
           }else{
             // NOTE: default BP Group Id
-            optionsForSergerGroup.bp_group_id = BP_GROUP_ID_DEFAULT_;
+            optionsForServerGroup.bp_group_id = BP_GROUP_ID_DEFAULT_;
           }
           cb();
         });
       }
     },
     function(cb){
-      servergroups.listFirstMileLocations(optionsForSergerGroup,function(error, result) {
+      servergroups.listFirstMileLocations(optionsForServerGroup,function(error, result) {
         if (error) {
           return cb(boom.badImplementation('Failed to retrive from the database a list of first mile locations'));
         }

@@ -220,6 +220,7 @@ module.exports = [{
           ]).required().description('Origin server host name or IP address'),
           origin_server_location_id: Joi.objectId().required().description('The ID of origin server location'),
           tolerance: Joi.string().regex(/^\d+$/).min(1).max(10).optional().description('APEX metric for RUM reports (default value 3 seconds)'),
+          bp_group_id: Joi.objectId().optional().description('BP Server Group ID the domain should be created'),
           comment: Joi.string().allow('').max(300).description('Comment')
         }
       },
@@ -397,7 +398,7 @@ module.exports = [{
             }),
 
             // TODO: add proper descriptions
-            enable_wallarm: Joi.boolean().default(false),
+            enable_wallarm: Joi.boolean(),
             wallarm_config: Joi.array().items({
               location                  : Joi.string().required().default('/'),
               wallarm_mode              : Joi.string().required().valid('off','monitoring','block','aggressive').default('off'),
@@ -491,7 +492,8 @@ module.exports = [{
               is: true, then: Joi.string().regex(routeModels.gihubPersonalAccessToken).required(),
               otherwise: Joi.string().allow('').optional()
             }).description('Personal API Key GitHub'),
-          }).description('GitHub Integration')
+          }).description('GitHub Integration'),
+          bp_group_id: Joi.objectId().optional().description('BP Server Group ID')
         }
       },
       //      response    : {

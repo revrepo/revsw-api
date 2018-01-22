@@ -310,7 +310,8 @@ exports.accountModel = Joi.object({
   created_at: Joi.date().required().description('Account creation date/time'),
   updated_at: Joi.date().required().description('Account last update date/time'),
   self_registered: Joi.boolean().description('Account was registered by user'),
-  valid_payment_method_configured: Joi.boolean().optional().description('Subscription valid payment method configured')
+  valid_payment_method_configured: Joi.boolean().optional().description('Subscription valid payment method configured'),
+  bp_group_id: Joi.objectId().optional().description('Account Server Group Id')
 }).meta({
   className: 'Account Details'
 });

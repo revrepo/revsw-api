@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2016] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -23,39 +23,43 @@ var config = require('config');
 
 var API = require('./../../common/api');
 
-describe('CRUD check', function () {
+describe('CRUD check', function() {
   this.timeout(config.get('api.request.maxTimeout'));
+  describe('Locations resource', function() {
+    // Defining set of users for which all below tests will be run
+    var users = [
+      config.get('api.users.revAdmin'),
+      config.get('api.users.reseller'),
+      config.get('api.users.admin'),
+      config.get('api.users.user'),
+      config.get('api.apikeys.admin'),
+      config.get('api.apikeys.reseller')
+    ];
 
-  // Defining set of users for which all below tests will be run
-  var users = [
-    config.get('api.users.revAdmin'),
-    config.get('api.users.reseller')
-  ];
+    users.forEach(function(user) {
 
-  users.forEach(function (user) {
+      describe('With user: ' + user.role, function() {
 
-    describe('With user: ' + user.role, function () {
 
-      describe('Locations resource', function () {
 
-        before(function (done) {
+        before(function(done) {
           done();
         });
 
-        after(function (done) {
+        after(function(done) {
           done();
         });
 
         it('should allow to get `first-mile` data.',
-          function (done) {
+          function(done) {
             API.helpers
-              .authenticateUser(user)
-              .then(function () {
+              .authenticate(user)
+              .then(function() {
                 API.resources.locations
                   .firstMile()
                   .getOne()
                   .expect(200)
-                  .then(function (response) {
+                  .then(function(response) {
                     var locations = response.body;
                     locations.should.not.be.undefined();
                     locations.length.should.greaterThanOrEqual(0);
@@ -67,15 +71,15 @@ describe('CRUD check', function () {
           });
 
         it('should allow to get `last-mile` data.',
-          function (done) {
+          function(done) {
             API.helpers
-              .authenticateUser(user)
-              .then(function () {
+              .authenticate(user)
+              .then(function() {
                 API.resources.locations
                   .lastMile()
                   .getOne()
                   .expect(200)
-                  .then(function (response) {
+                  .then(function(response) {
                     var locations = response.body;
                     locations.should.not.be.undefined();
                     locations.length.should.greaterThanOrEqual(0);

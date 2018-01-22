@@ -55,6 +55,32 @@ function AuditEvents(mongoose, connection, options) {
 }
 
 AuditEvents.prototype = {
+
+  list: function(params, callback) {
+    this.model.find(params, function(err, results) {
+      if(!err && results){
+        results = _.map(results,function(item){
+          return {
+            ip_address: item.meta.ip_address,
+            user_id: item.meta.user_id,
+            user_name: item.meta.user_name,
+            user_type: item.meta.user_type,
+            account_id: item.meta.account_id,
+            datetime: item.meta.datetime,
+            account: item.meta.account,
+            activity_type: item.meta.activity_type,
+            activity_target: item.meta.activity_target,
+            target_name: item.meta.target_name,
+            target_id: item.meta.target_id,
+            operation_status: item.meta.operation_status,
+            target_object: item.meta.target_object
+          };
+        });
+      }
+      callback(err, results);
+    });
+  },
+
   detailed : function (request, callback) {
     this.model.find(request).sort({'timestamp': 'descending'}).limit(config.get('number_of_reported_audit_log_records')).exec( function (err, auditevents) {
       var data      = [];
@@ -79,7 +105,49 @@ AuditEvents.prototype = {
       }
       callback(err, data);
     });
-  }  
+  },
+
+  summary : function (request, callback) {
+    var requestBody = [
+      {
+        $match : request
+      },
+      {
+        $group : {
+          _id    : {
+            ip_address        : '$meta.ip_address',
+            user_id          : '$meta.user_id',
+            email            : '$meta.target_object.email',
+            firstname        : '$meta.target_object.firstname',
+            lastname         : '$meta.target_object.lastname',
+            activity_type    : '$meta.activity_type',
+            activity_target  : '$meta.activity_target',
+            operation_status : '$meta.operation_status'
+          },
+          amount : {
+            $sum : 1
+          }
+        }
+      }
+    ];
+
+    this.model.aggregate(requestBody, function (err, auditevents) {
+      var data = [];
+      for (var key in auditevents) {
+        var innerData = {
+          activity_target  : auditevents[key]._id.activity_target,
+          activity_type    : auditevents[key]._id.activity_type,
+          email            : auditevents[key]._id.email,
+          firstname        : auditevents[key]._id.firstname,
+          lastname         : auditevents[key]._id.lastname,
+          operation_status : auditevents[key]._id.operation_status,
+          amount           : auditevents[key].amount
+        };
+        data.push(innerData);
+      }
+      callback(err, data);
+    });
+  }
 };
 
 module.exports = AuditEvents;
