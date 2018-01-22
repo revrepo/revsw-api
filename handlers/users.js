@@ -353,7 +353,7 @@ exports.updateUser = function (request, reply) {
               if (!user) {
                 return cb('Cannot change role if you are the only one admin for the account');
               } else {
-                return users.update(updateUserData);
+                return cb();
               }
             });
         } else if (storedUserData.role === 'reseller') {
