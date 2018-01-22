@@ -25,24 +25,28 @@ var Joi = require('joi');
 var staginServersHandlers = require('../handlers/staginServers.js');
 var routeModels = require('../lib/routeModels');
 
-module.exports = [
-  {
-    method: 'GET',
-    path: '/v1/staging_servers',
-    config: {
-      auth: {
-        scope : ['user', 'admin', 'reseller', 'revadmin', 'apikey']
-      },
-      handler:  staginServersHandlers.getStaginServers,
-      description: 'List of Staging Servers',
-      tags: ['api'],
-      plugins: {
-        'hapi-swagger': {
-          responseMessages: routeModels.standardHTTPErrors
-        }
-      },
-       response: {
-        schema: routeModels.listOfStagingServersModel
+module.exports = [{
+  method: 'GET',
+  path: '/v1/staging_servers',
+  config: {
+    auth: {
+      scope: ['user', 'admin', 'reseller', 'revadmin', 'apikey']
+    },
+    handler: staginServersHandlers.getStaginServers,
+    description: 'List of Staging Servers',
+    tags: ['api'],
+    validate: {
+      query: {
+        account_id: Joi.objectId().optional().trim().description('ID of a company')
       }
+    },
+    plugins: {
+      'hapi-swagger': {
+        responseMessages: routeModels.standardHTTPErrors
+      }
+    },
+    response: {
+      schema: routeModels.listOfStagingServersModel
     }
-  }];
+  }
+}];
