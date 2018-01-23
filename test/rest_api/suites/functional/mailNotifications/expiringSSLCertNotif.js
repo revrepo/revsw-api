@@ -210,15 +210,17 @@ describe('Functional check', function () {
                                 .then(function (msg) {
                                     msg
                                         .data
-                                        .parts
+                                        .parts[0]
+                                        .body
                                         .should
                                         .containEql(expiringSSLCert.cert_name); // should contain the cert name somewhere in the body
 
                                     msg
                                         .data
-                                        .parts
+                                        .parts[0]
+                                        .body
                                         .should
-                                        .containEql('Dear ' + testUser.first_name); // should contain our user's first name
+                                        .containEql('Dear ' + testUser.firstname); // should contain our user's first name
                                     done();
                                 });
                         })
