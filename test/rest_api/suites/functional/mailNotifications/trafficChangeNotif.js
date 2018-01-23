@@ -63,7 +63,7 @@ describe('Functional check', function () {
         it('should successfully send an email if traffic change is detected',
             function (done) {
                 // setting our command
-                scriptCommand = 'node ./../../utils/notify_about_traffic_changes.js ' +
+                scriptCommand = 'nodejs ./../../utils/notify_about_traffic_changes.js ' +
                     '--alert_on_traffic_changes ' +
                     '--traffic_alerting_email ' +
                     email;

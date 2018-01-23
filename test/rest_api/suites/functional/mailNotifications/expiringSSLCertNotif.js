@@ -82,7 +82,7 @@ xdescribe('Functional check', function () {
         it('should successfully send an email if and expiring SSL Cert is detected',
             function (done) {
                 // setting our command
-                scriptCommand = 'node ./../../utils/notify_about_expiring_ssl_cert.js';
+                scriptCommand = 'nodejs ./../../utils/notify_about_expiring_ssl_cert.js';
                 exec(scriptCommand, function (err, stdout) {
                     console.log(stdout);
                     should(stdout).not.equal(null);
