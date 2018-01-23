@@ -20,9 +20,9 @@ require('should-http');
 
 var config = require('config');
 
-var API = require('./../../common/api');
-var AccountsDP = require('./../../common/providers/data/accounts');
-var DataProvider = require('./../../common/providers/data');
+var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
+var DataProvider = require('./../../../common/providers/data');
 var DELAY_AFTER_DELETE_DOMAIN_CONFIG_MS = 15 * 1000;
 
 describe('Functional check', function() {
