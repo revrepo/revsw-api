@@ -94,6 +94,34 @@ var MailinatorHelper = {
   },
 
   /**
+   * Gets all messages from Inbox from given Mailinator email address.
+   *
+   * @param {String} emailAddress
+   * @returns {Promise}
+   */
+  getAllMessages: function (emailAddress) {
+    return MailinatorResource
+      .getInbox(emailAddress)
+      .then(function (inbox) {
+        return inbox.messages;
+      });
+  },
+
+  /**
+ * Gets a message from Inbox from given Mailinator email address.
+ *
+ * @param {String} Message ID
+ * @returns {Promise}
+ */
+  getMessage: function (id) {
+    return MailinatorResource
+      .getEmail(id)
+      .then(function (email) {
+        return email;
+      });
+  },
+
+  /**
    * Gets the verification token from email just sent to given
    * Mailinator email address and a part of subject text.
    *

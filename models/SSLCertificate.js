@@ -274,13 +274,17 @@ SSLCertificate.prototype = {
     var countDays = 60; //NOTE: default count days for time period
     var actualDay = moment(options.actualDate).utc();
     var expireDate = moment(options.expireDate) || new moment(actualDay).utc().add(countDays,'days').endOf('day');
-    var where =  {
-      $and: [
+    var accountId = options.accountId;
+    var where =  {      
+      $and: [        
         { expires_at: { $gte: actualDay.startOf('day').toDate() } }, // NOTE: Don’t get already expired certs
         { expires_at: { $lte: expireDate.toDate()}}
       ],
       deleted: { $ne: true }
     };
+    if (accountId) {
+      where.account_id = { $in: [accountId] };
+    }
     var fields = 'id account_id cert_name cert_type domains expires_at';
     this.model.find(where, fields)
       .lean() // NOTE: return plain javascript objects
