@@ -18,7 +18,6 @@
 
 require('should-http');
 var should = require('should');
-var request = require('supertest-as-promised');
 
 var exec = require('child_process').exec;
 
@@ -63,7 +62,7 @@ describe('Functional check', function () {
         it('should successfully send an email if traffic change is detected',
             function (done) {
                 // setting our command
-                scriptCommand = 'nodejs ./../../utils/notify_about_traffic_changes.js ' +
+                scriptCommand = 'node ./../../utils/notify_about_traffic_changes.js ' +
                     '--alert_on_traffic_changes ' +
                     '--traffic_alerting_email ' +
                     email;
