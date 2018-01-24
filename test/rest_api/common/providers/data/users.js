@@ -60,7 +60,7 @@ var UsersDataProvider = {
     var user = {
       firstname: firstName,
       lastname: lastName,
-      email: [firstName, Date.now() + '@mailinator.com']
+      email: data.email || [firstName, Date.now() + '@mailinator.com']
         .join('-')
         .toLowerCase(),
       password: 'password1',
