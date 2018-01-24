@@ -21,7 +21,7 @@ var DomainConfigsDP = require('./../providers/data/domainConfigs');
 var APITestError = require('./../apiTestError');
 var Promise = require('bluebird');
 
-// # Users Helper
+// # Domain Configs Helper
 // Abstracts common functionality for the related resource.
 module.exports = {
 
@@ -41,7 +41,7 @@ module.exports = {
   waitForDomain: function (domainId) {
     return new Promise(function (resolve, reject) {
       var times = 15; // try 15 times
-      var interval = 3000; // every 3 sec
+      var interval = 5000; // every 5 sec
       var polling = function (times) {
         if (times <= 0) {
           reject();
@@ -58,7 +58,8 @@ module.exports = {
               } else {
                 resolve();
               }
-            });
+            })
+            .catch(reject);
         }
       };
 
