@@ -35,15 +35,19 @@ var MailinatorHelper = {
    * @param {String} emailAddress,
    * @param {Number} timeout, milliseconds
    * @param {String|null} subjectText, text in a email subject
+   * @param {Boolean} dontError, flag to show/not show error message after timeout
    */
-  waitWhileInboxIsEmpty: function (emailAddress, timeout, subjectText) {
+  waitWhileInboxIsEmpty: function (emailAddress, timeout, subjectText, dontError) {
     var _timeout = timeout || TIMEOUT;
     var _counter = 0;
 
     var _cb = function (inbox) {
       _counter += DELAY;
-      if (_counter > _timeout) {
+      if ((_counter > _timeout) && !dontError) {
         throw 'Timeout while getting Mailinator inbox for ' + emailAddress;
+      } else if ((_counter > _timeout) && dontError) {
+        // we dont want an error, just return the promise
+        return;
       }
       if (inbox && (inbox.messages.length > 0)) {
         // NOTE: wait specific email
