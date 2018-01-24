@@ -74,13 +74,7 @@ describe('Functional check', function () {
         var scriptCommand;
 
         before(function (done) {
-            oldEnv = process.env.NODE_ENV;
-            oldDir = process.env.NODE_CONFIG_DIR;
-            // setting node env and config dir to successfully run the script
-            process.env.NODE_ENV = 'unitTests';
-            process.env.NODE_CONFIG_DIR = './../../config';
-
-            // lets start creating an account, a user, domains and the SSL Certs we need!
+            // lets start by creating an account, a user, domains and the SSL Certs we need!
             API.helpers.authenticate(revAdmin)
                 .then(function () {
                     // creating an account for the certs
@@ -105,6 +99,7 @@ describe('Functional check', function () {
                         .expect(200);
                 })
                 .then(function (res) {
+                    // get the cert and save it
                     return API.resources.sslCerts
                         .getOne(res.body.id)
                         .expect(200);
@@ -140,6 +135,7 @@ describe('Functional check', function () {
                         .expect(200);
                 })
                 .then(function (res) {
+                    // get the cert and save it
                     return API.resources.sslCerts
                         .getOne(res.body.id)
                         .expect(200);
@@ -163,6 +159,13 @@ describe('Functional check', function () {
                         .expect(200);
                 })
                 .then(function () {
+                    // setting our command and env vars so that we can successfully run the script
+                    oldEnv = process.env.NODE_ENV;
+                    oldDir = process.env.NODE_CONFIG_DIR;
+                    process.env.NODE_ENV = 'unitTests';
+                    process.env.NODE_CONFIG_DIR = './../../config';
+                    scriptCommand = 'node ./../../utils/notify_about_expiring_ssl_cert.js --accountId '
+                        + accountId;
                     // done with everything, lets go!
                     done();
                 })
@@ -184,28 +187,66 @@ describe('Functional check', function () {
                 });
         });
 
+        it('should verify the mail box is empty for `' + email + '`',
+            function (done) {
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000, null, true).then(function () {
+                    MailinatorHelper.getAllMessages(email)
+                        .then(function (res) {
+                            res.length.should.equal(0); // should be empty
+                            done();
+                        })
+                        .catch(done);
+                });
+            });
+
         it('should successfully send an email if an expiring SSL Cert is detected',
             function (done) {
-                // setting our command
-                scriptCommand = 'node ./../../utils/notify_about_expiring_ssl_cert.js --accountId '
-                    + accountId;
                 exec(scriptCommand, function (err, stdout) {
                     should(stdout).not.equal(null);
                     should(err).equal(null);
                     MailinatorHelper.waitWhileInboxIsEmpty(email, 30000).then(function () {
-                        MailinatorHelper.getAllMessages(email).then(function (res) {
-                            res.length.should.equal(1); // should only have 1 email.
-                            var mailMsg = res[0];
-                            mailMsg
-                                .subject
-                                .should
-                                .containEql(expiringSSLCert.cert_name); // should contain info about expiring SSL Cert
-                            mailMsg
-                                .subject
-                                .should
-                                .containEql('will expire soon'); // should contain the expiring warning
+                        MailinatorHelper.getAllMessages(email)
+                            .then(function (res) {
+                                res.length.should.equal(1); // should only have 1 email
+                                done();
+                            })
+                            .catch(done);
+                    });
+                });
+            });
 
-                            // lets dig into the email to test further
+        it('should contain proper data in the email subject', function () {
+            exec(scriptCommand, function (err, stdout) {
+                should(stdout).not.equal(null);
+                should(err).equal(null);
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000)
+                    .then(function () {
+                        MailinatorHelper.getAllMessages(email)
+                            .then(function (res) {
+                                var mailMsg = res[0];
+                                mailMsg
+                                    .subject
+                                    .should
+                                    .containEql(expiringSSLCert.cert_name); // should contain info about expiring SSL Cert
+                                mailMsg
+                                    .subject
+                                    .should
+                                    .containEql('will expire soon'); // should contain the expiring warning
+                                done();
+                            })
+                            .catch(done);
+                    });
+            });
+        });
+
+        it('should contain proper data in the email body', function () {
+            exec(scriptCommand, function (err, stdout) {
+                should(stdout).not.equal(null);
+                should(err).equal(null);
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000).then(function () {
+                    MailinatorHelper.getAllMessages(email)
+                        .then(function (res) {
+                            var mailMsg = res[0];
                             MailinatorHelper.getMessage(mailMsg.id)
                                 .then(function (msg) {
                                     msg
@@ -224,10 +265,10 @@ describe('Functional check', function () {
                                     done();
                                 });
                         })
-                            .catch(done);
-                    });
+                        .catch(done);
                 });
             });
+        });
     });
 
 });
