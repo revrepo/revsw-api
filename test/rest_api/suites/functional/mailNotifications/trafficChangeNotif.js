@@ -50,6 +50,11 @@ describe('Functional check', function () {
             // setting node env and config dir to successfully run the script
             process.env.NODE_ENV = 'unitTests';
             process.env.NODE_CONFIG_DIR = './../../config';
+            // setting our command
+            scriptCommand = 'node ./../../utils/notify_about_traffic_changes.js ' +
+                '--alert_on_traffic_changes ' +
+                '--traffic_alerting_email ' +
+                email;
             done();
         });
 
@@ -59,22 +64,85 @@ describe('Functional check', function () {
             done();
         });
 
+        it('should verify the mail box is empty for `' + email + '`',
+            function (done) {
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000, null, true).then(function () {
+                    MailinatorHelper.getAllMessages(email)
+                        .then(function (res) {
+                            res.length.should.equal(0); // should be empty
+                            done();
+                        })
+                        .catch(done);
+                });
+            });
+
         it('should successfully send an email if traffic change is detected',
             function (done) {
-                // setting our command
-                scriptCommand = 'node ./../../utils/notify_about_traffic_changes.js ' +
-                    '--alert_on_traffic_changes ' +
-                    '--traffic_alerting_email ' +
-                    email;
                 exec(scriptCommand, function (err, stdout) {
-                    console.log(stdout);
                     should(stdout).not.equal(null);
                     should(err).equal(null);
-                    MailinatorHelper.getLastMessage(email, 'Traffic change').then(function (res) {
-                        should(res).not.equal(null);
-                        done();
-                    })
-                    .catch(done);
+                    MailinatorHelper.waitWhileInboxIsEmpty(email, 30000)
+                        .then(function () {
+                            MailinatorHelper.getAllMessages(email)
+                                .then(function (res) {
+                                    res.length.should.be.above(0); // should be more than one mail
+                                    done();
+                                })
+                                .catch(done);
+                        });
+                });
+            });
+
+        it('should contain proper data in sent email subject',
+            function (done) {
+                exec(scriptCommand, function (err, stdout) {
+                    should(stdout).not.equal(null);
+                    should(err).equal(null);
+                    MailinatorHelper.waitWhileInboxIsEmpty(email, 30000)
+                        .then(function () {
+                            MailinatorHelper.getAllMessages(email)
+                                .then(function (res) {
+                                    res[0]
+                                        .subject
+                                        .should
+                                        .containEql('Traffic change detected for domain');
+                                    done();
+                                })
+                                .catch(done);
+                        });
+                });
+            });
+
+        it('should contain proper data in sent email body',
+            function (done) {
+                exec(scriptCommand, function (err, stdout) {
+                    should(stdout).not.equal(null);
+                    should(err).equal(null);
+                    MailinatorHelper.waitWhileInboxIsEmpty(email, 30000).then(function () {
+                        MailinatorHelper.getAllMessages(email)
+                            .then(function (res) {
+                                var mailMsg = res[0];
+                                MailinatorHelper.getMessage(mailMsg.id)
+                                    .then(function (msg) {
+                                        var body = msg.data.parts[0].body;
+                                        // checking if some required strings are in the body
+                                        body
+                                            .should
+                                            .containEql('Traffic for yesterday');
+
+                                        body
+                                            .should
+                                            .containEql('Traffic for day before yesterday');
+
+                                        body
+                                            .should
+                                            .containEql('detected a traffic change');
+
+                                        done();
+                                    });
+                            })
+                            .catch(done);
+                    });
                 });
             });
     });
