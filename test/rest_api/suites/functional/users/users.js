@@ -48,7 +48,7 @@ describe('Functional check', function () {
         roles.push('reseller');
       }
 
-      var userSample = DataProvider.generateUser('user');
+      var userSample;
       var accountSample = AccountsDP.generateOne();
 
       before(function (done) {
@@ -65,13 +65,13 @@ describe('Functional check', function () {
             accountSample.id = response.body.object_id;
           })
           .then(function () {
+            userSample = DataProvider.generateUser('user');
             userSample.access_control_list.readOnly = false;
             userSample.companyId = [accountSample.id];
             return API.resources.users.createOne(userSample);
           })
           .then(function (response) {
             userSample.id = response.body.object_id;
-            userSample.name = userSample.email;
             done();
           })
           .catch(done);
