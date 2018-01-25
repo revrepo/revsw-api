@@ -215,7 +215,7 @@ describe('Functional check', function () {
                 });
             });
 
-        it('should contain proper data in the email subject', function () {
+        it('should contain proper data in the email subject', function (done) {
             exec(scriptCommand, function (err, stdout) {
                 should(stdout).not.equal(null);
                 should(err).equal(null);
@@ -239,7 +239,7 @@ describe('Functional check', function () {
             });
         });
 
-        it('should contain proper data in the email body', function () {
+        it('should contain proper data in the email body', function (done) {
             exec(scriptCommand, function (err, stdout) {
                 should(stdout).not.equal(null);
                 should(err).equal(null);
