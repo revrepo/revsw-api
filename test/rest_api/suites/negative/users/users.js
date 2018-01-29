@@ -20,9 +20,9 @@ require('should-http');
 
 var config = require('config');
 
-var API = require('./../../common/api');
-var AccountsDP = require('./../../common/providers/data/accounts');
-var DataProvider = require('./../../common/providers/data');
+var API = require('./../../../common/api');
+var AccountsDP = require('./../../../common/providers/data/accounts');
+var DataProvider = require('./../../../common/providers/data');
 
 describe('Functional check', function () {
   this.timeout(config.api.request.maxTimeout);
@@ -88,44 +88,41 @@ describe('Functional check', function () {
           .catch(done);
       });
 
-    it('should update user with reseller role', function (done) {
-      API.helpers
-        .authenticateUser(revAdmin)
-        .then(function () {
-          API.resources.users
-            .update(userSample.id, {
-              role: 'reseller'
-            })
-            .expect(200)
-            .end(function (err, res) {
-              done();
-            });
-        })
-        .catch(done);
-    });
-
     it('should return `Bad Request` when updating user\'s role from `reseller` to `user` having multiple' +
       ' accounts assigned to the reseller',
       function (done) {
+        // change user's role to reseller and then test
         API.helpers
-          .authenticateUser(userSample)
-          .then(function() {
-            var resellerAccountSample = AccountsDP.generateOne();
-            return API.resources.accounts.createOne(resellerAccountSample);
-          })
+          .authenticateUser(revAdmin)
           .then(function () {
             API.resources.users
               .update(userSample.id, {
-                role: 'user'
+                role: 'reseller'
               })
-              .expect(400)
-              .end(function (err, res) {
-                res.body.message.should.equal('Cannot change role if you are the ' +
-                  'only one reseller for the accounts');
-                done();
+              .expect(200)
+              .end(function () {
+                API.helpers
+                  .authenticateUser(userSample)
+                  .then(function () {
+                    var resellerAccountSample = AccountsDP.generateOne();
+                    return API.resources.accounts.createOne(resellerAccountSample);
+                  })
+                  .then(function () {
+                    API.resources.users
+                      .update(userSample.id, {
+                        role: 'user'
+                      })
+                      .expect(400)
+                      .end(function (err, res) {
+                        res.body.message.should.equal('Cannot change role if you are the ' +
+                          'only one reseller for the accounts');
+                        done();
+                      });
+                  })
+                  .catch(done);
               });
           })
-          .catch(done);
+          .catch(done);        
       });
   });
 });

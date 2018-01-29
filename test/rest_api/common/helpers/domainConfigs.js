@@ -19,22 +19,51 @@
 var DomainConfigsResource = require('./../resources/domainConfigs');
 var DomainConfigsDP = require('./../providers/data/domainConfigs');
 var APITestError = require('./../apiTestError');
+var Promise = require('bluebird');
 
-// # Users Helper
+// # Domain Configs Helper
 // Abstracts common functionality for the related resource.
 module.exports = {
 
-  createOne: function(accountId, prefix) {
+  createOne: function (accountId, prefix) {
     var domainConfig = DomainConfigsDP.generateOne(accountId, prefix);
     return DomainConfigsResource
       .createOne(domainConfig)
-      .then(function(res) {
+      .then(function (res) {
         domainConfig.id = res.body.object_id;
         return domainConfig;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         throw new APITestError('Creating Domain Config',
           error.response.body, domainConfig);
       });
+  },
+  waitForDomain: function (domainId) {
+    return new Promise(function (resolve, reject) {
+      var times = 15; // try 15 times
+      var interval = 5000; // every 5 sec
+      var polling = function (times) {
+        if (times <= 0) {
+          reject();
+        } else {
+          DomainConfigsResource
+            .status(domainId)
+            .getOne()
+            .expect(200)
+            .then(function (res) {
+              if (res.body.staging_status !== 'Published' && res.body.global_status !== 'Published') {
+                setTimeout(function () {
+                  polling(times -= 1);
+                }, interval);
+              } else {
+                resolve();
+              }
+            })
+            .catch(reject);
+        }
+      };
+
+      polling(times);
+    });
   }
 };

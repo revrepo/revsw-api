@@ -42,6 +42,8 @@ var showHelp = function() {
   console.log('        does not send email (debug mode)');
   console.log('    -h, --help :');
   console.log('        this message');
+  console.log('    --accountId :');
+  console.log('        get SSL Certs only related to this account');
   console.log('    --CLI_MODE :');
   console.log('        used CLI mode logging \n\n');
 
@@ -66,6 +68,8 @@ for (var i = 0; i < parslen; ++i) {
     //   curr_par = 'date';
   } else if (pars[i] === '--dry-run') {
     conf.dry = true;
+  } else if (pars[i] === '--accountId') {
+    curr_par = 'accountId';
   } else if (curr_par) {
     conf[curr_par] = pars[i];
     curr_par = false;
@@ -83,6 +87,7 @@ promise.promisifyAll(sslCertificatesReports);
 
 var countSends = 0;
 var options = {
+  accountId: conf.accountId
   //  count_expiring_days: 30 // TODO: add additional CLI parameter
 };
 // NOTE: start work-flow notification for expiring SSL Cartificates
@@ -92,7 +97,7 @@ sslCertificatesReports
     log_('Get list Expiring SSL Certificates. Found expiring - ' + data.length + '.');
     return data;
   })
-  .map(function(itemExperingSSLCertificateInformation) {
+  .map(function(itemExperingSSLCertificateInformation) {    
     var options = itemExperingSSLCertificateInformation;
     return sslCertificatesReports.prepareNotificationEmailsForExperingSSLCetificatesAsync(options)
       .then(function(data) {
@@ -106,7 +111,7 @@ sslCertificatesReports
   }, {
     concurrency: 1 // NOTE:
   })
-  .then(function(extendedInformation) {
+  .then(function(extendedInformation) {    
     // NOTE: make one mail options list for send all notification emails
     var totalListSendEmails = _.flatten(extendedInformation);
     // log_('Total count emails for send equal '+ totalListSendEmails.length);
@@ -114,7 +119,7 @@ sslCertificatesReports
   })
   // NOTE: start send emails
   .map(function(item) {
-    var options = item;
+    var options = item;    
     if (conf.dry !== true) {
       return sslCertificatesReports.sendSSLNotificationEmailsAsync(options)
         .then(function infoResultSendEmail(data) {
