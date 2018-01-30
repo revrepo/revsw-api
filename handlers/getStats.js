@@ -342,7 +342,13 @@ exports.getStatsImageEngine = function(request, reply) {
                           lt: span.end
                         }
                       }
-                    }]
+                    }],
+                    must_not: [{
+                        missing: {
+                          'field' : 'ie_bytes_o'
+                        }
+                      }
+                    ]
                   }
                 }
               }
