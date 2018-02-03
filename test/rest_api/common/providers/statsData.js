@@ -151,6 +151,7 @@ var DataProvider = module.exports = function( from, to ) {
       duration: 0.147,
       upstream_time: '0.147',
       response: '200',
+      ie_bytes_o: 500,
       s_bytes: 2000,
       r_bytes: 200,
       method: 'GET',
@@ -983,7 +984,7 @@ DataProvider.prototype.generateImageEngineTests = function () {
       keys_.push( 'device' );
       count /= len8;
     }
-      
+
     tests.push({
       keys: keys_,
       count: count
@@ -1005,6 +1006,7 @@ DataProvider.prototype.generateImageEngineTests = function () {
       name: test.keys.join(','),
       query: test.query,
       count: test.count,
+      ie_bytes_o: test.count * this.options.template_short.ie_bytes_o,
       sent_bytes: test.count * this.options.template_short.s_bytes,
       received_bytes: test.count * this.options.template_short.r_bytes
     };
@@ -1060,7 +1062,7 @@ DataProvider.prototype.generateMobileDesktopTests = function () {
       keys_.push( 'country' );
       count /= len6;
     }
-     
+
     tests.push({
       keys: keys_,
       count: 120000
@@ -1091,7 +1093,7 @@ DataProvider.prototype.generateMobileDesktopTests = function () {
  */
 DataProvider.prototype.generateFBTHeatmapTests = function () {
 
-   
+
   var keys = this.options.keys,
     len0 = keys.count,
     total = len0;
@@ -1174,7 +1176,7 @@ DataProvider.prototype.generateFBTDistributionTests = function () {
       keys_.push( 'limit_ms' );
       count /= len5;
     }
-    
+
     tests.push({
       keys: keys_,
       count: 120000
