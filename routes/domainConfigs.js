@@ -321,7 +321,7 @@ module.exports = [{
               version: Joi.number().valid(1).required(),
               url: Joi.object({
                 is_wildcard: Joi.boolean().required(),
-                value: Joi.string().max(300).required()
+                value: Joi.string().max(10000).required()
               }).required(),
               enable_esi: Joi.boolean().default(false),
               edge_caching: Joi.object({
