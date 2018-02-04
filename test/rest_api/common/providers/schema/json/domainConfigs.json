@@ -44,7 +44,7 @@
   "rev_component_bp.caching_rules.0.version": "Joi.number().valid(1).required()",
   "rev_component_bp.caching_rules.0.url": "Joi.object({}).required()",
   "rev_component_bp.caching_rules.0.url.is_wildcard": "Joi.boolean().required()",
-  "rev_component_bp.caching_rules.0.url.value": "Joi.string().required()",
+  "rev_component_bp.caching_rules.0.url.value": "Joi.string().max(10000).required()",
   "rev_component_bp.caching_rules.0.edge_caching": "Joi.object({}).required()",
   "rev_component_bp.caching_rules.0.edge_caching.override_origin": "Joi.boolean().required()",
   "rev_component_bp.caching_rules.0.edge_caching.new_ttl": "Joi.number().integer().required()",
