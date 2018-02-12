@@ -98,6 +98,7 @@
   },
   "report_about_unknown_domains": "ops@revsw.com",
   "report_daily_activity_logs": "ops@revsw.com",
+  "report_about_unknown_billing_zones": "ops@revsw.com",
 
   "chargify": {
     "domain": "the_correct_value_is_in_local_json",
