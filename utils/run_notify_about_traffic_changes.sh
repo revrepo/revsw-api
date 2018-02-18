@@ -21,4 +21,4 @@ if [ -d $API_DIR ]; then
   cd $API_DIR
 fi
 
-nodejs --expose-gc utils/notify_about_traffic_changes.js --CLI_MODE --date -12h --alert_on_traffic_changes --traffic_alerting_email victor@revapm.com
+nodejs --expose-gc utils/notify_about_traffic_changes.js --CLI_MODE --date -12h --alert_on_traffic_changes --traffic_alerting_email ops@revapm.com
