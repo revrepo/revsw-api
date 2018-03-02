@@ -120,7 +120,7 @@ promise.resolve()
         };
       });
   }, {
-    concurrency: 10
+    concurrency: 1 // TODO: set 10 after fix the problem "aggregation result exceeds maximum document size (16MB)"
   })
   .then(function sucess(data) {
     if (conf.verbose) {
