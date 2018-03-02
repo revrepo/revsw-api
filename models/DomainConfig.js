@@ -264,6 +264,18 @@ DomainConfig.prototype = {
 
     return promise.all([
         this.model.aggregate([
+          // NOTE: trying minimize memory
+          { $project: {
+            'deleted': 1,
+            'enable_enhanced_analytics': 1,
+            'proxy_config.account_id': 1,
+            'proxy_config.rev_component_bp.custom_vcl.enabled': 1,
+            'proxy_config.rev_component_bp.enable_waf': 1,
+            'enable_ssl': 1,
+            'bp_lua_enable_all': 1,
+            'co_lua_enable_all': 1
+            }
+          },
           { $match: _.assign({ deleted: { $ne:true } }, where ) },
           { $project: {
               'enable_enhanced_analytics': 1,
@@ -288,6 +300,7 @@ DomainConfig.prototype = {
           }
         ]).exec(),
         this.model.aggregate([
+          { $project: {'proxy_config.account_id': 1, deleted:1}},// NOTE: trying minimize memory
           { $match: where },
           { $project: {'proxy_config.account_id': 1}},
           { $group: { _id: '$proxy_config.account_id', count: { $sum: 1 } } }
@@ -457,6 +470,17 @@ DomainConfig.prototype = {
         $match._id = mongoose.Types.ObjectId(wafRulesId);
       }
     }
+    pipline.push({
+      // NOTE: trying minimize memory
+      $project: {
+        '_id': 1,
+        'id': 1,
+        deleted: 1,
+        'proxy_confi.account_id': 1,
+        domain_name: 1,
+        'proxy_config.rev_component_bp.waf':1,
+      }
+    });
     pipline.push({ $match: $match });
     pipline.push({
       $project: {
