@@ -224,6 +224,7 @@ exports.getDomainConfig = function(request, reply) {
       if (response_json.image_engine) {
          response.image_engine = response_json.image_engine;
       }
+      response.enable_enhanced_analytics = response_json.enable_enhanced_analytics;
       response.published_domain_version = response_json.published_domain_version;
       response.last_published_domain_version = response_json.last_published_domain_version;
       response.enable_ssl = response_json.enable_ssl;
