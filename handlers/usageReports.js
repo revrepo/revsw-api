@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2017] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -122,7 +122,7 @@ exports.getAccountReport = function (request, reply) {
  */
 exports.getAccountStats = function (request, reply) {
 
-  // TODO: need to move the following permissions checking code to a separate function  
+  // TODO: need to move the following permissions checking code to a separate function
   // and it in this and previous handlers
   var isFromCache = true;
   var accountIds = utils.getAccountID(request);
@@ -176,12 +176,20 @@ exports.getAccountStats = function (request, reply) {
     });
 };
 
+/**
+ * @name generateAccountReport
+ * @description method for call generate Usage Report data
+ * @param {*} request
+ * @param {*} reply
+ */
 exports.generateAccountReport = function (request, reply) {
   var conf = {
     accountId: utils.getAccountID(request),
     dry: false // NOTE: by default save data to storage
   };
-  var countSends = 0;
+  if(request.query.account_id){
+    conf.accountId = request.query.account_id;
+  }
   promise.resolve()
     .then(function () {
       if (conf.accountId === false) {
@@ -195,7 +203,7 @@ exports.generateAccountReport = function (request, reply) {
       return data;
     })
     .map(function (itemId) {
-      logger.info('usageReport:collectDayReport:call');
+      logger.info('usageReport:collectDayReport:call for Account Id '+itemId);
       return usageReport.collectDayReport(
         (conf.date || 'now'),
         itemId /* Account ID*/,
@@ -214,7 +222,7 @@ exports.generateAccountReport = function (request, reply) {
         statusCode: 200,
         message: 'Usage Report Generated'
       };
-      
+
       if (conf.verbose) {
         logger.info(data, 5);
       }
