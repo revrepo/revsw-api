@@ -22,7 +22,8 @@
     "smoke-stats-sdk": "cd test/rest_api/; NODE_ENV=qa mocha suites/smoke/stats-sdk.js",
     "func-stats": "cd test/rest_api/; NODE_ENV=qa mocha suites/functional/stats.js",
     "func-stats-sdk": "cd test/rest_api/; NODE_ENV=qa mocha suites/functional/stats-sdk.js",
-    "func-usage": "cd test/rest_api/; NODE_ENV=qa mocha suites/functional/usage-report.js"
+    "func-usage": "cd test/rest_api/; NODE_ENV=qa mocha suites/functional/usage-report.js",
+    "test-unit":"mocha unitTestsAPI/tests/* --recursive"
   },
   "dependencies": {
     "atob": "^2.0.3",
@@ -84,7 +85,7 @@
     "ns1": "^0.1.11",
     "object-assign": "~4.1.0",
     "qs": "^6.1.0",
-    "request": "2.53.0",
+    "request": "2.53.0", 
     "revsw-logger": "git@github.com:/revrepo/revsw-logger",
     "sendgrid": "^2.0.0",
     "should": "^7.1.0",
