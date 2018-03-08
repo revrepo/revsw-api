@@ -363,5 +363,29 @@ module.exports = [
         schema: routeModels.statusModel
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/v1/users/{user_id}/resend_invitation',
+    config: {
+      handler: users.resendInvitation,
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      description: 'Resend an invitation mail for a user.',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          user_id: Joi.objectId().description('Resend invitation for this user ID')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
   }
 ];

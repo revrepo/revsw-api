@@ -45,6 +45,8 @@ var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getCon
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var usersService = require('../services/users.js');
+var emailService = require('../services/email');
+
 /**
  * @name getUsers
  * @description method get all users
@@ -54,15 +56,15 @@ exports.getUsers = function getUsers(request, reply) {
   var accountIds = utils.getAccountID(request);
   var usersAccountId = utils.getAccountID(request);
   var options = {};
-  if(!!filters_ && filters_.account_id){
-    if(!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+  if (!!filters_ && filters_.account_id) {
+    if (!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
       return reply(boom.badRequest('Account ID not found'));
     }
     usersAccountId = filters_.account_id;
     options.account_id = filters_.account_id;
   } else {
     // NOTE: set limit accounts if user is not RevAdmin
-    if(!utils.isUserRevAdmin(request)){
+    if (!utils.isUserRevAdmin(request)) {
       options.account_id = accountIds;
     }
   }
@@ -75,8 +77,8 @@ exports.getUsers = function getUsers(request, reply) {
     if (listOfUsers.length === 0 && !filters_) {
       return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
     }
-    listOfUsers = _.filter( listOfUsers, function(itemUser){
-      if(!utils.checkUserAccessPermissionToUser(request, itemUser)) {
+    listOfUsers = _.filter(listOfUsers, function (itemUser) {
+      if (!utils.checkUserAccessPermissionToUser(request, itemUser)) {
         return false;
       }
       return true;
@@ -100,7 +102,7 @@ exports.createUser = function (request, reply) {
   // NOTE: set default companyId
   if ((newUser.companyId === undefined || newUser.companyId.length === 0) && utils.getAccountID(request).length !== 0) {
     newUser.companyId = utils.getAccountID(request);
-    if(['user','admin'].indexOf(newUser.role) >-1 ){
+    if (['user', 'admin'].indexOf(newUser.role) > -1) {
       newUser.companyId.length = 1;
     }
   }
@@ -118,10 +120,10 @@ exports.createUser = function (request, reply) {
   var accountId = newUser.companyId[0];
 
   // NOTE: controll users Additional Accounts To Manage
-  if(!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin')  &&
+  if (!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin') &&
     ((_.isArray(newUser.companyId) && newUser.companyId.length > 1) ||
-    ((_.isString(newUser.companyId) && newUser.companyId.split(',').length > 1) ))){
-    return reply(boom.badRequest('User with role "'+newUser.role+'" cannot manage other accounts'));
+      ((_.isString(newUser.companyId) && newUser.companyId.split(',').length > 1)))) {
+    return reply(boom.badRequest('User with role "' + newUser.role + '" cannot manage other accounts'));
   }
   // check that the email address is not already in use
   users.get({
@@ -135,38 +137,38 @@ exports.createUser = function (request, reply) {
       var resultUserData;
       async.waterfall([
         // NOTE: check for domain names
-        function validateManagedDomainName(cb){
-          if (!_.isArray(newUser.domain) ||  (newUser.domain.length === 0)){
+        function validateManagedDomainName(cb) {
+          if (!_.isArray(newUser.domain) || (newUser.domain.length === 0)) {
             return cb();
           }
           var condition = {
             // 'proxy_config.domain_name': {$in:newUser.domain}, //TODO: ?? use this and why it empty ??
-            'domain_name': {$in:newUser.domain},
+            'domain_name': { $in: newUser.domain },
             deleted: { $ne: true }
           };
-          domainConfigs.query(condition,function(err,listDomainConfigs){
-            if(err){
-             return  cb(err);
+          domainConfigs.query(condition, function (err, listDomainConfigs) {
+            if (err) {
+              return cb(err);
             }
-            var isNotAvailableDomain = _.find(listDomainConfigs,function(item){
+            var isNotAvailableDomain = _.find(listDomainConfigs, function (item) {
               return !_.includes(newUser.companyId, item.proxy_config.account_id);
             });
-            if(!!isNotAvailableDomain){
-              return  cb('Can`t manage domain name another account');
+            if (!!isNotAvailableDomain) {
+              return cb('Can`t manage domain name another account');
             }
             cb();
           });
         },
-        function(cb){
+        function (cb) {
           usersService.createUser(newUser, function (error, result) {
-            if(error){
+            if (error) {
               return cb(error);
             }
             resultUserData = publicRecordFields.handle(result, 'user');
             cb();
           });
         },
-        function(cb){
+        function (cb) {
           // TODO: add activity log to all accounts (not only newUser.companyId[0])
           AuditLogger.store({
             account_id: accountId,
@@ -179,7 +181,7 @@ exports.createUser = function (request, reply) {
           }, request);
           cb();
         },
-        function(cb){
+        function (cb) {
           if (!!resultUserData) {
             statusResponse = {
               statusCode: 200,
@@ -187,9 +189,9 @@ exports.createUser = function (request, reply) {
               object_id: resultUserData.user_id
             };
           }
-          cb(null,statusResponse);
+          cb(null, statusResponse);
         }
-      ],function(error,statusResponse){
+      ], function (error, statusResponse) {
         renderJSON(request, reply, error, statusResponse);
       });
       // TODO: delete old implementation
@@ -268,34 +270,34 @@ exports.updateUser = function (request, reply) {
   var userAccountId;
   var userId;
   // NOTE: controll users Additional Accounts To Manage
-  if(!!updateUserData.companyId && (updateUserData.role === 'user' || updateUserData.role === 'admin')  &&
-    ((_.isArray(updateUserData.companyId) && updateUserData.companyId.length>1)||
-     ((_.isString(updateUserData.companyId) && updateUserData.companyId.split(',').length>1) ))){
-    return reply(boom.badRequest('User with role "'+updateUserData.role+'" cannot manage other accounts'));
+  if (!!updateUserData.companyId && (updateUserData.role === 'user' || updateUserData.role === 'admin') &&
+    ((_.isArray(updateUserData.companyId) && updateUserData.companyId.length > 1) ||
+      ((_.isString(updateUserData.companyId) && updateUserData.companyId.split(',').length > 1)))) {
+    return reply(boom.badRequest('User with role "' + updateUserData.role + '" cannot manage other accounts'));
   }
   var statusResponse;
   var storedUserData;
   var resultUserData;
 
   async.waterfall([
-    function validateManagedDomainName(cb){
-      if (!_.isArray(updateUserData.domain) ||  (updateUserData.domain.length === 0)){
+    function validateManagedDomainName(cb) {
+      if (!_.isArray(updateUserData.domain) || (updateUserData.domain.length === 0)) {
         return cb();
       }
       var condition = {
         // 'proxy_config.domain_name': {$in:updateUserData.domain}, //TODO: ?? use this and why it empty ??
-        'domain_name': {$in:updateUserData.domain},
+        'domain_name': { $in: updateUserData.domain },
         deleted: { $ne: true }
       };
-      domainConfigs.query(condition,function(err,listDomainConfigs){
-        if(err){
-         return  cb(err);
+      domainConfigs.query(condition, function (err, listDomainConfigs) {
+        if (err) {
+          return cb(err);
         }
-        var isNotAvailableDomain = _.find(listDomainConfigs,function(item){
+        var isNotAvailableDomain = _.find(listDomainConfigs, function (item) {
           return !_.includes(updateUserData.companyId, item.proxy_config.account_id);
         });
-        if(!!isNotAvailableDomain){
-         return  cb('Can`t manage domain name another account');
+        if (!!isNotAvailableDomain) {
+          return cb('Can`t manage domain name another account');
         }
         cb();
       });
@@ -325,9 +327,9 @@ exports.updateUser = function (request, reply) {
       // }
       cb();
     },
-    function (cb){
-      users.get({_id: userId}, function (error, result) {
-        if(error){
+    function (cb) {
+      users.get({ _id: userId }, function (error, result) {
+        if (error) {
           return cb(error);
         }
         storedUserData = publicRecordFields.handle(result, 'user');
@@ -342,53 +344,53 @@ exports.updateUser = function (request, reply) {
 
       if (updateUserData.role && updateUserData.role === 'user') {
         if (storedUserData.role === 'admin') {
-            users.get({
-              _id: { $ne: storedUserData.user_id },
-              companyId: new RegExp(userAccountId, 'i'),
-              role: storedUserData.role
-            },function(err, user) {
-              if(err){
-                return cb(Error('Cannot change role if you are the only one admin for the account'));
-              }
-              if (!user) {
-                return cb('Cannot change role if you are the only one admin for the account');
-              } else {
-                return cb();
-              }
-            });
+          users.get({
+            _id: { $ne: storedUserData.user_id },
+            companyId: new RegExp(userAccountId, 'i'),
+            role: storedUserData.role
+          }, function (err, user) {
+            if (err) {
+              return cb(Error('Cannot change role if you are the only one admin for the account'));
+            }
+            if (!user) {
+              return cb('Cannot change role if you are the only one admin for the account');
+            } else {
+              return cb();
+            }
+          });
         } else if (storedUserData.role === 'reseller') {
           users.get({
-              _id: { $ne: storedUserData.user_id },
-              companyId: new RegExp(storedUserData.companyId.join('.*,'), 'ig'),
-              role: storedUserData.role
-            },function (error, user) {
-              if(error) {
-                return cb(Error('Cannot change role if you are the only one reseller for the accounts'));
-              }
-              if (!user) {
-                return cb('Cannot change role if you are the only one reseller for the accounts');
-              } else {
-                return cb();
-              }
-            });
+            _id: { $ne: storedUserData.user_id },
+            companyId: new RegExp(storedUserData.companyId.join('.*,'), 'ig'),
+            role: storedUserData.role
+          }, function (error, user) {
+            if (error) {
+              return cb(Error('Cannot change role if you are the only one reseller for the accounts'));
+            }
+            if (!user) {
+              return cb('Cannot change role if you are the only one reseller for the accounts');
+            } else {
+              return cb();
+            }
+          });
         } else {
-         cb();
+          cb();
         }
       } else {
         // NOTE: updateUserData.role !== 'user'
         cb();
       }
     },
-    function(cb){
-      users.update(updateUserData,function(err,result){
-        if(err){
+    function (cb) {
+      users.update(updateUserData, function (err, result) {
+        if (err) {
           return cb(err);
         }
         resultUserData = publicRecordFields.handle(result, 'user');
         cb();
       });
     },
-    function(cb){
+    function (cb) {
       // TODO: add activity log to all accounts (not only updateUserData.companyId[0])
       AuditLogger.store({
         account_id: userAccountId,
@@ -402,7 +404,7 @@ exports.updateUser = function (request, reply) {
 
       cb();
     },
-    function(cb){
+    function (cb) {
       if (!!resultUserData) {
         statusResponse = {
           statusCode: 200,
@@ -411,7 +413,7 @@ exports.updateUser = function (request, reply) {
       }
       cb(null, statusResponse);
     }
-  ],function(error,statusResponse){
+  ], function (error, statusResponse) {
     renderJSON(request, reply, error, statusResponse);
   });
 };
@@ -661,7 +663,7 @@ exports.init2fa = function (request, reply) {
     if (user) {
       var account_id = user.companyId[0];
       var name = currentVendor.companyNameShort + ':' + email_;
-      var secretKey = speakeasy.generate_key({length: 16, google_auth_qr: true, name: name});
+      var secretKey = speakeasy.generate_key({ length: 16, google_auth_qr: true, name: name });
       user.two_factor_auth_secret_base32 = secretKey.base32;
       delete user.password;
       users.update(user, function (error, result) {
@@ -699,7 +701,7 @@ exports.enable2fa = function (request, reply) {
     if (user) {
       var account_id = user.companyId[0];
       if (user.two_factor_auth_secret_base32) {
-        var generatedOneTimePassword = speakeasy.time({key: user.two_factor_auth_secret_base32, encoding: 'base32'});
+        var generatedOneTimePassword = speakeasy.time({ key: user.two_factor_auth_secret_base32, encoding: 'base32' });
         if (generatedOneTimePassword === oneTimePassword) {
           user.two_factor_auth_enabled = true;
           delete user.password;
@@ -811,7 +813,7 @@ exports.completeInvitation = function (request, reply) {
                 statusCode: 200,
                 message: 'Successfully updated the password'
               };
-    
+
               renderJSON(request, reply, error, statusResponse);
             } else {
               return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
@@ -822,6 +824,63 @@ exports.completeInvitation = function (request, reply) {
         }
       } else {
         return reply(boom.badRequest('Bad invitation token'));
+      }
+    } else {
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
+    }
+  });
+};
+
+exports.resendInvitation = function (request, reply) {
+  var user_id = request.params.user_id;
+  users.get({
+    _id: user_id
+  }, function (error, user) {
+    if (user) {
+      if (user.invitation_token !== null) {
+        user.invitation_token = utils.generateToken(24);
+        user.invitation_expire_at = Date.now() + config.get('user_invitation_expire_ms');
+        var account_id = user.companyId[0] || null;
+        users.update(user, function (error, result) {
+          if (!error) {
+            // get the account so we can get the vendor
+            accounts.get({ id: account_id }, function (err, acc) {
+              var statusResponse;
+              if (!err) {                
+                statusResponse = {
+                  statusCode: 200,
+                  message: 'Successfully updated the invitation token'
+                };
+              } else {
+                statusResponse = {
+                  statusCode: 400,
+                  message: 'Could not get account vendor'
+                };
+              }
+              // set up an email with the new token and expiry date.
+              var mailOptions = {
+                userFullName: user.firstname + ' ' + user.lastname,
+                userEmail: user.email,
+                invitationToken: user.invitation_token,
+                invitationExpireAt: user.invitation_expire_at,
+                portalUrl: config.get('vendor_profiles')[acc ? acc.vendor_profile : 'revapm'].vendorUrl,
+                userId: user.user_id
+              };
+
+              emailService.sendInvitationEmail(mailOptions, function (err, data) {
+                if (err) {
+                  throw new Error(err);
+                }
+                // invitation mail has been sent.    
+                renderJSON(request, reply, error, statusResponse);
+              });
+            });
+          } else {
+            return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
+          }
+        });
+      } else {
+        return reply(boom.badRequest('User already completed the invitation process'));
       }
     } else {
       return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
