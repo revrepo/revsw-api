@@ -84,6 +84,7 @@
 
   "user_verify_token_lifetime_ms":  604800000, // 7 day 
   "password_reset_token_lifespan_ms": 3600000,     // 1 hour
+  "user_invitation_expire_ms": 86400000, // 24 hour
   
   "support_email" : "support@revapm.com",
 

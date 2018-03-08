@@ -92,7 +92,8 @@ module.exports = [
           }).required(),
           role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
-          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
+          self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user')
         }
       },
       response: {
@@ -330,6 +331,32 @@ module.exports = [
       validate: {
         params: {
           user_id: Joi.objectId().description('Disable two factor authentication for this user ID')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/v1/users/{user_id}/complete_invitation',
+    config: {
+      handler: users.completeInvitation,
+      auth: false,
+      description: 'Complete the invitation for a newly created user, set the password and delete the token',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          user_id: Joi.objectId().description('Complete invitation for this user ID')
+        },
+        payload: {
+          password: Joi.string().min(8).max(15).required().description('Password'),
+          invitation_token: Joi.string().required().description('The invitation token')
         }
       },
       response: {

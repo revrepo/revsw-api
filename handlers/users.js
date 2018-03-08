@@ -785,3 +785,46 @@ exports.disable2fa = function (request, reply) {
     });
   });
 };
+
+exports.completeInvitation = function (request, reply) {
+  var newPassword = request.payload.password;
+  var user_id = request.params.user_id;
+  var inviteToken = request.payload.invitation_token;
+
+  users.get({
+    _id: user_id
+  }, function (error, user) {
+    if (user) {
+      if (user.invitation_token !== null && user.invitation_token === inviteToken) {
+        // Ok the token is aight..
+        if (user.invitation_expire_at !== null && Date.parse(user.invitation_expire_at) < Date.now()) {
+          // The expire date is also aight..
+          user.password = newPassword;
+          user.invitation_token = null;
+          user.invitation_expire_at = null;
+          // remove all invitation stuff and set new password.
+          var account_id = user.companyId[0] || null;
+          users.update(user, function (error, result) {
+            if (!error) {
+              var statusResponse;
+              statusResponse = {
+                statusCode: 200,
+                message: 'Successfully updated the password'
+              };
+    
+              renderJSON(request, reply, error, statusResponse);
+            } else {
+              return reply(boom.badImplementation('Failed to update user details for ID ' + user_id));
+            }
+          });
+        } else {
+          return reply(boom.badRequest('Invitation token has expired'));
+        }
+      } else {
+        return reply(boom.badRequest('Bad invitation token'));
+      }
+    } else {
+      return reply(boom.badImplementation('Failed to retrieve user details for ID ' + user_id));
+    }
+  });
+};

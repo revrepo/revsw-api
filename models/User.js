@@ -83,6 +83,8 @@ function User(mongoose, connection, options) {
 
     deleted: { type: Boolean, default: false },
     comment: { type: String, default: ''},
+    invitation_token: { type: String, default: null },
+    invitation_expire_at: { type: Date, default: Date.now }
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
