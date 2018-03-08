@@ -840,6 +840,7 @@ exports.resendInvitation = function (request, reply) {
       if (user.invitation_token !== null) {
         user.invitation_token = utils.generateToken(24);
         user.invitation_expire_at = Date.now() + config.get('user_invitation_expire_ms');
+        user.invitation_sent_at = Date.now();
         var account_id = user.companyId[0] || null;
         users.update(user, function (error, result) {
           if (!error) {
