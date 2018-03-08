@@ -79,7 +79,7 @@ module.exports = [
           email: Joi.string().email().required().trim().description('User email address also used as login name'),
           firstname: Joi.string().required().trim().max(30).regex(routeModels.userFirstName).description('First name'),
           lastname: Joi.string().required().max(30).regex(routeModels.userLastName).description('Last name'),
-          password: Joi.string().min(8).max(15).required().description('Password'),
+          password: Joi.string().min(8).max(15).optional().description('Password'),
           companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
