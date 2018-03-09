@@ -249,7 +249,14 @@
         "provider_name": "RevAPM.MobileCDN",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
-      }
+      },
+      "user_invitation_mail_subject": "You have been invited to revapm CDN!",
+      "user_invitation_mail_body": ["Hello {{fullname}}.\n",
+      "You have been invited to join the revapm CDN, please click the link below to ",
+      "complete the invitation process.\n",
+      "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+      "{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}",
+      "</a>"]
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -349,7 +356,14 @@
         "provider_name": "nuubit.nextgencdn",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.nuubit.net"
-      }
+      },
+      "user_invitation_mail_subject": "You have been invited to nuubit CDN!",
+      "user_invitation_mail_body": ["Hello {{fullname}}.\n",
+        "You have been invited to join the nuu:bit CDN, please click the link below to ",
+        "complete the invitation process.\n",
+        "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+        "{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}",
+        "</a>"]
     },
     "hooli": {
       "vendorUrl": "http://localhost:5000",
@@ -449,7 +463,14 @@
         "provider_name": "RevAPM.MobileCDN",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
-      }
+      },
+      "user_invitation_mail_subject": "You have been invited to hoolit CDN!",
+      "user_invitation_mail_body": ["Hello {{fullname}}.\n",
+        "You have been invited to join the hooli CDN, please click the link below to ",
+        "complete the invitation process.\n",
+        "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+        "{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}",
+        "</a>"]
     }
   },
   "proxy_white_referer_urls": [

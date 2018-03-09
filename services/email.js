@@ -99,13 +99,19 @@ exports.sendRevOpsEmailAboutCloseAccount = function(options, cb) {
   }
 };
 
+// helper function to replace all strings in a string.
+String.prototype.replaceAll = function(search, replacement) {
+  var target = this;
+  return target.split(search).join(replacement);
+};
+
 
 /**
  * @name sendInvitationEmail
- * @description sends an invitation email to a newly created user
+ * @description Prepares and sends an invitation email to a newly created user
  *
  *
- * @param  {[type]}   options [description]
+ * @param  {[type]}   options [description] email data
  * @param  {Function} cb      [description]
  * @return {[type]}           [description]
  */
@@ -115,16 +121,18 @@ exports.sendInvitationEmail = function(options, cb) {
   var tokenExpire = (options.invitationExpireAt - Date.now()) * 1000 * 60; // how much hours left to expiry
   var inviteToken = options.invitationToken;
   var userId = options.userId;
+  var acc = options.acc;
   if (email !== '') {
+    var mailHTML = config.get('vendor_profiles')[acc.vendor_profile].user_invitation_mail_body;
+    mailHTML = mailHTML.join('\n')
+                       .replace('{{fullname}}', fullname)
+                       .replaceAll('{{userId}}', userId)
+                       .replaceAll('{{portalURL}}', options.portalUrl)
+                       .replaceAll('{{inviteToken}}', inviteToken);
     var mailOptions = {
       to: email,
-      subject: 'You have been invited to nuu:bit CDN!',
-      html: 'Hello ' + fullname + '\n' +
-        'You have been invited to join the nuu:bit CDN, please click the link below to ' +
-        'complete the invitation process.\n' +
-        '<a href="' + options.portalUrl + '/#/invitation/' + userId + '/' + inviteToken + '">' +
-        options.portalUrl + '/#/invitation/' + userId + '/' + inviteToken +
-        '</a>'
+      subject: config.get('vendor_profiles')[acc.vendor_profile].user_invitation_mail_subject,
+      html: mailHTML
     };
 
     mail.sendMail(mailOptions, function(err, data) {
