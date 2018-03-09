@@ -788,6 +788,11 @@ exports.disable2fa = function (request, reply) {
   });
 };
 
+/**
+ * @name resendInvitation
+ * @description Updates the password for a newly created user with the password he chose
+ * and removes the invitation token, finishing the invitation process.
+ */
 exports.completeInvitation = function (request, reply) {
   var newPassword = request.payload.password;
   var user_id = request.params.user_id;
@@ -811,7 +816,7 @@ exports.completeInvitation = function (request, reply) {
               var statusResponse;
               statusResponse = {
                 statusCode: 200,
-                message: 'Successfully updated the password'
+                message: 'Successfully set the password'
               };
 
               renderJSON(request, reply, error, statusResponse);
@@ -831,6 +836,11 @@ exports.completeInvitation = function (request, reply) {
   });
 };
 
+/**
+ * @name resendInvitation
+ * @description Resends an invitation to a user, generates a new invitation token and
+ * resets the expire date.
+ */
 exports.resendInvitation = function (request, reply) {
   var user_id = request.params.user_id;
   users.get({
@@ -850,7 +860,7 @@ exports.resendInvitation = function (request, reply) {
               if (!err) {                
                 statusResponse = {
                   statusCode: 200,
-                  message: 'Successfully updated the invitation token'
+                  message: 'Successfully resent the invitation'
                 };
               } else {
                 statusResponse = {
@@ -865,7 +875,8 @@ exports.resendInvitation = function (request, reply) {
                 invitationToken: user.invitation_token,
                 invitationExpireAt: user.invitation_expire_at,
                 portalUrl: config.get('vendor_profiles')[acc ? acc.vendor_profile : 'revapm'].vendorUrl,
-                userId: user.user_id
+                userId: user.user_id,
+                acc: acc
               };
 
               emailService.sendInvitationEmail(mailOptions, function (err, data) {

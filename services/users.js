@@ -114,7 +114,8 @@ exports.createUser = function (newUser, callback) {
             invitationToken: _createdUser_.invitation_token,
             invitationExpireAt: _createdUser_.invitation_expire_at,
             portalUrl: config.get('vendor_profiles')[acc.vendor_profile].vendorUrl,
-            userId: _createdUser_.user_id
+            userId: _createdUser_.user_id,
+            acc: acc
           };
   
           emailService.sendInvitationEmail(mailOptions, function (err, data) {

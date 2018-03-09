@@ -344,7 +344,7 @@ module.exports = [
     config: {
       handler: users.completeInvitation,
       auth: false,
-      description: 'Complete the invitation for a newly created user, set the password and delete the token',
+      description: 'Complete the invitation for a newly created user and set a password',
       plugins: {
         'hapi-swagger': {
           responseMessages: routeModels.standardHTTPErrors
@@ -356,7 +356,7 @@ module.exports = [
         },
         payload: {
           password: Joi.string().min(8).max(15).required().description('Password'),
-          invitation_token: Joi.string().required().description('The invitation token')
+          invitation_token: Joi.string().length(48).required().description('The invitation token')
         }
       },
       response: {
