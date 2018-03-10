@@ -310,7 +310,7 @@ User.prototype = {
 
     //filter by group ID
     if (!!params.group_id) {
-      options.group_id = { $in: [params.group_id] }
+      options.group_id = { $in: [params.group_id] };
     }
 
     // NOTE: don't show the fields "validation", "password", "old_passwords", "__v"

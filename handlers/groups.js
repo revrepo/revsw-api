@@ -153,6 +153,15 @@ exports.createGroup = function (request, reply) {
   });
 };
 
+/**
+ * @name getGroup
+ * @description
+ *   Get a single group
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.getGroup = function (request, reply) {
 
   var id = request.params.group_id;
@@ -164,6 +173,14 @@ exports.getGroup = function (request, reply) {
   });
 };
 
+/**
+ * @name updateGroup
+ * @description
+ *   Updates a group
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.updateGroup = function (request, reply) {
   var updateGroupData = request.payload;
   var groupAccountId;
@@ -219,6 +236,15 @@ exports.updateGroup = function (request, reply) {
   });
 };
 
+/**
+ * @name deleteGroup
+ * @description
+ *   Delete a group
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
 exports.deleteGroup = function (request, reply) {
   var id = request.params.group_id;
 
