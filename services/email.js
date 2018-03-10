@@ -100,11 +100,12 @@ exports.sendRevOpsEmailAboutCloseAccount = function(options, cb) {
 };
 
 // helper function to replace all strings in a string.
+/* jshint ignore:start */
 String.prototype.replaceAll = function(search, replacement) {
   var target = this;
   return target.split(search).join(replacement);
 };
-
+/* jshint ignore:end */
 
 /**
  * @name sendInvitationEmail
