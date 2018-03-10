@@ -46,7 +46,8 @@ module.exports = [
       validate:{
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().trim().description('ID of a company')
+            account_id: Joi.objectId().optional().trim().description('ID of a company'),
+            group_id: Joi.objectId().optional().trim().description('Filter by group ID')
           })
          .optional().description('Filters parameters')
         }
@@ -93,7 +94,8 @@ module.exports = [
           role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
-          self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user')
+          self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user'),
+          group_id: Joi.objectId().description('The group the user is in')
         }
       },
       response: {
@@ -141,7 +143,8 @@ module.exports = [
           }),
           role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
-          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
+          group_id: Joi.objectId().description('The group the user is in')
         }
       },
       response: {
