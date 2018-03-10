@@ -69,6 +69,10 @@ exports.getUsers = function getUsers(request, reply) {
     }
   }
 
+  if (!!filters_ && filters_.group_id) {
+    options.group_id = filters_.group_id;
+  }
+
   users.list(options, function (error, listOfUsers) {
     if (error || !listOfUsers) {
       return reply(boom.badImplementation('Failed to get a list of users'));
