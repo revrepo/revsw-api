@@ -29,9 +29,11 @@ var mongoConnection = require('../lib/mongoConnections');
 
 var User = require('../models/User');
 var Account = require('../models/Account');
+var Group = require('../models/Group');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 
 var defaultSystemVendorProfile = config.get('default_system_vendor_profile');
 
@@ -57,32 +59,89 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
 
     result.scope = [];
 
+    var accountId;
+
     result.scope.push(result.role);
-    if (!result.access_control_list.readOnly) {
-      result.scope.push(result.role + '_rw');
-    }
 
-    var accountId = result.companyId && result.companyId.length && result.companyId[0];
-    if(!accountId){
-       result.vendor_profile = defaultSystemVendorProfile;
+    if(result.group_id || result.acl) {
+      // if user is in a group or has the new `acl` field, use new permissions feature
 
-      return callback(error, true, result);
-    }
+      if (result.group_id) {
+        /* if the user is in a group, we need to get that group and use it's permissions
+           they override the user's `acl`. */
+        groups.getById(result.group_id).then(function (group) {
+          if (!group.permissions.read_only) {
+            result.scope.push(result.role + '_rw');
+            result.permissions = group.permissions; // set a permissions field containing all our permissions
+          }
+        }).catch(function (err) {
+          return callback(err, false, result);
+        });
 
-    accounts.get( { _id: accountId }, function (error, account) {
-      if (error) {
+        
+      } else {
+        // no group, only ACL.
+        if (!result.acl.read_only) {
+          result.scope.push(result.role + '_rw');
+        }
+
+         // result.permissions will have either user's group permissions (if exists) or user's ACL permissions.
+         // so we dont have to check everytime where to pull the permissions from.
+        result.permissions = result.acl;
+      }
+
+      accountId = result.companyId && result.companyId.length && result.companyId[0];
+      if (!accountId) {
+        result.vendor_profile = defaultSystemVendorProfile;
+
+        return callback(error, true, result);
+      }
+
+      accounts.get({ _id: accountId }, function (error, account) {
+        if (error) {
           logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (User ' + user_id + ')');
           return callback(error, false, result);
-      }
+        }
 
-      if (!account) {
+        if (!account) {
           logger.error('DB inconsitency for Users: cannot find account ID ' + accountId + ' (User ' + user_id + ')');
           return callback(error, false, result);
+        }
+
+        result.vendor_profile = account.vendor_profile || defaultSystemVendorProfile;
+
+        return callback(error, true, result);
+      });
+
+    } else {
+      // use old `access_control_list` method, no group or acl found..
+
+      if (!result.access_control_list.readOnly) {
+        result.scope.push(result.role + '_rw');
       }
 
-      result.vendor_profile = account.vendor_profile || defaultSystemVendorProfile;
+      accountId = result.companyId && result.companyId.length && result.companyId[0];
+      if(!accountId){
+        result.vendor_profile = defaultSystemVendorProfile;
 
-      return callback(error, true, result);
-    });
+        return callback(error, true, result);
+      }
+
+      accounts.get( { _id: accountId }, function (error, account) {
+        if (error) {
+          logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (User ' + user_id + ')');
+          return callback(error, false, result);
+        }
+
+        if (!account) {
+          logger.error('DB inconsitency for Users: cannot find account ID ' + accountId + ' (User ' + user_id + ')');
+          return callback(error, false, result);
+        }
+
+        result.vendor_profile = account.vendor_profile || defaultSystemVendorProfile;
+
+        return callback(error, true, result);
+      });
+    }
   });
 };
