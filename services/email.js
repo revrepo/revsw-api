@@ -100,6 +100,7 @@ exports.sendRevOpsEmailAboutCloseAccount = function(options, cb) {
 };
 
 // helper function to replace all strings in a string.
+// ignore because jshint complains when we add a method to String's prototype..
 /* jshint ignore:start */
 String.prototype.replaceAll = function(search, replacement) {
   var target = this;
