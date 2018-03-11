@@ -34,7 +34,7 @@ function Group(mongoose, connection, options) {
     id: String,
     name: String,
     comment: String,
-    account_id: String,
+    account_id: this.ObjectId,
     created_at: { type: Date, default: Date.now },
     created_by: String,
     updated_at: { type: Date, default: Date.now },
@@ -45,24 +45,28 @@ function Group(mongoose, connection, options) {
       API_access: { type: Boolean, default: true },
       dashboards: { type: Boolean, default: true },
       mobile_apps: {
-        active: { type: Boolean, default: true },
-        apps: [String]
+        access: { type: Boolean, default: true },
+        apps: { type: [this.ObjectId], default: null },
+        allow_list: { type: Boolean, default: true }
       },
       ssl_names: { type: Boolean, default: true },
       ssl_certs: { type: Boolean, default: true },
       waf_rules: { type: Boolean, default: true },
       cache_purge: { type: Boolean, default: true },
       web_analytics: {
-        active: { type: Boolean, default: true },
-        domain_list: [String]
+        access: { type: Boolean, default: true },
+        domains: { type: [this.ObjectId], default: null },
+        allow_list: { type: Boolean, default: true }
       },
       security_analytics: {
-        active: { type: Boolean, default: true },
-        domain_list: [String]
+        access: { type: Boolean, default: true },
+        domains: { type: [this.ObjectId], default: null },
+        allow_list: { type: Boolean, default: true }
       },
       dns_zones: {
-        active: { type: Boolean, default: true },
-        zone_list: [String]
+        access: { type: Boolean, default: true },
+        zones: { type: [this.ObjectId], default: null },
+        allow_list: { type: Boolean, default: true }
       },
       dns_analytics: { type: Boolean, default: true },
       groups: { type: Boolean, default: true },
@@ -71,8 +75,9 @@ function Group(mongoose, connection, options) {
       logshipping_jobs: { type: Boolean, default: true },
       activity_log: { type: Boolean, default: true },
       accounts: {
-        active: { type: Boolean, default: true },
-        account_list: [String]
+        access: { type: Boolean, default: true },
+        account_list: { type: [this.ObjectId], default: null },
+        allow_list: { type: Boolean, default: true }
       },
       traffic_alerts: { type: Boolean, default: true },
       notification_lists: { type: Boolean, default: true },

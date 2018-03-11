@@ -85,24 +85,28 @@ module.exports = [
             API_access: Joi.boolean().default(true).required().description('Access to API endpoints'),
             dashboards: Joi.boolean().default(true).required().description('Access to dashboard management'),
             mobile_apps: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to mobile apps'),
-              apps: Joi.array().description('Access only to certain mobile apps')
+              access: Joi.boolean().required().description('Access to mobile apps'),
+              apps: Joi.array().description('List of apps'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of apps')
             }),
             ssl_names: Joi.boolean().default(true).required().description('Access to SSL Names management'),
             ssl_certs: Joi.boolean().default(true).required().description('Access to SSL Certs management'),
             waf_rules: Joi.boolean().default(true).required().description('Access to WAF Rules management'),
             cache_purge: Joi.boolean().default(true).required().description('Abillity to purge cache'),
             web_analytics: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to web analytics'),
-              domain_list: Joi.array().description('Access only to certain domains')
+              access: Joi.boolean().required().description('Access to web analytics'),
+              domains: Joi.array().description('List of domains'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             security_analytics: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to security analytics'),
-              domain_list: Joi.array().description('Access only to certain domains')
+              access: Joi.boolean().required().description('Access to security analytics'),
+              domains: Joi.array().description('List of domains'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             dns_zones: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to dns zones'),
-              zone_list: Joi.array().description('Access only to certain dns zones')
+              access: Joi.boolean().required().description('Access to DNS zones'),
+              zones: Joi.array().description('List of zones'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of zones')
             }),
             dns_analytics: Joi.boolean().default(true).required().description('Access to DNS analytics'),
             groups: Joi.boolean().default(true).required().description('Access to groups'),
@@ -111,8 +115,9 @@ module.exports = [
             logshipping_jobs: Joi.boolean().default(true).required().description('Access to logshipping jobs'),
             activity_log: Joi.boolean().default(true).required().description('Access to activity log'),
             accounts: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to accounts'),
-              account_list: Joi.array().description('Access only to certain accounts')
+              access: Joi.boolean().required().description('Access to accounts'),
+              account_list: Joi.array().description('List of accounts'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of accounts')
             }),
             traffic_alerts: Joi.boolean().default(true).required().description('Access to traffic alerts'),
             notification_lists: Joi.boolean().default(true).required().description('Access to notification lists'),
@@ -153,49 +158,54 @@ module.exports = [
         },
         payload: {
           account_id: Joi.string().description('The account that this group is associated to'),
-          name: Joi.string().trim().max(30).regex(routeModels.groupName).required().description('Group name'),
+          name: Joi.string().trim().max(30).regex(routeModels.groupName).description('Group name'),
           comment: Joi.string().trim().allow('').max(300).optional().description('Group comment'),
           permissions: Joi.object({
-            read_only: Joi.boolean().default(false).required().description('Read-only user group'),
-            enforce_2fa: Joi.boolean().default(false).required().description('Enforce 2FA for this group'),
-            portal_login: Joi.boolean().default(true).required().description('Access to portal login'),
-            API_access: Joi.boolean().default(true).required().description('Access to API endpoints'),
-            dashboards: Joi.boolean().default(true).required().description('Access to dashboard management'),
+            read_only: Joi.boolean().description('Read-only user group'),
+            enforce_2fa: Joi.boolean().description('Enforce 2FA for this group'),
+            portal_login: Joi.boolean().description('Access to portal login'),
+            API_access: Joi.boolean().description('Access to API endpoints'),
+            dashboards: Joi.boolean().description('Access to dashboard management'),
             mobile_apps: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to mobile apps'),
-              apps: Joi.array().description('Access only to certain mobile apps')
+              access: Joi.boolean().description('Access to mobile apps'),
+              apps: Joi.array().description('List of apps'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of apps')
             }),
-            ssl_names: Joi.boolean().default(true).required().description('Access to SSL Names management'),
-            ssl_certs: Joi.boolean().default(true).required().description('Access to SSL Certs management'),
-            waf_rules: Joi.boolean().default(true).required().description('Access to WAF Rules management'),
-            cache_purge: Joi.boolean().default(true).required().description('Abillity to purge cache'),
+            ssl_names: Joi.boolean().description('Access to SSL Names management'),
+            ssl_certs: Joi.boolean().description('Access to SSL Certs management'),
+            waf_rules: Joi.boolean().description('Access to WAF Rules management'),
+            cache_purge: Joi.boolean().description('Abillity to purge cache'),
             web_analytics: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to web analytics'),
-              domain_list: Joi.array().description('Access only to certain domains')
+              access: Joi.boolean().description('Access to web analytics'),
+              domains: Joi.array().description('List of domains'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             security_analytics: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to security analytics'),
-              domain_list: Joi.array().description('Access only to certain domains')
+              access: Joi.boolean().description('Access to security analytics'),
+              domains: Joi.array().description('List of domains'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             dns_zones: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to dns zones'),
-              zone_list: Joi.array().description('Access only to certain dns zones')
+              access: Joi.boolean().description('Access to DNS zones'),
+              zones: Joi.array().description('List of zones'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of zones')
             }),
-            dns_analytics: Joi.boolean().default(true).required().description('Access to DNS analytics'),
-            groups: Joi.boolean().default(true).required().description('Access to groups'),
-            users: Joi.boolean().default(true).required().description('Access to users'),
-            API_keys: Joi.boolean().default(true).required().description('Access to API keys'),
-            logshipping_jobs: Joi.boolean().default(true).required().description('Access to logshipping jobs'),
-            activity_log: Joi.boolean().default(true).required().description('Access to activity log'),
+            dns_analytics: Joi.boolean().description('Access to DNS analytics'),
+            groups: Joi.boolean().description('Access to groups'),
+            users: Joi.boolean().description('Access to users'),
+            API_keys: Joi.boolean().description('Access to API keys'),
+            logshipping_jobs: Joi.boolean().description('Access to logshipping jobs'),
+            activity_log: Joi.boolean().description('Access to activity log'),
             accounts: Joi.object({
-              active: Joi.boolean().default(true).required().description('Access to accounts'),
-              account_list: Joi.array().description('Access only to certain accounts')
+              access: Joi.boolean().description('Access to accounts'),
+              account_list: Joi.array().description('List of accounts'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of accounts')
             }),
-            traffic_alerts: Joi.boolean().default(true).required().description('Access to traffic alerts'),
-            notification_lists: Joi.boolean().default(true).required().description('Access to notification lists'),
-            usage_reports: Joi.boolean().default(true).required().description('Access to usage reports'),
-            billing_statements: Joi.boolean().default(true).required().description('Access to billing statements'),
-            billing_plan: Joi.boolean().default(true).required().description('Access to billing plan')
+            traffic_alerts: Joi.boolean().description('Access to traffic alerts'),
+            notification_lists: Joi.boolean().description('Access to notification lists'),
+            usage_reports: Joi.boolean().description('Access to usage reports'),
+            billing_statements: Joi.boolean().description('Access to billing statements'),
+            billing_plan: Joi.boolean().description('Access to billing plan')
           })
         }
       },
