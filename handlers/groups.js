@@ -255,16 +255,30 @@ exports.deleteGroup = function (request, reply) {
     }
 
     // get users by group id, check if our group has users in it before we delete it
-    users.list({ group_id: id }, function (err, users) {
+    users.list({ group_id: id }, function (err, userList) {
       if (err) {
         return reply(boom.badRequest(err));
       }
 
-      if (users) {
-        return reply(boom.badRequest('Cannot delete a group with users'));
+      if (userList && userList.length > 0) {
+        var returnUsers = [];
+        userList.forEach(function (user) {
+          returnUsers.push({
+            id: user.user_id,
+            email: user.email
+          });
+        });
+        var statusResponse;
+        statusResponse = {
+          statusCode: 400,
+          message: 'Cannot delete a group with users',
+          data: JSON.stringify(returnUsers)
+        };
+
+        return renderJSON(request, reply, statusResponse, null);
       }
 
-      if (!err && !users) {
+      if (!err && (!userList || userList.length === 0)) {
         // ok no users, lets delete it!
         var account_id = result.account_id[0];
 
@@ -294,7 +308,7 @@ exports.deleteGroup = function (request, reply) {
 
           AuditLogger.store(auditRecord);
 
-          renderJSON(request, reply, null, statusResponse);
+          return renderJSON(request, reply, null, statusResponse);
         }).catch(function (err) {
           return reply(boom.badRequest(err));
         });
