@@ -275,7 +275,7 @@ exports.deleteGroup = function (request, reply) {
           data: JSON.stringify(returnUsers)
         };
 
-        return renderJSON(request, reply, statusResponse, null);
+        return reply(boom.badRequest(statusResponse.message, statusResponse.data));
       }
 
       if (!err && (!userList || userList.length === 0)) {
@@ -312,9 +312,9 @@ exports.deleteGroup = function (request, reply) {
         }).catch(function (err) {
           return reply(boom.badRequest(err));
         });
-      }
-
-      return reply(boom.badImplementation());
+      } else {
+        return reply(boom.badRequest('Something went wrong!'));
+      }      
     });
   }).catch(function (err) {
     return reply(boom.badRequest(err));
