@@ -86,8 +86,13 @@ module.exports = [
             dashboards: Joi.boolean().default(true).required().description('Access to dashboard management'),
             mobile_apps: Joi.object({
               access: Joi.boolean().required().description('Access to mobile apps'),
-              apps: Joi.array().description('List of apps'),
+              list: Joi.array().description('List of apps'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of apps')
+            }),
+            domains: Joi.object({
+              access: Joi.boolean().required().description('Access to domains'),
+              list: Joi.array().description('List of apps'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             ssl_names: Joi.boolean().default(true).required().description('Access to SSL Names management'),
             ssl_certs: Joi.boolean().default(true).required().description('Access to SSL Certs management'),
@@ -95,17 +100,17 @@ module.exports = [
             cache_purge: Joi.boolean().default(true).required().description('Abillity to purge cache'),
             web_analytics: Joi.object({
               access: Joi.boolean().required().description('Access to web analytics'),
-              domains: Joi.array().description('List of domains'),
+              list: Joi.array().description('List of domains'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             security_analytics: Joi.object({
               access: Joi.boolean().required().description('Access to security analytics'),
-              domains: Joi.array().description('List of domains'),
+              list: Joi.array().description('List of domains'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             dns_zones: Joi.object({
               access: Joi.boolean().required().description('Access to DNS zones'),
-              zones: Joi.array().description('List of zones'),
+              list: Joi.array().description('List of zones'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of zones')
             }),
             dns_analytics: Joi.boolean().default(true).required().description('Access to DNS analytics'),
@@ -116,7 +121,7 @@ module.exports = [
             activity_log: Joi.boolean().default(true).required().description('Access to activity log'),
             accounts: Joi.object({
               access: Joi.boolean().required().description('Access to accounts'),
-              account_list: Joi.array().description('List of accounts'),
+              list: Joi.array().description('List of accounts'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of accounts')
             }),
             traffic_alerts: Joi.boolean().default(true).required().description('Access to traffic alerts'),
@@ -168,8 +173,13 @@ module.exports = [
             dashboards: Joi.boolean().description('Access to dashboard management'),
             mobile_apps: Joi.object({
               access: Joi.boolean().description('Access to mobile apps'),
-              apps: Joi.array().description('List of apps'),
+              list: Joi.array().description('List of apps'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of apps')
+            }),
+            domains: Joi.object({
+              access: Joi.boolean().description('Access to domains'),
+              list: Joi.array().description('List of domains'),
+              allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             ssl_names: Joi.boolean().description('Access to SSL Names management'),
             ssl_certs: Joi.boolean().description('Access to SSL Certs management'),
@@ -177,17 +187,17 @@ module.exports = [
             cache_purge: Joi.boolean().description('Abillity to purge cache'),
             web_analytics: Joi.object({
               access: Joi.boolean().description('Access to web analytics'),
-              domains: Joi.array().description('List of domains'),
+              list: Joi.array().description('List of domains'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             security_analytics: Joi.object({
               access: Joi.boolean().description('Access to security analytics'),
-              domains: Joi.array().description('List of domains'),
+              list: Joi.array().description('List of domains'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
             }),
             dns_zones: Joi.object({
               access: Joi.boolean().description('Access to DNS zones'),
-              zones: Joi.array().description('List of zones'),
+              list: Joi.array().description('List of zones'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of zones')
             }),
             dns_analytics: Joi.boolean().description('Access to DNS analytics'),
@@ -198,7 +208,7 @@ module.exports = [
             activity_log: Joi.boolean().description('Access to activity log'),
             accounts: Joi.object({
               access: Joi.boolean().description('Access to accounts'),
-              account_list: Joi.array().description('List of accounts'),
+              list: Joi.array().description('List of accounts'),
               allow_list: Joi.boolean().description('Flag to allow/deny access to the list of accounts')
             }),
             traffic_alerts: Joi.boolean().description('Access to traffic alerts'),

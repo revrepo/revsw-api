@@ -202,6 +202,7 @@ exports.updateGroup = function (request, reply) {
     },
     function (cb) {
       updateGroupData.updated_at = Date.now();
+      updateGroupData.updated_by = request.auth.credentials.email || null;
       groups.update(updateGroupData).then(function (result) {
         resultGroupData = publicRecordFields.handle(result, 'group');
         cb();
@@ -257,7 +258,7 @@ exports.deleteGroup = function (request, reply) {
     // get users by group id, check if our group has users in it before we delete it
     users.list({ group_id: id }, function (err, userList) {
       if (err) {
-        return reply(boom.badRequest(err));
+        return reply(boom.badImplementation(err));
       }
 
       if (userList && userList.length > 0) {

@@ -86,7 +86,7 @@ function User(mongoose, connection, options) {
     invitation_token: { type: String, default: null },
     invitation_expire_at: { type: Date, default: Date.now },
     invitation_sent_at: { type: Date, default: Date.now },
-    group_id: { type: this.ObjectId, default: null },
+    group_id: { type: String, default: null },
     acl: { // new permissions system!
       read_only: { type: Boolean, default: false },
       enforce_2fa: { type: Boolean, default: false },
