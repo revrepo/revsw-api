@@ -63,7 +63,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
 
     result.scope.push(result.role);
 
-    if(result.group_id || result.acl) {
+    if(result.group_id) { // || result.acl
       // if user is in a group or has the new `acl` field, use new permissions feature
 
       if (result.group_id) {
@@ -79,7 +79,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
         });
 
         
-      } else {
+      }/* else {
         // no group, only ACL.
         if (!result.acl.read_only) {
           result.scope.push(result.role + '_rw');
@@ -88,7 +88,7 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
          // result.permissions will have either user's group permissions (if exists) or user's ACL permissions.
          // so we dont have to check everytime where to pull the permissions from.
         result.permissions = result.acl;
-      }
+      }*/
 
       accountId = result.companyId && result.companyId.length && result.companyId[0];
       if (!accountId) {
