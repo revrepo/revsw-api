@@ -95,7 +95,8 @@ module.exports = [
           theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
           self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user'),
-          group_id: Joi.string().allow(null).description('The group the user is in')
+          group_id: Joi.string().allow(null).description('The group the user is in'),
+          permissions: routeModels.permissionsModel
         }
       },
       response: {
@@ -144,7 +145,8 @@ module.exports = [
           role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
-          group_id: Joi.string().allow(null).description('The group the user is in')
+          group_id: Joi.string().allow(null).description('The group the user is in'),
+          permissions: routeModels.permissionsModel
         }
       },
       response: {

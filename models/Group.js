@@ -25,6 +25,8 @@ var utils = require('../lib/utilities.js');
 var _ = require('lodash');
 var Promise = require('bluebird');
 
+var permissionSchema = require('./Permissions');
+
 function Group(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
@@ -39,58 +41,7 @@ function Group(mongoose, connection, options) {
     created_by: String,
     updated_at: { type: Date, default: Date.now },
     updated_by: { type: String, default: null },
-    permissions: {
-      read_only: { type: Boolean, default: false },
-      enforce_2fa: { type: Boolean, default: false },
-      portal_login: { type: Boolean, default: true },
-      API_access: { type: Boolean, default: true },
-      dashboards: { type: Boolean, default: true },
-      mobile_apps: {
-        access: { type: Boolean, default: true },
-        list: { type: [this.ObjectId], default: null },
-        allow_list: { type: Boolean, default: true }
-      },
-      domains: {
-        access: { type: Boolean, default: true },
-        list: { type: [this.ObjectId], default: null },
-        allow_list: { type: Boolean, default: true }
-      },
-      ssl_names: { type: Boolean, default: true },
-      ssl_certs: { type: Boolean, default: true },
-      waf_rules: { type: Boolean, default: true },
-      cache_purge: { type: Boolean, default: true },
-      web_analytics: {
-        access: { type: Boolean, default: true },
-        list: { type: [this.ObjectId], default: null },
-        allow_list: { type: Boolean, default: true }
-      },
-      security_analytics: {
-        access: { type: Boolean, default: true },
-        list: { type: [this.ObjectId], default: null },
-        allow_list: { type: Boolean, default: true }
-      },
-      dns_zones: {
-        access: { type: Boolean, default: true },
-        list: { type: [this.ObjectId], default: null },
-        allow_list: { type: Boolean, default: true }
-      },
-      dns_analytics: { type: Boolean, default: true },
-      groups: { type: Boolean, default: true },
-      users: { type: Boolean, default: true },
-      API_keys: { type: Boolean, default: true },
-      logshipping_jobs: { type: Boolean, default: true },
-      activity_log: { type: Boolean, default: true },
-      accounts: {
-        access: { type: Boolean, default: true },
-        list: { type: [this.ObjectId], default: null },
-        allow_list: { type: Boolean, default: true }
-      },
-      traffic_alerts: { type: Boolean, default: true },
-      notification_lists: { type: Boolean, default: true },
-      usage_reports: { type: Boolean, default: true },
-      billing_statements: { type: Boolean, default: true },
-      billing_plan: { type: Boolean, default: true }
-    }
+    permissions: permissionSchema
   });
 
   this.model = connection.model('Group', this.GroupSchema, 'Group');
