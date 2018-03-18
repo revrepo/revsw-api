@@ -128,6 +128,25 @@ Account.prototype = {
     });
   },
 
+  listWithFilters: function (filters, callback) {
+    this.model.find({ deleted: { $ne: true }, parent_account_id: { $in: [filters] } }, function (err, accounts) {
+      if (accounts) {
+        accounts = utils.clone(accounts);
+        for (var i = 0; i < accounts.length; i++) {
+          var current = accounts[i];
+
+          current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
+          delete current._id;
+          delete current.__v;
+          delete current.status;
+        }
+      }
+
+      callback(err, accounts);
+    });
+  },
+
   listAll : function (request, callback) {
     this.model.find(function (err, accounts) {
       if (accounts) {

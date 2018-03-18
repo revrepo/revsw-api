@@ -47,22 +47,42 @@ var Customer = require('../lib/chargify').Customer;
 var accountService = require('../services/accounts.js');
 
 exports.getAccounts = function getAccounts(request, reply) {
+  var filters = request.query.filters;
+  var options = filters ? filters.parent_account_id : null;
 
-  accounts.list(function(error, listOfAccounts) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to read accounts list from the DB'));
-    }
-
-    for (var i = 0; i < listOfAccounts.length; i++) {
-      if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
-        listOfAccounts.splice(i, 1);
-        i--;
+  if (options) {
+    accounts.listWithFilters(options, function(error, listOfAccounts) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read accounts list from the DB'));
       }
-    }
-
-    var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
-    renderJSON(request, reply, error, accounts_list);
-  });
+  
+      for (var i = 0; i < listOfAccounts.length; i++) {
+        if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
+          listOfAccounts.splice(i, 1);
+          i--;
+        }
+      }
+  
+      var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
+      renderJSON(request, reply, error, accounts_list);
+    });
+  } else {
+    accounts.list(function(error, listOfAccounts) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+      }
+  
+      for (var i = 0; i < listOfAccounts.length; i++) {
+        if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
+          listOfAccounts.splice(i, 1);
+          i--;
+        }
+      }
+  
+      var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
+      renderJSON(request, reply, error, accounts_list);
+    });
+  }  
 };
 /**
  * @name createAccount
