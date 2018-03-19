@@ -27,6 +27,8 @@ var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
+var APIKey = require('../models/User');
+var apikeys = new APIKey(mongoose, mongoConnection.getConnectionPortal());
 var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
@@ -155,63 +157,7 @@ domainConfigs.list(function (err, list) {
                 throw new Error(err);
             } else if (usrs) {
                 for (var i = 0; i < usrs.length; i++) {
-                    var user = usrs[i];
-                    delete user.password;
-                    switch (user.role) {
-                        case 'user':
-                            var permissions = _.clone(permissionsUser);
-                            var domainArray = [];
-                            var domainIDs = [];
-                            permissions.read_only = user.access_control_list.readOnly;
-                            
-                            if (user.domain && user.domain !== '') {
-                                if (user.domain.includes(',')) {
-                                    domainArray = user.domain.split(',');
-                                } else {
-                                    domainArray.push(user.domain);
-                                }
-                                domainArray.forEach(function (domain) {                                    
-                                    domains.forEach(function (domainConfig) {
-                                        if (domain === domainConfig.domain_name) {                                            
-                                            domainIDs.push(domainConfig._id.toString());
-                                        }
-                                    });
-                                });
-                            }
-
-                            permissions.domains.list = domainIDs.length > 0 ? domainIDs : null;
-                            permissions.domains.access = true;
-                            permissions.domains.allow_list = true;
-
-                            user.permissions = permissions;
-                            user.user_id = user._id;
-                            users.update(user, function (err, doc) {
-                                if (err) {
-                                    throw new Error(err);
-                                } else if (doc) {
-                                    console.log(doc.email + ' successfully updated!');
-                                }
-                            });
-                            break;
-                        case 'admin':
-                        case 'reseller':
-                        case 'revadmin':
-                            var permissions = _.clone(permissionsAdmin);
-                            permissions.read_only = user.access_control_list.readOnly;
-                            user.permissions = permissions;
-                            user.user_id = user._id;
-                            users.update(user, function (err, doc) {
-                                if (err) {
-                                    throw new Error(err);
-                                } else if (doc) {
-                                    console.log(doc.email + ' successfully updated!');
-                                }
-                            });
-                            break;
-                        default:
-                            throw new Error(user.role);
-                            break;
-                    }
+                    updateUser(usrs[i]);
                 }
             }
         });
@@ -219,3 +165,66 @@ domainConfigs.list(function (err, list) {
         throw new Error('Problem getting domains');
     }
 });
+
+var updateUser = function (usr) {
+    var user = {};
+    if (usr.companyId) {
+        user.account_id = usr.companyId.includes(',') ? usr.companyId.split(',')[0] : usr.companyId;
+    }
+    
+    user.user_id = usr._id;
+    switch (usr.role) {
+        case 'user':
+            var permissions = _.clone(permissionsUser);
+            var domainArray = [];
+            var domainIDs = [];
+            permissions.read_only = usr.access_control_list.readOnly;
+            
+            if (usr.domain && usr.domain !== '') {
+                if (usr.domain.includes(',')) {
+                    domainArray = usr.domain.split(',');
+                } else {
+                    domainArray.push(usr.domain);
+                }
+                domainArray.forEach(function (domain) {                                    
+                    domains.forEach(function (domainConfig) {
+                        if (domain === domainConfig.domain_name) {                                            
+                            domainIDs.push(domainConfig._id.toString());
+                        }
+                    });
+                });
+            }
+
+            permissions.domains.list = domainIDs.length > 0 ? domainIDs : null;
+            permissions.domains.access = true;
+            permissions.domains.allow_list = true;
+
+            user.permissions = permissions;                       
+            users.update(user, function (err, doc) {
+                if (err) {
+                    throw new Error(err);
+                } else if (doc) {
+                    console.log(doc.email + ' successfully updated!');
+                }
+            });
+            break;
+        case 'admin':
+        case 'reseller':
+        case 'revadmin':
+            var permissions = _.clone(permissionsAdmin);
+            permissions.read_only = usr.access_control_list.readOnly;
+            user.permissions = permissions;
+            
+            users.update(user, function (err, doc) {
+                if (err) {
+                    throw new Error(err);
+                } else if (doc) {
+                    console.log(doc.email + ' successfully updated!');
+                }
+            });
+            break;
+        default:
+            throw new Error(user.role);
+            break;
+    }
+};
