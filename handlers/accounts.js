@@ -100,6 +100,11 @@ exports.createAccount = function(request, reply) {
     newAccount.vendor_profile = request.auth.credentials.vendor_profile;
   }
 
+  if (request.auth.credentials.role === 'reseller') {
+    // set parent account id
+    newAccount.parent_account_id = request.auth.credentials.account_id || null;
+  }
+
   // TODO: Make it able to use user_type apikey to create accounts
   if (request.auth.credentials.user_type === 'apikey') {
     return reply(boom.badRequest('Cannot create account with API key'));
