@@ -89,7 +89,8 @@ function User(mongoose, connection, options) {
     invitation_expire_at: { type: Date, default: Date.now },
     invitation_sent_at: { type: Date, default: Date.now },
     group_id: { type: String, default: null },
-    permissions: permissionSchema // new permissions system!
+    permissions: permissionSchema, // new permissions system!
+    account_id: { type: this.ObjectId, default: null }
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
@@ -367,7 +368,6 @@ User.prototype = {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
-
         //       console.log('Inside update: updated doc = ', doc);
         doc.save(function (err, item) {
           if (item) {
