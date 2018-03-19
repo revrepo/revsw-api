@@ -28,9 +28,11 @@ var mongoConnection = require('../lib/mongoConnections');
 
 var ApiKey = require('../models/APIKey');
 var Account = require('../models/Account');
+var Group = require('../models/Group');
 
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 
 var accountId;
 
@@ -75,9 +77,25 @@ exports.validateAPIKey = function (request, key, callback) {
       result.vendor_profile = account.vendor_profile;
       result.user_type = 'apikey';
       result.scope = [ 'apikey' ];
-      if (result.read_only_status === false) {
-        result.scope.push('apikey_rw');
+
+      
+      if (result.group_id) {
+        /* if the api key is in a group, we need to get that group and use it's permissions
+           they override the keys's `allowed_ops` and `permissions`. */
+        groups.getById(result.group_id).then(function (group) {
+          if (!group.permissions.read_only) {
+            result.scope.push('apikey_rw');
+            result.permissions = group.permissions; // set a permissions field containing all our permissions
+          }
+        }).catch(function (err) {
+          return callback(err, false, result);
+        });
+      } else {
+        if (result.read_only_status === false) {
+          result.scope.push('apikey_rw');
+        }
       }
+      
 
       return callback(error, true, result);
     });

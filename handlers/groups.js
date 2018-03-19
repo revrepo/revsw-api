@@ -68,7 +68,7 @@ exports.getGroups = function getGroups(request, reply) {
 
   groups.list(options).then(function (listOfGroups) {
     if (listOfGroups.length === 0 && !filters_) {
-      return reply(boom.badImplementation('Failed to get a list of groups (there should be at least one group in the list)'));
+      return reply(boom.badRequest('Could not find any groups.'));
     }
     listOfGroups = _.filter(listOfGroups, function (itemGroup) {
       if (!utils.checkUserAccessPermissionToGroup(request, itemGroup)) {

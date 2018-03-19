@@ -23,6 +23,7 @@
 
 var _ = require('lodash');
 var utils = require('../lib/utilities.js');
+var permissionsSchema = require('./Permissions');
 
 function APIKey(mongoose, connection, options) {
   this.options = options;
@@ -47,7 +48,9 @@ function APIKey(mongoose, connection, options) {
     'read_only_status': {type: Boolean, default: false},
     'active'          : {type: Boolean, default: true},
     'created_at'      : {type: Date, default: Date.now},
-    'updated_at'      : {type: Date, default: Date.now}
+    'updated_at'      : {type: Date, default: Date.now},
+    permissions: permissionsSchema,
+    group_id: {type: this.ObjectId, default: null}
   });
 
   this.model = connection.model('APIKey', this.APIKeySchema, 'APIKey');
@@ -90,6 +93,9 @@ APIKey.prototype = {
     if(!!filter_){
       if(!!filter_.account_id){
         options.account_id = {$regex: filter_.account_id, $options: 'i'};
+      }
+      if (!!filter_.group_id) {
+        options.group_id = { $in: [filter_.group_id] };
       }
     }
     this.model.find(options, function (err, api_keys) {
