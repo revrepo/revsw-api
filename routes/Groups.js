@@ -32,7 +32,7 @@ module.exports = [
     path: '/v1/groups',
     config: {
       auth: {
-        scope: ['revadmin']
+        scope: ['revadmin', 'reseller', 'admin']
       },
       handler: groups.getGroups,
       description: 'Get a list of groups',
@@ -62,7 +62,7 @@ module.exports = [
     path: '/v1/groups',
     config: {
       auth: {
-        scope: ['revadmin_rw']
+        scope: ['revadmin_rw', 'reseller_rw', 'admin_rw']
       },
       handler: groups.createGroup,
       description: 'Create a new group',
@@ -92,7 +92,7 @@ module.exports = [
     path: '/v1/groups/{group_id}',
     config: {
       auth: {
-        scope: ['revadmin_rw']
+        scope: ['revadmin_rw', 'reseller_rw', 'admin_rw']
       },
       handler: groups.updateGroup,
       description: 'Update a group',
@@ -128,7 +128,7 @@ module.exports = [
     path: '/v1/groups/{group_id}',
     config: {
       auth: {
-        scope: ['revadmin']
+        scope: ['revadmin', 'reseller', 'admin']
       },
       handler: groups.getGroup,
       description: 'Get a group',
@@ -155,7 +155,7 @@ module.exports = [
     path: '/v1/groups/{group_id}',
     config: {
       auth: {
-        scope: ['revadmin_rw']
+        scope: ['revadmin_rw', 'reseller_rw', 'admin_rw']
       },
       handler: groups.deleteGroup,
       description: 'Delete a group',
