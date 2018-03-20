@@ -78,21 +78,35 @@ exports.validateAPIKey = function (request, key, callback) {
       result.user_type = 'apikey';
       result.scope = [ 'apikey' ];
 
-      
-      if (result.group_id) {
-        /* if the api key is in a group, we need to get that group and use it's permissions
-           they override the keys's `allowed_ops` and `permissions`. */
-        groups.getById(result.group_id).then(function (group) {
-          if (!group.permissions.read_only) {
+      if (result.group_id || result.permissions) {
+        if (result.group_id) {
+          /* if the user is in a group, we need to get that group and use it's permissions
+             they override the user's `permissions`. */
+          groups.getById(result.group_id).then(function (group) {
+            if (!group.permissions.read_only) {
+              result.scope.push('apikey_rw');
+              result.scope.push(result.role + '_rw');
+              result.permissions = group.permissions; // set a permissions field containing all our group's permissions
+            }
+          }).catch(function (err) {
+            return callback(err, false, result);
+          });
+  
+  
+        } else {
+          // no group, only permissions.
+          if (!result.permissions.read_only) {
             result.scope.push('apikey_rw');
-            result.permissions = group.permissions; // set a permissions field containing all our permissions
+            result.scope.push(result.role + '_rw');
           }
-        }).catch(function (err) {
-          return callback(err, false, result);
-        });
+  
+          // result.permissions will have either user's group permissions (if exists) or user's permissions.
+          // so we dont have to check everytime where to pull the permissions from.
+        }
       } else {
         if (result.read_only_status === false) {
           result.scope.push('apikey_rw');
+          result.scope.push(result.role + '_rw');
         }
       }
       
