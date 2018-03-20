@@ -117,17 +117,8 @@ Group.prototype = {
     var me = this;
     return new Promise(function (resolve, reject) {
       var options = {};
-      if (!!params.account_id) {
-        if (_.isArray(params.account_id)) {
-          options.$or = [];
-          _.each(params.account_id, function (item) {
-            options.$or.push({
-              companyId: { $regex: item, $options: 'i' }
-            });
-          });
-        } else {
-          options.companyId = { $regex: params.account_id, $options: 'i' };
-        }
+      if (!!params.account_id) {        
+          options.account_id = {$in: [params.account_id]};
       }
       me.model.find(options, function (err, groups) {
         if (err) {
