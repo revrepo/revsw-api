@@ -67,8 +67,8 @@ exports.getGroups = function getGroups(request, reply) {
   }
 
   groups.list(options).then(function (listOfGroups) {
-    if (listOfGroups.length === 0 && !filters_) {
-      return reply(boom.badRequest('Could not find any groups.'));
+    if (listOfGroups.length === 0) {
+      renderJSON(request, reply, null, listOfGroups);
     }
     listOfGroups = _.filter(listOfGroups, function (itemGroup) {
       if (!utils.checkUserAccessPermissionToGroup(request, itemGroup)) {
