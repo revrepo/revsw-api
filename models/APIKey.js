@@ -50,7 +50,8 @@ function APIKey(mongoose, connection, options) {
     'created_at'      : {type: Date, default: Date.now},
     'updated_at'      : {type: Date, default: Date.now},
     permissions: permissionsSchema,
-    group_id: {type: this.ObjectId, default: null}
+    group_id: {type: this.ObjectId, default: null},
+    role: { type: String, default: 'admin' }
   });
 
   this.model = connection.model('APIKey', this.APIKeySchema, 'APIKey');

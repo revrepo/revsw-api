@@ -178,7 +178,8 @@ module.exports = [
           read_only_status: Joi.boolean().required().description('Tells if the API key is read-only or read/write'),
           active          : Joi.boolean().required().description('Tells if the API key is active or not'),
           permissions: routeModels.permissionsModel,
-          group_id: Joi.objectId().allow(null).description('ID of the group this key is in')
+          group_id: Joi.objectId().allow(null).description('ID of the group this key is in'),
+          role: Joi.string().description('Role of the API Key')
         }
       },
       response: {

@@ -29,6 +29,7 @@ var permissionSchema = {
         list: { type: [mongoose.Schema.ObjectId], default: null },
         allow_list: { type: Boolean, default: true }
     },
+    mobile_analytics: { type: Boolean, default: true },
     domains: {
         access: { type: Boolean, default: true },
         list: { type: [mongoose.Schema.ObjectId], default: null },
