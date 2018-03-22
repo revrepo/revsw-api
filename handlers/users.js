@@ -47,6 +47,8 @@ var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPort
 var usersService = require('../services/users.js');
 var emailService = require('../services/email');
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 /**
  * @name getUsers
  * @description method get all users
@@ -57,7 +59,7 @@ exports.getUsers = function getUsers(request, reply) {
   var usersAccountId = utils.getAccountID(request);
   var options = {};
   if (!!filters_ && filters_.account_id) {
-    if (!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: filters_.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     usersAccountId = filters_.account_id;
@@ -82,7 +84,7 @@ exports.getUsers = function getUsers(request, reply) {
       return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
     }
     listOfUsers = _.filter(listOfUsers, function (itemUser) {
-      if (!utils.checkUserAccessPermissionToUser(request, itemUser)) {
+      if (!permissionCheck.checkPermissionsToResource(request, itemUser, 'users')) {
         return false;
       }
       return true;
@@ -116,7 +118,7 @@ exports.createUser = function (request, reply) {
     return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
   }
   // NOTE: Who is creating new User must have access to the user after creation
-  if (!utils.checkUserAccessPermissionToUser(request, newUser)) {
+  if (!permissionCheck.checkPermissionsToResource(request, newUser, 'users')) {
     // TODO: fix the error message text "You don't have permissions for this action "
     return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
   }
@@ -236,7 +238,7 @@ exports.getUser = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve user details for user ID ' + user_id));
     }
-    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'users')) {
       return reply(boom.badRequest('User ID not found'));
     } else {
       result = publicRecordFields.handle(result, 'user');
@@ -337,7 +339,7 @@ exports.updateUser = function (request, reply) {
           return cb(error);
         }
         storedUserData = publicRecordFields.handle(result, 'user');
-        if (!storedUserData || !utils.checkUserAccessPermissionToUser(request, result)) {
+        if (!storedUserData || !permissionCheck.checkPermissionsToResource(request, result, 'users')) {
           return cb('User not found');
         }
         cb();
@@ -462,7 +464,7 @@ exports.updateUser = function (request, reply) {
 //     return users.getAsync({_id: userId});
 //   })
 //     .then(function (result) {
-//       if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+//       if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'users')) {
 //         return Promise.reject(Error('User not found'));
 //       }
 
@@ -616,7 +618,7 @@ exports.deleteUser = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for user ID ' + user_id));
     }
-    if (!result || !utils.checkUserAccessPermissionToUser(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'users')) {
       return reply(boom.badRequest('User ID not found'));
     }
     var account_id = result.companyId[0];
@@ -758,7 +760,7 @@ exports.disable2fa = function (request, reply) {
 
     // console.log('user = ', JSON.stringify(user));
 
-    if (!user || !utils.checkUserAccessPermissionToUser(request, user)) {
+    if (!user || !permissionCheck.checkPermissionsToResource(request, user, 'users')) {
       return reply(boom.badRequest('User ID not found'));
     }
 

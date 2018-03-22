@@ -33,7 +33,7 @@ var logger = require('revsw-logger')(config.log_config);
 
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 //
 // Handler for Top Objects report
 //
@@ -47,7 +47,7 @@ exports.getTopObjects = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
 
       domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
@@ -149,7 +149,7 @@ exports.getSlowestFBTObjects = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
 
       domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
@@ -256,7 +256,7 @@ exports.getSlowestDownloadObjects = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
 
       domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );

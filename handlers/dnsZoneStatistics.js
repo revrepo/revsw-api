@@ -38,7 +38,7 @@ var utils = require('../lib/utilities.js');
 var _ = require('lodash');
 
 var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getConnectionPortal()));
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var Nsone = require('../lib/nsone.js');
 
 var DNS_ZONE_NOT_FOUND = 'DNS zone not found';
@@ -77,7 +77,7 @@ module.exports.getDnsZonesStatsUsageZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zone')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;

@@ -46,6 +46,7 @@ var memoryCache = cacheManager.caching({
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
+var permissionCheck = require('./../lib/requestPermissionScope');
 //  ---------------------------------
 /**
  * @name topReports_
@@ -588,7 +589,7 @@ exports.getTopReports = function( request, reply ) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       // NOTE: make correction for the time range
       _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
       var span = utils.query2Span( queryProperties, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
@@ -639,7 +640,7 @@ exports.getTopLists = function( request, reply ) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       domainName = domainConfig.domain_name;
       var span = utils.query2Span(request.query, 1 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days */ );
       if (span.error) {

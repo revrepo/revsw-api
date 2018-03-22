@@ -35,7 +35,7 @@ var Account = require('../models/Account');
 var servergroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var locations = new Location(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var BP_GROUP_ID_DEFAULT_ = config.get('bp_group_id_default');
 
 /**
@@ -53,7 +53,7 @@ exports.getFirstMileLocations = function(request, reply) {
   // NOTE: main workflow
   async.waterfall([
     function chekPermissionToParentAccount(cb) {
-      if (!!accountId && !utils.checkUserAccessPermissionToAccount(request, accountId)) {
+      if (!!accountId && !permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
         return cb(boom.badRequest('Account ID not found'));
       }else{
         if(!!accountId){

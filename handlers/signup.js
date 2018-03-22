@@ -47,7 +47,7 @@ var sendgrid = require('sendgrid')(config.get('sendgrid_api_key'));
 var Account = require('../models/Account');
 var User = require('../models/User');
 var Location = require('../models/Location');
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var billing_plans = require('../models/BillingPlan');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());

@@ -40,6 +40,8 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 function verifyDomainOwnership(companyId, domainList, callback) {
 
   var verified = true;
@@ -91,7 +93,7 @@ exports.getApiKey = function (request, reply) {
       return reply(boom.badImplementation('Failed to get API key ID ' + id));
     }
 
-    if (result && utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (result && permissionCheck.checkPermissionsToResource(request, result, 'API_keys')) {
 
       result = publicRecordFields.handle(result, 'apiKeys');
       renderJSON(request, reply, error, result);
@@ -130,7 +132,7 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
-  if (!newApiKey.account_id || !utils.checkUserAccessPermissionToAccount(request, newApiKey.account_id)) {
+  if (!newApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, {id: newApiKey.account_id}, 'accounts')) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -216,7 +218,7 @@ exports.updateApiKey = function (request, reply) {
     });
   }
 
-  if (!updatedApiKey.account_id || !utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
+  if (!updatedApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, updatedApiKey, 'API_keys')) {
       return reply(boom.badRequest('Company ID not found'));
   }
   // NOTE: check  user access permission to account for manage
@@ -224,7 +226,7 @@ exports.updateApiKey = function (request, reply) {
     var hasError = false;
     updatedApiKey.managed_account_ids = _.unique(updatedApiKey.managed_account_ids);
     updatedApiKey.managed_account_ids.forEach(function(itemAccountId) {
-      if (!utils.checkUserAccessPermissionToAccount(request, itemAccountId)) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: itemAccountId}, 'accounts')) {
         hasError = true;
       }
     });
@@ -274,7 +276,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (!result.account_id || !permissionCheck.checkPermissionsToResource(request, result, 'API_keys')) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -357,7 +359,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (!result.account_id || !permissionCheck.checkPermissionsToResource(request, result, 'API_keys')) {
       return reply(boom.badRequest('API key not found'));
     }
 

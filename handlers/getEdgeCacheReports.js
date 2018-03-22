@@ -39,6 +39,8 @@ var logger = require('revsw-logger')(config.log_config);
 var AuditEvents = require('../models/AuditEvents');
 var DomainConfig = require('../models/DomainConfig');
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 var auditevents = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
@@ -326,7 +328,7 @@ module.exports.getStatsEdgeCache = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       domainName = domainConfig.domain_name;
       var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 /* maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
       if (span.error) {

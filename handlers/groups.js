@@ -45,7 +45,7 @@ var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectio
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var groups = Promise.promisifyAll(new Group(mongoose, mongoConnection.getConnectionPortal()));
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 /**
  * @name getGroups
  * @description method get all groups
@@ -55,7 +55,7 @@ exports.getGroups = function getGroups(request, reply) {
   var accountIds = utils.getAccountID(request);
   var options = {};
   if (!!filters_ && filters_.account_id) {
-    if (!utils.checkUserAccessPermissionToAccount(request, filters_.account_id)) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: filters_.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     options.account_id = filters_.account_id;
@@ -71,7 +71,7 @@ exports.getGroups = function getGroups(request, reply) {
       renderJSON(request, reply, null, listOfGroups);
     }
     listOfGroups = _.filter(listOfGroups, function (itemGroup) {
-      if (!utils.checkUserAccessPermissionToGroup(request, itemGroup)) {
+      if (!permissionCheck.checkPermissionsToResource(request, itemGroup, 'groups')) {
         return false;
       }
       return true;
@@ -105,7 +105,7 @@ exports.createGroup = function (request, reply) {
     return reply(boom.badRequest('You have to specify account_id if your group does not have a valid account_id attribute'));
   }
   // NOTE: Who is creating new User must have access to the user after creation
-  if (!utils.checkUserAccessPermissionToUser(request, newGroup)) {
+  if (!permissionCheck.checkPermissionsToResource(request, newGroup, 'groups')) {
     // TODO: fix the error message text "You don't have permissions for this action "
     return reply(boom.badRequest('Your group does not manage the specified company ID(s)'));
   }
@@ -251,7 +251,7 @@ exports.deleteGroup = function (request, reply) {
 
   // get our group
   groups.getById(id).then(function (result) {
-    if (!result || !utils.checkUserAccessPermissionToGroup(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'groups')) {
       return reply(boom.badRequest('Group not found'));
     }
 

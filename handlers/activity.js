@@ -37,6 +37,8 @@ var users = new Users(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 exports.getDetailedAuditInfo = function(request, reply) {
   var requestBody = {};
   var startTime;
@@ -51,7 +53,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
 
   var userId = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
 
-  // TODO: create  validation function checkUserAccessPermissionToTargetId
+  // TODO: create  validation function c/heckUserAccessPermissionToTargetId
   var currentUser = null;
   // NOTE: waterfall actions list for generate response
   async.waterfall([
@@ -102,14 +104,14 @@ exports.getDetailedAuditInfo = function(request, reply) {
             var activityActionUserType_ = null;
             // check permission current request user to activityActionUser
             if (!!results.activityUser_) {
-              if (!utils.checkUserAccessPermissionToUser(request, results.activityUser_)) {
+              if (!permissionCheck.checkPermissionsToResource(request, results.activityUser_, 'users')) {
                 cb({ errorCode: 400, err: null, message: 'User ID not found' });
                 return;
               }
               activityActionUserType_ = 'user';
             }
             if (!!results.activityAPIKey_) {
-              if (!utils.checkUserAccessPermissionToAPIKey(request, results.activityAPIKey_)) {
+              if (!permissionCheck.checkPermissionsToResource(request, results.activityAPIKey_, 'API_keys')) {
                 cb({ errorCode: 400, err: null, message: 'User ID not found' });
                 return;
               }
@@ -138,7 +140,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
      */
     function prepareLimitOfAccountsInfo(cb) {
       if (activityAccountId) {
-        if (!utils.checkUserAccessPermissionToAccount(request, activityAccountId)) {
+        if (!permissionCheck.checkPermissionsToResource(request, {id: activityAccountId}, 'accounts')) {
           cb({ errorCode: 400, err: null, message: 'Account ID not found' });
           return;
         }

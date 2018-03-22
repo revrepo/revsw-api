@@ -39,6 +39,7 @@ var memoryCache = cacheManager.caching({
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
+var permissionCheck = require('./../lib/requestPermissionScope');
 
 //  ----------------------------------------------------------------------------------------------//
 /**
@@ -62,7 +63,7 @@ exports.getAccountReport = function (request, reply) {
         accountID = accountID[0];
       }
     } else {
-      if (!utils.checkUserAccessPermissionToAccount(request, accountID)) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: accountID}, 'accounts')) {
         isValidAccountId = false;
       }
     }
@@ -139,7 +140,7 @@ exports.getAccountStats = function (request, reply) {
         accountID = accountID[0];
       }
     } else {
-      if (!utils.checkUserAccessPermissionToAccount(request, accountID)) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: accountID}, 'accounts')) {
         isValidAccountId = false;
       }
     }

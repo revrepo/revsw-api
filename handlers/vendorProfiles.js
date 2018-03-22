@@ -36,6 +36,7 @@ var logger = require('revsw-logger')(config.log_config);
 
 var Account = require('../models/Account');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var permissionCheck = require('./../lib/requestPermissionScope');
 
 exports.getVendorProfiles = function(request, reply) {
     var vendorProfilesConfig = config.get('vendor_profiles');
@@ -106,7 +107,7 @@ exports.updateAccountVendor = function(request, reply) {
       return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 

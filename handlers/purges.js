@@ -37,7 +37,7 @@ var PurgeJob = require('../models/PurgeJob');
 
 var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var purgeJobs = new PurgeJob(mongoose, mongoConnection.getConnectionPurge());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var queryString = require('querystring');
 //
 // Management of purges
@@ -58,7 +58,7 @@ exports.purgeObject = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrive domain details for domain name ' + domainName));
     }
 
-    if (!result[0] || !utils.checkUserAccessPermissionToDomain(request, result[0])) {
+    if (!result[0] || !permissionCheck.checkPermissionsToResource(request, result[0], 'cache_purge')) {
       return reply(boom.badRequest('Domain not found'));
     }
     result = result[0];
@@ -157,7 +157,7 @@ exports.getPurgeJobs = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrive domain details for domain ID ' + domainId));
     }
-    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'cache_purge')) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 

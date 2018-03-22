@@ -35,6 +35,7 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
 var maxTimePeriodForWAFGraphsDays = config.get('max_time_period_for_waf_graphs_days');
+var permissionCheck = require('./../lib/requestPermissionScope');
 //  ---------------------------------
 var topReportsWAF_ = function (req, reply, domainConfig, span) {
 
@@ -242,7 +243,7 @@ exports.getTopReportsWAF = function (request, reply) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
 
       var span = utils.query2Span(request.query, 1 /*def start in hrs*/, 24 * maxTimePeriodForWAFGraphsDays /*allowed period - max count days*/);
       if (span.error) {

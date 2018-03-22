@@ -45,6 +45,7 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var Customer = require('../lib/chargify').Customer;
 
 var accountService = require('../services/accounts.js');
+var permissionCheck = require('./../lib/requestPermissionScope');
 
 exports.getAccounts = function getAccounts(request, reply) {
   var filters = request.query.filters;
@@ -57,7 +58,7 @@ exports.getAccounts = function getAccounts(request, reply) {
       }
   
       for (var i = 0; i < listOfAccounts.length; i++) {
-        if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
+        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], 'accounts')) {
           listOfAccounts.splice(i, 1);
           i--;
         }
@@ -73,7 +74,7 @@ exports.getAccounts = function getAccounts(request, reply) {
       }
   
       for (var i = 0; i < listOfAccounts.length; i++) {
-        if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
+        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], 'accounts')) {
           listOfAccounts.splice(i, 1);
           i--;
         }
@@ -219,7 +220,7 @@ exports.createAccount = function(request, reply) {
 exports.createBillingProfile = function(request, reply) {
   var account_id = request.params.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -299,7 +300,7 @@ exports.getAccount = function(request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -350,7 +351,7 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
   var account_id = request.params.account_id;
   var billing_plan_handle = request.params.billing_plan_handle;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -419,7 +420,7 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
  */
 exports.getAccountSubscriptionSummary = function(request, reply) {
   var accountId = request.params.account_id;
-  if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -527,7 +528,7 @@ exports.getAccountStatements = function(request, reply) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
         ' Account ID: ' + account_id, error));
     }
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -556,7 +557,7 @@ exports.getAccountTransactions = function(request, reply) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
         ' Account ID: ' + account_id, error));
     }
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -587,7 +588,7 @@ exports.getAccountStatement = function(request, reply) {
         ' Account ID: ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -641,7 +642,7 @@ exports.getAccountStatement = function(request, reply) {
 exports.getPdfStatement = function(request, reply) {
   var account_id = request.params.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Accounts::getPdfStatement: Permission denied for' +
       ' Account ID: ' + account_id));
   }
@@ -654,7 +655,7 @@ exports.getPdfStatement = function(request, reply) {
         ' Account ID: ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -730,7 +731,7 @@ exports.updateAccount = function(request, reply) {
       return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -794,7 +795,7 @@ exports.deleteAccount = function(request, reply) {
   var _payload = request.payload;
   var cancellationMessage_ = _payload.cancellation_message || 'not provided';
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 

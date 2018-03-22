@@ -45,6 +45,8 @@ var memoryCache = cacheManager.caching({
   promiseDependency: promise
 });
 var multiCache = cacheManager.multiCaching([memoryCache]);
+
+var permissionCheck = require('./../lib/requestPermissionScope');
 var maxmind = require('../services/maxmind');
 //
 // Get traffic stats for WAF
@@ -65,7 +67,7 @@ exports.getStatsWAF = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       domainName = domainConfig.domain_name;
 
       var span = utils.query2Span(request.query, 24 /*def start in hrs*/, 24 * maxTimePeriodForWAFGraphsDays /*allowed period - max count days*/);
@@ -191,7 +193,7 @@ exports.getWAFEventsList = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       domainName = domainConfig.domain_name;
 
       var span = utils.query2Span(request.query, 24 /*def start in hrs*/, 24 * maxTimePeriodForWAFGraphsDays /*allowed period - max count days*/);

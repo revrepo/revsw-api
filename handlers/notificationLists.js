@@ -32,7 +32,7 @@ var AuditLogger = require('../lib/audit');
 var NotificationList = require('../models/NotificationList');
 
 var notificationList = new NotificationList(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 /**
  * @name creataNotificationList
  * @description method for creating new Notification List
@@ -42,7 +42,7 @@ exports.createNotificationList = function(request, reply) {
   var accountId = payloadData.account_id;
   var notificationListName = payloadData.list_name;
 
-  if (!accountId || !utils.checkUserAccessPermissionToAccount(request, accountId)) {
+  if (!accountId || !permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
   var createdBy = utils.generateCreatedByField(request);
@@ -90,7 +90,7 @@ exports.getNotificationLists = function(request, reply) {
   var accountId = request.query.account_id;
   var options = {};
   // NOTE: check an access permissition
-  if (!!accountId && !utils.checkUserAccessPermissionToAccount(request, accountId)) {
+  if (!!accountId && !permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
     return reply(boom.badRequest('Notification List ID not found'));
   }
   // NOTE: if accountId is 'null' when should return notification lists configured for the user’s account
@@ -137,7 +137,7 @@ exports.updateNotificationList = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Notification List ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToAccount(request, result.account_id)) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: result.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     var createdBy = utils.generateCreatedByField(request);
@@ -185,7 +185,7 @@ exports.deleteNotificationList = function(request, reply) {
     }
     var options = {};
     // NOTE: check an access permissition
-    if (!result || !utils.checkUserAccessPermissionToAccount(request, result.account_id)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, {id: result.account_id}, 'accounts')) {
       return reply(boom.badRequest('Notification List ID not found'));
     }
 
