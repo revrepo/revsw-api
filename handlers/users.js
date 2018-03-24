@@ -321,12 +321,16 @@ exports.updateUser = function (request, reply) {
       userId = request.params.user_id;
       updateUserData.user_id = userId;
 
-      // TODO use an existing access verification function instead of the code
-      if (request.auth.credentials.role !== 'revadmin' &&
-        (updateUserData.companyId &&
-          !utils.isArray1IncludedInArray2(updateUserData.companyId, utils.getAccountID(request)))) {
+      if (request.auth.credentials.role !== 'revadmin' && !utils.getAccountID(request).toString().includes(updateUserData.account_id)) {
         return cb('The new account is not found');
       }
+
+      // TODO use an existing access verification function instead of the code
+      // if (request.auth.credentials.role !== 'revadmin' &&
+      //   (updateUserData.companyId &&
+      //     !utils.isArray1IncludedInArray2(updateUserData.companyId, utils.getAccountID(request)))) {
+      //   return cb('The new account is not found');
+      // }
       // TODO: try new code
       // if(updateUserData.companyId && !utils.checkUserAccessPermissionToUser(request, updateUserData)) {
       //   return cb('The new account is not found');
