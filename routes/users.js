@@ -96,7 +96,8 @@ module.exports = [
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
           self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user'),
           group_id: Joi.string().allow(null).description('The group the user is in'),
-          permissions: routeModels.permissionsModel
+          permissions: routeModels.permissionsModel,
+          account_id: Joi.objectId().description('The user`s account ID')
         }
       },
       response: {
@@ -146,7 +147,8 @@ module.exports = [
           theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
           group_id: Joi.string().allow(null).description('The group the user is in'),
-          permissions: routeModels.permissionsModel
+          permissions: routeModels.permissionsModel,
+          account_id: Joi.objectId().description('The user`s account ID')
         }
       },
       response: {
