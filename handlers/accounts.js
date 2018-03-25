@@ -52,7 +52,7 @@ exports.getAccounts = function getAccounts(request, reply) {
   var options = filters ? filters.parent_account_id : null;
 
   if (options) {
-    accounts.listWithFilters(options, function(error, listOfAccounts) {
+    accounts.listByParentID(options, function(error, listOfAccounts) {
       if (error) {
         return reply(boom.badImplementation('Failed to read accounts list from the DB'));
       }

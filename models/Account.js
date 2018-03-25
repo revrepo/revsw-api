@@ -128,7 +128,7 @@ Account.prototype = {
     });
   },
 
-  listWithFilters: function (filters, callback) {
+  listByParentID: function (filters, callback) {
     this.model.find({ deleted: { $ne: true }, parent_account_id: { $in: [filters] } }, function (err, accounts) {
       if (accounts) {
         accounts = utils.clone(accounts);
