@@ -57,6 +57,14 @@ exports.getUsers = function getUsers(request, reply) {
   var filters_ = request.query.filters;
   var accountIds = utils.getAccountID(request);
   var usersAccountId = utils.getAccountID(request);
+  if (request.auth.credentials.role === 'reseller') {
+    if(permissionCheck.getResellerAccs()) {
+      accountIds = _.map(permissionCheck.getResellerAccs(), function (list) {
+        return list.id;
+      });
+      accountIds.push(utils.getAccountID(request)[0]);
+    }
+  }
   var options = {};
   if (!!filters_ && filters_.account_id) {
     if (!permissionCheck.checkPermissionsToResource(request, {id: filters_.account_id}, 'accounts')) {

@@ -91,6 +91,7 @@ APIKey.prototype = {
   list: function (request, callback) {
     var options  = {};
     var filter_ = request.query.filters;
+    var resellerAccs;
     if(!!filter_){
       if(!!filter_.account_id){
         options.account_id = {$regex: filter_.account_id, $options: 'i'};
@@ -99,12 +100,20 @@ APIKey.prototype = {
         options.group_id = { $in: [filter_.group_id] };
       }
     }
+
+    if (request.account_list) {
+      resellerAccs = request.account_list;
+    }
     this.model.find(options, function (err, api_keys) {
       if (api_keys) {
         // TODO need to move the accesss control stuff out of the database model
         var keys = utils.clone(api_keys);
         for (var i = 0; i < keys.length; i++) {
           if (request.auth.credentials.role === 'revadmin' || utils.getAccountID(request).indexOf(keys[i].account_id) !== -1) {
+            keys[i].id = keys[i]._id + '';
+            delete keys[i]._id;
+            delete keys[i].__v;
+          } else if (request.auth.credentials.role === 'reseller' && resellerAccs.indexOf(keys[i].account_id) !== -1) {
             keys[i].id = keys[i]._id + '';
             delete keys[i]._id;
             delete keys[i].__v;

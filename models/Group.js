@@ -118,7 +118,7 @@ Group.prototype = {
     return new Promise(function (resolve, reject) {
       var options = {};
       if (!!params.account_id) {        
-          options.account_id = {$in: [params.account_id]};
+          options.account_id = {$in: _.isArray(params.account_id) ? params.account_id : [params.account_id]};
       }
       me.model.find(options, function (err, groups) {
         if (err) {

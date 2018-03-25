@@ -80,10 +80,22 @@ function verifyDomainOwnership(companyId, domainList, callback) {
 
 exports.getApiKeys = function(request, reply) {
   // TODO: Need to move the access check function from ".list" to this function
-  apiKeys.list(request, function (error, listOfApiKeys) {
-    listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
-    renderJSON(request, reply, error, listOfApiKeys);
-  });
+
+
+  if (permissionCheck.getResellerAccs()) {
+    request.account_list = _.map(permissionCheck.getResellerAccs(), function (acc) {
+      return acc.id;
+    });
+    apiKeys.list(request, function (error, listOfApiKeys) {
+      listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
+      renderJSON(request, reply, error, listOfApiKeys);
+    });
+  } else {
+    apiKeys.list(request, function (error, listOfApiKeys) {
+      listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
+      renderJSON(request, reply, error, listOfApiKeys);
+    });
+  }
 };
 
 exports.getApiKey = function (request, reply) {
