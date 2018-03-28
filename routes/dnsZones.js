@@ -42,7 +42,8 @@ module.exports = [
       validate:{
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().trim().description('ID of a company')
+            account_id: Joi.objectId().optional().trim().description('ID of a company'),
+            operation: Joi.string().optional().trim().description('Operation for DNS Zones (manage, analytics..)')
           })
          .optional().description('Filters parameters')
         }

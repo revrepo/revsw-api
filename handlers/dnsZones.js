@@ -74,6 +74,7 @@ var DNS_RECORD_TYPES_AUTO_DISCOVER = dnsZoneAutoDisciverDictionary.list_of_recor
 //'DNS service unable to process your request now, try again later'
 exports.getDnsZones = function(request, reply) {
   var filters_ = request.query.filters;
+  var operation = filters_ ? filters_.operation : null;
   return Promise.try(function() {
       return dnsZones.listAsync({
         filters: filters_
@@ -83,7 +84,13 @@ exports.getDnsZones = function(request, reply) {
       var responseZones = [];
       var callRecordsPromises = [];
       zones.forEach(function(zone) {
-        if (permissionCheck.checkPermissionsToResource(request, zone, 'dns_zones')) {
+        var permissionFilter = 'dns_zones';
+        if (operation && operation !== '') {
+          if (operation === 'dns_analytics') {
+            permissionFilter = 'dns_analytics';
+          }
+        }
+        if (permissionCheck.checkPermissionsToResource(request, zone, permissionFilter)) {
           responseZones.push(zone);
           // NOTE: call additional inforamtion about DNS Zone
           callRecordsPromises.push(

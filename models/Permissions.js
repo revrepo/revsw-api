@@ -58,7 +58,11 @@ var permissionSchema = {
         list: { type: [mongoose.Schema.ObjectId], default: null },
         allow_list: { type: Boolean, default: true }
     },
-    dns_analytics: { type: Boolean, default: true },
+    dns_analytics: {
+        access: { type: Boolean, default: true },
+        list: { type: [mongoose.Schema.ObjectId], default: null },
+        allow_list: { type: Boolean, default: true }
+    },
     groups: { type: Boolean, default: true },
     users: { type: Boolean, default: true },
     API_keys: { type: Boolean, default: true },

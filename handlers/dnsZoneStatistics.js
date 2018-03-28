@@ -77,7 +77,7 @@ module.exports.getDnsZonesStatsUsageZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zone')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_analytics')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
