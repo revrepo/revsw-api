@@ -75,7 +75,7 @@ exports.getUsers = function getUsers(request, reply) {
   } else {
     // NOTE: set limit accounts if user is not RevAdmin
     if (!utils.isUserRevAdmin(request)) {
-      options.account_id = accountIds;
+      options.account_id = usersAccountId;
     }
   }
 
@@ -113,16 +113,9 @@ exports.getUsers = function getUsers(request, reply) {
  */
 exports.createUser = function (request, reply) {
   var newUser = request.payload;
-  // NOTE: set default companyId
-  if ((newUser.companyId === undefined || newUser.companyId.length === 0) && utils.getAccountID(request).length !== 0) {
-    newUser.companyId = utils.getAccountID(request);
-    if (['user', 'admin'].indexOf(newUser.role) > -1) {
-      newUser.companyId.length = 1;
-    }
-  }
 
   // NOTE: New User must have "companyId"
-  if (newUser.companyId === undefined || newUser.companyId.length === 0) {
+  if (!newUser.account_id) {
     return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
   }
   // NOTE: Who is creating new User must have access to the user after creation
@@ -131,14 +124,7 @@ exports.createUser = function (request, reply) {
     return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
   }
 
-  var accountId = newUser.companyId[0];
-
-  // NOTE: controll users Additional Accounts To Manage
-  if (!!newUser.companyId && (newUser.role === 'user' || newUser.role === 'admin') &&
-    ((_.isArray(newUser.companyId) && newUser.companyId.length > 1) ||
-      ((_.isString(newUser.companyId) && newUser.companyId.split(',').length > 1)))) {
-    return reply(boom.badRequest('User with role "' + newUser.role + '" cannot manage other accounts'));
-  }
+  var accountId = newUser.account_id;
   // check that the email address is not already in use
   users.get({
     email: newUser.email
@@ -165,7 +151,7 @@ exports.createUser = function (request, reply) {
               return cb(err);
             }
             var isNotAvailableDomain = _.find(listDomainConfigs, function (item) {
-              return !_.includes(newUser.companyId, item.proxy_config.account_id);
+              return !_.includes(newUser.account_id, item.proxy_config.account_id);
             });
             if (!!isNotAvailableDomain) {
               return cb('Can`t manage domain name another account');

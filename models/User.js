@@ -301,14 +301,9 @@ User.prototype = {
     var options = {};
     if (!!params.account_id) {
       if (_.isArray(params.account_id)) {
-        options.$or = [];
-        _.each(params.account_id, function (item) {
-          options.$or.push({
-            companyId: { $regex: item, $options: 'i' }
-          });
-        });
+        options.account_id = { $in: params.account_id };
       } else {
-        options.companyId = { $regex: params.account_id, $options: 'i' };
+        options.account_id = { $in: [params.account_id] };
       }
     }
 
