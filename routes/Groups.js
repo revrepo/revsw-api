@@ -151,6 +151,33 @@ module.exports = [
   },
 
   {
+    method: 'GET',
+    path: '/v1/groups/{group_id}/users',
+    config: {
+      auth: {
+        scope: ['revadmin', 'reseller', 'admin']
+      },
+      handler: groups.getGroupUsers,
+      description: 'Get a list of users in a group',
+      notes: 'Use the call to get the list of users of a group.',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          group_id: Joi.objectId().required().description('Group ID')
+        }
+      },
+      response: {
+        schema: routeModels.groupUsersModel
+      }
+    }
+  },
+
+  {
     method: 'DELETE',
     path: '/v1/groups/{group_id}',
     config: {

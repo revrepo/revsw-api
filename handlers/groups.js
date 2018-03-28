@@ -37,6 +37,7 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var logger = require('revsw-logger')(config.log_config);
 
 var User = require('../models/User');
+var APIKey = require('../models/APIKey');
 var Group = require('../models/Group');
 var Account = require('../models/Account');
 var DomainConfig = require('../models/DomainConfig');
@@ -45,6 +46,7 @@ var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectio
 var accounts = Promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var groups = Promise.promisifyAll(new Group(mongoose, mongoConnection.getConnectionPortal()));
+var APIkeys = Promise.promisifyAll(new APIKey(mongoose, mongoConnection.getConnectionPortal()));
 var permissionCheck = require('./../lib/requestPermissionScope');
 /**
  * @name getGroups
@@ -126,6 +128,7 @@ exports.createGroup = function (request, reply) {
       newGroup.created_by = request.auth.credentials.email;
       newGroup.created_at = Date.now();
       newGroup.updated_at = Date.now();
+      newGroup.updated_by = request.auth.credentials.email;
       groups.add(newGroup).then(function (group) {
         _createdGroup = group;
         cb(null);
@@ -176,6 +179,36 @@ exports.getGroup = function (request, reply) {
   groups.getById(id).then(function (group) {
     var result = publicRecordFields.handle(group, 'group');
     renderJSON(request, reply, null, result);
+  }).catch(function (err) {
+    return reply(boom.badRequest(err));
+  });
+};
+
+/**
+ * @name getGroupUsers
+ * @description
+ *   Get a single groups list of users/APIkeys
+ *
+ * @param  {[type]} request [description]
+ * @param  {[type]} reply   [description]
+ * @return {[type]}         [description]
+ */
+exports.getGroupUsers = function (request, reply) {
+  var id = request.params.group_id;
+  var userList = [];
+  groups.getById(id).then(function (group) {
+    users.list({group_id: group.id}, function (err, users) {
+      userList = userList.concat(users);
+      APIkeys.model.find({group_id: { $in: [group.id] }}, function (error, keys) {
+        userList = userList.concat(keys);
+        var result = {
+          count: userList.length,
+          users: userList
+        };
+        var res = publicRecordFields.handle(result, 'groupUsers');
+        renderJSON(request, reply, null, res);
+      });
+    });
   }).catch(function (err) {
     return reply(boom.badRequest(err));
   });
