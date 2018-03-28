@@ -27,7 +27,7 @@ var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
-var APIKey = require('../models/User');
+var APIKey = require('../models/APIKey');
 var apikeys = new APIKey(mongoose, mongoConnection.getConnectionPortal());
 var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
@@ -73,7 +73,11 @@ var permissionsAdmin = {
         list: null,
         allow_list: true
     },
-    dns_analytics: true,
+    dns_analytics: {
+        access: true,
+        list: null,
+        allow_list: true
+    },
     groups: true,
     users: true,
     API_keys: true,
@@ -129,7 +133,11 @@ var permissionsUser = {
         list: null,
         allow_list: true
     },
-    dns_analytics: true,
+    dns_analytics: {
+        access: true,
+        list: null,
+        allow_list: true
+    },
     groups: false,
     users: false,
     API_keys: false,
@@ -148,7 +156,7 @@ var permissionsUser = {
 };
 
 domainConfigs.list(function (err, list) {
-    if(err) {
+    if (err) {
         throw new Error(err);
     } else if (list) {
         domains = list;
@@ -156,9 +164,12 @@ domainConfigs.list(function (err, list) {
             if (err) {
                 throw new Error(err);
             } else if (usrs) {
-                for (var i = 0; i < usrs.length; i++) {
-                    updateUser(usrs[i]);
-                }
+                apikeys.model.find({}, function (error, keys) {
+                    usrs = usrs.concat(keys);
+                    for (var i = 0; i < usrs.length; i++) {
+                        updateUser(usrs[i]);
+                    }
+                });
             }
         });
     } else {
@@ -171,24 +182,28 @@ var updateUser = function (usr) {
     if (usr.companyId) {
         user.account_id = usr.companyId.includes(',') ? usr.companyId.split(',')[0] : usr.companyId;
     }
-    
-    user.user_id = usr._id;
+
+    if (!usr.key) {
+        user.user_id = usr._id;
+    } else {
+        user._id = usr._id;
+    }
     switch (usr.role) {
         case 'user':
             var permissions = _.clone(permissionsUser);
             var domainArray = [];
             var domainIDs = [];
-            permissions.read_only = usr.access_control_list.readOnly;
-            
+            permissions.read_only = usr.permissions.read_only || false;
+
             if (usr.domain && usr.domain !== '') {
                 if (usr.domain.includes(',')) {
                     domainArray = usr.domain.split(',');
                 } else {
                     domainArray.push(usr.domain);
                 }
-                domainArray.forEach(function (domain) {                                    
+                domainArray.forEach(function (domain) {
                     domains.forEach(function (domainConfig) {
-                        if (domain === domainConfig.domain_name) {                                            
+                        if (domain === domainConfig.domain_name) {
                             domainIDs.push(domainConfig._id.toString());
                         }
                     });
@@ -199,29 +214,51 @@ var updateUser = function (usr) {
             permissions.domains.access = true;
             permissions.domains.allow_list = true;
 
-            user.permissions = permissions;                       
-            users.update(user, function (err, doc) {
-                if (err) {
-                    throw new Error(err);
-                } else if (doc) {
-                    console.log(doc.email + ' successfully updated!');
-                }
-            });
+            user.permissions = permissions;
+            if (!usr.key) {
+                users.update(user, function (err, doc) {
+                    if (err) {
+                        throw new Error(err);
+                    } else if (doc) {
+                        console.log(doc.email + ' successfully updated!');
+                    }
+                });
+            } else {
+                user.key = usr.key;
+                apikeys.update(user, function (err, doc) {
+                    if (err) {
+                        throw new Error(err);
+                    } else if (doc) {
+                        console.log(doc.key_name + ' successfully updated!');
+                    }
+                });
+            }
             break;
         case 'admin':
         case 'reseller':
         case 'revadmin':
             var permissions = _.clone(permissionsAdmin);
-            permissions.read_only = usr.access_control_list.readOnly;
+            permissions.read_only = usr.permissions.read_only || false;
             user.permissions = permissions;
-            
-            users.update(user, function (err, doc) {
-                if (err) {
-                    throw new Error(err);
-                } else if (doc) {
-                    console.log(doc.email + ' successfully updated!');
-                }
-            });
+
+            if (!usr.key) {
+                users.update(user, function (err, doc) {
+                    if (err) {
+                        throw new Error(err);
+                    } else if (doc) {
+                        console.log(doc.email + ' successfully updated!');
+                    }
+                });
+            } else {
+                user.key = usr.key;
+                apikeys.update(user, function (err, doc) {
+                    if (err) {
+                        throw new Error(err);
+                    } else if (doc) {
+                        console.log(doc.key_name + ' successfully updated!');
+                    }
+                });
+            }
             break;
         default:
             throw new Error(user.role);
