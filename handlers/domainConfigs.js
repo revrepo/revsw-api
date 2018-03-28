@@ -152,6 +152,10 @@ exports.getDomainConfigStatus = function(request, reply) {
 
 exports.getDomainConfigs = function(request, reply) {
   var filters_ = request.query.filters;
+  var operation = 'domains'; // default is manage domains..
+  if (filters_ && filters_.operation) {
+    operation = filters_.operation;
+  }
   cdsRequest({
     url: config.get('cds_url') + '/v1/domain_configs',
     headers: authHeader
@@ -168,7 +172,7 @@ exports.getDomainConfigs = function(request, reply) {
       }
       var response = [];
       for (var i = 0; i < response_json.length; i++) {
-        if (permissionCheck.checkPermissionsToResource(request, response_json[i], 'domains')) {
+        if (permissionCheck.checkPermissionsToResource(request, response_json[i], operation)) {
           response.push(response_json[i]);
         }
       }

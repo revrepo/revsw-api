@@ -65,7 +65,7 @@ exports.getRTTReports = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       domainName = domainConfig.domain_name;
 
       var span = utils.query2Span(queryProperties, 1 /*def start in hrs*/ , 24 /*allowed period in hrs*/ );
@@ -278,7 +278,7 @@ exports.getRTTStats = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       domainName = domainConfig.domain_name;
 
       // var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
