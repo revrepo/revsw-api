@@ -106,7 +106,7 @@ exports.createUser = function (newUser, callback) {
       // Check if an invitation mail is needed to be sent.
       if (isInvite && _createdUser_.invitation_token !== null && Date.now() < moment(_createdUser_.invitation_expire_at).valueOf()) {
         logger.info('UserService::createUser:info prepare to send invitation email for user with id ' + _createdUser_.user_id);
-        accounts.get({id: _createdUser_.companyId}, function (err, acc) {
+        accounts.get({_id: _createdUser_.account_id}, function (err, acc) {
           // Get the account vendor and set the URL based on that          
           var mailOptions = {
             userFullName: _createdUser_.firstname + ' ' + _createdUser_.lastname,

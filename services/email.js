@@ -126,7 +126,7 @@ exports.sendInvitationEmail = function(options, cb) {
   var acc = options.acc;
   if (email !== '') {
     var mailHTML = config.get('vendor_profiles')[acc.vendor_profile].user_invitation_mail_body;
-    mailHTML = mailHTML.join('\n')
+    mailHTML = mailHTML.join('<br />')
                        .replace('{{fullname}}', fullname)
                        .replaceAll('{{userId}}', userId)
                        .replaceAll('{{portalURL}}', options.portalUrl)
