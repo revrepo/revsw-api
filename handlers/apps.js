@@ -38,6 +38,10 @@ var permissionCheck = require('./../lib/requestPermissionScope');
 
 exports.getApps = function(request, reply) {
   var filters_ = request.query.filters;
+  var operation = 'mobile_apps';
+  if (filters_ && filters_.operation) {
+    operation = filters_.operation;
+  }
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
@@ -52,7 +56,7 @@ exports.getApps = function(request, reply) {
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
-          return permissionCheck.checkPermissionsToResource(request, app, 'mobile_apps');
+          return permissionCheck.checkPermissionsToResource(request, app, operation);
         });
       }
       // TODO: ??? make refactoring - send filter then call CDS
