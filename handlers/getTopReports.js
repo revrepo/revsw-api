@@ -589,7 +589,7 @@ exports.getTopReports = function( request, reply ) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
       // NOTE: make correction for the time range
       _.merge(queryProperties, utils.roundTimestamps(request.query, 5));
       var span = utils.query2Span( queryProperties, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
@@ -640,7 +640,7 @@ exports.getTopLists = function( request, reply ) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
       domainName = domainConfig.domain_name;
       var span = utils.query2Span(request.query, 1 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days */ );
       if (span.error) {

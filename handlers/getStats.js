@@ -68,7 +68,7 @@ exports.getStats = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
       domainName = domainConfig.domain_name;
       var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
       if (span.error) {
@@ -201,7 +201,7 @@ exports.getStatsDomainActivity = function(request, reply) {
       if (error) {
         return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
       }
-      if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+      if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
         domainName = domainConfig.domain_name;
         var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForActivityDays /*allowed period - max count days*/ );
         if (span.error) {
@@ -316,7 +316,7 @@ exports.getStatsImageEngine = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
       domainName = domainConfig.domain_name;
 
       var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
@@ -457,7 +457,7 @@ exports.getMobileDesktopDistribution = function(request, reply) {
    if (error) {
      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
    }
-   if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+   if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
      domainName = domainConfig.domain_name;
 
      var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 * maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );

@@ -80,9 +80,19 @@ exports.listLogShippingJobs = function(request, reply) {
     }
 
     var response = [];
-    for (var i=0; i < result.length; i++) {
+    for (var i = 0; i < result.length; i++) {
       if (permissionCheck.checkPermissionsToResource(request, result[i], 'logshipping_jobs')) {
-        response.push(result[i]);
+        if (result[i].source_type === 'domain' && result[i].source_id) {
+          if (permissionCheck.checkPermissionsToResource(request, {id: result[i].source_id}, 'domains')) {
+            response.push(result[i]);
+          }
+        } else if (result[i].source_type === 'app' && result[i].source_id) {
+          if (permissionCheck.checkPermissionsToResource(request, {id: result[i].source_id}, 'mobile_apps')) {
+            response.push(result[i]);
+          }
+        } else {
+          response.push(result[i]);
+        }
       }
     }
     // TODO: ??? make refactoring - apply filter like option in logShippingJobs.list ???

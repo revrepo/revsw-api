@@ -47,7 +47,7 @@ exports.getTopObjects = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
 
       domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
@@ -149,7 +149,7 @@ exports.getSlowestFBTObjects = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
 
       domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );
@@ -256,7 +256,7 @@ exports.getSlowestDownloadObjects = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
 
       domainName = domainConfig.domain_name;
       var span = utils.query2Span( request.query, 1/*def start in hrs*/, 24/*allowed period in hrs*/ );

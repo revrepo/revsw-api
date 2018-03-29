@@ -86,9 +86,7 @@ exports.getDnsZones = function(request, reply) {
       zones.forEach(function(zone) {
         var permissionFilter = 'dns_zones';
         if (operation && operation !== '') {
-          if (operation === 'dns_analytics') {
-            permissionFilter = 'dns_analytics';
-          }
+          permissionFilter = operation;
         }
         if (permissionCheck.checkPermissionsToResource(request, zone, permissionFilter)) {
           responseZones.push(zone);

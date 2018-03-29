@@ -77,7 +77,8 @@ var permissionSchema = {
     notification_lists: { type: Boolean, default: true },
     usage_reports: { type: Boolean, default: true },
     billing_statements: { type: Boolean, default: true },
-    billing_plan: { type: Boolean, default: true }
+    billing_plan: { type: Boolean, default: true },
+    account_profile: { type: Boolean, default: true }
 };
 
 module.exports = permissionSchema;

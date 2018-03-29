@@ -243,7 +243,7 @@ exports.getTopReportsWAF = function (request, reply) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
 
-    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'security_analytics')) {
 
       var span = utils.query2Span(request.query, 1 /*def start in hrs*/, 24 * maxTimePeriodForWAFGraphsDays /*allowed period - max count days*/);
       if (span.error) {
