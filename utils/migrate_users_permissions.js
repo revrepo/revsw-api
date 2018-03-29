@@ -29,6 +29,8 @@ var DomainConfig = require('../models/DomainConfig');
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var APIKey = require('../models/APIKey');
 var apikeys = new APIKey(mongoose, mongoConnection.getConnectionPortal());
+var Group = require('../models/Group');
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
@@ -92,7 +94,8 @@ var permissionsAdmin = {
     notification_lists: true,
     usage_reports: true,
     billing_statements: true,
-    billing_plan: true
+    billing_plan: true,
+    account_profile: true
 };
 var permissionsUser = {
     read_only: false,
@@ -152,7 +155,8 @@ var permissionsUser = {
     notification_lists: false,
     usage_reports: false,
     billing_statements: false,
-    billing_plan: false
+    billing_plan: false,
+    account_profile: true
 };
 
 domainConfigs.list(function (err, list) {
@@ -166,9 +170,12 @@ domainConfigs.list(function (err, list) {
             } else if (usrs) {
                 apikeys.model.find({}, function (error, keys) {
                     usrs = usrs.concat(keys);
-                    for (var i = 0; i < usrs.length; i++) {
-                        updateUser(usrs[i]);
-                    }
+                    groups.model.find({}, function (errs, grps) {
+                        usrs = usrs.concat(grps);
+                        for (var i = 0; i < usrs.length; i++) {
+                            updateUser(usrs[i]);
+                        }
+                    });                    
                 });
             }
         });
@@ -183,85 +190,100 @@ var updateUser = function (usr) {
         user.account_id = usr.companyId.includes(',') ? usr.companyId.split(',')[0] : usr.companyId;
     }
 
-    if (!usr.key) {
+    if (!usr.key && !usr.name) {
         user.user_id = usr._id;
-    } else {
+    } else if (usr.key) {
         user._id = usr._id;
+    } else if (usr.name) {
+        user.id = usr._id;
     }
-    switch (usr.role) {
-        case 'user':
-            var permissions = _.clone(permissionsUser);
-            var domainArray = [];
-            var domainIDs = [];
-            permissions.read_only = usr.permissions.read_only || false;
 
-            if (usr.domain && usr.domain !== '') {
-                if (usr.domain.includes(',')) {
-                    domainArray = usr.domain.split(',');
-                } else {
-                    domainArray.push(usr.domain);
+    if (!usr.role) {
+        var permissions = _.clone(permissionsAdmin);
+        user.permissions = permissions;
+        groups.update(user, function (err, doc) {
+            if (err) {
+                throw new Error(err);
+            } else if (doc) {
+                console.log(doc.name + ' successfully updated!');
+            }
+        });
+    } else {
+        switch (usr.role) {
+            case 'user':
+                var permissions = _.clone(permissionsUser);
+                var domainArray = [];
+                var domainIDs = [];
+                permissions.read_only = usr.permissions.read_only || false;
+    
+                if (usr.domain && usr.domain !== '') {
+                    if (usr.domain.includes(',')) {
+                        domainArray = usr.domain.split(',');
+                    } else {
+                        domainArray.push(usr.domain);
+                    }
+                    domainArray.forEach(function (domain) {
+                        domains.forEach(function (domainConfig) {
+                            if (domain === domainConfig.domain_name) {
+                                domainIDs.push(domainConfig._id.toString());
+                            }
+                        });
+                    });
                 }
-                domainArray.forEach(function (domain) {
-                    domains.forEach(function (domainConfig) {
-                        if (domain === domainConfig.domain_name) {
-                            domainIDs.push(domainConfig._id.toString());
+    
+                permissions.domains.list = domainIDs.length > 0 ? domainIDs : null;
+                permissions.domains.access = true;
+                permissions.domains.allow_list = true;
+    
+                user.permissions = permissions;
+                if (!usr.key) {
+                    users.update(user, function (err, doc) {
+                        if (err) {
+                            throw new Error(err);
+                        } else if (doc) {
+                            console.log(doc.email + ' successfully updated!');
                         }
                     });
-                });
-            }
-
-            permissions.domains.list = domainIDs.length > 0 ? domainIDs : null;
-            permissions.domains.access = true;
-            permissions.domains.allow_list = true;
-
-            user.permissions = permissions;
-            if (!usr.key) {
-                users.update(user, function (err, doc) {
-                    if (err) {
-                        throw new Error(err);
-                    } else if (doc) {
-                        console.log(doc.email + ' successfully updated!');
-                    }
-                });
-            } else {
-                user.key = usr.key;
-                apikeys.update(user, function (err, doc) {
-                    if (err) {
-                        throw new Error(err);
-                    } else if (doc) {
-                        console.log(doc.key_name + ' successfully updated!');
-                    }
-                });
-            }
-            break;
-        case 'admin':
-        case 'reseller':
-        case 'revadmin':
-            var permissions = _.clone(permissionsAdmin);
-            permissions.read_only = usr.permissions.read_only || false;
-            user.permissions = permissions;
-
-            if (!usr.key) {
-                users.update(user, function (err, doc) {
-                    if (err) {
-                        throw new Error(err);
-                    } else if (doc) {
-                        console.log(doc.email + ' successfully updated!');
-                    }
-                });
-            } else {
-                user.key = usr.key;
-                apikeys.update(user, function (err, doc) {
-                    if (err) {
-                        throw new Error(err);
-                    } else if (doc) {
-                        console.log(doc.key_name + ' successfully updated!');
-                    }
-                });
-            }
-            break;
-        default:
-            throw new Error(user.role);
-            break;
+                } else {
+                    user.key = usr.key;
+                    apikeys.update(user, function (err, doc) {
+                        if (err) {
+                            throw new Error(err);
+                        } else if (doc) {
+                            console.log(doc.key_name + ' successfully updated!');
+                        }
+                    });
+                }
+                break;
+            case 'admin':
+            case 'reseller':
+            case 'revadmin':
+                var permissions = _.clone(permissionsAdmin);
+                permissions.read_only = usr.permissions.read_only || false;
+                user.permissions = permissions;
+    
+                if (!usr.key) {
+                    users.update(user, function (err, doc) {
+                        if (err) {
+                            throw new Error(err);
+                        } else if (doc) {
+                            console.log(doc.email + ' successfully updated!');
+                        }
+                    });
+                } else {
+                    user.key = usr.key;
+                    apikeys.update(user, function (err, doc) {
+                        if (err) {
+                            throw new Error(err);
+                        } else if (doc) {
+                            console.log(doc.key_name + ' successfully updated!');
+                        }
+                    });
+                }
+                break;
+            default:
+                throw new Error(user.role);
+                break;
+        }
     }
 };
