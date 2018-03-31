@@ -46,7 +46,7 @@ module.exports = [
       validate:{
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().trim().description('ID of a company'),
+            account_id: Joi.objectId().optional().allow('').trim().description('ID of a company'),
             group_id: Joi.objectId().optional().trim().description('Filter by group ID')
           })
          .optional().description('Filters parameters')
