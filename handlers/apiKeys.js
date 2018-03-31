@@ -202,6 +202,10 @@ exports.createApiKey = function(request, reply) {
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
   var id = request.params.key_id;
+  if (updatedApiKey.permissions && updatedApiKey.permissions.domains.access) {
+    updatedApiKey.permissions.waf_rules = true;
+    updatedApiKey.permissions.ssl_certs = true;
+  }
 
   function doUpdate() {
     apiKeys.update(updatedApiKey, function (error, result) {

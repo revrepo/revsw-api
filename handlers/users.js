@@ -314,6 +314,10 @@ exports.updateUser = function (request, reply) {
 
       userId = request.params.user_id;
       updateUserData.user_id = userId;
+      if (updateUserData.permissions && updateUserData.permissions.domains.access) {
+        updateUserData.permissions.waf_rules = true;
+        updateUserData.permissions.ssl_certs = true;
+      }
 
       if (request.auth.credentials.role !== 'revadmin' && !utils.getAccountID(request).toString().includes(updateUserData.account_id)) {
         return cb('The new account is not found');
