@@ -50,6 +50,10 @@ var permissionCheck = require('./../lib/requestPermissionScope');
 exports.getAccounts = function getAccounts(request, reply) {
   var filters = request.query.filters;
   var options = filters ? filters.parent_account_id : null;
+  var operation = 'accounts';
+  if (filters && filters.operation) {
+    operation = filters.operation;
+  }
 
   if (options) {
     accounts.listByParentID(options, function(error, listOfAccounts) {
@@ -58,7 +62,7 @@ exports.getAccounts = function getAccounts(request, reply) {
       }
   
       for (var i = 0; i < listOfAccounts.length; i++) {
-        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], 'accounts')) {
+        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], operation)) {
           listOfAccounts.splice(i, 1);
           i--;
         }
@@ -74,7 +78,7 @@ exports.getAccounts = function getAccounts(request, reply) {
       }
   
       for (var i = 0; i < listOfAccounts.length; i++) {
-        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], 'accounts')) {
+        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], operation)) {
           listOfAccounts.splice(i, 1);
           i--;
         }

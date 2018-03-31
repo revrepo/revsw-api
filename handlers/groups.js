@@ -78,7 +78,7 @@ exports.getGroups = function getGroups(request, reply) {
 
   groups.list(options).then(function (listOfGroups) {
     if (listOfGroups.length === 0) {
-      renderJSON(request, reply, null, listOfGroups);
+      return renderJSON(request, reply, null, listOfGroups);
     }
     listOfGroups = _.filter(listOfGroups, function (itemGroup) {
       if (!permissionCheck.checkPermissionsToResource(request, itemGroup, 'groups')) {
@@ -88,7 +88,7 @@ exports.getGroups = function getGroups(request, reply) {
     });
     listOfGroups = publicRecordFields.handle(listOfGroups, 'groups');
 
-    renderJSON(request, reply, null, listOfGroups);
+    return renderJSON(request, reply, null, listOfGroups);
   }).catch(function (err) {
     return reply(boom.badRequest(err));
   });
