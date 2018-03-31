@@ -211,13 +211,17 @@
         "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
-        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "RevAPM Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
-        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "RevAPM Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
       "sdk": {
@@ -251,12 +255,13 @@
         "user_email_domain": "azure-user.revapm.net"
       },
       "user_invitation_mail_subject": "You have been invited to revapm CDN!",
-      "user_invitation_mail_body": ["Hello {{fullname}}.\n",
+      "user_invitation_mail_body": ["<b>Hello {{fullname}}.</b><br />\n",
       "You have been invited to join the revapm CDN, please click the link below to ",
       "complete the invitation process.\n",
       "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
-      "{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}",
-      "</a>"]
+      "Invitation Link",
+      "</a>", 
+      "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"]
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -310,7 +315,9 @@
         "Your are welcome to visit our customer portal at {{portalUrl}}",
         "and start managing your configuration!\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
-        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+        "Kind regards,\n",
+        "nuu:bit Customer Support Team\n",
+        "http://www.nuubit.com/\n"
       ],
       "password_reset_email_text": [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n",
@@ -318,7 +325,9 @@
         "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
-        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+        "Kind regards,\n",
+        "nuu:bit Customer Support Team\n",
+        "http://www.nuubit.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n",
@@ -425,13 +434,17 @@
         "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
-        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "Hooli Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
-        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "Hooli Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",      
       "sdk": {
