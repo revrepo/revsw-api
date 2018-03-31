@@ -47,6 +47,11 @@ var permissionsAdmin = {
         list: null,
         allow_list: true
     },
+    mobile_analytics: {
+        access: true,
+        list: null,
+        allow_list: true
+    },
     domains: {
         access: true,
         list: null,
@@ -104,6 +109,11 @@ var permissionsUser = {
     API_access: true,
     dashboards: true,
     mobile_apps: {
+        access: true,
+        list: null,
+        allow_list: true
+    },
+    mobile_analytics: {
         access: true,
         list: null,
         allow_list: true
