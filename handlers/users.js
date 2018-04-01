@@ -113,7 +113,9 @@ exports.getUsers = function getUsers(request, reply) {
  */
 exports.createUser = function (request, reply) {
   var newUser = request.payload;
-
+  if (newUser.companyId) {
+  newUser.account_id = newUser.account_id || newUser.companyId[0];
+  }
   // NOTE: New User must have "companyId"
   if (!newUser.account_id) {
     return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));

@@ -109,14 +109,15 @@ describe('Smoke check', function () {
             .then(function () {
               return API.resources.dashboards
                 .getAll()
-                .expect(200);
+                .expect(200)
+                .then(function (response) {
+                  var dashboards = response.body;
+                  dashboards.should.be.instanceof(Array).and.have.lengthOf(1);
+                  done();
+                })
+                .catch(done);
             })
-            .then(function (response) {
-              var dashboards = response.body;
-              dashboards.should.be.instanceof(Array).and.have.lengthOf(1);
-              done();
-            })
-            .catch(done);
+            .catch(done);           
         });
     });
   });
