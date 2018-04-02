@@ -126,7 +126,7 @@
     },
     "apikeys": {
       "admin": {
-        "role": "API Key without managed accounts(like Admin role)",
+        "role": "API Key - Admin",
         "id": "59af86226694e5104b039594",
         "key": "6d47fb9e-f567-4b65-9099-81dfba98273a", 
         "managed_account_ids": [],
@@ -136,7 +136,7 @@
         } 
       }, 
        "reseller": {
-         "role": "API Key with managed accounts (like Reseller role)",
+         "role": "API Key - Reseller",
          "id": "59b0a3a66694e5104b03963c", 
          "key": "1eb71357-0885-4cbd-bfa0-16ea9b649675",
          "managed_account_ids": ["59b0a37c6694e5104b03963b"],
@@ -205,5 +205,71 @@
     "http://localhost:4000/",
     "http://testsjc20-victordev01.revsw.net:3000/",
     "http://testsjc20-victordev01.revsw.net:4000/"
-  ]
+  ],
+  "permissions_schema": {
+    "read_only": false,
+    "enforce_2fa": false,
+    "portal_login": true,
+    "API_access": true,
+    "dashboards": true,
+    "mobile_apps": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "mobile_analytics": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "domains": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "ssl_names": true,
+    "ssl_certs": true,
+    "waf_rules": true,
+    "cache_purge": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "web_analytics": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "security_analytics": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "dns_zones": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "dns_analytics": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "groups": true,
+    "users": true,
+    "API_keys": true,
+    "logshipping_jobs": true,
+    "activity_log": true,
+    "accounts": {
+       "access": true,
+       "list": [],
+       "allow_list": true
+    },
+    "traffic_alerts": true,
+    "notification_lists": true,
+    "usage_reports": true,
+    "billing_statements": true,
+    "billing_plan": true,
+    "account_profile": true
+ }
 }
