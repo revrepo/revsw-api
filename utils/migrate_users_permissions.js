@@ -256,6 +256,10 @@ var updateUser = function (usr) {
                     });
                 } else {
                     user.key = usr.key;
+                    if (usr.managed_account_ids && usr.managed_account_ids.length > 0) {
+                        user.permissions.accounts.list = usr.managed_account_ids;
+                        user.role = 'reseller';
+                    }
                     apikeys.update(user, function (err, doc) {
                         if (err) {
                             throw new Error(err);
@@ -282,6 +286,10 @@ var updateUser = function (usr) {
                     });
                 } else {
                     user.key = usr.key;
+                    if (usr.managed_account_ids && usr.managed_account_ids.length > 0) {
+                        user.permissions.accounts.list = usr.managed_account_ids;
+                        user.role = 'reseller'; // if APIkey has managed account ids, its a reseller.
+                    }
                     apikeys.update(user, function (err, doc) {
                         if (err) {
                             throw new Error(err);
