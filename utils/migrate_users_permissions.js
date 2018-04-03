@@ -34,6 +34,7 @@ var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
+var permissions;
 var domains = [];
 mongoose.set('debug', false);
 var permissionsAdmin = {
@@ -209,7 +210,7 @@ var updateUser = function (usr) {
     }
 
     if (!usr.role) {
-        var permissions = _.clone(permissionsAdmin);
+        permissions = _.clone(permissionsAdmin);
         user.permissions = permissions;
         groups.update(user, function (err, doc) {
             if (err) {
@@ -221,7 +222,7 @@ var updateUser = function (usr) {
     } else {
         switch (usr.role) {
             case 'user':
-                var permissions = _.clone(permissionsUser);
+                permissions = _.clone(permissionsUser);
                 var domainArray = [];
                 var domainIDs = [];
                 permissions.read_only = usr.permissions.read_only || false;
@@ -272,7 +273,7 @@ var updateUser = function (usr) {
             case 'admin':
             case 'reseller':
             case 'revadmin':
-                var permissions = _.clone(permissionsAdmin);
+                permissions = _.clone(permissionsAdmin);
                 permissions.read_only = usr.permissions.read_only || false;
                 user.permissions = permissions;
     
@@ -300,7 +301,7 @@ var updateUser = function (usr) {
                 }
                 break;
             default:
-                throw new Error(user.role);
+                console.log(user.role + ' Error! ----------');
                 break;
         }
     }
