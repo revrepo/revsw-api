@@ -32,7 +32,7 @@ var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var emailService = require('../services/email.js');
-
+var Group = require('../models/Group');
 var User = require('../models/User');
 var Account = require('../models/Account');
 var publicRecordFields = require('../lib/publicRecordFields');
@@ -41,6 +41,7 @@ var Promise = require('bluebird');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 
 var AzureResource = require('../models/AzureResource');
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
@@ -119,7 +120,16 @@ exports.authenticate = function(request, reply) {
     if (!user) {
       logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
       return reply(boom.unauthorized());
+    } else if (user && !user.permissions.portal_login) {
+      return reply(boom.badRequest('You do not have permissions to be logged in to the portal'));
     } else {
+      if (user && user.group_id && user.group_id !== '') {
+        groups.getById(user.group_id).then(function (group) {
+          if (!group.permissions.portal_login) {
+            return reply(boom.badRequest('You do not have permissions to be logged in to the portal'));
+          }
+        });
+      }
       var authPassed = false;
       /**
        * @name  sendResultChecks

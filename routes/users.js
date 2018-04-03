@@ -394,5 +394,27 @@ module.exports = [
         schema: routeModels.statusModel
       }
     }
+  },
+  {
+    method: 'GET',
+    path: '/v1/users/{invitation_token}/status',
+    config: {
+      handler: users.getInvitationStatus,
+      auth: false,
+      description: 'Get invitation status for a token',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          invitation_token: Joi.string().length(48).required().description('The invitation token')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
   }
 ];
