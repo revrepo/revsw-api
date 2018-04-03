@@ -304,10 +304,6 @@ exports.getAccount = function(request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
-    return reply(boom.badRequest('Account ID not found'));
-  }
-
   accounts.get({
     _id: account_id
   }, function(error, result) {
@@ -317,6 +313,9 @@ exports.getAccount = function(request, reply) {
     }
 
     if (result) {
+      if (!permissionCheck.checkPermissionsToResource(request, result, 'accounts')) {
+        return reply(boom.badRequest('Account ID not found'));
+      }
       // NOTE: get information about payment method
       result.valid_payment_method_configured = false;
       if (result.subscription_id) {
