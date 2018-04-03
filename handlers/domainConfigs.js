@@ -574,7 +574,7 @@ exports.updateDomainConfig = function(request, reply) {
         return reply(boom.badRequest('Domain ID not found'));
       }
 
-      if (!permissionCheck.checkPermissionsToResource(request, {id: newDomainJson.accountId}, 'accounts')) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: newDomainJson.account_id}, 'accounts')) {
         return reply(boom.badRequest('Account ID not found'));
       }
       // NOTE: Only RevAdmin can change value "bp_group_id"
