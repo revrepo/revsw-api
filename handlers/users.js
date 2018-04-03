@@ -909,3 +909,36 @@ exports.resendInvitation = function (request, reply) {
     }
   });
 };
+
+/**
+ * @name getInvitationStatus
+ * @description Get invitation status of token
+ */
+exports.getInvitationStatus = function (request, reply) {
+  var token = request.params.invitation_token;
+  users.list({}, function (error, listOfUsers) {
+    if (error || !listOfUsers) {
+      return reply(boom.badImplementation('Failed to get a list of users'));
+    }
+
+    if (listOfUsers.length === 0) {
+      return reply(boom.badImplementation('Failed to get a list of users (there should be at least one user in the list)'));
+    }
+    listOfUsers = _.filter(listOfUsers, function (itemUser) {
+      return itemUser.invitation_token === token;
+    });
+    var statusResponse;
+    if (!listOfUsers || listOfUsers.length === 0) {                
+      statusResponse = {
+        statusCode: 400,
+        message: 'Invitation token is invalid'
+      };
+    } else {
+      statusResponse = {
+        statusCode: 200,
+        message: 'Invitation token is valid'
+      };
+    }
+    renderJSON(request, reply, error, statusResponse);
+  });
+};
