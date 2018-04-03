@@ -121,12 +121,12 @@ exports.authenticate = function(request, reply) {
       logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
       return reply(boom.unauthorized());
     } else if (user && !user.permissions.portal_login) {
-      return reply(boom.badRequest('You do not have permissions to be logged in to the portal.'));
+      return reply(boom.badRequest('You do not have permissions to be logged in to the portal'));
     } else {
       if (user && user.group_id && user.group_id !== '') {
         groups.getById(user.group_id).then(function (group) {
           if (!group.permissions.portal_login) {
-            return reply(boom.badRequest('You do not have permissions to be logged in to the portal.'));
+            return reply(boom.badRequest('You do not have permissions to be logged in to the portal'));
           }
         });
       }
