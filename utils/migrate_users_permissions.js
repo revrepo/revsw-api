@@ -34,7 +34,6 @@ var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
-var permissions;
 var domains = [];
 mongoose.set('debug', false);
 var permissionsAdmin = {
@@ -210,8 +209,8 @@ var updateUser = function (usr) {
     }
 
     if (!usr.role) {
-        permissions = _.clone(permissionsAdmin);
-        user.permissions = permissions;
+        var permissionsGroup = _.cloneDeep(permissionsAdmin);
+        user.permissions = permissionsGroup;
         groups.update(user, function (err, doc) {
             if (err) {
                 throw new Error(err);
@@ -222,10 +221,10 @@ var updateUser = function (usr) {
     } else {
         switch (usr.role) {
             case 'user':
-                permissions = _.clone(permissionsUser);
+                var permissionsUr = _.cloneDeep(permissionsUser);
                 var domainArray = [];
                 var domainIDs = [];
-                permissions.read_only = usr.permissions.read_only || false;
+                permissionsUr.read_only = usr.permissions.read_only || false;
     
                 if (usr.domain && usr.domain !== '') {
                     if (usr.domain.includes(',')) {
@@ -242,11 +241,11 @@ var updateUser = function (usr) {
                     });
                 }
     
-                permissions.domains.list = domainIDs.length > 0 ? domainIDs : null;
-                permissions.domains.access = true;
-                permissions.domains.allow_list = true;
+                permissionsUr.domains.list = domainIDs.length > 0 ? domainIDs : null;
+                permissionsUr.domains.access = true;
+                permissionsUr.domains.allow_list = true;
     
-                user.permissions = permissions;
+                user.permissions = permissionsUr;
                 if (!usr.key) {
                     users.update(user, function (err, doc) {
                         if (err) {
@@ -273,11 +272,11 @@ var updateUser = function (usr) {
             case 'admin':
             case 'reseller':
             case 'revadmin':
-                permissions = _.clone(permissionsAdmin);
-                permissions.read_only = usr.permissions.read_only || false;
-                user.permissions = permissions;
+                var permissionsRest = _.cloneDeep(permissionsAdmin);
+                permissionsRest.read_only = usr.permissions.read_only || false;
+                user.permissions = permissionsRest;
     
-                if (!usr.key) {
+                if (!usr.key) {                    
                     users.update(user, function (err, doc) {
                         if (err) {
                             throw new Error(err);
@@ -288,8 +287,9 @@ var updateUser = function (usr) {
                 } else {
                     user.key = usr.key;
                     if (usr.managed_account_ids && usr.managed_account_ids.length > 0) {
+                        
                         user.permissions.accounts.list = usr.managed_account_ids;
-                        user.role = 'reseller'; // if APIkey has managed account ids, its a reseller.
+                        user.role = 'reseller'; // if APIkey has managed account ids, its a reseller.                        
                     }
                     apikeys.update(user, function (err, doc) {
                         if (err) {
