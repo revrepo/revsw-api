@@ -64,7 +64,7 @@ var updateAccount = function (id, parentID) {
     accounts.list(function (err, accs) {
         accs.forEach(function (testAccount) {
             if (testAccount.parent_account_id === id) {
-                console.log('Account with ID `' + parentAccount.id + '` cant have a parent account because it is a parent account already.');
+                console.log('Account with ID `' + parentID + '` cant have a parent account because it is a parent account already.');
                 flaggie = false;
             }
         });
