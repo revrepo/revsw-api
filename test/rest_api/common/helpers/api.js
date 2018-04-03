@@ -27,7 +27,7 @@ var AuthenticateRes = require('./../resources/authenticate');
 var SSOAuthenticateRes = require('./../resources/authenticateSSOAzure');
 var APIKeysRes = require('./../resources/apiKeys');
 var UsersRes = require('./../resources/users');
-
+var GroupsRes = require('./../resources/groups');
 
 // Required Helpers to attach to main API helper object
 var AccountsHelper = require('./accounts');
@@ -42,6 +42,7 @@ var SignUpHelper = require('./signUp');
 var SSLCertsHelper = require('./sslCerts');
 var SSLNamesHelper = require('./sslNames');
 var UsersHelper = require('./users');
+var GroupsHelper = require('./groups');
 var LogShippingJobsHelper = require('./logShippingJobs');
 var WAFRulesHelper = require('./wafRules');
 var VendorsHelper = require('./vendorProfiles');
@@ -66,6 +67,7 @@ var APIHelpers = {
   wafRules: WAFRulesHelper,
   vendors: VendorsHelper,
   azure: AzureHelper,
+  groups: GroupsHelper,
 
   /**
   * ### API.helpers.authenticate()

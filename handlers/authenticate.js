@@ -47,7 +47,7 @@ var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConne
 
 var vendorProfileList = config.get('vendor_profiles');
 var defaultVendorProfile = config.get('default_signup_vendor_profile');
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var onAuthPassed = function(user, request, reply, error) {
   var token = utils.generateJWT(user);
   var statusResponse;

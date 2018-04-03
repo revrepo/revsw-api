@@ -46,6 +46,8 @@ describe('Smoke check: Users', function() {
           userSample.domain = [];
         }
 
+        userSample.account_id = credentials.account.id;
+
         API.helpers
           .authenticate(credentials)
           .then(function() {
@@ -108,6 +110,9 @@ describe('Smoke check: Users', function() {
             newUser.companyId = [credentials.account.id];
             newUser.domain = [];
           }
+
+          newUser.account_id = credentials.account.id;
+
           API.helpers
             .authenticate(credentials)
             .then(function() {
@@ -131,6 +136,9 @@ describe('Smoke check: Users', function() {
             newUser.companyId = [credentials.account.id];
             newUser.domain = [];
           }
+
+          newUser.account_id = credentials.account.id;
+
           API.helpers
             .authenticate(credentials)
             .then(function() {
@@ -157,6 +165,9 @@ describe('Smoke check: Users', function() {
           newUser.companyId = [credentials.account.id];
           newUser.domain = [];
         }
+
+        newUser.account_id = credentials.account.id;
+        
         API.helpers
           .authenticate(credentials)
           .then(function() {

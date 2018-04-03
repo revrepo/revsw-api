@@ -47,6 +47,15 @@ module.exports = [{
       },
       response: {
         schema: routeModels.listOfAccountsModel
+      },
+      validate: {
+        query: {
+          filters: Joi.object().keys({
+            parent_account_id: Joi.objectId().optional().trim().description('ID of a parent company'),
+            operation: Joi.string().optional().trim().description('Filter by operation'),
+          })
+         .optional().description('Filters parameters')
+        }
       }
     }
   },

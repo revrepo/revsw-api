@@ -30,7 +30,7 @@ var _ = require('lodash');
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var SSLConfigurationProfile = require('../models/SSLConfigurationProfile');
 
 var sslConfigurationProfiles = new SSLConfigurationProfile(mongoose, mongoConnection.getConnectionPortal());

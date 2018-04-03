@@ -29,6 +29,8 @@ var logger = require('revsw-logger')(config.log_config);
 var Promise = require('bluebird');
 var _ = require('lodash');
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 var renderJSON      = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var publicRecordFields = require('../lib/publicRecordFields');
@@ -52,7 +54,7 @@ exports.getLogShippingJobStatus = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for log shipping job ID ' + logJobId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToLogShippingJob(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'logshipping_jobs')) {
       return reply(boom.badRequest('Log shipping job ID not found'));
     }
 
@@ -78,9 +80,19 @@ exports.listLogShippingJobs = function(request, reply) {
     }
 
     var response = [];
-    for (var i=0; i < result.length; i++) {
-      if (utils.checkUserAccessPermissionToLogShippingJob(request,result[i])) {
-        response.push(result[i]);
+    for (var i = 0; i < result.length; i++) {
+      if (permissionCheck.checkPermissionsToResource(request, result[i], 'logshipping_jobs')) {
+        if (result[i].source_type === 'domain' && result[i].source_id) {
+          if (permissionCheck.checkPermissionsToResource(request, {id: result[i].source_id}, 'domains')) {
+            response.push(result[i]);
+          }
+        } else if (result[i].source_type === 'app' && result[i].source_id) {
+          if (permissionCheck.checkPermissionsToResource(request, {id: result[i].source_id}, 'mobile_apps')) {
+            response.push(result[i]);
+          }
+        } else {
+          response.push(result[i]);
+        }
       }
     }
     // TODO: ??? make refactoring - apply filter like option in logShippingJobs.list ???
@@ -102,7 +114,7 @@ exports.getLogShippingJob = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for log shipping job ID ' + logJobId));
     }
-    if (!result || !utils.checkUserAccessPermissionToLogShippingJob(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'logshipping_jobs')) {
       return reply(boom.badRequest('Log shipping job ID not found'));
     }
 
@@ -114,7 +126,7 @@ exports.getLogShippingJob = function(request, reply) {
 exports.createLogShippingJob = function(request, reply) {
   var newLogJob = request.payload;
 
-  if (!utils.checkUserAccessPermissionToLogShippingJob(request, newLogJob)) {
+  if (!permissionCheck.checkPermissionsToResource(request, newLogJob, 'logshipping_jobs')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -163,11 +175,11 @@ exports.updateLogShippingJob = function(request, reply) {
         throw new Error('Failed to retrieve details for log shipping job ID ' + logJobId);
       }
 
-      if (!utils.checkUserAccessPermissionToLogShippingJob(request, result)) {
+      if (!permissionCheck.checkPermissionsToResource(request, result, 'logshipping_jobs')) {
         throw new Error('Log shipping job ID not found');
       }
 
-      if (!utils.checkUserAccessPermissionToAccount(request, updatedLogJob.account_id)) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: updatedLogJob.account_id}, 'accounts')) {
         throw new Error('Account ID not found');
       }
 
@@ -191,7 +203,7 @@ exports.updateLogShippingJob = function(request, reply) {
           // Check if the user/api key able to control domain
           domainConfigs.getAsync(updatedLogJob.source_id)
             .then(function (result) {
-              if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+              if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
                 return reject(Error('Domain ID not found'));
               } else {
                 return resolve(true);
@@ -201,7 +213,7 @@ exports.updateLogShippingJob = function(request, reply) {
           // Check if the user/api key able to control app
           apps.getAsync(updatedLogJob.source_id)
             .then(function (result) {
-              if (!result || !utils.checkUserAccessPermissionToApps(request, result)) {
+              if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
                 return reject(Error('App ID not found'));
               } else {
                 return resolve(true);
@@ -275,7 +287,7 @@ exports.deleteLogShippingJob = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for log shipping job ID ' + logJobId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToLogShippingJob(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'logshipping_jobs')) {
       return reply(boom.badRequest('Log shipping job ID not found'));
     }
 

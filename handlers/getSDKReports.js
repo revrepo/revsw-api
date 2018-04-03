@@ -32,7 +32,7 @@ var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
 var App = require('../models/App');
 var apps = new App(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var maxTimePeriodForTrafficGraphsDays = config.get('max_time_period_for_traffic_graphs_days');
 //  ---------------------------------
 // TODO Need to move the function to "utils" module

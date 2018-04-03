@@ -45,7 +45,16 @@ var API = {
   },
 
   // A set of all resources that the REST API service provides.
-  resources: APIResources
+  resources: APIResources,
+
+
+  // lets link the API.helpers.authenticate... function to here for less annoying code
+  // API.authenticate(user)
+  // instead of
+  // API.helpers.authenticate(user)
+  authenticate: function (credentials) {
+    return this.helpers.authenticate(credentials);
+  }
 };
 
 module.exports =  API;

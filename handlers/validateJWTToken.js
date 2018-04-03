@@ -29,11 +29,14 @@ var mongoConnection = require('../lib/mongoConnections');
 
 var User = require('../models/User');
 var Account = require('../models/Account');
+var Group = require('../models/Group');
 
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 
 var defaultSystemVendorProfile = config.get('default_system_vendor_profile');
+var permissionsScope = require('./../lib/requestPermissionScope');
 
 
 exports.validateJWTToken = function (request, decodedToken, callback) {
@@ -48,41 +51,10 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
       return callback(error, false, result);
     }
 
-    // Users without companyId data should not be able to log in
-    if (result.role !== 'revadmin' && !result.companyId) {
-      return callback(error, false, result);
-    }
-
-    result.user_type = 'user';
-
-    result.scope = [];
-
-    result.scope.push(result.role);
-    if (!result.access_control_list.readOnly) {
-      result.scope.push(result.role + '_rw');
-    }
-
-    var accountId = result.companyId && result.companyId.length && result.companyId[0];
-    if(!accountId){
-       result.vendor_profile = defaultSystemVendorProfile;
-
-      return callback(error, true, result);
-    }
-
-    accounts.get( { _id: accountId }, function (error, account) {
-      if (error) {
-          logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (User ' + user_id + ')');
-          return callback(error, false, result);
-      }
-
-      if (!account) {
-          logger.error('DB inconsitency for Users: cannot find account ID ' + accountId + ' (User ' + user_id + ')');
-          return callback(error, false, result);
-      }
-
-      result.vendor_profile = account.vendor_profile || defaultSystemVendorProfile;
-
-      return callback(error, true, result);
+    permissionsScope.setPermissionsScope(result).then(function (res) {
+      return callback(null, true, res); 
+    }).catch(function (err) {
+      return callback(err, false, result); 
     });
   });
 };

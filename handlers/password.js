@@ -39,7 +39,7 @@ var User = require('../models/User');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var vendorProfiles = config.get('vendor_profiles');
 var currentVendorProfile = vendorProfiles[config.get('default_system_vendor_profile')];
 

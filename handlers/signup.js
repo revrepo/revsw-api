@@ -47,7 +47,7 @@ var sendgrid = require('sendgrid')(config.get('sendgrid_api_key'));
 var Account = require('../models/Account');
 var User = require('../models/User');
 var Location = require('../models/Location');
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var billing_plans = require('../models/BillingPlan');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
@@ -274,6 +274,7 @@ exports.signup = function(req, reply) {
           auditTargetObjectAccount.promocode = promoCode;
       }
       var newUser = {
+        account_id: _newAccount.id,
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true,
@@ -519,6 +520,7 @@ exports.signup2 = function(req, reply) {
     .then(function createNewAdminUser(account) {
       _newAccount = account;
       var newUser = {
+        account_id: _newAccount.id,
         companyId: _newAccount.id,
         role: 'admin',
         self_registered: true, // NOTE: Important for self registration user

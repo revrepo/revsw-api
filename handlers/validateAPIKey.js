@@ -28,10 +28,12 @@ var mongoConnection = require('../lib/mongoConnections');
 
 var ApiKey = require('../models/APIKey');
 var Account = require('../models/Account');
+var Group = require('../models/Group');
 
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
-
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
+var permissionsScope = require('./../lib/requestPermissionScope');
 var accountId;
 
 exports.validateAPIKey = function (request, key, callback) {
@@ -49,37 +51,20 @@ exports.validateAPIKey = function (request, key, callback) {
       return callback(error, false, result);
     }
 
-    if (!result.account_id) {
-      logger.error('API key ' + key + ' does not have a proper account_id attribute');
-      return callback(error, false, result);
-    }
-
-    if (!result.active) {
-      logger.warn('Trying to use disabled API key ' + key);
-      return callback(error, false, result);
-    }
-
-    accountId = result.account_id;
-
-    accounts.get( { _id: accountId }, function (error, account) {
-      if (error) {
-        logger.error('Failed to retrieve DB details for account ID ' + accountId + ' (API key ' + key + ')');
+      if (!result.account_id) {
+        logger.error('API key ' + key + ' does not have a proper account_id attribute');
         return callback(error, false, result);
       }
 
-      if (!account) {
-        logger.error('DB inconsitency for API keys: cannot find account ID ' + accountId + ' (API key ' + key + ')');
+      if (!result.active) {
+        logger.warn('Trying to use disabled API key ' + key);
         return callback(error, false, result);
       }
 
-      result.vendor_profile = account.vendor_profile;
-      result.user_type = 'apikey';
-      result.scope = [ 'apikey' ];
-      if (result.read_only_status === false) {
-        result.scope.push('apikey_rw');
-      }
-
-      return callback(error, true, result);
+      permissionsScope.setPermissionsScope(result).then(function (res) {
+        return callback(null, true, res);
+      }).catch(function (err) {
+        return callback(err, false, result);
+      });
     });
-  });
 };

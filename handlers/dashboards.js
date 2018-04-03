@@ -28,6 +28,7 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var dashboardService = require('../services/dashboards.js');
 var Dashboard = require('../models/Dashboard');
 var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
+var permissionCheck = require('./../lib/requestPermissionScope');
 
 exports.getDashboards = function getDashboards(request, reply) {
   var userId = request.auth.credentials.user_id;
@@ -51,7 +52,7 @@ exports.getDashboard = function getDashboard(request, reply) {
         ' Dashboard ID: ' + dashboardId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'dashboards')) {
       return reply(boom.badRequest('Dashboard ID not found'));
     }
 
@@ -99,7 +100,7 @@ exports.deleteDashboard = function(request, reply) {
       return reply(boom.badImplementation('Error retrieving Dashboard with id ' + dashboardId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'dashboards')) {
       return reply(boom.badRequest('Dashboard ID not found'));
     }
 
@@ -134,7 +135,7 @@ exports.updateDashboard = function(request, reply) {
       return reply(boom.badImplementation('Failed to verify Dashboard ' + id));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'dashboards')) {
       return reply(boom.badRequest('Dashboard not found'));
     }
 

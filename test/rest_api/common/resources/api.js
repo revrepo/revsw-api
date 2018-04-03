@@ -43,6 +43,7 @@ var StatsResource = require('./stats');
 var StatsSDKResource = require('./stats-sdk');
 var TwoFAResource = require('./2fa');
 var UsersResource = require('./users');
+var GroupsResource = require('./groups');
 var UsageReportResource = require('./usage-report');
 var LogShippingJobsResource = require('./logShippingJobs');
 var DNSZonesResource = require('./dnsZones');
@@ -88,7 +89,8 @@ var APIResources = {
   azure: AzureResource,
   wafStats: WAFStats,
   authenticateSSOAzure: AuthenticateSSOAzure,
-  proxy: ProxyRes
+  proxy: ProxyRes,
+  groups: GroupsResource
 };
 
 module.exports = APIResources;
