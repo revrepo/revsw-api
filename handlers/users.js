@@ -663,6 +663,9 @@ exports.deleteUser = function (request, reply) {
 };
 
 exports.init2fa = function (request, reply) {
+  if (request.auth.credentials.user_type === 'apikey') {
+    return reply(boom.forbidden('API Key can not init 2FA')); 
+  }
   var user_id = request.auth.credentials.user_id;
   var email_ = request.auth.credentials.email;
   var vendorProfiles = config.get('vendor_profiles');
