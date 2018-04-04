@@ -306,7 +306,7 @@ exports.updateWAFRule = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for WAF Rule ID ' + wafRuleId));
     }
      // TODO: Check permission
-    if (!permissionCheck.checkPermissionsToResource(request, updatedWAFRule.account_id, 'accounts')) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: updatedWAFRule.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     // TODO: Check permission

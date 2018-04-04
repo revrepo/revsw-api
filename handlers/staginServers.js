@@ -62,7 +62,7 @@ exports.getStaginServers = function(request, reply) {
       cb(null, parentAccountId);
     },
     bpGroupId: function(cb, result) {
-      if (request.auth.credentials.role === 'revadmin' && !result.parentAccountId) {
+      if (request.auth.credentials.role === 'revadmin' && (!result.parentAccountId || !result.parentAccountId[0])) {
         cb();
       } else {
         accounts.get({

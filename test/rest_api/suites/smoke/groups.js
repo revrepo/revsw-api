@@ -36,16 +36,14 @@ describe('Smoke Tests - Groups', function () {
 
   after(function (done) {
     // cleanup groups
-    groups.forEach(function (group) {
-      API
-        .authenticate(config.api.users.revAdmin)
-        .then(function () {
-          API.resources.groups
-            .deleteOne(group)
-            .end(done);
-        })
-        .catch(done);
-    });
+    API
+      .authenticate(config.api.users.revAdmin)
+      .then(function () {
+        API.resources.groups
+          .deleteManyIfExist(groups)
+          .finally(done);
+      })
+      .catch(done);
   });
 
   users.forEach(function (user) {
