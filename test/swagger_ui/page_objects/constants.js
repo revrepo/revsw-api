@@ -118,7 +118,10 @@ var Constants = {
         '/v1/waf_rules',
         '/v1/waf_rules/auto_generated_rules',
         '/v1/waf_rules/{waf_rule_id}',
-        '/v1/waf_rules/{waf_rule_id}/config_status'
+        '/v1/waf_rules/{waf_rule_id}/config_status',
+        '/v1/groups',
+        '/v1/groups/{group_id}',
+        '/v1/groups/{group_id}/users',
     ]
 };
 module.exports = Constants;

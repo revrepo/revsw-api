@@ -43,6 +43,7 @@ module.exports = function (grunt) {
           'scripts/clean/wafRules.js',
           'scripts/clean/accounts.js',
           'scripts/clean/users.js',
+          'scripts/clean/groups.js',
           'scripts/clean/chargify.js',
         ]
       },
