@@ -101,11 +101,13 @@ exports.getAccountReport = function (request, reply) {
       accountIds = accountID;
     }
 
+    accountIds = accountID;
+
     if (request.auth.credentials.role === 'reseller' && resellerAccs && !request.query.account_id) {
       accountID = accountIds;
       accountID.push(request.auth.credentials.account_id);
     }
-
+  
     if ((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
       return reply(boom.badRequest('Account ID not found'));
     }
@@ -185,11 +187,13 @@ exports.getAccountStats = function (request, reply) {
     accountIds = accountID;
   }
 
+  accountIds = accountID;
+
   if (request.auth.credentials.role === 'reseller' && resellerAccs && !request.query.account_id) {
     accountID = accountIds;
     accountID.push(request.auth.credentials.account_id);
   }
-
+  
   if ((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
     return reply(boom.badRequest('Account ID not found'));
   }
