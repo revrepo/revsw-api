@@ -48,7 +48,8 @@ describe('Functional check', function () {
         .then(function () {
           return API.helpers.users.create({
             firstName: 'Tom',
-            lastName: 'Smith'
+            lastName: 'Smith',
+            account_id: reseller.account.id
           });
         })
         .then(function (newUser) {
