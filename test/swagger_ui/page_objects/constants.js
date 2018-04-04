@@ -122,9 +122,6 @@ var Constants = {
         '/v1/groups',
         '/v1/groups/{group_id}',
         '/v1/groups/{group_id}/users',
-        '/v1/users/{invitation_token}/status',
-        '/v1/users/{user_id}/resend_invitation',
-        '/v1/users/{user_id}/complete_invitation',
     ]
 };
 module.exports = Constants;
