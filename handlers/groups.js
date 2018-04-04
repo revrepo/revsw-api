@@ -63,6 +63,11 @@ exports.getGroups = function getGroups(request, reply) {
       accountIds.push(utils.getAccountID(request)[0]);
     }
   }
+
+  if (accountIds.toString().includes(request.auth.credentials.account_id) === false) {
+    accountIds.push(request.auth.credentials.account_id);
+  }
+
   var options = {};
   if (!!filters_ && filters_.account_id) {
     if (!permissionCheck.checkPermissionsToResource(request, {id: filters_.account_id}, 'accounts')) {
