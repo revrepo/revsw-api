@@ -72,7 +72,8 @@ var UsersDataProvider = {
         readOnly: false
       },
       role: data.role || 'user',
-      theme: 'light'
+      theme: 'light',
+      account_id: data.account_id || null
     };
     if (data.companyId) {
       user.companyId = data.companyId;
