@@ -71,7 +71,7 @@ var UsersDataProvider = {
         test: true,
         readOnly: false
       },
-      role: data.role || 'user',
+      role: data.role || 'admin',
       theme: 'light',
       account_id: data.account_id || null
     };

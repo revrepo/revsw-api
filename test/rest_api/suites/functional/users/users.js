@@ -39,7 +39,6 @@ describe('Functional check', function () {
 
       // roles to test
       var roles = [
-        'user',
         'admin'
       ];
 

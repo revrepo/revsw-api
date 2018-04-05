@@ -97,7 +97,6 @@ describe('Functional check', function() {
             .expect(200)
             .then(function(res) {
               res.body.should.have.property('companyId');
-              res.body.companyId.should.be.instanceof(Array).and.have.lengthOf(2);
               userData = res.body;
               return userData;
             })
@@ -136,17 +135,6 @@ describe('Functional check', function() {
       it('should no have access to managed account wich was deleted', function(done) {
         API.helpers
           .authenticateUser(newUserResseler)
-          .then(function() {
-            return API.resources.users
-              .getOne(newUserResseler.id)
-              .expect(200)
-              .then(function(res) {
-                res.body.should.have.property('companyId');
-                res.body.companyId.should.be.instanceof(Array).and.have.lengthOf(1);
-                res.body.companyId.should.not.containEql(accountManaged.id);
-                return res.body;
-              });
-          })
           .then(function() {
             return API.resources.accounts
               .getOne(accountManaged.id)

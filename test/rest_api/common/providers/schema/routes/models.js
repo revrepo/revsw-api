@@ -37,6 +37,75 @@ exports.httpHeaderValue = /^([a-zA-Z0-9 -~]{0,128})$/;
 exports.countryCode = /^([A-Z][A-Z])?$/;
 exports.subnetMask = /^(([0-9]{1,2})|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))?$/;
 
+var permissionsModel = Joi.object({
+  read_only: Joi.boolean().required().description('Read-only user group'),
+  enforce_2fa: Joi.boolean().required().description('Enforce 2FA for this group'),
+  portal_login: Joi.boolean().required().description('Access to portal login'),
+  API_access: Joi.boolean().required().description('Access to API endpoints'),
+  dashboards: Joi.boolean().required().description('Access to dashboard management'),
+  mobile_apps: Joi.object({
+    access: Joi.boolean().required().description('Access to mobile apps'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of apps'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of apps')
+  }),
+  mobile_analytics: Joi.object({
+    access: Joi.boolean().required().description('Access to mobile analytics'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of apps'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of apps')
+  }),
+  domains: Joi.object({
+    access: Joi.boolean().required().description('Access to domains'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of domains'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
+  }),
+  ssl_names: Joi.boolean().required().description('Access to SSL Names management'),
+  ssl_certs: Joi.boolean().required().description('Access to SSL Certs management'),
+  waf_rules: Joi.boolean().required().description('Access to WAF Rules management'),
+  cache_purge: Joi.object({
+    access: Joi.boolean().required().description('Access to purge the cache'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of domains'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
+  }),
+  web_analytics: Joi.object({
+    access: Joi.boolean().required().description('Access to web analytics'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of domains'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
+  }),
+  security_analytics: Joi.object({
+    access: Joi.boolean().required().description('Access to security analytics'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of domains'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of domains')
+  }),
+  dns_zones: Joi.object({
+    access: Joi.boolean().required().description('Access to DNS zones'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of zones'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of zones')
+  }),
+  dns_analytics: Joi.object({
+    access: Joi.boolean().required().description('Access to DNS analytics'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of zones'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of zones')
+  }),
+  groups: Joi.boolean().required().description('Access to groups'),
+  users: Joi.boolean().required().description('Access to users'),
+  API_keys: Joi.boolean().required().description('Access to API keys'),
+  logshipping_jobs: Joi.boolean().required().description('Access to logshipping jobs'),
+  activity_log: Joi.boolean().required().description('Access to activity log'),
+  accounts: Joi.object({
+    access: Joi.boolean().required().description('Access to accounts'),
+    list: Joi.array().items(Joi.objectId()).allow(null).description('List of accounts'),
+    allow_list: Joi.boolean().description('Flag to allow/deny access to the list of accounts')
+  }),
+  traffic_alerts: Joi.boolean().required().description('Access to traffic alerts'),
+  notification_lists: Joi.boolean().required().description('Access to notification lists'),
+  usage_reports: Joi.boolean().required().description('Access to usage reports'),
+  billing_statements: Joi.boolean().required().description('Access to billing statements'),
+  billing_plan: Joi.boolean().required().description('Access to billing plan'),
+  account_profile: Joi.boolean().required().description('Access to account profile')
+});
+
+exports.permissionsModel = permissionsModel;
+
 exports.statusModel = Joi.object({
   statusCode: Joi.number().optional().description('Operation status code (should be equal to HTTP response code)'),
   error: Joi.string().description('Optional description of statusCode'),
@@ -97,7 +166,9 @@ exports.listOfUsersModel = Joi.array().items({
   role: Joi.string().required().description('User role'),
   updated_at: Joi.date().required().description('Last update date/time'),
   last_login_at: Joi.date().allow(null).description('User last login date/time'),
-  two_factor_auth_enabled: Joi.boolean().required().description('Status of two factor authentication')
+  two_factor_auth_enabled: Joi.boolean().required().description('Status of two factor authentication'),
+  group_id: Joi.string().allow(null).description('User`s group ID'),
+  account_id: Joi.objectId().allow(null).description('The user`s account ID')
 }).meta({
   className: 'List of Users'
 });
@@ -128,7 +199,10 @@ exports.userModel = Joi.object({
   }).meta({
     className: 'User Permission Flag'
   }),
-  self_registered: Joi.boolean().description('Is user registered by himself')
+  self_registered: Joi.boolean().description('Is user registered by himself'),
+  group_id: Joi.string().allow(null).required().description('ID of the group the user is in'),
+  permissions: permissionsModel,
+  account_id: Joi.objectId().allow(null).description('The user`s account ID')
 }).meta({
   className: 'User profile details'
 });
@@ -354,7 +428,9 @@ exports.listOfAPIKeysModel = Joi.array().items({
   read_only_status: Joi.boolean().description('Defines if the API key can be used only for read-write or read-only'),
   active: Joi.boolean().description('Active or inactive API key'),
   created_at: Joi.date().description('API key creation date/time'),
-  updated_at: Joi.date().description('API key last update date/time')
+  updated_at: Joi.date().description('API key last update date/time'),
+  group_id: Joi.string().allow(null).required().description('ID of the group the API key is in'),
+  role: Joi.string().description('Role of the API Key')
 }).meta({
   className: 'List of API keys'
 });
@@ -377,8 +453,12 @@ exports.APIKeyModel = Joi.object({
   }).description('Operations allowed with the API key'),
   read_only_status: Joi.boolean().description('Defines if the API key can be used only for read-write or read-only'),
   active: Joi.boolean().description('Active or inactive API key'),
+  permissions: permissionsModel,
   created_at: Joi.date().description('API key creation date/time'),
-  updated_at: Joi.date().description('API key last update date/time')
+  updated_at: Joi.date().description('API key last update date/time'),
+  permissions: permissionsModel,
+  group_id: Joi.string().allow(null).required().description('ID of the group the API key is in'),
+  role: Joi.string().description('Role of the API Key')
 }).meta({
   className: 'API key'
 });
@@ -556,3 +636,36 @@ exports.standardHTTPErrors = [{
   code: 500,
   message: 'Internal Server Error'
 }];
+
+
+exports.listOfGroupsModel = Joi.array().items({
+  id: Joi.objectId().required().description('Group ID'),
+  account_id: Joi.string().required().description('The account that this group is associated to'),
+  name: Joi.string().required().description('Group name'),
+  comment: Joi.string().allow('').optional().description('Group comment'),
+  updated_at: Joi.date().description('The date this group was last updated'),
+  updated_by: Joi.string().allow(null).description('User who last updated this group (email)')
+}).meta({
+  className: 'List of Groups'
+});
+
+exports.groupModel = Joi.object({
+  id: Joi.objectId().required().description('Group ID'),
+  account_id: Joi.string().required().description('The account that this group is associated to'),
+  name: Joi.string().required().description('Group name'),
+  comment: Joi.string().allow('').optional().description('Group comment'),
+  created_by: Joi.string().optional().description('Email of the user that created this group'),
+  updated_at: Joi.date().required().description('Last update date/time'),
+  created_at: Joi.date().required().description('Creation date/time'),
+  updated_by: Joi.string().allow(null).description('User who last updated this group (email)'),
+  permissions: permissionsModel
+}).meta({
+  className: 'Group'
+});
+
+exports.groupUsersModel = Joi.object({
+  count: Joi.number().description('Amount of users in the group'),
+  users: Joi.array().allow(null).description('List of users')
+}).meta({
+  className: 'GroupUsers'
+});
