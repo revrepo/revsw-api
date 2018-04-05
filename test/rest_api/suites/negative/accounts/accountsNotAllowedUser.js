@@ -62,7 +62,7 @@ describe('Negative check', function () {
         done();
       });
 
-      it('should return `Forbidden` response when getting all accounts with ' +
+      xit('should return `Forbidden` response when getting all accounts with ' +
         '`user-role` user.',
         function (done) {
           API.helpers
@@ -76,7 +76,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when getting specific account ' +
+      xit('should return `Forbidden` response when getting specific account ' +
         'with `user-role` user.',
         function (done) {
           API.helpers
@@ -90,7 +90,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when creating specific account ' +
+      xit('should return `Forbidden` response when creating specific account ' +
         'with `user-role` user.',
         function (done) {
           var newAccount = AccountsDP.generateOne('test');
@@ -105,7 +105,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when updating specific account ' +
+      xit('should return `Forbidden` response when updating specific account ' +
         'with `user-role` user.',
         function (done) {
           var updatedAccount = AccountsDP.generateOne('UPDATED');
@@ -120,7 +120,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Forbidden` response when deleting an account with ' +
+      xit('should return `Forbidden` response when deleting an account with ' +
         '`user-role` user.',
         function (done) {
           API.helpers
