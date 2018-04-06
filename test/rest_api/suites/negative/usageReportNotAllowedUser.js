@@ -25,7 +25,9 @@ var API = require('./../../common/api');
 var AccountsDP = require('./../../common/providers/data/accounts');
 var DataProvider = require('./../../common/providers/data');
 
-describe('Negative check', function () {
+
+// xiting because user role no longer exists
+xdescribe('Negative check', function () {
   
   this.timeout(config.api.request.maxTimeout);
 

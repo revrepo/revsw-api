@@ -31,8 +31,7 @@ describe('Negative check', function() {
     var revAdmin = config.get('api.users.revAdmin');
 
     var userRolesList = [
-      'admin',
-      'user'
+      'admin'
     ];
 
     userRolesList.forEach(function(role) {
@@ -79,7 +78,8 @@ describe('Negative check', function() {
             .catch(done);
         });
 
-        it('should return `Bad Request` when try create user with many managed Accounts ID', function(done) {
+        // xiting this, new permissions handles this differently
+        xit('should return `Bad Request` when try create user with many managed Accounts ID', function(done) {
           var newUser = DataProvider.generateUser(role);
           API.helpers
             .authenticateUser(revAdmin)

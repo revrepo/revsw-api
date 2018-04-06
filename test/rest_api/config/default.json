@@ -96,12 +96,12 @@
         }
       },
       "user": {
-        "email": "qa_user_with_user_perm@revsw.com",
+        "email": "api_qa_user_with_admin_perm@revsw.com",
         "password": "password1",
-        "role": "Normal User",
+        "role": "Admin",
         "account": {
-          "id": "5588869fbde7a0d00338ce8f",
-          "companyName": "Rev Test"
+          "id": "55b6ff6a7957012304a49d04",
+          "companyName": "API QA Account"
         }
       },
       "admin2": {

@@ -144,6 +144,15 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
 
+  if (newApiKey.managed_account_ids && newApiKey.managed_account_ids.length > 0) {
+    if (!newApiKey.permissions) {
+      newApiKey.permissions = permissionCheck.permissionObject;
+    }
+    newApiKey.permissions.accounts.list = newApiKey.managed_account_ids;
+    newApiKey.permissions.accounts.access = true;
+    newApiKey.permissions.accounts.allow_list = true;
+  }
+
   if (!newApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, {id: newApiKey.account_id}, 'accounts')) {
       return reply(boom.badRequest('Company ID not found'));
   }
@@ -207,6 +216,22 @@ exports.updateApiKey = function (request, reply) {
     updatedApiKey.permissions.ssl_certs = true;
   }
 
+  if (updatedApiKey.managed_account_ids && updatedApiKey.managed_account_ids.length > 0) {
+    if (!updatedApiKey.permissions) {
+      updatedApiKey.permissions = permissionCheck.permissionObject;
+    }
+    updatedApiKey.permissions.accounts.list = updatedApiKey.managed_account_ids;
+    updatedApiKey.permissions.accounts.access = true;
+    updatedApiKey.permissions.accounts.allow_list = true;
+  } else {
+    if (!updatedApiKey.permissions) {
+      updatedApiKey.permissions = permissionCheck.permissionObject;
+    }
+    updatedApiKey.permissions.accounts.list = null;
+    updatedApiKey.permissions.accounts.access = true;
+    updatedApiKey.permissions.accounts.allow_list = true;
+  }
+
   function doUpdate() {
     apiKeys.update(updatedApiKey, function (error, result) {
       if (error) {
@@ -236,19 +261,6 @@ exports.updateApiKey = function (request, reply) {
 
   if (!updatedApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, updatedApiKey, 'API_keys')) {
       return reply(boom.badRequest('Company ID not found'));
-  }
-  // NOTE: check  user access permission to account for manage
-  if (!!updatedApiKey.managed_account_ids && updatedApiKey.managed_account_ids.length > 0) {
-    var hasError = false;
-    updatedApiKey.managed_account_ids = _.unique(updatedApiKey.managed_account_ids);
-    updatedApiKey.managed_account_ids.forEach(function(itemAccountId) {
-      if (!permissionCheck.checkPermissionsToResource(request, {id: itemAccountId}, 'accounts')) {
-        hasError = true;
-      }
-    });
-    if (hasError === true) {
-      return reply(boom.badRequest('Company ID not found'));
-    }
   }
 
   apiKeys.get({_id: id}, function (error, result) {

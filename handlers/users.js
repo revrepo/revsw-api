@@ -115,10 +115,22 @@ exports.createUser = function (request, reply) {
   var newUser = request.payload;
   if (newUser.companyId) {
   newUser.account_id = newUser.account_id || newUser.companyId[0];
+    if (newUser.companyId.length > 0) {
+      newUser.companyId.splice(0, 1);
+      if (!newUser.permissions) {
+        newUser.permissions = permissionCheck.permissionObject;
+      }
+      newUser.permissions.accounts.list = newUser.companyId;
+      newUser.permissions.accounts.access = true;
+      newUser.permissions.accounts.allow_list = true;
+    }
   }
   // NOTE: New User must have "companyId"
-  if (!newUser.account_id) {
+  if (!newUser.account_id && request.auth.credentials.role === 'revadmin') {
     return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
+  } else if (!newUser.account_id && request.auth.credentials.account_id) {
+    newUser.account_id = request.auth.credentials.account_id;
+    newUser.companyId = request.auth.credentials.companyId[0];
   }
   // NOTE: Who is creating new User must have access to the user after creation
   if (!permissionCheck.checkPermissionsToResource(request, newUser, 'users')) {
@@ -321,7 +333,7 @@ exports.updateUser = function (request, reply) {
         updateUserData.permissions.ssl_certs = true;
       }
 
-      if (request.auth.credentials.role !== 'revadmin' && !utils.getAccountID(request).toString().includes(updateUserData.account_id)) {
+      if (request.auth.credentials.role !== 'revadmin' && !permissionCheck.checkPermissionsToResource(request, updateUserData, 'users')) {
         return cb('The new account is not found');
       }
 

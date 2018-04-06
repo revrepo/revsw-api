@@ -83,6 +83,7 @@ module.exports = {
    *     }
    */
   generateUser: function (role, prefix) {
+    role = role === 'user' ? 'admin' : role;
     var timestamp = (new Date()).getTime();
 
     prefix = prefix ? prefix + '_' : '';
@@ -99,7 +100,7 @@ module.exports = {
         test: true,
         readOnly: true
       },
-      role: role || 'user',
+      role: role || 'admin',
       theme: 'light'
     };
   },

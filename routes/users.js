@@ -97,7 +97,7 @@ module.exports = [
           self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user'),
           group_id: Joi.string().allow(null).description('The group the user is in'),
           permissions: routeModels.permissionsModel,
-          account_id: Joi.objectId().description('The user`s account ID')
+          account_id: Joi.objectId().allow(null).description('The user`s account ID')
         }
       },
       response: {

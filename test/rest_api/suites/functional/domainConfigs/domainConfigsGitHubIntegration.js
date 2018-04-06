@@ -27,7 +27,6 @@ describe('Functional check', function() {
     config.get('api.users.revAdmin'),
     config.get('api.users.reseller'),
     config.get('api.users.admin'),
-    config.get('api.users.user'),
     config.get('api.apikeys.admin'),
     config.get('api.apikeys.reseller')
   ];

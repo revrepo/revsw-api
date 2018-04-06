@@ -24,7 +24,7 @@ var API = require('./../../../common/api');
 var AccountsDP = require('./../../../common/providers/data/accounts');
 var DataProvider = require('./../../../common/providers/data');
 
-describe('Functional check', function () {
+describe('Negative check', function () {
   this.timeout(config.api.request.maxTimeout);
 
   var resellerUser = config.get('api.users.reseller');
@@ -68,7 +68,7 @@ describe('Functional check', function () {
 
   describe('Users resource', function () {
 
-    it('should return `Bad Request` when updating user\'s role from `admin` to `user`.',
+    xit('should return `Bad Request` when updating user\'s role from `admin` to `user`.',
       function (done) {
         API.helpers
           .authenticateUser(userSample)

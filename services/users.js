@@ -29,6 +29,7 @@ var sendgrid = require('sendgrid')(config.get('sendgrid_api_key'));
 var crypto = require('crypto');
 var mongoose = require('mongoose');
 var utils = require('../lib/utilities.js');
+var Promise = require('bluebird');
 
 var mongoConnection = require('../lib/mongoConnections');
 
@@ -229,3 +230,54 @@ exports.removeUser = function (userId, callback) {
       callback(err, _removedUser_);
     });
 };
+
+exports.deleteAccountFromPermissions = function (account_id) {
+  return new Promise(function (resolve, reject) {
+    if (!account_id) {
+      return reject('No account ID specified');
+    }
+
+    users.model.find({}, function (err, userList) {
+      if (err || !userList || userList.length === 0) {
+        return reject('Problem fetching users');
+      }
+
+      userList.forEach(function (user) {
+        var orgUser = user;
+        user = user._doc;
+        checkUserForAccount(user, account_id).then(function () {
+          if (userList.indexOf(orgUser) === userList.length - 1) {
+            return resolve(true);
+          }
+        })
+        .catch(reject);
+      });
+      
+    });
+  });
+};
+
+function checkUserForAccount(user, account_id) {
+  return new Promise(function (resolve, reject) {
+    if (user.permissions) {
+      if (user.permissions.accounts.list && user.permissions.accounts.list.indexOf(account_id) !== -1) {
+        user.permissions.accounts.list.splice(user.permissions.accounts.list.indexOf(account_id), 1);
+        var updateUser = {
+          user_id: user.id || user._id,
+          permissions: user.permissions
+        };
+        users.update(updateUser, function (error, item) {
+          if (error) {
+            return reject(error);
+          }
+
+          return resolve(true);
+        });
+      } else {
+        return resolve(true);
+      }
+    } else {
+      return resolve(true);
+    }
+  });
+}

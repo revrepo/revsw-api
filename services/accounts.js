@@ -55,6 +55,7 @@ var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var usersService = require('../services/users.js');
+var groupsService = require('../services/groups.js');
 var emailService = require('../services/email.js');
 var apiKeysService = require('../services/APIKeys.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
@@ -424,6 +425,27 @@ exports.removeAccount = function(accountId, options, callback) {
           }
           logger.info('Clean managed_account_ids in All API keys while removing account ID ' + accountId);
           cb(err_);
+        });
+      },
+      function removeAccountFromPermissions(cb) {
+        usersService.deleteAccountFromPermissions(accountId.toString()).then(function (res) {
+          if (res) {
+            apiKeysService.deleteAccountFromPermissions(accountId.toString()).then(function (res) {
+              if (res) {
+                groupsService.deleteAccountFromPermissions(accountId.toString()).then(function (res) {
+                  if (res) {
+                    cb(null);
+                  }
+                }).catch(function (err) {
+                  cb(err);
+                });
+              }
+            }).catch(function (err) {
+              cb(err);
+            });
+          }
+        }).catch(function (err) {
+          cb(err);
         });
       },
       // NOTE: Auto Delete Log Shipping Jobs
