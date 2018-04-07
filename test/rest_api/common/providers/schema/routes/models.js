@@ -453,7 +453,6 @@ exports.APIKeyModel = Joi.object({
   }).description('Operations allowed with the API key'),
   read_only_status: Joi.boolean().description('Defines if the API key can be used only for read-write or read-only'),
   active: Joi.boolean().description('Active or inactive API key'),
-  permissions: permissionsModel,
   created_at: Joi.date().description('API key creation date/time'),
   updated_at: Joi.date().description('API key last update date/time'),
   permissions: permissionsModel,
