@@ -149,7 +149,8 @@ var APISchemaProviders = {
         subscription_id: Joi.string().allow(null),
         use_contact_info_as_billing_info: Joi.boolean(),
         self_registered: Joi.boolean(),
-        valid_payment_method_configured: Joi.boolean()
+        valid_payment_method_configured: Joi.boolean(),
+        parent_account_id: Joi.objectId().allow(null)
       });
     return accountSchema;
   },

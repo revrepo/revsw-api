@@ -53,8 +53,8 @@ describe('Sanity check', function () {
   after(function (done) {
     done();
   });
-
-  describe('Accounts resource', function () {
+  // x this because user role testing is not needed.
+  xdescribe('Accounts resource', function () {
     describe('Error Response Data Schema', function () {
 
       beforeEach(function (done) {
