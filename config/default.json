@@ -254,14 +254,17 @@
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
       },
-      "user_invitation_mail_subject": "You have been invited to revapm CDN!",
-      "user_invitation_mail_body": ["<b>Hello {{fullname}}.</b><br />\n",
-      "You have been invited to join the revapm CDN, please click the link below to ",
-      "complete the invitation process.\n",
-      "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
-      "Invitation Link",
-      "</a>", 
-      "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"]
+      "user_invitation_mail_subject": "You have been invited to manage a RevAPM CDN account",
+      "user_invitation_mail_body": [
+        "Hello {{fullname}},<br/>\n",
+        "You have been invited to join the RevAPM CDN. Please click the link below to ",
+        "complete the invitation process.\n",
+        "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+        "Invitation Link",
+        "</a>",
+        "<br>The link will expire in 24 hours.<br>", 
+        "Kind regards,<br>RevAPM Customer Support Team<br>http://www.revapm.com/"
+      ]
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -366,13 +369,17 @@
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.nuubit.net"
       },
-      "user_invitation_mail_subject": "You have been invited to nuubit CDN!",
-      "user_invitation_mail_body": ["Hello {{fullname}}.\n",
-        "You have been invited to join the nuu:bit CDN, please click the link below to ",
+      "user_invitation_mail_subject": "You have been invited to manage a nuu:bit CDN account",
+      "user_invitation_mail_body": [
+        "Hello {{fullname}},<br/>\n",
+        "You have been invited to join the nuu:bit CDN. Please click the link below to ",
         "complete the invitation process.\n",
         "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
-        "{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}",
-        "</a>"]
+        "Invitation Link",
+        "</a>",
+        "<br>The link will expire in 24 hours.<br>",
+        "Kind regards,<br>nuu:bit Customer Support Team<br>http://www.nuubit.com/"
+      ]
     },
     "hooli": {
       "vendorUrl": "http://localhost:5000",
@@ -477,13 +484,17 @@
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
       },
-      "user_invitation_mail_subject": "You have been invited to hoolit CDN!",
-      "user_invitation_mail_body": ["Hello {{fullname}}.\n",
-        "You have been invited to join the hooli CDN, please click the link below to ",
+      "user_invitation_mail_subject": "You have been invited to manage a nuu:bit CDN account",
+      "user_invitation_mail_body": [
+        "Hello {{fullname}},<br/>\n",
+        "You have been invited to join the nuu:bit CDN. Please click the link below to ",
         "complete the invitation process.\n",
         "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
-        "{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}",
-        "</a>"]
+        "Invitation Link",
+        "</a>",
+        "<br>The link will expire in 24 hours.<br>",
+        "Kind regards,<br>nuu:bit Customer Support Team<br>http://www.nuubit.com/"
+      ]
     }
   },
   "proxy_white_referer_urls": [
