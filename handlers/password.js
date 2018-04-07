@@ -55,7 +55,7 @@ exports.forgotPassword = function(request, reply) {
           async.waterfall([
               function(done) {
                   accounts.get({
-                      _id: user.companyId[0]
+                      _id: user.account_id
                   }, function(error, account) {
                       currentVendorProfile = vendorProfiles[account.vendor_profile] || currentVendorProfile;
                       done();
@@ -124,7 +124,7 @@ exports.forgotPassword = function(request, reply) {
       }
 
       if (user.self_registered) {
-          logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.companyId[0]);
+          logger.info('forgotPassword::authenticate:Self Registered User whith User ID: ' + user.user_id + ' and Accont Id: ' + user.account_id);
           // NOTE: User not verify
           if (user.validation === undefined  || user.validation.verified===false) {
               logger.error('forgotPassword::authenticate: User with ' +
@@ -132,7 +132,7 @@ exports.forgotPassword = function(request, reply) {
               return reply(boom.create(418, 'Your registration not finished'));
           }
           accounts.get({
-            _id: user.companyId[0]
+            _id: user.account_id
           }, function(error, account) {
             if (error) {
               logger.error('forgotPassword::authenticate: Failed to find an account associated with user' +
@@ -205,6 +205,11 @@ exports.resetPassword = function(request, reply) {
         user.resetPasswordToken   = undefined;
         user.resetPasswordExpires = undefined;
 
+        if (user.invitation_token) {
+          // user finishes invitation proccess.
+          user.invitation_token = undefined;          
+        }
+
         users.update( user, function(error, result) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user ' + user.email + ' with new password'));
@@ -223,7 +228,7 @@ exports.resetPassword = function(request, reply) {
             user_id          : user.user_id,
             user_name        : user.email,
             user_type        : 'user',
-            account_id       : result.companyId[0],
+            account_id       : result.account_id,
             activity_type    : 'resetpassword',
             activity_target  : 'user',
             target_id        : result.user_id,
@@ -239,10 +244,10 @@ exports.resetPassword = function(request, reply) {
 
     function(user, done) {
         accounts.get({
-            _id: user.companyId[0]
+            _id: user.account_id
         }, function(error, account) {
           if(error || !account) {
-            return reply(boom.badImplementation('Failed to find account for user  ' + user.email + ' with companyId ' + user.companyId[0]));
+            return reply(boom.badImplementation('Failed to find account for user  ' + user.email + ' with companyId ' + user.account_id));
           }
           currentVendorProfile = (!!account.vendor_profile) ? vendorProfiles[account.vendor_profile] : currentVendorProfile;
             var mailOptions = {
