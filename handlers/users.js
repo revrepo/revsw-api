@@ -132,6 +132,11 @@ exports.createUser = function (request, reply) {
     newUser.account_id = request.auth.credentials.account_id;
     newUser.companyId = request.auth.credentials.companyId[0];
   }
+
+  if (newUser.account_id) {
+    newUser.companyId = [newUser.account_id];
+  }
+
   // NOTE: Who is creating new User must have access to the user after creation
   if (!permissionCheck.checkPermissionsToResource(request, newUser, 'users')) {
     // TODO: fix the error message text "You don't have permissions for this action "
