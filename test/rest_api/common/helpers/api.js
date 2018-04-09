@@ -22,6 +22,7 @@ var Session = require('./../session');
 var Promise = require('bluebird');
 var config = require('config');
 var host = config.api.host;
+var APITestError = require('./../apiTestError');
 // Requiring resources to use in these Helpers.
 var AuthenticateRes = require('./../resources/authenticate');
 var SSOAuthenticateRes = require('./../resources/authenticateSSOAzure');
@@ -273,6 +274,90 @@ var APIHelpers = {
    */
   getAPIURL: function () {
     return host.protocol + '://' + host.name + ':' + host.port; 
+  },
+
+  /**
+   * Create a full suite of resources for testing.
+   * Mobile App, Domain, DNS Zone, Account.
+   * 
+   * @param {String} role the role of the user that will be created
+   * @param {String} account_id account id for the resources (optional)
+   *
+   * @returns {Object} Object of resource (Object.mobile_app, Object.domain...)
+   */
+  createResources: function (role, account_id) {
+    var revAdmin = config.api.users.revAdmin;
+    var resources = {};
+    var me = this;
+    return this.authenticateUser(revAdmin)
+      .then(function () {
+        if (account_id) {
+          return {id: account_id};
+        } else {
+          return AccountsHelper.createOne();
+        }
+      })
+      .then(function (acc) {
+        resources.account_id = acc.id;
+        return AppsHelper.create({
+          accountId: acc.id,
+          platform: 'iOS'
+        });
+      })
+      .then(function (app) {
+        resources.app_id = app.id;
+        return DomainConfigsHelper.createOne(resources.account_id);
+      })
+      .then(function (domain) {
+        resources.domain_id = domain.id;
+        return DNSZonesHelper.create(resources.account_id);
+      })
+      .then(function (DNSZone) {
+        resources.dns_zone_id = DNSZone.id;
+        return UsersHelper.create({
+          account_id: resources.account_id,
+          role: role || 'admin'
+        });
+      })
+      .then(function (user) {
+        resources.user_id = user.id;
+        return UsersRes.getOne(user.id).expect(200);          
+      })
+      .then(function (user) {      
+        var authUser = {
+          email: user.body.email,
+          password: 'password1'
+        };
+        return me.authenticate(authUser);
+      })
+      .then(function () {
+        return Dashboards.createOne();
+      })
+      .then(function (dash) {
+        resources.dashboard = dash.id;
+        return me.authenticate(revAdmin);
+      })
+      .then(function () {
+        return SSLCertsHelper.createOne(resources.account_id);
+      })
+      .then(function (ssl_cert) {
+        resources.ssl_cert = ssl_cert.id;
+        return GroupsHelper.create({account_id: resources.account_id});
+      })
+      .then(function (group) {
+        resources.group = group.id;
+        return APIKeysHelper.createOneForAccount({id : resources.account_id});
+      })
+      .then(function (API_key) {
+        resources.api_key = API_key.id;
+        return LogShippingJobsHelper.createOne(resources.account_id);
+      })
+      .then(function (logshipping_jobs) {
+        return resources;
+      })
+      .catch(function (err) {
+        return new Error('Creating resources');
+      });
   }
 };
 

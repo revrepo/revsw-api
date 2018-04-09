@@ -88,6 +88,9 @@ exports.getApiKeys = function(request, reply) {
     });
     apiKeys.list(request, function (error, listOfApiKeys) {
       listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
+      if (!permissionCheck.checkSimplePermissions(request, 'API_keys')) {
+        listOfApiKeys = [];
+      }
       renderJSON(request, reply, error, listOfApiKeys);
     });
   } else {
