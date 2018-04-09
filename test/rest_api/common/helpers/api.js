@@ -273,6 +273,54 @@ var APIHelpers = {
    */
   getAPIURL: function () {
     return host.protocol + '://' + host.name + ':' + host.port; 
+  },
+
+  /**
+   * Create a full suite of resources for testing.
+   * Mobile App, Domain, DNS Zone, Account.
+   * 
+   * @param {String} role the role of the user that will be created
+   * @param {String} account_id account id for the resources (optional)
+   *
+   * @returns {Object} Object of resource (Object.mobile_app, Object.domain...)
+   */
+  createResources: function (role, account_id) {
+    var revAdmin = config.api.users.revAdmin;
+    var resources = {};
+    return this.authenticateUser(revAdmin)
+      .then(function () {
+        if (account_id) {
+          return {id: account_id};
+        } else {
+          return AccountsHelper.createOne();
+        }
+      })
+      .then(function (acc) {
+        resources.account_id = acc.id;
+        return AppsHelper.create({
+          accountId: acc.id,
+          platform: 'iOS'
+        });
+      })
+      .then(function (app) {
+        resources.app_id = app.id;
+        return DomainConfigsHelper.createOne(resources.account_id);
+      })
+      .then(function (domain) {
+        resources.domain_id = domain.id;
+        return DNSZonesHelper.create(resources.account_id);
+      })
+      .then(function (DNSZone) {
+        resources.dns_zone_id = DNSZone.id;
+        return UsersHelper.create({
+          account_id: resources.account_id,
+          role: role || 'admin'
+        });
+      })
+      .then(function (user) {
+        resources.user_id = user.id;
+        return resources;
+      });
   }
 };
 
