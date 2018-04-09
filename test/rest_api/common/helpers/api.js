@@ -288,6 +288,7 @@ var APIHelpers = {
   createResources: function (role, account_id) {
     var revAdmin = config.api.users.revAdmin;
     var resources = {};
+    var me = this;
     return this.authenticateUser(revAdmin)
       .then(function () {
         if (account_id) {
@@ -320,10 +321,42 @@ var APIHelpers = {
       })
       .then(function (user) {
         resources.user_id = user.id;
+        return UsersRes.getOne(user.id).expect(200);          
+      })
+      .then(function (user) {      
+        var authUser = {
+          email: user.body.email,
+          password: 'password1'
+        };
+        return me.authenticate(authUser);
+      })
+      .then(function () {
+        return Dashboards.createOne();
+      })
+      .then(function (dash) {
+        resources.dashboard = dash.id;
+        return me.authenticate(revAdmin);
+      })
+      .then(function () {
+        return SSLCertsHelper.createOne(resources.account_id);
+      })
+      .then(function (ssl_cert) {
+        resources.ssl_cert = ssl_cert.id;
+        return GroupsHelper.create({account_id: resources.account_id});
+      })
+      .then(function (group) {
+        resources.group = group.id;
+        return APIKeysHelper.createOneForAccount({id : resources.account_id});
+      })
+      .then(function (API_key) {
+        resources.api_key = API_key.id;
+        return LogShippingJobsHelper.createOne(resources.account_id);
+      })
+      .then(function (logshipping_jobs) {
         return resources;
       })
       .catch(function (err) {
-        throw new APITestError('Creating resources', err, err);
+        return new Error('Creating resources');
       });
   }
 };

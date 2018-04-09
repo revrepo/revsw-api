@@ -53,17 +53,22 @@ describe('Functional Check: ', function () {
                 domain_configs: [],
                 apps: [],
                 dns_zones: [],
-                users: []
+                users: [],
+                dashboards: null,
+                ssl_certs: null,
+                groups: null,
+                api_keys: null,
+                log_shipping_jobs: null
             };
-
+            var cCounter = 1;
             var pushResources = function (done) {
-                API.helpers.createResources(user.role.toLowerCase(), account_id).then(function (res) {
+                return API.helpers.createResources(user.role.toLowerCase(), account_id).then(function (res) {
                     testingResources = res;
                     permissionsToTest.domain_configs.push(res.domain_id);
                     permissionsToTest.apps.push(res.app_id);
                     permissionsToTest.dns_zones.push(res.dns_zone_id);
                     permissionsToTest.users.push(res.user_id);
-                    if (permissionsToTest.domain_configs.length === RESOURCES_LENGTH) {
+                    if (cCounter === RESOURCES_LENGTH) {
 
                         API.resources.users.getOne(permissionsToTest.users[0])
                             .expect(200)
@@ -88,6 +93,7 @@ describe('Functional Check: ', function () {
                                                     .expect(200)
                                                     .then(function () {
                                                         done();
+                                                        return true;
                                                     })
                                                     .catch(done);
                                             })
@@ -97,10 +103,11 @@ describe('Functional Check: ', function () {
                             })
                             .catch(done);
                     } else {
-                        return;
+                        cCounter++;
+                        return false;
                     }
                 })
-                .catch(done);
+                    .catch(done);
             };
 
             // this needs to be the length of permissionsToTest object
@@ -111,12 +118,14 @@ describe('Functional Check: ', function () {
                     API.helpers.accounts.createOne().then(function (acc) {
                         account_id = acc.id;
                         for (var i = 0; i < RESOURCES_LENGTH; i++) {
-                            setTimeout(function () {
-                                pushResources(done);
-                            }, 5000);
+                            pushResources(done).then(function (res) {
+                                if (res) {
+                                    done();
+                                }
+                            });
                         }
                     })
-                    .catch(done);
+                        .catch(done);
                 });
             });
 
@@ -124,21 +133,24 @@ describe('Functional Check: ', function () {
                 API.authenticate(testingUser).then(function () {
                     var count = 1;
                     for (var perm in permissionsToTest) {
-                        request(API_URL + '/v1/' + perm)
-                            .get('')
-                            .set('Authorization', 'Bearer ' + testingUser.token)
-                            .expect(200)
-                            .then(function (res) {
-                                should(res.ok);
-                                // amount of resources we are testing
-                                res.body.length.should.equal(RESOURCES_LENGTH);
-                                if (count === PERM_LENGTH) {
-                                    done();
-                                }
-                                count++;
-                            });
+                        if (permissionsToTest[perm]) {
+                            request(API_URL + '/v1/' + perm)
+                                .get('')
+                                .set('Authorization', 'Bearer ' + testingUser.token)
+                                .expect(200)
+                                .then(function (res) {
+                                    should(res.ok);
+                                    res.body.length.should.be.above(0);
+                                    if (count === PERM_LENGTH) {
+                                        done();
+                                    }
+                                    count++;
+                                }).catch(done);;
+                        } else {
+                            count++;
+                        }
                     }
-                });
+                }).catch(done);;
             });
 
             it('should not have access to resources after disabling groups permissions for that resource', function (done) {
@@ -147,6 +159,13 @@ describe('Functional Check: ', function () {
                     updateGroup.permissions.mobile_apps.access = false;
                     updateGroup.permissions.domains.access = false;
                     updateGroup.permissions.dns_zones.access = false;
+                    updateGroup.permissions.dashboards = false;
+                    updateGroup.permissions.ssl_names = false;
+                    updateGroup.permissions.ssl_certs = false;
+                    updateGroup.permissions.waf_rules = false;
+                    updateGroup.permissions.logshipping_jobs = false;
+                    updateGroup.permissions.groups = false;
+                    updateGroup.permissions.API_keys = false;
                     API.resources.groups
                         .update(testingGroup.id, updateGroup)
                         .expect(200)
@@ -154,18 +173,26 @@ describe('Functional Check: ', function () {
                             API.authenticate(testingUser).then(function () {
                                 var count = 1;
                                 for (var perm in permissionsToTest) {
-                                    request(API_URL + '/v1/' + perm)
-                                        .get('')
-                                        .set('Authorization', 'Bearer ' + testingUser.token)
-                                        .expect(200)
-                                        .then(function (res) {
-                                            should(res.ok);
-                                            res.body.length.should.equal(0);
-                                            if (count === PERM_LENGTH) {
-                                                done();
-                                            }
-                                            count++;
-                                        });
+                                    if (permissionsToTest[perm]) {
+                                        request(API_URL + '/v1/' + perm)
+                                            .get('')
+                                            .set('Authorization', 'Bearer ' + testingUser.token)
+                                            .expect(200)
+                                            .then(function (res) {
+                                                should(res.ok);
+                                                if (res.body.length > 0) {
+                                                    // this is for debugging, keep this for MUCH easier debuging..
+                                                    console.log(JSON.stringify(res.body) + ' <<<< Error is in this body!');
+                                                }
+                                                res.body.length.should.equal(0);
+                                                if (count === PERM_LENGTH) {
+                                                    done();
+                                                }
+                                                count++;
+                                            });
+                                    } else {
+                                        count++;
+                                    }
                                 }
                             });
                         });
@@ -178,6 +205,13 @@ describe('Functional Check: ', function () {
                     updateGroup.permissions.mobile_apps.access = true;
                     updateGroup.permissions.domains.access = true;
                     updateGroup.permissions.dns_zones.access = true;
+                    updateGroup.permissions.dashboards = true;
+                    updateGroup.permissions.ssl_names = true;
+                    updateGroup.permissions.ssl_certs = true;
+                    updateGroup.permissions.waf_rules = true;
+                    updateGroup.permissions.logshipping_jobs = true;
+                    updateGroup.permissions.groups = true;
+                    updateGroup.permissions.API_keys = true;
                     API.resources.groups
                         .update(testingGroup.id, updateGroup)
                         .expect(200)
@@ -185,19 +219,27 @@ describe('Functional Check: ', function () {
                             API.authenticate(testingUser).then(function () {
                                 var count = 1;
                                 for (var perm in permissionsToTest) {
-                                    request(API_URL + '/v1/' + perm)
-                                        .get('')
-                                        .set('Authorization', 'Bearer ' + testingUser.token)
-                                        .expect(200)
-                                        .then(function (res) {
-                                            should(res.ok);
-                                            // amount of resources we are testing
-                                            res.body.length.should.equal(RESOURCES_LENGTH);
-                                            if (count === PERM_LENGTH) {
-                                                done();
-                                            }
-                                            count++;
-                                        });
+                                    if (permissionsToTest[perm]) {
+                                        request(API_URL + '/v1/' + perm)
+                                            .get('')
+                                            .set('Authorization', 'Bearer ' + testingUser.token)
+                                            .expect(200)
+                                            .then(function (res) {
+                                                should(res.ok);
+                                                if (res.body.length < RESOURCES_LENGTH) {
+                                                    // this is for debugging, keep this for MUCH easier debuging..
+                                                    console.log(JSON.stringify(res.body) + ' <<<< Error is in this body!');
+                                                }
+                                                // amount of resources we are testing
+                                                res.body.length.should.equal(RESOURCES_LENGTH);
+                                                if (count === PERM_LENGTH) {
+                                                    done();
+                                                }
+                                                count++;
+                                            });
+                                    } else {
+                                        count++;
+                                    }
                                 }
                             });
                         });
@@ -217,12 +259,16 @@ describe('Functional Check: ', function () {
                             API.authenticate(testingUser).then(function () {
                                 var count = 1;
                                 for (var perm in permissionsToTest) {
-                                    requestAPI(perm, permissionsToTest[perm][0]).then(function (res) {
-                                        if (count === PERM_LENGTH) {
-                                            done();
-                                        }
+                                    if (permissionsToTest[perm]) {
+                                        requestAPI(perm, permissionsToTest[perm][0]).then(function (res) {
+                                            if (count === PERM_LENGTH) {
+                                                done();
+                                            }
+                                            count++;
+                                        });
+                                    } else {
                                         count++;
-                                    });
+                                    }
                                 }
                             });
                         });
@@ -233,17 +279,21 @@ describe('Functional Check: ', function () {
                 API.authenticate(testingUser).then(function () {
                     var count = 1;
                     for (var perm in permissionsToTest) {
-                        request(API_URL + '/v1/' + perm)
-                            .get('/' + permissionsToTest[perm][1])
-                            .set('Authorization', 'Bearer ' + testingUser.token)
-                            .expect(400)
-                            .then(function (res) {
-                                should(!res.ok);
-                                if (count === PERM_LENGTH) {
-                                    done();
-                                }
-                                count++;
-                            });
+                        if (permissionsToTest[perm]) {
+                            request(API_URL + '/v1/' + perm)
+                                .get('/' + permissionsToTest[perm][1])
+                                .set('Authorization', 'Bearer ' + testingUser.token)
+                                .expect(400)
+                                .then(function (res) {
+                                    should(!res.ok);
+                                    if (count === PERM_LENGTH) {
+                                        done();
+                                    }
+                                    count++;
+                                });
+                        } else {
+                            count++;
+                        }
                     }
                 });
             });
@@ -264,12 +314,16 @@ describe('Functional Check: ', function () {
                             API.authenticate(testingUser).then(function () {
                                 var count = 1;
                                 for (var perm in permissionsToTest) {
-                                    requestAPI(perm, permissionsToTest[perm][1]).then(function (res) {
-                                        if (count === PERM_LENGTH) {
-                                            done();
-                                        }
+                                    if (permissionsToTest[perm]) {
+                                        requestAPI(perm, permissionsToTest[perm][1]).then(function (res) {
+                                            if (count === PERM_LENGTH) {
+                                                done();
+                                            }
+                                            count++;
+                                        });
+                                    } else {
                                         count++;
-                                    });
+                                    }
                                 }
                             });
                         });
@@ -280,12 +334,16 @@ describe('Functional Check: ', function () {
                 API.authenticate(testingUser).then(function () {
                     var count = 1;
                     for (var perm in permissionsToTest) {
-                        requestAPI(perm, permissionsToTest[perm][1]).then(function (res) {
-                            if (count === PERM_LENGTH) {
-                                done();
-                            }
+                        if (permissionsToTest[perm]) {
+                            requestAPI(perm, permissionsToTest[perm][1]).then(function (res) {
+                                if (count === PERM_LENGTH) {
+                                    done();
+                                }
+                                count++;
+                            });
+                        } else {
                             count++;
-                        });
+                        }
                     }
                 });
             });
