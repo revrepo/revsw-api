@@ -31,6 +31,8 @@ describe('Functional Check: ', function () {
 
     var API_URL = API.helpers.getAPIURL();
 
+    var revAdmin = config.api.users.revAdmin;
+
     var users = [
         config.get('api.users.reseller'),
         config.get('api.users.admin')
@@ -105,7 +107,7 @@ describe('Functional Check: ', function () {
             var PERM_LENGTH = Object.keys(permissionsToTest).length - 1;
 
             before(function (done) {
-                API.authenticate(user).then(function () {
+                API.authenticate(revAdmin).then(function () {
                     API.helpers.accounts.createOne().then(function (acc) {
                         account_id = acc.id;
                         for (var i = 0; i < RESOURCES_LENGTH; i++) {

@@ -30,6 +30,8 @@ describe('Functional Check: ', function () {
 
     var API_URL = API.helpers.getAPIURL();
 
+    var revAdmin = config.api.users.revAdmin;
+
     var users = [
         config.get('api.users.reseller'),
         config.get('api.users.admin')
@@ -60,7 +62,6 @@ describe('Functional Check: ', function () {
                     permissionsToTest.dns_zones.push(res.dns_zone_id);
                     permissionsToTest.users.push(res.user_id);
                     if (permissionsToTest.domain_configs.length === RESOURCES_LENGTH) {
-
                         API.resources.users.getOne(permissionsToTest.users[0])
                             .expect(200)
                             .then(function (_user) {
@@ -70,22 +71,26 @@ describe('Functional Check: ', function () {
                                 done();
                             })
                             .catch(done);
+                    } else {
+                        return;
                     }
-                });
+                }).catch(done);;
             };
 
             // this needs to be the length of permissionsToTest object
             var PERM_LENGTH = Object.keys(permissionsToTest).length - 1;
 
             before(function (done) {
-                API.authenticate(user).then(function () {
+                API.authenticate(revAdmin).then(function () {
                     API.helpers.accounts.createOne().then(function (acc) {
                         account_id = acc.id;
                         for (var i = 0; i < RESOURCES_LENGTH; i++) {
-                            pushResources(done);
+                            setTimeout(function () {
+                                pushResources(done);
+                            }, 5000);
                         }
-                    });
-                });
+                    }).catch(done);;
+                }).catch(done);;
             });
 
             it('should have access to all resources by default', function (done) {
@@ -104,9 +109,9 @@ describe('Functional Check: ', function () {
                                     done();
                                 }
                                 count++;
-                            });
+                            }).catch(done);;
                     }
-                });
+                }).catch(done);;
             });
 
             it('should not have access to resources after disabling permissions for that resource', function (done) {
