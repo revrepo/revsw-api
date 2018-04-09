@@ -35,8 +35,11 @@ exports.getDashboards = function getDashboards(request, reply) {
   dashboard.getDashboardsByUserID(userId, function(error, listOfDashboards) {
     if (error) {
       return reply(boom.badImplementation('Failed to read dashboards list from the DB'));
-    }
+    }    
     var dashboards_list = publicRecordFields.handle(listOfDashboards, 'dashboards');
+    if (!permissionCheck.checkSimplePermissions(request, 'dashboards')) {
+      dashboards_list = [];
+    }
     renderJSON(request, reply, error, dashboards_list);
   });
 };
