@@ -23,6 +23,7 @@ var _ = require('lodash');
 var API = require('./../../../../common/api');
 var AccountsDP = require('./../../../../common/providers/data/accounts');
 var DataProvider = require('./../../../../common/providers/data');
+var GroupDP = require('./../../../../common/providers/data/groups');
 var request = require('supertest-as-promised');
 
 describe('Functional Check: ', function () {
@@ -36,13 +37,14 @@ describe('Functional Check: ', function () {
     ];
 
     users.forEach(function (user) {
-        describe('Users self permissions with role - ' + user.role, function () {
+        describe('Users group inherited permissions with role - ' + user.role, function () {
 
             var RESOURCES_LENGTH = 2;
 
             var account_id;
 
             var testingResources;
+            var testingGroup;
             var testingResources2;
             var testingUser;
             var permissionsToTest = {
@@ -67,11 +69,36 @@ describe('Functional Check: ', function () {
                                 testingUser = _user.body;
                                 testingUser.password = 'password1';
                                 delete permissionsToTest.users;
-                                done();
+                                var grp = GroupDP.generateValid({ account_id: account_id });
+                                API.resources.groups.createOne(grp)
+                                    .expect(200)
+                                    .then(function (group) {
+                                        API
+                                            .resources
+                                            .groups
+                                            .getOne(group.body.object_id)
+                                            .expect(200)
+                                            .then(function (group) {
+                                                testingGroup = group.body;
+                                                testingUser.group_id = testingGroup.id;
+                                                API.resources.users
+                                                    .update(testingUser.user_id, testingUser)
+                                                    .expect(200)
+                                                    .then(function () {
+                                                        done();
+                                                    })
+                                                    .catch(done);
+                                            })
+                                            .catch(done);
+                                    })
+                                    .catch(done);
                             })
                             .catch(done);
+                    } else {
+                        return;
                     }
-                });
+                })
+                .catch(done);
             };
 
             // this needs to be the length of permissionsToTest object
@@ -82,9 +109,12 @@ describe('Functional Check: ', function () {
                     API.helpers.accounts.createOne().then(function (acc) {
                         account_id = acc.id;
                         for (var i = 0; i < RESOURCES_LENGTH; i++) {
-                            pushResources(done);
+                            setTimeout(function () {
+                                pushResources(done);
+                            }, 5000);
                         }
-                    });
+                    })
+                    .catch(done);
                 });
             });
 
@@ -109,15 +139,14 @@ describe('Functional Check: ', function () {
                 });
             });
 
-            it('should not have access to resources after disabling permissions for that resource', function (done) {
+            it('should not have access to resources after disabling groups permissions for that resource', function (done) {
                 API.authenticate(testingUser).then(function () {
-                    var updateUser = _.cloneDeep(testingUser);
-                    delete updateUser.password;
-                    updateUser.permissions.mobile_apps.access = false;
-                    updateUser.permissions.domains.access = false;
-                    updateUser.permissions.dns_zones.access = false;
-                    API.resources.users
-                        .update(testingUser.user_id, updateUser)
+                    var updateGroup = _.cloneDeep(testingGroup);
+                    updateGroup.permissions.mobile_apps.access = false;
+                    updateGroup.permissions.domains.access = false;
+                    updateGroup.permissions.dns_zones.access = false;
+                    API.resources.groups
+                        .update(testingGroup.id, updateGroup)
                         .expect(200)
                         .then(function () {
                             API.authenticate(testingUser).then(function () {
@@ -143,13 +172,12 @@ describe('Functional Check: ', function () {
 
             it('should have access to resources after re-enabling permissions for that resource', function (done) {
                 API.authenticate(testingUser).then(function () {
-                    var updateUser = _.cloneDeep(testingUser);
-                    delete updateUser.password;
-                    updateUser.permissions.mobile_apps.access = true;
-                    updateUser.permissions.domains.access = true;
-                    updateUser.permissions.dns_zones.access = true;
-                    API.resources.users
-                        .update(testingUser.user_id, updateUser)
+                    var updateGroup = _.cloneDeep(testingGroup);
+                    updateGroup.permissions.mobile_apps.access = true;
+                    updateGroup.permissions.domains.access = true;
+                    updateGroup.permissions.dns_zones.access = true;
+                    API.resources.groups
+                        .update(testingGroup.id, updateGroup)
                         .expect(200)
                         .then(function () {
                             API.authenticate(testingUser).then(function () {
@@ -176,13 +204,12 @@ describe('Functional Check: ', function () {
 
             it('should have access only to resources listed in the permission list', function (done) {
                 API.authenticate(testingUser).then(function () {
-                    var updateUser = _.cloneDeep(testingUser);
-                    delete updateUser.password;
-                    updateUser.permissions.mobile_apps.list = [permissionsToTest.apps[0]];
-                    updateUser.permissions.domains.list = [permissionsToTest.domain_configs[0]];
-                    updateUser.permissions.dns_zones.list = [permissionsToTest.dns_zones[0]];
-                    API.resources.users
-                        .update(testingUser.user_id, updateUser)
+                    var updateGroup = _.cloneDeep(testingGroup);
+                    updateGroup.permissions.mobile_apps.list = [permissionsToTest.apps[0]];
+                    updateGroup.permissions.domains.list = [permissionsToTest.domain_configs[0]];
+                    updateGroup.permissions.dns_zones.list = [permissionsToTest.dns_zones[0]];
+                    API.resources.groups
+                        .update(testingGroup.id, updateGroup)
                         .expect(200)
                         .then(function () {
                             API.authenticate(testingUser).then(function () {
@@ -221,16 +248,15 @@ describe('Functional Check: ', function () {
 
             it('should not have access to a resource in a list after disabling `allow_list` flag of that permission list', function (done) {
                 API.authenticate(testingUser).then(function () {
-                    var updateUser = _.cloneDeep(testingUser);
-                    delete updateUser.password;
-                    updateUser.permissions.mobile_apps.list = [permissionsToTest.apps[0]];
-                    updateUser.permissions.domains.list = [permissionsToTest.domain_configs[0]];
-                    updateUser.permissions.dns_zones.list = [permissionsToTest.dns_zones[0]];
-                    updateUser.permissions.mobile_apps.allow_list = false;
-                    updateUser.permissions.domains.allow_list = false;
-                    updateUser.permissions.dns_zones.allow_list = false;
-                    API.resources.users
-                        .update(testingUser.user_id, updateUser)
+                    var updateGroup = _.cloneDeep(testingGroup);
+                    updateGroup.permissions.mobile_apps.list = [permissionsToTest.apps[0]];
+                    updateGroup.permissions.domains.list = [permissionsToTest.domain_configs[0]];
+                    updateGroup.permissions.dns_zones.list = [permissionsToTest.dns_zones[0]];
+                    updateGroup.permissions.mobile_apps.allow_list = false;
+                    updateGroup.permissions.domains.allow_list = false;
+                    updateGroup.permissions.dns_zones.allow_list = false;
+                    API.resources.groups
+                        .update(testingGroup.id, updateGroup)
                         .expect(200)
                         .then(function () {
                             API.authenticate(testingUser).then(function () {

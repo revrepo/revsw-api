@@ -22,6 +22,7 @@ var Session = require('./../session');
 var Promise = require('bluebird');
 var config = require('config');
 var host = config.api.host;
+var APITestError = require('./../apiTestError');
 // Requiring resources to use in these Helpers.
 var AuthenticateRes = require('./../resources/authenticate');
 var SSOAuthenticateRes = require('./../resources/authenticateSSOAzure');
@@ -320,6 +321,9 @@ var APIHelpers = {
       .then(function (user) {
         resources.user_id = user.id;
         return resources;
+      })
+      .catch(function (err) {
+        throw new APITestError('Creating resources', err, err);
       });
   }
 };
