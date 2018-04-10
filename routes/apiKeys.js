@@ -131,6 +131,7 @@ module.exports = [
       validate: {
         payload: {
           account_id      : Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
+          role: Joi.string().trim().description('Role of API Key')
         }
       },
       response: {

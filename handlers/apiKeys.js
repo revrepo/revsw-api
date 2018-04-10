@@ -146,6 +146,7 @@ exports.createApiKey = function(request, reply) {
   var newKey = uuid();
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
+  newApiKey.role = request.payload.role || 'admin';
 
   if (newApiKey.managed_account_ids && newApiKey.managed_account_ids.length > 0) {
     if (!newApiKey.permissions) {
