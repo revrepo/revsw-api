@@ -31,8 +31,8 @@ var APIKeysHelper = {
    *
    * @returns {Object} API Key data.
    */
-  createOneForAccount: function(account) {
-    var apiKey = APIKeyDP.generateOne(account.id);
+  createOneForAccount: function(account, role) {
+    var apiKey = APIKeyDP.generateOne(account.id, role);
     return APIKeysResource
       .createOne(apiKey)
       .then(function(response) {

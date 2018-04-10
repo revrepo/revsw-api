@@ -346,13 +346,13 @@ var APIHelpers = {
       })
       .then(function (group) {
         resources.group = group.id;
-        return APIKeysHelper.createOneForAccount({id : resources.account_id});
+        return APIKeysHelper.createOneForAccount({id : resources.account_id}, role);
       })
       .then(function (API_key) {
         resources.api_key = API_key.id;
         return LogShippingJobsHelper.createOne(resources.account_id);
       })
-      .then(function (logshipping_jobs) {
+      .then(function (logshipping_jobs) {        
         return resources;
       })
       .catch(function (err) {

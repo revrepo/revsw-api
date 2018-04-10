@@ -44,9 +44,10 @@ var APIKeysDataProvider = {
    *       account_id: String
    *    }
    */
-  generateOne: function (accountId) {
+  generateOne: function (accountId, role) {
     return {
-      account_id: accountId
+      account_id: accountId,
+      role: role || 'admin'
     };
   },
 
