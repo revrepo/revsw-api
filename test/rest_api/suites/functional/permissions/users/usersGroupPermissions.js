@@ -41,8 +41,6 @@ describe('Functional Check: ', function () {
     users.forEach(function (user) {
         describe('Users group inherited permissions with role - ' + user.role, function () {
 
-            var RESOURCES_LENGTH = 2;
-
             var account_id;
 
             var testingResources;
@@ -60,55 +58,6 @@ describe('Functional Check: ', function () {
                 api_keys: null,
                 log_shipping_jobs: null
             };
-            var cCounter = 1;
-            var pushResources = function (done) {
-                return API.helpers.createResources(user.role.toLowerCase(), account_id).then(function (res) {
-                    testingResources = res;
-                    permissionsToTest.domain_configs.push(res.domain_id);
-                    permissionsToTest.apps.push(res.app_id);
-                    permissionsToTest.dns_zones.push(res.dns_zone_id);
-                    permissionsToTest.users.push(res.user_id);
-                    if (cCounter === RESOURCES_LENGTH) {
-
-                        API.resources.users.getOne(permissionsToTest.users[0])
-                            .expect(200)
-                            .then(function (_user) {
-                                testingUser = _user.body;
-                                testingUser.password = 'password1';
-                                delete permissionsToTest.users;
-                                var grp = GroupDP.generateValid({ account_id: account_id });
-                                API.resources.groups.createOne(grp)
-                                    .expect(200)
-                                    .then(function (group) {
-                                        API
-                                            .resources
-                                            .groups
-                                            .getOne(group.body.object_id)
-                                            .expect(200)
-                                            .then(function (group) {
-                                                testingGroup = group.body;
-                                                testingUser.group_id = testingGroup.id;
-                                                API.resources.users
-                                                    .update(testingUser.user_id, testingUser)
-                                                    .expect(200)
-                                                    .then(function () {
-                                                        done();
-                                                        return true;
-                                                    })
-                                                    .catch(done);
-                                            })
-                                            .catch(done);
-                                    })
-                                    .catch(done);
-                            })
-                            .catch(done);
-                    } else {
-                        cCounter++;
-                        return false;
-                    }
-                })
-                    .catch(done);
-            };
 
             // this needs to be the length of permissionsToTest object
             var PERM_LENGTH = Object.keys(permissionsToTest).length - 1;
@@ -117,16 +66,58 @@ describe('Functional Check: ', function () {
                 API.authenticate(revAdmin).then(function () {
                     API.helpers.accounts.createOne().then(function (acc) {
                         account_id = acc.id;
-                        for (var i = 0; i < RESOURCES_LENGTH; i++) {
-                            pushResources(done).then(function (res) {
-                                if (res) {
-                                    done();
-                                }
-                            });
-                        }
+                        API.helpers.createResources(user.role.toLowerCase(), account_id).then(function (res) {
+                            testingResources = res;
+                            permissionsToTest.domain_configs.push(res.domain_id);
+                            permissionsToTest.apps.push(res.app_id);
+                            permissionsToTest.dns_zones.push(res.dns_zone_id);
+                            permissionsToTest.users.push(res.user_id);
+                            API.helpers.createResources(user.role.toLowerCase(), account_id).then(function (ress) {
+                                testingResources = ress;
+                                permissionsToTest.domain_configs.push(ress.domain_id);
+                                permissionsToTest.apps.push(ress.app_id);
+                                permissionsToTest.dns_zones.push(ress.dns_zone_id);
+                                permissionsToTest.users.push(ress.user_id);
+                                API.resources.users.getOne(permissionsToTest.users[0])
+                                    .expect(200)
+                                    .then(function (_user) {
+                                        testingUser = _user.body;
+                                        testingUser.password = 'password1';
+                                        delete permissionsToTest.users;
+                                        var grp = GroupDP.generateValid({ account_id: account_id });
+                                        API.resources.groups.createOne(grp)
+                                            .expect(200)
+                                            .then(function (group) {
+                                                API
+                                                    .resources
+                                                    .groups
+                                                    .getOne(group.body.object_id)
+                                                    .expect(200)
+                                                    .then(function (group) {
+                                                        testingGroup = group.body;
+                                                        testingUser.group_id = testingGroup.id;
+                                                        API.resources.users
+                                                            .update(testingUser.user_id, testingUser)
+                                                            .expect(200)
+                                                            .then(function () {
+                                                                done();
+                                                                return true;
+                                                            })
+                                                            .catch(done);
+                                                    })
+                                                    .catch(done);
+                                            })
+                                            .catch(done);
+                                    })
+                                    .catch(done);
+                            })
+                                .catch(done);
+                        })
+                            .catch(done);
                     })
                         .catch(done);
-                });
+                })
+                    .catch(done);
             });
 
             it('should have access to all resources by default', function (done) {
@@ -226,12 +217,12 @@ describe('Functional Check: ', function () {
                                             .expect(200)
                                             .then(function (res) {
                                                 should(res.ok);
-                                                if (res.body.length < RESOURCES_LENGTH) {
+                                                if (res.body.length < 2) {
                                                     // this is for debugging, keep this for MUCH easier debuging..
                                                     console.log(JSON.stringify(res.body) + ' <<<< Error is in this body!');
                                                 }
                                                 // amount of resources we are testing
-                                                res.body.length.should.equal(RESOURCES_LENGTH);
+                                                res.body.length.should.equal(2);
                                                 if (count === PERM_LENGTH) {
                                                     done();
                                                 }
