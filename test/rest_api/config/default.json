@@ -271,5 +271,16 @@
     "billing_statements": true,
     "billing_plan": true,
     "account_profile": true
- }
+ },
+ "user_invitation_mail_subject": "You have been invited to manage a RevAPM CDN account",
+ "user_invitation_mail_body": [
+   "Hello {{fullname}},<br/>\n",
+   "You have been invited to join the RevAPM CDN. Please click the link below to ",
+   "complete the invitation process.\n",
+   "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+   "Invitation Link",
+   "</a>",
+   "<br>The link will expire in 24 hours.<br>", 
+   "Kind regards,<br>RevAPM Customer Support Team<br>http://www.revapm.com/"
+ ]
 }

@@ -32,6 +32,8 @@ var UsersHelper = {
    * ### UsersHelper.create()
    *
    * Creates a new App using the account ID and the data provided.
+   * 
+   * @param self is the user self registered?
    *
    * @param {Object} data, mobile app data with the following structure:
    *    {
@@ -40,8 +42,11 @@ var UsersHelper = {
    *      lastName: String
    *    }
    */
-  create: function (data) {
+  create: function (data, self) {
     var user = UsersDP.generate(data);
+    if (self !== undefined) {
+      user.self_registered = self;
+    }
     return UsersResource
       .createOne(user)
       .then(function (res) {

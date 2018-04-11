@@ -69,6 +69,7 @@ var APIHelpers = {
   vendors: VendorsHelper,
   azure: AzureHelper,
   groups: GroupsHelper,
+  mailinator: MailinatorHelper,
 
   /**
   * ### API.helpers.authenticate()
