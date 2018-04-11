@@ -29,6 +29,43 @@ var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
 mongoose.set('debug', false);
 
+var dryRun = false;
+
+function printHelp() {
+    console.log(' --- Account Migration Script --- ');
+    console.log('');
+    console.log('');
+    console.log(' > Args:');
+    console.log(' >>> -d, -dry, -dryrun, --d, --dryrun, --dry:');
+    console.log(' >>> Dryrun mode, no data will be updated, only info will be displayed.');
+    console.log('');
+    console.log('');
+    console.log(' >>> -h, -help, --h, --help:');
+    console.log(' >>> Display this help info');
+}
+
+process.argv.forEach(function (val, index, array) {
+    switch (val) {
+        case '-d':
+        case '-dry':
+        case '-dryrun':
+        case '--d':
+        case '--dryrun':
+        case '--dry':
+            // dry run, dont save anything..
+            dryRun = true;
+            console.log(' --- Dryrun Mode is On ---');
+            break;
+        case '-h':
+        case '-help':
+        case '--h':
+        case '--help':
+            printHelp();
+            process.exit();
+            break;
+    }
+});
+
 users.model.find({}, function (err, usrs) {
     if (err) {
         throw new Error(err);
@@ -78,8 +115,7 @@ var updateAccount = function (id, parentID) {
                 } else if (parentAccount) {
                     // This 
                     if (parentAccount.parent_account_id) {
-                        console.log('Account with ID `' + parentAccount.id + '` can\'t be a Parent account because it has a Parent account.');
-                        console.log('Removing parent account from `' + parentAccount.id + '`...');
+                        console.log('Error related >>>> `' + id + '` Is the account ID we are trying to update.');
                         throw new Error('Account with ID `' + parentAccount.id + '` can\'t be a Parent account because it has a Parent account.');
                     }
                     accounts.get({ _id: id }, function (error, acc) {
@@ -95,15 +131,20 @@ var updateAccount = function (id, parentID) {
                                 acc.account_id = acc.id;
 
                                 // run save function to save acc with new parent id
-                                accounts.update(acc, function (saveError, item) {
-                                    if (saveError) {
-                                        throw new Error(saveError);
-                                    } else if (item) {
-                                        console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
-                                    } else {
-                                        console.log('Cannot update account: `' + id + '`');
-                                    }
-                                });
+                                if (!dryRun) {
+                                    accounts.update(acc, function (saveError, item) {
+                                        if (saveError) {
+                                            throw new Error(saveError);
+                                        } else if (item) {
+                                            console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
+                                        } else {
+                                            console.log('Cannot update account: `' + id + '`');
+                                        }
+                                    });
+                                } else {
+                                    console.log('Dryrun mode is on, not updating any objects, only displaying info.');
+                                    console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
+                                }
                             }
                         } else {
                             console.log('Cannot get account: `' + id + '`');
