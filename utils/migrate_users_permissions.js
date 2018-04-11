@@ -196,8 +196,13 @@ domainConfigs.list(function (err, list) {
 
 var updateUser = function (usr) {
     var user = {};
+
     if (usr.companyId) {
         user.account_id = usr.companyId.includes(',') ? usr.companyId.split(',')[0] : usr.companyId;
+    }
+
+    if (user.role === 'revadmin') {
+        user.account_id = null;
     }
 
     if (!usr.key && !usr.name) {
@@ -208,7 +213,7 @@ var updateUser = function (usr) {
         user.id = usr._id;
     }
 
-    if (!usr.role) {
+    if (!usr.role && false) {
         var permissionsGroup = _.cloneDeep(permissionsAdmin);
         user.permissions = permissionsGroup;
         groups.update(user, function (err, doc) {
@@ -236,6 +241,8 @@ var updateUser = function (usr) {
                         domains.forEach(function (domainConfig) {
                             if (domain === domainConfig.domain_name) {
                                 domainIDs.push(domainConfig._id.toString());
+                            } else if (domains.indexOf(domainConfig) === (domains.length - 1)) {
+                                console.log('Problem matching Domain name to ID, Name: ' + domain);
                             }
                         });
                     });
