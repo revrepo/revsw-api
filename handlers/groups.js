@@ -232,7 +232,6 @@ exports.updateGroup = function (request, reply) {
   var groupAccountId;
   var groupId;
   var statusResponse;
-  var storedGroupData;
   var resultGroupData;
 
   async.waterfall([

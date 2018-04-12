@@ -55,7 +55,7 @@ var permissionCheck = require('./../lib/requestPermissionScope');
  */
 exports.getUsers = function getUsers(request, reply) {
   var filters_ = request.query.filters;
-  var accountIds = utils.getAccountID(request);
+  var accountIds;
   var usersAccountId = utils.getAccountID(request);
   if (request.auth.credentials.role === 'reseller') {
     if(permissionCheck.getResellerAccs()) {
@@ -840,7 +840,6 @@ exports.completeInvitation = function (request, reply) {
           user.invitation_token = null;
           user.invitation_expire_at = null;
           // remove all invitation stuff and set new password.
-          var account_id = user.companyId[0] || null;
           users.update(user, function (error, result) {
             if (!error) {
               var statusResponse;
