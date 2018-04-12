@@ -29,6 +29,43 @@ var accountService = require('../services/accounts.js');
 var Promise = require('bluebird');
 mongoose.set('debug', false);
 
+var dryRun = false;
+
+function printHelp() {
+    console.log(' --- Account Migration Script --- ');
+    console.log('');
+    console.log('');
+    console.log(' > Args:');
+    console.log(' >>> -d, -dry, -dryrun, --d, --dryrun, --dry:');
+    console.log(' >>> Dryrun mode, no data will be updated, only info will be displayed.');
+    console.log('');
+    console.log('');
+    console.log(' >>> -h, -help, --h, --help:');
+    console.log(' >>> Display this help info');
+}
+
+process.argv.forEach(function (val, index, array) {
+    switch (val) {
+        case '-d':
+        case '-dry':
+        case '-dryrun':
+        case '--d':
+        case '--dryrun':
+        case '--dry':
+            // dry run, dont save anything..
+            dryRun = true;
+            console.log(' --- Dryrun Mode is On ---');
+            break;
+        case '-h':
+        case '-help':
+        case '--h':
+        case '--help':
+            printHelp();
+            process.exit();
+            break;
+    }
+});
+
 users.model.find({}, function (err, usrs) {
     if (err) {
         throw new Error(err);
@@ -62,9 +99,12 @@ users.model.find({}, function (err, usrs) {
 var updateAccount = function (id, parentID) {
     var flaggie = true;
     accounts.list(function (err, accs) {
+        // This check tests all accounts in the DB to see if any of them have current id (from funciton param)
+        // set as their parent_account_id, if a case is found, we dont update that account, we display an error
+        // and need to manually fix it.
         accs.forEach(function (testAccount) {
             if (testAccount.parent_account_id === id) {
-                console.log('Account with ID `' + parentID + '` can\'t have a parent account because it is a parent account already.');
+                console.log('Account with ID `' + id + '` can\'t have a parent account because it is a parent account already.');
                 flaggie = false;
             }
         });
@@ -73,50 +113,43 @@ var updateAccount = function (id, parentID) {
                 if (error) {
                     throw new Error(error);
                 } else if (parentAccount) {
+                    // This 
                     if (parentAccount.parent_account_id) {
-                        console.log('Account with ID `' + parentAccount.id + '` can\'t be a Parent account because it has a Parent account.');
-                        console.log('Removing parent account from `' + parentAccount.id + '`...');
-                        parentAccount.parent_account_id = null;
-                        parentAccount.account_id = parentAccount.id;
-                        accounts.update(parentAccount, function (saveError, item) {
-                            if (saveError) {
-                                throw new Error(saveError);
-                            } else if (item) {
-                                console.log('Account `' + item.id + '` parent ID has been removed!');
-                                accounts.get({ _id: id }, function (error, acc) {
-                                    if (error) {
-                                        throw new Error(error);
-                                    } else if (acc) {
-                                        if (acc.parent_account_id && acc.parent_account_id !== parentID) {
-                                            console.log('Account ID `' + acc.id + '` already has a parent account!');
-                                            console.log('Current: `' + acc.parent_account_id + '`; New one: `' + parentID + '`');
-                                        } else {
-                                            // if the account already has a parent ID, leave it as is
-                                            acc.parent_account_id = acc.parent_account_id || parentID;
-                                            acc.account_id = acc.id;
-        
-                                            // run save function to save acc with new parent id
-                                            accounts.update(acc, function (saveError, item) {
-                                                if (saveError) {
-                                                    throw new Error(saveError);
-                                                } else if (item) {
-                                                    console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
-                                                } else {
-                                                    console.log('Cannot update account: `' + id + '`');
-                                                }
-                                            });
-                                        }
-                                    } else {
-                                        console.log('Cannot get account: `' + id + '`');
-                                    }
-                                });
-                            } else {
-                                console.log('Cannot update account: `' + id + '`');
-                            }
-                        });
+                        console.log('Error related >>>> `' + id + '` Is the account ID we are trying to update.');
+                        throw new Error('Account with ID `' + parentAccount.id + '` can\'t be a Parent account because it has a Parent account.');
                     }
-                } else {
-                    console.log('Cannot get account ' + parentID);
+                    accounts.get({ _id: id }, function (error, acc) {
+                        if (error) {
+                            throw new Error(error);
+                        } else if (acc) {
+                            if (acc.parent_account_id && acc.parent_account_id !== parentID) {
+                                console.log('Account ID `' + acc.id + '` already has a parent account!');
+                                console.log('Current: `' + acc.parent_account_id + '`; New one: `' + parentID + '`');
+                            } else {
+                                // if the account already has a parent ID, leave it as is
+                                acc.parent_account_id = acc.parent_account_id || parentID;
+                                acc.account_id = acc.id;
+
+                                // run save function to save acc with new parent id
+                                if (!dryRun) {
+                                    accounts.update(acc, function (saveError, item) {
+                                        if (saveError) {
+                                            throw new Error(saveError);
+                                        } else if (item) {
+                                            console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
+                                        } else {
+                                            console.log('Cannot update account: `' + id + '`');
+                                        }
+                                    });
+                                } else {
+                                    console.log('Dryrun mode is on, not updating any objects, only displaying info.');
+                                    console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
+                                }
+                            }
+                        } else {
+                            console.log('Cannot get account: `' + id + '`');
+                        }
+                    });
                 }
             });
         }
