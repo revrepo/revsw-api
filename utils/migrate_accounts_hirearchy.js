@@ -143,7 +143,7 @@ var updateAccount = function (id, parentID) {
                                     });
                                 } else {
                                     console.log('Dryrun mode is on, not updating any objects, only displaying info.');
-                                    console.log('Account `' + item.id + '` parent ID is set to: `' + item.parent_account_id + '`!');
+                                    console.log('Account `' + acc.id + '` parent ID is set to: `' + acc.parent_account_id + '`!');
                                 }
                             }
                         } else {
