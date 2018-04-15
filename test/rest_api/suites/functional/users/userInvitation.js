@@ -224,21 +224,14 @@ describe('Functional check: User invitation process', function () {
                                                                 .then(function (mail_) {
                                                                     invitationMail = mail_.data;
                                                                     invitationMail.subject.should.equal(invitationMailSubjet);
-                                                                    var invLink = invitationMail.parts[0].body.match(linkRegex)[2];
-                                                                    request(invLink)
-                                                                        .get('')
-                                                                        .then(function (res) {
-                                                                            res.headers
-                                                                                .location
-                                                                                .should
-                                                                                .containEql(user_.invitation_token);
-                                                                            res.headers
-                                                                                .location
-                                                                                .should
-                                                                                .containEql(user_.user_id);
-                                                                            done();
-                                                                        })
-                                                                        .catch(done);
+                                                                    var invText = invitationMail.parts[0].body;
+                                                                    invText
+                                                                        .should
+                                                                        .containEql(user_.invitation_token);
+                                                                    invText
+                                                                        .should
+                                                                        .containEql(user_.user_id);
+                                                                    done();
                                                                 })
                                                                 .catch(done);
                                                         })

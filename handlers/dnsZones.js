@@ -305,7 +305,7 @@ exports.deleteDnsZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         // DNS zone exists, so we can delete it
@@ -373,7 +373,7 @@ exports.deleteDnsZone = function(request, reply) {
           if (/NS1 API Request Failed/.test(error.message)) {
             return reply(boom.badRequest(DNS_ZONE_INVALID_PROVIDED));
           } else if (/DNS zone not found/.test(error.message)) {
-            reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
+            return reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
           } else {
             return reply(boom.badImplementation(error.message));
           }
@@ -403,7 +403,7 @@ exports.updateDnsZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         // Found zone to update
@@ -479,7 +479,7 @@ exports.updateDnsZone = function(request, reply) {
               return reply(boom.badRequest(error.message));
             }
           } else if (/DNS zone not found/.test(error.message)) {
-            reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
+            return reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
           } else {
             if (!!error.response && error.response.body && error.response.body.message) {
               // NOTE: Show message from NS1
@@ -503,7 +503,7 @@ exports.getDnsZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -738,7 +738,7 @@ exports.getDnsZoneRecords = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -815,7 +815,7 @@ exports.createDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -951,7 +951,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -1083,7 +1083,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -1210,7 +1210,7 @@ exports.getDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZones, 'dns_zones')) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
