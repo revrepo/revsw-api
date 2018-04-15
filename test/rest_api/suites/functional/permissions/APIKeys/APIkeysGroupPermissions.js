@@ -39,7 +39,7 @@ describe('Functional Check: ', function () {
     ];
 
     users.forEach(function (user) {
-        describe('API Keys self permissions with role - ' + user.role, function () {
+        describe('API Keys group inherited permissions with role - ' + user.role, function () {
             var keyRole = user.role.includes('Reseller') ? 'reseller' : 'admin';
             var account_id;
 
