@@ -39,13 +39,9 @@ describe('Functional check', function () {
 
       // roles to test
       var roles = [
-        'admin'
+        'admin',
+        'reseller'
       ];
-
-      // if not testing with API key, do `reseller` role change.
-      if (!user.key) {
-        roles.push('reseller');
-      }
 
       var userSample;
       var accountSample = AccountsDP.generateOne();
@@ -86,7 +82,8 @@ describe('Functional check', function () {
                   .update(userSample.id, {
                     firstname: 'Jon',
                     lastname: 'Doe',
-                    role: role
+                    role: role,
+                    account_id: accountSample.id
                   })
                   .expect(200)
                   .then(function () {
