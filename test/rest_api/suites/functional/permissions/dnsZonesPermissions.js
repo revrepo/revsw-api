@@ -22,7 +22,7 @@ var config = require('config');
 var _ = require('lodash');
 var API = require('./../../../common/api');
 var AccountsDP = require('./../../../common/providers/data/accounts');
-var domainConfigsDP = require('./../../../common/providers/data/domainConfigs');
+var dnsZonesDP = require('./../../../common/providers/data/dnsZones');
 var DataProvider = require('./../../../common/providers/data');
 var request = require('supertest-as-promised');
 
@@ -44,7 +44,7 @@ describe('Functional Check: ', function () {
         var object1;
         var object2;
         var account_id;
-        describe('Domains permissions with - ' + user, function () {
+        describe('DNS Zones permissions with - ' + user, function () {
             before(function (done) {
                 API.authenticate(revAdmin)
                     .then(function () {
@@ -82,14 +82,14 @@ describe('Functional Check: ', function () {
                                             .then(function () {
                                                 API
                                                     .helpers
-                                                    .domainConfigs
-                                                    .createOne(account_id)
+                                                    .dnsZones
+                                                    .create(account_id)
                                                     .then(function (val1) {
                                                         object1 = val1;
                                                         API
                                                             .helpers
-                                                            .domainConfigs
-                                                            .createOne(account_id)
+                                                            .dnsZones
+                                                            .create(account_id)
                                                             .then(function (val2) {
                                                                 object2 = val2;
                                                                 done();
@@ -115,14 +115,14 @@ describe('Functional Check: ', function () {
                                             .then(function () {
                                                 API
                                                     .helpers
-                                                    .domainConfigs
-                                                    .createOne(account_id)
+                                                    .dnsZones
+                                                    .create(account_id)
                                                     .then(function (val1) {
                                                         object1 = val1;
                                                         API
                                                             .helpers
-                                                            .domainConfigs
-                                                            .createOne(account_id)
+                                                            .dnsZones
+                                                            .create(account_id)
                                                             .then(function (val2) {
                                                                 object2 = val2;
                                                                 done();
@@ -140,13 +140,13 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should have access to both domains', function (done) {
+            it('should have access to both DNS Zones', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
                         API
                             .resources
-                            .domainConfigs
+                            .dnsZones
                             .getAll()
                             .expect(200)
                             .then(function (res) {
@@ -160,7 +160,7 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should not have access to both domains after disabling `domains` permission', function (done) {
+            it('should not have access to both DNS Zones after disabling `DNS Zones` permission', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
@@ -168,7 +168,7 @@ describe('Functional Check: ', function () {
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = false;
+                        updateUser.permissions.dns_zones.access = false;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -184,20 +184,20 @@ describe('Functional Check: ', function () {
                     .then(function () {
                         API
                             .resources
-                            .domainConfigs
+                            .dnsZones
                             .getAll()
                             .expect(200)
                             .then(function (res) {
                                 res.body.length.should.equal(0);
                                 API
                                     .resources
-                                    .domainConfigs
+                                    .dnsZones
                                     .getOne(object1.id)
                                     .expect(400)
                                     .then(function () {
                                         API
                                             .resources
-                                            .domainConfigs
+                                            .dnsZones
                                             .getOne(object2.id)
                                             .expect(400)
                                             .then(function () {
@@ -212,7 +212,7 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should have access only to first domain after setting `domains` permission list', function (done) {
+            it('should have access only to first DNS Zone after setting `DNS Zones` permission list', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
@@ -220,9 +220,9 @@ describe('Functional Check: ', function () {
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = true;
-                        updateUser.permissions.domains.list = [object1.id];
-                        updateUser.permissions.domains.allow_list = true;
+                        updateUser.permissions.dns_zones.access = true;
+                        updateUser.permissions.dns_zones.list = [object1.id];
+                        updateUser.permissions.dns_zones.allow_list = true;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -240,20 +240,20 @@ describe('Functional Check: ', function () {
                             .then(function () {
                                 API
                                     .resources
-                                    .domainConfigs
+                                    .dnsZones
                                     .getAll()
                                     .expect(200)
                                     .then(function (res) {
                                         res.body.length.should.equal(1);
                                         API
                                             .resources
-                                            .domainConfigs
+                                            .dnsZones
                                             .getOne(object1.id)
                                             .expect(200)
                                             .then(function () {
                                                 API
                                                     .resources
-                                                    .domainConfigs
+                                                    .dnsZones
                                                     .getOne(object2.id)
                                                     .expect(400)
                                                     .then(function () {
@@ -270,7 +270,7 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should NOT have access only to first domain after setting `domains` permission list', function (done) {
+            it('should NOT have access only to first DNS Zone after setting `DNS Zones` permission list', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
@@ -278,9 +278,9 @@ describe('Functional Check: ', function () {
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = true;
-                        updateUser.permissions.domains.list = [object1.id];
-                        updateUser.permissions.domains.allow_list = false;
+                        updateUser.permissions.dns_zones.access = true;
+                        updateUser.permissions.dns_zones.list = [object1.id];
+                        updateUser.permissions.dns_zones.allow_list = false;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -296,20 +296,20 @@ describe('Functional Check: ', function () {
                     .then(function () {
                         API
                             .resources
-                            .domainConfigs
+                            .dnsZones
                             .getAll()
                             .expect(200)
                             .then(function (res) {
                                 res.body.length.should.equal(1);
                                 API
                                     .resources
-                                    .domainConfigs
+                                    .dnsZones
                                     .getOne(object1.id)
                                     .expect(400)
                                     .then(function () {
                                         API
                                             .resources
-                                            .domainConfigs
+                                            .dnsZones
                                             .getOne(object2.id)
                                             .expect(200)
                                             .then(function () {
@@ -324,7 +324,7 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should NOT have access to any app after setting `domains` permission list', function (done) {
+            it('should NOT have access to any app after setting `DNS Zones` permission list', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
@@ -332,9 +332,9 @@ describe('Functional Check: ', function () {
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = true;
-                        updateUser.permissions.domains.list = [object1.id, object2.id];
-                        updateUser.permissions.domains.allow_list = false;
+                        updateUser.permissions.dns_zones.access = true;
+                        updateUser.permissions.dns_zones.list = [object1.id, object2.id];
+                        updateUser.permissions.dns_zones.allow_list = false;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -350,20 +350,20 @@ describe('Functional Check: ', function () {
                     .then(function () {
                         API
                             .resources
-                            .domainConfigs
+                            .dnsZones
                             .getAll()
                             .expect(200)
                             .then(function (res) {
                                 res.body.length.should.equal(0);
                                 API
                                     .resources
-                                    .domainConfigs
+                                    .dnsZones
                                     .getOne(object1.id)
                                     .expect(400)
                                     .then(function () {
                                         API
                                             .resources
-                                            .domainConfigs
+                                            .dnsZones
                                             .getOne(object2.id)
                                             .expect(400)
                                             .then(function () {
@@ -378,7 +378,7 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should have access to both domainConfigs after setting `domains` permission list', function (done) {
+            it('should have access to both dnsZones after setting `DNS Zones` permission list', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
@@ -386,9 +386,9 @@ describe('Functional Check: ', function () {
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = true;
-                        updateUser.permissions.domains.list = [object1.id, object2.id];
-                        updateUser.permissions.domains.allow_list = true;
+                        updateUser.permissions.dns_zones.access = true;
+                        updateUser.permissions.dns_zones.list = [object1.id, object2.id];
+                        updateUser.permissions.dns_zones.allow_list = true;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -404,20 +404,20 @@ describe('Functional Check: ', function () {
                     .then(function () {
                         API
                             .resources
-                            .domainConfigs
+                            .dnsZones
                             .getAll()
                             .expect(200)
                             .then(function (res) {
                                 res.body.length.should.equal(2);
                                 API
                                     .resources
-                                    .domainConfigs
+                                    .dnsZones
                                     .getOne(object1.id)
                                     .expect(200)
                                     .then(function () {
                                         API
                                             .resources
-                                            .domainConfigs
+                                            .dnsZones
                                             .getOne(object2.id)
                                             .expect(200)
                                             .then(function () {
@@ -432,7 +432,7 @@ describe('Functional Check: ', function () {
                     .catch(done);
             });
 
-            it('should successfully update domain that we have access to', function (done) {
+            it('should successfully update DNS Zone that we have access to', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
@@ -440,9 +440,9 @@ describe('Functional Check: ', function () {
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = true;
-                        updateUser.permissions.domains.list = [object1.id];
-                        updateUser.permissions.domains.allow_list = true;
+                        updateUser.permissions.dns_zones.access = true;
+                        updateUser.permissions.dns_zones.list = [object1.id];
+                        updateUser.permissions.dns_zones.allow_list = true;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -456,51 +456,31 @@ describe('Functional Check: ', function () {
                         }
                     })
                     .then(function () {
+                        var dnsCopy = _.cloneDeep(object1);
                         API
                             .resources
-                            .domainConfigs
-                            .getOne(object1.id)
-                            .then(function (dom) {
-                                delete dom.body.cname;
-                                delete dom.body.domain_name;
-                                delete dom.body.published_domain_version;
-                                delete dom.body.last_published_domain_version;
-                                API
-                                    .resources
-                                    .domainConfigs
-                                    .update(object1.id, dom.body)
-                                    .expect(200)
-                                    .end(done);
-                            })
-                            .catch(done);
-
+                            .dnsZones
+                            .update(dnsCopy.id, null)
+                            .expect(200)
+                            .then(function () {
+                                done();
+                            })          
+                            .catch(done);              
                     })
                     .catch(done);
             });
 
-            it('should NOT successfully update domain that we DONT have access to', function (done) {
-                var domainCopy;
+            it('should NOT successfully update DNS Zone that we DONT have access to', function (done) {
                 API
                     .authenticate(testingUser)
                     .then(function () {
-                        return API
-                            .resources
-                            .domainConfigs
-                            .getOne(object1.id);
-                    })
-                    .then(function (dom) {
-                        delete dom.body.cname;
-                        delete dom.body.domain_name;
-                        delete dom.body.published_domain_version;
-                        delete dom.body.last_published_domain_version;
-                        domainCopy = dom.body;
                         var updateUser = _.cloneDeep(testingUser);
                         if (updateUser.password) {
                             delete updateUser.password;
                         }
-                        updateUser.permissions.domains.access = true;
-                        updateUser.permissions.domains.list = [object1.id];
-                        updateUser.permissions.domains.allow_list = false;
+                        updateUser.permissions.dns_zones.access = true;
+                        updateUser.permissions.dns_zones.list = [object1.id];
+                        updateUser.permissions.dns_zones.allow_list = false;
                         if (updateUser.key) {
                             return API
                                 .resources
@@ -514,12 +494,16 @@ describe('Functional Check: ', function () {
                         }
                     })
                     .then(function () {
+                        var dnsCopy = _.cloneDeep(object1);
                         API
                             .resources
-                            .domainConfigs
-                            .update(object1.id, domainCopy)
+                            .dnsZones
+                            .update(dnsCopy.id, null)
                             .expect(400)
-                            .end(done);
+                            .then(function () {
+                                done();
+                            })          
+                            .catch(done);              
                     })
                     .catch(done);
             });
