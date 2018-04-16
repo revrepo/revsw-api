@@ -107,7 +107,7 @@ describe('Smoke check', function () {
               .authenticate(user)
               .then(function () {
                 API.resources.sslNames
-                  .createOne(sslname)
+                  .createOne(sslname)                  
                   .expect(200)
                   .then(function (response) {
                     API.resources.sslNames
@@ -148,6 +148,7 @@ describe('Smoke check', function () {
                     API.resources.sslNames
                       .approvers()
                       .getAll({ssl_name: sslNames[0].ssl_name})
+                      .timeout(600000)
                       .expect(200)
                       .end(done);
                   })

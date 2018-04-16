@@ -186,6 +186,52 @@ describe('Functional Check: ', function () {
                         .catch(done);
                 });
 
+            it('should successfully queue purge for accessible domains even if domain management is not allowed',
+                function (done) {
+                    API.helpers
+                        .authenticateUser(testingUser)
+                        .then(function () {
+                            var updateUser = _.cloneDeep(testingUser);
+                            if (updateUser.password) {
+                                delete updateUser.password;
+                            }
+                            updateUser.permissions.domains.access = false;
+                            if (updateUser.key) {
+                                return API
+                                    .resources
+                                    .apiKeys
+                                    .update(testingUser.id, updateUser);
+                            } else {
+                                return API
+                                    .resources
+                                    .users
+                                    .update(testingUser.id, updateUser);
+                            }
+                        })
+                        .then(function () {
+                            var purgeData = PurgeDP.generateOne(object1.domain_name);
+                            var purgeData2 = PurgeDP.generateOne(object2.domain_name);
+                            API.resources.purge
+                                .createOne(purgeData)
+                                .expect(200)
+                                .then(function (response) {
+                                    var expMsg = 'The purge request has been successfully queued';
+                                    response.body.message.should.equal(expMsg);
+                                    API.resources.purge
+                                        .createOne(purgeData2)
+                                        .expect(200)
+                                        .then(function (response) {
+                                            var expMsg = 'The purge request has been successfully queued';
+                                            response.body.message.should.equal(expMsg);
+                                            done();
+                                        })
+                                        .catch(done);
+                                })
+                                .catch(done);
+                        })
+                        .catch(done);
+                });
+
             it('should return data when getting specific purge request for accessible domain',
                 function (done) {
                     API.helpers

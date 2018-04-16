@@ -132,7 +132,7 @@ exports.getDnsZonesStatsUsage = function(request, reply) {
     .then(function(zones) {
       var responseZones = [];
       zones.forEach(function(zone) {
-        if (permissionCheck.checkPermissionsToResource(request, zone, 'dns_zones')) {
+        if (permissionCheck.checkPermissionsToResource(request, zone, 'dns_analytics')) {
           responseZones.push(zone);
         }
       });
