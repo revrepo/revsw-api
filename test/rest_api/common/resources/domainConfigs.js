@@ -38,6 +38,20 @@ var resourceConfig = {
   ],
   nestedResources: [
     {
+      name: 'webAnalytics',
+      path: '?filters={"operation": "web_analytics"}',
+      methods: [
+        Methods.READ_ALL
+      ]
+    },
+    {
+      name: 'securityAnalytics',
+      path: '?filters={"operation": "security_analytics"}',
+      methods: [
+        Methods.READ_ALL
+      ]
+    },
+    {
       name: 'status',
       path: '/config_status',
       methods: [

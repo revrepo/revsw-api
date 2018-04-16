@@ -133,6 +133,7 @@ exports.sendInvitationEmail = function(options, cb) {
                        .replaceAll('{{inviteToken}}', inviteToken);
     var mailOptions = {
       to: email,
+      from: config.get('vendor_profiles')[acc.vendor_profile].support_email,
       subject: config.get('vendor_profiles')[acc.vendor_profile].user_invitation_mail_subject,
       html: mailHTML
     };
