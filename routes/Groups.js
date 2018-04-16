@@ -46,7 +46,8 @@ module.exports = [
       validate: {
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().allow('').trim().description('ID of a company')
+            account_id: Joi.objectId().optional().allow('').trim().description('ID of a company'),
+            operation: Joi.string().optional().allow('').trim().description('Operation of request')
           })
             .optional().description('Filters parameters')
         }
@@ -142,6 +143,12 @@ module.exports = [
       validate: {
         params: {
           group_id: Joi.objectId().required().description('Group ID')
+        },
+        query: {
+          filters: Joi.object().keys({
+            operation: Joi.string().optional().allow('').trim().description('Operation of request')
+          })
+            .optional().description('Filters parameters')
         }
       },
       response: {
