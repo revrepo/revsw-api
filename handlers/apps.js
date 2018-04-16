@@ -227,7 +227,7 @@ exports.updateApp = function(request, reply) {
     if (!permissionCheck.checkPermissionsToResource(request, existing_app, 'mobile_apps')) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!permissionCheck.checkPermissionsToResource(request, updatedApp, 'mobile_apps')) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: updatedApp.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  utils.generateCreatedByField(request);
