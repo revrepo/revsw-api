@@ -68,6 +68,11 @@ exports.getGroups = function getGroups(request, reply) {
     accountIds.push(request.auth.credentials.account_id);
   }
 
+  var operation;
+  if (filters_ && filters_.operation) {
+    operation = filters_.operation;
+  }
+
   var options = {};
   if (!!filters_ && filters_.account_id) {
     if (!permissionCheck.checkPermissionsToResource(request, {id: filters_.account_id}, 'accounts')) {
@@ -86,7 +91,7 @@ exports.getGroups = function getGroups(request, reply) {
       return renderJSON(request, reply, null, listOfGroups);
     }
     listOfGroups = _.filter(listOfGroups, function (itemGroup) {
-      if (!permissionCheck.checkPermissionsToResource(request, itemGroup, 'groups')) {
+      if (!permissionCheck.checkPermissionsToResource(request, itemGroup, 'groups') && operation !== 'user_management') {
         return false;
       }
       return true;
@@ -181,7 +186,17 @@ exports.createGroup = function (request, reply) {
 exports.getGroup = function (request, reply) {
 
   var id = request.params.group_id;
+  var operation;
+  if (request.query.filters && request.query.filters.operation) {
+    operation = request.query.filters.operation;
+  }
   groups.getById(id).then(function (group) {
+    if (!permissionCheck.checkPermissionsToResource(request, group, 'groups') && operation !== 'user_management') {
+      // we should allow access to a group if we are in it
+      if (request.auth.credentials.group_id !== id) {
+        return reply(boom.badRequest('Group ID Not Found'));
+      }
+    }
     var result = publicRecordFields.handle(group, 'group');
     renderJSON(request, reply, null, result);
   }).catch(function (err) {
