@@ -262,7 +262,7 @@ exports.updateGroup = function (request, reply) {
     },
     function (cb) {
       updateGroupData.updated_at = Date.now();
-      updateGroupData.updated_by = request.auth.credentials.email || null;
+      updateGroupData.updated_by = request.auth.credentials.email || request.auth.credentials.key;
       if (updateGroupData.permissions && updateGroupData.permissions.domains.access) {
         updateGroupData.permissions.waf_rules = true;
         updateGroupData.permissions.ssl_certs = true;

@@ -136,7 +136,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when getting specific SSL Name with Email Approvers',
+        xit('should return a success response when getting specific SSL Name with Email Approvers',
           function (done) {
             API.helpers
               .authenticate(user)

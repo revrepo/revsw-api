@@ -150,7 +150,7 @@ describe('CRUD check', function () {
               .catch(done);
           });
 
-        it('should get specific SSL Name with Email Approvers and user-role user.',
+        xit('should get specific SSL Name with Email Approvers and user-role user.',
           function (done) {
             API.helpers
               .authenticateUser(user)
