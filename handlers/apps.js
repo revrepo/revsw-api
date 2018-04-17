@@ -170,8 +170,17 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (!permissionCheck.checkPermissionsToResource(request, newApp, 'mobile_apps')) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newApp.account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
+  }
+
+  var appPerm = request.auth.credentials.permissions.mobile_apps;
+  if (!appPerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new app'));
+  } else if (appPerm.access && (appPerm.list && appPerm.list.length > 0)) {
+    if (appPerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new app'));
+    }
   }
   // NOTE: Can be the same app_name for different platforms, but uniqueness for account_id
   apps.get({app_name: newApp.app_name, app_platform: newApp.app_platform, account_id:newApp.account_id, deleted: {$ne: true}}, function(error, result) {

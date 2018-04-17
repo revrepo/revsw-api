@@ -182,6 +182,15 @@ exports.createDnsZone = function(request, reply) {
   var nsoneZoneInfo;
   var statusResponse;
 
+  var zonePerm = request.auth.credentials.permissions.dns_zones;
+  if (!zonePerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new DNS Zone'));
+  } else if (zonePerm.access && (zonePerm.list && zonePerm.list.length > 0)) {
+    if (zonePerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new DNS Zone'));
+    }
+  }
+
   return Promise.try(function() {
       // Check account access
       if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
