@@ -17,7 +17,7 @@
  */
 
 var Promise = require('bluebird');
-
+var _ = require('lodash');
 var config = require('config');
 var API = require('./../../common/api');
 
@@ -69,6 +69,64 @@ describe('Clean up', function () {
                       .deleteManyIfExist(idsForApiKeysToDelete)
                       .finally(done);
                   });
+              })
+              .catch(done);
+          });
+
+          it('should clean API Keys created for testing with the name `New API Key` (API QA Account).',
+          function (done) {
+            var API_QA_ACCOUNT = config.api.users.admin.account.id;
+            API.helpers
+              .authenticateUser(config.api.users.revAdmin)
+              .then(function () {
+                return API.resources.apiKeys
+                  .getAll({
+                    filters: {
+                      account_id: API_QA_ACCOUNT
+                    }
+                  })
+                  .expect(200);
+              })
+              .then(function (res) {
+                var keysToDelete = _.filter(res.body, function (key) {
+                  return key.key_name === 'New API Key';
+                });
+
+                  var keysIds = _.map(keysToDelete, function (key) {
+                    return key.id;
+                  });
+                  API.resources.apiKeys
+                    .deleteManyIfExist(keysIds)
+                    .finally(done);
+              })
+              .catch(done);
+          });
+
+          it('should clean API Keys created for testing with the name `New API Key` (API QA Reseller Company).',
+          function (done) {
+            var API_QA_RESELLER_COMPANY = config.api.users.reseller.account.id;
+            API.helpers
+              .authenticateUser(config.api.users.revAdmin)
+              .then(function () {
+                return API.resources.apiKeys
+                  .getAll({
+                    filters: {
+                      account_id: API_QA_RESELLER_COMPANY
+                    }
+                  })
+                  .expect(200);
+              })
+              .then(function (res) {
+                var keysToDelete = _.filter(res.body, function (key) {
+                  return key.key_name === 'New API Key';
+                });
+
+                  var keysIds = _.map(keysToDelete, function (key) {
+                    return key.id;
+                  });
+                  API.resources.apiKeys
+                    .deleteManyIfExist(keysIds)
+                    .finally(done);
               })
               .catch(done);
           });
