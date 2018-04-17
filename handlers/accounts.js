@@ -101,6 +101,15 @@ exports.createAccount = function(request, reply) {
   var newAccount = request.payload;
   newAccount.createdBy = utils.generateCreatedByField(request);
 
+  var accPerm = request.auth.credentials.permissions.accounts;
+  if (!accPerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new account'));
+  } else if (accPerm.access && (accPerm.list && accPerm.list.length > 0)) {
+    if (accPerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new account'));
+    }
+  }
+
   if (request.auth.credentials.role === 'reseller' || request.auth.credentials.user_type === 'apikey') {
     newAccount.vendor_profile = request.auth.credentials.vendor_profile;
   }

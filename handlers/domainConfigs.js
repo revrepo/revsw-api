@@ -313,6 +313,15 @@ exports.createDomainConfig = function(request, reply) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
+  var domainPerm = request.auth.credentials.permissions.domains;
+  if (!domainPerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new domain'));
+  } else if (domainPerm.access && (domainPerm.list && domainPerm.list.length > 0)) {
+    if (domainPerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new domain'));
+    }
+  }
+
   var callbackResultCreateDomain = function(error, result) {
     if (error) {
       return reply(boom.badImplementation('Failed to get a list of public CO server group for location ID' + newDomainJson.origin_server_location_id));
