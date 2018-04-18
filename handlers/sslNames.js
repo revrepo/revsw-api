@@ -176,6 +176,10 @@ exports.addSSLName = function (request, reply) {
   var verificationObject = '';
   var status;
 
+  if (!permissionCheck.checkSimplePermissions(request, 'ssl_names')) {
+    return reply(boom.forbidden('You are not authorized to create a new SSL Name'));
+  }
+
   function createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers) {
     var newSSLArray = {
       account_id: accountId,

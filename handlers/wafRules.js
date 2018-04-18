@@ -257,8 +257,11 @@ exports.getWAFRule = function(request, reply) {
  * @name createWAFRule
  * @description Create new WAF Rule
  */
-exports.createWAFRule = function(request, reply) {
+exports.createWAFRule = function (request, reply) {
   var newWAFRule = request.payload;
+  if (!permissionCheck.checkSimplePermissions(request, 'waf_rules')) {
+    return reply(boom.forbidden('You are not authorized to create a new WAF Rule'));
+  }
   if (!permissionCheck.checkPermissionsToResource(request, newWAFRule, 'waf_rules')) {
     return reply(boom.badRequest('Account ID not found'));
   }

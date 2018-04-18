@@ -115,22 +115,22 @@ exports.getGroups = function getGroups(request, reply) {
 exports.createGroup = function (request, reply) {
   var newGroup = request.payload;
   var _createdGroup;
-  // NOTE: set default companyId
   if ((newGroup.account_id === undefined || newGroup.account_id.length === 0) && utils.getAccountID(request).length !== 0) {
     newGroup.account_id = utils.getAccountID(request);
   }
 
-  // NOTE: New User must have "account_id"
   if (newGroup.account_id === undefined || newGroup.account_id.length === 0) {
     return reply(boom.badRequest('You have to specify account_id if your group does not have a valid account_id attribute'));
   }
-  // NOTE: Who is creating new User must have access to the user after creation
-  if (!permissionCheck.checkPermissionsToResource(request, newGroup, 'groups')) {
-    // TODO: fix the error message text "You don't have permissions for this action "
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newGroup.account_id}, 'accounts')) {
     return reply(boom.badRequest('Your group does not manage the specified company ID(s)'));
   }
 
-  var accountId = newGroup.account_id[0];
+  if (!permissionCheck.checkSimplePermissions(request, 'groups')) {
+    return reply(boom.forbidden('You are not authorized to create a new group'));
+  }
+
+  var accountId = newGroup.account_id;
 
   var statusResponse;
   async.waterfall([
@@ -147,7 +147,6 @@ exports.createGroup = function (request, reply) {
       });
     },
     function (cb) {
-      // TODO: add activity log to all accounts (not only newGroup.companyId[0])
       AuditLogger.store({
         account_id: accountId,
         activity_type: 'add',
