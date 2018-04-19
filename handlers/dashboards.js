@@ -69,6 +69,10 @@ exports.createDashboard = function createDashboard(request, reply) {
   var newDashboard = request.payload;
   var user_id = request.auth.credentials.user_id;
 
+  if (!permissionCheck.checkSimplePermissions(request, 'dashboards')) {
+    return reply(boom.forbidden('You are not authorized to create a new dashboard'));
+  }
+
   dashboardService.createUserDashboard({ user_id: user_id, new_dashboard_options: newDashboard}, function(error, result) {
     if (error || !result) {
       // TODO: Change method for detect message for user ("You cannot") ?

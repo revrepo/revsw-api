@@ -126,6 +126,10 @@ exports.getLogShippingJob = function(request, reply) {
 exports.createLogShippingJob = function(request, reply) {
   var newLogJob = request.payload;
 
+  if (!permissionCheck.checkSimplePermissions(request, 'logshipping_jobs')) {
+    return reply(boom.forbidden('You are not authorized to create a new Log shipping job'));
+  }
+
   if (!permissionCheck.checkPermissionsToResource(request, newLogJob, 'logshipping_jobs')) {
     return reply(boom.badRequest('Account ID not found'));
   }

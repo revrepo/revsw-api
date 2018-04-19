@@ -148,6 +148,10 @@ exports.createApiKey = function(request, reply) {
   newApiKey.key_name = 'New API Key';
   newApiKey.role = request.payload.role || 'admin';
 
+  if (!permissionCheck.checkSimplePermissions(request, 'API_keys')) {
+    return reply(boom.forbidden('You are not authorized to create a new API Key'));
+  }
+
   if (newApiKey.managed_account_ids && newApiKey.managed_account_ids.length > 0) {
     if (!newApiKey.permissions) {
       newApiKey.permissions = permissionCheck.permissionObject;

@@ -139,7 +139,10 @@ exports.getSSLCertificate = function(request, reply) {
 exports.createSSLCertificate = function(request, reply) {
 
   var newSSLCert = request.payload;
-  if (!permissionCheck.checkPermissionsToResource(request, newSSLCert, 'ssl_certs')) {
+  if (!permissionCheck.checkSimplePermissions(request, 'ssl_certs')) {
+    return reply(boom.forbidden('You are not authorized to create a new SSL Cert'));
+  }
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newSSLCert.account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 

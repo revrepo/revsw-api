@@ -137,8 +137,12 @@ exports.createUser = function (request, reply) {
     newUser.companyId = [newUser.account_id];
   }
 
+  if (!permissionCheck.checkSimplePermissions(request, 'users')) {
+    return reply(boom.forbidden('You are not authorized to create a new user'));
+  }
+
   // NOTE: Who is creating new User must have access to the user after creation
-  if (!permissionCheck.checkPermissionsToResource(request, newUser, 'users')) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newUser.account_id}, 'accounts')) {
     // TODO: fix the error message text "You don't have permissions for this action "
     return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
   }
