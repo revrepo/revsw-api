@@ -91,11 +91,17 @@ exports.getApiKeys = function(request, reply) {
       if (!permissionCheck.checkSimplePermissions(request, 'API_keys')) {
         listOfApiKeys = [];
       }
+      listOfApiKeys = _.filter(listOfApiKeys, function (key) {
+        return permissionCheck.checkPermissionsToResource(request, { id: key.account_id }, 'accounts');
+      });
       renderJSON(request, reply, error, listOfApiKeys);
     });
   } else {
     apiKeys.list(request, function (error, listOfApiKeys) {
       listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
+      listOfApiKeys = _.filter(listOfApiKeys, function (key) {
+        return permissionCheck.checkPermissionsToResource(request, { id: key.account_id }, 'accounts');
+      });
       renderJSON(request, reply, error, listOfApiKeys);
     });
   }

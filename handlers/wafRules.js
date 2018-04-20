@@ -217,6 +217,14 @@ exports.listWAFRules = function(request, reply) {
       }
     ],
     function(err, response) {
+      response = _.filter(response, function (rule) {
+        if (rule.rule_type === 'builtin') {
+          return true;
+        } 
+        return permissionCheck.checkPermissionsToResource(request, { id: rule.account_id }, 'accounts');
+      });
+
+      response = _.uniq(response, 'id');
       renderJSON(request, reply, err, response);
     });
 
@@ -262,7 +270,7 @@ exports.createWAFRule = function (request, reply) {
   if (!permissionCheck.checkSimplePermissions(request, 'waf_rules')) {
     return reply(boom.forbidden('You are not authorized to create a new WAF Rule'));
   }
-  if (!permissionCheck.checkPermissionsToResource(request, newWAFRule, 'waf_rules')) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newWAFRule.account_id }, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
