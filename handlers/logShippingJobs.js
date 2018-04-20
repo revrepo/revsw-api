@@ -83,11 +83,17 @@ exports.listLogShippingJobs = function(request, reply) {
     for (var i = 0; i < result.length; i++) {
       if (permissionCheck.checkPermissionsToResource(request, result[i], 'logshipping_jobs')) {
         if (result[i].source_type === 'domain' && result[i].source_id) {
-          if (permissionCheck.checkPermissionsToResource(request, {id: result[i].source_id}, 'domains')) {
+          if (permissionCheck.checkPermissionsToResource(request, {
+            id: result[i].source_id,
+            account_id: result[i].account_id
+          }, 'domains')) {
             response.push(result[i]);
           }
         } else if (result[i].source_type === 'app' && result[i].source_id) {
-          if (permissionCheck.checkPermissionsToResource(request, {id: result[i].source_id}, 'mobile_apps')) {
+          if (permissionCheck.checkPermissionsToResource(request, {
+            id: result[i].source_id,
+            account_id: result[i].account_id
+          }, 'mobile_apps')) {
             response.push(result[i]);
           }
         } else {
