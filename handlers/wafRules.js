@@ -217,6 +217,9 @@ exports.listWAFRules = function(request, reply) {
       }
     ],
     function(err, response) {
+      response = _.filter(response, function (rule) {
+        return permissionCheck.checkPermissionsToResource(request, { id: rule.account_id }, 'accounts');
+      });
       renderJSON(request, reply, err, response);
     });
 
