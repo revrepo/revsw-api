@@ -409,7 +409,7 @@ exports.updateUser = function (request, reply) {
       });
     },
     function (cb) {
-      userAccountId = storedUserData.companyId[0];
+      userAccountId = storedUserData.account_id;      
 
       if (updateUserData.role && updateUserData.role === 'user') {
         if (storedUserData.role === 'admin') {
@@ -628,7 +628,7 @@ exports.updateUserPassword = function (request, reply) {
     _id: user_id
   }, function (error, user) {
     if (user) {
-      var account_id = user.companyId[0];
+      var account_id = user.account_id;
       var currPassHash = utils.getHash(currentPassword);
       if (currPassHash !== user.password) {
         return reply(boom.badRequest('The current user password is not correct'));
@@ -684,7 +684,7 @@ exports.deleteUser = function (request, reply) {
     if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'users')) {
       return reply(boom.badRequest('User ID not found'));
     }
-    var account_id = result.companyId[0];
+    var account_id = result.account_id;
 
     result = publicRecordFields.handle(result, 'user');
 
@@ -733,7 +733,7 @@ exports.init2fa = function (request, reply) {
     _id: user_id
   }, function (error, user) {
     if (user) {
-      var account_id = user.companyId[0];
+      var account_id = user.account_id;
       var name = currentVendor.companyNameShort + ':' + email_;
       var secretKey = speakeasy.generate_key({ length: 16, google_auth_qr: true, name: name });
       user.two_factor_auth_secret_base32 = secretKey.base32;
@@ -771,7 +771,7 @@ exports.enable2fa = function (request, reply) {
     _id: user_id
   }, function (error, user) {
     if (user) {
-      var account_id = user.companyId[0];
+      var account_id = user.account_id;
       if (user.two_factor_auth_secret_base32) {
         var generatedOneTimePassword = speakeasy.time({ key: user.two_factor_auth_secret_base32, encoding: 'base32' });
         if (generatedOneTimePassword === oneTimePassword) {
@@ -830,7 +830,7 @@ exports.disable2fa = function (request, reply) {
       return reply(boom.badRequest('User ID not found'));
     }
 
-    var account_id = user.companyId[0];
+    var account_id = user.account_id;
     user.two_factor_auth_enabled = false;
     delete user.password;
     users.update(user, function (error, result) {

@@ -20,6 +20,7 @@
 
 'use strict';
 
+var _ = require('lodash');
 var async = require('async');
 var boom = require('boom');
 var mongoConnection = require('../lib/mongoConnections');
@@ -159,6 +160,14 @@ exports.getDetailedAuditInfo = function(request, reply) {
           }
         } else {
           accountIds_ = utils.getAccountID(request, false);
+        }
+
+        if (request.auth.credentials.role === 'reseller' && request.auth.credentials.child_accounts) {
+          accountIds_ = request.auth.credentials.child_accounts;
+          accountIds_.push(request.auth.credentials.account_id);
+          accountIds_ = _.filter(accountIds_, function (acc) {
+            return permissionCheck.checkPermissionsToResource(request, {id: acc}, 'accounts');
+          });
         }
         if (accountIds_) {
           requestBody['meta.account_id'] = { $in: accountIds_ };
