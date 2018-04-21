@@ -15,6 +15,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Rev Software, Inc.
  */
+var _ = require('lodash');
 var config = require('config');
 var should = require('should');
 var API = require('./../../common/api');
@@ -56,6 +57,7 @@ describe('Smoke Tests - Groups', function () {
        *  - getting a list of group's users
        *  - deleting a group
        *  - testing group modification (update)
+       *  - testing proper Audit activity logging for group management
        */
 
       // generate testing group data
@@ -315,6 +317,132 @@ describe('Smoke Tests - Groups', function () {
               .catch(done);
           });
 
+        describe('Audit activity logging for groups', function () {
+          it('Should successfully log group creation with audit', function (done) {
+            var auditGroup = GroupDP.generateValid({
+              account_id: user.account.id
+            });
+            API
+              .authenticate(user)
+              .then(function () {
+                API
+                  .helpers
+                  .groups
+                  .create(auditGroup)
+                  .then(function (res) {
+                    res.id.should.not.equal(null);
+                    API
+                      .resources
+                      .activity
+                      .getAll()
+                      .expect(200)
+                      .then(function (actres) {
+                        var activity = _.filter(actres.body.data, function (act) {
+                          return act.target_id === res.id;
+                        });
+
+                        activity = activity[0];
+
+                        activity.activity_target.should.equal('group');
+                        activity.operation_status.should.equal('success');
+                        activity.target_name.should.equal(auditGroup.name);
+                        activity.activity_type.should.equal('add');
+                        done();
+                      })
+                      .catch(done);
+                  });
+              })
+              .catch(done);
+          });
+
+          it('Should successfully log group modification with audit', function (done) {
+            var auditGroup = GroupDP.generateValid({
+              account_id: user.account.id
+            });
+            API
+              .authenticate(user)
+              .then(function () {
+                API
+                  .helpers
+                  .groups
+                  .create(auditGroup)
+                  .then(function (res) {
+                    res.id.should.not.equal(null);
+                    API
+                      .resources
+                      .groups
+                      .update(res.id, auditGroup)
+                      .expect(200)
+                      .then(function () {
+                        API
+                          .resources
+                          .activity
+                          .getAll()
+                          .expect(200)
+                          .then(function (actres) {
+                            var activity = _.filter(actres.body.data, function (act) {
+                              return act.target_id === res.id;
+                            });
+
+                            activity = activity[0];
+
+                            activity.activity_target.should.equal('group');
+                            activity.operation_status.should.equal('success');
+                            activity.target_name.should.equal(auditGroup.name);
+                            activity.activity_type.should.equal('modify');
+                            done();
+                          })
+                          .catch(done);
+                      })
+                      .catch(done);
+                  });
+              })
+              .catch(done);
+          });
+
+          it('Should successfully log group delete with audit', function (done) {
+            var auditGroup = GroupDP.generateValid({
+              account_id: user.account.id
+            });
+            API
+              .authenticate(user)
+              .then(function () {
+                API
+                  .helpers
+                  .groups
+                  .create(auditGroup)
+                  .then(function (res) {
+                    res.id.should.not.equal(null);
+                    API
+                      .resources
+                      .groups
+                      .deleteOne(res.id)
+                      .expect(200)
+                      .end(function () {
+                        API
+                          .resources
+                          .activity
+                          .getAll()
+                          .expect(200)
+                          .then(function (actres) {
+                            var activity = _.filter(actres.body.data, function (act) {
+                              return act.target_id === res.id;
+                            });
+
+                            activity = activity[0];
+                            activity.activity_target.should.equal('group');
+                            activity.operation_status.should.equal('success');
+                            activity.target_name.should.equal(auditGroup.name);
+                            activity.activity_type.should.equal('delete');
+                            done();
+                          })
+                          .catch(done);
+                      });
+                  });
+              })
+              .catch(done);
+          });
+        });
       });
     });
   });
