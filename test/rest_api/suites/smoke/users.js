@@ -209,6 +209,8 @@ describe('Smoke check: Users', function() {
 
 describe('User resource profile', function() {
 
+  this.timeout(config.api.request.maxTimeout);
+
   var usersData = [
     config.api.users.revAdmin,
     config.api.users.reseller,
