@@ -247,6 +247,7 @@ domainConfigs.list(function (err, list) {
  */
 
 var updateUser = function (usr) {
+    /* jshint maxstatements:60 */
     var user = {};
 
     if (usr.companyId) {
@@ -325,7 +326,7 @@ var updateUser = function (usr) {
                             }
                         });
                     } else {
-                        console.log(doc.key_name + ' will be successfully updated!');
+                        console.log(usr.key_name + ' will be successfully updated!');
                     }
                 }
                 break;
@@ -399,7 +400,7 @@ var updateUser = function (usr) {
                                     }
                                 });
                             } else {
-                                console.log(usr.key_name + ' will besuccessfully updated!');
+                                console.log(usr.key_name + ' will be successfully updated!');
                             }
                         });
                     } else {
@@ -412,7 +413,7 @@ var updateUser = function (usr) {
                                 }
                             });
                         } else {
-                            console.log(usr.key_name + ' will besuccessfully updated!');
+                            console.log(usr.key_name + ' will be successfully updated!');
                         }
                     }
                 }
