@@ -736,11 +736,18 @@ exports.updateAccount = function(request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
   var account_id = updatedAccount.account_id;
+  var requestUser = request.auth.credentials;
   accounts.get({
     _id: account_id
   }, function(error, account) {
     if (error) {
       return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
+    }
+
+    if ((account.parent_account_id !== updatedAccount.parent_account_id) && updatedAccount.parent_account_id) {
+      if (requestUser.role !== 'revadmin') {
+        return reply(boom.badRequest('Cannot update parent account'));
+      }
     }
 
     if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
