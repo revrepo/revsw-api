@@ -166,7 +166,7 @@ var permissionsUser = {
     usage_reports: false,
     billing_statements: false,
     billing_plan: false,
-    account_profile: true
+    account_profile: false
 };
 
 var dryRun = false;
