@@ -300,9 +300,7 @@ exports.updateApiKey = function (request, reply) {
 
         if (doc.parent_account_id) {
           return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
-        }
-
-        else {
+        } else {
           apiKeys.update(updatedApiKey, function (error, result) {
             if (error) {
               return reply(boom.badImplementation('Failed to update API key ID ' + id));
@@ -334,37 +332,30 @@ exports.updateApiKey = function (request, reply) {
         if (err || !doc) {
           return reply(boom.badRequest('Account ID Not Found'));
         }
+        apiKeys.update(updatedApiKey, function (error, result) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to update API key ID ' + id));
+          }
 
-        if (doc.parent_account_id) {
-          return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
-        }
+          var statusResponse = {
+            statusCode: 200,
+            message: 'Successfully updated the API key'
+          };
 
-        else {
-          apiKeys.update(updatedApiKey, function (error, result) {
-            if (error) {
-              return reply(boom.badImplementation('Failed to update API key ID ' + id));
-            }
-      
-            var statusResponse = {
-              statusCode: 200,
-              message   : 'Successfully updated the API key'
-            };
-      
-            result = publicRecordFields.handle(result, 'apiKeys');
-      
-            AuditLogger.store({
-              account_id       : updatedApiKey.account_id,
-              activity_type    : 'modify',
-              activity_target  : 'apikey',
-              target_id        : result.id,
-              target_name      : result.key_name,
-              target_object    : result,
-              operation_status : 'success'
-            }, request);
-      
-            renderJSON(request, reply, error, statusResponse);
-          });
-        }
+          result = publicRecordFields.handle(result, 'apiKeys');
+
+          AuditLogger.store({
+            account_id: updatedApiKey.account_id,
+            activity_type: 'modify',
+            activity_target: 'apikey',
+            target_id: result.id,
+            target_name: result.key_name,
+            target_object: result,
+            operation_status: 'success'
+          }, request);
+
+          renderJSON(request, reply, error, statusResponse);
+        });
       });
     }
   }
