@@ -206,8 +206,6 @@ process.argv.forEach(function (val, index, array) {
     }
 });
 
-console.log('ye');
-
 domainConfigs.list(function (err, list) {
     if (err) {
         throw new Error(err);
@@ -273,7 +271,7 @@ var updateUser = function (usr) {
                 var permissionsUr = _.cloneDeep(permissionsUser);
                 var domainArray = [];
                 var domainIDs = [];
-                permissionsUr.read_only = usr.access_control_list.readOnly || false;
+                permissionsUr.read_only = usr.access_control_list ? usr.access_control_list.readOnly : false;
 
                 if (usr.domain && usr.domain !== '') {
                     if (usr.domain.includes(',')) {
@@ -286,7 +284,9 @@ var updateUser = function (usr) {
                             if (domain === domainConfig.domain_name) {
                                 domainIDs.push(domainConfig._id.toString());
                             } else if (domains.indexOf(domainConfig) === (domains.length - 1)) {
-                                console.log('Problem matching Domain name to ID, Name: ' + domain);
+                                if (domainIDs.indexOf(domainConfig._id) === -1) {
+                                    console.log('Problem matching Domain name to ID, Name: ' + domain);
+                                }
                             }
                         });
                     });
@@ -306,6 +306,8 @@ var updateUser = function (usr) {
                                 console.log(doc.email + ' successfully updated!');
                             }
                         });
+                    } else {
+                        console.log(usr.email + ' will be successfully updated!');
                     }
                 } else {
                     user.permissions.read_only = usr.read_only_status || false;
@@ -322,6 +324,8 @@ var updateUser = function (usr) {
                                 console.log(doc.key_name + ' successfully updated!');
                             }
                         });
+                    } else {
+                        console.log(doc.key_name + ' will be successfully updated!');
                     }
                 }
                 break;
@@ -329,21 +333,21 @@ var updateUser = function (usr) {
             case 'reseller':
             case 'revadmin':
                 var permissionsRest = _.cloneDeep(permissionsAdmin);
-                permissionsRest.read_only = usr.access_control_list.readOnly || false;
+                permissionsRest.read_only = usr.access_control_list ? usr.access_control_list.readOnly : false;
                 user.permissions = permissionsRest;
 
                 if (!usr.key) {
-                    if (!dryRun) {
-                        if (usr.role === 'reseller') {
-                            accounts.get({ _id: user.account_id }, function (err, doc) {
-                                if (err || !doc) {
-                                    throw new Error('Problem getting account');
-                                }
 
-                                if (doc.parent_account_id) {
-                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id);
-                                }
+                    if (usr.role === 'reseller') {
+                        accounts.get({ _id: user.account_id }, function (err, docacc) {
+                            if (err || !docacc) {
+                                throw new Error('Problem getting account');
+                            }
 
+                            if (docacc.parent_account_id) {
+                                throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id);
+                            }
+                            if (!dryRun) {
                                 users.update(user, function (err, doc) {
                                     if (err) {
                                         throw new Error(err);
@@ -351,8 +355,12 @@ var updateUser = function (usr) {
                                         console.log(doc.email + ' successfully updated!');
                                     }
                                 });
-                            });
-                        } else {
+                            } else {
+                                console.log(usr.email + ' will be successfully updated!');
+                            }
+                        });
+                    } else {
+                        if (!dryRun) {
                             users.update(user, function (err, doc) {
                                 if (err) {
                                     throw new Error(err);
@@ -360,8 +368,11 @@ var updateUser = function (usr) {
                                     console.log(doc.email + ' successfully updated!');
                                 }
                             });
+                        } else {
+                            console.log(usr.email + ' will be successfully updated!');
                         }
                     }
+
                 } else {
                     user.key = usr.key;
                     user.permissions.read_only = usr.read_only_status || false;
@@ -370,17 +381,16 @@ var updateUser = function (usr) {
                         user.permissions.accounts.list = usr.managed_account_ids;
                         user.role = 'reseller'; // if APIkey has managed account ids, its a reseller.                        
                     }
-                    if (!dryRun) {
-                        if (usr.role === 'reseller') {
-                            accounts.get({ _id: user.account_id }, function (err, doc) {
-                                if (err || !doc) {
-                                    throw new Error('Problem getting account');
-                                }
+                    if (usr.role === 'reseller') {
+                        accounts.get({ _id: user.account_id }, function (err, docacc) {
+                            if (err || !docacc) {
+                                throw new Error('Problem getting account');
+                            }
 
-                                if (doc.parent_account_id) {
-                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id);
-                                }
-
+                            if (docacc.parent_account_id) {
+                                throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id);
+                            }
+                            if (!dryRun) {
                                 apikeys.update(user, function (err, doc) {
                                     if (err) {
                                         throw new Error(err);
@@ -388,8 +398,12 @@ var updateUser = function (usr) {
                                         console.log(doc.key_name + ' successfully updated!');
                                     }
                                 });
-                            });
-                        } else {
+                            } else {
+                                console.log(usr.key_name + ' will besuccessfully updated!');
+                            }
+                        });
+                    } else {
+                        if (!dryRun) {
                             apikeys.update(user, function (err, doc) {
                                 if (err) {
                                     throw new Error(err);
@@ -397,8 +411,9 @@ var updateUser = function (usr) {
                                     console.log(doc.key_name + ' successfully updated!');
                                 }
                             });
+                        } else {
+                            console.log(usr.key_name + ' will besuccessfully updated!');
                         }
-
                     }
                 }
                 break;
