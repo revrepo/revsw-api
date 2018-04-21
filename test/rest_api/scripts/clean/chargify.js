@@ -88,7 +88,7 @@ describe('Clean up', function () {
                 .expect(204);
             }));
         }
-      });
+      });      
 
       Promise.all(requestsAll)
         .then(function (data) {
@@ -99,6 +99,39 @@ describe('Clean up', function () {
           return done(err);
         });
 
+    });
+
+    it('should delete all inactive customers ', function (done) {
+      var requestsAll = [];
+      request(baseUrl)
+        .get('/customers.json')
+        .query()
+        .auth(apiKey, chargify.password)
+        .type('application/json')
+        .accept('application/json')
+        .end(function (err, dataResponse) {
+          var testMail = /[a-z]*-[0-9]*@mailinator.com/g;
+          _.forEach(dataResponse.body, function (item) {
+            if (testMail.test(item.customer.email) || item.customer.email === 'company01@mail.com') {
+              requestsAll.push(              
+                  request(baseUrl)
+                  .delete('/customers/' + item.customer.id + '.json')
+                  .auth(apiKey, password)
+                  .type('application/json')
+                  .expect(204)
+              );
+            }
+          });
+
+          Promise.all(requestsAll)
+            .then(function (data) {
+              console.log('Total records deleted: ', data.length);
+              return done();
+            })
+            .catch(function (err) {
+              return done(err);
+            });
+        });
     });
   });
 });

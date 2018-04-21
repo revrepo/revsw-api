@@ -273,7 +273,7 @@ var updateUser = function (usr) {
                 var permissionsUr = _.cloneDeep(permissionsUser);
                 var domainArray = [];
                 var domainIDs = [];
-                permissionsUr.read_only = usr.permissions.read_only || false;
+                permissionsUr.read_only = usr.access_control_list.readOnly || false;
 
                 if (usr.domain && usr.domain !== '') {
                     if (usr.domain.includes(',')) {
@@ -308,6 +308,7 @@ var updateUser = function (usr) {
                         });
                     }
                 } else {
+                    user.permissions.read_only = usr.read_only_status || false;
                     user.key = usr.key;
                     if (usr.managed_account_ids && usr.managed_account_ids.length > 0) {
                         user.permissions.accounts.list = usr.managed_account_ids;
@@ -328,7 +329,7 @@ var updateUser = function (usr) {
             case 'reseller':
             case 'revadmin':
                 var permissionsRest = _.cloneDeep(permissionsAdmin);
-                permissionsRest.read_only = usr.permissions.read_only || false;
+                permissionsRest.read_only = usr.access_control_list.readOnly || false;
                 user.permissions = permissionsRest;
 
                 if (!usr.key) {
@@ -363,6 +364,7 @@ var updateUser = function (usr) {
                     }
                 } else {
                     user.key = usr.key;
+                    user.permissions.read_only = usr.read_only_status || false;
                     if (usr.managed_account_ids && usr.managed_account_ids.length > 0) {
 
                         user.permissions.accounts.list = usr.managed_account_ids;
