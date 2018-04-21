@@ -312,9 +312,10 @@ exports.updateGroup = function (request, reply) {
  */
 exports.deleteGroup = function (request, reply) {
   var id = request.params.group_id;
-
+  var delGroup;
   // get our group
   groups.getById(id).then(function (result) {
+    delGroup = result;
     if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'groups')) {
       return reply(boom.badRequest('Group not found'));
     }
@@ -345,24 +346,9 @@ exports.deleteGroup = function (request, reply) {
 
       if (!err && (!userList || userList.length === 0)) {
         // ok no users, lets delete it!
-        var account_id = result.account_id[0];
+        var account_id = delGroup.account_id;
 
         result = publicRecordFields.handle(result, 'group');
-
-        var auditRecord = {
-          ip_address: utils.getAPIUserRealIP(request),
-          datetime: Date.now(),
-          user_id: request.auth.credentials.user_id,
-          user_name: request.auth.credentials.email,
-          user_type: 'user',
-          account_id: account_id,
-          activity_type: 'delete',
-          activity_target: 'group',
-          target_id: result.id,
-          target_name: result.name,
-          target_object: result,
-          operation_status: 'success'
-        };
 
         groups.removeById(id).then(function (result) {
           var statusResponse;
@@ -371,7 +357,15 @@ exports.deleteGroup = function (request, reply) {
             message: 'Successfully deleted the group'
           };
 
-          AuditLogger.store(auditRecord);
+          AuditLogger.store({
+            account_id: account_id,
+            activity_type: 'delete',
+            activity_target: 'group',
+            target_id: delGroup.id,
+            target_name: delGroup.name,
+            target_object: delGroup,
+            operation_status: 'success'
+          }, request);
 
           return renderJSON(request, reply, null, statusResponse);
         }).catch(function (err) {
