@@ -747,7 +747,7 @@ exports.updateAccount = function(request, reply) {
       return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
     }
 
-    if ((account.parent_account_id !== updatedAccount.parent_account_id) && updatedAccount.parent_account_id) {
+    if (account && ((account.parent_account_id !== updatedAccount.parent_account_id) && updatedAccount.parent_account_id)) {
       if (requestUser.role !== 'revadmin') {
         return reply(boom.badRequest('Cannot update parent account'));
       }
