@@ -99,6 +99,9 @@ exports.getAccounts = function getAccounts(request, reply) {
 exports.createAccount = function(request, reply) {
   var vendorProfiles = config.get('vendor_profiles');
   var newAccount = request.payload;
+  if (newAccount.parent_account_id && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.forbidden('You are not authorized to create a new account with a parent account'));
+  }
   newAccount.createdBy = utils.generateCreatedByField(request);
 
   var accPerm = request.auth.credentials.permissions.accounts;

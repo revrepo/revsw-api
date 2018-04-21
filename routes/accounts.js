@@ -81,7 +81,8 @@ module.exports = [{
           companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
             .trim().description('Company name of newly registered customer account'),
           vendor_profile: Joi.string().max(20).allow('').description('Vendor profile name'),
-          comment: Joi.string().max(300).trim().allow('').description('Free-text comment about the company')
+          comment: Joi.string().max(300).trim().allow('').description('Free-text comment about the company'),
+          parent_account_id: Joi.objectId().optional().description('Parent account ID')
         }
       },
       response: {

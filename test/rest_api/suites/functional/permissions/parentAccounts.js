@@ -113,5 +113,34 @@ describe('Functional check', function () {
                             .catch(done);
                     });
             });
+
+        it('should be able to create an account with a parent account as Rev Admin',
+            function (done) {
+                API.helpers
+                    .authenticateUser(revAdmin)
+                    .then(function () {
+                        var newAcc = AccountsDP.generateOne();
+                        newAcc.parent_account_id = firstAcc.id;
+                        API
+                            .resources
+                            .accounts
+                            .createOne(newAcc)
+                            .expect(200)
+                            .then(function (res) {
+                                var id = res.body.object_id;
+                                API
+                                    .resources
+                                    .accounts
+                                    .getOne(id)
+                                    .expect(200)
+                                    .then(function (res) {
+                                        res.body.parent_account_id.should.equal(firstAcc.id);
+                                        done();
+                                    })
+                                    .catch(done);
+                            })
+                            .catch(done);
+                    });
+            });
     });
 });
