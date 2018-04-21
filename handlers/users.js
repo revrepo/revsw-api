@@ -159,6 +159,25 @@ exports.createUser = function (request, reply) {
       var statusResponse;
       var resultUserData;
       async.waterfall([
+        function checkAccount(cb) {
+          if (newUser.role === 'reseller') {
+            accounts.get({ _id: newUser.account_id }, function (err, doc) {
+              if (err || !doc) {
+                return reply(boom.badRequest('Account ID Not Found'));
+              }
+
+              if (doc.parent_account_id) {
+                return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+              }
+
+              else {
+                return cb();
+              }
+            });
+          } else {
+            return cb();
+          }
+        },
         // NOTE: check for domain names
         function validateManagedDomainName(cb) {
           if (!_.isArray(newUser.domain) || (newUser.domain.length === 0)) {
@@ -303,6 +322,25 @@ exports.updateUser = function (request, reply) {
   var resultUserData;
 
   async.waterfall([
+    function checkAccount(cb) {
+      if (updateUserData.role === 'reseller') {
+        accounts.get({ _id: updateUserData.account_id }, function (err, doc) {
+          if (err || !doc) {
+            return reply(boom.badRequest('Account ID Not Found'));
+          }
+
+          if (doc.parent_account_id) {
+            return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+          }
+
+          else {
+            return cb();
+          }
+        });
+      } else {
+        return cb();
+      }
+    },
     function validateManagedDomainName(cb) {
       if (!_.isArray(updateUserData.domain) || (updateUserData.domain.length === 0)) {
         return cb();
@@ -884,11 +922,11 @@ exports.resendInvitation = function (request, reply) {
         user.invitation_token = utils.generateToken(24);
         user.invitation_expire_at = Date.now() + config.get('user_invitation_expire_ms');
         user.invitation_sent_at = Date.now();
-        var account_id = user.companyId[0] || null;
+        var account_id = user.account_id;
         users.update(user, function (error, result) {
           if (!error) {
             // get the account so we can get the vendor
-            accounts.get({ id: account_id }, function (err, acc) {
+            accounts.get({ _id: account_id }, function (err, acc) {
               var statusResponse;
               if (!err) {                
                 statusResponse = {

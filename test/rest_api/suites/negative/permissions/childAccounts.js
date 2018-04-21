@@ -307,6 +307,93 @@ describe('Negative check', function () {
                     })
                     .catch(done);
             });
+
+        describe('Parent account change', function () {
+            var acc1;
+            var acc2;
+            before(function (done) {
+                API
+                    .authenticate(config.api.users.reseller)
+                    .then(function () {
+                        return API.helpers.accounts.createOne();
+                    })
+                    .then(function (res) {
+                        acc1 = res;
+                        return API.helpers.accounts.createOne();
+                    })
+                    .then(function (res) {
+                        acc2 = res;
+                        done();
+                    })
+                    .catch(done);
+            });
+
+            it('should NOT be able to change an accounts parent account with ' + config.api.users.reseller.role,
+                function (done) {
+                    API.helpers
+                        .authenticate(config.api.users.reseller)
+                        .then(function () {
+                            API
+                                .resources
+                                .accounts
+                                .getOne(acc1.id)
+                                .expect(200)
+                                .then(function (acc) {
+
+                                    var updateAcc = acc.body;
+                                    updateAcc.id = acc1.id;
+                                    updateAcc.parent_account_id = acc2.id;
+                                    API
+                                        .resources
+                                        .accounts
+                                        .update(updateAcc.id, updateAcc)
+                                        .expect(400)
+                                        .then(function (res) {
+                                            res.body.message.should.equal('Cannot update parent account');
+                                            done();
+                                        })
+                                        .catch(done);
+                                })
+                                .catch(done);
+                        });
+                });
+
+            [
+                config.api.users.admin,
+                config.api.apikeys.admin,
+                config.api.apikeys.reseller
+            ].forEach(function (cred) {
+                it('should NOT be able to change an accounts parent account with ' + cred.role,
+                    function (done) {
+                        API.helpers
+                            .authenticate(cred)
+                            .then(function () {
+                                API
+                                    .resources
+                                    .accounts
+                                    .getOne(cred.account.id)
+                                    .expect(200)
+                                    .then(function (acc) {
+
+                                        var updateAcc = acc.body;
+                                        updateAcc.id = cred.account.id;
+                                        updateAcc.parent_account_id = acc2.id;
+                                        API
+                                            .resources
+                                            .accounts
+                                            .update(updateAcc.id, updateAcc)
+                                            .expect(400)
+                                            .then(function (res) {
+                                                res.body.message.should.equal('Cannot update parent account');
+                                                done();
+                                            })
+                                            .catch(done);
+                                    })
+                                    .catch(done);
+                            });
+                    });
+            });
+        });
     });
 });
 
