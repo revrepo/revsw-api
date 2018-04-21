@@ -83,7 +83,7 @@ describe('Functional check', function () {
                     firstname: 'Jon',
                     lastname: 'Doe',
                     role: role,
-                    account_id: accountSample.id
+                    account_id: role === 'reseller' ? user.account.id : accountSample.id
                   })
                   .expect(200)
                   .then(function () {
