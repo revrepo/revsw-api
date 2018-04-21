@@ -177,7 +177,7 @@ module.exports = [{
             .description('Billing information for create Chargify Customer Account'),
           subscription_state: Joi.string().min(1).max(30).trim()
             .description('Subscription state (status)'),
-          parent_account_id: Joi.objectId().optional()
+          parent_account_id: Joi.objectId().optional().allow(null)
             .description('Parent account ID')
         }
       },
