@@ -94,7 +94,8 @@ var APIKeysDataProvider = {
         admin: true
       },
       read_only_status: true,
-      active: true
+      active: true,
+      role: 'admin'
     };
   },
 
