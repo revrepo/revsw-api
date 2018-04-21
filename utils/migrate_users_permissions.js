@@ -233,8 +233,22 @@ domainConfigs.list(function (err, list) {
     }
 });
 
+/**
+ * var permissionsGroup = _.cloneDeep(permissionsAdmin);
+        user.permissions = permissionsGroup;
+        if (!dryRun) {
+            groups.update(user, function (err, doc) {
+                if (err) {
+                    throw new Error(err);
+                } else if (doc) {
+                    console.log(doc.name + ' successfully updated!');
+                }
+            });
+        }
+ * 
+ */
+
 var updateUser = function (usr) {
-    console.log(usr);
     var user = {};
 
     if (usr.companyId) {
@@ -253,19 +267,7 @@ var updateUser = function (usr) {
         user.id = usr._id;
     }
 
-    if (!usr.role && false) {
-        var permissionsGroup = _.cloneDeep(permissionsAdmin);
-        user.permissions = permissionsGroup;
-        if (!dryRun) {
-            groups.update(user, function (err, doc) {
-                if (err) {
-                    throw new Error(err);
-                } else if (doc) {
-                    console.log(doc.name + ' successfully updated!');
-                }
-            });
-        }
-    } else {
+    if (usr.role) {
         switch (usr.role) {
             case 'user':
                 var permissionsUr = _.cloneDeep(permissionsUser);
@@ -338,7 +340,7 @@ var updateUser = function (usr) {
                                 }
 
                                 if (doc.parent_account_id) {
-                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id)
+                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id);
                                 }
 
                                 users.update(user, function (err, doc) {
@@ -374,7 +376,7 @@ var updateUser = function (usr) {
                                 }
 
                                 if (doc.parent_account_id) {
-                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id)
+                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id);
                                 }
 
                                 apikeys.update(user, function (err, doc) {
