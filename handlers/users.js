@@ -884,11 +884,11 @@ exports.resendInvitation = function (request, reply) {
         user.invitation_token = utils.generateToken(24);
         user.invitation_expire_at = Date.now() + config.get('user_invitation_expire_ms');
         user.invitation_sent_at = Date.now();
-        var account_id = user.companyId[0] || null;
+        var account_id = user.account_id;
         users.update(user, function (error, result) {
           if (!error) {
             // get the account so we can get the vendor
-            accounts.get({ id: account_id }, function (err, acc) {
+            accounts.get({ _id: account_id }, function (err, acc) {
               var statusResponse;
               if (!err) {                
                 statusResponse = {
