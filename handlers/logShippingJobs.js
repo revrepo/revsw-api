@@ -216,6 +216,10 @@ exports.updateLogShippingJob = function(request, reply) {
               if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
                 return reject(Error('Domain ID not found'));
               } else {
+                // check if domain account_id matches job account_id
+                if (result.account_id !== updatedLogJob.account_id) {
+                  return reply(boom.badRequest('Job account ID doesnt match Domain account ID'));
+                }
                 return resolve(true);
               }
             });
@@ -226,6 +230,10 @@ exports.updateLogShippingJob = function(request, reply) {
               if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
                 return reject(Error('App ID not found'));
               } else {
+                // check if app account_id matches job account_id
+                if (result.account_id !== updatedLogJob.account_id) {
+                  return reply(boom.badRequest('Job account ID doesnt match APP account ID'));
+                }
                 return resolve(true);
               }
             });
