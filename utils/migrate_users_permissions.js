@@ -265,8 +265,8 @@ var updateUser = function (usr) {
                 }
             });
         }
-    } else {        
-        switch (usr.role) {            
+    } else {
+        switch (usr.role) {
             case 'user':
                 var permissionsUr = _.cloneDeep(permissionsUser);
                 var domainArray = [];
@@ -331,13 +331,33 @@ var updateUser = function (usr) {
 
                 if (!usr.key) {
                     if (!dryRun) {
-                        users.update(user, function (err, doc) {
-                            if (err) {
-                                throw new Error(err);
-                            } else if (doc) {
-                                console.log(doc.email + ' successfully updated!');
-                            }
-                        });
+                        if (usr.role === 'reseller') {
+                            accounts.get({ _id: user.account_id }, function (err, doc) {
+                                if (err || !doc) {
+                                    throw new Error('Problem getting account');
+                                }
+
+                                if (doc.parent_account_id) {
+                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id)
+                                }
+
+                                users.update(user, function (err, doc) {
+                                    if (err) {
+                                        throw new Error(err);
+                                    } else if (doc) {
+                                        console.log(doc.email + ' successfully updated!');
+                                    }
+                                });
+                            });
+                        } else {
+                            users.update(user, function (err, doc) {
+                                if (err) {
+                                    throw new Error(err);
+                                } else if (doc) {
+                                    console.log(doc.email + ' successfully updated!');
+                                }
+                            });
+                        }
                     }
                 } else {
                     user.key = usr.key;
@@ -347,13 +367,34 @@ var updateUser = function (usr) {
                         user.role = 'reseller'; // if APIkey has managed account ids, its a reseller.                        
                     }
                     if (!dryRun) {
-                        apikeys.update(user, function (err, doc) {
-                            if (err) {
-                                throw new Error(err);
-                            } else if (doc) {
-                                console.log(doc.key_name + ' successfully updated!');
-                            }
-                        });
+                        if (usr.role === 'reseller') {
+                            accounts.get({ _id: user.account_id }, function (err, doc) {
+                                if (err || !doc) {
+                                    throw new Error('Problem getting account');
+                                }
+
+                                if (doc.parent_account_id) {
+                                    throw new Error('Reseller cant have a subaccount as its primary account ' + user.user_id)
+                                }
+
+                                apikeys.update(user, function (err, doc) {
+                                    if (err) {
+                                        throw new Error(err);
+                                    } else if (doc) {
+                                        console.log(doc.key_name + ' successfully updated!');
+                                    }
+                                });
+                            });
+                        } else {
+                            apikeys.update(user, function (err, doc) {
+                                if (err) {
+                                    throw new Error(err);
+                                } else if (doc) {
+                                    console.log(doc.key_name + ' successfully updated!');
+                                }
+                            });
+                        }
+
                     }
                 }
                 break;
