@@ -409,7 +409,7 @@ exports.updateUser = function (request, reply) {
       });
     },
     function (cb) {
-      userAccountId = storedUserData.companyId[0];
+      userAccountId = storedUserData.account_id || storedUserData.companyId[0];      
 
       if (updateUserData.role && updateUserData.role === 'user') {
         if (storedUserData.role === 'admin') {
