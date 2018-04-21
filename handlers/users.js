@@ -159,6 +159,25 @@ exports.createUser = function (request, reply) {
       var statusResponse;
       var resultUserData;
       async.waterfall([
+        function checkAccount(cb) {
+          if (newUser.role === 'reseller') {
+            accounts.get({ _id: newUser.account_id }, function (err, doc) {
+              if (err || !doc) {
+                return reply(boom.badRequest('Account ID Not Found'));
+              }
+
+              if (doc.parent_account_id) {
+                return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+              }
+
+              else {
+                return cb();
+              }
+            });
+          } else {
+            return cb();
+          }
+        },
         // NOTE: check for domain names
         function validateManagedDomainName(cb) {
           if (!_.isArray(newUser.domain) || (newUser.domain.length === 0)) {
@@ -303,6 +322,25 @@ exports.updateUser = function (request, reply) {
   var resultUserData;
 
   async.waterfall([
+    function checkAccount(cb) {
+      if (updateUserData.role === 'reseller') {
+        accounts.get({ _id: updateUserData.account_id }, function (err, doc) {
+          if (err || !doc) {
+            return reply(boom.badRequest('Account ID Not Found'));
+          }
+
+          if (doc.parent_account_id) {
+            return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+          }
+
+          else {
+            return cb();
+          }
+        });
+      } else {
+        return cb();
+      }
+    },
     function validateManagedDomainName(cb) {
       if (!_.isArray(updateUserData.domain) || (updateUserData.domain.length === 0)) {
         return cb();
