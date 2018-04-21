@@ -684,7 +684,7 @@ exports.deleteUser = function (request, reply) {
     if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'users')) {
       return reply(boom.badRequest('User ID not found'));
     }
-    var account_id = result.account_it;
+    var account_id = result.account_id;
 
     result = publicRecordFields.handle(result, 'user');
 
