@@ -29,12 +29,12 @@ describe('Negative check', function () {
 
   var resellerUser = config.get('api.users.reseller');
   var revAdmin = config.get('api.users.revAdmin');
-  var userSample = DataProvider.generateUser('admin');
+  var userSample = DataProvider.generateUser('reseller');
   var accountSample = AccountsDP.generateOne();
 
   before(function (done) {
     API.helpers
-      .authenticateUser(resellerUser)
+      .authenticateUser(revAdmin)
       .then(function () {
         return API.resources.accounts.createOne(accountSample);
       })
@@ -43,7 +43,7 @@ describe('Negative check', function () {
       })
       .then(function () {
         userSample.access_control_list.readOnly = false;
-        userSample.companyId = [accountSample.id + ''];
+        userSample.account_id = accountSample.id;
         return API.resources.users.createOne(userSample);
       })
       .then(function (response) {
@@ -88,7 +88,7 @@ describe('Negative check', function () {
           .catch(done);
       });
 
-    it('should return `Bad Request` when updating user\'s role from `reseller` to `user` having multiple' +
+    it('should return `Bad Request` when updating user\'s role from `reseller` to `admin` having multiple' +
       ' accounts assigned to the reseller',
       function (done) {
         // change user's role to reseller and then test
@@ -110,7 +110,7 @@ describe('Negative check', function () {
                   .then(function () {
                     API.resources.users
                       .update(userSample.id, {
-                        role: 'user'
+                        role: 'admin'
                       })
                       .expect(400)
                       .end(function (err, res) {
