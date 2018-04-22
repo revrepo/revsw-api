@@ -324,21 +324,28 @@ exports.updateUser = function (request, reply) {
   async.waterfall([
     function checkAccount(cb) {
       if (updateUserData.role === 'reseller') {
-        accounts.get({ _id: updateUserData.account_id }, function (err, doc) {
-          if (err || !doc) {
-            return reply(boom.badRequest('Account ID Not Found'));
+        userId = request.params.user_id;
+        users.get({ _id: userId }, function (error, result) {
+          if (error) {
+            return cb(error);
           }
 
-          if (doc.parent_account_id) {
-            return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
-          }
-
-          else {
-            return cb();
-          }
-        });
+          accounts.get({ _id: result.account_id }, function (err, doc) {
+            if (err || !doc) {
+              return reply(boom.badRequest('Account ID Not Found'));
+            }
+  
+            if (doc.parent_account_id) {
+              return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+            }
+  
+            else {
+              cb();
+            }
+          });
+        });        
       } else {
-        return cb();
+        cb();
       }
     },
     function validateManagedDomainName(cb) {
@@ -411,11 +418,11 @@ exports.updateUser = function (request, reply) {
     function (cb) {
       userAccountId = storedUserData.account_id;      
 
-      if (updateUserData.role && updateUserData.role === 'user') {
-        if (storedUserData.role === 'admin') {
+      if (updateUserData.role) {
+        if (storedUserData.role === 'admin' && storedUserData.role !== updateUserData.role) {
           users.get({
             _id: { $ne: storedUserData.user_id },
-            companyId: new RegExp(userAccountId, 'i'),
+            account_id: storedUserData.account_id,
             role: storedUserData.role
           }, function (err, user) {
             if (err) {
@@ -427,10 +434,10 @@ exports.updateUser = function (request, reply) {
               return cb();
             }
           });
-        } else if (storedUserData.role === 'reseller') {
+        } else if (storedUserData.role === 'reseller' && storedUserData.role !== updateUserData.role) {
           users.get({
             _id: { $ne: storedUserData.user_id },
-            companyId: new RegExp(storedUserData.companyId.join('.*,'), 'ig'),
+            account_id: storedUserData.account_id,
             role: storedUserData.role
           }, function (error, user) {
             if (error) {

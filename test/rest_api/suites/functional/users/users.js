@@ -48,25 +48,28 @@ describe('Functional check', function () {
 
       before(function (done) {
         API.helpers
-          .authenticate(user)
+          .authenticate(revAdmin)
           .then(function () {
-            if (user.key) {
-              return { body: { object_id: user.account.id } };
-            } else {
-              return API.resources.accounts.createOne(accountSample);
-            }
+            return API.resources.accounts.createOne(accountSample);
           })
           .then(function (response) {
             accountSample.id = response.body.object_id;
           })
           .then(function () {
-            userSample = DataProvider.generateUser('user');
+            userSample = DataProvider.generateUser('admin');
             userSample.access_control_list.readOnly = false;
-            userSample.companyId = [accountSample.id];
+            userSample.account_id = accountSample.id;
             return API.resources.users.createOne(userSample);
           })
           .then(function (response) {
             userSample.id = response.body.object_id;
+            // another user to be able to change roles
+            var userSample2 = DataProvider.generateUser('admin');
+            userSample2.access_control_list.readOnly = false;
+            userSample2.account_id = accountSample.id;
+            return API.resources.users.createOne(userSample2);            
+          })
+          .then(function () {
             done();
           })
           .catch(done);
@@ -76,7 +79,7 @@ describe('Functional check', function () {
         it('should successfully update user\'s role to ' + role,
           function (done) {
             API.helpers
-              .authenticate(user)
+              .authenticate(revAdmin)
               .then(function () {
                 API.resources.users
                   .update(userSample.id, {
