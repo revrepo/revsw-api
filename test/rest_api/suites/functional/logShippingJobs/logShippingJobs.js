@@ -238,6 +238,7 @@ describe('LogShipping Jobs functional test', function() {
       function(done) {
         firstLsJresp.source_id = secondDc.id;
         firstLsJresp.operational_mode = 'active';
+        firstLsJresp.account_id = secondDc.account_id;
 
         var expectedMsg = 'Successfully updated the log shipping job';
         API.helpers
