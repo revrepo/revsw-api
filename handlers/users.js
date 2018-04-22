@@ -419,10 +419,10 @@ exports.updateUser = function (request, reply) {
       userAccountId = storedUserData.account_id;      
 
       if (updateUserData.role) {
-        if (storedUserData.role === 'admin') {
+        if (storedUserData.role === 'admin' && storedUserData.role !== updateUserData.role) {
           users.get({
             _id: { $ne: storedUserData.user_id },
-            companyId: new RegExp(userAccountId, 'i'),
+            account_id: storedUserData.account_id,
             role: storedUserData.role
           }, function (err, user) {
             if (err) {
@@ -434,7 +434,7 @@ exports.updateUser = function (request, reply) {
               return cb();
             }
           });
-        } else if (storedUserData.role === 'reseller') {
+        } else if (storedUserData.role === 'reseller' && storedUserData.role !== updateUserData.role) {
           users.get({
             _id: { $ne: storedUserData.user_id },
             account_id: storedUserData.account_id,
