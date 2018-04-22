@@ -224,7 +224,7 @@ exports.createResource = function(request, reply) {
             var password = crypto.randomBytes(8).toString('hex');
 
             var newUser = {
-              companyId: account.id,
+              account_id: account.id,
               role: 'admin',
               firstname: 'Azure Subscription ' + subscriptionId,
               lastname: 'Resource ' + resourceName,
