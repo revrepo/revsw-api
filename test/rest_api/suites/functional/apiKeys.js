@@ -18,7 +18,7 @@
 require('should-http');
 // # Functional check: API Keys
 var config = require('config');
-
+var _ = require('lodash');
 var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
 var AccountsDP = require('./../../common/providers/data/accounts');
@@ -32,7 +32,7 @@ describe('Functional check', function () {
 
   before(function (done) {
     API.helpers
-      .authenticateUser(resellerUser)
+      .authenticateUser(config.api.users.revAdmin)
       .then(function () {
         // create account 1
         accountFirst = AccountsDP.generateOne();
@@ -44,32 +44,28 @@ describe('Functional check', function () {
           });
       })
       .then(function () {
-        // create account 2
-        accountSecond = AccountsDP.generateOne();
-        return API.resources.accounts
-          .createOne(accountSecond)
-          .then(function (response) {
-            accountSecond.id = response.body.object_id;
-            return accountSecond;
-          });
-      })
-      .then(function() {
-        // create account 3 for delete
-        accountForDelete = AccountsDP.generateOne();
-        return API.resources.accounts
-          .createOne(accountForDelete)
-          .then(function(response) {
-            accountForDelete.id = response.body.object_id;
-            return accountForDelete;
-          });
-      })
-      .then(function () {
         // create user with role "resseler" and access to Account First and Account Second
-        userReseller.companyId = [accountFirst.id + '', accountSecond.id + '', accountForDelete.id + ''];
+        userReseller.account_id = accountFirst.id;
         userReseller.access_control_list.readOnly = false;
         API.resources.users
           .createOne(userReseller)
-          .end(done);
+          .then(function (res) {                        
+            API.authenticate(userReseller)
+            .then(function () {
+              API.helpers.accounts.createOne(AccountsDP.generateOne())
+                .then(function (acc) {
+                  accountSecond = acc;
+                  API.helpers.accounts.createOne(AccountsDP.generateOne())
+                    .then(function (acc2) {
+                      accountForDelete = acc2;
+                      done();
+                    })
+                    .catch(done);
+                })
+                .catch(done);
+            });
+          })
+          .catch(done);
       })
       .catch(done);
   });
@@ -84,11 +80,11 @@ describe('Functional check', function () {
       API.helpers.authenticateUser(userReseller)
         .then(function () {
           // create API Key for Account 1
-          return API.helpers.apiKeys.createOneForAccount(accountFirst)
+            return API.helpers.apiKeys.createOneForAccount(accountFirst)
             .then(function (response) {
               apiKey = response;
               return apiKey;
-            });
+            });      
         })
         .then(function () {
           done();
