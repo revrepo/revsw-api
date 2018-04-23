@@ -33,6 +33,7 @@ describe('Functional Check: ', function () {
     var revAdmin = config.api.users.revAdmin;
     var user;
     var objects = {};
+    var accountTest;
 
     describe('Resource creation with different permissions', function () {
         before(function (done) {
@@ -44,6 +45,7 @@ describe('Functional Check: ', function () {
                         .createCompleteOne();
                 })
                 .then(function (account) {
+                    accountTest = account;
                     API
                         .helpers
                         .users
@@ -262,66 +264,96 @@ describe('Functional Check: ', function () {
 
         it('should be able to create a new account ' +
             'with permissions to manage all accounts (Reseller)', function (done) {
-                var userCopy = _.cloneDeep(user);
-                delete userCopy.password;
-                userCopy.permissions.accounts.access = true;
-                userCopy.role = 'reseller';
                 API
                     .authenticate(revAdmin)
                     .then(function () {
-                        API
-                            .resources
-                            .users
-                            .update(user.user_id, userCopy)
-                            .expect(200)
-                            .then(function () {
-                                var acc = AccountsDP.generateOne();
-                                API.authenticate(user)
-                                    .then(function () {
+                        API.helpers.users.create({
+                            account_id: accountTest.id,
+                            role: 'reseller'
+                        })
+                            .then(function (usr) {
+                                API
+                                    .resources
+                                    .users
+                                    .getOne(usr.id)
+                                    .expect(200)
+                                    .then(function (res) {
+                                        var upUser = res.body;
+                                        var upUserCopy = _.cloneDeep(upUser);
+                                        delete upUserCopy.password;
+                                        upUserCopy.permissions.accounts.access = true;
+                                        upUser.password = 'password1';
                                         API
                                             .resources
-                                            .accounts
-                                            .createOne(acc)
+                                            .users
+                                            .update(upUser.user_id, upUserCopy)
                                             .expect(200)
-                                            .end(done);
+                                            .then(function () {
+                                                var acc = AccountsDP.generateOne();
+                                                API.authenticate(upUser)
+                                                    .then(function () {
+                                                        API
+                                                            .resources
+                                                            .accounts
+                                                            .createOne(acc)
+                                                            .expect(200)
+                                                            .end(done);
+                                                    })
+                                                    .catch(done);
+                                            })
+                                            .catch(done);
                                     })
                                     .catch(done);
-                            })
-                            .catch(done);
+                            });
                     })
                     .catch(done);
             });
 
         it('should be able to create a new account ' +
             'with permissions to manage all accounts but one (Reseller)', function (done) {
-                var userCopy = _.cloneDeep(user);
-                delete userCopy.password;
-                userCopy.permissions.accounts.access = true;
-                userCopy.permissions.accounts.list = [user.account_id];
-                userCopy.permissions.accounts.allow_list = false;
-                userCopy.role = 'reseller';
                 API
                     .authenticate(revAdmin)
                     .then(function () {
-                        API
-                            .resources
-                            .users
-                            .update(user.user_id, userCopy)
-                            .expect(200)
-                            .then(function () {
-                                var acc = AccountsDP.generateOne();
-                                API.authenticate(user)
-                                    .then(function () {
+                        API.helpers.users.create({
+                            account_id: accountTest.id,
+                            role: 'reseller'
+                        })
+                            .then(function (usr) {
+                                API
+                                    .resources
+                                    .users
+                                    .getOne(usr.id)
+                                    .expect(200)
+                                    .then(function (res) {
+                                        var upUser = res.body;
+                                        var upUserCopy = _.cloneDeep(upUser);
+                                        delete upUserCopy.password;
+                                        upUserCopy.permissions.accounts.access = true;
+                                        upUserCopy.permissions.accounts.list = [upUser.account_id];
+                                        upUserCopy.permissions.accounts.allow_list = false;
+                                        upUser.password = 'password1';
                                         API
                                             .resources
-                                            .accounts
-                                            .createOne(acc)
+                                            .users
+                                            .update(upUser.user_id, upUserCopy)
                                             .expect(200)
-                                            .end(done);
+                                            .then(function () {
+                                                var acc = AccountsDP.generateOne();
+                                                API.authenticate(upUser)
+                                                    .then(function () {
+                                                        API
+                                                            .resources
+                                                            .accounts
+                                                            .createOne(acc)
+                                                            .expect(200)
+                                                            .end(done);
+                                                    })
+                                                    .catch(done);
+                                            })
+                                            .catch(done);
                                     })
                                     .catch(done);
-                            })
-                            .catch(done);
+                            });
                     })
                     .catch(done);
             });
