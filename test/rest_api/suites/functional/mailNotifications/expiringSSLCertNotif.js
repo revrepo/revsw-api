@@ -17,12 +17,13 @@
  */
 
 require('should-http');
+var config = require('config');
 var should = require('should');
 var request = require('supertest-as-promised');
 var generateCert = require('self-signed');
 var DomainDP = require('./../../../common/providers/data/domainConfigs');
-
-/* Genereting SSL Certs to test with, one expiring in 89 days, one in 91. */
+var expireDays = config.notification_window_for_expiring_ssl_cert_days;
+/* Genereting SSL Certs to test with, one expiring in 29 days, one in 31. */
 var expiringCert = generateCert({
     name: 'revsw.test.com',
     city: 'Testilvenia',
@@ -31,7 +32,7 @@ var expiringCert = generateCert({
     unit: 'Test'
 }, {
         keySize: 1024,
-        expire: 60 * 60 * 24 * 89 * 1000 // 89 days
+        expire: 60 * 60 * 24 * (expireDays - 1) * 1000 // 29 days
     });
 
 var longLifeCert = generateCert({
@@ -42,13 +43,11 @@ var longLifeCert = generateCert({
     unit: 'Test'
 }, {
         keySize: 1024,
-        expire: 60 * 60 * 24 * 91 * 1000 // 91 days
+        expire: 60 * 60 * 24 * (expireDays + 1) * 1000 // 31 days
     });
 
 
 var exec = require('child_process').exec;
-
-var config = require('config');
 var API = require('./../../../common/api');
 var oldEnv;
 var oldDir;
@@ -83,7 +82,7 @@ describe('Functional check', function () {
                 .then(function (acc) {
                     accountId = acc.id;
                     // creating a user for that account, so we can get the emails
-                    return API.helpers.users.create({ email: email, companyId: [accountId] });
+                    return API.helpers.users.create({ email: email, account_id: accountId });
                 })
                 .then(function (user) {
                     testUser = user;
