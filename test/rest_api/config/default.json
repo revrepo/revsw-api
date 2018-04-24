@@ -282,5 +282,6 @@
    "</a>",
    "<br>The link will expire in 24 hours.<br>", 
    "Kind regards,<br>RevAPM Customer Support Team<br>http://www.revapm.com/"
- ]
+ ],
+ "notification_window_for_expiring_ssl_cert_days": 30
 }
