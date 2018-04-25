@@ -57,20 +57,6 @@ var UsersHelper = {
         throw new APITestError('Creating User' , error.response.body,
           user);
       });
-  },
-
-  /**
-   * Returns the first company ID related to the given user.
-   *
-   * @param {Object} user
-   * @returns {Promise} which returns the company related to the given user
-   */
-  getFirstCompanyId: function (user) {
-    return UsersResource
-      .getOne(user.id)
-      .then(function (res) {
-        return res.body.companyId[0];
-      });
   }
 };
 

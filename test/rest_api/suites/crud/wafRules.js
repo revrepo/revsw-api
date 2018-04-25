@@ -56,7 +56,7 @@ describe('CRUD check', function () {
                   .expect(200)
                   .then(function (res) {
                     return {
-                      'id': res.body.companyId[0]
+                      'id': res.body.account_id
                     };
                   })
                   .catch(done);

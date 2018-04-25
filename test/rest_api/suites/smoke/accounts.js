@@ -180,7 +180,7 @@ describe('Smoke check', function () {
                 return API.helpers
                   .authenticateUser(revAdmin)
                   .then(function () {
-                    return API.helpers.users.getFirstCompanyId(user);
+                    return user.account_id
                   })
                   .then(function (accId) {
                     API.resources.accounts

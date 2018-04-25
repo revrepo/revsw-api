@@ -42,8 +42,7 @@ describe('Smoke check: Users', function() {
       before(function(done) {
         userSample = DataProvider.generateUser();
         if (credentials.role === config.api.users.revAdmin.role) {
-          userSample.companyId = [credentials.account.id];
-          userSample.domain = [];
+          userSample.account_id = credentials.account.id;
         }
 
         userSample.account_id = credentials.account.id;
@@ -107,8 +106,7 @@ describe('Smoke check: Users', function() {
         function(done) {
           var newUser = DataProvider.generateUser();
           if (credentials.role === config.api.users.revAdmin.role) {
-            newUser.companyId = [credentials.account.id];
-            newUser.domain = [];
+            newUser.account_id = credentials.account.id;
           }
 
           newUser.account_id = credentials.account.id;
@@ -133,8 +131,7 @@ describe('Smoke check: Users', function() {
         function(done) {
           var newUser = DataProvider.generateUser();
           if (credentials.role === config.api.users.revAdmin.role) {
-            newUser.companyId = [credentials.account.id];
-            newUser.domain = [];
+            newUser.account_id = credentials.account.id;
           }
 
           newUser.account_id = credentials.account.id;
@@ -162,8 +159,7 @@ describe('Smoke check: Users', function() {
       it('should return a response when deleting new user.', function(done) {
         var newUser = DataProvider.generateUser();
         if (credentials.role === config.api.users.revAdmin.role) {
-          newUser.companyId = [credentials.account.id];
-          newUser.domain = [];
+          newUser.account_id = credentials.account.id;
         }
 
         newUser.account_id = credentials.account.id;

@@ -39,7 +39,7 @@ describe('Functional check', function () {
               .then(function (dataAccount) {
                 firstAccount = dataAccount;
                 return API.helpers.users.create({
-                    companyId: [firstAccount.id + '']
+                    account_id: firstAccount.id
                   })
                   .then(function (dataUser) {
                     firstUser = dataUser;
@@ -55,7 +55,7 @@ describe('Functional check', function () {
                   .then(function (dataAccount) {
                     seccondAccount = dataAccount;
                     return API.helpers.users.create({
-                        companyId: [seccondAccount.id + '']
+                        account_id: seccondAccount.id
                       })
                       .then(function (dataUser) {
                         seccondUser = dataUser;

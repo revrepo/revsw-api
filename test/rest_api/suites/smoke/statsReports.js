@@ -63,7 +63,7 @@ describe('Smoke check:', function () {
     describe('Stats Reports with role "' + roleName + '"', function () {
       before(function (done) {
         var newUser = DataProvider.generateUser(roleName);
-        newUser.companyId = [accountForUsers.id];
+        newUser.account_id = accountForUsers.id;
         newUser.domain = [];
         API.helpers
           .authenticate(revAdminCredentials)

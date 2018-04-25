@@ -57,7 +57,6 @@ describe('Functional check', function () {
           })
           .then(function () {
             userSample = DataProvider.generateUser('admin');
-            userSample.access_control_list.readOnly = false;
             userSample.account_id = accountSample.id;
             return API.resources.users.createOne(userSample);
           })
@@ -65,7 +64,6 @@ describe('Functional check', function () {
             userSample.id = response.body.object_id;
             // another user to be able to change roles
             var userSample2 = DataProvider.generateUser('admin');
-            userSample2.access_control_list.readOnly = false;
             userSample2.account_id = accountSample.id;
             return API.resources.users.createOne(userSample2);            
           })

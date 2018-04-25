@@ -159,7 +159,6 @@ exports.dashboardModel = Joi.object({
 exports.listOfUsersModel = Joi.array().items({
   user_id: Joi.objectId().required().description('User ID'),
   email: Joi.string().email().required().description('Login name (email address)'),
-  companyId: Joi.array().items(Joi.objectId().description('The ID of customer account the user belongs to')),
   domain: Joi.array().items(Joi.string().description('Domain name the customer can manage')).required(),
   firstname: Joi.string().required().description('First name'),
   lastname: Joi.string().required().description('Last name'),
@@ -176,8 +175,6 @@ exports.listOfUsersModel = Joi.array().items({
 exports.userModel = Joi.object({
   user_id: Joi.objectId().required().description('User ID'),
   email: Joi.string().email().required().description('Login name (email address)'),
-  companyId: Joi.array().items(Joi.objectId().description('The ID of customer account the user belongs to'))
-    .description('An array of company IDs managed by the user'),
   domain: Joi.array().items(Joi.string().description('Domain name the customer can manage')).required()
     .description('An array of domain names managed by the user'),
   firstname: Joi.string().required().description('First name'),
@@ -190,15 +187,6 @@ exports.userModel = Joi.object({
   last_login_from: Joi.string().allow(null).description('The remote IP address the user has been recently logged in'),
   two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
   comment: Joi.string().allow(null).allow('').max(300).optional().description('Free-text comment about the user'),
-  access_control_list: Joi.object({
-    readOnly: Joi.boolean().description('Read-only flag'),
-    test: Joi.boolean().description('Access flag to TEST portal section'),
-    configure: Joi.boolean().description('Access flag to CONFIGURE portal section'),
-    reports: Joi.boolean().description('Access flag to REPORTS portal section'),
-    dashBoard: Joi.boolean().description('Access flag to DASHBOARD portal section')
-  }).meta({
-    className: 'User Permission Flag'
-  }),
   self_registered: Joi.boolean().description('Is user registered by himself'),
   group_id: Joi.string().allow(null).required().description('ID of the group the user is in'),
   permissions: permissionsModel,
@@ -328,7 +316,6 @@ exports.listOfDNSZoneRecordsModel = Joi.array().items({
 });
 
 exports.domainModel = Joi.object({
-  companyId: Joi.objectId().required().description('The ID of customer account (company) managing the domain'),
   id: Joi.objectId().required().description('Domain ID'),
   name: Joi.string().required().description('Domain name'),
   comment: Joi.string().allow(null).max(300).optional().description('Free-text comment about the domain'),
@@ -414,7 +401,6 @@ exports.listOfAPIKeysModel = Joi.array().items({
   key: Joi.string().description('Customer\'s API key'),
   key_name: Joi.string().description('Customer\'s API key name'),
   account_id: Joi.objectId().description('The ID of customer account the API key belongs to'),
-  managed_account_ids: Joi.array().items(Joi.objectId()).description('Array of account IDs the key should have access to'),
   domains: Joi.array().items(Joi.objectId()).description('Array of domain IDs the key should have access to'),
   created_by: Joi.string().description('User who created the account'),
   allowed_ops: Joi.object({
@@ -425,7 +411,6 @@ exports.listOfAPIKeysModel = Joi.array().items({
     reports: Joi.boolean(),
     admin: Joi.boolean(),
   }).description('Operations allowed with the API key'),
-  read_only_status: Joi.boolean().description('Defines if the API key can be used only for read-write or read-only'),
   active: Joi.boolean().description('Active or inactive API key'),
   created_at: Joi.date().description('API key creation date/time'),
   updated_at: Joi.date().description('API key last update date/time'),
@@ -440,7 +425,6 @@ exports.APIKeyModel = Joi.object({
   key: Joi.string().description('Customer\'s API key'),
   key_name: Joi.string().description('Customer\'s API key name'),
   account_id: Joi.objectId().description('The ID of customer account the API key belongs to'),
-  managed_account_ids: Joi.array().items(Joi.objectId()).description('Array of account IDs the key should have access to'),
   domains: Joi.array().items(Joi.objectId()).description('Array of domain IDs the key should have access to'),
   created_by: Joi.string().description('User who created the account'),
   allowed_ops: Joi.object({
@@ -451,7 +435,6 @@ exports.APIKeyModel = Joi.object({
     reports: Joi.boolean(),
     admin: Joi.boolean(),
   }).description('Operations allowed with the API key'),
-  read_only_status: Joi.boolean().description('Defines if the API key can be used only for read-write or read-only'),
   active: Joi.boolean().description('Active or inactive API key'),
   created_at: Joi.date().description('API key creation date/time'),
   updated_at: Joi.date().description('API key last update date/time'),

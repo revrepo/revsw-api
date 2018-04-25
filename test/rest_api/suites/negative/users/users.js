@@ -42,7 +42,6 @@ describe('Negative check', function () {
         accountSample.id = response.body.object_id;
       })
       .then(function () {
-        userSample.access_control_list.readOnly = false;
         userSample.account_id = accountSample.id;
         return API.resources.users.createOne(userSample);
       })

@@ -27,8 +27,8 @@ var DELAY_AFTER_DELETE_DOMAIN_CONFIG_MS = 15 * 1000;
 
 describe('Functional check', function() {
   this.timeout(config.api.request.maxTimeout);
-
-  describe('Users managed domain_name', function() {
+  // deprecated
+  xdescribe('Users managed domain_name', function() {
     var revAdmin = config.get('api.users.revAdmin');
 
     var userRolesList = [
@@ -68,9 +68,8 @@ describe('Functional check', function() {
                 });
             })
             .then(function() {
-              newUserWithRole.access_control_list.readOnly = false;
-              newUserWithRole.companyId = [accountMain.id + ''];
-              newUserWithRole.domain = [managedDomainConfig.domain_name + '', deleteDomainConfig.domain_name + ''];
+              newUserWithRole.account_id = accountMain.id;
+              newUserWithRole.permissions.domains.list = [managedDomainConfig.id, deleteDomainConfig.id];
               return API.resources.users.createOne(newUserWithRole)
                 .then(function(response) {
                   newUserWithRole.id = response.body.object_id;

@@ -93,13 +93,6 @@ module.exports = {
       firstname: 'Jean',
       lastname: 'Valjean',
       password: 'secret123',
-      access_control_list: {
-        dashBoard: true,
-        reports: true,
-        configure: true,
-        test: true,
-        readOnly: true
-      },
       role: role || 'admin',
       theme: 'light'
     };

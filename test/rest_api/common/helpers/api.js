@@ -264,7 +264,18 @@ var APIHelpers = {
         return me.signUp.verify(token);
       })
       .then(function () {
-        return testUser;
+        return AuthenticateRes.createOne({
+          email: config.api.users.revAdmin.email,
+          password: config.api.users.revAdmin.password
+        });
+      })
+      .then(function (res) {
+        config.api.users.revAdmin.token = res.body.token;
+        Session.setCurrentUser(config.api.users.revAdmin);
+        return UsersRes.getOne(testUser.id);
+      })
+      .then(function (res) {
+        return res.body;
       });
   },
 
