@@ -243,7 +243,7 @@ exports.createResource = function(request, reply) {
               // TODO: add code to send email notifications about new Azure resources registered in the system
               // TODO: add code to add audit records for new subscription, resource, user
               AuditLogger.store({
-                account_id: newUser.companyId,
+                account_id: newUser.account_id,
                 activity_type: 'add',
                 activity_target: 'user',
                 target_id: user.user_id,

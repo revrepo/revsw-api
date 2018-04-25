@@ -158,15 +158,6 @@ exports.createApiKey = function(request, reply) {
     return reply(boom.forbidden('You are not authorized to create a new API Key'));
   }
 
-  if (newApiKey.managed_account_ids && newApiKey.managed_account_ids.length > 0) {
-    if (!newApiKey.permissions) {
-      newApiKey.permissions = permissionCheck.permissionObject;
-    }
-    newApiKey.permissions.accounts.list = newApiKey.managed_account_ids;
-    newApiKey.permissions.accounts.access = true;
-    newApiKey.permissions.accounts.allow_list = true;
-  }
-
   if (!newApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, {id: newApiKey.account_id}, 'accounts')) {
       return reply(boom.badRequest('Company ID not found'));
   }
@@ -275,21 +266,12 @@ exports.updateApiKey = function (request, reply) {
     updatedApiKey.permissions.ssl_certs = true;
   }
 
-  if (updatedApiKey.managed_account_ids && updatedApiKey.managed_account_ids.length > 0) {
-    if (!updatedApiKey.permissions) {
-      updatedApiKey.permissions = permissionCheck.permissionObject;
-    }
-    updatedApiKey.permissions.accounts.list = updatedApiKey.managed_account_ids;
-    updatedApiKey.permissions.accounts.access = true;
-    updatedApiKey.permissions.accounts.allow_list = true;
-  } else {
-    if (!updatedApiKey.permissions) {
-      updatedApiKey.permissions = permissionCheck.permissionObject;
-    }
-    updatedApiKey.permissions.accounts.list = null;
-    updatedApiKey.permissions.accounts.access = true;
-    updatedApiKey.permissions.accounts.allow_list = true;
+  if (!updatedApiKey.permissions) {
+    updatedApiKey.permissions = permissionCheck.permissionObject;
   }
+  updatedApiKey.permissions.accounts.list = null;
+  updatedApiKey.permissions.accounts.access = true;
+  updatedApiKey.permissions.accounts.allow_list = true;
 
   function doUpdate() {
     if (updatedApiKey.role === 'reseller') {

@@ -78,7 +78,7 @@ var onAuthPassed = function(user, request, reply, error) {
       user_id: user.user_id,
       user_name: user.email,
       user_type: 'user',
-      account_id: user.companyId[0],
+      account_id: user.account_id,
       activity_type: 'login',
       activity_target: 'user',
       target_id: user.user_id,
@@ -167,7 +167,7 @@ exports.authenticate = function(request, reply) {
           // If no enabled 2FA
           authPassed = true;
           if (user.self_registered) {
-            logger.info('Authenticate::authenticate: User whith Id: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+            logger.info('Authenticate::authenticate: User whith Id: ' + user.user_id + ' and Accont Id: ' + user.account_id);
             // NOTE: For Self Registered User
 
             if (user.self_registered && (user.validation === undefined || user.validation.verified === false)) {
@@ -176,7 +176,7 @@ exports.authenticate = function(request, reply) {
               return reply(boom.create(418, 'Your registration not finished'));
             }
             accounts.get({
-              _id: user.companyId[0]
+              _id: user.account_id
             }, function(error, account) {
               if (error) {
                 logger.error('Authenticate::authenticate: Failed to find an account associated with user' +

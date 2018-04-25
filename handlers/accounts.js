@@ -138,11 +138,6 @@ exports.createAccount = function(request, reply) {
     return reply(boom.badRequest('vendor_profile attribute is not correct'));
   }
 
-  // Update the user who created the new company account with details of the new account ID
-  var updatedUser = {
-    user_id: request.auth.credentials.user_id,
-    companyId: utils.getAccountID(request)
-  };
   var statusResponse;
 
   // NOTE: main workflow
@@ -165,17 +160,6 @@ exports.createAccount = function(request, reply) {
         cb();
       }
     },
-    function getCurrentUserForUpdate(cb){
-      users.get({ _id: updatedUser.user_id }, function(error, user) {
-        if (error || !user) {
-          return cb(new Error('Failed to get user ' + updatedUser.user_id));
-        }
-        if ((user.role === 'admin' || user.role === 'user') && user.companyId.length !== 0) {
-          return cb('Cannot assign more, than one account to the user');
-        }
-        cb();
-      });
-    },
     function createNewAccount(cb){
       var loggerData = {
         user_name: newAccount.createdBy,
@@ -194,20 +178,7 @@ exports.createAccount = function(request, reply) {
           object_id: result.id
         };
 
-        if (request.auth.credentials.role !== 'revadmin') {
-          updatedUser.companyId.push(result.id);
-        }
         cb();
-      });
-    },
-    function updateUserData(cb){
-      users.update(updatedUser, function(error, result) {
-        if (error) {
-          return cb(Error('Failed to update user ID ' + updatedUser.user_id +
-            ' with details of new account IDs ' + updatedUser.companyId));
-        } else {
-          cb(null);
-        }
       });
     },
     function makeResponseData(cb){

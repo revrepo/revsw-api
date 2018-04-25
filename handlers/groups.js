@@ -243,7 +243,7 @@ exports.getGroupUsers = function (request, reply) {
  */
 exports.updateGroup = function (request, reply) {
   var updateGroupData = request.payload;
-  var groupAccountId;
+  var groupAccountId = updateGroupData.account_id;
   var groupId;
   var statusResponse;
   var resultGroupData;

@@ -113,28 +113,11 @@ exports.getUsers = function getUsers(request, reply) {
  */
 exports.createUser = function (request, reply) {
   var newUser = request.payload;
-  if (newUser.companyId) {
-  newUser.account_id = newUser.account_id || newUser.companyId[0];
-    if (newUser.companyId.length > 0) {
-      newUser.companyId.splice(0, 1);
-      if (!newUser.permissions) {
-        newUser.permissions = permissionCheck.permissionObject;
-      }
-      newUser.permissions.accounts.list = newUser.companyId;
-      newUser.permissions.accounts.access = true;
-      newUser.permissions.accounts.allow_list = true;
-    }
-  }
-  // NOTE: New User must have "companyId"
+  // NOTE: New User must have "account_id"
   if (!newUser.account_id && request.auth.credentials.role === 'revadmin') {
-    return reply(boom.badRequest('You have to specify companyId if your user does not have a valid companyId attribute (relevant for users with revadmin role)'));
+    return reply(boom.badRequest('You have to specify account ID if your user does not have a valid account_id attribute (relevant for users with revadmin role)'));
   } else if (!newUser.account_id && request.auth.credentials.account_id) {
     newUser.account_id = request.auth.credentials.account_id;
-    newUser.companyId = request.auth.credentials.companyId[0];
-  }
-
-  if (newUser.account_id) {
-    newUser.companyId = [newUser.account_id];
   }
 
   if (!permissionCheck.checkSimplePermissions(request, 'users')) {
@@ -144,7 +127,7 @@ exports.createUser = function (request, reply) {
   // NOTE: Who is creating new User must have access to the user after creation
   if (!permissionCheck.checkPermissionsToResource(request, {id: newUser.account_id}, 'accounts')) {
     // TODO: fix the error message text "You don't have permissions for this action "
-    return reply(boom.badRequest('Your user does not manage the specified company ID(s)'));
+    return reply(boom.badRequest('Your user does not manage the specified account'));
   }
 
   var accountId = newUser.account_id;
@@ -211,7 +194,6 @@ exports.createUser = function (request, reply) {
           });
         },
         function (cb) {
-          // TODO: add activity log to all accounts (not only newUser.companyId[0])
           AuditLogger.store({
             account_id: accountId,
             activity_type: 'add',
@@ -311,12 +293,6 @@ exports.updateUser = function (request, reply) {
   var updateUserData = request.payload;
   var userAccountId;
   var userId;
-  // NOTE: controll users Additional Accounts To Manage
-  if (!!updateUserData.companyId && (updateUserData.role === 'user' || updateUserData.role === 'admin') &&
-    ((_.isArray(updateUserData.companyId) && updateUserData.companyId.length > 1) ||
-      ((_.isString(updateUserData.companyId) && updateUserData.companyId.split(',').length > 1)))) {
-    return reply(boom.badRequest('User with role "' + updateUserData.role + '" cannot manage other accounts'));
-  }
   var statusResponse;
   var storedUserData;
   var resultUserData;
@@ -348,6 +324,7 @@ exports.updateUser = function (request, reply) {
         cb();
       }
     },
+    /* Disabling this function because domain management is done by new permissions system
     function validateManagedDomainName(cb) {
       if (!_.isArray(updateUserData.domain) || (updateUserData.domain.length === 0)) {
         return cb();
@@ -369,6 +346,9 @@ exports.updateUser = function (request, reply) {
         }
         cb();
       });
+      */
+    function (cb) {
+      cb(); 
     },
     function (cb) {
       if (Object.keys(updateUserData).length === 0) {

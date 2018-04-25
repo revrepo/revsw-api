@@ -440,7 +440,7 @@ exports.createDomainConfig = function(request, reply) {
         if (!res) {
           return reply(boom.forbidden(account.companyName + ' subscription is not active'));
         }
-        checkDomainsLimit(request.auth.credentials.companyId, function(err, diff) {
+        checkDomainsLimit(request.auth.credentials.account_id, function(err, diff) {
           if (err) {
             return reply(boom.badImplementation(err));
           }
