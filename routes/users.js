@@ -81,16 +81,8 @@ module.exports = [
           firstname: Joi.string().required().trim().max(30).regex(routeModels.userFirstName).description('First name'),
           lastname: Joi.string().required().max(30).regex(routeModels.userLastName).description('Last name'),
           password: Joi.string().min(8).max(15).optional().description('Password'),
-          companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
-          access_control_list: Joi.object( {
-            dashBoard: Joi.boolean().required().default(true).description('Access to the portal Dashboard section'),
-            reports: Joi.boolean().required().default(true).description('Access to the portal REPORTS section'),
-            configure: Joi.boolean().required().description('Access to the portal CONFIGURE section'),
-            test: Joi.boolean().required().description('Access to the portal TEST section'),
-            readOnly: Joi.boolean().required().description('Enable read-only access to the configuration')
-          }).required(),
           role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
@@ -133,16 +125,8 @@ module.exports = [
           firstname: Joi.string().trim().max(30).regex(routeModels.userFirstName).description('First name'),
           lastname: Joi.string().max(30).regex(routeModels.userLastName).description('Last name'),
           password: Joi.string().min(8).max(15).description('New Password'),
-          companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
-          access_control_list: Joi.object( {
-            dashBoard: Joi.boolean().default(true).description('Access to the portal Dashboard section'),
-            reports: Joi.boolean().default(true).description('Access to the portal REPORTS section'),
-            configure: Joi.boolean().description('Access to the portal CONFIGURE section'),
-            test: Joi.boolean().description('Access to the portal TEST section'),
-            readOnly: Joi.boolean().description('Enable read-only access to the configuration')
-          }),
           role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
           comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
