@@ -57,6 +57,25 @@ var UsersHelper = {
         throw new APITestError('Creating User' , error.response.body,
           user);
       });
+  },
+
+  completeInvitation: function (id) {
+    return UsersResource
+      .getOne(id)
+      .expect(200)
+      .then(function (user) {
+        var invitationData = {
+          password: 'password1',
+          invitation_token: user.body.invitation_token
+        };
+        return UsersResource
+          .completeInvitation()
+          .update(id, invitationData)
+          .expect(200)
+          .then(function (res) {
+            return res.body;
+          });
+      });
   }
 };
 
