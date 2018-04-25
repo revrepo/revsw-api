@@ -97,62 +97,7 @@ describe('Negative check', function() {
               done();
             })
             .catch(done);
-        });
-
-        it('should return `Bad Request` when try create user with managed Domain Name with another Accounts ID', function(done) {
-          var newUser = DataProvider.generateUser(role);
-          API.helpers
-            .authenticateUser(revAdmin)
-            .then(function() {
-              newUser.access_control_list.readOnly = false;
-              newUser.companyId = [accountMain.id + ''];
-              newUser.domain = [additionalDomainConfig.domain_name];
-              return API.resources.users
-                .createOne(newUser)
-                .expect(400)
-                .then(function(response) {
-                  response.body.error.should.equal('Bad Request');
-                  response.body.message.should.equal('Can`t manage domain name another account');
-                  return;
-                });
-            })
-            .then(function() {
-              done();
-            })
-            .catch(done);
-        });
-
-        it('should return `Bad Request` then try update user with managed Domain Name with Accounts ID', function(done) {
-          var newUser = DataProvider.generateUser(role);
-          API.helpers
-            .authenticateUser(revAdmin)
-            .then(function() {
-              newUser.access_control_list.readOnly = false;
-              newUser.companyId = [accountMain.id + ''];
-              newUser.domain = [];
-              return API.resources.users.createOne(newUser)
-                .then(function(response) {
-                  newUser.id = response.body.object_id;
-                  newUser.name = newUser.email;
-                  return newUser;
-                });
-            })
-            .then(function() {
-              newUser.domain.push(additionalDomainConfig.domain_name);
-              return API.resources.users
-                .update(newUser.id, newUser)
-                .expect(400)
-                .then(function(response) {
-                  response.body.error.should.equal('Bad Request');
-                  response.body.message.should.equal('Can`t manage domain name another account');
-                  return;
-                });
-            })
-            .then(function() {
-              done();
-            })
-            .catch(done);
-        });
+        });        
       });
     });
   });

@@ -42,13 +42,6 @@ var UsersDataProvider = {
    *      firstname: String,
    *      lastname: String,
    *      password: String,
-   *      access_control_list: {
-   *        dashBoard: Boolean,
-   *        reports: Boolean,
-   *        configure: Boolean,
-   *        test: Boolean,
-   *        readOnly: Boolean
-   *      },
    *      role: String,
    *      theme: String
    *    }
@@ -64,20 +57,10 @@ var UsersDataProvider = {
         .join('-')
         .toLowerCase(),
       password: 'password1',
-      access_control_list: {
-        dashBoard: true,
-        reports: true,
-        configure: true,
-        test: true,
-        readOnly: false
-      },
       role: data.role || 'admin',
       theme: 'light',
       account_id: data.account_id || null
     };
-    if (data.companyId) {
-      user.companyId = data.companyId;
-    }
     return user;
   },
 

@@ -84,41 +84,9 @@ describe('Negative check', function() {
           API.helpers
             .authenticateUser(revAdmin)
             .then(function() {
-              newUser.access_control_list.readOnly = false;
               newUser.companyId = [accountMain.id + '', accountAdditional.id + ''];
               return API.resources.users
                 .createOne(newUser)
-                .expect(400)
-                .then(function(response) {
-                  response.body.message.should.equal('User with role "' + role + '" cannot manage other accounts');
-                  response.body.error.should.equal('Bad Request');
-                  return newUser;
-                });
-            })
-            .then(function() {
-              done();
-            })
-            .catch(done);
-        });
-
-        it('should return `Bad Request` then try update user with many managed Accounts ID', function(done) {
-          API.helpers
-            .authenticateUser(revAdmin)
-             .then(function() {
-              newUser.access_control_list.readOnly = false;
-              newUser.companyId = [accountMain.id + ''];
-              newUser.domain = [];
-              return API.resources.users.createOne(newUser)
-                .then(function(response) {
-                  newUser.id = response.body.object_id;
-                  newUser.name = newUser.email;
-                  return newUser;
-                });
-            })
-            .then(function() {
-              newUser.companyId.push(accountAdditional.id + '');
-              return API.resources.users
-                .update(newUser.id, newUser)
                 .expect(400)
                 .then(function(response) {
                   response.body.message.should.equal('User with role "' + role + '" cannot manage other accounts');

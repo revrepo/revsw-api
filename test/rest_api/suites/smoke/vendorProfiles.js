@@ -42,7 +42,7 @@ runs.forEach(function (run) {
           return API.helpers.accounts.createOne();
         })
         .then(function (acc) {
-          return API.helpers.users.create({ companyId: [acc.id] });
+          return API.helpers.users.create({ account_id: acc.id });
         })
         .then(function (user) {
           testUser = user;
@@ -96,10 +96,10 @@ runs.forEach(function (run) {
                 API
                   .helpers
                   .vendors
-                  .updateVendorProfile(testUser.companyId[0], vendor).then(function (res) {
+                  .updateVendorProfile(testUser.account_id, vendor).then(function (res) {
                     res.statusCode.should.equal(200);
                     API.resources.accounts
-                      .getOne(testUser.companyId[0])
+                      .getOne(testUser.account_id)
                       .expect(200)
                       .then(function (res) {
                         res.body.vendor_profile.should.equal(vendor);

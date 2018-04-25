@@ -59,17 +59,22 @@ var UsersHelper = {
       });
   },
 
-  /**
-   * Returns the first company ID related to the given user.
-   *
-   * @param {Object} user
-   * @returns {Promise} which returns the company related to the given user
-   */
-  getFirstCompanyId: function (user) {
+  completeInvitation: function (id) {
     return UsersResource
-      .getOne(user.id)
-      .then(function (res) {
-        return res.body.companyId[0];
+      .getOne(id)
+      .expect(200)
+      .then(function (user) {
+        var invitationData = {
+          password: 'password1',
+          invitation_token: user.body.invitation_token
+        };
+        return UsersResource
+          .completeInvitation()
+          .update(id, invitationData)
+          .expect(200)
+          .then(function (res) {
+            return res.body;
+          });
       });
   }
 };

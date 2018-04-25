@@ -34,7 +34,6 @@ function APIKey(mongoose, connection, options) {
     'key'             : String,
     'key_name'        : String,
     'account_id'       : String,
-    'managed_account_ids': [String],
     'domains'         : [String],
     'created_by'       : String,
     'allowed_ops'     : {
@@ -45,7 +44,6 @@ function APIKey(mongoose, connection, options) {
       reports         : {type: Boolean, default: false},
       admin           : {type: Boolean, default: false},
     },
-    'read_only_status': {type: Boolean, default: false},
     'active'          : {type: Boolean, default: true},
     'created_at'      : {type: Date, default: Date.now},
     'updated_at'      : {type: Date, default: Date.now},

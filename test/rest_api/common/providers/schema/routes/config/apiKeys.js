@@ -164,7 +164,6 @@ module.exports = [
         payload: {
           key_name: Joi.string().required().min(1).max(150).description('Name of the API key'),
           account_id: Joi.objectId().required().description('ID of a company that the API key belongs to'),
-          managed_account_ids: Joi.array().optional().items(Joi.objectId().description('IDs of companies the API key is allowed to manage')),
           domains: Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
           allowed_ops: Joi.object({
             read_config: Joi.boolean().required(),
@@ -174,7 +173,6 @@ module.exports = [
             reports: Joi.boolean().required(),
             admin: Joi.boolean().required(),
           }),
-          read_only_status: Joi.boolean().required().description('Tells if the API key is read-only or read/write'),
           active: Joi.boolean().required().description('Tells if the API key is active or not')
         }
       },

@@ -153,7 +153,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
         var accountIds_ = null;
         if (request.auth.credentials.user_type === 'user') {
           if (request.auth.credentials.role !== 'revadmin') {
-            accountIds_ = request.auth.credentials.companyId;
+            accountIds_ = utils.getAccountID(request, false);
           } else {
             // revadmin no have limit
             accountIds_ = null;
@@ -268,32 +268,15 @@ exports.getSummaryAuditInfo = function(request, reply) {
 
       switch (request.auth.credentials.role) {
 
-        case 'user':
-          if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
-            return reply(boom.badRequest('User ID not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Account ID not found'));
-          }
-          requestBody['meta.user_id'] = userId;
-          break;
-
         case 'admin':
-          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+          if (request.query.user_id && !permissionCheck.checkPermissionsToResource(request, {id: user.account_id}, 'accounts')) {
             return reply(boom.badRequest('User ID not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Account ID not found'));
           }
           requestBody['meta.user_id'] = userId;
           break;
-
         case 'reseller':
-          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+          if (request.query.user_id && !permissionCheck.checkPermissionsToResource(request, {id: request.query.company_id}, 'accounts')) {
             return reply(boom.badRequest('User ID not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Account ID not found'));
           }
           if (request.query.user_id) {
             requestBody['meta.user_id'] = userId;
@@ -301,7 +284,7 @@ exports.getSummaryAuditInfo = function(request, reply) {
           break;
       }
 
-      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
+      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.account_id;
 
       delete request.query.user_id;
       delete request.query.company_id;
@@ -330,7 +313,7 @@ exports.getSummaryAuditInfo = function(request, reply) {
           metadata: {
             user_id: userId,
             //domain_id  : request.query.domain_id,
-            company_id: utils.getAccountID(request, false),//request.query.company_id ? request.query.company_id : user.companyId,
+            company_id: utils.getAccountID(request, false),
             start_time: startTime,
             end_time: endTime
           },

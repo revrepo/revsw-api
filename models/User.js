@@ -33,16 +33,6 @@ function User(mongoose, connection, options) {
   this.ObjectId = this.Schema.ObjectId;
 
   this.UserSchema = new this.Schema({
-    'access_control_list': {
-      dashBoard: { type: Boolean, default: true },
-      reports: { type: Boolean, default: true },
-      configure: { type: Boolean, default: true },
-      test: { type: Boolean, default: true },
-      readOnly: { type: Boolean, default: false }
-    },
-    // TODO need to rename to account_id
-    'companyId': String,
-    'domain': { type: String, lowercase: true },
     'email': String,
     // TODO rename to first_name
     'firstname': String,
@@ -104,14 +94,6 @@ User.prototype = {
     var hash = utils.getHash(item.password);
     item.password = hash;
 
-    if (utils.isArray(item.domain)) {
-      item.domain = item.domain.join(',').toLowerCase();
-    }
-
-    if (utils.isArray(item.companyId)) {
-      item.companyId = item.companyId.join(',');
-    }
-
     new this.model(item).save(function (err, item) {
       if (callback) {
         item = utils.clone(item);
@@ -144,17 +126,6 @@ User.prototype = {
         delete doc.validation;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        } else {
-          doc.companyId = [];
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
-
       }
       callback(err, doc);
     });
@@ -174,15 +145,6 @@ User.prototype = {
         delete doc.validation;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
-
       }
       callback(err, doc);
     });
@@ -201,17 +163,6 @@ User.prototype = {
         delete doc.token;
         delete doc.status;
         delete doc.old_passwords;
-
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        } else {
-          doc.companyId = [];
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
 
       }
       callback(err, doc);
@@ -248,16 +199,6 @@ User.prototype = {
         delete doc.status;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        } else {
-          doc.companyId = [];
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
@@ -317,21 +258,10 @@ User.prototype = {
       if (users) {
         users = utils.clone(users);
         for (var i = 0; i < users.length; i++) {
-          if (users[i].companyId) {
-            users[i].companyId = users[i].companyId.split(',');
-          } else {
-            users[i].companyId = [];
-          }
 
           users[i].user_id = users[i]._id;
           users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
           delete users[i]._id;
-
-          if (users[i].domain && users[i].domain !== '') {
-            users[i].domain = users[i].domain.toLowerCase().split(',');
-          } else {
-            users[i].domain = [];
-          }
         }
       }
       //    console.log('Inside list, users = ', users);
@@ -344,15 +274,6 @@ User.prototype = {
     this.model.findOne({ _id: item.user_id }, function (err, doc) {
       //     console.log('Inside update: doc = ', doc);
       if (doc) {
-
-        if (utils.isArray(item.domain)) {
-          item.domain = _.uniq(item.domain);
-          item.domain = item.domain.join(',').toLowerCase();
-        }
-
-        if (utils.isArray(item.companyId)) {
-          item.companyId = item.companyId.join(',');
-        }
 
         if (item.password) {
           var hash = utils.getHash(item.password);

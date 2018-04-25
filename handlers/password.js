@@ -214,12 +214,6 @@ exports.resetPassword = function(request, reply) {
           if (error) {
             return reply(boom.badImplementation('Failed to update user ' + user.email + ' with new password'));
           }
-          // NOTE: method users.update not convert "companyId" to Array
-          if(result.companyId) {
-            result.companyId = result.companyId.split(',');
-          } else {
-            result.companyId = [];
-          }
           result = publicRecordFields.handle(result, 'users');
 
           AuditLogger.store({

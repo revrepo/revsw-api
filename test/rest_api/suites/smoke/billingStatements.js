@@ -31,16 +31,11 @@ describe('Smoke check', function () {
     API.helpers
       .signUpAndVerifyUser()
       .then(function (user) {
-        return API.helpers
-          .authenticateUser(revAdmin)
-          .then(function () {
-            return API.helpers.users.getFirstCompanyId(user);
-          })
-          .then(function (firstAccountId) {
-            accountId = firstAccountId;
-            done();
-          })
-          .catch(done);
+        return user.account_id;
+      })
+      .then(function (firstAccountId) {
+        accountId = firstAccountId;
+        done();
       })
       .catch(done);
   });
