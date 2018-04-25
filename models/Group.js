@@ -126,12 +126,6 @@ Group.prototype = {
         } else if (groups) {
           groups = utils.clone(groups);
           for (var i = 0; i < groups.length; i++) {
-            if (groups[i].companyId) {
-              groups[i].companyId = groups[i].companyId.split(',');
-            } else {
-              groups[i].companyId = [];
-            }
-
             groups[i].id = groups[i]._id;
             groups[i].two_factor_auth_enabled = groups[i].two_factor_auth_enabled || false;
             delete groups[i]._id;
