@@ -203,7 +203,7 @@ describe('Functional check', function () {
                 exec(scriptCommand, function (err, stdout) {
                     should(stdout).not.equal(null);
                     should(err).equal(null);
-                    MailinatorHelper.waitWhileInboxIsEmpty(email, 30000).then(function () {
+                    MailinatorHelper.waitWhileInboxIsEmpty(email, 600000).then(function () {
                         MailinatorHelper.getAllMessages(email)
                             .then(function (res) {
                                 res.length.should.equal(1); // should only have 1 email
@@ -218,7 +218,7 @@ describe('Functional check', function () {
             exec(scriptCommand, function (err, stdout) {
                 should(stdout).not.equal(null);
                 should(err).equal(null);
-                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000)
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 600000)
                     .then(function () {
                         MailinatorHelper.getAllMessages(email)
                             .then(function (res) {
@@ -242,7 +242,7 @@ describe('Functional check', function () {
             exec(scriptCommand, function (err, stdout) {
                 should(stdout).not.equal(null);
                 should(err).equal(null);
-                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000).then(function () {
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 600000).then(function () {
                     MailinatorHelper.getAllMessages(email)
                         .then(function (res) {
                             var mailMsg = res[0];
