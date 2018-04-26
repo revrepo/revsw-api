@@ -188,7 +188,7 @@ describe('Functional check', function () {
 
         it('should verify the mail box is empty for `' + email + '`',
             function (done) {
-                MailinatorHelper.waitWhileInboxIsEmpty(email, 60000, null, true).then(function () {
+                MailinatorHelper.waitWhileInboxIsEmpty(email, 30000, null, true).then(function () {
                     MailinatorHelper.getAllMessages(email)
                         .then(function (res) {
                             res.length.should.equal(0); // should be empty
