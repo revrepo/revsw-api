@@ -94,6 +94,7 @@ describe('Smoke check', function () {
         API.helpers.signUpAndVerifyUser()
           .then(function (user) {
             testUser = user;
+            testUser.password = 'password1';
             return testUser;
           })
           .then(function () {
