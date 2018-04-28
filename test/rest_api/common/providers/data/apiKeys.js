@@ -82,15 +82,6 @@ var APIKeysDataProvider = {
     return {
       account_id: accountId,
       key_name: prefix + ': ' + faker.lorem.words()[0],
-      domains: [],
-      allowed_ops: {
-        read_config: true,
-        modify_config: true,
-        delete_config: true,
-        purge: true,
-        reports: true,
-        admin: true
-      },
       active: true,
       role: 'admin'
     };

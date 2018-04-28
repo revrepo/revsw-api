@@ -166,15 +166,6 @@ module.exports = [
         payload: {
           key_name        : Joi.string().required().regex(routeModels.apiKeyNameRegex).min(1).max(150).description('Name of the API key'),
           account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
-          domains         : Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
-          allowed_ops     : Joi.object({
-            read_config     : Joi.boolean().required(),
-            modify_config   : Joi.boolean().required(),
-            delete_config   : Joi.boolean().required(),
-            purge           : Joi.boolean().required(),
-            reports         : Joi.boolean().required(),
-            admin           : Joi.boolean().required(),
-          }),
           active          : Joi.boolean().required().description('Tells if the API key is active or not'),
           permissions: routeModels.permissionsModel,
           group_id: Joi.objectId().allow(null).description('ID of the group this key is in'),
