@@ -21,7 +21,7 @@ var Joi = require('joi');
 
 var config = require('config');
 var API = require('./../../../common/api');
-var UsersDP = require('./../../../common/providers/data/users');
+var GroupsDP = require('./../../../common/providers/data/groups');
 
 var SchemaProvider = require('./../../../common/providers/schema/api');
 
@@ -32,34 +32,41 @@ describe('Sanity check', function () {
 
   // Defining set of users for which all below tests will be run
   var users = [
-    config.get('api.users.reseller')
+    config.get('api.users.reseller'),
+    config.get('api.users.admin'),
+    config.get('api.apikeys.admin'),
+    config.get('api.apikeys.reseller')
   ];
   var errorResponseSchema = SchemaProvider.getErrorResponse();
 
   users.forEach(function (user) {
 
     var testAccount;
-    var testUser;
+    var testGroup;
 
     describe('With user: ' + user.role, function () {
 
-      describe('Users resource', function () {
+      describe('Groups resource', function () {
         describe('Error Response Data Schema', function () {
 
           before(function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
-                return API.helpers.accounts.createOne();
+                if (user.role === 'reseller') {
+                  return API.helpers.accounts.createOne();
+                } else {
+                  return user.account;
+                }
               })
               .then(function (newAccount) {
                 testAccount = newAccount;
-                return API.helpers.users.create({
+                return API.helpers.groups.create({
                   account_id: newAccount.id
                 });
               })
-              .then(function (user_) {
-                testUser = user_;
+              .then(function (group_) {
+                testGroup = group_;
               })
               .then(done)
               .catch(done);
@@ -67,9 +74,9 @@ describe('Sanity check', function () {
 
           after(function (done) {
             API.helpers
-              .authenticateUser(user)
+              .authenticate(user)
               .then(function () {
-                API.resources.users.deleteOne(testUser.id).end(done);
+                API.resources.groups.deleteOne(testGroup.id).end(done);
                 //API.resources.apiKeys.deleteAllPrerequisites(done);// TODO-NOTE: this method not work
               })
               .catch(done);
@@ -84,10 +91,10 @@ describe('Sanity check', function () {
           });
 
           it('should return data applying `error response` schema when ' +
-            'getting all Users.',
+            'getting all Groups.',
             function (done) {
               API.session.reset();
-              API.resources.users
+              API.resources.groups
                 .getAll()
                 .expect(401)
                 .then(function (response) {
@@ -98,11 +105,11 @@ describe('Sanity check', function () {
             });
 
           it('should return data applying `error response` schema when ' +
-            'getting specific user.',
+            'getting specific group.',
             function (done) {
               API.session.reset();
-              API.resources.users
-                .getOne(testUser.id)
+              API.resources.groups
+                .getOne(testGroup.id)
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
@@ -112,14 +119,14 @@ describe('Sanity check', function () {
             });
 
           it('should return data applying `error response` schema when ' +
-            'creating specific user.',
+            'creating specific group.',
             function (done) {
-              var newUser = UsersDP.generate({
+              var newGroup = GroupsDP.generateValid({
                 account_id: testAccount.id
               });
               API.session.reset();
-              API.resources.users
-                .createOne(newUser)
+              API.resources.groups
+                .createOne(newGroup)
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
@@ -129,14 +136,14 @@ describe('Sanity check', function () {
             });
 
           it('should return data applying `error response` schema when ' +
-            'updating specific user.',
+            'updating specific group.',
             function (done) {
-              var newUser = UsersDP.generate({
+              var newGroup = GroupsDP.generateValid({
                 account_id: testAccount.id
               });
               API.session.reset();
-              API.resources.users
-                .update(testUser.id, newUser)
+              API.resources.groups
+                .update(testGroup.id, newGroup)
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;
@@ -146,11 +153,11 @@ describe('Sanity check', function () {
             });
 
           it('should return data applying `error response` schema when ' +
-            'deleting a user.',
+            'deleting a group.',
             function (done) {
               API.session.reset();
-              API.resources.users
-                .deleteOne(testUser.id)
+              API.resources.groups
+                .deleteOne(testGroup.id)
                 .expect(401)
                 .then(function (response) {
                   var data = response.body;

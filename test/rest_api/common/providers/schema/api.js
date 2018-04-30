@@ -326,8 +326,16 @@ var APISchemaProviders = {
     return models.userModel;
   },
 
+  getGroup: function () {
+    return models.groupModel;
+  },
+
   getListOfUsers: function () {
     return models.listOfUsersModel;
+  },
+
+  getListOfGroups: function () {
+    return models.listOfGroupsModel;
   },
 
   getCreateAPIKeyStatus: function () {
