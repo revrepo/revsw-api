@@ -172,11 +172,27 @@ exports.listOfUsersModel = Joi.array().items({
   className: 'List of Users'
 });
 
-exports.userModel = Joi.object({
+exports.listOfUsersModel = Joi.array().items({
   user_id: Joi.objectId().required().description('User ID'),
   email: Joi.string().email().required().description('Login name (email address)'),
-  domain: Joi.array().items(Joi.string().description('Domain name the customer can manage')).required()
-    .description('An array of domain names managed by the user'),
+  firstname: Joi.string().required().description('First name'),
+  lastname: Joi.string().required().description('Last name'),
+  role: Joi.string().required().description('User role'),
+  updated_at: Joi.date().required().description('Last update date/time'),
+  last_login_at: Joi.date().allow(null).description('User last login date/time'),
+  two_factor_auth_enabled: Joi.boolean().required().description('Status of two factor authentication'),
+  group_id: Joi.string().allow(null).description('User`s group ID'),
+  account_id: Joi.objectId().allow(null).description('The user`s account ID')
+}).meta({
+  className: 'List of Users'
+});
+
+exports.userModel = Joi.object({
+  user_id: Joi.objectId().required().description('User ID'),
+  invitation_token: Joi.string().allow(null).optional().description('Invitation token'),
+  invitation_expire_at: Joi.date().allow(null).optional().description('The date when the invitation will expire'),
+  invitation_sent_at: Joi.date().allow(null).optional().description('The date when the invitation was sent'),
+  email: Joi.string().email().required().description('Login name (email address)'),
   firstname: Joi.string().required().description('First name'),
   lastname: Joi.string().required().description('Last name'),
   role: Joi.string().required().description('User role'),
@@ -193,6 +209,14 @@ exports.userModel = Joi.object({
   account_id: Joi.objectId().allow(null).description('The user`s account ID')
 }).meta({
   className: 'User profile details'
+});
+
+exports.userCreateModel = Joi.object({
+  statusCode: Joi.number().required().description('HTTP Response status code'),
+  message: Joi.string().required().description('Message'),
+  object_id: Joi.objectId().required().description('ID of new user')
+}).meta({
+  className: 'User Creation response'
 });
 
 

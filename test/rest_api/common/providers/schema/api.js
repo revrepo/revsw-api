@@ -322,11 +322,27 @@ var APISchemaProviders = {
     return models.APIKeyModel;
   },
 
+  getUser: function () {
+    return models.userModel;
+  },
+
+  getListOfUsers: function () {
+    return models.listOfUsersModel;
+  },
+
   getCreateAPIKeyStatus: function () {
     return models.APIKeyStatusModel;
   },
 
+  getCreateUserStatus: function () {
+    return models.userCreateModel;
+  },
+
   getAPIKeyStatus: function () {
+    return models.statusModel;
+  },
+
+  getUserStatus: function () {
     return models.statusModel;
   }
 };
