@@ -418,7 +418,7 @@ module.exports.getStatsEdgeCacheByCType = function (request, reply) {
                 aggs: {
                   cache_hit_miss: {
                     terms: {
-                      field: 'cache' 
+                      field: 'cache'
                     }
                   }
                 }
@@ -461,7 +461,9 @@ module.exports.getStatsEdgeCacheByCType = function (request, reply) {
                 res.HIT = hit;
                 res.MISS = miss;
                 res.total = hit + miss;
-                response.push(res);
+                if (res.total > 0) {
+                  response.push(res);
+                }                
               });
               response = _.sortBy(response, function (val) {
                 return -val.total; // descending
