@@ -393,5 +393,26 @@ module.exports = [{
         schema: routeModels.statusModel
       }
     }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/reseller_accounts',
+    config: {
+      auth: {
+        scope: ['revadmin']
+      },
+      handler: account.getResellerAccounts,
+      description: 'Get a list of all reseller accounts',
+      notes: 'Use this function to get a list of reseller accounts (accounts with at least 1 child account)',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.listOfAccountsModel
+      }
+    }
   }
 ];
