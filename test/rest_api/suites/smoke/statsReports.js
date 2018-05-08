@@ -149,6 +149,20 @@ describe('Smoke check:', function () {
             })
             .catch(done);
         });
+
+        it('should return success response when getting edge cache by content type reports',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.stats
+                .cTypeEdgeCache()
+                .getOne(domain.id)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
     });
   });
 });

@@ -117,6 +117,14 @@ var resourceConfig = {
     },
     {
       idKey: domainConfigIdKey,
+      name: 'cTypeEdgeCache',
+      path: '/edge_cache/content_type/{' + domainConfigIdKey + '}',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: domainConfigIdKey,
       name: 'slowestFBTObjects',
       path: '/slowest_fbt_objects/{' + domainConfigIdKey + '}',
       methods: [
