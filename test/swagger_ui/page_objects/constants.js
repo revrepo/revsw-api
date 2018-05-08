@@ -74,6 +74,7 @@ var Constants = {
         '/v1/ssl_names/{ssl_name_id}/verify',
         '/v1/staging_servers',
         '/v1/stats/edge_cache/{domain_id}',
+        '/v1/stats/edge_cache/content_type/{domain_id}',
         '/v1/stats/fbt/average/{domain_id}',
         '/v1/stats/fbt/distribution/{domain_id}',
         '/v1/stats/fbt/heatmap/{domain_id}',

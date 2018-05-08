@@ -848,3 +848,32 @@ exports.deleteAccount = function(request, reply) {
   }
 
 };
+
+exports.getResellerAccounts = function getAccounts(request, reply) {
+
+  if (request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('Account ID Not Found'));
+  }
+
+  accounts.list(function(error, listOfAccounts) {
+    /* jshint loopfunc: true */
+    var resllerAccounts = [];
+    if (error) {
+      return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+    }
+
+    for (var i = 0; i < listOfAccounts.length; i++) {
+      var acc = _.filter(listOfAccounts, function (item) {
+        return item.id === listOfAccounts[i].parent_account_id;
+      });
+
+      if (acc[0]) {
+        resllerAccounts.push(acc[0]);
+      }
+    }
+
+    resllerAccounts = _.uniq(resllerAccounts);
+    var accounts_list = publicRecordFields.handle(resllerAccounts, 'accounts');
+    renderJSON(request, reply, error, accounts_list);
+  });
+};

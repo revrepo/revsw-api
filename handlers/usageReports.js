@@ -112,45 +112,97 @@ exports.getAccountReport = function (request, reply) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
-    var from = new Date(), to = new Date();// NOTE: default report period
-    var from_ = request.query.from,
-      to_ = request.query.to;
-
-    if (!!from_) {
-      from = new Date(from_);
-    }
-    from.setUTCDate(1);             //  the very beginning of the month
-    from.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
-    if (!!to_) {
-      to = new Date(to_);
-    }
-    to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
-    var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
-    return reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
-      .then(function (response) {
-        var response_ = {
-          metadata: {
-            account_id: accountID,
-            from: from.valueOf(),
-            from_datetime: from,
-            to: to.valueOf(),
-            to_datetime: to,
-            data_points_count: response.length
-          },
-          data: response
-        };
-        return response_;
-      }).then(function (response) {
-        if (isFromCache === true) {
-          logger.info('getAccountStats:return cache for key - ' + cacheKey);
+    if (request.query.agg) {
+      accounts.listByParentID(request.query.account_id, function(error, listOfAccounts) {
+        if (error) {
+          return reply(boom.badImplementation('Failed to read accounts list from the DB'));
         }
-        reply(response).type('application/json; charset=utf-8');
-      }).catch(function (err) {
-        var msg = err.toString() + ': account ID ' + accountID +
-          ', span from ' + (new Date(from)).toUTCString() +
-          ', to ' + (new Date(to)).toUTCString();
-        return reply(boom.badImplementation(msg));
+        accountID = [request.query.account_id];
+        _.map(listOfAccounts, function (acc) {
+          accountID.push(acc.id);
+        });
+  
+        var from = new Date(), to = new Date();// NOTE: default report period
+        var from_ = request.query.from,
+          to_ = request.query.to;
+    
+        if (!!from_) {
+          from = new Date(from_);
+        }
+        from.setUTCDate(1);             //  the very beginning of the month
+        from.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+        if (!!to_) {
+          to = new Date(to_);
+        }
+        to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+        var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
+        return reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+          .then(function (response) {        
+            var response_ = {
+              metadata: {
+                account_id: accountID,
+                from: from.valueOf(),
+                from_datetime: from,
+                to: to.valueOf(),
+                to_datetime: to,
+                data_points_count: response.length
+              },
+              data: response
+            };
+            return response_;
+          }).then(function (response) {
+            if (isFromCache === true) {
+              logger.info('getAccountStats:return cache for key - ' + cacheKey);
+            }
+            reply(response).type('application/json; charset=utf-8');
+          }).catch(function (err) {
+            var msg = err.toString() + ': account ID ' + accountID +
+              ', span from ' + (new Date(from)).toUTCString() +
+              ', to ' + (new Date(to)).toUTCString();
+            return reply(boom.badImplementation(msg));
+          });
       });
+    } else {
+      var from = new Date(), to = new Date();// NOTE: default report period
+      var from_ = request.query.from,
+        to_ = request.query.to;
+  
+      if (!!from_) {
+        from = new Date(from_);
+      }
+      from.setUTCDate(1);             //  the very beginning of the month
+      from.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+      if (!!to_) {
+        to = new Date(to_);
+      }
+      to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+      var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
+      return reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+        .then(function (response) {        
+          var response_ = {
+            metadata: {
+              account_id: accountID,
+              from: from.valueOf(),
+              from_datetime: from,
+              to: to.valueOf(),
+              to_datetime: to,
+              data_points_count: response.length
+            },
+            data: response
+          };
+          return response_;
+        }).then(function (response) {
+          if (isFromCache === true) {
+            logger.info('getAccountStats:return cache for key - ' + cacheKey);
+          }
+          reply(response).type('application/json; charset=utf-8');
+        }).catch(function (err) {
+          var msg = err.toString() + ': account ID ' + accountID +
+            ', span from ' + (new Date(from)).toUTCString() +
+            ', to ' + (new Date(to)).toUTCString();
+          return reply(boom.badImplementation(msg));
+        });
+    }
   });
 };
 
@@ -198,7 +250,17 @@ exports.getAccountStats = function (request, reply) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
-  var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * 61/*allowed period - 2 months*/);
+  if (request.query.agg) {
+    accounts.listByParentID(request.query.account_id, function(error, listOfAccounts) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+      }
+      accountID = [request.query.account_id];
+      _.map(listOfAccounts, function (acc) {
+        accountID.push(acc.id);
+      });
+
+      var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * 61/*allowed period - 2 months*/);
   if (span.error) {
     return reply(boom.badRequest(span.error));
   }
@@ -220,6 +282,32 @@ exports.getAccountStats = function (request, reply) {
         ', to ' + (new Date(span.end)).toUTCString();
       return reply(boom.badImplementation(msg));
     });
+
+    });
+  } else {
+    var span = utils.query2Span(request.query, 24/*def start in hrs*/, 24 * 61/*allowed period - 2 months*/);
+  if (span.error) {
+    return reply(boom.badRequest(span.error));
+  }
+  var cacheKey = 'getAccountStats:' + accountID + ':' + JSON.stringify(request.query);
+  multiCache.wrap(cacheKey, function () {
+    isFromCache = false;
+    span.interval = 86400000; //  voluntarily set to full day
+    return reports.checkLoadStats(span, accountID);
+  })
+    .then(function (response) {
+      if (isFromCache === true) {
+        logger.info('getAccountStats:return cache for key - ' + cacheKey);
+      }
+      reply(response).type('application/json; charset=utf-8');
+    })
+    .catch(function (err) {
+      var msg = err.toString() + ': account ID ' + accountID +
+        ', span from ' + (new Date(span.start)).toUTCString() +
+        ', to ' + (new Date(span.end)).toUTCString();
+      return reply(boom.badImplementation(msg));
+    });
+  }
   });  
 };
 

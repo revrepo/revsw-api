@@ -48,6 +48,7 @@ module.exports = [{
         to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
         only_overall: Joi.boolean().default(true).description('Report should contain only overall summary, default true'),
         keep_samples: Joi.boolean().default(false).description('Report should contain 5min interval traffic data, default false'),
+        agg: Joi.boolean().optional('Get an aggregated report for all child accounts')
       }
     }
   }
@@ -71,7 +72,8 @@ module.exports = [{
       query: {
         account_id: Joi.objectId().allow('').default('').description('Account ID, optional'),
         from_timestamp: Joi.number().unit('milliseconds').description('Report period start timestamp (defaults to 24 hours ago from now)'),
-        to_timestamp: Joi.number().unit('milliseconds').description('Report period end timestamp (defaults to now)')
+        to_timestamp: Joi.number().unit('milliseconds').description('Report period end timestamp (defaults to now)'),
+        agg: Joi.boolean().optional('Get an aggregated report for all child accounts')
       }
     }
   }
