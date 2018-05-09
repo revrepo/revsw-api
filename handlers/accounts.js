@@ -523,9 +523,10 @@ exports.getAccountStatements = function(request, reply) {
     }
     Customer.getStatements(account.subscription_id, function(error, statements) {
       if (error) {
-        return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to receive statements for subscription' +
-          ' Subscription ID: ' + account.subscription_id +
-          ' Account ID: ' + account_id, error));
+        logger.error('Accounts::getAccountStatements: Failed to receive statements for subscription' +
+        ' Subscription ID: ' + account.subscription_id +
+        ' Account ID: ' + account_id + ';' + error);
+        return reply(boom.badRequest('Could not get subscription ID: ' + account.subscription_id));
       }
       statements = publicRecordFields.handle(statements, 'statements');
       renderJSON(request, reply, error, statements);
