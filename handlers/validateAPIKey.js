@@ -34,6 +34,7 @@ var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 var permissionsScope = require('./../lib/requestPermissionScope');
+var utils = require('./../lib/utilities');
 var accountId;
 
 exports.validateAPIKey = function (request, key, callback) {
@@ -48,23 +49,32 @@ exports.validateAPIKey = function (request, key, callback) {
 
     if (!result) {
       logger.warn('Cannot find API ' + key + ' in the database');
-      return callback(error, false, result);
-    }
-
-      if (!result.account_id) {
-        logger.error('API key ' + key + ' does not have a proper account_id attribute');
         return callback(error, false, result);
-      }
+      } else if (result) {
+        /* update API Key used at and used from records */
+        result.last_used_at = Date.now();
+        result.last_used_from = utils.getAPIUserRealIP(request);
 
-      if (!result.active) {
-        logger.warn('Trying to use disabled API key ' + key);
-        return callback(error, false, result);
-      }
+        apiKeys.updateLastUsed(result, function (err, doc) {
+          if (err) {
+            return callback(err, false, result);
+          }
+          if (!result.account_id) {
+            logger.error('API key ' + key + ' does not have a proper account_id attribute');
+            return callback(error, false, result);
+          }
 
-      permissionsScope.setPermissionsScope(result).then(function (res) {
-        return callback(null, true, res);
-      }).catch(function (err) {
-        return callback(err, false, result);
-      });
+          if (!result.active) {
+            logger.warn('Trying to use disabled API key ' + key);
+            return callback(error, false, result);
+          }
+
+          permissionsScope.setPermissionsScope(result).then(function (res) {
+            return callback(null, true, res);
+          }).catch(function (err) {
+            return callback(err, false, result);
+          });
+        });
+      }
     });
 };

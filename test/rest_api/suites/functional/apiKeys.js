@@ -16,6 +16,7 @@
  * from Rev Software, Inc.
  */
 require('should-http');
+var should = require('should');
 // # Functional check: API Keys
 var config = require('config');
 var _ = require('lodash');
@@ -23,12 +24,14 @@ var API = require('./../../common/api');
 var DataProvider = require('./../../common/providers/data');
 var AccountsDP = require('./../../common/providers/data/accounts');
 var APIKeyDataProvider = require('./../../common/providers/data/apiKeys');
+var moment = require('moment');
 
 describe('Functional check', function () {
   this.timeout(config.get('api.request.maxTimeout'));
   var resellerUser = config.get('api.users.reseller');
   var accountFirst, accountSecond, accountForDelete;
   var userReseller = DataProvider.generateUser('reseller');
+  var revAdmin = config.api.users.revAdmin;
 
   before(function (done) {
     API.helpers
@@ -138,6 +141,41 @@ describe('Functional check', function () {
             });
         })
         .catch(done);
+    });
+
+    it('should successfully update API Key\'s last used data on usage', function (done) {
+      API.authenticate(revAdmin)
+        .then(function () {
+          API.helpers.apiKeys.createOne()
+            .then(function (key) {
+              API
+                .resources
+                .apiKeys
+                .getOne(key.id)
+                .expect(200)
+                .then(function (res) {
+                  should(res.body.last_used_at).equal(null);
+                  should(res.body.last_used_from).equal(null);
+                  API.authenticate(res.body)
+                    .then(function () {
+                      API
+                        .resources
+                        .apiKeys
+                        .getOne(key.id)
+                        .expect(200)
+                        .then(function (res_) {
+                          var ipRegex = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/;
+                          moment(res_.body.last_used_at)
+                            .diff(Date.now(), 'seconds').should.be.lessThan(5);
+                          should(ipRegex.test(res_.body.last_used_from)).equal(true);
+                          done();
+                        });
+                    });
+                })
+                .catch(done);
+            })
+            .catch(done);
+        });
     });
   });
 });

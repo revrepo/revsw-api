@@ -38,6 +38,8 @@ function APIKey(mongoose, connection, options) {
     'active'          : {type: Boolean, default: true},
     'created_at'      : {type: Date, default: Date.now},
     'updated_at'      : {type: Date, default: Date.now},
+    last_used_at: { type: Date, default: null },
+    last_used_from: { type: String, default: null },
     permissions: permissionsSchema,
     group_id: {type: this.ObjectId, default: null},
     role: { type: String, default: 'admin' }
@@ -125,6 +127,30 @@ APIKey.prototype = {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.id =  item._id + '';
+
+            delete item._id;
+            delete item.__v;
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
+    });
+  },
+
+  updateLastUsed: function (item, callback) {
+    this.model.findOne({
+      key: item.key
+    }, function (err, doc) {
+      if (doc) {
+        for (var attrname in item) {
+          doc[attrname] = item[attrname];
+        }
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
