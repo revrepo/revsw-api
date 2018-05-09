@@ -429,6 +429,8 @@ exports.listOfAPIKeysModel = Joi.array().items({
   active: Joi.boolean().description('Active or inactive API key'),
   created_at: Joi.date().description('API key creation date/time'),
   updated_at: Joi.date().description('API key last update date/time'),
+  last_used_at: Joi.date().allow(null).description('Last time the API Key was used'),
+  last_used_from: Joi.string().allow(null).description('IP of client last used the key'),
   group_id: Joi.string().allow(null).required().description('ID of the group the API key is in'),
   role: Joi.string().description('Role of the API Key')
 }).meta({
@@ -444,6 +446,8 @@ exports.APIKeyModel = Joi.object({
   active: Joi.boolean().description('Active or inactive API key'),
   created_at: Joi.date().description('API key creation date/time'),
   updated_at: Joi.date().description('API key last update date/time'),
+  last_used_at: Joi.date().allow(null).description('Last time the API Key was used'),
+  last_used_from: Joi.string().allow(null).description('IP of client last used the key'),
   permissions: permissionsModel,
   group_id: Joi.string().allow(null).required().description('ID of the group the API key is in'),
   role: Joi.string().description('Role of the API Key')
