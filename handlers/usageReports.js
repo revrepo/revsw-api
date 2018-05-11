@@ -44,6 +44,8 @@ var mongoose = require('mongoose');
 var mongoConnection = require('./../lib/mongoConnections');
 var Account = require('./../models/Account');
 var accounts = promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
+var Json2csvParser = require('json2csv').Parser;
+var csvFormatter = require('./../lib/csvFormatter');
 
 exports.getResellersAccounts = function (request) {
   return new promise(function (resolve, reject) {
@@ -374,3 +376,154 @@ exports.generateAccountReport = function (request, reply) {
       return;
     });
 };
+
+/**
+ * @name exportCSVReport
+ * @description Export an account's usage report as a CSV file.
+ * @param {*} request 
+ * @param {*} reply 
+ */
+exports.exportCSVReport = function (request, reply) {
+  getUsageReport(request).then(function (response) {
+    csvFormatter.formatUsageReport(response.data[0]).then(function (csvReport) {
+      return reply(csvReport);
+    });    
+  });
+};
+
+/**
+ * @description Get a usage report (function similiar to exports.getAccountReport())
+ * @param {*} request 
+ */
+function getUsageReport(request) {
+  var accountIds = utils.getAccountID(request);
+  return exports.getResellersAccounts(request).then(function (resellerAccs) {
+    accountIds = resellerAccs;
+    var queryProperties = _.clone(request.query);
+    var isFromCache = true;
+    var accountID = request.query.account_id || '';
+    var isValidAccountId = true;
+    var isRevAdmin = utils.isUserRevAdmin(request);
+    if (!isRevAdmin) {    // For non-revadmin user check the validity of requested account IDs
+      if (accountID === '') {
+        accountID = utils.getAccountID(request);
+        if (accountID.length === 0) {
+          isValidAccountId = false;
+        }
+        if (accountID.length === 1) {
+          accountID = accountID[0];
+        }
+      } else {
+        if (!permissionCheck.checkPermissionsToResource(request, { id: accountID }, 'accounts')) {
+          isValidAccountId = false;
+        }
+      }
+    } else {
+      // for revadmin role just give whatever is requested
+      accountIds = accountID;
+    }
+
+    accountIds = accountID;
+
+    if (request.auth.credentials.role === 'reseller' && resellerAccs && !request.query.account_id) {
+      accountID = accountIds;
+      accountID.push(request.auth.credentials.account_id);
+    }
+  
+    if ((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
+      return false;
+    }
+
+    if (request.query.agg) {
+      accounts.listByParentID(request.query.account_id, function(error, listOfAccounts) {
+        if (error) {
+          return false;
+        }
+        accountID = [request.query.account_id];
+        _.map(listOfAccounts, function (acc) {
+          accountID.push(acc.id);
+        });
+  
+        var from = new Date(), to = new Date();// NOTE: default report period
+        var from_ = request.query.from,
+          to_ = request.query.to;
+    
+        if (!!from_) {
+          from = new Date(from_);
+        }
+        from.setUTCDate(1);             //  the very beginning of the month
+        from.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+        if (!!to_) {
+          to = new Date(to_);
+        }
+        to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+        var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
+        return reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+          .then(function (response) {        
+            var response_ = {
+              metadata: {
+                account_id: accountID,
+                from: from.valueOf(),
+                from_datetime: from,
+                to: to.valueOf(),
+                to_datetime: to,
+                data_points_count: response.length
+              },
+              data: response
+            };
+            return response_;
+          }).then(function (response) {
+            if (isFromCache === true) {
+              logger.info('getAccountStats:return cache for key - ' + cacheKey);
+            }
+            return response;
+          }).catch(function (err) {
+            var msg = err.toString() + ': account ID ' + accountID +
+              ', span from ' + (new Date(from)).toUTCString() +
+              ', to ' + (new Date(to)).toUTCString();
+            return false;
+          });
+      });
+    } else {
+      var from = new Date(), to = new Date();// NOTE: default report period
+      var from_ = request.query.from,
+        to_ = request.query.to;
+  
+      if (!!from_) {
+        from = new Date(from_);
+      }
+      from.setUTCDate(1);             //  the very beginning of the month
+      from.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+      if (!!to_) {
+        to = new Date(to_);
+      }
+      to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
+      var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
+      return reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+        .then(function (response) {        
+          var response_ = {
+            metadata: {
+              account_id: accountID,
+              from: from.valueOf(),
+              from_datetime: from,
+              to: to.valueOf(),
+              to_datetime: to,
+              data_points_count: response.length
+            },
+            data: response
+          };
+          return response_;
+        }).then(function (response) {
+          if (isFromCache === true) {
+            logger.info('getAccountStats:return cache for key - ' + cacheKey);
+          }
+          return response;
+        }).catch(function (err) {
+          var msg = err.toString() + ': account ID ' + accountID +
+            ', span from ' + (new Date(from)).toUTCString() +
+            ', to ' + (new Date(to)).toUTCString();
+          return false;
+        });
+    }
+  });
+}

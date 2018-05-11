@@ -100,6 +100,31 @@ module.exports = [{
       }
     }
   }
+},
+
+{
+  method: 'GET',
+  path: '/v1/usage_reports/export_csv',
+  config: {
+    auth: {
+      scope: ['admin', 'reseller', 'revadmin', 'apikey']
+    },
+    handler: usageReports.exportCSVReport,
+    description: 'Create a CSV report for a usage report',
+    plugins: {
+      'hapi-swagger': {
+        responseMessages: routeModels.standardHTTPErrors
+      }
+    },
+    validate: {
+      params: {},
+      query: {
+        account_id: Joi.objectId().allow('').default('').description('Account ID, optional'),
+        from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
+        to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
+      }
+    }
+  }
 }
 
 ];
