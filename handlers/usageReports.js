@@ -385,7 +385,23 @@ exports.generateAccountReport = function (request, reply) {
  */
 exports.exportCSVReport = function (request, reply) {
   getUsageReport(request).then(function (response) {
-    csvFormatter.formatUsageReport(response.data).then(function (csvReports) {
+    csvFormatter.formatUsageReport(response).then(function (csvReports) {
+      var headerString = ['"Account ID"',
+        '"Company Name"',
+        '"Object Type"',
+        '"Object ID"',
+        '"Object Name"',
+        '"Metric Code ID"',
+        '"Metric Description"',
+        '"Metric Value"',
+        '"Metric Unit"',
+        '"Billing Period Start Date"',
+        '"Billing Period End Date"'];
+      for (var i = 0; i < csvReports.length; i++) {
+        if (i !== 0) {
+          csvReports[i] = csvReports[i].replace(headerString.toString(), '');
+        }
+      }
       var res = {
         csvContent: csvReports,
         created_at: Date.now()
@@ -393,9 +409,9 @@ exports.exportCSVReport = function (request, reply) {
       return reply(res);
     });
   })
-  .catch(function (err) {
-    return reply(boom.badRequest(err));
-  });
+    .catch(function (err) {
+      return reply(boom.badRequest(err));
+    });
 };
 
 /**
@@ -405,7 +421,7 @@ exports.exportCSVReport = function (request, reply) {
 function getUsageReport(request) {
   return new Promise(function (resolve, reject) {
     var accountIds = utils.getAccountID(request);
-   exports.getResellersAccounts(request).then(function (resellerAccs) {
+    exports.getResellersAccounts(request).then(function (resellerAccs) {
       accountIds = resellerAccs;
       var queryProperties = _.clone(request.query);
       var isFromCache = true;
@@ -430,18 +446,18 @@ function getUsageReport(request) {
         // for revadmin role just give whatever is requested
         accountIds = accountID;
       }
-  
+
       accountIds = accountID;
-  
+
       if (request.auth.credentials.role === 'reseller' && resellerAccs && !request.query.account_id) {
         accountID = accountIds;
         accountID.push(request.auth.credentials.account_id);
       }
-  
+
       if ((!isRevAdmin && !accountIds.length) || !isValidAccountId) {
         return reject('Account ID Not Found');
       }
-  
+
       if (request.query.agg) {
         accounts.listByParentID(request.query.account_id, function (error, listOfAccounts) {
           if (error) {
@@ -451,11 +467,11 @@ function getUsageReport(request) {
           _.map(listOfAccounts, function (acc) {
             accountID.push(acc.id);
           });
-  
+
           var from = new Date(), to = new Date();// NOTE: default report period
           var from_ = request.query.from,
             to_ = request.query.to;
-  
+
           if (!!from_) {
             from = new Date(from_);
           }
@@ -466,7 +482,7 @@ function getUsageReport(request) {
           }
           to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
           var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
-         reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+          reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
             .then(function (response) {
               var response_ = {
                 metadata: {
@@ -496,7 +512,7 @@ function getUsageReport(request) {
         var from = new Date(), to = new Date();// NOTE: default report period
         var from_ = request.query.from,
           to_ = request.query.to;
-  
+
         if (!!from_) {
           from = new Date(from_);
         }
@@ -507,7 +523,7 @@ function getUsageReport(request) {
         }
         to.setUTCHours(0, 0, 0, 0); //  the very beginning of the day
         var cacheKey = 'getAccountReport:' + accountID + ':' + JSON.stringify(queryProperties);
-       reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
+        reports.checkLoadReports(from, to, accountID, request.query.only_overall, request.query.keep_samples)
           .then(function (response) {
             var response_ = {
               metadata: {
@@ -534,5 +550,5 @@ function getUsageReport(request) {
           });
       }
     });
-  });  
+  });
 }
