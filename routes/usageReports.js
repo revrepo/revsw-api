@@ -122,6 +122,7 @@ module.exports = [{
         account_id: Joi.objectId().allow('').default('').description('Account ID, optional'),
         from: Joi.string().regex(routeModels.dateRegex).description('Report period start date in YYYY-MM-DD format'),
         to: Joi.string().regex(routeModels.dateRegex).description('Report period end(inclusive) date in YYYY-MM-DD format'),
+        agg: Joi.boolean().optional('Get an aggregated report for all child accounts')
       }
     }
   }
