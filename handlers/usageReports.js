@@ -419,7 +419,7 @@ exports.exportCSVReport = function (request, reply) {
  * @param {*} request 
  */
 function getUsageReport(request) {
-  return new Promise(function (resolve, reject) {
+  return new promise(function (resolve, reject) {
     var accountIds = utils.getAccountID(request);
     exports.getResellersAccounts(request).then(function (resellerAccs) {
       accountIds = resellerAccs;
