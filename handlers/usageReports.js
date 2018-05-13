@@ -44,7 +44,6 @@ var mongoose = require('mongoose');
 var mongoConnection = require('./../lib/mongoConnections');
 var Account = require('./../models/Account');
 var accounts = promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
-var Json2csvParser = require('json2csv').Parser;
 var csvFormatter = require('./../lib/csvFormatter');
 
 exports.getResellersAccounts = function (request) {
