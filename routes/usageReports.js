@@ -126,6 +126,23 @@ module.exports = [{
       }
     }
   }
+},
+
+{
+  method: 'GET',
+  path: '/v1/usage_reports/export_csv/metrics',
+  config: {
+    auth: {
+      scope: ['admin', 'reseller', 'revadmin', 'apikey']
+    },
+    handler: usageReports.getCSVReportMetrics,
+    description: 'Get the CSV report metric break-down',
+    plugins: {
+      'hapi-swagger': {
+        responseMessages: routeModels.standardHTTPErrors
+      }
+    }
+  }
 }
 
 ];

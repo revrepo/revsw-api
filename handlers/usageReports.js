@@ -45,6 +45,7 @@ var mongoConnection = require('./../lib/mongoConnections');
 var Account = require('./../models/Account');
 var accounts = promise.promisifyAll(new Account(mongoose, mongoConnection.getConnectionPortal()));
 var csvFormatter = require('./../lib/csvFormatter');
+var CSVREPORT_METRICS = require('./../lib/jsons/csvReportMetrics');
 
 exports.getResellersAccounts = function (request) {
   return new promise(function (resolve, reject) {
@@ -405,12 +406,30 @@ exports.exportCSVReport = function (request, reply) {
         csvContent: csvReports,
         created_at: Date.now()
       };
+
       return reply(res);
     });
   })
     .catch(function (err) {
       return reply(boom.badRequest(err));
     });
+};
+
+/**
+ * @name getCSVReportMetrics
+ * @description Get the CSV report metrics
+ * @param {*} request 
+ * @param {*} reply 
+ */
+exports.getCSVReportMetrics = function (request, reply) {
+  var metrics = CSVREPORT_METRICS.map(function (metric) {
+      return {
+        metric_id: metric.metric_id,
+        metric_desc: metric.metric_desc
+      };
+  });
+
+  return reply(metrics);
 };
 
 /**
