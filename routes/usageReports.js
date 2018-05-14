@@ -111,6 +111,7 @@ module.exports = [{
     },
     handler: usageReports.exportCSVReport,
     description: 'Create a CSV report for a usage report',
+    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors
@@ -137,6 +138,7 @@ module.exports = [{
     },
     handler: usageReports.getCSVReportMetrics,
     description: 'Get the CSV report metric break-down',
+    tags: ['api'],
     plugins: {
       'hapi-swagger': {
         responseMessages: routeModels.standardHTTPErrors

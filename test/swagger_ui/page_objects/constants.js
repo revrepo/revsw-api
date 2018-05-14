@@ -112,6 +112,8 @@ var Constants = {
         '/v1/stats/{domain_id}/activity',
         '/v1/usage_reports/web',
         '/v1/usage_reports/web/stats',
+        '/v1/usage_reports/export_csv',
+        '/v1/usage_reports/export_csv/metrics',
         '/v1/users',
         '/v1/users/myself',
         '/v1/users/password/{user_id}',
