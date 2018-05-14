@@ -78,6 +78,33 @@ describe('Smoke check', function () {
               })
               .catch(done);
           });
+
+          it('should return a success response when getting a CSV usage report.', 
+          function (done) {
+            API.helpers
+              .authenticate(user)
+              .then(function () {
+                API.resources.csvExporting
+                  .getAll({account_id: account_id})
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
+
+          it('should return a success response when getting the CSV usage report format metrics.', 
+          function (done) {
+            API.helpers
+              .authenticate(user)
+              .then(function () {
+                API.resources.csvExporting                
+                  .metrics()
+                  .getAll()
+                  .expect(200)
+                  .end(done);
+              })
+              .catch(done);
+          });
       });
     });
   });

@@ -53,6 +53,7 @@ var AzureResource = require('./azure');
 var WAFStats = require('./wafStats');
 var AuthenticateSSOAzure = require('./authenticateSSOAzure');
 var ProxyRes = require('./proxy');
+var CSVExporting = require('./csvExporting');
 
 // Set of all resources that the REST API service provides..
 var APIResources = {
@@ -90,7 +91,8 @@ var APIResources = {
   wafStats: WAFStats,
   authenticateSSOAzure: AuthenticateSSOAzure,
   proxy: ProxyRes,
-  groups: GroupsResource
+  groups: GroupsResource,
+  csvExporting: CSVExporting
 };
 
 module.exports = APIResources;
