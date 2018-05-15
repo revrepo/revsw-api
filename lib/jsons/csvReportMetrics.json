@@ -400,16 +400,6 @@
         "metric_desc": "Billable Sent Bps"
     },
     {
-        "metric_id": 81,
-        "metric_field": "acc_id",
-        "metric_desc": "Account ID"
-    },
-    {
-        "metric_id": 82,
-        "metric_field": "acc_name",
-        "metric_desc": "Account Name"
-    },
-    {
         "metric_id": 83,
         "metric_field": "active_domains",
         "metric_desc": "Active Domains"
