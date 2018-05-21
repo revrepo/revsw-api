@@ -1,0 +1,28 @@
+{
+    "default_values": {
+        "requests_per_second": 5,
+        "heavy_requests_per_second": 1,
+        "heavy_requests": [
+            {
+                "endpoint": "/v1/domains",
+                "methods": "*"
+            },
+            {
+                "endpoint": "/v1/apps",
+                "methods": "*"
+            },
+            {
+                "endpoint": "/v1/waf_rules",
+                "methods": "POST,PUT,DELETE"
+            }
+        ]
+    },
+    "exceptions": [
+        {
+            "account_id": null,
+            "requests_per_second": 1,
+            "endpoint": "/v1/domains",
+            "methods": "POST"
+        }
+    ]
+}

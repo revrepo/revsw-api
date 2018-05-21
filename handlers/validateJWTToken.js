@@ -37,6 +37,7 @@ var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 
 var defaultSystemVendorProfile = config.get('default_system_vendor_profile');
 var permissionsScope = require('./../lib/requestPermissionScope');
+var requestThrottling = require('./../lib/requestThrottling');
 
 
 exports.validateJWTToken = function (request, decodedToken, callback) {
@@ -45,16 +46,25 @@ exports.validateJWTToken = function (request, decodedToken, callback) {
 
   users.get({
     _id: user_id, password: password
-  }, function(error, result) {
+  }, function (error, result) {
 
     if (!result) {
       return callback(error, false, result);
     }
 
-    permissionsScope.setPermissionsScope(result).then(function (res) {
-      return callback(null, true, res); 
-    }).catch(function (err) {
-      return callback(err, false, result); 
-    });
+    if (!result.account_id && result.role !== 'revadmin') {
+      return callback('Account ID is not set', false, result);
+    }
+
+    requestThrottling.checkAccount(request, result.account_id).then(function (response) {
+      permissionsScope.setPermissionsScope(result).then(function (res) {
+        return callback(null, true, res);
+      }).catch(function (err) {
+        return callback(err, false, result);
+      });
+    })
+      .catch(function (err) {
+        return callback(err, false, null);
+      });
   });
 };
