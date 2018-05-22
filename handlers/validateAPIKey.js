@@ -36,6 +36,7 @@ var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 var permissionsScope = require('./../lib/requestPermissionScope');
 var utils = require('./../lib/utilities');
 var accountId;
+var requestThrottling = require('./../lib/requestThrottling');
 
 exports.validateAPIKey = function (request, key, callback) {
   apiKeys.get({
@@ -69,11 +70,16 @@ exports.validateAPIKey = function (request, key, callback) {
             return callback(error, false, result);
           }
 
-          permissionsScope.setPermissionsScope(result).then(function (res) {
-            return callback(null, true, res);
-          }).catch(function (err) {
-            return callback(err, false, result);
-          });
+          requestThrottling.checkAccount(request, result.account_id).then(function (response) {
+            permissionsScope.setPermissionsScope(result).then(function (res) {
+              return callback(null, true, res);
+            }).catch(function (err) {
+              return callback(err, false, result);
+            });
+          })
+            .catch(function (err) {
+              return callback(err, false, null);
+            });
         });
       }
     });
