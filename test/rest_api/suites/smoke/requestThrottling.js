@@ -21,7 +21,7 @@ require('should-http');
 var config = require('config');
 var API = require('./../../common/api');
 
-describe('Smoke check', function () {
+xdescribe('Smoke check', function () {
 
     // Changing default mocha's timeout (Default is 2 seconds).
     this.timeout(config.get('api.request.maxTimeout'));
