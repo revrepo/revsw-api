@@ -519,5 +519,9 @@
   "infra_db_password": "7pmlZ5axCwYe",
   "max_number_of_uncompleted_waf_auto_generated_rule_jobs": 5,
   "max_number_of_dashboards_per_user":30,
-  "bp_group_id_default": "55a56f85476c10c329a90740"
+  "bp_group_id_default": "55a56f85476c10c329a90740",
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 6379
+  }
 }
