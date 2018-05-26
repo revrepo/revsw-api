@@ -17,7 +17,7 @@
  */
 
 require('should-http');
-
+var should = require('should');
 var config = require('config');
 var API = require('./../../common/api');
 
@@ -39,20 +39,24 @@ describe('Smoke check', function () {
 
             describe('API Requests Throttling', function () {
                 it('should limit API Requests per second', function (done) {
+                    let flag = false;
+                    let c = 0;
                     API.authenticate(user).then(function () {
-                        for (let j = 0; j < 50; j++) {
-                            let flag = false;
+                        for (let j = 0; j < 50; j++) {                            
                             API
                                 .resources
                                 .users
                                 .getAll()
                                 .then(function (res) {
-                                    if (res.text === 'API Requests limit reached, please try again later.') {
-                                        flag = true;
+                                    c++;
+                                    if (res.body.statusCode === 429) {
+                                        res
+                                            .body
+                                            .message
+                                            .should
+                                            .equal('API Requests limit reached, please try again later.');
                                     }
-
-                                    if (j === 49) {
-                                        flag.should.equal(true);
+                                    if (c === 49) {
                                         done();
                                     }
                                 });
@@ -62,20 +66,21 @@ describe('Smoke check', function () {
 
                 it('should NOT limit API Requests if limit is not reached', function (done) {
                     setTimeout(function () {
+                        let flag = false;
+                        let c = 0;
                         API.authenticate(user).then(function () {
-                            for (let j = 0; j < 3; j++) {
-                                let flag = false;
+                            for (let j = 0; j < 4; j++) {                                
                                 API
                                     .resources
                                     .users
                                     .getAll()
                                     .then(function (res) {
-                                        if (res.text === 'API Requests limit reached, please try again later.') {
-                                            flag = true;
+                                        c++;
+                                        if (res.body.statusCode === 429) {
+                                            should(false).equal(true);
                                         }
 
-                                        if (j === 2) {
-                                            flag.should.equal(false);
+                                        if (c === 3) {
                                             done();
                                         }
                                     });

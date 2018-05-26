@@ -6,51 +6,31 @@
         "if `account_id` matches an account, the rule is only active for that specific account.",
         "methods can contain all possible methods seperated by a comma."
     ],
-    "requests_per_second": 5,
+    "requests_per_second": 15,
     "requests_config": [
         {
             "account_id": null,
-            "endpoint": "/v1/domains",
+            "endpoint": "/v1/domain_configs",
             "methods": "*",
-            "requests_per_second": 1
+            "requests_per_second": 3
         },
         {
             "account_id": null,
             "endpoint": "/v1/apps",
             "methods": "*",
-            "requests_per_second": 1
+            "requests_per_second": 3
+        },
+        {
+            "account_id": null,
+            "endpoint": "/v1/dns_zones",
+            "methods": "*",
+            "requests_per_second": 3
         },
         {
             "account_id": null,
             "endpoint": "/v1/waf_rules",
-            "methods": "POST,PUT,DELETE",
-            "requests_per_second": 1
-        },
-        {
-            "account_id": "asdf",
-            "endpoint": "/v1/domains",
-            "methods": "POST",
-            "requests_per_second": 10
-        },
-        {
-            "account_id": "55b6ff6a7957012304a49d04",
-            "endpoint": "/v1/users",
-            "methods": "GET",
-            "requests_per_second": 10,
-            "comment": [
-                "THIS RULE IS FOR `API QA ACCOUNT`",
-                "PLEASE DONT DELETE THIS RULE, ITS USED FOR TESTING."
-            ]
-        },
-        {
-            "account_id": "55b6ff6a7957012304a49d04",
-            "endpoint": "/v1/apps",
-            "methods": "GET",
-            "requests_per_second": 10,
-            "comment": [
-                "THIS RULE IS FOR `API QA ACCOUNT`",
-                "PLEASE DONT DELETE THIS RULE, ITS USED FOR TESTING."
-            ]
+            "methods": "POST,PUT",
+            "requests_per_second": 3
         }
     ]
 }

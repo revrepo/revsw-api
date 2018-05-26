@@ -6,17 +6,6 @@
         "if `account_id` matches an account, the rule is only active for that specific account.",
         "methods can contain all possible methods seperated by a comma."
     ],
-    "requests_per_second": 500,
-    "requests_config": [
-        {
-            "account_id": "55b6ff6a7957012304a49d04",
-            "endpoint": "/v1/apps",
-            "methods": "GET",
-            "requests_per_second": 1000,
-            "comment": [
-                "THIS RULE IS FOR `API QA ACCOUNT`",
-                "PLEASE DONT DELETE THIS RULE, ITS USED FOR TESTING."
-            ]
-        }
-    ]
+    "requests_per_second": 40,
+    "requests_config": []
 }

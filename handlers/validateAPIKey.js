@@ -22,6 +22,7 @@
 
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
+var boom = require('boom');
 
 var mongoose = require('mongoose');
 var mongoConnection = require('../lib/mongoConnections');
@@ -78,7 +79,7 @@ exports.validateAPIKey = function (request, key, callback) {
             });
           })
             .catch(function (err) {
-              return callback(err, false, null);
+              return callback(boom.tooManyRequests(config.API_request_throttling_message));
             });
         });
       }
