@@ -21,7 +21,7 @@ require('should-http');
 var config = require('config');
 var API = require('./../../common/api');
 
-xdescribe('Smoke check', function () {
+describe('Smoke check', function () {
 
     // Changing default mocha's timeout (Default is 2 seconds).
     this.timeout(config.get('api.request.maxTimeout'));
@@ -39,9 +39,9 @@ xdescribe('Smoke check', function () {
 
             describe('API Requests Throttling', function () {
                 it('should limit API Requests per second', function (done) {
+                    let flag = false;
                     API.authenticate(user).then(function () {
                         for (let j = 0; j < 50; j++) {
-                            let flag = false;
                             API
                                 .resources
                                 .users
@@ -62,9 +62,9 @@ xdescribe('Smoke check', function () {
 
                 it('should NOT limit API Requests if limit is not reached', function (done) {
                     setTimeout(function () {
+                        let flag = false;
                         API.authenticate(user).then(function () {
-                            for (let j = 0; j < 3; j++) {
-                                let flag = false;
+                            for (let j = 0; j < 10; j++) {
                                 API
                                     .resources
                                     .users
@@ -74,7 +74,7 @@ xdescribe('Smoke check', function () {
                                             flag = true;
                                         }
 
-                                        if (j === 2) {
+                                        if (j === 9) {
                                             flag.should.equal(false);
                                             done();
                                         }
