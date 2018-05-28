@@ -10,7 +10,7 @@
         "Except for checking staging/global status because those",
         "requests are sent in bulk from the Portal"
     ],
-    "requests_per_second": 15,
+    "requests_per_second": 150,
     "requests_config": [
         {
             "account_id": null,
