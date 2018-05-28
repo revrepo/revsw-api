@@ -11,26 +11,20 @@
         {
             "account_id": null,
             "endpoint": "/v1/domain_configs",
-            "methods": "*",
-            "requests_per_second": 6
+            "methods": "POST,PUT,DELETE",
+            "requests_per_second": 2
         },
         {
             "account_id": null,
-            "endpoint": "/v1/apps",
-            "methods": "*",
-            "requests_per_second": 6
-        },
-        {
-            "account_id": null,
-            "endpoint": "/v1/dns_zones",
-            "methods": "*",
-            "requests_per_second": 6
+            "endpoint": "/v1/ssl_certs",
+            "methods": "PUT",
+            "requests_per_second": 2
         },
         {
             "account_id": null,
             "endpoint": "/v1/waf_rules",
-            "methods": "POST,PUT",
-            "requests_per_second": 6
+            "methods": "PUT",
+            "requests_per_second": 2
         }
     ]
 }
