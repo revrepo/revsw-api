@@ -21,13 +21,13 @@
         {
             "account_id": null,
             "endpoint": "/v1/ssl_certs",
-            "methods": "PUT",
+            "methods": "POST,PUT,DELETE",
             "requests_per_second": 2
         },
         {
             "account_id": null,
             "endpoint": "/v1/waf_rules",
-            "methods": "PUT",
+            "methods": "POST,PUT,DELETE",
             "requests_per_second": 2
         }
     ]
