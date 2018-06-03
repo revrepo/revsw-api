@@ -217,7 +217,7 @@
     {
         "metric_id": 44,
         "metric_field": "traffic.count",
-        "metric_desc": "Count Traffic"
+        "metric_desc": "Total Traffic"
     },
     {
         "metric_id": 45,
@@ -232,12 +232,12 @@
     {
         "metric_id": 47,
         "metric_field": "traffic.billable_received_bps",
-        "metric_desc": "Billable Received Bps Traffic"
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps"
     },
     {
         "metric_id": 48,
         "metric_field": "traffic.billable_sent_bps",
-        "metric_desc": "Billable Sent Bps Traffic"
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps"
     },
     {
         "metric_id": 49,
@@ -247,7 +247,7 @@
     {
         "metric_id": 50,
         "metric_field": "traffic_per_billing_zone.North America.count",
-        "metric_desc": "Count North America Traffic Per Billing Zone"
+        "metric_desc": "Total North America Traffic Per Billing Zone"
     },
     {
         "metric_id": 51,
@@ -267,17 +267,17 @@
     {
         "metric_id": 54,
         "metric_field": "traffic_per_billing_zone.North America.billable_received_bps",
-        "metric_desc": "Billable Received Bps North America Traffic Per Billing Zone"
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps North America"
     },
     {
         "metric_id": 55,
         "metric_field": "traffic_per_billing_zone.North America.billable_sent_bps",
-        "metric_desc": "Billable Sent Bps North America Traffic Per Billing Zone"
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps North America"
     },
     {
         "metric_id": 56,
         "metric_field": "traffic_per_billing_zone.Testing Lab.count",
-        "metric_desc": "Count Testing Lab Traffic Per Billing Zone"
+        "metric_desc": "Total Testing Lab Traffic Per Billing Zone"
     },
     {
         "metric_id": 57,
@@ -297,12 +297,12 @@
     {
         "metric_id": 60,
         "metric_field": "traffic_per_billing_zone.Testing Lab.billable_received_bps",
-        "metric_desc": "Billable Received Bps Testing Lab Traffic Per Billing Zone"
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Testing Lab"
     },
     {
         "metric_id": 61,
         "metric_field": "traffic_per_billing_zone.Testing Lab.billable_sent_bps",
-        "metric_desc": "Billable Sent Bps Testing Lab Traffic Per Billing Zone"
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Testing Lab"
     },
     {
         "metric_id": 62,
@@ -312,12 +312,12 @@
     {
         "metric_id": 63,
         "metric_field": "port_hits.80",
-        "metric_desc": "80 Port Hits"
+        "metric_desc": "HTTP"
     },
     {
         "metric_id": 64,
         "metric_field": "port_hits.443",
-        "metric_desc": "443 Port Hits"
+        "metric_desc": "HTTPS"
     },
     {
         "metric_id": 65,
@@ -362,7 +362,7 @@
     {
         "metric_id": 73,
         "metric_field": "image_engine.optimized_images_count",
-        "metric_desc": "Optimized Images Count Image Engine"
+        "metric_desc": "Optimized Images Amount Image Engine"
     },
     {
         "metric_id": 74,
@@ -377,7 +377,7 @@
     {
         "metric_id": 76,
         "metric_field": "count",
-        "metric_desc": "Count"
+        "metric_desc": "Requests"
     },
     {
         "metric_id": 77,
@@ -392,12 +392,12 @@
     {
         "metric_id": 79,
         "metric_field": "billable_received_bps",
-        "metric_desc": "Billable Received Bps"
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile)"
     },
     {
         "metric_id": 80,
         "metric_field": "billable_sent_bps",
-        "metric_desc": "Billable Sent Bps"
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile)"
     },
     {
         "metric_id": 83,
@@ -418,5 +418,155 @@
         "metric_id": 86,
         "metric_field": "billing_samples",
         "metric_desc": "Billing Samples"
+    },
+    {
+        "metric_id": 561,
+        "metric_field": "traffic_per_billing_zone.Africa.count",
+        "metric_desc": "Total Africa Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 571,
+        "metric_field": "traffic_per_billing_zone.Africa.received_bytes",
+        "metric_desc": "Received Bytes Africa Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 581,
+        "metric_field": "traffic_per_billing_zone.Africa.sent_bytes",
+        "metric_desc": "Sent Bytes Africa Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 591,
+        "metric_field": "traffic_per_billing_zone.Africa.billing_samples",
+        "metric_desc": "Billing Samples Africa Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 601,
+        "metric_field": "traffic_per_billing_zone.Africa.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Africa"
+    },
+    {
+        "metric_id": 611,
+        "metric_field": "traffic_per_billing_zone.Africa.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Africa"
+    },
+    {
+        "metric_id": 562,
+        "metric_field": "traffic_per_billing_zone.Asia.count",
+        "metric_desc": "Total Asia Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 572,
+        "metric_field": "traffic_per_billing_zone.Asia.received_bytes",
+        "metric_desc": "Received Bytes Asia Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 582,
+        "metric_field": "traffic_per_billing_zone.Asia.sent_bytes",
+        "metric_desc": "Sent Bytes Asia Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 592,
+        "metric_field": "traffic_per_billing_zone.Asia.billing_samples",
+        "metric_desc": "Billing Samples Asia Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 602,
+        "metric_field": "traffic_per_billing_zone.Asia.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Asia"
+    },
+    {
+        "metric_id": 612,
+        "metric_field": "traffic_per_billing_zone.Asia.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Asia"
+    },
+    {
+        "metric_id": 563,
+        "metric_field": "traffic_per_billing_zone.Europe.count",
+        "metric_desc": "Total Europe Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 573,
+        "metric_field": "traffic_per_billing_zone.Europe.received_bytes",
+        "metric_desc": "Received Bytes Europe Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 583,
+        "metric_field": "traffic_per_billing_zone.Europe.sent_bytes",
+        "metric_desc": "Sent Bytes Europe Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 593,
+        "metric_field": "traffic_per_billing_zone.Europe.billing_samples",
+        "metric_desc": "Billing Samples Europe Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 603,
+        "metric_field": "traffic_per_billing_zone.Europe.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Europe"
+    },
+    {
+        "metric_id": 613,
+        "metric_field": "traffic_per_billing_zone.Europe.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Europe"
+    },
+    {
+        "metric_id": 564,
+        "metric_field": "traffic_per_billing_zone.Oceania.count",
+        "metric_desc": "Total Oceania Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 574,
+        "metric_field": "traffic_per_billing_zone.Oceania.received_bytes",
+        "metric_desc": "Received Bytes Oceania Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 584,
+        "metric_field": "traffic_per_billing_zone.Oceania.sent_bytes",
+        "metric_desc": "Sent Bytes Oceania Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 594,
+        "metric_field": "traffic_per_billing_zone.Oceania.billing_samples",
+        "metric_desc": "Billing Samples Oceania Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 604,
+        "metric_field": "traffic_per_billing_zone.Oceania.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Oceania"
+    },
+    {
+        "metric_id": 614,
+        "metric_field": "traffic_per_billing_zone.Oceania.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Oceania"
+    },
+    {
+        "metric_id": 565,
+        "metric_field": "traffic_per_billing_zone.South America.count",
+        "metric_desc": "Total South America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 575,
+        "metric_field": "traffic_per_billing_zone.South America.received_bytes",
+        "metric_desc": "Received Bytes South America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 585,
+        "metric_field": "traffic_per_billing_zone.South America.sent_bytes",
+        "metric_desc": "Sent Bytes South America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 595,
+        "metric_field": "traffic_per_billing_zone.South America.billing_samples",
+        "metric_desc": "Billing Samples South America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 605,
+        "metric_field": "traffic_per_billing_zone.South America.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps South America"
+    },
+    {
+        "metric_id": 615,
+        "metric_field": "traffic_per_billing_zone.South America.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps South America"
     }
 ]
