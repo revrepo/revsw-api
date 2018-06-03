@@ -77,77 +77,77 @@
     {
         "metric_id": 16,
         "metric_field": "api_keys.total",
-        "metric_desc": "Total Api Keys"
+        "metric_desc": "Total API Keys"
     },
     {
         "metric_id": 17,
         "metric_field": "api_keys.inactive",
-        "metric_desc": "Inactive Api Keys"
+        "metric_desc": "Inactive API Keys"
     },
     {
         "metric_id": 18,
         "metric_field": "api_keys.active",
-        "metric_desc": "Active Api Keys"
+        "metric_desc": "Active API Keys"
     },
     {
         "metric_id": 19,
         "metric_field": "api_keys",
-        "metric_desc": "Api Keys"
+        "metric_desc": "API Keys"
     },
     {
         "metric_id": 20,
         "metric_field": "ssl_certs.total",
-        "metric_desc": "Total Ssl Certs"
+        "metric_desc": "Total SSL Certs"
     },
     {
         "metric_id": 21,
         "metric_field": "ssl_certs.deleted",
-        "metric_desc": "Deleted Ssl Certs"
+        "metric_desc": "Deleted SSL Certs"
     },
     {
         "metric_id": 22,
         "metric_field": "ssl_certs.active",
-        "metric_desc": "Active Ssl Certs"
+        "metric_desc": "Active SSL Certs"
     },
     {
         "metric_id": 23,
         "metric_field": "ssl_certs",
-        "metric_desc": "Ssl Certs"
+        "metric_desc": "SSL Certs"
     },
     {
         "metric_id": 24,
         "metric_field": "ssl_certs_per_type.private.total",
-        "metric_desc": "Total Private Ssl Certs Per Type"
+        "metric_desc": "Total Private SSL Certs Per Type"
     },
     {
         "metric_id": 25,
         "metric_field": "ssl_certs_per_type.private.deleted",
-        "metric_desc": "Deleted Private Ssl Certs Per Type"
+        "metric_desc": "Deleted Private SSL Certs Per Type"
     },
     {
         "metric_id": 26,
         "metric_field": "ssl_certs_per_type.private.active",
-        "metric_desc": "Active Private Ssl Certs Per Type"
+        "metric_desc": "Active Private SSL Certs Per Type"
     },
     {
         "metric_id": 27,
         "metric_field": "ssl_certs_per_type.shared.total",
-        "metric_desc": "Total Shared Ssl Certs Per Type"
+        "metric_desc": "Total Shared SSL Certs Per Type"
     },
     {
         "metric_id": 28,
         "metric_field": "ssl_certs_per_type.shared.deleted",
-        "metric_desc": "Deleted Shared Ssl Certs Per Type"
+        "metric_desc": "Deleted Shared SSL Certs Per Type"
     },
     {
         "metric_id": 29,
         "metric_field": "ssl_certs_per_type.shared.active",
-        "metric_desc": "Active Shared Ssl Certs Per Type"
+        "metric_desc": "Active Shared SSL Certs Per Type"
     },
     {
         "metric_id": 30,
         "metric_field": "ssl_certs_per_type",
-        "metric_desc": "Ssl Certs Per Type"
+        "metric_desc": "SSL Certs Per Type"
     },
     {
         "metric_id": 31,
@@ -167,12 +167,12 @@
     {
         "metric_id": 34,
         "metric_field": "domains.ssl_enabled",
-        "metric_desc": "Ssl Enabled Domains"
+        "metric_desc": "SSL Enabled Domains"
     },
     {
         "metric_id": 35,
         "metric_field": "domains.total_custom_vcl_feature",
-        "metric_desc": "Total Custom Vcl Feature Domains"
+        "metric_desc": "Total Custom VCL Feature Domains"
     },
     {
         "metric_id": 36,
@@ -182,7 +182,7 @@
     {
         "metric_id": 37,
         "metric_field": "domains.total_waf_feature",
-        "metric_desc": "Total Waf Feature Domains"
+        "metric_desc": "Total WAF Feature Domains"
     },
     {
         "metric_id": 38,
@@ -197,27 +197,27 @@
     {
         "metric_id": 40,
         "metric_field": "dns_zones.total_dns_zones",
-        "metric_desc": "Total Dns Zones Dns Zones"
+        "metric_desc": "Total DNS Zones"
     },
     {
         "metric_id": 41,
         "metric_field": "dns_zones.total_dns_records",
-        "metric_desc": "Total Dns Records Dns Zones"
+        "metric_desc": "Total DNS Records"
     },
     {
         "metric_id": 42,
         "metric_field": "dns_zones.total_dns_queries",
-        "metric_desc": "Total Dns Queries Dns Zones"
+        "metric_desc": "Total DNS Queries"
     },
     {
         "metric_id": 43,
         "metric_field": "dns_zones",
-        "metric_desc": "Dns Zones"
+        "metric_desc": "DNS Zones"
     },
     {
         "metric_id": 44,
         "metric_field": "traffic.count",
-        "metric_desc": "Total Traffic"
+        "metric_desc": "Total Requests"
     },
     {
         "metric_id": 45,
@@ -247,7 +247,7 @@
     {
         "metric_id": 50,
         "metric_field": "traffic_per_billing_zone.North America.count",
-        "metric_desc": "Total North America Traffic Per Billing Zone"
+        "metric_desc": "Requests In North America Billing Zone"
     },
     {
         "metric_id": 51,
@@ -277,7 +277,7 @@
     {
         "metric_id": 56,
         "metric_field": "traffic_per_billing_zone.Testing Lab.count",
-        "metric_desc": "Total Testing Lab Traffic Per Billing Zone"
+        "metric_desc": "Requests In Testing Lab Billing Zone"
     },
     {
         "metric_id": 57,
@@ -312,12 +312,12 @@
     {
         "metric_id": 63,
         "metric_field": "port_hits.80",
-        "metric_desc": "HTTP"
+        "metric_desc": "HTTP Requests"
     },
     {
         "metric_id": 64,
         "metric_field": "port_hits.443",
-        "metric_desc": "HTTPS"
+        "metric_desc": "HTTPS Requests"
     },
     {
         "metric_id": 65,
@@ -342,7 +342,7 @@
     {
         "metric_id": 69,
         "metric_field": "total_ssl_names",
-        "metric_desc": "Total Ssl Names"
+        "metric_desc": "Total SSL Names"
     },
     {
         "metric_id": 70,
@@ -422,7 +422,7 @@
     {
         "metric_id": 561,
         "metric_field": "traffic_per_billing_zone.Africa.count",
-        "metric_desc": "Total Africa Traffic Per Billing Zone"
+        "metric_desc": "Requests In Africa Billing Zone"
     },
     {
         "metric_id": 571,
@@ -452,7 +452,7 @@
     {
         "metric_id": 562,
         "metric_field": "traffic_per_billing_zone.Asia.count",
-        "metric_desc": "Total Asia Traffic Per Billing Zone"
+        "metric_desc": "Requests In Asia Billing Zone"
     },
     {
         "metric_id": 572,
@@ -482,7 +482,7 @@
     {
         "metric_id": 563,
         "metric_field": "traffic_per_billing_zone.Europe.count",
-        "metric_desc": "Total Europe Traffic Per Billing Zone"
+        "metric_desc": "Requests In Europe Billing Zone"
     },
     {
         "metric_id": 573,
@@ -512,7 +512,7 @@
     {
         "metric_id": 564,
         "metric_field": "traffic_per_billing_zone.Oceania.count",
-        "metric_desc": "Total Oceania Traffic Per Billing Zone"
+        "metric_desc": "Requests In Oceania Billing Zone"
     },
     {
         "metric_id": 574,
@@ -542,7 +542,7 @@
     {
         "metric_id": 565,
         "metric_field": "traffic_per_billing_zone.South America.count",
-        "metric_desc": "Total South America Traffic Per Billing Zone"
+        "metric_desc": "Requests In South America Billing Zone"
     },
     {
         "metric_id": 575,
