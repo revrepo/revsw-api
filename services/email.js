@@ -153,3 +153,33 @@ exports.sendInvitationEmail = function(options, cb) {
     cb(null);
   }
 };
+
+exports.sendNotificationEmail = function (options, cb) {
+  var email = options.userEmail;
+  var content = options.notificationContent;
+  var title = options.notificationTitle;
+
+  if (email !== '') {
+    var mailHTML = content;
+    var mailOptions = {
+      to: email,
+      fromname: config.get('vendor_profiles').revapm.support_name,
+      from: config.get('vendor_profiles').revapm.support_email,
+      subject: title,
+      html: mailHTML
+    };
+
+    mail.sendMail(mailOptions, function(err, data) {
+      if (err) {
+        logger.error('sendNotificationEmail:error: ' + JSON.stringify(err));
+        cb(err);
+      } else {
+        logger.info('sendNotificationEmail:success');
+        cb(err, data);
+      }
+    });
+  } else {
+    logger.info('sendNotificationEmail');
+    cb(null);
+  }
+};

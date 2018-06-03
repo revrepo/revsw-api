@@ -22,13 +22,13 @@
 
 var mongoose = require('mongoose');
 var boom = require('boom');
-
+var config = require('config');
 var mongoConnection = require('../lib/mongoConnections');
 var renderJSON = require('../lib/renderJSON');
 var utils = require('../lib/utilities.js');
 var publicRecordFields = require('../lib/publicRecordFields');
 var AuditLogger = require('../lib/audit');
-
+var emailer = require('./../services/email');
 var NotificationList = require('../models/NotificationList');
 
 var notificationList = new NotificationList(mongoose, mongoConnection.getConnectionPortal());
@@ -213,5 +213,59 @@ exports.deleteNotificationList = function(request, reply) {
       // }, request);
       renderJSON(request, reply, error, statusResponse);
     });
+  });
+};
+
+exports.sendNotificationToList = function(request, reply) {
+  var alerterToken = request.headers['x-trafficalerter-token'];
+  if (!alerterToken || (alerterToken !== config.traffic_alerter.token)) {
+    // send a 404 not found, we want to keep this endpoint private, only for revsw-trafficalerter.
+    return reply(boom.notFound());
+  }
+
+  var notificationListId = request.params.list_id;
+  var notificationContent = request.payload.notification_content;
+  var notificationTitle = request.payload.notification_title;
+
+  if (!notificationContent || notificationContent === '') {
+    return reply(boom.badRequest('Notification content is empty'));
+  }
+  notificationList.get({
+    _id: notificationListId
+  }, function(error, result) {
+
+    if (error) {
+      return reply(boom.badImplementation('Error retrieving Notification List with id ' + notificationListId));
+    }
+
+    if (!result) {
+      return reply(boom.badRequest('Notification List ID not found'));
+    }
+
+    if (!result.destinations) {
+      return reply(boom.badRequest('Notification List has no destinations'));      
+    }
+
+    result.destinations.forEach(function (dest) {
+      switch (dest.destination_type) {
+        case 'email':
+          if (!dest.email || dest.email === '') {
+            return reply(boom.badRequest('Notification List Destination has no email'));
+          }
+
+          emailer.sendNotificationEmail({
+            userEmail: dest.email,
+            notificationContent: notificationContent,
+            notificationTitle: notificationTitle
+          }, function (err, res) {
+            if (err) {
+              return reply(boom.badRequest(err));
+            }
+
+            return reply(res);
+          });
+          break;
+      }
+    });    
   });
 };
