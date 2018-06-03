@@ -102,6 +102,7 @@
     "x509": "^0.2.6",
     "yargs": "^3.30.0",
     "zlibjs": "^0.2.0",
+    "supertest": "^1.1.0",
     "supertest-as-promised": "^2.0.2"
   },
   "devDependencies": {
