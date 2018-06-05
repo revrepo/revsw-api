@@ -22,7 +22,7 @@
             "account_id": null,
             "endpoint": "/v1/ssl_certs",
             "methods": "POST,PUT,DELETE",
-            "requests_per_second": 2
+            "requests_per_second": 150
         },
         {
             "account_id": null,
