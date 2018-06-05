@@ -62,6 +62,7 @@ var Constants = {
         '/v1/log_shipping_jobs/{log_job_id}/status',
         '/v1/notification_lists',
         '/v1/notification_lists/{list_id}',
+        '/v1/notification_lists/{list_id}/send_notification',
         '/v1/purge',
         '/v1/purge/{request_id}',
         '/v1/ssl_certs',
@@ -125,6 +126,8 @@ var Constants = {
         '/v1/groups',
         '/v1/groups/{group_id}',
         '/v1/groups/{group_id}/users',
+        '/v1/traffic_alerts',
+        '/v1/traffic_alerts/{traffic_alert_id}'
     ]
 };
 module.exports = Constants;
