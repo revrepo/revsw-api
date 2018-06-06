@@ -111,7 +111,7 @@ module.exports = [
           stripUnknown: true
         },
         params: {
-          trafficAlert_id: Joi.objectId().required().description('The ID of trafficAlert to be updated')
+          traffic_alert_id: Joi.objectId().required().description('The ID of trafficAlert to be updated')
         },
         payload: {
           name: Joi.string().min(2).max(100).required(),
@@ -152,6 +152,32 @@ module.exports = [
       },
       response: {
         schema: routeModels.trafficAlertModel
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/traffic_alerts/{traffic_alert_id}/status',
+    config: {
+      auth: {
+        scope: ['revadmin', 'reseller', 'admin']
+      },
+      handler: trafficAlerts.getTrafficAlertStatus,
+      description: 'Get alert rule status',
+      tags: ['api'],
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          traffic_alert_id: Joi.objectId().required().description('trafficAlert ID')
+        }
+      },
+      response: {
+        schema: routeModels.trafficAlertRuleStatus
       }
     }
   },
