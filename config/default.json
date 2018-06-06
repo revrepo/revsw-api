@@ -45,7 +45,7 @@
   },
   "traffic_alerter": {
     "host": "127.0.0.1",
-    "port": "7000",
+    "port": "7443",
     "token": "9ff71a58943396c3491bd7f65303407bcb8c2068f66ee584fabc04c17bfce97d"
   },
   "service": {

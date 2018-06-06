@@ -191,47 +191,37 @@ exports.createTrafficAlert = function (request, reply) {
  */
 exports.getTrafficAlert = function (request, reply) {
 
-  var id = request.params.TrafficAlert_id;
+  var id = request.params.traffic_alert_id;
   var operation;
   if (request.query.filters && request.query.filters.operation) {
     operation = request.query.filters.operation;
   }
   trafficAlertsConfigs.getById(id).then(function (TrafficAlert) {
-    var result = publicRecordFields.handle(TrafficAlert, 'TrafficAlert');
-    renderJSON(request, reply, null, result);
+    var result = publicRecordFields.handle(TrafficAlert, 'trafficAlerts');
+    return renderJSON(request, reply, null, result);
   }).catch(function (err) {
     return reply(boom.badRequest(err));
   });
 };
 
 /**
- * @name getTrafficAlertUsers
+ * @name getTrafficAlertStatus
  * @description
- *   Get a single TrafficAlerts list of users/APIkeys
+ *   Get rule alert status
  *
  * @param  {[type]} request [description]
  * @param  {[type]} reply   [description]
  * @return {[type]}         [description]
  */
-exports.getTrafficAlertUsers = function (request, reply) {
-  var id = request.params.TrafficAlert_id;
-  var userList = [];
-  trafficAlertsConfigs.getById(id).then(function (TrafficAlert) {
-    users.list({ TrafficAlert_id: TrafficAlert.id }, function (err, users) {
-      userList = userList.concat(users);
-      APIkeys.model.find({ TrafficAlert_id: { $in: [TrafficAlert.id] } }, function (error, keys) {
-        userList = userList.concat(keys);
-        var result = {
-          count: userList.length,
-          users: userList
-        };
-        var res = publicRecordFields.handle(result, 'TrafficAlertUsers');
-        renderJSON(request, reply, null, res);
-      });
+exports.getTrafficAlertStatus = function (request, reply) {
+
+  var id = request.params.traffic_alert_id;
+  trafficAlerter.getAlertRuleStatus(id).then(function (res) {
+    return reply({ status: res.body });
+  })
+    .catch(function (err) {
+      return reply(boom.badRequest(err));
     });
-  }).catch(function (err) {
-    return reply(boom.badRequest(err));
-  });
 };
 
 /**
@@ -255,7 +245,7 @@ exports.updateTrafficAlert = function (request, reply) {
         return cb('No attributes specified');
       }
 
-      TrafficAlertId = request.params.TrafficAlert_id;
+      TrafficAlertId = request.params.traffic_alert_id;
       updateTrafficAlertData.id = TrafficAlertId;
 
       cb();
@@ -269,7 +259,7 @@ exports.updateTrafficAlert = function (request, reply) {
       }
 
       trafficAlertsConfigs.update(updateTrafficAlertData).then(function (result) {
-        resultTrafficAlertData = publicRecordFields.handle(result, 'TrafficAlert');
+        resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
         cb();
       }).catch(function (err) {
         return reply(boom.badRequest(err));
