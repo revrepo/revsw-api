@@ -80,7 +80,7 @@ module.exports = [
           notifications_list_id: Joi.objectId().required(),
           target_type: Joi.string().allow(['domain']).required(),
           target: Joi.string().required(),
-          rule_type: Joi.string().allow(['rps_spike', 'rps_level']).required(),
+          rule_type: Joi.string().required(),
           rule_config: Joi.object().required()
         }
       },
@@ -119,7 +119,7 @@ module.exports = [
           notifications_list_id: Joi.objectId().required(),
           target_type: Joi.string().allow(['domain']).required(),
           target: Joi.string().required(),
-          rule_type: Joi.string().allow(['rps_spike', 'rps_level']).required(),
+          rule_type: Joi.string().required(),
           rule_config: Joi.object().required()
         }
       },
