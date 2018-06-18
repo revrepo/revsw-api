@@ -37,11 +37,13 @@ function TrafficAlertConfig(mongoose, connection, options) {
     target: { type: String },
     rule_type: { type: String },
     rule_config: { type: Object },
-    status: { type: String, default: 'active' },
+    status: { type: String, default: 'unknown' },
     created_at: { type: Date, default: Date.now() },
     created_by: { type: String },
     updated_at: { type: Date, default: Date.now() },
     updated_by: { type: String },
+    last_hit: { type: Date, default: null },
+    last_run: { type: Date, default: null },
     notifications_list_id: { type: mongoose.SchemaTypes.ObjectId }
   });
 

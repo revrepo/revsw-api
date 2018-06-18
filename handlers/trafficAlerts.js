@@ -92,8 +92,8 @@ exports.getTrafficAlerts = function getTrafficAlerts(request, reply) {
       return renderJSON(request, reply, null, listOfTrafficAlerts);
     }
 
-    for (let i = 0; i < listOfTrafficAlerts.length; i++) {
-      if (!listOfTrafficAlerts[i].notifications_list_id) {
+    if (false) {
+      for (let i = 0; i < listOfTrafficAlerts.length; i++) {
         trafficAlertsConfigs.removeById(listOfTrafficAlerts[i].id);
       }
     }
