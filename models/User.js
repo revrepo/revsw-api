@@ -456,6 +456,27 @@ User.prototype = {
       }
       cb(err, { total: total });
     });
+  },
+
+  /**
+   * @name getRevAdmins
+   * @description get a list of revadmins in our system
+   */
+  getRevAdmins: function () {
+    var me = this;
+    return new promise(function (resolve, reject) {
+      me.model.find({}, function (err, res) {
+        if (err) {
+          return reject(err);
+        }
+
+        res = res.filter(function (user) {
+          return user.role === 'revadmin';
+        });
+
+        return resolve(res);
+      });
+    });
   }
 };
 
