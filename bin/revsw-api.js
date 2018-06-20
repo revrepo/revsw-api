@@ -333,7 +333,7 @@ server.ext('onPreResponse', function(request, reply) {
           });
 
           return reply.continue();
-        } else if (response.source.data && response.source.data.length > 0) {
+        } else if (response.source && response.source.data && response.source.data.length > 0) {
           response.source.data.forEach(function (item) {
             revadminHideFields.forEach(function (field) {
               for (var itemField in item) {
