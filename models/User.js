@@ -465,14 +465,10 @@ User.prototype = {
   getRevAdmins: function () {
     var me = this;
     return new promise(function (resolve, reject) {
-      me.model.find({}, function (err, res) {
+      me.model.find({ role: 'revadmin' }, function (err, res) {
         if (err) {
           return reject(err);
         }
-
-        res = res.filter(function (user) {
-          return user.role === 'revadmin';
-        });
 
         return resolve(res);
       });
