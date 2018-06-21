@@ -529,5 +529,6 @@
     "host": "127.0.0.1",
     "port": 6379
   },
-  "API_request_throttling_message": "API Requests limit reached, please try again later."
+  "API_request_throttling_message": "API Requests limit reached, please try again later.",
+  "hide_revadmin_email_from_fields": true,
 }
