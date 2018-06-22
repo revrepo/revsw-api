@@ -310,74 +310,28 @@ server.ext('onPreResponse', function(request, reply) {
         if (isFromCache === true) {
           logger.info('hapi:onPreResponse:return cache for key - ' + cacheKey);
         }
-        if (response.source && response.source.length > 0) {
-          /*jshint loopfunc: true*/
-          response.source.forEach(function (item) {
-            revadminHideFields.forEach(function (field) {
-              for (var itemField in item) {
-                if (itemField === field) {
-                  var mail = item[itemField];
-                  var admin = res.find(function (user) {
-                    return user.email === mail;
-                  });
 
-                  if (admin) {
-                    item[itemField] = vendorProfiles[request
-                      .auth
-                      .credentials
-                      .vendor_profile].support_name;
-                  }
-                }
-              }
-            });
+        if (response.source) {
+
+          let replacer = function(str, find, replace) {
+            return str.replace(new RegExp(find, 'g'), replace);
+          };
+
+          let resJSON = JSON.stringify(response.source);
+          res.forEach(function (admin) {
+            resJSON = replacer(resJSON, admin.email, vendorProfiles[request
+              .auth
+              .credentials
+              .vendor_profile].support_name);
           });
 
-          return reply.continue();
-        } else if (response.source && response.source.data && response.source.data.length > 0) {
-          response.source.data.forEach(function (item) {
-            revadminHideFields.forEach(function (field) {
-              for (var itemField in item) {
-                if (itemField === field) {
-                  var mail = item[itemField];
-                  var admin = res.find(function (user) {
-                    return user.email === mail;
-                  });
-
-                  if (admin) {
-                    item[itemField] = vendorProfiles[request
-                      .auth
-                      .credentials
-                      .vendor_profile].support_name;
-                  }
-                }
-              }
-            });
-          });
-
-          return reply.continue();
-        } else if (response.source) {
-          revadminHideFields.forEach(function (field) {
-            for (var itemField in response.source) {
-              if (itemField === field) {
-                var mail = response.source[itemField];
-                var admin = res.find(function (user) {
-                  return user.email === mail;
-                });
-
-                if (admin) {
-                  response.source[itemField] = vendorProfiles[request
-                    .auth
-                    .credentials
-                    .vendor_profile].support_name;
-                }
-              }
-            }
-          });
+          response.source = JSON.parse(resJSON);
 
           return reply.continue();
         } else {
           return reply.continue();
         }
+
       })
       .catch(function (err) {
         var msg = err.toString();
