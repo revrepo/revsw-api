@@ -281,5 +281,10 @@
    "<br>The link will expire in 24 hours.<br>", 
    "Kind regards,<br>RevAPM Customer Support Team<br>http://www.revapm.com/"
  ],
- "notification_window_for_expiring_ssl_cert_days": 30
+ "notification_window_for_expiring_ssl_cert_days": 30,
+ "vendor_profiles": {
+   "revapm": "RevAPM Support Team",
+   "nuubit": "nuu:bit Support Team",
+   "hooli": "Hooli Support Team"
+ }
 }
