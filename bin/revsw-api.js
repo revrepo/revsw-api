@@ -319,10 +319,14 @@ server.ext('onPreResponse', function(request, reply) {
 
           let resJSON = JSON.stringify(response.source);
           res.forEach(function (admin) {
-            resJSON = replacer(resJSON, admin.email, vendorProfiles[request
-              .auth
-              .credentials
-              .vendor_profile].support_name);
+            if (request.auth.credentials.vendor_profile) {
+              resJSON = replacer(resJSON, admin.email, vendorProfiles[request
+                .auth
+                .credentials
+                .vendor_profile].support_name);
+            } else {
+              resJSON = replacer(resJSON, admin.email, 'RevAPM Support Team');
+            }
           });
 
           response.source = JSON.parse(resJSON);
