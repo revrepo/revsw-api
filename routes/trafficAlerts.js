@@ -120,7 +120,8 @@ module.exports = [
           target_type: Joi.string().allow(['domain']).required(),
           target: Joi.string().required(),
           rule_type: Joi.string().required(),
-          rule_config: Joi.object().required()
+          rule_config: Joi.object().required(),
+          silenced: Joi.boolean()
         }
       },
       response: {
