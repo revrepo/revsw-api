@@ -121,7 +121,8 @@ module.exports = [
           target: Joi.string().required(),
           rule_type: Joi.string().required(),
           rule_config: Joi.object().required(),
-          silenced: Joi.boolean()
+          silenced: Joi.boolean(),
+          silence_until: Joi.date().allow([null, 'null'])
         }
       },
       response: {

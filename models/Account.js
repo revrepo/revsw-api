@@ -85,7 +85,9 @@ function Account(mongoose, connection, options) {
     },
     'promocode': {type: String, default: null},
     'bp_group_id': {type: this.ObjectId, default : null },
-    parent_account_id: {type: this.ObjectId, default: null}
+    parent_account_id: {type: this.ObjectId, default: null},
+    silence_alerts: { type: Boolean, default: false },
+    silence_until: { type: Date, default: null }
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');

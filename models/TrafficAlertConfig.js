@@ -45,7 +45,8 @@ function TrafficAlertConfig(mongoose, connection, options) {
     last_hit: { type: Date, default: null },
     last_run: { type: Date, default: null },
     notifications_list_id: { type: mongoose.SchemaTypes.ObjectId },
-    silenced: { type: Boolean, default: false }
+    silenced: { type: Boolean, default: false },
+    silence_until: { type: Date, default: null }
   });
 
   this.model = connection.model('TrafficAlertConfig', this.TrafficAlertConfigSchema, 'TrafficAlertConfig');
