@@ -127,7 +127,8 @@ var Constants = {
         '/v1/groups/{group_id}',
         '/v1/groups/{group_id}/users',
         '/v1/traffic_alerts',
-        '/v1/traffic_alerts/{traffic_alert_id}'
+        '/v1/traffic_alerts/{traffic_alert_id}',
+        '/v1/traffic_alerts/{traffic_alert_id}/status'
     ]
 };
 module.exports = Constants;

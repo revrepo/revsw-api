@@ -51,7 +51,7 @@ exports.purgeObject = function(request, reply) {
   var domainId;
 
   domainConfigs.query({
-    domain_name : domainName
+    domain_name : domainName, deleted: { $ne:true }
   }, function (error, result) {
 
     if (error) {
