@@ -260,14 +260,15 @@ exports.updateTrafficAlert = function (request, reply) {
     function (cb) {
       updateTrafficAlertData.updated_at = Date.now();
       updateTrafficAlertData.updated_by = request.auth.credentials.email || request.auth.credentials.key;
-      if (updateTrafficAlertData.permissions && updateTrafficAlertData.permissions.domains.access) {
-        updateTrafficAlertData.permissions.waf_rules = true;
-        updateTrafficAlertData.permissions.ssl_certs = true;
-      }
 
       trafficAlertsConfigs.update(updateTrafficAlertData).then(function (result) {
-        resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
-        cb();
+        trafficAlerter.updateRuleFile(request.params.traffic_alert_id, updateTrafficAlertData).then(function (res) {
+          resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
+          cb();
+        })
+          .catch(function (err) {
+            return reply(boom.badRequest(err));
+          });
       }).catch(function (err) {
         return reply(boom.badRequest(err));
       });
