@@ -98,6 +98,13 @@ exports.getTrafficAlerts = function getTrafficAlerts(request, reply) {
       }
     }
 
+    if (false) {
+      for (let i = 0; i < listOfTrafficAlerts.length; i++) {
+        listOfTrafficAlerts[i].silenced = false;
+        trafficAlertsConfigs.update(listOfTrafficAlerts[i]);
+      }
+    }
+
     listOfTrafficAlerts = publicRecordFields.handle(listOfTrafficAlerts, 'trafficAlerts');
 
     return renderJSON(request, reply, null, listOfTrafficAlerts);
@@ -253,14 +260,15 @@ exports.updateTrafficAlert = function (request, reply) {
     function (cb) {
       updateTrafficAlertData.updated_at = Date.now();
       updateTrafficAlertData.updated_by = request.auth.credentials.email || request.auth.credentials.key;
-      if (updateTrafficAlertData.permissions && updateTrafficAlertData.permissions.domains.access) {
-        updateTrafficAlertData.permissions.waf_rules = true;
-        updateTrafficAlertData.permissions.ssl_certs = true;
-      }
 
       trafficAlertsConfigs.update(updateTrafficAlertData).then(function (result) {
-        resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
-        cb();
+        trafficAlerter.updateRuleFile(request.params.traffic_alert_id, updateTrafficAlertData).then(function (res) {
+          resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
+          cb();
+        })
+          .catch(function (err) {
+            return reply(boom.badRequest(err));
+          });
       }).catch(function (err) {
         return reply(boom.badRequest(err));
       });
@@ -308,23 +316,29 @@ exports.deleteTrafficAlert = function (request, reply) {
   trafficAlertsConfigs.getById(id).then(function (res) {
     delTrafficAlert = res;
     trafficAlertsConfigs.removeById(id).then(function (result) {
-      var statusResponse;
-      statusResponse = {
-        statusCode: 200,
-        message: 'Successfully deleted the TrafficAlert'
-      };
 
-      AuditLogger.store({
-        account_id: request.auth.credentials.account_id,
-        activity_type: 'delete',
-        activity_target: 'trafficAlert',
-        target_id: delTrafficAlert.id,
-        target_name: delTrafficAlert.name,
-        target_object: delTrafficAlert,
-        operation_status: 'success'
-      }, request);
+      trafficAlerter.deleteRuleFile(id).then(function (res) {
+        var statusResponse;
+        statusResponse = {
+          statusCode: 200,
+          message: 'Successfully deleted the TrafficAlert'
+        };
 
-      return renderJSON(request, reply, null, statusResponse);
+        AuditLogger.store({
+          account_id: request.auth.credentials.account_id,
+          activity_type: 'delete',
+          activity_target: 'trafficAlert',
+          target_id: delTrafficAlert.id,
+          target_name: delTrafficAlert.name,
+          target_object: delTrafficAlert,
+          operation_status: 'success'
+        }, request);
+
+        return renderJSON(request, reply, null, statusResponse);
+      })
+        .catch(function (err) {
+          return reply(boom.badRequest(err));
+        });
     }).catch(function (err) {
       return reply(boom.badRequest(err));
     });
