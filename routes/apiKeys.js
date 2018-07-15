@@ -45,7 +45,8 @@ module.exports = [
       validate:{
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().trim().description('ID of a company')
+            account_id: Joi.objectId().optional().allow('').trim().description('ID of a company'),
+            group_id: Joi.objectId().optional().trim().description('Filter by group ID')
           })
          .optional().description('Filters parameters')
         }
@@ -130,6 +131,7 @@ module.exports = [
       validate: {
         payload: {
           account_id      : Joi.objectId().required().trim().description('ID of a company the new API key should be created for'),
+          role: Joi.string().trim().description('Role of API Key')
         }
       },
       response: {
@@ -164,18 +166,10 @@ module.exports = [
         payload: {
           key_name        : Joi.string().required().regex(routeModels.apiKeyNameRegex).min(1).max(150).description('Name of the API key'),
           account_id      : Joi.objectId().required().description('ID of a company that the API key belongs to'),
-          managed_account_ids : Joi.array().optional().items(Joi.objectId().description('IDs of companies the API key is allowed to manage')),
-          domains         : Joi.array().required().items(Joi.objectId().description('IDs of web domains the API key is allowed to manage')),
-          allowed_ops     : Joi.object({
-            read_config     : Joi.boolean().required(),
-            modify_config   : Joi.boolean().required(),
-            delete_config   : Joi.boolean().required(),
-            purge           : Joi.boolean().required(),
-            reports         : Joi.boolean().required(),
-            admin           : Joi.boolean().required(),
-          }),
-          read_only_status: Joi.boolean().required().description('Tells if the API key is read-only or read/write'),
-          active          : Joi.boolean().required().description('Tells if the API key is active or not')
+          active          : Joi.boolean().required().description('Tells if the API key is active or not'),
+          permissions: routeModels.permissionsModel,
+          group_id: Joi.objectId().allow(null).description('ID of the group this key is in'),
+          role: Joi.string().description('Role of the API Key')
         }
       },
       response: {

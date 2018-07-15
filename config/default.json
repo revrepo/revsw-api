@@ -43,6 +43,11 @@
       }
     }
   },
+  "traffic_alerter": {
+    "host": "127.0.0.1",
+    "port": "7443",
+    "token": "9ff71a58943396c3491bd7f65303407bcb8c2068f66ee584fabc04c17bfce97d"
+  },
   "service": {
     "host": "0.0.0.0",
     "http_port": 7000,
@@ -84,6 +89,7 @@
 
   "user_verify_token_lifetime_ms":  604800000, // 7 day 
   "password_reset_token_lifespan_ms": 3600000,     // 1 hour
+  "user_invitation_expire_ms": 86400000, // 24 hour
   
   "support_email" : "support@revapm.com",
 
@@ -210,13 +216,17 @@
         "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
-        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "RevAPM Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
-        "Kind regards,\nRevAPM Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "RevAPM Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",
       "sdk": {
@@ -238,7 +248,7 @@
       "acceptable_use_policy_link": "https://www.nuubit.com/aup",
       "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
       "zendesk_support_site": "nuubit.zendesk.com",
-      "copyright": "Copyright RevAPM 2013-2017",
+      "copyright": "Copyright RevAPM 2013-2018",
       "googleAnalyticsAccount": "UA-68856309-2",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "RevAPM Platform API Documentation",
@@ -248,7 +258,18 @@
         "provider_name": "RevAPM.MobileCDN",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
-      }
+      },
+      "user_invitation_mail_subject": "You have been invited to manage a RevAPM CDN account",
+      "user_invitation_mail_body": [
+        "Hello {{fullname}},<br/>\n",
+        "You have been invited to join the RevAPM CDN. Please click the link below to ",
+        "complete the invitation process.\n",
+        "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+        "Invitation Link",
+        "</a>",
+        "<br>The link will expire in 24 hours.<br>", 
+        "Kind regards,<br>RevAPM Customer Support Team<br>http://www.revapm.com/"
+      ]
     },
     "nuubit": {
       "vendorUrl": "http://localhost:4000",
@@ -302,7 +323,9 @@
         "Your are welcome to visit our customer portal at {{portalUrl}}",
         "and start managing your configuration!\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}}\n",
-        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+        "Kind regards,\n",
+        "nuu:bit Customer Support Team\n",
+        "http://www.nuubit.com/\n"
       ],
       "password_reset_email_text": [
         "Hello,\n\nYou are receiving this email because you (or someone else) have requested the reset of the password for your account.\n",
@@ -310,7 +333,9 @@
         "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
-        "Kind regards,\nnuu:bit Customer Support Team\nhttp://www.nuubit.com/\n"
+        "Kind regards,\n",
+        "nuu:bit Customer Support Team\n",
+        "http://www.nuubit.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n",
@@ -338,7 +363,7 @@
       "acceptable_use_policy_link": "https://www.nuubit.com/aup",
       "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
       "zendesk_support_site": "nuubit.zendesk.com",
-      "copyright": "Copyright nuu:bit, Inc. 2017",
+      "copyright": "Copyright nuu:bit, Inc. 2018",
       "googleAnalyticsAccount": "UA-68856309-2",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "nuu:bit Platform API Documentation",
@@ -348,7 +373,18 @@
         "provider_name": "nuubit.nextgencdn",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.nuubit.net"
-      }
+      },
+      "user_invitation_mail_subject": "You have been invited to manage a nuu:bit CDN account",
+      "user_invitation_mail_body": [
+        "Hello {{fullname}},<br/>\n",
+        "You have been invited to join the nuu:bit CDN. Please click the link below to ",
+        "complete the invitation process.\n",
+        "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+        "Invitation Link",
+        "</a>",
+        "<br>The link will expire in 24 hours.<br>",
+        "Kind regards,<br>nuu:bit Customer Support Team<br>http://www.nuubit.com/"
+      ]
     },
     "hooli": {
       "vendorUrl": "http://localhost:5000",
@@ -410,13 +446,17 @@
         "{{resetPasswordUrl}}/#/password/reset/{{token}}\n",
         "If you did not request this, please ignore this email and your password will remain unchanged.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} .\n",
-        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "Hooli Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "password_reset_confirmation_email_text" : [
         "Hello,\n",
         "This is a confirmation that the password for your account {{email}} has just been changed.\n",
         "Should you have any questions please contact us 24x7 at {{supportEmail}} \n",
-        "Kind regards,\nHooli Customer Support Team\nhttp://www.revapm.com/\n"
+        "Kind regards,\n",
+        "Hooli Customer Support Team\n",
+        "http://www.revapm.com/\n"
       ],
       "domain_quick_start_guide_url": "https://support.nuubit.net/hc/en-us/articles/206454663-Quick-Start-Guide-for-the-nuu-bit-platform",      
       "sdk": {
@@ -438,7 +478,7 @@
       "acceptable_use_policy_link": "https://www.nuubit.com/aup",
       "privacy_policy_link": "https://www.nuubit.com/privacypolicy",
       "zendesk_support_site": "nuubit.zendesk.com",
-      "copyright": "Copyright Hooli 2017",
+      "copyright": "Copyright Hooli 2018",
       "googleAnalyticsAccount": "UA-68856309-2",
       "apiGoogleAnalyticsAccount": "UA-68856309-7",
       "swaggerUIPageTitle": "Hooli Platform API Documentation",
@@ -448,7 +488,18 @@
         "provider_name": "RevAPM.MobileCDN",
         "sso_endpoint": "https://testsjc20-portal01.revsw.net/#/azure-sso",
         "user_email_domain": "azure-user.revapm.net"
-      }
+      },
+      "user_invitation_mail_subject": "You have been invited to manage a nuu:bit CDN account",
+      "user_invitation_mail_body": [
+        "Hello {{fullname}},<br/>\n",
+        "You have been invited to join the nuu:bit CDN. Please click the link below to ",
+        "complete the invitation process.\n",
+        "<a href='{{portalURL}}/#/invitation/{{userId}}/{{inviteToken}}'>",
+        "Invitation Link",
+        "</a>",
+        "<br>The link will expire in 24 hours.<br>",
+        "Kind regards,<br>nuu:bit Customer Support Team<br>http://www.nuubit.com/"
+      ]
     }
   },
   "proxy_white_referer_urls": [
@@ -462,7 +513,7 @@
   "promo_codes":["VS2017", "BUILD2017", "DEV2MFREE", "GD2017"],
   "max_time_period_for_traffic_graphs_days": 8,
   "max_time_period_for_waf_graphs_days": 30,
-  "notification_window_for_expiring_ssl_cert_days": 90,
+  "notification_window_for_expiring_ssl_cert_days": 30,
   "notify_admin_by_email_on_ssl_cert_expiration": "ops@revsw.com",
   "cache_memory_ttl_seconds": 600,
   "cache_memory_max_bytes": 1073741824, 
@@ -473,5 +524,11 @@
   "infra_db_password": "7pmlZ5axCwYe",
   "max_number_of_uncompleted_waf_auto_generated_rule_jobs": 5,
   "max_number_of_dashboards_per_user":30,
-  "bp_group_id_default": "55a56f85476c10c329a90740"
+  "bp_group_id_default": "55a56f85476c10c329a90740",
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 6379
+  },
+  "API_request_throttling_message": "API Requests limit reached, please try again later.",
+  "hide_revadmin_email_from_fields": true
 }

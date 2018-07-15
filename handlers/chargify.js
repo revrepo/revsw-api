@@ -118,7 +118,7 @@ exports.webhookHandler = function(request, reply) {
         .then(function findAdminUser() {
           var account_admin = {
             role: 'admin',
-            companyId: account_id
+            account_id: account_id
           };
           return users.getValidationAsync(account_admin);
         })

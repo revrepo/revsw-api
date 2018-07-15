@@ -55,6 +55,7 @@ var User = require('../models/User');
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
 
 var usersService = require('../services/users.js');
+var groupsService = require('../services/groups.js');
 var emailService = require('../services/email.js');
 var apiKeysService = require('../services/APIKeys.js');
 var logShippingJobsService = require('../services/logShippingJobs.js');
@@ -426,6 +427,27 @@ exports.removeAccount = function(accountId, options, callback) {
           cb(err_);
         });
       },
+      function removeAccountFromPermissions(cb) {
+        usersService.deleteAccountFromPermissions(accountId.toString()).then(function (res) {
+          if (res) {
+            apiKeysService.deleteAccountFromPermissions(accountId.toString()).then(function (res) {
+              if (res) {
+                groupsService.deleteAccountFromPermissions(accountId.toString()).then(function (res) {
+                  if (res) {
+                    cb(null);
+                  }
+                }).catch(function (err) {
+                  cb(err);
+                });
+              }
+            }).catch(function (err) {
+              cb(err);
+            });
+          }
+        }).catch(function (err) {
+          cb(err);
+        });
+      },
       // NOTE: Auto Delete Log Shipping Jobs
       function autoRemoveLogShippingJobs(cb) {
         logShippingJobsService.deleteJobsWithAccountId(accountId, function(error, data) {
@@ -464,10 +486,8 @@ exports.removeAccount = function(accountId, options, callback) {
         async.eachSeries(usersListRemovedAccount_, function(user, callback_) {
             var user_id = user.user_id;
             var _role = user.role;
-            logger.info('User with ID ' + user_id + 'and role "' + _role + '"  while removing account ID ' + accountId + '. Count Companies = ' +
-              user.companyId.length + ' ' + JSON.stringify(user.companyId));
+            logger.info('User with ID ' + user_id + 'and role "' + _role + '"  while removing account ID ' + accountId);
 
-            if (user.companyId.length === 1) {
               // NOTE: delete user and all his resources
               logger.info('Accounts:dropAccountUsers:Removing user with ID ' + user_id + ' while removing account ID ' + accountId);
               usersService.removeUser(user_id, function(error, result) {
@@ -480,10 +500,6 @@ exports.removeAccount = function(accountId, options, callback) {
                 }
                 callback_(err_, user);
               });
-
-            } else { /// else just update the user account and delete the account_id from companyId array (see next step cleanManagedAccountIdForResselers)
-              callback_(null);
-            }
           },
           function(error) {
             cb(error);

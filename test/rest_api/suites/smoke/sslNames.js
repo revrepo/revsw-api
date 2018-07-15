@@ -107,7 +107,7 @@ describe('Smoke check', function () {
               .authenticate(user)
               .then(function () {
                 API.resources.sslNames
-                  .createOne(sslname)
+                  .createOne(sslname)                  
                   .expect(200)
                   .then(function (response) {
                     API.resources.sslNames
@@ -136,7 +136,7 @@ describe('Smoke check', function () {
               .catch(done);
           });
 
-        it('should return a success response when getting specific SSL Name with Email Approvers',
+        xit('should return a success response when getting specific SSL Name with Email Approvers',
           function (done) {
             API.helpers
               .authenticate(user)
@@ -148,6 +148,7 @@ describe('Smoke check', function () {
                     API.resources.sslNames
                       .approvers()
                       .getAll({ssl_name: sslNames[0].ssl_name})
+                      .timeout(600000)
                       .expect(200)
                       .end(done);
                   })

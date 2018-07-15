@@ -1,0 +1,34 @@
+{
+    "comment": [
+        "`requests_per_second` is the default value for request throttling.",
+        "`requests_config` contains specific data for throttling endpoints/accounts.",
+        "if `account_id` is null/*/not found then the rule is global.",
+        "if `account_id` matches an account, the rule is only active for that specific account.",
+        "methods can contain all possible methods seperated by a comma.",
+        "-----------",
+        "A `heavy request` is a request that involves using a proxy.",
+        "Except for checking staging/global status because those",
+        "requests are sent in bulk from the Portal"
+    ],
+    "requests_per_second": 150,
+    "requests_config": [
+        {
+            "account_id": null,
+            "endpoint": "/v1/domain_configs",
+            "methods": "POST,PUT,DELETE",
+            "requests_per_second": 2
+        },
+        {
+            "account_id": null,
+            "endpoint": "/v1/ssl_certs",
+            "methods": "POST,PUT,DELETE",
+            "requests_per_second": 150
+        },
+        {
+            "account_id": null,
+            "endpoint": "/v1/waf_rules",
+            "methods": "POST,PUT,DELETE",
+            "requests_per_second": 2
+        }
+    ]
+}

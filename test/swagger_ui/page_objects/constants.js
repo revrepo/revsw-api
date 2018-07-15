@@ -62,6 +62,7 @@ var Constants = {
         '/v1/log_shipping_jobs/{log_job_id}/status',
         '/v1/notification_lists',
         '/v1/notification_lists/{list_id}',
+        '/v1/notification_lists/{list_id}/send_notification',
         '/v1/purge',
         '/v1/purge/{request_id}',
         '/v1/ssl_certs',
@@ -74,6 +75,7 @@ var Constants = {
         '/v1/ssl_names/{ssl_name_id}/verify',
         '/v1/staging_servers',
         '/v1/stats/edge_cache/{domain_id}',
+        '/v1/stats/edge_cache/content_type/{domain_id}',
         '/v1/stats/fbt/average/{domain_id}',
         '/v1/stats/fbt/distribution/{domain_id}',
         '/v1/stats/fbt/heatmap/{domain_id}',
@@ -111,6 +113,8 @@ var Constants = {
         '/v1/stats/{domain_id}/activity',
         '/v1/usage_reports/web',
         '/v1/usage_reports/web/stats',
+        '/v1/usage_reports/export_csv',
+        '/v1/usage_reports/export_csv/metrics',
         '/v1/users',
         '/v1/users/myself',
         '/v1/users/password/{user_id}',
@@ -118,7 +122,13 @@ var Constants = {
         '/v1/waf_rules',
         '/v1/waf_rules/auto_generated_rules',
         '/v1/waf_rules/{waf_rule_id}',
-        '/v1/waf_rules/{waf_rule_id}/config_status'
+        '/v1/waf_rules/{waf_rule_id}/config_status',
+        '/v1/groups',
+        '/v1/groups/{group_id}',
+        '/v1/groups/{group_id}/users',
+        '/v1/traffic_alerts',
+        '/v1/traffic_alerts/{traffic_alert_id}',
+        '/v1/traffic_alerts/{traffic_alert_id}/status'
     ]
 };
 module.exports = Constants;

@@ -35,10 +35,24 @@ var Hapi = require('hapi'),
     os = require('os'),
     boom  = require('boom'),
     mail = require('../lib/mail');
+var promise = require('bluebird');
+
+var cacheManager = require('cache-manager');
+var memoryCache = cacheManager.caching({
+  store: 'memory',
+  max: config.get('cache_memory_max_bytes'),
+  ttl: config.get('cache_memory_ttl_seconds') /*seconds*/,
+  promiseDependency: promise
+});
+var multiCache = cacheManager.multiCaching([memoryCache]);
 
 var logger = require('revsw-logger')(config.log_config);
-
+var mongoose = require('mongoose');
+var mongoConnection = require('../lib/mongoConnections');
+var User = require('../models/User');
+var users = promise.promisifyAll(new User(mongoose, mongoConnection.getConnectionPortal()));
 var notifyEmail = config.get('notify_developers_by_email_about_uncaught_exceptions');
+var vendorProfiles = config.vendor_profiles;
 if (notifyEmail !== '') {
   process.on('uncaughtException', function (er) {
     console.error(er.stack);
@@ -271,7 +285,65 @@ server.ext('onPreResponse', function(request, reply) {
       });
     }
   }
-  return reply.continue();
+
+  var revadminHideFields = [
+    'created_by',
+    'updated_by',
+    'deleted_by',
+    'createdBy',
+    'user_name'
+  ];
+
+  var hideTheFileds = config.hide_revadmin_email_from_fields;
+  if (!request.auth.credentials || request.auth.credentials.role === 'revadmin') {
+    hideTheFileds = false;
+  }
+
+  if (hideTheFileds) {
+    var cacheKey = 'hapi:onPreResponse:userList:revAdmins';
+    var isFromCache = true;
+    multiCache.wrap(cacheKey, function () {
+      isFromCache = false;
+      return users.getRevAdmins();
+    })
+      .then(function (res) {
+        if (isFromCache === true) {
+          logger.info('hapi:onPreResponse:return cache for key - ' + cacheKey);
+        }
+
+        if (response.source) {
+
+          let replacer = function(str, find, replace) {
+            return str.replace(new RegExp(find, 'g'), replace);
+          };
+
+          let resJSON = JSON.stringify(response.source);
+          res.forEach(function (admin) {
+            if (request.auth.credentials.vendor_profile) {
+              resJSON = replacer(resJSON, admin.email, vendorProfiles[request
+                .auth
+                .credentials
+                .vendor_profile].support_name);
+            } else {
+              resJSON = replacer(resJSON, admin.email, 'RevAPM Support Team');
+            }
+          });
+
+          response.source = JSON.parse(resJSON);
+
+          return reply.continue();
+        } else {
+          return reply.continue();
+        }
+
+      })
+      .catch(function (err) {
+        var msg = err.toString();
+        return reply(boom.badImplementation(msg));
+      });
+  } else {
+    return reply.continue();
+  }  
 });
 
 server.register({

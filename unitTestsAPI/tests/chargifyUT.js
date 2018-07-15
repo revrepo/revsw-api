@@ -23,6 +23,7 @@ process.env.NODE_ENV = 'unitTests'; // use unit tests config
 
 var chargifyFile = require('./../../handlers/chargify');
 var accountsFile = require('./../../handlers/accounts');
+var requestPermissions = require('./../../lib/requestPermissionScope');
 var config = require('config');
 var chargifyAcc = config.get('chargify_account.subscription');
 
@@ -60,12 +61,12 @@ describe('Unit Test:', function () {
                         console.log(res.message);
                         console.log('New link available at: ' + res.newLinkAt);
                         // passing test anyway
-                        res.statusCode.should.equal(429);                        
+                        res.statusCode.should.equal(429);
                         done();
                     } else {
                         res.statusCode.should.equal(200);
                         done();
-                    }                    
+                    }
                 });
             });
         });
@@ -85,15 +86,20 @@ describe('Unit Test:', function () {
                     credentials: {
                         user_type: 'user',
                         companyId: [config.get('users.admin.account.id')],
-                        role: 'admin'
+                        role: 'admin',
+                        account_id: config.users.admin.account.id,
+                        permissions: config.permissions_schema
                     }
                 }
             };
 
             request2.params.account_id = config.get('users.admin.account.id');
-            accountsFile.createBillingProfile(request2, function (res) {
-                res.billing_id.should.not.equal(null);
-                done();
+            requestPermissions.setPermissionsScope(request2.auth.credentials).then(function (cred) {
+                request2.auth.credentials = cred;
+                accountsFile.createBillingProfile(request2, function (res) {
+                    res.billing_id.should.not.equal(null);
+                    done();
+                });
             });
         });
 

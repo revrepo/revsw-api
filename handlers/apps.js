@@ -34,8 +34,14 @@ var utils              = require('../lib/utilities.js');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 var _ = require('lodash');
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 exports.getApps = function(request, reply) {
   var filters_ = request.query.filters;
+  var operation = 'mobile_apps';
+  if (filters_ && filters_.operation) {
+    operation = filters_.operation;
+  }
   logger.info('Calling CDS to get a list of registered apps');
   cds_request({method: 'GET', url: config.get('cds_url') + '/v1/apps', headers: authHeader}, function (err, res, body) {
     if (err) {
@@ -50,7 +56,7 @@ exports.getApps = function(request, reply) {
       var listOfApps = [];
       if (response_json && response_json.length) {
         listOfApps = response_json.filter(function(app) {
-          return utils.checkUserAccessPermissionToApps(request, app);
+          return permissionCheck.checkPermissionsToResource(request, app, operation);
         });
       }
       // TODO: ??? make refactoring - send filter then call CDS
@@ -76,7 +82,7 @@ exports.getApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
+    if (!permissionCheck.checkPermissionsToResource(request, existing_app, 'mobile_apps')) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get details for app ID ' + app_id);
@@ -109,7 +115,7 @@ exports.getAppVersions = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
+    if (!permissionCheck.checkPermissionsToResource(request, existing_app, 'mobile_apps')) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get a list of configuration versions for app ID ' + app_id);
@@ -140,7 +146,7 @@ exports.getAppConfigStatus = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
+    if (!permissionCheck.checkPermissionsToResource(request, existing_app, 'mobile_apps')) {
       return reply(boom.badRequest('App ID not found'));
     }
     logger.info('Calling CDS to get configuration status for app ID: ' + app_id);
@@ -164,8 +170,17 @@ exports.getAppConfigStatus = function(request, reply) {
 
 exports.addApp = function(request, reply) {
   var newApp = request.payload;
-  if (!utils.checkUserAccessPermissionToApps(request, newApp)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newApp.account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
+  }
+
+  var appPerm = request.auth.credentials.permissions.mobile_apps;
+  if (!appPerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new app'));
+  } else if (appPerm.access && (appPerm.list && appPerm.list.length > 0)) {
+    if (appPerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new app'));
+    }
   }
   // NOTE: Can be the same app_name for different platforms, but uniqueness for account_id
   apps.get({app_name: newApp.app_name, app_platform: newApp.app_platform, account_id:newApp.account_id, deleted: {$ne: true}}, function(error, result) {
@@ -218,10 +233,10 @@ exports.updateApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
+    if (!permissionCheck.checkPermissionsToResource(request, existing_app, 'mobile_apps')) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToApps(request, updatedApp)) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: updatedApp.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     updatedApp.updated_by =  utils.generateCreatedByField(request);
@@ -267,7 +282,7 @@ exports.deleteApp = function(request, reply) {
     if (!existing_app) {
       return reply(boom.badRequest('App ID not found'));
     }
-    if (!utils.checkUserAccessPermissionToApps(request, existing_app)) {
+    if (!permissionCheck.checkPermissionsToResource(request, existing_app, 'mobile_apps')) {
       return reply(boom.badRequest('App ID not found'));
     }
     account_id = existing_app.account_id;

@@ -22,7 +22,7 @@ var API = require('./../../common/api');
 describe('Clean up', function () {
 
   // Changing default mocha's timeout (Default is 2 seconds).
-  this.timeout(config.get('api.request.maxTimeout'));
+  this.timeout(900000);
 
   var users = [
     config.get('api.users.revAdmin'),

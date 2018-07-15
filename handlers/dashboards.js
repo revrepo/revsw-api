@@ -28,14 +28,18 @@ var publicRecordFields = require('../lib/publicRecordFields');
 var dashboardService = require('../services/dashboards.js');
 var Dashboard = require('../models/Dashboard');
 var dashboard = new Dashboard(mongoose, mongoConnection.getConnectionPortal());
+var permissionCheck = require('./../lib/requestPermissionScope');
 
 exports.getDashboards = function getDashboards(request, reply) {
   var userId = request.auth.credentials.user_id;
   dashboard.getDashboardsByUserID(userId, function(error, listOfDashboards) {
     if (error) {
       return reply(boom.badImplementation('Failed to read dashboards list from the DB'));
-    }
+    }    
     var dashboards_list = publicRecordFields.handle(listOfDashboards, 'dashboards');
+    if (!permissionCheck.checkSimplePermissions(request, 'dashboards')) {
+      dashboards_list = [];
+    }
     renderJSON(request, reply, error, dashboards_list);
   });
 };
@@ -51,7 +55,7 @@ exports.getDashboard = function getDashboard(request, reply) {
         ' Dashboard ID: ' + dashboardId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'dashboards')) {
       return reply(boom.badRequest('Dashboard ID not found'));
     }
 
@@ -64,6 +68,10 @@ exports.getDashboard = function getDashboard(request, reply) {
 exports.createDashboard = function createDashboard(request, reply) {
   var newDashboard = request.payload;
   var user_id = request.auth.credentials.user_id;
+
+  if (!permissionCheck.checkSimplePermissions(request, 'dashboards')) {
+    return reply(boom.forbidden('You are not authorized to create a new dashboard'));
+  }
 
   dashboardService.createUserDashboard({ user_id: user_id, new_dashboard_options: newDashboard}, function(error, result) {
     if (error || !result) {
@@ -99,7 +107,7 @@ exports.deleteDashboard = function(request, reply) {
       return reply(boom.badImplementation('Error retrieving Dashboard with id ' + dashboardId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'dashboards')) {
       return reply(boom.badRequest('Dashboard ID not found'));
     }
 
@@ -134,7 +142,7 @@ exports.updateDashboard = function(request, reply) {
       return reply(boom.badImplementation('Failed to verify Dashboard ' + id));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToDashboard(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'dashboards')) {
       return reply(boom.badRequest('Dashboard not found'));
     }
 

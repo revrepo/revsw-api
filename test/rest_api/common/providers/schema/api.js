@@ -149,7 +149,8 @@ var APISchemaProviders = {
         subscription_id: Joi.string().allow(null),
         use_contact_info_as_billing_info: Joi.boolean(),
         self_registered: Joi.boolean(),
-        valid_payment_method_configured: Joi.boolean()
+        valid_payment_method_configured: Joi.boolean(),
+        parent_account_id: Joi.objectId().allow(null)
       });
     return accountSchema;
   },
@@ -321,11 +322,35 @@ var APISchemaProviders = {
     return models.APIKeyModel;
   },
 
+  getUser: function () {
+    return models.userModel;
+  },
+
+  getGroup: function () {
+    return models.groupModel;
+  },
+
+  getListOfUsers: function () {
+    return models.listOfUsersModel;
+  },
+
+  getListOfGroups: function () {
+    return models.listOfGroupsModel;
+  },
+
   getCreateAPIKeyStatus: function () {
     return models.APIKeyStatusModel;
   },
 
+  getCreateUserStatus: function () {
+    return models.userCreateModel;
+  },
+
   getAPIKeyStatus: function () {
+    return models.statusModel;
+  },
+
+  getUserStatus: function () {
     return models.statusModel;
   }
 };

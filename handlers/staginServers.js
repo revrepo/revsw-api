@@ -31,7 +31,7 @@ var BP_GROUP_ID_DEFAULT_ = config.get('bp_group_id_default');
 
 var Account = require('../models/Account');
 var ServerGroup = require('../models/ServerGroup');
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var servergroups = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 /**
@@ -52,7 +52,7 @@ exports.getStaginServers = function(request, reply) {
   async.auto({
     parentAccountId: function(cb) {
       var parentAccountId = utils.getAccountID(request, true);
-      if (!!accountId && !utils.checkUserAccessPermissionToAccount(request, accountId)) {
+      if (!!accountId && !permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
         return cb(boom.badRequest('Account ID not found'));
       } else {
         if (!!accountId) {
@@ -62,7 +62,7 @@ exports.getStaginServers = function(request, reply) {
       cb(null, parentAccountId);
     },
     bpGroupId: function(cb, result) {
-      if (request.auth.credentials.role === 'revadmin' && !result.parentAccountId) {
+      if (request.auth.credentials.role === 'revadmin' && (!result.parentAccountId || !result.parentAccountId[0])) {
         cb();
       } else {
         accounts.get({

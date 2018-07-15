@@ -43,7 +43,7 @@ var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 var globalSignApi = new GlobalSign();
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var sslNames = new SSLName(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var generateVerificationNames = function (data) {
   var arrDomain = data.ssl_name.split('.');
   var verificationNames_ = [];
@@ -102,7 +102,7 @@ exports.listSSLNames = function (request, reply) {
     var response = publicRecordFields.handle(result, 'sslNames');
     var response2 = [];
     for (var i = 0; response.length > i; i++) {
-      if (utils.checkUserAccessPermissionToSSLName(request, response[i])) {
+      if (permissionCheck.checkPermissionsToResource(request, response[i], 'ssl_names')) {
         response2.push(generateVerificationNames(response[i]));
       }
     }
@@ -124,7 +124,7 @@ exports.getSSLName = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_names')) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
@@ -176,6 +176,10 @@ exports.addSSLName = function (request, reply) {
   var verificationObject = '';
   var status;
 
+  if (!permissionCheck.checkSimplePermissions(request, 'ssl_names')) {
+    return reply(boom.forbidden('You are not authorized to create a new SSL Name'));
+  }
+
   function createNewSSLName(accountId, SSLName, created_by, verificationMethod, verificationObject, approvers) {
     var newSSLArray = {
       account_id: accountId,
@@ -215,7 +219,7 @@ exports.addSSLName = function (request, reply) {
     });
   }
 
-  if (!utils.checkUserAccessPermissionToSSLName(request, { account_id: accountId })) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -318,7 +322,7 @@ exports.verifySSLName = function (request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_names')) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 
@@ -404,7 +408,7 @@ exports.deleteSSLName = function (request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL name ID ' + sslNameId, error));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLName(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_names')) {
       return reply(boom.badRequest('SSL name ID not found'));
     }
 

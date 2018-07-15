@@ -47,6 +47,15 @@ module.exports = [{
       },
       response: {
         schema: routeModels.listOfAccountsModel
+      },
+      validate: {
+        query: {
+          filters: Joi.object().keys({
+            parent_account_id: Joi.objectId().optional().trim().description('ID of a parent company'),
+            operation: Joi.string().optional().trim().description('Filter by operation'),
+          })
+         .optional().description('Filters parameters')
+        }
       }
     }
   },
@@ -72,7 +81,8 @@ module.exports = [{
           companyName: Joi.string().required().regex(routeModels.companyNameRegex).min(1).max(150)
             .trim().description('Company name of newly registered customer account'),
           vendor_profile: Joi.string().max(20).allow('').description('Vendor profile name'),
-          comment: Joi.string().max(300).trim().allow('').description('Free-text comment about the company')
+          comment: Joi.string().max(300).trim().allow('').description('Free-text comment about the company'),
+          parent_account_id: Joi.objectId().optional().description('Parent account ID')
         }
       },
       response: {
@@ -166,7 +176,9 @@ module.exports = [{
           billing_info: Joi.object().optional()
             .description('Billing information for create Chargify Customer Account'),
           subscription_state: Joi.string().min(1).max(30).trim()
-            .description('Subscription state (status)')
+            .description('Subscription state (status)'),
+          parent_account_id: Joi.objectId().optional().allow(null)
+            .description('Parent account ID')
         }
       },
       response: {
@@ -379,6 +391,27 @@ module.exports = [{
       },
       response: {
         schema: routeModels.statusModel
+      }
+    }
+  },
+
+  {
+    method: 'GET',
+    path: '/v1/accounts/reseller_accounts',
+    config: {
+      auth: {
+        scope: ['revadmin']
+      },
+      handler: account.getResellerAccounts,
+      description: 'Get a list of all reseller accounts',
+      notes: 'Use this function to get a list of reseller accounts (accounts with at least 1 child account)',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      response: {
+        schema: routeModels.listOfAccountsModel
       }
     }
   }

@@ -56,6 +56,8 @@ var authHeader = { Authorization: 'Bearer ' + config.get('cds_api_token') };
 var vendorProfiles = config.get('vendor_profiles');
 var deafultVendorProfile = vendorProfiles[config.get('default_system_vendor_profile')];
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 var checkDomainsLimit = function(companyId, callback) {
   accounts.get({ _id: companyId }, function(err, account) {
     if (err) {
@@ -124,7 +126,7 @@ exports.getDomainConfigStatus = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrive configuration details for domain ID ' + domain_id));
     }
-    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -150,6 +152,10 @@ exports.getDomainConfigStatus = function(request, reply) {
 
 exports.getDomainConfigs = function(request, reply) {
   var filters_ = request.query.filters;
+  var operation = 'domains'; // default is manage domains..
+  if (filters_ && filters_.operation) {
+    operation = filters_.operation;
+  }
   cdsRequest({
     url: config.get('cds_url') + '/v1/domain_configs',
     headers: authHeader
@@ -166,7 +172,7 @@ exports.getDomainConfigs = function(request, reply) {
       }
       var response = [];
       for (var i = 0; i < response_json.length; i++) {
-        if (utils.checkUserAccessPermissionToDomain(request, response_json[i])) {
+        if (permissionCheck.checkPermissionsToResource(request, response_json[i], operation)) {
           response.push(response_json[i]);
         }
       }
@@ -191,7 +197,7 @@ exports.getDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -268,7 +274,7 @@ exports.getDomainConfigVersions = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domain_id));
     }
-    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -303,8 +309,17 @@ exports.createDomainConfig = function(request, reply) {
   var newDomainJson = request.payload;
   var originalDomainJson = newDomainJson;
   var accountId = newDomainJson.account_id;
-  if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
+  }
+
+  var domainPerm = request.auth.credentials.permissions.domains;
+  if (!domainPerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new domain'));
+  } else if (domainPerm.access && (domainPerm.list && domainPerm.list.length > 0)) {
+    if (domainPerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new domain'));
+    }
   }
 
   var callbackResultCreateDomain = function(error, result) {
@@ -403,7 +418,7 @@ exports.createDomainConfig = function(request, reply) {
         newDomainJson.account_id));
     }
 
-    if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     // NOTE: Account has property "vendor_profile". We need get additional parameter 'cname_domain' from them
@@ -425,7 +440,7 @@ exports.createDomainConfig = function(request, reply) {
         if (!res) {
           return reply(boom.forbidden(account.companyName + ' subscription is not active'));
         }
-        checkDomainsLimit(request.auth.credentials.companyId, function(err, diff) {
+        checkDomainsLimit(request.auth.credentials.account_id, function(err, diff) {
           if (err) {
             return reply(boom.badImplementation(err));
           }
@@ -564,11 +579,11 @@ exports.updateDomainConfig = function(request, reply) {
       if (error) {
         return reply(boom.badImplementation('Failed to retrieve domain details for domain ID ' + domainId));
       }
-      if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+      if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
         return reply(boom.badRequest('Domain ID not found'));
       }
 
-      if (!utils.checkUserAccessPermissionToAccount(request, newDomainJson.account_id)) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: newDomainJson.account_id}, 'accounts')) {
         return reply(boom.badRequest('Account ID not found'));
       }
       // NOTE: Only RevAdmin can change value "bp_group_id"
@@ -712,7 +727,7 @@ exports.deleteDomainConfig = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for domain' + domainId, error));
     }
-    if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
       return reply(boom.badRequest('Domain ID not found'));
     }
 
@@ -845,7 +860,7 @@ exports.checkIntegration = function(request, reply) {
           if (error) {
             return cb(boom.badImplementation('Failed to retrieve domain details for domain' + domainId, error));
           }
-          if (!result || !utils.checkUserAccessPermissionToDomain(request, result)) {
+          if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'domains')) {
             return cb(boom.badRequest('Domain ID not found'));
           }
           domainConfig = result;
@@ -1259,7 +1274,7 @@ exports.getWAFRulesList = function(request, reply) {
     if(error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if(!domainConfig || !utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if(!domainConfig || !permissionCheck.checkPermissionsToResource(request, domainConfig, 'domains')) {
       return reply(boom.badRequest('Domain ID not found'));
     }
     response.metadata.domain_id = domainID;

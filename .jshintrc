@@ -13,5 +13,7 @@
   "funcscope": true,
   "node": true,
   // "unused": true,
-  "undef": true
+  "undef": true,
+  "esversion": 6,
+  "predef": [ "-Promise" ]
 }

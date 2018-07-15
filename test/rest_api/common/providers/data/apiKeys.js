@@ -44,9 +44,10 @@ var APIKeysDataProvider = {
    *       account_id: String
    *    }
    */
-  generateOne: function (accountId) {
+  generateOne: function (accountId, role) {
     return {
-      account_id: accountId
+      account_id: accountId,
+      role: role || 'admin'
     };
   },
 
@@ -73,7 +74,6 @@ var APIKeysDataProvider = {
    *        reports: Boolean,
    *        admin: Boolean
    *      },
-   *      read_only_status: Boolean,
    *      active: Boolean
    *    }
    */
@@ -81,19 +81,9 @@ var APIKeysDataProvider = {
     prefix = (prefix ? prefix + '_' : this.prefix ) + Date.now();
     return {
       account_id: accountId,
-      managed_account_ids: [],
       key_name: prefix + ': ' + faker.lorem.words()[0],
-      domains: [],
-      allowed_ops: {
-        read_config: true,
-        modify_config: true,
-        delete_config: true,
-        purge: true,
-        reports: true,
-        admin: true
-      },
-      read_only_status: true,
-      active: true
+      active: true,
+      role: 'admin'
     };
   },
 

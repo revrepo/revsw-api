@@ -37,6 +37,8 @@ var User = require('../models/User');
 var utils = require('../lib/utilities.js');
 var _ = require('lodash');
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 var dnsZones = Promise.promisifyAll(new DNSZone(mongoose, mongoConnection.getConnectionPortal()));
 
 var Nsone = require('../lib/nsone.js');
@@ -72,6 +74,7 @@ var DNS_RECORD_TYPES_AUTO_DISCOVER = dnsZoneAutoDisciverDictionary.list_of_recor
 //'DNS service unable to process your request now, try again later'
 exports.getDnsZones = function(request, reply) {
   var filters_ = request.query.filters;
+  var operation = filters_ ? filters_.operation : null;
   return Promise.try(function() {
       return dnsZones.listAsync({
         filters: filters_
@@ -81,7 +84,11 @@ exports.getDnsZones = function(request, reply) {
       var responseZones = [];
       var callRecordsPromises = [];
       zones.forEach(function(zone) {
-        if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
+        var permissionFilter = 'dns_zones';
+        if (operation && operation !== '') {
+          permissionFilter = operation;
+        }
+        if (permissionCheck.checkPermissionsToResource(request, zone, permissionFilter)) {
           responseZones.push(zone);
           // NOTE: call additional inforamtion about DNS Zone
           callRecordsPromises.push(
@@ -125,7 +132,7 @@ exports.getDnsZonesStatsUsage = function(request, reply) {
     .then(function(zones) {
       var responseZones = [];
       zones.forEach(function(zone) {
-        if (utils.checkUserAccessPermissionToDNSZone(request, zone)) {
+        if (permissionCheck.checkPermissionsToResource(request, zone, 'dns_analytics')) {
           responseZones.push(zone);
         }
       });
@@ -175,9 +182,18 @@ exports.createDnsZone = function(request, reply) {
   var nsoneZoneInfo;
   var statusResponse;
 
+  var zonePerm = request.auth.credentials.permissions.dns_zones;
+  if (!zonePerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new DNS Zone'));
+  } else if (zonePerm.access && (zonePerm.list && zonePerm.list.length > 0)) {
+    if (zonePerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new DNS Zone'));
+    }
+  }
+
   return Promise.try(function() {
       // Check account access
-      if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+      if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
         throw new Error(ACCOUNT_NOT_FOUND);
       }
       // Get DNS zone by dns_zone domain
@@ -298,7 +314,7 @@ exports.deleteDnsZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         // DNS zone exists, so we can delete it
@@ -366,7 +382,7 @@ exports.deleteDnsZone = function(request, reply) {
           if (/NS1 API Request Failed/.test(error.message)) {
             return reply(boom.badRequest(DNS_ZONE_INVALID_PROVIDED));
           } else if (/DNS zone not found/.test(error.message)) {
-            reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
+            return reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
           } else {
             return reply(boom.badImplementation(error.message));
           }
@@ -396,7 +412,7 @@ exports.updateDnsZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         // Found zone to update
@@ -472,7 +488,7 @@ exports.updateDnsZone = function(request, reply) {
               return reply(boom.badRequest(error.message));
             }
           } else if (/DNS zone not found/.test(error.message)) {
-            reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
+            return reply(boom.badRequest(DNS_ZONE_NOT_EXISTS));
           } else {
             if (!!error.response && error.response.body && error.response.body.message) {
               // NOTE: Show message from NS1
@@ -496,7 +512,7 @@ exports.getDnsZone = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -731,7 +747,7 @@ exports.getDnsZoneRecords = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -808,7 +824,7 @@ exports.createDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -944,7 +960,7 @@ exports.deleteDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -1076,7 +1092,7 @@ exports.updateDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -1203,7 +1219,7 @@ exports.getDnsZoneRecord = function(request, reply) {
     })
     .then(function(dnsZone) {
       // Check if dns_zone owned by any user
-      if (!dnsZone || !utils.checkUserAccessPermissionToDNSZone(request, dnsZone)) {
+      if (!dnsZone || !permissionCheck.checkPermissionsToResource(request, dnsZone, 'dns_zones')) {
         throw new Error(DNS_ZONE_NOT_FOUND);
       } else {
         foundDnsZone = dnsZone;
@@ -1296,7 +1312,7 @@ exports.checkDnsZoneNS = function(request, reply) {
     .then(function() {
       return Promise.try(function() {
         var zone_ = workFlowData_.zone;
-        if (!utils.checkUserAccessPermissionToDNSZone(request, zone_)) {
+        if (!permissionCheck.checkPermissionsToResource(request, zone_, 'dns_zones')) {
           throw new Error(DNS_ZONE_NOT_FOUND);
         } else {
           return Promise.resolve();
@@ -1439,7 +1455,7 @@ exports.checkDnsZoneRecords = function(request, reply) {
     .then(function() {
       return Promise.try(function() {
         var zone_ = workFlowData_.zone;
-        if (!utils.checkUserAccessPermissionToDNSZone(request, zone_)) {
+        if (!permissionCheck.checkPermissionsToResource(request, zone_, 'dns_zones')) {
           throw new Error(DNS_ZONE_NOT_FOUND);
         } else {
           return Promise.resolve();

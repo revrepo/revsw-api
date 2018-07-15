@@ -138,6 +138,58 @@ describe('Negative check', function () {
             })
             .catch(done);
         });
+
+      it('should return `Bad Request` when trying to update logshipping job ' +
+        'with `invalid` domain.',
+        function (done) {
+          var firstAcc = account;
+          var secAcc;
+          var domain1;
+          var domain2;
+          var newJob;
+          API.helpers
+            .authenticateUser(reseller)
+            .then(function () {
+              return API.helpers.accounts.createOne();
+            })
+            .then(function (newAccount) {
+              secAcc = newAccount;
+              return API.helpers.domainConfigs.createOne(firstAcc.id);
+            })
+            .then(function (firstDomain) {
+              domain1 = firstDomain;
+              return API.helpers.domainConfigs.createOne(secAcc.id);
+            })
+            .then(function (secDomain) {
+              domain2 = secDomain;
+              newJob = LogShippingJobsDP.generateCompleteOne({
+                accountId: firstAcc.id,
+                sourceId: domain1.id
+              });
+              return API
+                .resources
+                .logShippingJobs
+                .update(logShippingJob.id, newJob)
+                .expect(200); // this will success because domain and job have the same account_id
+            })
+            .then(function (job) {
+              newJob = LogShippingJobsDP.generateCompleteOne({
+                accountId: firstAcc.id,
+                sourceId: domain2.id
+              });
+
+              return API
+                .resources
+                .logShippingJobs
+                .update(logShippingJob.id, newJob)
+                .expect(400); // this will fail because job and domain dont have the same account_id
+                              // even tho we have access to that domain!
+            })
+            .then(function (res) {
+              done();
+            })
+            .catch(done);
+        });
     });
   });
 });

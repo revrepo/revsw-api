@@ -63,7 +63,7 @@ describe('Smoke check:', function () {
     describe('Stats Reports with role "' + roleName + '"', function () {
       before(function (done) {
         var newUser = DataProvider.generateUser(roleName);
-        newUser.companyId = [accountForUsers.id];
+        newUser.account_id = accountForUsers.id;
         newUser.domain = [];
         API.helpers
           .authenticate(revAdminCredentials)
@@ -143,6 +143,20 @@ describe('Smoke check:', function () {
             .then(function () {
               API.resources.stats
                 .slowestDownloadObjects()
+                .getOne(domain.id)
+                .expect(200)
+                .end(done);
+            })
+            .catch(done);
+        });
+
+        it('should return success response when getting edge cache by content type reports',
+        function (done) {
+          API.helpers
+            .authenticateUser(user)
+            .then(function () {
+              API.resources.stats
+                .cTypeEdgeCache()
                 .getOne(domain.id)
                 .expect(200)
                 .end(done);

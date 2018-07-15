@@ -219,6 +219,50 @@ describe('UsageReport Functional check:', function () {
         report.billable_sent_bps.should.be.approximately( ( estimated.sent_bytes * 8 / test_data_timespan ), 100 );
         report.billable_received_bps.should.be.approximately( ( estimated.received_bytes * 8 / test_data_timespan ), 100 );
       });
+
+      describe('Usage Report CSV Export', function () {
+        it('should return content in CSV format for a usage report.', 
+          function (done) {
+            API.helpers
+              .authenticate(user)
+              .then(function () {
+                API.resources.csvExporting
+                  .getAll({account_id: account_id})
+                  .expect(200)
+                  .then(function (res) {
+                    res.body.csvContent.forEach(function (cont) {
+                      cont.should.not.equal('');
+                    });
+
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+
+          it('should return correct CSV report metrics.', 
+          function (done) {
+            API.helpers
+              .authenticate(user)
+              .then(function () {
+                API.resources.csvExporting                
+                  .metrics()
+                  .getAll()
+                  .expect(200)
+                  .then(function (res) {
+                    res.body.forEach(function (metric) {
+                      metric.metric_id.should.be.a.Number();
+                      metric.metric_desc.should.be.a.String();
+                    });
+
+                    done();
+                  })
+                  .catch(done);
+              })
+              .catch(done);
+          });
+      });
     });
   });
 });

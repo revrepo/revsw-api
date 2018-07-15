@@ -20,6 +20,7 @@
 
 'use strict';
 
+var _ = require('lodash');
 var async = require('async');
 var boom = require('boom');
 var mongoConnection = require('../lib/mongoConnections');
@@ -37,6 +38,8 @@ var users = new Users(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 var apiKeys = new ApiKey(mongoose, mongoConnection.getConnectionPortal());
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 exports.getDetailedAuditInfo = function(request, reply) {
   var requestBody = {};
   var startTime;
@@ -51,7 +54,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
 
   var userId = request.query.user_id ? request.query.user_id : request.auth.credentials.user_id;
 
-  // TODO: create  validation function checkUserAccessPermissionToTargetId
+  // TODO: create  validation function c/heckUserAccessPermissionToTargetId
   var currentUser = null;
   // NOTE: waterfall actions list for generate response
   async.waterfall([
@@ -102,14 +105,14 @@ exports.getDetailedAuditInfo = function(request, reply) {
             var activityActionUserType_ = null;
             // check permission current request user to activityActionUser
             if (!!results.activityUser_) {
-              if (!utils.checkUserAccessPermissionToUser(request, results.activityUser_)) {
+              if (!permissionCheck.checkPermissionsToResource(request, results.activityUser_, 'users')) {
                 cb({ errorCode: 400, err: null, message: 'User ID not found' });
                 return;
               }
               activityActionUserType_ = 'user';
             }
             if (!!results.activityAPIKey_) {
-              if (!utils.checkUserAccessPermissionToAPIKey(request, results.activityAPIKey_)) {
+              if (!permissionCheck.checkPermissionsToResource(request, results.activityAPIKey_, 'API_keys')) {
                 cb({ errorCode: 400, err: null, message: 'User ID not found' });
                 return;
               }
@@ -138,7 +141,7 @@ exports.getDetailedAuditInfo = function(request, reply) {
      */
     function prepareLimitOfAccountsInfo(cb) {
       if (activityAccountId) {
-        if (!utils.checkUserAccessPermissionToAccount(request, activityAccountId)) {
+        if (!permissionCheck.checkPermissionsToResource(request, {id: activityAccountId}, 'accounts')) {
           cb({ errorCode: 400, err: null, message: 'Account ID not found' });
           return;
         }
@@ -150,13 +153,21 @@ exports.getDetailedAuditInfo = function(request, reply) {
         var accountIds_ = null;
         if (request.auth.credentials.user_type === 'user') {
           if (request.auth.credentials.role !== 'revadmin') {
-            accountIds_ = request.auth.credentials.companyId;
+            accountIds_ = utils.getAccountID(request, false);
           } else {
             // revadmin no have limit
             accountIds_ = null;
           }
         } else {
           accountIds_ = utils.getAccountID(request, false);
+        }
+
+        if (request.auth.credentials.role === 'reseller' && request.auth.credentials.child_accounts) {
+          accountIds_ = request.auth.credentials.child_accounts;
+          accountIds_.push(request.auth.credentials.account_id);
+          accountIds_ = _.filter(accountIds_, function (acc) {
+            return permissionCheck.checkPermissionsToResource(request, {id: acc}, 'accounts');
+          });
         }
         if (accountIds_) {
           requestBody['meta.account_id'] = { $in: accountIds_ };
@@ -257,32 +268,15 @@ exports.getSummaryAuditInfo = function(request, reply) {
 
       switch (request.auth.credentials.role) {
 
-        case 'user':
-          if (request.query.user_id && request.query.user_id !== request.auth.credentials.user_id) {
-            return reply(boom.badRequest('User ID not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Account ID not found'));
-          }
-          requestBody['meta.user_id'] = userId;
-          break;
-
         case 'admin':
-          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+          if (request.query.user_id && !permissionCheck.checkPermissionsToResource(request, {id: user.account_id}, 'accounts')) {
             return reply(boom.badRequest('User ID not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Account ID not found'));
           }
           requestBody['meta.user_id'] = userId;
           break;
-
         case 'reseller':
-          if (request.query.user_id && !utils.isArray1IncludedInArray2(user.companyId, request.auth.credentials.companyId)) {
+          if (request.query.user_id && !permissionCheck.checkPermissionsToResource(request, {id: request.query.company_id}, 'accounts')) {
             return reply(boom.badRequest('User ID not found'));
-          }
-          if (request.query.company_id && !utils.isArray1IncludedInArray2([request.query.company_id], request.auth.credentials.companyId)) {
-            return reply(boom.badRequest('Account ID not found'));
           }
           if (request.query.user_id) {
             requestBody['meta.user_id'] = userId;
@@ -290,7 +284,7 @@ exports.getSummaryAuditInfo = function(request, reply) {
           break;
       }
 
-      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.companyId;
+      requestBody['meta.account_id'] = request.query.company_id ? request.query.company_id : user.account_id;
 
       delete request.query.user_id;
       delete request.query.company_id;
@@ -319,7 +313,7 @@ exports.getSummaryAuditInfo = function(request, reply) {
           metadata: {
             user_id: userId,
             //domain_id  : request.query.domain_id,
-            company_id: utils.getAccountID(request, false),//request.query.company_id ? request.query.company_id : user.companyId,
+            company_id: utils.getAccountID(request, false),
             start_time: startTime,
             end_time: endTime
           },

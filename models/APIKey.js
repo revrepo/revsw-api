@@ -23,6 +23,7 @@
 
 var _ = require('lodash');
 var utils = require('../lib/utilities.js');
+var permissionsSchema = require('./Permissions');
 
 function APIKey(mongoose, connection, options) {
   this.options = options;
@@ -33,21 +34,15 @@ function APIKey(mongoose, connection, options) {
     'key'             : String,
     'key_name'        : String,
     'account_id'       : String,
-    'managed_account_ids': [String],
-    'domains'         : [String],
     'created_by'       : String,
-    'allowed_ops'     : {
-      read_config     : {type: Boolean, default: false},
-      modify_config   : {type: Boolean, default: false},
-      delete_config   : {type: Boolean, default: false},
-      purge           : {type: Boolean, default: false},
-      reports         : {type: Boolean, default: false},
-      admin           : {type: Boolean, default: false},
-    },
-    'read_only_status': {type: Boolean, default: false},
     'active'          : {type: Boolean, default: true},
     'created_at'      : {type: Date, default: Date.now},
-    'updated_at'      : {type: Date, default: Date.now}
+    'updated_at'      : {type: Date, default: Date.now},
+    last_used_at: { type: Date, default: null },
+    last_used_from: { type: String, default: null },
+    permissions: permissionsSchema,
+    group_id: {type: this.ObjectId, default: null},
+    role: { type: String, default: 'admin' }
   });
 
   this.model = connection.model('APIKey', this.APIKeySchema, 'APIKey');
@@ -87,10 +82,18 @@ APIKey.prototype = {
   list: function (request, callback) {
     var options  = {};
     var filter_ = request.query.filters;
+    var resellerAccs;
     if(!!filter_){
       if(!!filter_.account_id){
         options.account_id = {$regex: filter_.account_id, $options: 'i'};
       }
+      if (!!filter_.group_id) {
+        options.group_id = { $in: [filter_.group_id] };
+      }
+    }
+
+    if (request.account_list) {
+      resellerAccs = request.account_list;
     }
     this.model.find(options, function (err, api_keys) {
       if (api_keys) {
@@ -98,6 +101,10 @@ APIKey.prototype = {
         var keys = utils.clone(api_keys);
         for (var i = 0; i < keys.length; i++) {
           if (request.auth.credentials.role === 'revadmin' || utils.getAccountID(request).indexOf(keys[i].account_id) !== -1) {
+            keys[i].id = keys[i]._id + '';
+            delete keys[i]._id;
+            delete keys[i].__v;
+          } else if (request.auth.credentials.role === 'reseller' && resellerAccs.indexOf(keys[i].account_id) !== -1) {
             keys[i].id = keys[i]._id + '';
             delete keys[i]._id;
             delete keys[i].__v;
@@ -120,6 +127,30 @@ APIKey.prototype = {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
+        doc.save(function (err, item) {
+          if (item) {
+            item = utils.clone(item);
+            item.id =  item._id + '';
+
+            delete item._id;
+            delete item.__v;
+          }
+          callback(err, item);
+        });
+      } else {
+        callback(err, doc);
+      }
+    });
+  },
+
+  updateLastUsed: function (item, callback) {
+    this.model.findOne({
+      key: item.key
+    }, function (err, doc) {
+      if (doc) {
+        for (var attrname in item) {
+          doc[attrname] = item[attrname];
+        }
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);

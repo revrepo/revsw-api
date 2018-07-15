@@ -109,7 +109,7 @@ describe('Negative check', function () {
             .catch(done);
         });
 
-      it('should return `Bad Request` response when creating an account using an API Key.',
+      it('should return `Forbidden` response when creating an account using an API Key.',
         function (done) {
           var apiKey;
           API.helpers.authenticateUser(resellerUser)
@@ -122,7 +122,7 @@ describe('Negative check', function () {
                     .then(function () {
                       API.resources.accounts
                         .createOne(newAccount)
-                        .expect(400)
+                        .expect(403)
                         .end(done);
                     });
                 });

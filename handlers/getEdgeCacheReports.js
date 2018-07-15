@@ -39,6 +39,8 @@ var logger = require('revsw-logger')(config.log_config);
 var AuditEvents = require('../models/AuditEvents');
 var DomainConfig = require('../models/DomainConfig');
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 var auditevents = new AuditEvents(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
@@ -326,7 +328,7 @@ module.exports.getStatsEdgeCache = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
     }
-    if (domainConfig && utils.checkUserAccessPermissionToDomain(request, domainConfig)) {
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
       domainName = domainConfig.domain_name;
       var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/ , 24 /* maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/ );
       if (span.error) {
@@ -350,6 +352,128 @@ module.exports.getStatsEdgeCache = function(request, reply) {
       }, function(err, reportData) {
         if (err) {
           logger.error('getStatsEdgeCache:' + err.message);
+          return reply(boom.badImplementation('Failed to retrieve information'));
+        }
+        reply(reportData.report_data);
+      });
+    } else {
+      return reply(boom.badRequest('Domain ID not found'));
+    }
+  });
+};
+
+
+/**
+ * @name getStatsEdgeCacheByCType
+ */
+module.exports.getStatsEdgeCacheByCType = function (request, reply) {
+  var ESURL = elasticSearch.getClientURL();
+  var domainID = request.params.domain_id,
+    domainName,
+    queryProperties = _.clone(request.query);
+
+  domainConfigs.get(domainID, function (error, domainConfig) {
+    if (error) {
+      return reply(boom.badImplementation('Failed to retrieve domain details for ID ' + domainID));
+    }
+    if (domainConfig && permissionCheck.checkPermissionsToResource(request, domainConfig, 'web_analytics')) {
+      domainName = domainConfig.domain_name;
+      var span = utils.query2Span(queryProperties, 24 /*def start in hrs*/, 24 /* maxTimePeriodForTrafficGraphsDays /*allowed period - max count days*/);
+      if (span.error) {
+        return reply(boom.badRequest(span.error));
+      }
+      // NOTE: change start time for make correction graphs for shift all values
+      var startTimeValue_ = span.start - span.interval;
+      var endTimeValue_ = span.end;
+      var cacheKey = 'getStatsEdgeCache:byContentType:' + domainID + ':' + JSON.stringify(queryProperties);
+
+      async.auto({
+        report_data: function (cb) {
+          var esQuery = {
+            query: {
+              filtered: {
+                filter: {
+                  bool: {
+                    must: [{
+                      range: {
+                        '@timestamp': {
+                          gte: startTimeValue_,
+                          lt: endTimeValue_
+                        }
+                      }
+                    }]
+                  }
+                }
+              }
+            },
+            aggs: {
+              results: {
+                terms: {
+                  field: 'cont_type',
+                  size: 20,
+                  order: {
+                    _count: 'desc'
+                  }        
+                },
+                aggs: {
+                  cache_hit_miss: {
+                    terms: {
+                      field: 'cache'
+                    }
+                  }
+                }
+              }
+            }
+          };
+          elasticSearch.buildESQueryTerms(esQuery.query.filtered.filter.bool, {
+            query: request.query
+          }, domainConfig);
+          return ESURL.search({
+            index: utils.buildIndexList(startTimeValue_, endTimeValue_),
+            ignoreUnavailable: true,
+            query_cache: true,
+            search_type: 'count', // NOTE: make it faster
+            timeout: config.get('elasticsearch_timeout_ms'),
+            body: esQuery
+          })
+            .then(function (data) {
+              var response = [];
+              data.aggregations.results.buckets.forEach(function (ctype) {
+                var res = {
+                  cType: ctype.key,
+                  HIT: 0,
+                  MISS: 0
+                };
+
+                var hit = 0;
+                var miss = 0;
+
+                if (ctype.cache_hit_miss.buckets.length > 0) {
+                  _.forEach(ctype.cache_hit_miss.buckets, function (val) {
+                    if (val.key === 'HIT') {
+                      hit += val.doc_count;
+                    } else if (val.key === 'MISS') {
+                      miss += val.doc_count;
+                    }
+                  });
+                }
+
+                res.HIT = hit;
+                res.MISS = miss;
+                res.total = hit + miss;
+                if (res.total > 0) {
+                  response.push(res);
+                }                
+              });
+              response = _.sortBy(response, function (val) {
+                return -val.total; // descending
+              });
+              reply(response);
+            });
+        }
+      }, function (err, reportData) {
+        if (err) {
+          logger.error('getStatsEdgeCache:byContentType:' + err.message);
           return reply(boom.badImplementation('Failed to retrieve information'));
         }
         reply(reportData.report_data);

@@ -30,8 +30,22 @@ var SSLNamesHelper = {
    *
    * @returns {Object} SSL Name data.
    */
-  createOne: function () {
-    return AccountsHelper
+  createOne: function (account_id) {
+    if (account_id) {
+      var sslName = SSLNameDP.generateOne(account_id);
+      return SSLNamesResource
+        .createOne(sslName)
+        .then(function (response) {
+          sslName.id = response.body.id;
+          return sslName;
+        })
+        .catch(function (error) {
+          throw new APITestError('Creating SSL Name',
+            error.response.body,
+            sslName);
+        });
+    }  else {
+      return AccountsHelper
       .createOne()
       .then(function (account) {
         var sslName = SSLNameDP.generateOne(account.id);
@@ -47,6 +61,7 @@ var SSLNamesHelper = {
               sslName);
           });
       });
+    }       
   }
 };
 

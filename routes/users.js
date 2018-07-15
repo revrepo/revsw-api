@@ -46,7 +46,8 @@ module.exports = [
       validate:{
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().trim().description('ID of a company')
+            account_id: Joi.objectId().optional().allow('').trim().description('ID of a company'),
+            group_id: Joi.objectId().optional().trim().description('Filter by group ID')
           })
          .optional().description('Filters parameters')
         }
@@ -79,20 +80,16 @@ module.exports = [
           email: Joi.string().email().required().trim().description('User email address also used as login name'),
           firstname: Joi.string().required().trim().max(30).regex(routeModels.userFirstName).description('First name'),
           lastname: Joi.string().required().max(30).regex(routeModels.userLastName).description('Last name'),
-          password: Joi.string().min(8).max(15).required().description('Password'),
-          companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
+          password: Joi.string().min(8).max(15).optional().description('Password'),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
-          access_control_list: Joi.object( {
-            dashBoard: Joi.boolean().required().default(true).description('Access to the portal Dashboard section'),
-            reports: Joi.boolean().required().default(true).description('Access to the portal REPORTS section'),
-            configure: Joi.boolean().required().description('Access to the portal CONFIGURE section'),
-            test: Joi.boolean().required().description('Access to the portal TEST section'),
-            readOnly: Joi.boolean().required().description('Enable read-only access to the configuration')
-          }).required(),
           role: Joi.string().required().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().required().valid('light','dark').description('Portal color scheme (light/dark)'),
-          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
+          self_registered: Joi.boolean().optional().description('Is this user self registered or created by another user'),
+          group_id: Joi.string().allow(null).description('The group the user is in'),
+          permissions: routeModels.permissionsModel,
+          account_id: Joi.objectId().allow(null).description('The user`s account ID')
         }
       },
       response: {
@@ -128,19 +125,14 @@ module.exports = [
           firstname: Joi.string().trim().max(30).regex(routeModels.userFirstName).description('First name'),
           lastname: Joi.string().max(30).regex(routeModels.userLastName).description('Last name'),
           password: Joi.string().min(8).max(15).description('New Password'),
-          companyId: Joi.array().items( Joi.objectId().description('Optional account ID of the account the user should be created for' ) ),
           domain: Joi.array().items( Joi.string().lowercase().regex(routeModels.domainRegex).description('Domain name the user should have access to') ),
           two_factor_auth_enabled: Joi.boolean().description('Status of two factor authentication protection'),
-          access_control_list: Joi.object( {
-            dashBoard: Joi.boolean().default(true).description('Access to the portal Dashboard section'),
-            reports: Joi.boolean().default(true).description('Access to the portal REPORTS section'),
-            configure: Joi.boolean().description('Access to the portal CONFIGURE section'),
-            test: Joi.boolean().description('Access to the portal TEST section'),
-            readOnly: Joi.boolean().description('Enable read-only access to the configuration')
-          }),
           role: Joi.string().valid('user','admin', 'reseller').description('User role (user/admin)'),
           theme: Joi.string().valid('light','dark').description('Portal color scheme (light/dark)'),
-          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user')
+          comment: Joi.string().trim().allow('').optional().max(300).description('Free-text comment about the user'),
+          group_id: Joi.string().allow(null).description('The group the user is in'),
+          permissions: routeModels.permissionsModel,
+          account_id: Joi.objectId().description('The user`s account ID')
         }
       },
       response: {
@@ -330,6 +322,78 @@ module.exports = [
       validate: {
         params: {
           user_id: Joi.objectId().description('Disable two factor authentication for this user ID')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/v1/users/{user_id}/complete_invitation',
+    config: {
+      handler: users.completeInvitation,
+      auth: false,
+      description: 'Complete the invitation for a newly created user and set a password',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          user_id: Joi.objectId().description('Complete invitation for this user ID')
+        },
+        payload: {
+          password: Joi.string().min(8).max(15).required().description('Password'),
+          invitation_token: Joi.string().length(48).required().description('The invitation token')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/v1/users/{user_id}/resend_invitation',
+    config: {
+      handler: users.resendInvitation,
+      auth: {
+        scope: [ 'user', 'admin', 'reseller', 'revadmin' ]
+      },
+      description: 'Resend an invitation mail for a user.',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          user_id: Joi.objectId().description('Resend invitation for this user ID')
+        }
+      },
+      response: {
+        schema: routeModels.statusModel
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/v1/users/{invitation_token}/status',
+    config: {
+      handler: users.getInvitationStatus,
+      auth: false,
+      description: 'Get invitation status for a token',
+      plugins: {
+        'hapi-swagger': {
+          responseMessages: routeModels.standardHTTPErrors
+        }
+      },
+      validate: {
+        params: {
+          invitation_token: Joi.string().length(48).required().description('The invitation token')
         }
       },
       response: {

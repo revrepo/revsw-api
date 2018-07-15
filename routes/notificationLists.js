@@ -64,6 +64,23 @@ module.exports = [{
     }
   },
   {
+    method: 'POST',
+    path: '/v1/notification_lists/{list_id}/send_notification',
+    config: {
+      auth: false, // we will use a special token to auth revsw-trafficalerter
+      tags: ['api', 'notification_lists'],
+      description: 'Send a notification to the notification list',
+      notes: 'Send a notification to the notification list',
+      handler: notificationListHandlers.sendNotificationToList,
+      validate: {
+        payload: {
+          notification_content: Joi.string().required().description('The content of the notification'),
+          notification_title: Joi.string().required().description('The title of the notification')
+        }
+      }
+    }
+  },
+  {
     method: 'PUT',
     path: '/v1/notification_lists/{list_id}',
     config: {

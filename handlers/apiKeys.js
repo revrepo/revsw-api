@@ -40,6 +40,8 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var domainConfigs = new DomainConfig(mongoose, mongoConnection.getConnectionPortal());
 
+var permissionCheck = require('./../lib/requestPermissionScope');
+
 function verifyDomainOwnership(companyId, domainList, callback) {
 
   var verified = true;
@@ -78,10 +80,31 @@ function verifyDomainOwnership(companyId, domainList, callback) {
 
 exports.getApiKeys = function(request, reply) {
   // TODO: Need to move the access check function from ".list" to this function
-  apiKeys.list(request, function (error, listOfApiKeys) {
-    listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
-    renderJSON(request, reply, error, listOfApiKeys);
-  });
+
+
+  if (permissionCheck.getResellerAccs()) {
+    request.account_list = _.map(permissionCheck.getResellerAccs(), function (acc) {
+      return acc.id;
+    });
+    apiKeys.list(request, function (error, listOfApiKeys) {
+      listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
+      if (!permissionCheck.checkSimplePermissions(request, 'API_keys')) {
+        listOfApiKeys = [];
+      }
+      listOfApiKeys = _.filter(listOfApiKeys, function (key) {
+        return permissionCheck.checkPermissionsToResource(request, { id: key.account_id }, 'accounts');
+      });
+      renderJSON(request, reply, error, listOfApiKeys);
+    });
+  } else {
+    apiKeys.list(request, function (error, listOfApiKeys) {
+      listOfApiKeys = publicRecordFields.handle(listOfApiKeys, 'apiKeys');
+      listOfApiKeys = _.filter(listOfApiKeys, function (key) {
+        return permissionCheck.checkPermissionsToResource(request, { id: key.account_id }, 'accounts');
+      });
+      renderJSON(request, reply, error, listOfApiKeys);
+    });
+  }
 };
 
 exports.getApiKey = function (request, reply) {
@@ -91,7 +114,7 @@ exports.getApiKey = function (request, reply) {
       return reply(boom.badImplementation('Failed to get API key ID ' + id));
     }
 
-    if (result && utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (result && permissionCheck.checkPermissionsToResource(request, result, 'API_keys')) {
 
       result = publicRecordFields.handle(result, 'apiKeys');
       renderJSON(request, reply, error, result);
@@ -129,8 +152,13 @@ exports.createApiKey = function(request, reply) {
   var newKey = uuid();
   newApiKey.key = newKey;
   newApiKey.key_name = 'New API Key';
+  newApiKey.role = request.payload.role || 'admin';
 
-  if (!newApiKey.account_id || !utils.checkUserAccessPermissionToAccount(request, newApiKey.account_id)) {
+  if (!permissionCheck.checkSimplePermissions(request, 'API_keys')) {
+    return reply(boom.forbidden('You are not authorized to create a new API Key'));
+  }
+
+  if (!newApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, {id: newApiKey.account_id}, 'accounts')) {
       return reply(boom.badRequest('Company ID not found'));
   }
 
@@ -151,36 +179,81 @@ exports.createApiKey = function(request, reply) {
         return reply(boom.badRequest('The API key is already registered in the system'));
       }
 
-      apiKeys.add(newApiKey, function (error, result) {
-        if (error || !result) {
-          return reply(boom.badImplementation('Failed to add new API key ' + newKey));
-        }
+      if (newApiKey.role === 'reseller') {
+        accounts.get({ _id: newApiKey.account_id }, function (err, doc) {
+          if (err || !doc) {
+            return reply(boom.badRequest('Account ID Not Found'));
+          }
 
-        var statusResponse;
+          if (doc.parent_account_id) {
+            return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+          }
 
-        result = publicRecordFields.handle(result, 'apiKeys');
+          else {
+            apiKeys.add(newApiKey, function (error, result) {
+              if (error || !result) {
+                return reply(boom.badImplementation('Failed to add new API key ' + newKey));
+              }
 
-        if (result) {
-          statusResponse = {
-            statusCode: 200,
-            message   : 'Successfully created new API key',
-            key       : newKey,
-            object_id : result.id
-          };
+              var statusResponse;
 
-          AuditLogger.store({
-            account_id      : newApiKey.account_id,
-            activity_type   : 'add',
-            activity_target : 'apikey',
-            target_id       : result.id,
-            target_name     : result.key_name,
-            target_object   : result,
-            operation_status: 'success'
-          }, request);
+              result = publicRecordFields.handle(result, 'apiKeys');
 
-          renderJSON(request, reply, error, statusResponse);
-        }
-      });
+              if (result) {
+                statusResponse = {
+                  statusCode: 200,
+                  message: 'Successfully created new API key',
+                  key: newKey,
+                  object_id: result.id
+                };
+
+                AuditLogger.store({
+                  account_id: newApiKey.account_id,
+                  activity_type: 'add',
+                  activity_target: 'apikey',
+                  target_id: result.id,
+                  target_name: result.key_name,
+                  target_object: result,
+                  operation_status: 'success'
+                }, request);
+
+                renderJSON(request, reply, error, statusResponse);
+              }
+            });
+          }
+        });
+      } else {
+        apiKeys.add(newApiKey, function (error, result) {
+          if (error || !result) {
+            return reply(boom.badImplementation('Failed to add new API key ' + newKey));
+          }
+
+          var statusResponse;
+
+          result = publicRecordFields.handle(result, 'apiKeys');
+
+          if (result) {
+            statusResponse = {
+              statusCode: 200,
+              message: 'Successfully created new API key',
+              key: newKey,
+              object_id: result.id
+            };
+
+            AuditLogger.store({
+              account_id: newApiKey.account_id,
+              activity_type: 'add',
+              activity_target: 'apikey',
+              target_id: result.id,
+              target_name: result.key_name,
+              target_object: result,
+              operation_status: 'success'
+            }, request);
+
+            renderJSON(request, reply, error, statusResponse);
+          }
+        });
+      } 
     });
   });
 };
@@ -188,49 +261,89 @@ exports.createApiKey = function(request, reply) {
 exports.updateApiKey = function (request, reply) {
   var updatedApiKey = request.payload;
   var id = request.params.key_id;
+  if (updatedApiKey.permissions && updatedApiKey.permissions.domains.access) {
+    updatedApiKey.permissions.waf_rules = true;
+    updatedApiKey.permissions.ssl_certs = true;
+  }
+
+  if (!updatedApiKey.permissions) {
+    updatedApiKey.permissions = permissionCheck.permissionObject;
+  }
+  updatedApiKey.permissions.accounts.list = null;
+  updatedApiKey.permissions.accounts.access = true;
+  updatedApiKey.permissions.accounts.allow_list = true;
 
   function doUpdate() {
-    apiKeys.update(updatedApiKey, function (error, result) {
-      if (error) {
-        return reply(boom.badImplementation('Failed to update API key ID ' + id));
-      }
+    if (updatedApiKey.role === 'reseller') {
+      accounts.get({ _id: updatedApiKey.account_id }, function (err, doc) {
+        if (err || !doc) {
+          return reply(boom.badRequest('Account ID Not Found'));
+        }
 
-      var statusResponse = {
-        statusCode: 200,
-        message   : 'Successfully updated the API key'
-      };
+        if (doc.parent_account_id) {
+          return reply(boom.badRequest('A reseller cannot have a sub-account as it\'s primary account'));
+        } else {
+          apiKeys.update(updatedApiKey, function (error, result) {
+            if (error) {
+              return reply(boom.badImplementation('Failed to update API key ID ' + id));
+            }
+      
+            var statusResponse = {
+              statusCode: 200,
+              message   : 'Successfully updated the API key'
+            };
+      
+            result = publicRecordFields.handle(result, 'apiKeys');
+      
+            AuditLogger.store({
+              account_id       : updatedApiKey.account_id,
+              activity_type    : 'modify',
+              activity_target  : 'apikey',
+              target_id        : result.id,
+              target_name      : result.key_name,
+              target_object    : result,
+              operation_status : 'success'
+            }, request);
+      
+            renderJSON(request, reply, error, statusResponse);
+          });
+        }
+      });
+    } else {
+      accounts.get({ _id: updatedApiKey.account_id }, function (err, doc) {
+        if (err || !doc) {
+          return reply(boom.badRequest('Account ID Not Found'));
+        }
+        apiKeys.update(updatedApiKey, function (error, result) {
+          if (error) {
+            return reply(boom.badImplementation('Failed to update API key ID ' + id));
+          }
 
-      result = publicRecordFields.handle(result, 'apiKeys');
+          var statusResponse = {
+            statusCode: 200,
+            message: 'Successfully updated the API key'
+          };
 
-      AuditLogger.store({
-        account_id       : updatedApiKey.account_id,
-        activity_type    : 'modify',
-        activity_target  : 'apikey',
-        target_id        : result.id,
-        target_name      : result.key_name,
-        target_object    : result,
-        operation_status : 'success'
-      }, request);
+          result = publicRecordFields.handle(result, 'apiKeys');
 
-      renderJSON(request, reply, error, statusResponse);
-    });
-  }
+          AuditLogger.store({
+            account_id: updatedApiKey.account_id,
+            activity_type: 'modify',
+            activity_target: 'apikey',
+            target_id: result.id,
+            target_name: result.key_name,
+            target_object: result,
+            operation_status: 'success'
+          }, request);
 
-  if (!updatedApiKey.account_id || !utils.checkUserAccessPermissionToAPIKey(request, updatedApiKey)) {
-      return reply(boom.badRequest('Company ID not found'));
-  }
-  // NOTE: check  user access permission to account for manage
-  if (!!updatedApiKey.managed_account_ids && updatedApiKey.managed_account_ids.length > 0) {
-    var hasError = false;
-    updatedApiKey.managed_account_ids = _.unique(updatedApiKey.managed_account_ids);
-    updatedApiKey.managed_account_ids.forEach(function(itemAccountId) {
-      if (!utils.checkUserAccessPermissionToAccount(request, itemAccountId)) {
-        hasError = true;
-      }
-    });
-    if (hasError === true) {
-      return reply(boom.badRequest('Company ID not found'));
+          renderJSON(request, reply, error, statusResponse);
+        });
+      });
     }
+  }
+
+  if (!updatedApiKey.account_id || !permissionCheck.checkPermissionsToResource(request, updatedApiKey, 'API_keys')) {
+      return reply(boom.badRequest('Company ID not found'));
   }
 
   apiKeys.get({_id: id}, function (error, result) {
@@ -274,7 +387,7 @@ exports.activateApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (!result.account_id || !permissionCheck.checkPermissionsToResource(request, result, 'API_keys')) {
       return reply(boom.badRequest('API key not found'));
     }
 
@@ -357,7 +470,7 @@ exports.deleteApiKey = function (request, reply) {
       return reply(boom.badRequest('API key not found'));
     }
 
-    if (!result.account_id || !utils.checkUserAccessPermissionToAPIKey(request, result)) {
+    if (!result.account_id || !permissionCheck.checkPermissionsToResource(request, result, 'API_keys')) {
       return reply(boom.badRequest('API key not found'));
     }
 

@@ -84,7 +84,10 @@ function Account(mongoose, connection, options) {
         default: false
     },
     'promocode': {type: String, default: null},
-    'bp_group_id': {type: this.ObjectId, default : null }
+    'bp_group_id': {type: this.ObjectId, default : null },
+    parent_account_id: {type: this.ObjectId, default: null},
+    silence_alerts: { type: Boolean, default: false },
+    silence_until: { type: Date, default: null }
   });
 
   this.model = connection.model('Company', this.AccountSchema, 'Company');
@@ -111,6 +114,25 @@ Account.prototype = {
   list : function (callback) {
     this.model.find({ deleted: { $ne: true } },function (err, accounts) {
       if(accounts) {
+        accounts = utils.clone(accounts);
+        for (var i = 0; i < accounts.length; i++) {
+          var current = accounts[i];
+
+          current.id = current._id + '';
+          // TODO need to move the "delete" operations to a separate function (in all Account methods)
+          delete current._id;
+          delete current.__v;
+          delete current.status;
+        }
+      }
+
+      callback(err, accounts);
+    });
+  },
+
+  listByParentID: function (filters, callback) {
+    this.model.find({ deleted: { $ne: true }, parent_account_id: { $in: [filters] } }, function (err, accounts) {
+      if (accounts) {
         accounts = utils.clone(accounts);
         for (var i = 0; i < accounts.length; i++) {
           var current = accounts[i];

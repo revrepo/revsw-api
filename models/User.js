@@ -25,41 +25,33 @@ var utils = require('../lib/utilities.js');
 var _ = require('lodash');
 var promise = require('bluebird');
 
+var permissionSchema = require('./Permissions');
+
 function User(mongoose, connection, options) {
   this.options = options;
   this.Schema = mongoose.Schema;
   this.ObjectId = this.Schema.ObjectId;
 
   this.UserSchema = new this.Schema({
-    'access_control_list'  : {
-      dashBoard : {type : Boolean, default : true},
-      reports   : {type : Boolean, default : true},
-      configure : {type : Boolean, default : true},
-      test      : {type : Boolean, default : true},
-      readOnly  : {type : Boolean, default : false}
-    },
-    // TODO need to rename to account_id
-    'companyId'            : String,
-    'domain'               : {type: String, lowercase: true},
-    'email'                : String,
-     // TODO rename to first_name
-    'firstname'            : String,
+    'email': String,
+    // TODO rename to first_name
+    'firstname': String,
     // TODO rename to last_name
-    'lastname'             : String,
-    'password'             : String,
-    'role'                 : {type : String, default : 'user'},
-    'status'               : {type : Boolean, default : true},
-    'theme'                : {type : String, default : 'light'},
-    'token'                : String,
-    'created_at'           : {type : Date, default : Date.now},
-    'updated_at'           : {type : Date, default : Date.now},
-    'last_login_at'        : {type : Date, default: null},
-    'last_login_from'      : {type : String, default: null},
+    'lastname': String,
+    'password': String,
+    'role': { type: String, default: 'user' },
+    'status': { type: Boolean, default: true },
+    'theme': { type: String, default: 'light' },
+    'token': String,
+    'created_at': { type: Date, default: Date.now },
+    'updated_at': { type: Date, default: Date.now },
+    'last_login_at': { type: Date, default: null },
+    'last_login_from': { type: String, default: null },
     // TODO: need to fix the ugly names of the two variables
     // should be reset_password_token and reset_password_expires
-    'resetPasswordToken'   : String,
-    'resetPasswordExpires' : Number,
-    'two_factor_auth_enabled': {type: Boolean, default: false},
+    'resetPasswordToken': String,
+    'resetPasswordExpires': Number,
+    'two_factor_auth_enabled': { type: Boolean, default: false },
     'two_factor_auth_secret_base32': String,
 
     // Self register section
@@ -76,13 +68,19 @@ function User(mongoose, connection, options) {
       // TODO: should be "expired_at"
       'expiredAt': Date,
       'token': String,
-      'verified': {type: Boolean, default: false}
+      'verified': { type: Boolean, default: false }
     },
 
     billing_plan: this.ObjectId,
 
     deleted: { type: Boolean, default: false },
-    comment: { type: String, default: ''},
+    comment: { type: String, default: '' },
+    invitation_token: { type: String, default: null },
+    invitation_expire_at: { type: Date, default: Date.now },
+    invitation_sent_at: { type: Date, default: Date.now },
+    group_id: { type: String, default: null },
+    permissions: permissionSchema, // new permissions system!
+    account_id: { type: this.ObjectId, default: null }
   });
 
   this.model = connection.model('User', this.UserSchema, 'User');
@@ -91,18 +89,10 @@ function User(mongoose, connection, options) {
 User.prototype = {
 
   // adds a new item
-  add : function (item, callback) {
+  add: function (item, callback) {
 
     var hash = utils.getHash(item.password);
     item.password = hash;
-
-    if (utils.isArray(item.domain)) {
-      item.domain = item.domain.join(',').toLowerCase();
-    }
-
-    if (utils.isArray(item.companyId)) {
-      item.companyId = item.companyId.join(',');
-    }
 
     new this.model(item).save(function (err, item) {
       if (callback) {
@@ -118,7 +108,7 @@ User.prototype = {
     });
   },
 
-  get : function (item, callback) {
+  get: function (item, callback) {
 
     this.model.findOne(item, function (err, doc) {
       if (doc) {
@@ -136,23 +126,12 @@ User.prototype = {
         delete doc.validation;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        } else {
-          doc.companyId = [];
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
-
       }
       callback(err, doc);
     });
   },
 
-  getById : function (id, callback) {
+  getById: function (id, callback) {
 
     this.model.findById(id, function (err, doc) {
       if (doc) {
@@ -166,21 +145,12 @@ User.prototype = {
         delete doc.validation;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
-
       }
       callback(err, doc);
     });
   },
 
-  getValidation : function (item, callback) {
+  getValidation: function (item, callback) {
     this.model.findOne(item, function (err, doc) {
       if (doc) {
 
@@ -194,17 +164,6 @@ User.prototype = {
         delete doc.status;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        } else {
-          doc.companyId = [];
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
-
       }
       callback(err, doc);
     });
@@ -217,15 +176,15 @@ User.prototype = {
    * @param  {Function} callback
    * @return
    */
-  updateValidation : function (item, callback) {
-    this.model.findOne({_id : item.user_id}, function (err, doc) {
+  updateValidation: function (item, callback) {
+    this.model.findOne({ _id: item.user_id }, function (err, doc) {
       if (doc) {
-        if(!!item.validation && item.validation.verified === true){
-            item.validation = {
-              expiredAt: undefined,
-              token: '',
-              verified: true
-            };
+        if (!!item.validation && item.validation.verified === true) {
+          item.validation = {
+            expiredAt: undefined,
+            token: '',
+            verified: true
+          };
         }
         for (var attrname in item) {
           doc[attrname] = item[attrname];
@@ -240,16 +199,6 @@ User.prototype = {
         delete doc.status;
         delete doc.old_passwords;
 
-        if (doc.companyId) {
-          doc.companyId = doc.companyId.split(',');
-        } else {
-          doc.companyId = [];
-        }
-        if (doc.domain) {
-          doc.domain = doc.domain.toLowerCase().split(',');
-        } else {
-          doc.domain = [];
-        }
         doc.save(function (err, item) {
           if (item) {
             item = utils.clone(item);
@@ -263,7 +212,7 @@ User.prototype = {
           }
           callback(err, item);
         });
-      }else{
+      } else {
         callback(err, doc);
       }
     });
@@ -289,40 +238,30 @@ User.prototype = {
    * @name list
    * @description method get list of users data
    */
-  list: function(params, callback) {
+  list: function (params, callback) {
     var options = {};
-    if(!!params.account_id){
-      if(_.isArray(params.account_id)){
-        options.$or = [];
-        _.each(params.account_id,function(item){
-          options.$or.push({
-            companyId: { $regex: item, $options: 'i' }
-          });
-        });
-      }else{
-        options.companyId = { $regex: params.account_id, $options: 'i'};
+    if (!!params.account_id) {
+      if (_.isArray(params.account_id)) {
+        options.account_id = { $in: params.account_id };
+      } else {
+        options.account_id = { $in: [params.account_id] };
       }
     }
+
+    //filter by group ID
+    if (!!params.group_id) {
+      options.group_id = { $in: [params.group_id] };
+    }
+
     // NOTE: don't show the fields "validation", "password", "old_passwords", "__v"
     this.model.find(options, '-validation -password -old_passwords -__v', function (err, users) {
       if (users) {
         users = utils.clone(users);
         for (var i = 0; i < users.length; i++) {
-          if (users[i].companyId) {
-            users[i].companyId = users[i].companyId.split(',');
-          } else {
-            users[i].companyId = [];
-          }
 
           users[i].user_id = users[i]._id;
           users[i].two_factor_auth_enabled = users[i].two_factor_auth_enabled || false;
           delete users[i]._id;
-
-          if (users[i].domain && users[i].domain !== '') {
-            users[i].domain = users[i].domain.toLowerCase().split(',');
-          } else {
-            users[i].domain = [];
-          }
         }
       }
       //    console.log('Inside list, users = ', users);
@@ -330,20 +269,11 @@ User.prototype = {
     });
   },
 
-  update : function (item, callback) {
+  update: function (item, callback) {
     var context = this;
-    this.model.findOne({_id : item.user_id}, function (err, doc) {
+    this.model.findOne({ _id: item.user_id }, function (err, doc) {
       //     console.log('Inside update: doc = ', doc);
       if (doc) {
-
-        if (utils.isArray(item.domain)) {
-          item.domain = _.uniq(item.domain);
-          item.domain = item.domain.join(',').toLowerCase();
-        }
-
-        if (utils.isArray(item.companyId)) {
-          item.companyId = item.companyId.join(',');
-        }
 
         if (item.password) {
           var hash = utils.getHash(item.password);
@@ -354,7 +284,6 @@ User.prototype = {
           doc[attrname] = item[attrname];
         }
         doc.updated_at = new Date();
-
         //       console.log('Inside update: updated doc = ', doc);
         doc.save(function (err, item) {
           if (item) {
@@ -374,9 +303,9 @@ User.prototype = {
     });
   },
 
-  updateLastLoginAt : function (item, callback) {
+  updateLastLoginAt: function (item, callback) {
     var context = this;
-    this.model.findOne({_id : item.user_id}, function (err, doc) {
+    this.model.findOne({ _id: item.user_id }, function (err, doc) {
       //     console.log('Inside update: doc = ', doc);
       if (doc) {
 
@@ -401,7 +330,7 @@ User.prototype = {
     });
   },
 
-  remove : function (item, callback) {
+  remove: function (item, callback) {
     var context = this;
     if (item) {
       this.get(item, function (err, data) {
@@ -418,7 +347,7 @@ User.prototype = {
     }
   },
 
-  getUsersUsesBillingPlan: function(billingPlanId, cb) {
+  getUsersUsesBillingPlan: function (billingPlanId, cb) {
     cb = cb || _.noop;
     this.get({
       billing_plan: billingPlanId,
@@ -438,10 +367,10 @@ User.prototype = {
   countUsers: function () {
     var res = { total: 0, active: 0, deleted: 0 };
     return promise.all([
-        this.model.count({ $or: [{ deleted : { $exists: false } }, { deleted: false } ] }).exec(),
-        this.model.count({}).exec()
-      ])
-      .then( function( c ) {
+      this.model.count({ $or: [{ deleted: { $exists: false } }, { deleted: false }] }).exec(),
+      this.model.count({}).exec()
+    ])
+      .then(function (c) {
         res.active = c[0];
         res.total = c[1];
         res.deleted = res.total - res.active;
@@ -455,60 +384,60 @@ User.prototype = {
    *
    * @param {{String}}  accountId - Account Id
    */
-  cleanOneManagedAccountIdForAllResselers: function(accountId, cb) {
+  cleanOneManagedAccountIdForAllResselers: function (accountId, cb) {
     var context = this;
-    if(_.isArray(accountId)){
-     return cb(new Error('accountId must be String'));
+    if (_.isArray(accountId)) {
+      return cb(new Error('accountId must be String'));
     }
-    var conditionsFind = { '$regex': ','+accountId/*not main Account Id*/ };
+    var conditionsFind = { '$regex': ',' + accountId/*not main Account Id*/ };
     var ops = [];
     this.model.find({
       companyId: conditionsFind
-    }, function(err, docs) {
-        if(err) {
-          return cb(err);
-        }
-        var total = docs.length;
-        docs.forEach(function(doc) {
-          ops.push({
-            'updateOne': {
-              'filter': { '_id': doc._id },
-              'update': { '$set': { 'companyId': doc.companyId.replace(',' + accountId, '') } }
-            }
-          });
-          if(ops.length === 500) {
-            context.model.collection.bulkWrite(ops);
-            ops = [];
+    }, function (err, docs) {
+      if (err) {
+        return cb(err);
+      }
+      var total = docs.length;
+      docs.forEach(function (doc) {
+        ops.push({
+          'updateOne': {
+            'filter': { '_id': doc._id },
+            'update': { '$set': { 'companyId': doc.companyId.replace(',' + accountId, '') } }
           }
         });
-        if(ops.length > 0){
+        if (ops.length === 500) {
           context.model.collection.bulkWrite(ops);
+          ops = [];
         }
-        cb(err, { total: total} );
       });
+      if (ops.length > 0) {
+        context.model.collection.bulkWrite(ops);
+      }
+      cb(err, { total: total });
+    });
   },
   /**
    * @name cleanOneManagedDomainNameForAllUsers
    * @description method clean one domain name for all users
    */
-  cleanOneManagedDomainNameForAllUsers: function(options, cb) {
+  cleanOneManagedDomainNameForAllUsers: function (options, cb) {
     var domainName = options.domain_name;
     var context = this;
     var ops = [];
-    if(!domainName) {
+    if (!domainName) {
       return cb(new Error('Property domain_name not set'));
     }
-    if(_.isArray(domainName)) {
+    if (_.isArray(domainName)) {
       return cb(new Error('Property domain_name must be String'));
     }
-    var conditionsFind = { '$regex': domainName};
-    this.model.find({ domain: conditionsFind }, function(err, docs){
-      if(err) {
+    var conditionsFind = { '$regex': domainName };
+    this.model.find({ domain: conditionsFind }, function (err, docs) {
+      if (err) {
         return cb(err);
       }
       var total = docs.length;
-      docs.forEach(function(doc) {
-        var domainList = _.filter(doc.domain.split(','), function(item){
+      docs.forEach(function (doc) {
+        var domainList = _.filter(doc.domain.split(','), function (item) {
           return item !== domainName;
         });
         ops.push({
@@ -517,15 +446,32 @@ User.prototype = {
             'update': { '$set': { 'domain': domainList.join(',') } }
           }
         });
-        if(ops.length === 500) {
+        if (ops.length === 500) {
           context.model.collection.bulkWrite(ops);
           ops = [];
         }
       });
-      if(ops.length > 0) {
+      if (ops.length > 0) {
         context.model.collection.bulkWrite(ops);
       }
       cb(err, { total: total });
+    });
+  },
+
+  /**
+   * @name getRevAdmins
+   * @description get a list of revadmins in our system
+   */
+  getRevAdmins: function () {
+    var me = this;
+    return new promise(function (resolve, reject) {
+      me.model.find({ role: 'revadmin' }, function (err, res) {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(res);
+      });
     });
   }
 };

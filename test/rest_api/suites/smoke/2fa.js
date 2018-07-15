@@ -38,7 +38,6 @@ describe('Smoke check:', function () {
   var users = [
     config.get('api.users.reseller'),
     config.get('api.users.revAdmin'),
-    config.get('api.apikeys.admin'),
     config.get('api.apikeys.reseller')
   ];
 
@@ -77,7 +76,7 @@ describe('Smoke check:', function () {
               .authenticate(user)
               .then(function () {
                 var newUser = DataProvider.generateUser(role);
-                newUser.companyId = [accountForUsers.id];
+                newUser.account_id = role === 'reseller' ? user.account.id : accountForUsers.id;
                 newUser.domain = [];
                 return API.helpers.users.create(newUser);
               })

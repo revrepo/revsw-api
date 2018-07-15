@@ -1,0 +1,537 @@
+[
+    {
+        "metric_id": 1,
+        "metric_field": "records_processed",
+        "metric_desc": "Records Processed"
+    },
+    {
+        "metric_id": 2,
+        "metric_field": "applications.total",
+        "metric_desc": "Total Applications"
+    },
+    {
+        "metric_id": 3,
+        "metric_field": "applications.deleted",
+        "metric_desc": "Deleted Applications"
+    },
+    {
+        "metric_id": 4,
+        "metric_field": "applications.active",
+        "metric_desc": "Active Applications"
+    },
+    {
+        "metric_id": 5,
+        "metric_field": "applications",
+        "metric_desc": "Applications"
+    },
+    {
+        "metric_id": 6,
+        "metric_field": "apps_per_platform.Windows_Mobile.total",
+        "metric_desc": "Total Windows Mobile Apps Per Platform"
+    },
+    {
+        "metric_id": 7,
+        "metric_field": "apps_per_platform.Windows_Mobile.deleted",
+        "metric_desc": "Deleted Windows Mobile Apps Per Platform"
+    },
+    {
+        "metric_id": 8,
+        "metric_field": "apps_per_platform.Windows_Mobile.active",
+        "metric_desc": "Active Windows Mobile Apps Per Platform"
+    },
+    {
+        "metric_id": 9,
+        "metric_field": "apps_per_platform.Android.total",
+        "metric_desc": "Total Android Apps Per Platform"
+    },
+    {
+        "metric_id": 10,
+        "metric_field": "apps_per_platform.Android.deleted",
+        "metric_desc": "Deleted Android Apps Per Platform"
+    },
+    {
+        "metric_id": 11,
+        "metric_field": "apps_per_platform.Android.active",
+        "metric_desc": "Active Android Apps Per Platform"
+    },
+    {
+        "metric_id": 12,
+        "metric_field": "apps_per_platform.iOS.total",
+        "metric_desc": "Total IOS Apps Per Platform"
+    },
+    {
+        "metric_id": 13,
+        "metric_field": "apps_per_platform.iOS.deleted",
+        "metric_desc": "Deleted IOS Apps Per Platform"
+    },
+    {
+        "metric_id": 14,
+        "metric_field": "apps_per_platform.iOS.active",
+        "metric_desc": "Active IOS Apps Per Platform"
+    },
+    {
+        "metric_id": 15,
+        "metric_field": "apps_per_platform",
+        "metric_desc": "Apps Per Platform"
+    },
+    {
+        "metric_id": 16,
+        "metric_field": "api_keys.total",
+        "metric_desc": "Total API Keys"
+    },
+    {
+        "metric_id": 17,
+        "metric_field": "api_keys.inactive",
+        "metric_desc": "Inactive API Keys"
+    },
+    {
+        "metric_id": 18,
+        "metric_field": "api_keys.active",
+        "metric_desc": "Active API Keys"
+    },
+    {
+        "metric_id": 19,
+        "metric_field": "api_keys",
+        "metric_desc": "API Keys"
+    },
+    {
+        "metric_id": 20,
+        "metric_field": "ssl_certs.total",
+        "metric_desc": "Total SSL Certs"
+    },
+    {
+        "metric_id": 21,
+        "metric_field": "ssl_certs.deleted",
+        "metric_desc": "Deleted SSL Certs"
+    },
+    {
+        "metric_id": 22,
+        "metric_field": "ssl_certs.active",
+        "metric_desc": "Active SSL Certs"
+    },
+    {
+        "metric_id": 23,
+        "metric_field": "ssl_certs",
+        "metric_desc": "SSL Certs"
+    },
+    {
+        "metric_id": 24,
+        "metric_field": "ssl_certs_per_type.private.total",
+        "metric_desc": "Total Private SSL Certs Per Type"
+    },
+    {
+        "metric_id": 25,
+        "metric_field": "ssl_certs_per_type.private.deleted",
+        "metric_desc": "Deleted Private SSL Certs Per Type"
+    },
+    {
+        "metric_id": 26,
+        "metric_field": "ssl_certs_per_type.private.active",
+        "metric_desc": "Active Private SSL Certs Per Type"
+    },
+    {
+        "metric_id": 27,
+        "metric_field": "ssl_certs_per_type.shared.total",
+        "metric_desc": "Total Shared SSL Certs Per Type"
+    },
+    {
+        "metric_id": 28,
+        "metric_field": "ssl_certs_per_type.shared.deleted",
+        "metric_desc": "Deleted Shared SSL Certs Per Type"
+    },
+    {
+        "metric_id": 29,
+        "metric_field": "ssl_certs_per_type.shared.active",
+        "metric_desc": "Active Shared SSL Certs Per Type"
+    },
+    {
+        "metric_id": 30,
+        "metric_field": "ssl_certs_per_type",
+        "metric_desc": "SSL Certs Per Type"
+    },
+    {
+        "metric_id": 31,
+        "metric_field": "domains.total",
+        "metric_desc": "Total Domains"
+    },
+    {
+        "metric_id": 32,
+        "metric_field": "domains.deleted",
+        "metric_desc": "Deleted Domains"
+    },
+    {
+        "metric_id": 33,
+        "metric_field": "domains.active",
+        "metric_desc": "Active Domains"
+    },
+    {
+        "metric_id": 34,
+        "metric_field": "domains.ssl_enabled",
+        "metric_desc": "SSL Enabled Domains"
+    },
+    {
+        "metric_id": 35,
+        "metric_field": "domains.total_custom_vcl_feature",
+        "metric_desc": "Total Custom VCL Feature Domains"
+    },
+    {
+        "metric_id": 36,
+        "metric_field": "domains.total_enhanced_web_analytics",
+        "metric_desc": "Total Enhanced Web Analytics Domains"
+    },
+    {
+        "metric_id": 37,
+        "metric_field": "domains.total_waf_feature",
+        "metric_desc": "Total WAF Feature Domains"
+    },
+    {
+        "metric_id": 38,
+        "metric_field": "domains.total_lua_feature",
+        "metric_desc": "Total Lua Feature Domains"
+    },
+    {
+        "metric_id": 39,
+        "metric_field": "domains",
+        "metric_desc": "Domains"
+    },
+    {
+        "metric_id": 40,
+        "metric_field": "dns_zones.total_dns_zones",
+        "metric_desc": "Total DNS Zones"
+    },
+    {
+        "metric_id": 41,
+        "metric_field": "dns_zones.total_dns_records",
+        "metric_desc": "Total DNS Records"
+    },
+    {
+        "metric_id": 42,
+        "metric_field": "dns_zones.total_dns_queries",
+        "metric_desc": "Total DNS Queries"
+    },
+    {
+        "metric_id": 43,
+        "metric_field": "dns_zones",
+        "metric_desc": "DNS Zones"
+    },
+    {
+        "metric_id": 44,
+        "metric_field": "traffic.count",
+        "metric_desc": "Total Requests"
+    },
+    {
+        "metric_id": 45,
+        "metric_field": "traffic.received_bytes",
+        "metric_desc": "Received Bytes Traffic"
+    },
+    {
+        "metric_id": 46,
+        "metric_field": "traffic.sent_bytes",
+        "metric_desc": "Sent Bytes Traffic"
+    },
+    {
+        "metric_id": 47,
+        "metric_field": "traffic.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps"
+    },
+    {
+        "metric_id": 48,
+        "metric_field": "traffic.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps"
+    },
+    {
+        "metric_id": 49,
+        "metric_field": "traffic",
+        "metric_desc": "Traffic"
+    },
+    {
+        "metric_id": 50,
+        "metric_field": "traffic_per_billing_zone.North America.count",
+        "metric_desc": "Requests In North America Billing Zone"
+    },
+    {
+        "metric_id": 51,
+        "metric_field": "traffic_per_billing_zone.North America.received_bytes",
+        "metric_desc": "Received Bytes North America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 52,
+        "metric_field": "traffic_per_billing_zone.North America.sent_bytes",
+        "metric_desc": "Sent Bytes North America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 54,
+        "metric_field": "traffic_per_billing_zone.North America.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps North America"
+    },
+    {
+        "metric_id": 55,
+        "metric_field": "traffic_per_billing_zone.North America.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps North America"
+    },
+    {
+        "metric_id": 56,
+        "metric_field": "traffic_per_billing_zone.Testing Lab.count",
+        "metric_desc": "Requests In Testing Lab Billing Zone"
+    },
+    {
+        "metric_id": 57,
+        "metric_field": "traffic_per_billing_zone.Testing Lab.received_bytes",
+        "metric_desc": "Received Bytes Testing Lab Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 58,
+        "metric_field": "traffic_per_billing_zone.Testing Lab.sent_bytes",
+        "metric_desc": "Sent Bytes Testing Lab Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 60,
+        "metric_field": "traffic_per_billing_zone.Testing Lab.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Testing Lab"
+    },
+    {
+        "metric_id": 61,
+        "metric_field": "traffic_per_billing_zone.Testing Lab.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Testing Lab"
+    },
+    {
+        "metric_id": 62,
+        "metric_field": "traffic_per_billing_zone",
+        "metric_desc": "Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 63,
+        "metric_field": "port_hits.80",
+        "metric_desc": "HTTP Requests"
+    },
+    {
+        "metric_id": 64,
+        "metric_field": "port_hits.443",
+        "metric_desc": "HTTPS Requests"
+    },
+    {
+        "metric_id": 65,
+        "metric_field": "port_hits",
+        "metric_desc": "Port Hits"
+    },
+    {
+        "metric_id": 66,
+        "metric_field": "cache_hits.HIT",
+        "metric_desc": "HIT Cache Hits"
+    },
+    {
+        "metric_id": 67,
+        "metric_field": "cache_hits.MISS",
+        "metric_desc": "MISS Cache Hits"
+    },
+    {
+        "metric_id": 68,
+        "metric_field": "cache_hits",
+        "metric_desc": "Cache Hits"
+    },
+    {
+        "metric_id": 69,
+        "metric_field": "total_ssl_names",
+        "metric_desc": "Total SSL Names"
+    },
+    {
+        "metric_id": 70,
+        "metric_field": "total_object_purge_commands",
+        "metric_desc": "Total Object Purge Commands"
+    },
+    {
+        "metric_id": 71,
+        "metric_field": "total_log_shipping_jobs",
+        "metric_desc": "Total Log Shipping Jobs"
+    },
+    {
+        "metric_id": 72,
+        "metric_field": "image_engine.optimized_image_size_bytes",
+        "metric_desc": "Optimized Image Size Bytes Image Engine"
+    },
+    {
+        "metric_id": 73,
+        "metric_field": "image_engine.optimized_images_count",
+        "metric_desc": "Optimized Images Amount Image Engine"
+    },
+    {
+        "metric_id": 74,
+        "metric_field": "image_engine.original_image_size_bytes",
+        "metric_desc": "Original Image Size Bytes Image Engine"
+    },
+    {
+        "metric_id": 75,
+        "metric_field": "image_engine",
+        "metric_desc": "Image Engine"
+    },
+    {
+        "metric_id": 76,
+        "metric_field": "count",
+        "metric_desc": "Requests"
+    },
+    {
+        "metric_id": 77,
+        "metric_field": "received_bytes",
+        "metric_desc": "Received Bytes"
+    },
+    {
+        "metric_id": 78,
+        "metric_field": "sent_bytes",
+        "metric_desc": "Sent Bytes"
+    },
+    {
+        "metric_id": 79,
+        "metric_field": "billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile)"
+    },
+    {
+        "metric_id": 80,
+        "metric_field": "billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile)"
+    },
+    {
+        "metric_id": 83,
+        "metric_field": "active_domains",
+        "metric_desc": "Active Domains"
+    },
+    {
+        "metric_id": 84,
+        "metric_field": "active_apps",
+        "metric_desc": "Active Apps"
+    },
+    {
+        "metric_id": 85,
+        "metric_field": "active_api_keys",
+        "metric_desc": "Active API Keys"
+    },
+    {
+        "metric_id": 86,
+        "metric_field": "billing_samples",
+        "metric_desc": "Billing Samples"
+    },
+    {
+        "metric_id": 561,
+        "metric_field": "traffic_per_billing_zone.Africa.count",
+        "metric_desc": "Requests In Africa Billing Zone"
+    },
+    {
+        "metric_id": 571,
+        "metric_field": "traffic_per_billing_zone.Africa.received_bytes",
+        "metric_desc": "Received Bytes Africa Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 581,
+        "metric_field": "traffic_per_billing_zone.Africa.sent_bytes",
+        "metric_desc": "Sent Bytes Africa Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 601,
+        "metric_field": "traffic_per_billing_zone.Africa.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Africa"
+    },
+    {
+        "metric_id": 611,
+        "metric_field": "traffic_per_billing_zone.Africa.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Africa"
+    },
+    {
+        "metric_id": 562,
+        "metric_field": "traffic_per_billing_zone.Asia.count",
+        "metric_desc": "Requests In Asia Billing Zone"
+    },
+    {
+        "metric_id": 572,
+        "metric_field": "traffic_per_billing_zone.Asia.received_bytes",
+        "metric_desc": "Received Bytes Asia Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 582,
+        "metric_field": "traffic_per_billing_zone.Asia.sent_bytes",
+        "metric_desc": "Sent Bytes Asia Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 602,
+        "metric_field": "traffic_per_billing_zone.Asia.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Asia"
+    },
+    {
+        "metric_id": 612,
+        "metric_field": "traffic_per_billing_zone.Asia.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Asia"
+    },
+    {
+        "metric_id": 563,
+        "metric_field": "traffic_per_billing_zone.Europe.count",
+        "metric_desc": "Requests In Europe Billing Zone"
+    },
+    {
+        "metric_id": 573,
+        "metric_field": "traffic_per_billing_zone.Europe.received_bytes",
+        "metric_desc": "Received Bytes Europe Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 583,
+        "metric_field": "traffic_per_billing_zone.Europe.sent_bytes",
+        "metric_desc": "Sent Bytes Europe Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 603,
+        "metric_field": "traffic_per_billing_zone.Europe.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Europe"
+    },
+    {
+        "metric_id": 613,
+        "metric_field": "traffic_per_billing_zone.Europe.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Europe"
+    },
+    {
+        "metric_id": 564,
+        "metric_field": "traffic_per_billing_zone.Oceania.count",
+        "metric_desc": "Requests In Oceania Billing Zone"
+    },
+    {
+        "metric_id": 574,
+        "metric_field": "traffic_per_billing_zone.Oceania.received_bytes",
+        "metric_desc": "Received Bytes Oceania Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 584,
+        "metric_field": "traffic_per_billing_zone.Oceania.sent_bytes",
+        "metric_desc": "Sent Bytes Oceania Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 604,
+        "metric_field": "traffic_per_billing_zone.Oceania.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps Oceania"
+    },
+    {
+        "metric_id": 614,
+        "metric_field": "traffic_per_billing_zone.Oceania.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps Oceania"
+    },
+    {
+        "metric_id": 565,
+        "metric_field": "traffic_per_billing_zone.South America.count",
+        "metric_desc": "Requests In South America Billing Zone"
+    },
+    {
+        "metric_id": 575,
+        "metric_field": "traffic_per_billing_zone.South America.received_bytes",
+        "metric_desc": "Received Bytes South America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 585,
+        "metric_field": "traffic_per_billing_zone.South America.sent_bytes",
+        "metric_desc": "Sent Bytes South America Traffic Per Billing Zone"
+    },
+    {
+        "metric_id": 605,
+        "metric_field": "traffic_per_billing_zone.South America.billable_received_bps",
+        "metric_desc": "Received Traffic Bandwidth (95/5 percentile) Bps South America"
+    },
+    {
+        "metric_id": 615,
+        "metric_field": "traffic_per_billing_zone.South America.billable_sent_bps",
+        "metric_desc": "Sent Traffic Bandwidth (95/5 percentile) Bps South America"
+    }
+]

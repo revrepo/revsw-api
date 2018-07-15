@@ -42,7 +42,7 @@ var domainConfigs   = new DomainConfig(mongoose, mongoConnection.getConnectionPo
 var serverGroups         = new ServerGroup(mongoose, mongoConnection.getConnectionPortal());
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var sslCertificates = new SSLCertificate(mongoose, mongoConnection.getConnectionPortal());
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var authHeader = {Authorization: 'Bearer ' + config.get('cds_api_token')};
 
 exports.getSSLCertificateStatus = function(request, reply) {
@@ -52,7 +52,7 @@ exports.getSSLCertificateStatus = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrive the details for SSL certificate ID ' + sslCertId));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLCertificate(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_certs')) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
 
@@ -90,7 +90,7 @@ exports.listSSLCertificates = function(request, reply) {
       }
       var response = [];
       for (var i=0; i < response_json.length; i++) {
-        if (utils.checkUserAccessPermissionToSSLCertificate(request,response_json[i])) {
+        if (permissionCheck.checkPermissionsToResource(request, response_json[i], 'ssl_certs')) {
           response.push(publicRecordFields.handle(response_json[i], 'sslCertificates'));
         }
       }
@@ -114,7 +114,7 @@ exports.getSSLCertificate = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL certificate ID ' + sslCertId));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLCertificate(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_certs')) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
 
@@ -139,7 +139,10 @@ exports.getSSLCertificate = function(request, reply) {
 exports.createSSLCertificate = function(request, reply) {
 
   var newSSLCert = request.payload;
-  if (!utils.checkUserAccessPermissionToSSLCertificate(request, newSSLCert)) {
+  if (!permissionCheck.checkSimplePermissions(request, 'ssl_certs')) {
+    return reply(boom.forbidden('You are not authorized to create a new SSL Cert'));
+  }
+  if (!permissionCheck.checkPermissionsToResource(request, {id: newSSLCert.account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -187,11 +190,11 @@ exports.updateSSLCertificate = function(request, reply) {
     if (error) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL certificate ID ' + sslCertId));
     }
-    if (!result || !utils.checkUserAccessPermissionToSSLCertificate(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_certs')) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
 
-    if (!utils.checkUserAccessPermissionToAccount(request, newSSLCert.account_id)) {
+    if (!permissionCheck.checkPermissionsToResource(request, {id: newSSLCert.account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -247,7 +250,7 @@ exports.deleteSSLCertificate = function(request, reply) {
       return reply(boom.badImplementation('Failed to retrieve details for SSL certificate ID ' + sslCertId));
     }
 
-    if (!result || !utils.checkUserAccessPermissionToSSLCertificate(request,result)) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, result, 'ssl_certs')) {
       return reply(boom.badRequest('SSL certificate ID not found'));
     }
 

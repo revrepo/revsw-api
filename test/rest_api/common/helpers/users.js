@@ -32,6 +32,8 @@ var UsersHelper = {
    * ### UsersHelper.create()
    *
    * Creates a new App using the account ID and the data provided.
+   * 
+   * @param self is the user self registered?
    *
    * @param {Object} data, mobile app data with the following structure:
    *    {
@@ -40,8 +42,11 @@ var UsersHelper = {
    *      lastName: String
    *    }
    */
-  create: function (data) {
+  create: function (data, self) {
     var user = UsersDP.generate(data);
+    if (self !== undefined) {
+      user.self_registered = self;
+    }
     return UsersResource
       .createOne(user)
       .then(function (res) {
@@ -54,17 +59,22 @@ var UsersHelper = {
       });
   },
 
-  /**
-   * Returns the first company ID related to the given user.
-   *
-   * @param {Object} user
-   * @returns {Promise} which returns the company related to the given user
-   */
-  getFirstCompanyId: function (user) {
+  completeInvitation: function (id) {
     return UsersResource
-      .getOne(user.id)
-      .then(function (res) {
-        return res.body.companyId[0];
+      .getOne(id)
+      .expect(200)
+      .then(function (user) {
+        var invitationData = {
+          password: 'password1',
+          invitation_token: user.body.invitation_token
+        };
+        return UsersResource
+          .completeInvitation()
+          .update(id, invitationData)
+          .expect(200)
+          .then(function (res) {
+            return res.body;
+          });
       });
   }
 };

@@ -1,0 +1,11 @@
+{
+    "comment": [
+        "`requests_per_second` is the default value for request throttling.",
+        "`requests_config` contains specific data for throttling endpoints/accounts.",
+        "if `account_id` is null/*/not found then the rule is global.",
+        "if `account_id` matches an account, the rule is only active for that specific account.",
+        "methods can contain all possible methods seperated by a comma."
+    ],
+    "requests_per_second": 40,
+    "requests_config": []
+}

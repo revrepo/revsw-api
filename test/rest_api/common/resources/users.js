@@ -50,6 +50,21 @@ var resourceConfig = {
       methods: [
         Methods.UPDATE
       ]
+    }, {
+      idKey: userIdKey,
+      name: 'invitationTokenStatus',
+      path: '/{' + userIdKey + '}/status',
+      methods: [
+        Methods.READ_ONE
+      ]
+    },
+    {
+      idKey: userIdKey,
+      name: 'completeInvitation',
+      path: '/{' + userIdKey + '}/complete_invitation',
+      methods: [
+        Methods.UPDATE
+      ]
     }
   ]
 };

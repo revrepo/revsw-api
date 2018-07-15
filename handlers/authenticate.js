@@ -32,7 +32,7 @@ var utils = require('../lib/utilities.js');
 var renderJSON = require('../lib/renderJSON');
 var mongoConnection = require('../lib/mongoConnections');
 var emailService = require('../services/email.js');
-
+var Group = require('../models/Group');
 var User = require('../models/User');
 var Account = require('../models/Account');
 var publicRecordFields = require('../lib/publicRecordFields');
@@ -41,13 +41,14 @@ var Promise = require('bluebird');
 
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
 var users = new User(mongoose, mongoConnection.getConnectionPortal());
+var groups = new Group(mongoose, mongoConnection.getConnectionPortal());
 
 var AzureResource = require('../models/AzureResource');
 var azureResources = Promise.promisifyAll(new AzureResource(mongoose, mongoConnection.getConnectionPortal()));
 
 var vendorProfileList = config.get('vendor_profiles');
 var defaultVendorProfile = config.get('default_signup_vendor_profile');
-
+var permissionCheck = require('./../lib/requestPermissionScope');
 var onAuthPassed = function(user, request, reply, error) {
   var token = utils.generateJWT(user);
   var statusResponse;
@@ -77,7 +78,7 @@ var onAuthPassed = function(user, request, reply, error) {
       user_id: user.user_id,
       user_name: user.email,
       user_type: 'user',
-      account_id: user.companyId[0],
+      account_id: user.account_id,
       activity_type: 'login',
       activity_target: 'user',
       target_id: user.user_id,
@@ -119,7 +120,16 @@ exports.authenticate = function(request, reply) {
     if (!user) {
       logger.warn('Authenticate::authenticate: User with email: ' + email + ' not found');
       return reply(boom.unauthorized());
+    } else if (user && !user.permissions.portal_login) {
+      return reply(boom.badRequest('You do not have permissions to be logged in to the portal'));
     } else {
+      if (user && user.group_id && user.group_id !== '') {
+        groups.getById(user.group_id).then(function (group) {
+          if (!group.permissions.portal_login) {
+            return reply(boom.badRequest('You do not have permissions to be logged in to the portal'));
+          }
+        });
+      }
       var authPassed = false;
       /**
        * @name  sendResultChecks
@@ -157,7 +167,7 @@ exports.authenticate = function(request, reply) {
           // If no enabled 2FA
           authPassed = true;
           if (user.self_registered) {
-            logger.info('Authenticate::authenticate: User whith Id: ' + user.user_id + ' and Accont Id: ' + user.companyId);
+            logger.info('Authenticate::authenticate: User whith Id: ' + user.user_id + ' and Accont Id: ' + user.account_id);
             // NOTE: For Self Registered User
 
             if (user.self_registered && (user.validation === undefined || user.validation.verified === false)) {
@@ -166,7 +176,7 @@ exports.authenticate = function(request, reply) {
               return reply(boom.create(418, 'Your registration not finished'));
             }
             accounts.get({
-              _id: user.companyId[0]
+              _id: user.account_id
             }, function(error, account) {
               if (error) {
                 logger.error('Authenticate::authenticate: Failed to find an account associated with user' +

@@ -45,24 +45,49 @@ var users = new User(mongoose, mongoConnection.getConnectionPortal());
 var Customer = require('../lib/chargify').Customer;
 
 var accountService = require('../services/accounts.js');
+var permissionCheck = require('./../lib/requestPermissionScope');
 
 exports.getAccounts = function getAccounts(request, reply) {
+  var filters = request.query.filters;
+  var options = filters ? filters.parent_account_id : null;
+  var operation = 'accounts';
+  if (filters && filters.operation) {
+    operation = filters.operation;
+  }
 
-  accounts.list(function(error, listOfAccounts) {
-    if (error) {
-      return reply(boom.badImplementation('Failed to read accounts list from the DB'));
-    }
-
-    for (var i = 0; i < listOfAccounts.length; i++) {
-      if (!utils.checkUserAccessPermissionToAccount(request, listOfAccounts[i].id)) {
-        listOfAccounts.splice(i, 1);
-        i--;
+  if (options) {
+    accounts.listByParentID(options, function(error, listOfAccounts) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read accounts list from the DB'));
       }
-    }
-
-    var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
-    renderJSON(request, reply, error, accounts_list);
-  });
+  
+      for (var i = 0; i < listOfAccounts.length; i++) {
+        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], operation)) {
+          listOfAccounts.splice(i, 1);
+          i--;
+        }
+      }
+  
+      var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
+      renderJSON(request, reply, error, accounts_list);
+    });
+  } else {
+    accounts.list(function(error, listOfAccounts) {
+      if (error) {
+        return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+      }
+  
+      for (var i = 0; i < listOfAccounts.length; i++) {
+        if (!permissionCheck.checkPermissionsToResource(request, listOfAccounts[i], operation)) {
+          listOfAccounts.splice(i, 1);
+          i--;
+        }
+      }
+  
+      var accounts_list = publicRecordFields.handle(listOfAccounts, 'accounts');
+      renderJSON(request, reply, error, accounts_list);
+    });
+  }  
 };
 /**
  * @name createAccount
@@ -74,10 +99,27 @@ exports.getAccounts = function getAccounts(request, reply) {
 exports.createAccount = function(request, reply) {
   var vendorProfiles = config.get('vendor_profiles');
   var newAccount = request.payload;
+  if (newAccount.parent_account_id && request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.forbidden('You are not authorized to create a new account with a parent account'));
+  }
   newAccount.createdBy = utils.generateCreatedByField(request);
+
+  var accPerm = request.auth.credentials.permissions.accounts;
+  if (!accPerm.access) {
+    return reply(boom.forbidden('You are not authorized to create a new account'));
+  } else if (accPerm.access && (accPerm.list && accPerm.list.length > 0)) {
+    if (accPerm.allow_list) {
+      return reply(boom.forbidden('You are not authorized to create a new account'));
+    }
+  }
 
   if (request.auth.credentials.role === 'reseller' || request.auth.credentials.user_type === 'apikey') {
     newAccount.vendor_profile = request.auth.credentials.vendor_profile;
+  }
+
+  if (request.auth.credentials.role === 'reseller') {
+    // set parent account id
+    newAccount.parent_account_id = request.auth.credentials.account_id || null;
   }
 
   // TODO: Make it able to use user_type apikey to create accounts
@@ -96,11 +138,6 @@ exports.createAccount = function(request, reply) {
     return reply(boom.badRequest('vendor_profile attribute is not correct'));
   }
 
-  // Update the user who created the new company account with details of the new account ID
-  var updatedUser = {
-    user_id: request.auth.credentials.user_id,
-    companyId: utils.getAccountID(request)
-  };
   var statusResponse;
 
   // NOTE: main workflow
@@ -123,17 +160,6 @@ exports.createAccount = function(request, reply) {
         cb();
       }
     },
-    function getCurrentUserForUpdate(cb){
-      users.get({ _id: updatedUser.user_id }, function(error, user) {
-        if (error || !user) {
-          return cb(new Error('Failed to get user ' + updatedUser.user_id));
-        }
-        if ((user.role === 'admin' || user.role === 'user') && user.companyId.length !== 0) {
-          return cb('Cannot assign more, than one account to the user');
-        }
-        cb();
-      });
-    },
     function createNewAccount(cb){
       var loggerData = {
         user_name: newAccount.createdBy,
@@ -152,20 +178,7 @@ exports.createAccount = function(request, reply) {
           object_id: result.id
         };
 
-        if (request.auth.credentials.role !== 'revadmin') {
-          updatedUser.companyId.push(result.id);
-        }
         cb();
-      });
-    },
-    function updateUserData(cb){
-      users.update(updatedUser, function(error, result) {
-        if (error) {
-          return cb(Error('Failed to update user ID ' + updatedUser.user_id +
-            ' with details of new account IDs ' + updatedUser.companyId));
-        } else {
-          cb(null);
-        }
       });
     },
     function makeResponseData(cb){
@@ -194,7 +207,7 @@ exports.createAccount = function(request, reply) {
 exports.createBillingProfile = function(request, reply) {
   var account_id = request.params.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -274,10 +287,6 @@ exports.getAccount = function(request, reply) {
 
   var account_id = request.params.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
-    return reply(boom.badRequest('Account ID not found'));
-  }
-
   accounts.get({
     _id: account_id
   }, function(error, result) {
@@ -287,6 +296,9 @@ exports.getAccount = function(request, reply) {
     }
 
     if (result) {
+      if (!permissionCheck.checkPermissionsToResource(request, result, 'accounts')) {
+        return reply(boom.badRequest('Account ID not found'));
+      }
       // NOTE: get information about payment method
       result.valid_payment_method_configured = false;
       if (result.subscription_id) {
@@ -325,7 +337,7 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
   var account_id = request.params.account_id;
   var billing_plan_handle = request.params.billing_plan_handle;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -394,7 +406,7 @@ exports.getAccountSubscriptionPreview = function(request, reply) {
  */
 exports.getAccountSubscriptionSummary = function(request, reply) {
   var accountId = request.params.account_id;
-  if (!utils.checkUserAccessPermissionToAccount(request, accountId)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -502,7 +514,7 @@ exports.getAccountStatements = function(request, reply) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
         ' Account ID: ' + account_id, error));
     }
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -511,9 +523,10 @@ exports.getAccountStatements = function(request, reply) {
     }
     Customer.getStatements(account.subscription_id, function(error, statements) {
       if (error) {
-        return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to receive statements for subscription' +
-          ' Subscription ID: ' + account.subscription_id +
-          ' Account ID: ' + account_id, error));
+        logger.error('Accounts::getAccountStatements: Failed to receive statements for subscription' +
+        ' Subscription ID: ' + account.subscription_id +
+        ' Account ID: ' + account_id + ';' + error);
+        return reply(boom.badRequest('Could not get subscription ID: ' + account.subscription_id));
       }
       statements = publicRecordFields.handle(statements, 'statements');
       renderJSON(request, reply, error, statements);
@@ -531,7 +544,7 @@ exports.getAccountTransactions = function(request, reply) {
       return reply(boom.badImplementation('Accounts::getAccountStatements: Failed to get an account' +
         ' Account ID: ' + account_id, error));
     }
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -562,7 +575,7 @@ exports.getAccountStatement = function(request, reply) {
         ' Account ID: ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -616,7 +629,7 @@ exports.getAccountStatement = function(request, reply) {
 exports.getPdfStatement = function(request, reply) {
   var account_id = request.params.account_id;
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Accounts::getPdfStatement: Permission denied for' +
       ' Account ID: ' + account_id));
   }
@@ -629,7 +642,7 @@ exports.getPdfStatement = function(request, reply) {
         ' Account ID: ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -698,6 +711,7 @@ exports.updateAccount = function(request, reply) {
   var updatedAccount = request.payload;
   updatedAccount.account_id = request.params.account_id;
   var account_id = updatedAccount.account_id;
+  var requestUser = request.auth.credentials;
   accounts.get({
     _id: account_id
   }, function(error, account) {
@@ -705,7 +719,13 @@ exports.updateAccount = function(request, reply) {
       return reply(boom.badImplementation('Failed to read details for account ID ' + account_id, error));
     }
 
-    if (!account || !utils.checkUserAccessPermissionToAccount(request, account_id)) {
+    if (account && ((account.parent_account_id !== updatedAccount.parent_account_id) && updatedAccount.parent_account_id)) {
+      if (requestUser.role !== 'revadmin') {
+        return reply(boom.badRequest('Cannot update parent account'));
+      }
+    }
+
+    if (!account || !permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
 
@@ -769,7 +789,7 @@ exports.deleteAccount = function(request, reply) {
   var _payload = request.payload;
   var cancellationMessage_ = _payload.cancellation_message || 'not provided';
 
-  if (!utils.checkUserAccessPermissionToAccount(request, account_id)) {
+  if (!permissionCheck.checkPermissionsToResource(request, {id: account_id}, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
 
@@ -828,4 +848,33 @@ exports.deleteAccount = function(request, reply) {
       });
   }
 
+};
+
+exports.getResellerAccounts = function getAccounts(request, reply) {
+
+  if (request.auth.credentials.role !== 'revadmin') {
+    return reply(boom.badRequest('Account ID Not Found'));
+  }
+
+  accounts.list(function(error, listOfAccounts) {
+    /* jshint loopfunc: true */
+    var resllerAccounts = [];
+    if (error) {
+      return reply(boom.badImplementation('Failed to read accounts list from the DB'));
+    }
+
+    for (var i = 0; i < listOfAccounts.length; i++) {
+      var acc = _.filter(listOfAccounts, function (item) {
+        return item.id === listOfAccounts[i].parent_account_id;
+      });
+
+      if (acc[0]) {
+        resllerAccounts.push(acc[0]);
+      }
+    }
+
+    resllerAccounts = _.uniq(resllerAccounts);
+    var accounts_list = publicRecordFields.handle(resllerAccounts, 'accounts');
+    renderJSON(request, reply, error, accounts_list);
+  });
 };
