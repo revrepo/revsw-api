@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2017] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -145,20 +145,22 @@ exports.createTrafficAlert = function (request, reply) {
       newTrafficAlert.created_at = Date.now();
       newTrafficAlert.updated_at = Date.now();
       newTrafficAlert.updated_by = request.auth.credentials.email;
-      trafficAlertsConfigs.add(newTrafficAlert).then(function (TrafficAlert) {
-        _createdTrafficAlert = TrafficAlert;
-        newTrafficAlert.config_id = TrafficAlert.id;
-        trafficAlerter.createAlertRule(newTrafficAlert)
-          .then(function (res) {
-            cb(null);
-          })
-          .catch(function (err) {
-            return reply(boom.badRequest(err));
-          });
-
-      }).catch(function (err) {
-        return reply(boom.badRequest(err));
-      });
+      trafficAlertsConfigs.add(newTrafficAlert)
+        .then(function (TrafficAlert) {
+          _createdTrafficAlert = TrafficAlert;
+          newTrafficAlert.config_id = TrafficAlert.id;
+          return trafficAlerter.createAlertRule(newTrafficAlert)
+            .then(function () {
+              cb(null);
+            })
+            .catch(function(error){
+              trafficAlertsConfigs.removeById(TrafficAlert.id);
+              throw error;
+            });
+        })
+        .catch(function () {
+          return reply(boom.badRequest('Failed to create a new rule'));
+        });
     },
     function (cb) {
       AuditLogger.store({
@@ -261,17 +263,17 @@ exports.updateTrafficAlert = function (request, reply) {
       updateTrafficAlertData.updated_at = Date.now();
       updateTrafficAlertData.updated_by = request.auth.credentials.email || request.auth.credentials.key;
 
-      trafficAlertsConfigs.update(updateTrafficAlertData).then(function (result) {
-        trafficAlerter.updateRuleFile(request.params.traffic_alert_id, updateTrafficAlertData).then(function (res) {
-          resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
-          cb();
+      trafficAlertsConfigs.update(updateTrafficAlertData)
+        .then(function (result) {
+          return trafficAlerter.updateRuleFile(request.params.traffic_alert_id, updateTrafficAlertData)
+            .then(function () {
+              resultTrafficAlertData = publicRecordFields.handle(result, 'trafficAlerts');
+              cb();
+            });
         })
-          .catch(function (err) {
-            return reply(boom.badRequest(err));
-          });
-      }).catch(function (err) {
-        return reply(boom.badRequest(err));
-      });
+        .catch(function () {
+          return reply(boom.badRequest('Failed to update the rule'));
+        });
 
     },
     function (cb) {
