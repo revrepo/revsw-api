@@ -273,7 +273,6 @@ exports.sendNotificationToList = function(request, reply) {
           if (!!result) {
             vendorProfile = result.vendor_profile;
           }
-          console.log('account', result);
           cb();
         });
       },
@@ -285,7 +284,7 @@ exports.sendNotificationToList = function(request, reply) {
           };
           switch (dest.destination_type) {
             case 'email':
-              if (!dest.email || dest.email !== '') {
+              if (!dest.email || dest.email === '') {
                 report.send = false;
                 report.reason = 'Notification List Destination has no email';
                 return callback(null, report);
