@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2017] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -20,6 +20,7 @@
 
 'use strict';
 
+var async = require('async');
 var mongoose = require('mongoose');
 var boom = require('boom');
 var config = require('config');
@@ -29,6 +30,10 @@ var utils = require('../lib/utilities.js');
 var publicRecordFields = require('../lib/publicRecordFields');
 var AuditLogger = require('../lib/audit');
 var emailer = require('./../services/email');
+
+var Account = require('../models/Account');
+var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+
 var NotificationList = require('../models/NotificationList');
 
 var notificationList = new NotificationList(mongoose, mongoConnection.getConnectionPortal());
@@ -42,7 +47,9 @@ exports.createNotificationList = function(request, reply) {
   var accountId = payloadData.account_id;
   var notificationListName = payloadData.list_name;
 
-  if (!accountId || !permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
+  if (!accountId || !permissionCheck.checkPermissionsToResource(request, {
+      id: accountId
+    }, 'accounts')) {
     return reply(boom.badRequest('Account ID not found'));
   }
   var createdBy = utils.generateCreatedByField(request);
@@ -90,7 +97,9 @@ exports.getNotificationLists = function(request, reply) {
   var accountId = request.query.account_id;
   var options = {};
   // NOTE: check an access permissition
-  if (!!accountId && !permissionCheck.checkPermissionsToResource(request, {id: accountId}, 'accounts')) {
+  if (!!accountId && !permissionCheck.checkPermissionsToResource(request, {
+      id: accountId
+    }, 'accounts')) {
     return reply(boom.badRequest('Notification List ID not found'));
   }
   // NOTE: if accountId is 'null' when should return notification lists configured for the user’s account
@@ -137,7 +146,9 @@ exports.updateNotificationList = function(request, reply) {
     if (!result) {
       return reply(boom.badRequest('Notification List ID not found'));
     }
-    if (!permissionCheck.checkPermissionsToResource(request, {id: result.account_id}, 'accounts')) {
+    if (!permissionCheck.checkPermissionsToResource(request, {
+        id: result.account_id
+      }, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
     var createdBy = utils.generateCreatedByField(request);
@@ -185,7 +196,9 @@ exports.deleteNotificationList = function(request, reply) {
     }
     var options = {};
     // NOTE: check an access permissition
-    if (!result || !permissionCheck.checkPermissionsToResource(request, {id: result.account_id}, 'accounts')) {
+    if (!result || !permissionCheck.checkPermissionsToResource(request, {
+        id: result.account_id
+      }, 'accounts')) {
       return reply(boom.badRequest('Notification List ID not found'));
     }
 
@@ -243,29 +256,78 @@ exports.sendNotificationToList = function(request, reply) {
     }
 
     if (!result.destinations) {
-      return reply(boom.badRequest('Notification List has no destinations'));      
+      return reply(boom.badRequest('Notification List has no destinations'));
     }
-
-    result.destinations.forEach(function (dest) {
-      switch (dest.destination_type) {
-        case 'email':
-          if (!dest.email || dest.email === '') {
-            return reply(boom.badRequest('Notification List Destination has no email'));
+    var accountId = result.account_id;
+    var vendorProfile = '';
+    var destinationsList = result.destinations;
+    async.waterfall([
+      // NOTE: get vendor name for send email
+      function(cb) {
+        accounts.get({
+          id: accountId
+        }, function(err, result) {
+          if (err) {
+            return cb(err);
+          }
+          if (!!result) {
+            vendorProfile = result.vendor_profile;
+          }
+          console.log('account', result);
+          cb();
+        });
+      },
+      // send all type notifications
+      function(cb) {
+        async.map(destinationsList, function(dest, callback) {
+          var report = {
+            destination_type: dest.destination_type
+          };
+          switch (dest.destination_type) {
+            case 'email':
+              if (!dest.email || dest.email !== '') {
+                report.send = false;
+                report.reason = 'Notification List Destination has no email';
+                return callback(null, report);
+              }
+              emailer.sendNotificationEmail({
+                userEmail: dest.email,
+                notificationContent: notificationContent,
+                notificationTitle: notificationTitle,
+                vendorProfile: vendorProfile
+              }, function(err, res) {
+                if (err) {
+                  report.send = false;
+                  report.reason = err.message;
+                } else {
+                  report.send = true;
+                  report.result = res;
+                }
+                callback(null, report);
+              });
+              break;
+            default:
+              callback(null, {
+                destination_type: dest.destination_type,
+                send: false,
+                reason: 'Not implemented'
+              });
+              break;
           }
 
-          emailer.sendNotificationEmail({
-            userEmail: dest.email,
-            notificationContent: notificationContent,
-            notificationTitle: notificationTitle
-          }, function (err, res) {
-            if (err) {
-              return reply(boom.badRequest(err));
-            }
-
-            return reply(res);
-          });
-          break;
+        }, function(err, results) {
+          if (err) {
+            return cb(boom.badRequest(err));
+          }
+          return cb(null, results);
+        });
       }
-    });    
+    ], function(err, reports) {
+      if (err) {
+        return reply(boom.badRequest(err));
+      }
+      return reply(reports);
+    });
+
   });
 };

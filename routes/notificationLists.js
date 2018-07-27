@@ -73,6 +73,9 @@ module.exports = [{
       notes: 'Send a notification to the notification list',
       handler: notificationListHandlers.sendNotificationToList,
       validate: {
+        params:{
+          list_id: Joi.objectId().required().description('ID Notification List')
+        },
         payload: {
           notification_content: Joi.string().required().description('The content of the notification'),
           notification_title: Joi.string().required().description('The title of the notification')
