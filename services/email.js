@@ -26,7 +26,7 @@ var mail = require('../lib/mail');
 
 var config = require('config');
 var logger = require('revsw-logger')(config.log_config);
-
+var vendorProfiles = config.get('vendor_profiles');
 /**
  * @name  sendEmailAboutUserLogin
  * @description
@@ -159,12 +159,14 @@ exports.sendNotificationEmail = function (options, cb) {
   var content = options.notificationContent;
   var title = options.notificationTitle;
 
+  var vendorData = vendorProfiles[options.vendorProfile] || vendorProfiles[config.get('default_system_vendor_profile')];
+
   if (email !== '') {
     var mailHTML = content;
     var mailOptions = {
       to: email,
-      fromname: config.get('vendor_profiles').revapm.support_name,
-      from: config.get('vendor_profiles').revapm.support_email,
+      fromname: vendorData.support_name,
+      from: vendorData.support_email,
       subject: title,
       html: mailHTML
     };
