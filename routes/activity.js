@@ -52,10 +52,11 @@ module.exports = [{
           'domain', 'object', 'apikey',
           'logshippingjob', 'app', 'sslcert',
           'sslname', 'dnszone', 'dnsrecord',
+          'notification_list',
           'wafrule')
           .when('target_id', { is: /^[0-9a-fA-F]{24}$/, then: Joi.required() })
           .description('Target type  (\'user\', \'account\', \'domain\', \'object\', \'apikey\', \'logshippingjob\', \'app\', \'sslcert\', \'sslname\','+
-          ' \'dnszone\',\'dnsrecord\',\'wafrule\''),
+          ' \'dnszone\',\'dnsrecord\',\'wafrule\',\'notification_list\''),
         activity_type: Joi.string().valid('login', 'add', 'modify', 'delete', 'publish', 'purge', 'init2fa', 'enable2fa',
           'disable2fa', 'resetpassword', 'signup', 'verify','verify_email')
             .description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\','+
