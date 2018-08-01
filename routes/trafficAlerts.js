@@ -26,8 +26,26 @@ var trafficAlerts = require('../handlers/trafficAlerts');
 
 var routeModels = require('../lib/routeModels');
 
-module.exports = [
-  {
+var RuleTypeConfig_StatusCodeFrequency = Joi.object({
+    timeframe_type: Joi.required(),
+    timeframe: Joi.required(),
+    responses: Joi.required(),
+    status_code: Joi.required(),
+  }).required()
+  .label('RuleTypeConfig_StatusCodeFrequency')
+  .description('Rule Config for Status Code Frequency');
+
+var RuleTypeConfig_Spike = Joi.object({
+    timeframe_type: Joi.required(),
+    timeframe: Joi.required(),
+    spike_amount: Joi.required(),
+    spike_direction: Joi.required(),
+  })
+  .required()
+  .label('RuleTypeConfig_Spike')
+  .description('Rule Config for Status Code Frequency');
+
+module.exports = [{
     method: 'GET',
     path: '/v1/traffic_alerts',
     config: {
@@ -46,8 +64,8 @@ module.exports = [
       validate: {
         query: {
           filters: Joi.object().keys({
-            account_id: Joi.objectId().optional().allow('').trim().description('ID of a company')
-          })
+              account_id: Joi.objectId().optional().allow('').trim().description('ID of a company')
+            })
             .optional().description('Filters parameters')
         }
       },
@@ -80,8 +98,25 @@ module.exports = [
           notifications_list_id: Joi.objectId().required(),
           target_type: Joi.string().allow(['domain']).required(),
           target: Joi.string().required(),
-          rule_type: Joi.string().required(),
-          rule_config: Joi.object().required()
+          rule_type: Joi.string().allow(['statusCode_frequency', 'Spike']).required(),
+          rule_config: Joi.object()
+            .keys({
+              timeframe_type: Joi.string().allow('minutes', 'hours', 'days').description('Timeframe type'),
+              responses: Joi.number().min(1).max(10000000).description('Number Of Responses value'),
+              timeframe: Joi.number().description('Timeframe'),
+              status_code: Joi.number().description('Status Code'),
+              spike_amount: Joi.number().description('Spike Ammount'),
+              spike_direction: Joi.string().allow('up', 'down', 'both').optional().description('Spike Direction'),
+            })
+
+            .when('rule_type', {
+              is: 'statusCode_frequency',
+              then: RuleTypeConfig_StatusCodeFrequency
+            })
+            .when('rule_type', {
+              is: 'Spike',
+              then: RuleTypeConfig_Spike
+            }).required()
         }
       },
       response: {
@@ -119,8 +154,25 @@ module.exports = [
           notifications_list_id: Joi.objectId().required(),
           target_type: Joi.string().allow(['domain']).required(),
           target: Joi.string().required(),
-          rule_type: Joi.string().required(),
-          rule_config: Joi.object().required(),
+          rule_type: Joi.string().allow(['statusCode_frequency', 'Spike']).required(),
+          rule_config: Joi.object().description('Rule Configuration')
+            .keys({
+              timeframe_type: Joi.string().optional().allow('minutes', 'hours', 'days').description('Timeframe type'),
+              responses: Joi.number().optional().min(1).max(10000000).description('Number Of Responses value'),
+              timeframe: Joi.number().optional().description('Timeframe'),
+              status_code: Joi.number().optional().description('Status Code'),
+              spike_amount: Joi.number().optional().description('Spike Ammount'),
+              spike_direction: Joi.string().allow('up', 'down', 'both').optional().description('Spike Direction'),
+            })
+            .required()
+            .when('rule_type', {
+              is: 'statusCode_frequency',
+              then: RuleTypeConfig_StatusCodeFrequency
+            })
+            .when('rule_type', {
+              is: 'Spike',
+              then: RuleTypeConfig_Spike
+            }),
           silenced: Joi.boolean(),
           silence_until: Joi.date().allow([null, 'null'])
         }
