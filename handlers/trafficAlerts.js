@@ -316,7 +316,7 @@ exports.deleteTrafficAlert = function (request, reply) {
   var delTrafficAlert;
 
   trafficAlertsConfigs.getById(id).then(function (result) {
-    delTrafficAlert = publicRecordFields.handle(result, 'trafficAlerts');;
+    delTrafficAlert = publicRecordFields.handle(result, 'trafficAlerts');
     trafficAlertsConfigs.removeById(id).then(function (result) {
 
       trafficAlerter.deleteRuleFile(id).then(function (res) {
