@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -49,16 +49,20 @@ module.exports = [{
         to_timestamp: Joi.string().max(50).description('Report period end timestamp (defaults to now)'),
         target_id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).description('Target ID'),
         target_type: Joi.string().valid('group', 'user', 'account',
-          'domain', 'object', 'apikey',
-          'logshippingjob', 'app', 'sslcert',
-          'sslname', 'dnszone', 'dnsrecord',
-          'wafrule')
-          .when('target_id', { is: /^[0-9a-fA-F]{24}$/, then: Joi.required() })
-          .description('Target type  (\'user\', \'account\', \'domain\', \'object\', \'apikey\', \'logshippingjob\', \'app\', \'sslcert\', \'sslname\','+
-          ' \'dnszone\',\'dnsrecord\',\'wafrule\''),
+            'domain', 'object', 'apikey',
+            'logshippingjob', 'app', 'sslcert',
+            'sslname', 'dnszone', 'dnsrecord',
+            'notification_list', 'traffic_alert',
+            'wafrule')
+          .when('target_id', {
+            is: /^[0-9a-fA-F]{24}$/,
+            then: Joi.required()
+          })
+          .description('Target type  (\'user\', \'account\', \'domain\', \'object\', \'apikey\', \'logshippingjob\', \'app\', \'sslcert\', \'sslname\',' +
+            ' \'dnszone\',\'dnsrecord\',\'wafrule\',\'notification_list\',\'traffic_alert\''),
         activity_type: Joi.string().valid('login', 'add', 'modify', 'delete', 'publish', 'purge', 'init2fa', 'enable2fa',
-          'disable2fa', 'resetpassword', 'signup', 'verify','verify_email')
-            .description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\','+
+            'disable2fa', 'resetpassword', 'signup', 'verify', 'verify_email')
+          .description('Activity type (\'login\', \'add\', \'modify\', \'delete\', \'publish\', \'purge\',' +
             ' \'init2fa\', \'enable2fa\', \'disable2fa\', \'resetpassword\', \'signup\', \'verify\', \'verify_email\')')
       }
     }

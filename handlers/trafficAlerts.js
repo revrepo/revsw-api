@@ -147,7 +147,7 @@ exports.createTrafficAlert = function (request, reply) {
       newTrafficAlert.updated_by = request.auth.credentials.email;
       trafficAlertsConfigs.add(newTrafficAlert)
         .then(function (TrafficAlert) {
-          _createdTrafficAlert = TrafficAlert;
+          _createdTrafficAlert = publicRecordFields.handle(TrafficAlert, 'trafficAlerts');
           newTrafficAlert.config_id = TrafficAlert.id;
           return trafficAlerter.createAlertRule(newTrafficAlert)
             .then(function () {
@@ -166,7 +166,7 @@ exports.createTrafficAlert = function (request, reply) {
       AuditLogger.store({
         account_id: accountId,
         activity_type: 'add',
-        activity_target: 'trafficAlert',
+        activity_target: 'traffic_alert',
         target_id: _createdTrafficAlert.id,
         target_name: _createdTrafficAlert.name,
         target_object: _createdTrafficAlert,
@@ -280,7 +280,7 @@ exports.updateTrafficAlert = function (request, reply) {
       AuditLogger.store({
         account_id: TrafficAlertAccountId,
         activity_type: 'modify',
-        activity_target: 'trafficAlert',
+        activity_target: 'traffic_alert',
         target_id: resultTrafficAlertData.id,
         target_name: resultTrafficAlertData.name,
         target_object: resultTrafficAlertData,
@@ -315,8 +315,8 @@ exports.deleteTrafficAlert = function (request, reply) {
   var id = request.params.traffic_alert_id;
   var delTrafficAlert;
 
-  trafficAlertsConfigs.getById(id).then(function (res) {
-    delTrafficAlert = res;
+  trafficAlertsConfigs.getById(id).then(function (result) {
+    delTrafficAlert = publicRecordFields.handle(result, 'trafficAlerts');
     trafficAlertsConfigs.removeById(id).then(function (result) {
 
       trafficAlerter.deleteRuleFile(id).then(function (res) {
@@ -329,7 +329,7 @@ exports.deleteTrafficAlert = function (request, reply) {
         AuditLogger.store({
           account_id: request.auth.credentials.account_id,
           activity_type: 'delete',
-          activity_target: 'trafficAlert',
+          activity_target: 'traffic_alert',
           target_id: delTrafficAlert.id,
           target_name: delTrafficAlert.name,
           target_object: delTrafficAlert,

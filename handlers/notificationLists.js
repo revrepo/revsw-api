@@ -74,16 +74,16 @@ exports.createNotificationList = function(request, reply) {
         message: 'Successfully created new Notification List',
         object_id: result.id
       };
-      // TODO: add activity_target = 'notificationList'
-      // AuditLogger.store({
-      //   account_id: newNotification.account_id,
-      //   activity_type: 'add',
-      //   activity_target: 'notificationList',
-      //   target_id: result.id,
-      //   target_name: result.list_name,
-      //   target_object: result,
-      //   operation_status: 'success'
-      // }, request);
+
+      AuditLogger.store({
+        account_id: newNotification.account_id,
+        activity_type: 'add',
+        activity_target: 'notification_list',
+        target_id: result.id,
+        target_name: result.list_name,
+        target_object: result,
+        operation_status: 'success'
+      }, request);
 
       renderJSON(request, reply, error, statusResponse);
     }
@@ -154,7 +154,7 @@ exports.updateNotificationList = function(request, reply) {
     var createdBy = utils.generateCreatedByField(request);
     notificationListData._id = notificationListId;
     notificationListData.updated_by = utils.generateCreatedByField(request);
-
+    // TODO: add checks for find changes
     notificationList.update(notificationListData,
       function(err, result) {
         if (err) {
@@ -166,16 +166,15 @@ exports.updateNotificationList = function(request, reply) {
         var response_json = publicRecordFields.handle(result, 'notificationList');
 
         notificationList.id = notificationListId;
-        // TODO: add activity_target = 'notification_list'
-        // AuditLogger.store({
-        //   account_id: result.account_id,
-        //   activity_type: action,
-        //   activity_target: 'notification_list',
-        //   target_id: notificationListId,
-        //   target_name: notificationList.app_name,
-        //   target_object: notificationList,
-        //   operation_status: 'success'
-        // }, request);
+        AuditLogger.store({
+          account_id: result.account_id,
+          activity_type: 'modify',
+          activity_target: 'notification_list',
+          target_id: notificationListId,
+          target_name: response_json.list_name,
+          target_object: response_json,
+          operation_status: 'success'
+        }, request);
         return renderJSON(request, reply, err, response_json);
       });
   });
@@ -214,16 +213,18 @@ exports.deleteNotificationList = function(request, reply) {
         statusCode: 200,
         message: 'Successfully deleted the Notification List'
       };
-      // TODO: add AuditLogger
-      // AuditLogger.store({
-      //   account_id: result.account_id,
-      //   activity_type: 'delete',
-      //   activity_target: 'notification_list',
-      //   target_id: notificationListId,
-      //   target_name: notificationList.app_name,
-      //   target_object: notificationList,
-      //   operation_status: 'success'
-      // }, request);
+
+      result = publicRecordFields.handle(result, 'notificationList');
+
+      AuditLogger.store({
+        account_id: result.account_id,
+        activity_type: 'delete',
+        activity_target: 'notification_list',
+        target_id: result.id,
+        target_name: result.list_name,
+        target_object: result,
+        operation_status: 'success'
+      }, request);
       renderJSON(request, reply, error, statusResponse);
     });
   });
