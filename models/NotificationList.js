@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2017] Rev Software, Inc.
+ * [2013] - [2018] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,6 +22,7 @@
 //	data access layer
 
 var utils = require('../lib/utilities.js');
+var _ = require('lodash');
 
 function NotificationList(mongoose, connection, options) {
   this.options = options;
@@ -132,7 +133,29 @@ NotificationList.prototype = {
       callback(utils.buildError('400', 'No Notification List passed to remove function'), null);
     }
   },
+  checkReasonForUpdate: function(newData, currentData, callback) {
+    var res = {
+      isDiff: false,
+    };
 
+    if (!newData || !currentData) {
+      callback(new Error('Bad parameters for check'));
+    }
+
+    if ((newData.list_name !== currentData.list_name) ||
+      (newData.destinations.length !== currentData.destinations.length)) {
+      res.isDiff = true;
+      return callback(null, res);
+    }
+    for (var x = 0; x < currentData.destinations.length; x++) {
+      if (res.isDiff === true) {
+        continue;
+      }
+      res.isDiff = !_.isEqual(currentData.destinations[x], newData.destinations[x]);
+    }
+
+    callback(null, res);
+  }
 };
 
 module.exports = NotificationList;

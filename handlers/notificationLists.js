@@ -151,32 +151,42 @@ exports.updateNotificationList = function(request, reply) {
       }, 'accounts')) {
       return reply(boom.badRequest('Account ID not found'));
     }
-    var createdBy = utils.generateCreatedByField(request);
+
     notificationListData._id = notificationListId;
     notificationListData.updated_by = utils.generateCreatedByField(request);
     // TODO: add checks for find changes
-    notificationList.update(notificationListData,
-      function(err, result) {
-        if (err) {
-          return reply(boom.badImplementation('Failed to update the Notification List with ID ' + notificationListId));
-        }
-        if (!result) {
-          return reply(boom.badRequest('Cannot update the Notification List with ID ' + notificationListId));
-        }
-        var response_json = publicRecordFields.handle(result, 'notificationList');
+    notificationList.checkReasonForUpdate(notificationListData, result, function(err, diffs) {
+      if (err || !diffs || diffs.isDiff === false) {
+        return renderJSON(request, reply, err, result);
+      } else {
+        notificationList.update(notificationListData,
+          function(err, result) {
+            if (err) {
+              return reply(boom.badImplementation('Failed to update the Notification List with ID ' + notificationListId));
+            }
+            if (!result) {
+              return reply(boom.badRequest('Cannot update the Notification List with ID ' + notificationListId));
+            }
+            var response_json = publicRecordFields.handle(result, 'notificationList');
 
-        notificationList.id = notificationListId;
-        AuditLogger.store({
-          account_id: result.account_id,
-          activity_type: 'modify',
-          activity_target: 'notification_list',
-          target_id: notificationListId,
-          target_name: response_json.list_name,
-          target_object: response_json,
-          operation_status: 'success'
-        }, request);
-        return renderJSON(request, reply, err, response_json);
-      });
+            notificationList.id = notificationListId;
+            AuditLogger.store({
+              account_id: result.account_id,
+              activity_type: 'modify',
+              activity_target: 'notification_list',
+              target_id: notificationListId,
+              target_name: response_json.list_name,
+              target_object: response_json,
+              operation_status: 'success'
+            }, request);
+            return renderJSON(request, reply, err, response_json);
+          });
+      }
+
+
+    });
+
+
   });
 };
 /**
