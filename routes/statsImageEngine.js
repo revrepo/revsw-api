@@ -32,7 +32,7 @@ var routeModels = require('../lib/routeModels');
 var commonQueryParamsStatsImageEngine = {
   from_timestamp: Joi.string().description('Report period start timestamp'),
   to_timestamp: Joi.string().description('Report period end timestamp'),
-  status_code: Joi.number().integer().min(000).max(600).description('HTTP status code to filter'),
+  status_code: Joi.number().integer().min(0).max(600).description('HTTP status code to filter'),
   cache_code: Joi.string().valid('HIT', 'MISS').description('HTTP cache hit/miss status to filter'),
   request_status: Joi.string().valid('OK', 'ERROR').description('Request completion status to filter'),
   protocol: Joi.string().valid('HTTP', 'HTTPS').description('HTTP/HTTPS protocol to filter'),
