@@ -56,7 +56,7 @@ module.exports = [
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp'),
           to_timestamp: Joi.string().description('Report period end timestamp'),
-          status_code: Joi.number().integer().min(100).max(600).description('HTTP status code to filter'),
+          status_code: Joi.number().integer().min(000).max(600).description('HTTP status code to filter'),
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
           request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
           protocol: Joi.string().valid( 'HTTP', 'HTTPS' ).description('HTTP/HTTPS protocol to filter'),
@@ -122,7 +122,7 @@ module.exports = [
           from_timestamp: Joi.string().description('Report period start timestamp (defaults to one hour ago from now)'),
           to_timestamp: Joi.string().description('Report period end timestamp (defaults to now)'),
           count: Joi.number().integer().min(1).max(250).description('Number of top objects to report (default to 30)'),
-          status_code: Joi.number().integer().min(100).max(600).description('HTTP status code to filter'),
+          status_code: Joi.number().integer().min(000).max(600).description('HTTP status code to filter'),
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
           request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
           protocol: Joi.string().valid( 'HTTP', 'HTTPS' ).description('HTTP/HTTPS protocol to filter'),
@@ -471,7 +471,7 @@ module.exports = [
         query: {
           from_timestamp: Joi.string().description('Report period start timestamp'),
           to_timestamp: Joi.string().description('Report period end timestamp'),
-          status_code: Joi.number().integer().min(100).max(600).description('HTTP status code to filter'),
+          status_code: Joi.number().integer().min(000).max(600).description('HTTP status code to filter'),
           cache_code: Joi.string().valid( 'HIT', 'MISS' ).description('HTTP cache hit/miss status to filter'),
           request_status: Joi.string().valid( 'OK', 'ERROR' ).description('Request completion status to filter'),
           protocol: Joi.string().valid( 'HTTP', 'HTTPS' ).description('HTTP/HTTPS protocol to filter'),
