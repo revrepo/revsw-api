@@ -22,6 +22,7 @@
 
 var async = require('async');
 var mongoose = require('mongoose');
+var Promise = require('bluebird');
 var boom = require('boom');
 var config = require('config');
 var mongoConnection = require('../lib/mongoConnections');
@@ -33,6 +34,9 @@ var emailer = require('./../services/email');
 
 var Account = require('../models/Account');
 var accounts = new Account(mongoose, mongoConnection.getConnectionPortal());
+
+var User = require('../models/User');
+var users = Promise.promisifyAll(new User(mongoose, mongoConnection.getConnectionPortal()));
 
 var NotificationList = require('../models/NotificationList');
 
@@ -289,23 +293,24 @@ exports.sendNotificationToList = function(request, reply) {
       },
       // send all type notifications
       function(cb) {
+        const sendParams = {
+          notificationContent: notificationContent,
+          notificationTitle: notificationTitle,
+          vendorProfile: vendorProfile
+        };
         async.map(destinationsList, function(dest, callback) {
           var report = {
-            destination_type: dest.destination_type
+            send: false,
+            destination: dest
           };
           switch (dest.destination_type) {
             case 'email':
               if (!dest.email || dest.email === '') {
-                report.send = false;
                 report.reason = 'Notification List Destination has no email';
                 return callback(null, report);
               }
-              emailer.sendNotificationEmail({
-                userEmail: dest.email,
-                notificationContent: notificationContent,
-                notificationTitle: notificationTitle,
-                vendorProfile: vendorProfile
-              }, function(err, res) {
+              sendParams.userEmail = dest.email;
+              emailer.sendNotificationEmail(sendParams, function(err, res) {
                 if (err) {
                   report.send = false;
                   report.reason = err.message;
@@ -316,9 +321,33 @@ exports.sendNotificationToList = function(request, reply) {
                 callback(null, report);
               });
               break;
+
+            case 'user':
+              if (!dest.user_id || dest.user_id === '') {
+                report.reason = 'Notification List Destination has no valid user_id';
+                return callback(null, report);
+              }
+              users.getById(dest.user_id, function(err, userInfo) {
+                if (err) {
+                  report.reason = 'Notification List Destination has no valid user_id';
+                  return callback(null, report);
+                }
+                sendParams.userEmail = userInfo.email;
+                emailer.sendNotificationEmail(sendParams, function(err, res) {
+                  if (err) {
+                    report.send = false;
+                    report.reason = err.message;
+                  } else {
+                    report.send = true;
+                    report.result = res;
+                  }
+                  callback(null, report);
+                });
+              });
+              break;
             default:
               callback(null, {
-                destination_type: dest.destination_type,
+                destination: dest,
                 send: false,
                 reason: 'Not implemented'
               });
